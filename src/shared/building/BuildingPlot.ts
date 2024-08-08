@@ -8,7 +8,6 @@ import { JSON } from "shared/fixes/Json";
 import { Objects } from "shared/fixes/objects";
 import { Operation } from "shared/Operation";
 import type { BlockRegistry } from "shared/block/BlockRegistry";
-import type { PlacedBlockLogicConnections } from "shared/building/BlockManager";
 
 const err = (message: string): ErrorResponse => ({ success: false, message });
 const success: SuccessResponse = { success: true };
@@ -162,27 +161,33 @@ export class BuildingPlot extends ReadonlyPlot {
 	}
 
 	logicConnect(request: Omit<LogicConnectRequest, "plot">): Response {
-		const inputInfo = BlockManager.manager.connections.get(request.inputBlock);
+		const config = BlockManager.manager.config.get(request.inputBlock) ?? {};
 		const outputInfo = BlockManager.manager.uuid.get(request.outputBlock);
 
-		const connections: PlacedBlockLogicConnections = {
-			...inputInfo,
+		const newConfig: typeof config = {
+			...config,
 			[request.inputConnection]: {
-				blockUuid: outputInfo,
-				connectionName: request.outputConnection,
+				type: "wire",
+				config: {
+					prevConfig: config[request.inputConnection],
+					blockUuid: outputInfo,
+					connectionName: request.outputConnection,
+				},
 			},
 		};
 
-		BlockManager.manager.connections.set(request.inputBlock, connections);
+		BlockManager.manager.config.set(request.inputBlock, newConfig);
 		return success;
 	}
 	logicDisconnect({ inputBlock, inputConnection }: Omit<LogicDisconnectRequest, "plot">): Response {
-		const connections = { ...BlockManager.manager.connections.get(inputBlock) };
-		if (connections[inputConnection]) {
-			delete connections[inputConnection];
+		const config = { ...BlockManager.manager.config.get(inputBlock) };
+		const cfg = config[inputConnection];
+		if (cfg?.type === "wire") {
+			// either set it to the previous config, or delete the key by setting it to nil
+			config[inputConnection] = cfg.config?.prevConfig;
 		}
 
-		BlockManager.manager.connections.set(inputBlock, connections);
+		BlockManager.manager.config.set(inputBlock, config);
 		return success;
 	}
 	paintBlocks({ blocks, color, material }: Omit<PaintBlocksRequest, "plot">): Response {

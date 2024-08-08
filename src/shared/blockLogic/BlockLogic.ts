@@ -14,17 +14,11 @@ import type { ReadonlySubscribeObservableValue } from "shared/event/ObservableVa
 type Keys = BlockConfigTypes2.TypeKeys;
 type Types = BlockConfigTypes2.Types;
 
-type ConfigPart<TKey extends Keys> = BlockConfigTypes2.Types[TKey]["config"];
-export type BlockConfigTypedPart<T extends Keys> = {
-	readonly type: T;
-	readonly config: ConfigPart<T>;
-};
-
 export type BlockConfigType = {
 	readonly displayName: string;
 	readonly group?: string;
-	readonly types: { readonly [k in keyof BlockConfigTypes2.Types]?: BlockConfigTypes2.Types[k] };
-	readonly defaultType: keyof BlockConfigTypes2.Types;
+	readonly types: { readonly [k in keyof Types]?: Types[k] };
+	readonly defaultType: keyof Types;
 	readonly connectorHidden?: boolean;
 	readonly configHidden?: boolean;
 };
@@ -38,8 +32,8 @@ export type BlockConfigBothDefinitions = {
 };
 
 export type PlacedBlockData2<T extends BlockModel = BlockModel> = ReplaceWith<
-	BlockDataBase,
-	{ readonly config: PlacedBlockConfig2; readonly instance: T }
+	Omit<BlockDataBase, "connections">,
+	{ readonly config: PlacedBlockConfig2 | undefined; readonly instance: T }
 >;
 
 class BlockLogicBase<T extends BlockModel = BlockModel> extends InstanceComponent<T> {
@@ -77,6 +71,8 @@ const createObservable = <TDef extends BlockConfigTypes2.Types[keyof BlockConfig
 };
 const BlockConfigValueRegistry: BlockConfigValueRegistry = {
 	unset: createObservable,
+	wire: createObservable,
+
 	bool: createObservable,
 	vector3: createObservable,
 	key: createObservable,

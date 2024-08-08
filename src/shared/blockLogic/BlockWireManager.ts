@@ -27,11 +27,12 @@ export namespace BlockWireManager {
 		color: { color: Colors.red },
 		byte: { color: Color3.fromRGB(97, 138, 255) },
 		bytearray: { color: Colors.black },
-		never: { color: Colors.black },
+		never: { color: Colors.white },
 	};
 
 	export const groups: { readonly [k in keyof BlockConfigTypes2.Types]: DataType } = {
 		unset: "never",
+		wire: "never",
 		bool: "bool",
 		vector3: "vector3",
 		keybool: "bool",
@@ -145,9 +146,14 @@ export namespace BlockWireManager {
 		groupMarkers(markers.values());
 
 		for (const block of plot.getBlockDatas()) {
-			if (block.connections === undefined) continue;
+			if (!block.config) continue;
 
-			for (const [connectionName, connection] of pairs(block.connections)) {
+			for (const [connectionName, config] of pairs(block.config)) {
+				if (config.type !== "wire" || !config.config) {
+					continue;
+				}
+
+				const connection = config.config;
 				const fromstr = `${block.uuid} input ${connectionName}`;
 				const tostr = `${connection.blockUuid} output ${connection.connectionName}`;
 

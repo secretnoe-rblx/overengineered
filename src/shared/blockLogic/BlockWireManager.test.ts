@@ -1,5 +1,5 @@
 import { Assert } from "shared/Assert";
-import { BlockWireManager } from "shared/block/BlockWireManager";
+import { BlockWireManager } from "shared/blockLogic/BlockWireManager";
 
 export namespace _Tests {
 	export namespace WireToolTests {

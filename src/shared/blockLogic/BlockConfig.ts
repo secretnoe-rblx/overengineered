@@ -1,24 +1,28 @@
 import type { BlockConfigType } from "shared/blockLogic/BlockLogic";
 
 type Keys = BlockConfigTypes2.TypeKeys;
+type Types = BlockConfigTypes2.Types;
 
-type ConfigPart<TKey extends Keys> = {
+export type BlockConfigPart<TKey extends Keys> = {
 	readonly type: TKey;
-	readonly config: BlockConfigTypes2.Types[TKey]["config"] | undefined;
+	readonly config: Types[TKey]["config"] | undefined;
 };
-export type DefinedConfigPart<TKey extends Keys> = {
+export type DefinedBlockConfigPart<TKey extends Keys> = {
 	readonly type: TKey;
-	readonly config: BlockConfigTypes2.Types[TKey]["config"];
+	readonly config: Types[TKey]["config"];
 };
 
-type GenericConfig = ConfigPart<Keys>;
-type GenericDefinedConfig = DefinedConfigPart<Keys>;
+type GenericConfig = BlockConfigPart<Keys>;
+type GenericDefinedConfig = DefinedBlockConfigPart<Keys>;
+
+type LessGenericConfig = { [k in Keys]: BlockConfigPart<k> }[Keys];
+type LessGenericDefinedConfig = { [k in Keys]: DefinedBlockConfigPart<k> }[Keys];
 
 export type PlacedBlockConfig2 = {
-	readonly [k in string]?: { [k in Keys]: ConfigPart<k> }[Keys];
+	readonly [k in string]?: LessGenericConfig;
 };
 export type DefinedPlacedBlockConfig2 = {
-	readonly [k in string]: { [k in Keys]: DefinedConfigPart<k> }[Keys];
+	readonly [k in string]: LessGenericDefinedConfig;
 };
 
 export namespace BlockConfig {
@@ -36,6 +40,10 @@ export namespace BlockConfig {
 			assert(typeIs(k, "string"));
 
 			const obj = result[k];
+			if (obj?.type === "unset" || obj?.type === "wire") {
+				continue;
+			}
+
 			if (!obj) {
 				const cfg: GenericDefinedConfig = {
 					type: def.defaultType,

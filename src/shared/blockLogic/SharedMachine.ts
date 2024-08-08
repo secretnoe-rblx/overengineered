@@ -8,7 +8,6 @@ import { ObservableValue } from "shared/event/ObservableValue";
 import type { BlockRegistry } from "shared/block/BlockRegistry";
 import type { GenericBlockLogic, PlacedBlockData2 } from "shared/blockLogic/BlockLogic";
 import type { GenericBlockList } from "shared/blocks/Blocks";
-import type { PlacedBlockData } from "shared/building/BlockManager";
 
 @injectable
 export class SharedMachine extends ContainerComponent<GenericBlockLogic> {
@@ -45,7 +44,7 @@ export class SharedMachine extends ContainerComponent<GenericBlockLogic> {
 		this.initialize(blocks);
 		this.enable();
 	}
-	protected initialize(blocks: readonly PlacedBlockData[]) {
+	protected initialize(blocks: readonly PlacedBlockData2[]) {
 		this.initializeSpeedLimiter();
 		// this.initializeBlockConnections();
 
@@ -54,7 +53,7 @@ export class SharedMachine extends ContainerComponent<GenericBlockLogic> {
 			this.impactController = this.parent(impact);
 		}
 	}
-	protected createImpactControllerIfNeeded(blocks: readonly PlacedBlockData[]): ImpactController | undefined {
+	protected createImpactControllerIfNeeded(blocks: readonly PlacedBlockData2[]): ImpactController | undefined {
 		return this.di.resolveForeignClass(ImpactController, [blocks]);
 	}
 

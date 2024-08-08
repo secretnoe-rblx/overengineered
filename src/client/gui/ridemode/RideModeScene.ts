@@ -17,7 +17,6 @@ import { CustomRemotes } from "shared/Remotes";
 import { RobloxUnit } from "shared/RobloxUnit";
 import { SlotsMeta } from "shared/SlotsMeta";
 import type { ClientMachine } from "client/blocks/ClientMachine";
-import type { Machine } from "client/blocks/Machine";
 import type { TextButtonDefinition } from "client/gui/controls/Button";
 import type { ProgressBarControlDefinition } from "client/gui/controls/ProgressBarControl";
 import type { PlayerDataStorage } from "client/PlayerDataStorage";
@@ -231,7 +230,7 @@ export class RideModeControls extends DictionaryControl<RideModeControlsDefiniti
 		};
 	}
 
-	start(machine: Machine | ClientMachine) {
+	start(machine: ClientMachine) {
 		this.clear();
 		machine.onDestroy(() => this.clear());
 		machine.occupiedByLocalPlayer.subscribe((occupied) => {
@@ -441,7 +440,7 @@ export class RideModeScene extends Control<RideModeSceneDefinition> {
 		}
 	}
 
-	start(machine: Machine | ClientMachine) {
+	start(machine: ClientMachine) {
 		if (InputController.inputType.get() === "Touch") {
 			this.controls.start(machine);
 		}

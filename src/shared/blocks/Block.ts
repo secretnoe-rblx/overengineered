@@ -6,7 +6,7 @@ declare global {
 		readonly name: string;
 		readonly description: string;
 
-		readonly logic: {
+		readonly logic?: {
 			readonly config: BlockConfigBothDefinitions;
 			readonly ctor: GenericBlockLogicCtor;
 		};

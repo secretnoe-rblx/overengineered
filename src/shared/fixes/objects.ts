@@ -1,4 +1,8 @@
 export namespace Objects {
+	export function firstKey<T>(object: readonly T[]): number | undefined;
+	export function firstKey<T>(object: ReadonlyMap<T, defined>): T | undefined;
+	export function firstKey<T>(object: ReadonlySet<T>): T | undefined;
+	export function firstKey<T extends object>(object: T): keyof T | undefined;
 	export function firstKey<T extends object>(object: T): keyof T | undefined {
 		for (const [key] of asMap(object)) {
 			return key;

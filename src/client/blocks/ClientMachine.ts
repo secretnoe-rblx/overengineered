@@ -5,7 +5,7 @@ import type { ConfigLogicValueBase } from "client/blocks/BlockLogicValues";
 import type { PlayerDataStorage } from "client/PlayerDataStorage";
 import type { BlockRegistry } from "shared/block/BlockRegistry";
 import type { ImpactController } from "shared/block/impact/ImpactController";
-import type { PlacedBlockData } from "shared/building/BlockManager";
+import type { PlacedBlockData2 } from "shared/blockLogic/BlockLogic";
 
 @injectable
 export class ClientMachine extends SharedMachine {
@@ -22,11 +22,11 @@ export class ClientMachine extends SharedMachine {
 		this.parent(this.logicInputs);
 	}
 
-	protected initialize(blocks: readonly PlacedBlockData[]) {
+	protected initialize(blocks: readonly PlacedBlockData2[]) {
 		super.initialize(blocks);
 		//this.initializeControls();
 	}
-	protected createImpactControllerIfNeeded(blocks: readonly PlacedBlockData[]): ImpactController | undefined {
+	protected createImpactControllerIfNeeded(blocks: readonly PlacedBlockData2[]): ImpactController | undefined {
 		if (!this.playerData.config.get().impact_destruction) {
 			return undefined;
 		}
@@ -41,7 +41,7 @@ export class ClientMachine extends SharedMachine {
 
 			for (const [key, observable] of pairs(logic.input)) {
 				// if already connected
-				if (logic.block.connections !== undefined && key in logic.block.connections) continue;
+				// if (logic.block.connections !== undefined && key in logic.block.connections) continue;
 
 				const def = configDef.input[key as keyof typeof configDef.input];
 

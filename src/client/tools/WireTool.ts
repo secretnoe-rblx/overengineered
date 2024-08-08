@@ -11,8 +11,8 @@ import { LogControl } from "client/gui/static/LogControl";
 import { ActionController } from "client/modes/build/ActionController";
 import { ClientBuilding } from "client/modes/build/ClientBuilding";
 import { ToolBase } from "client/tools/ToolBase";
-import { BlockWireManager } from "shared/block/BlockWireManager";
 import { blockConfigRegistry } from "shared/block/config/BlockConfigRegistry";
+import { BlockWireManager } from "shared/blockLogic/BlockWireManager";
 import { Component } from "shared/component/Component";
 import { ComponentChild } from "shared/component/ComponentChild";
 import { ComponentChildren } from "shared/component/ComponentChildren";
@@ -27,19 +27,7 @@ import type { PlacedBlockData } from "shared/building/BlockManager";
 import type { SharedPlot } from "shared/building/SharedPlot";
 import type { ReadonlyObservableValue } from "shared/event/ObservableValue";
 
-type TypeGroup = {
-	readonly color: Color3;
-};
-const typeGroups: { readonly [k in BlockWireManager.DataType]: TypeGroup } = {
-	bool: { color: Colors.yellow },
-	vector3: { color: Colors.pink },
-	number: { color: Colors.green },
-	string: { color: Colors.purple },
-	color: { color: Colors.red },
-	byte: { color: Color3.fromRGB(97, 138, 255) },
-	bytearray: { color: Colors.black },
-	never: { color: Colors.black },
-};
+const typeGroups = BlockWireManager.typeGroups;
 
 const markerParent = Element.create("ScreenGui", {
 	Name: "WireToolMarkers",

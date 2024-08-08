@@ -1,12 +1,18 @@
+import { blockConfigRegistry } from "shared/block/config/BlockConfigRegistry";
 import { BlockManager } from "shared/building/BlockManager";
 import { JSON } from "shared/fixes/Json";
 import { Objects } from "shared/fixes/objects";
 import { Serializer } from "shared/Serializer";
-import type { blockConfigRegistry } from "shared/block/config/BlockConfigRegistry";
+import type { BlockConfigRegistry } from "shared/block/config/BlockConfigRegistry";
 import type { BlockId } from "shared/BlockDataRegistry";
-import type { PlacedBlockConfig, PlacedBlockLogicConnections } from "shared/building/BlockManager";
+import type { PlacedBlockConfig2 } from "shared/blockLogic/BlockConfig";
+import type { PlacedBlockLogicConnections } from "shared/building/BlockManager";
 import type { BuildingPlot } from "shared/building/BuildingPlot";
 import type { ReadonlyPlot } from "shared/building/ReadonlyPlot";
+
+export type PlacedBlockConfigV1 = {
+	readonly [k in string]: unknown;
+};
 
 type SerializedBlocks<TBlocks extends SerializedBlockBase> = {
 	readonly version: number;
@@ -20,7 +26,7 @@ interface SerializedBlockV0 extends SerializedBlockBase {
 	readonly location: CFrame;
 	readonly material?: Enum.Material | undefined;
 	readonly color?: Color3 | undefined;
-	readonly config?: PlacedBlockConfig | undefined;
+	readonly config?: PlacedBlockConfigV1 | undefined;
 }
 interface SerializedBlockV2 extends SerializedBlockV0 {
 	readonly uuid: BlockUuid;
@@ -28,15 +34,17 @@ interface SerializedBlockV2 extends SerializedBlockV0 {
 interface SerializedBlockV3 extends SerializedBlockV2 {
 	readonly connections?: PlacedBlockLogicConnections | undefined;
 }
+interface SerializedBlockV4
+	extends ReplaceWith<SerializedBlockV3, { readonly config?: PlacedBlockConfig2 | undefined }> {}
 
-export type LatestSerializedBlock = SerializedBlockV3;
+export type LatestSerializedBlock = SerializedBlockV4;
 export type LatestSerializedBlocks = SerializedBlocks<LatestSerializedBlock>;
 
 namespace Filter {
 	const white = Color3.fromRGB(255, 255, 255);
 	const plastic = Enum.Material.Plastic;
 
-	export function deleteDefaultValues(block: Writable<LatestSerializedBlock>) {
+	export function deleteDefaultValues(block: Writable<ReplaceWith<LatestSerializedBlock, { config?: {} }>>) {
 		if (block.color === white) {
 			delete block.color;
 		}
@@ -961,11 +969,52 @@ const v24: UpgradableBlocksSerializer<SerializedBlocks<SerializedBlockV3>, typeo
 	},
 };
 
+// update config structure
+const v25: UpgradableBlocksSerializer<SerializedBlocks<SerializedBlockV4>, typeof v24> = {
+	version: 25,
+
+	upgradeFrom(prev: SerializedBlocks<SerializedBlockV3>): SerializedBlocks<SerializedBlockV4> {
+		const update = (block: SerializedBlockV3): SerializedBlockV4 => {
+			const ret: SerializedBlockV4 = {
+				...block,
+				config: !block.config
+					? undefined
+					: asObject(
+							asMap(block.config).mapToMap(
+								(k, v): LuaTuple<[string, PlacedBlockConfig2[string] & defined]> => {
+									const def = (blockConfigRegistry as BlockConfigRegistry)[
+										block.id as keyof BlockConfigRegistry
+									]!.input[k];
+
+									let ctype = def.type;
+									if (def.type === "or") {
+										ctype = Objects.firstKey(def.types)!;
+									}
+
+									return $tuple(k, {
+										type: ctype as (PlacedBlockConfig2[string] & defined)["type"],
+										config: v as never,
+									});
+								},
+							),
+						),
+			};
+
+			return ret;
+		};
+
+		return {
+			version: this.version,
+			blocks: prev.blocks.map(update),
+		};
+	},
+};
+
 //
 
 const versions = [
 	...([v4, v5, v6, v7, v8, v9, v10, v11, v12, v13, v14, v15, v16, v17, v18, v19, v20, v21, v22] as const),
-	...([v23, v24] as const),
+	...([v23, v24, v25] as const),
 ] as const;
 const current = versions[versions.size() - 1] as typeof versions extends readonly [...unknown[], infer T] ? T : never;
 
