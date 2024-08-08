@@ -21,7 +21,7 @@ import type { BuildingMode } from "client/modes/build/BuildingMode";
 import type { MultiBlockSelectorConfiguration } from "client/tools/highlighters/MultiBlockSelector";
 //import type { TutorialConfigBlockHighlight } from "client/tutorial/TutorialConfigTool";
 import type { BlockRegistry } from "shared/block/BlockRegistry";
-import type { PlacedBlockConfig2 } from "shared/blockLogic/BlockConfig";
+import type { PlacedBlockConfig } from "shared/blockLogic/BlockConfig";
 import type { GenericBlockList } from "shared/blocks/Blocks";
 
 namespace Scene {
@@ -119,7 +119,7 @@ namespace Scene {
 				if (!defs) return undefined!;
 
 				const config = BlockConfig.addDefaults(
-					BlockManager.manager.config.get(blockmodel) as PlacedBlockConfig2,
+					BlockManager.manager.config.get(blockmodel) as PlacedBlockConfig,
 					defs,
 				);
 				return {

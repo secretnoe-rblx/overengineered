@@ -8,7 +8,7 @@ import { Objects } from "shared/fixes/objects";
 import { RemoteEvents } from "shared/RemoteEvents";
 import { PartUtils } from "shared/utils/PartUtils";
 import type { IBlockLogicValue } from "shared/block/BlockLogicValue";
-import type { PlacedBlockConfig2 } from "shared/blockLogic/BlockConfig";
+import type { PlacedBlockConfig } from "shared/blockLogic/BlockConfig";
 import type { ReadonlySubscribeObservableValue } from "shared/event/ObservableValue";
 
 type Keys = BlockConfigTypes2.TypeKeys;
@@ -33,7 +33,7 @@ export type BlockConfigBothDefinitions = {
 
 export type PlacedBlockData2<T extends BlockModel = BlockModel> = ReplaceWith<
 	BlockDataBase,
-	{ readonly config: PlacedBlockConfig2 | undefined; readonly instance: T }
+	{ readonly config: PlacedBlockConfig | undefined; readonly instance: T }
 >;
 
 class BlockLogicBase<T extends BlockModel = BlockModel> extends InstanceComponent<T> {

@@ -5,7 +5,7 @@ import { Objects } from "shared/fixes/objects";
 import { Serializer } from "shared/Serializer";
 import type { BlockConfigRegistry } from "shared/block/config/BlockConfigRegistry";
 import type { BlockId } from "shared/BlockDataRegistry";
-import type { PlacedBlockConfig2 } from "shared/blockLogic/BlockConfig";
+import type { PlacedBlockConfig } from "shared/blockLogic/BlockConfig";
 import type { PlacedBlockLogicConnections } from "shared/building/BlockManager";
 import type { BuildingPlot } from "shared/building/BuildingPlot";
 import type { ReadonlyPlot } from "shared/building/ReadonlyPlot";
@@ -36,7 +36,7 @@ interface SerializedBlockV3 extends SerializedBlockV2 {
 	readonly connections?: PlacedBlockLogicConnections | undefined;
 }
 interface SerializedBlockV4
-	extends ReplaceWith<SerializedBlockV3, { readonly config?: PlacedBlockConfig2 | undefined }> {}
+	extends ReplaceWith<SerializedBlockV3, { readonly config?: PlacedBlockConfig | undefined }> {}
 
 export type LatestSerializedBlock = SerializedBlockV4;
 export type LatestSerializedBlocks = SerializedBlocks<LatestSerializedBlock>;
@@ -983,7 +983,7 @@ const v25: UpgradableBlocksSerializer<SerializedBlocks<SerializedBlockV4>, typeo
 					? undefined
 					: asObject(
 							asMap(block.config).mapToMap(
-								(k, v): LuaTuple<[string, PlacedBlockConfig2[string] & defined]> => {
+								(k, v): LuaTuple<[string, PlacedBlockConfig[string] & defined]> => {
 									const def = (blockConfigRegistry as BlockConfigRegistry)[
 										block.id as keyof BlockConfigRegistry
 									]!.input[k];
@@ -994,7 +994,7 @@ const v25: UpgradableBlocksSerializer<SerializedBlocks<SerializedBlockV4>, typeo
 									}
 
 									return $tuple(k, {
-										type: ctype as (PlacedBlockConfig2[string] & defined)["type"],
+										type: ctype as (PlacedBlockConfig[string] & defined)["type"],
 										config: v as never,
 									});
 								},

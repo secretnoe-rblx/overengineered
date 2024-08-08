@@ -1,4 +1,4 @@
-import type { PlacedBlockConfig2 } from "shared/blockLogic/BlockConfig";
+import type { PlacedBlockConfig } from "shared/blockLogic/BlockConfig";
 
 declare global {
 	namespace BlockConfigTypes2 {
@@ -16,7 +16,7 @@ declare global {
 			/** OUTPUT connector name */
 			readonly connectionName: BlockConnectionName;
 
-			readonly prevConfig: PlacedBlockConfig2[string] | undefined;
+			readonly prevConfig: PlacedBlockConfig[string] | undefined;
 		}>;
 		export type Bool = BCPrimitive<boolean>;
 		export type Vec3 = BCPrimitive<Vector3>;

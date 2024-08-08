@@ -1,7 +1,7 @@
 import { BlockList } from "shared/blocks/Blocks";
 import { Colors } from "shared/Colors";
 import { ObservableValue } from "shared/event/ObservableValue";
-import type { PlacedBlockConfig2 } from "shared/blockLogic/BlockConfig";
+import type { PlacedBlockConfig } from "shared/blockLogic/BlockConfig";
 import type { GenericBlockList } from "shared/blocks/Blocks";
 import type { SharedPlot } from "shared/building/SharedPlot";
 
@@ -106,7 +106,7 @@ export namespace BlockWireManager {
 					let dataTypes: readonly DataType[];
 
 					{
-						const existingcfg = (block.config as PlacedBlockConfig2 | undefined)?.[key];
+						const existingcfg = (block.config as PlacedBlockConfig | undefined)?.[key];
 
 						if (existingcfg === undefined || existingcfg.type === "unset") {
 							dataTypes = asMap(config.types).map((k) => groups[k]);

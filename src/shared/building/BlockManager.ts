@@ -1,7 +1,7 @@
 import { JSON } from "shared/fixes/Json";
 import { Serializer } from "shared/Serializer";
 import type { BlockId } from "shared/BlockDataRegistry";
-import type { PlacedBlockConfig2 } from "shared/blockLogic/BlockConfig";
+import type { PlacedBlockConfig } from "shared/blockLogic/BlockConfig";
 
 /** Connections to the INPUT connectors */
 export type PlacedBlockLogicConnections = {
@@ -20,7 +20,7 @@ declare global {
 		readonly uuid: BlockUuid;
 		readonly color: Color3;
 		readonly material: Enum.Material;
-		readonly config: PlacedBlockConfig2 | undefined;
+		readonly config: PlacedBlockConfig | undefined;
 	};
 }
 
@@ -97,13 +97,13 @@ export namespace BlockManager {
 		},
 
 		config: {
-			set: (block, value: PlacedBlockConfig2 | undefined) =>
+			set: (block, value: PlacedBlockConfig | undefined) =>
 				block.SetAttribute("config", value ? JSON.serialize(value) : undefined),
 			get: (block) => {
 				const attribute = block.GetAttribute("config") as string | undefined;
 				if (attribute === undefined) return undefined;
 
-				return JSON.deserialize<PlacedBlockConfig2>(attribute);
+				return JSON.deserialize<PlacedBlockConfig>(attribute);
 			},
 		},
 	} satisfies { readonly [k in Exclude<keyof PlacedBlockData, "instance">]: Manager<PlacedBlockData[k]> };

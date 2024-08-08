@@ -9,7 +9,7 @@ export type BlockConfigPart<TKey extends Keys> = {
 };
 
 type GenericConfig = BlockConfigPart<Keys>;
-export type PlacedBlockConfig2 = {
+export type PlacedBlockConfig = {
 	readonly [k in string]: { [k in Keys]: BlockConfigPart<k> }[Keys];
 };
 
@@ -19,9 +19,9 @@ export namespace BlockConfig {
 	};
 
 	export function addDefaults<TDef extends Def>(
-		config: PlacedBlockConfig2 | undefined,
+		config: PlacedBlockConfig | undefined,
 		definition: TDef,
-	): PlacedBlockConfig2 {
+	): PlacedBlockConfig {
 		const result: { [k in string]?: GenericConfig } = { ...(config ?? {}) };
 
 		for (const [k, def] of pairs(definition)) {
@@ -68,6 +68,6 @@ export namespace BlockConfig {
 			result[k] = cfg;
 		}
 
-		return result as PlacedBlockConfig2;
+		return result as PlacedBlockConfig;
 	}
 }
