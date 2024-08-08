@@ -23,7 +23,7 @@ import type { DropdownListDefinition } from "client/gui/controls/DropdownList";
 import type { KeyOrStringChooserControlDefinition } from "client/gui/controls/KeyOrStringChooserControl";
 import type { NumberTextBoxControlDefinition } from "client/gui/controls/NumberTextBoxControl";
 import type { TextBoxControlDefinition } from "client/gui/controls/TextBoxControl";
-import type { DefinedBlockConfigPart } from "shared/blockLogic/BlockConfig";
+import type { BlockConfigPart } from "shared/blockLogic/BlockConfig";
 
 type Keys = BlockConfigTypes2.TypeKeys;
 type Types = BlockConfigTypes2.Types;
@@ -42,7 +42,7 @@ export type VisualBlockConfigDefinitions = { readonly [k in string]: VisualBlock
 type ConfigPart<TKey extends Keys> = Types[TKey]["config"];
 type ConfigParts<TKey extends Keys> = OfBlocks<ConfigPart<TKey>>;
 
-type TypedConfigPart = DefinedBlockConfigPart<Keys>;
+type TypedConfigPart = BlockConfigPart<Keys>;
 type BlocksConfigPart = OfBlocks<TypedConfigPart>;
 type BlocksConfig = OfBlocks<{ readonly [k in string]: TypedConfigPart }>;
 

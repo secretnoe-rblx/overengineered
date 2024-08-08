@@ -2,7 +2,7 @@ import { MultiBlockConfigControl } from "client/gui/BlockConfigControls";
 import { Control } from "client/gui/Control";
 import { Element } from "shared/Element";
 import type { VisualBlockConfigDefinitions } from "client/gui/BlockConfigControls";
-import type { DefinedBlockConfigPart } from "shared/blockLogic/BlockConfig";
+import type { BlockConfigPart } from "shared/blockLogic/BlockConfig";
 
 export const _Tests = () => {
 	const frame = Element.create(
@@ -142,7 +142,7 @@ export const _Tests = () => {
 
 	type cfg = {
 		readonly [k in string]: {
-			readonly [k in keyof typeof def]: DefinedBlockConfigPart<
+			readonly [k in keyof typeof def]: BlockConfigPart<
 				keyof (typeof def)[k]["types"] & BlockConfigTypes2.TypeKeys
 			>;
 		};

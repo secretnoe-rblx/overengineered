@@ -264,33 +264,57 @@ const reGenerateUuids = (
 	const plotBlocks = plot.getBlocks().mapToSet(BlockManager.manager.uuid.get);
 
 	for (const [olduuid, newblock] of uuidmap) {
-		const connections = asObject(
-			new Map(
-				asMap(existingBlocks.get(olduuid)?.connections ?? {}).map((k, v) => [
-					k,
-					{ ...v } as Writable<typeof v>,
-				]),
-			),
-		);
+		const config = existingBlocks.get(olduuid)?.config;
+		if (!config) continue;
 
-		for (const [key, connection] of [...asMap(connections)]) {
+		const keysToDelete: string[] = [];
+		for (const [key, cfg] of [...asMap(config)]) {
+			if (cfg.type !== "wire") continue;
+			const connection = cfg.config;
+
 			if (!plotBlocks.has(connection.blockUuid) && !uuidmap.has(connection.blockUuid)) {
 				$log(
-					`Deleting nonexistent connection ${olduuid} ${key} -> ${connection.blockUuid} ${connection.connectionName}`,
+					`Deleting a nonexistent connection ${olduuid} ${key} -> ${connection.blockUuid} ${connection.connectionName}`,
 				);
-				delete connections[key];
+
+				keysToDelete.push(key);
 			}
 		}
 
-		for (const [key, connection] of pairs(connections)) {
+		const keysToChange = new Map<string, BlockUuid>();
+		for (const [key, cfg] of pairs(config)) {
+			if (cfg.type !== "wire") continue;
+			if (keysToDelete.includes(key)) continue;
+			const connection = cfg.config;
+
 			const neww = uuidmap.get(connection.blockUuid);
 			if (!neww) continue;
 
-			$log(`Rerouting the connection ${olduuid} ${key} -> ${connection.blockUuid} ${connection.connectionName}`);
-			connection.blockUuid = neww.uuid;
+			$log(`Rerouting a connection ${olduuid} ${key} -> ${connection.blockUuid} ${connection.connectionName}`);
+			keysToChange.set(key, neww.uuid);
 		}
 
-		newblock.connections = connections;
+		const copy: Writable<typeof config> = {};
+		for (const [key, cfg] of pairs(config)) {
+			if (cfg.type !== "wire") {
+				copy[key] = cfg;
+				continue;
+			}
+
+			if (keysToDelete.includes(key)) {
+				continue;
+			}
+
+			const keyToChange = keysToChange.get(key);
+			if (keyToChange) {
+				copy[key] = { ...cfg, config: { ...cfg.config, blockUuid: keyToChange } };
+				continue;
+			}
+
+			copy[key] = cfg;
+		}
+
+		newblock.config = copy;
 	}
 
 	return newblocks;

@@ -32,7 +32,7 @@ export type BlockConfigBothDefinitions = {
 };
 
 export type PlacedBlockData2<T extends BlockModel = BlockModel> = ReplaceWith<
-	Omit<BlockDataBase, "connections">,
+	BlockDataBase,
 	{ readonly config: PlacedBlockConfig2 | undefined; readonly instance: T }
 >;
 

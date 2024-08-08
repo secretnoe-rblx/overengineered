@@ -14,9 +14,12 @@ export namespace SharedBuilding {
 			(readonly [PlacedBlockData, BlockConnectionName, PlacedBlockDataConnection])[]
 		>();
 		for (const otherblock of blocks) {
-			if (otherblock.connections === undefined) continue;
+			if (!otherblock.config) continue;
 
-			for (const [connectionName, connection] of pairs(otherblock.connections)) {
+			for (const [connectionName, cfg] of pairs(otherblock.config)) {
+				if (cfg.type !== "wire") continue;
+				const connection = cfg.config;
+
 				if (!uuids.has(connection.blockUuid)) continue;
 
 				let ret = result.get(connection.blockUuid);
@@ -24,7 +27,7 @@ export namespace SharedBuilding {
 					result.set(connection.blockUuid, (ret = []));
 				}
 
-				ret.push([otherblock, connectionName, connection] as const);
+				ret.push([otherblock, connectionName as BlockConnectionName, connection] as const);
 			}
 		}
 

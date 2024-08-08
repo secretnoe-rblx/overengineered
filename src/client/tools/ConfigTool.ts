@@ -122,12 +122,10 @@ namespace Scene {
 					BlockManager.manager.config.get(blockmodel) as PlacedBlockConfig2,
 					defs,
 				);
-				const connections = BlockManager.manager.connections.get(blockmodel);
 				return {
 					blockmodel,
 					uuid: BlockManager.manager.uuid.get(blockmodel),
 					config,
-					connections: connections ? new ReadonlySet(Objects.keys(connections)) : new ReadonlySet<string>(),
 				} as const;
 			});
 

@@ -14,10 +14,6 @@ export type PlacedBlockDataConnection = {
 	readonly connectionName: BlockConnectionName;
 };
 
-export type PlacedBlockConfig = {
-	readonly [k in string]: unknown;
-};
-
 declare global {
 	type BlockDataBase = {
 		readonly id: BlockId;
@@ -25,9 +21,6 @@ declare global {
 		readonly color: Color3;
 		readonly material: Enum.Material;
 		readonly config: PlacedBlockConfig2 | undefined;
-
-		/** @deprecated TOBEDELETED */
-		readonly connections: PlacedBlockLogicConnections | undefined;
 	};
 }
 
@@ -104,23 +97,13 @@ export namespace BlockManager {
 		},
 
 		config: {
-			set: (block, value: PlacedBlockConfig | undefined) =>
+			set: (block, value: PlacedBlockConfig2 | undefined) =>
 				block.SetAttribute("config", value ? JSON.serialize(value) : undefined),
 			get: (block) => {
 				const attribute = block.GetAttribute("config") as string | undefined;
 				if (attribute === undefined) return undefined;
 
 				return JSON.deserialize<PlacedBlockConfig2>(attribute);
-			},
-		},
-		connections: {
-			set: (block, value: PlacedBlockLogicConnections | undefined) =>
-				block.SetAttribute("connections", value !== undefined ? JSON.serialize(value) : undefined),
-			get: (block) => {
-				const attribute = block.GetAttribute("connections") as string | undefined;
-				if (attribute === undefined) return undefined;
-
-				return JSON.deserialize<PlacedBlockLogicConnections>(attribute);
 			},
 		},
 	} satisfies { readonly [k in Exclude<keyof PlacedBlockData, "instance">]: Manager<PlacedBlockData[k]> };
@@ -132,7 +115,6 @@ export namespace BlockManager {
 			color: manager.color.get(model),
 			material: manager.material.get(model),
 			uuid: manager.uuid.get(model),
-			connections: manager.connections.get(model),
 			config: manager.config.get(model),
 		};
 	}

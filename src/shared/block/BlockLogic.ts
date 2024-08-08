@@ -1,6 +1,6 @@
 import { InstanceComponent } from "shared/component/InstanceComponent";
 import { PartUtils } from "shared/utils/PartUtils";
-import type { PlacedBlockData, PlacedBlockDataConnection } from "shared/building/BlockManager";
+import type { PlacedBlockData } from "shared/building/BlockManager";
 
 export type BlockLogicData<
 	TDef extends BlockConfigTypes.Definitions,
@@ -10,7 +10,6 @@ export type BlockLogicData<
 	{
 		readonly instance: TBlock;
 		readonly config?: Partial<ConfigDefinitionsToConfig<keyof TDef, TDef>>;
-		readonly connections?: Readonly<Partial<Record<keyof TDef & BlockConnectionName, PlacedBlockDataConnection>>>;
 	}
 >;
 

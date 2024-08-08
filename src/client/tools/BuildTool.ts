@@ -635,7 +635,6 @@ namespace SinglePlaceController {
 					location: g.pos,
 					uuid: undefined,
 					config: undefined,
-					connections: undefined,
 				}),
 			);
 
@@ -1017,7 +1016,6 @@ namespace MultiPlaceController {
 						location: loc.pos,
 						uuid: undefined,
 						config: undefined,
-						connections: undefined,
 					}),
 				),
 			});

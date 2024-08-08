@@ -149,7 +149,7 @@ export namespace BlockWireManager {
 			if (!block.config) continue;
 
 			for (const [connectionName, config] of pairs(block.config)) {
-				if (config.type !== "wire" || !config.config) {
+				if (config.type !== "wire") {
 					continue;
 				}
 

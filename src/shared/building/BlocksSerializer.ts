@@ -32,6 +32,7 @@ interface SerializedBlockV2 extends SerializedBlockV0 {
 	readonly uuid: BlockUuid;
 }
 interface SerializedBlockV3 extends SerializedBlockV2 {
+	/** @deprecated Do not use; was deleted */
 	readonly connections?: PlacedBlockLogicConnections | undefined;
 }
 interface SerializedBlockV4
@@ -977,6 +978,7 @@ const v25: UpgradableBlocksSerializer<SerializedBlocks<SerializedBlockV4>, typeo
 		const update = (block: SerializedBlockV3): SerializedBlockV4 => {
 			const ret: SerializedBlockV4 = {
 				...block,
+				["connnections" as keyof SerializedBlockV4]: undefined!,
 				config: !block.config
 					? undefined
 					: asObject(
@@ -1106,7 +1108,6 @@ export namespace BlocksSerializer {
 			material: blockData.material ?? Enum.Material.Plastic,
 			config: blockData.config,
 			uuid: blockData.uuid,
-			connections: blockData.connections,
 		};
 	}
 }

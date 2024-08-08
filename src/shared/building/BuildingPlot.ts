@@ -86,12 +86,8 @@ export class BuildingPlot extends ReadonlyPlot {
 
 		model.PivotTo(data.location);
 
-		// Set material & color
 		if (data.config && Objects.size(data.config) !== 0) {
 			BlockManager.manager.config.set(model, data.config);
-		}
-		if (data.connections !== undefined && Objects.size(data.connections) !== 0) {
-			BlockManager.manager.connections.set(model, data.connections);
 		}
 
 		BlockManager.manager.uuid.set(model, uuid);
@@ -182,9 +178,10 @@ export class BuildingPlot extends ReadonlyPlot {
 	logicDisconnect({ inputBlock, inputConnection }: Omit<LogicDisconnectRequest, "plot">): Response {
 		const config = { ...BlockManager.manager.config.get(inputBlock) };
 		const cfg = config[inputConnection];
-		if (cfg?.type === "wire") {
+		if (cfg.type === "wire") {
 			// either set it to the previous config, or delete the key by setting it to nil
-			config[inputConnection] = cfg.config?.prevConfig;
+			if (!cfg.config.prevConfig) delete config[inputConnection];
+			else config[inputConnection] = cfg.config.prevConfig;
 		}
 
 		BlockManager.manager.config.set(inputBlock, config);

@@ -5,24 +5,12 @@ type Types = BlockConfigTypes2.Types;
 
 export type BlockConfigPart<TKey extends Keys> = {
 	readonly type: TKey;
-	readonly config: Types[TKey]["config"] | undefined;
-};
-export type DefinedBlockConfigPart<TKey extends Keys> = {
-	readonly type: TKey;
 	readonly config: Types[TKey]["config"];
 };
 
 type GenericConfig = BlockConfigPart<Keys>;
-type GenericDefinedConfig = DefinedBlockConfigPart<Keys>;
-
-type LessGenericConfig = { [k in Keys]: BlockConfigPart<k> }[Keys];
-type LessGenericDefinedConfig = { [k in Keys]: DefinedBlockConfigPart<k> }[Keys];
-
 export type PlacedBlockConfig2 = {
-	readonly [k in string]?: LessGenericConfig;
-};
-export type DefinedPlacedBlockConfig2 = {
-	readonly [k in string]: LessGenericDefinedConfig;
+	readonly [k in string]: { [k in Keys]: BlockConfigPart<k> }[Keys];
 };
 
 export namespace BlockConfig {
@@ -33,7 +21,7 @@ export namespace BlockConfig {
 	export function addDefaults<TDef extends Def>(
 		config: PlacedBlockConfig2 | undefined,
 		definition: TDef,
-	): DefinedPlacedBlockConfig2 {
+	): PlacedBlockConfig2 {
 		const result: { [k in string]?: GenericConfig } = { ...(config ?? {}) };
 
 		for (const [k, def] of pairs(definition)) {
@@ -45,7 +33,7 @@ export namespace BlockConfig {
 			}
 
 			if (!obj) {
-				const cfg: GenericDefinedConfig = {
+				const cfg: GenericConfig = {
 					type: def.defaultType,
 					config: def.types[def.defaultType]!.config,
 				};
@@ -61,7 +49,7 @@ export namespace BlockConfig {
 					throw "wrong stuff bruh";
 				}
 
-				const cfg: GenericDefinedConfig = {
+				const cfg: GenericConfig = {
 					...obj,
 					config: {
 						...(obj.config ?? {}),
@@ -73,13 +61,13 @@ export namespace BlockConfig {
 				continue;
 			}
 
-			const cfg: GenericDefinedConfig = {
+			const cfg: GenericConfig = {
 				...obj,
 				config: defConfig,
 			};
 			result[k] = cfg;
 		}
 
-		return result as DefinedPlacedBlockConfig2;
+		return result as PlacedBlockConfig2;
 	}
 }

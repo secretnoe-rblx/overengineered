@@ -12,7 +12,7 @@ declare global {
 	type BuildResponse = Response<{ readonly model: BlockModel }>;
 	type MultiBuildResponse = Response<{ readonly models: readonly BlockModel[] }>;
 
-	type PlaceBlockRequest = MakePartial<BlockDataBase, "uuid" | "config" | "connections"> & {
+	type PlaceBlockRequest = MakePartial<BlockDataBase, "uuid" | "config"> & {
 		readonly location: CFrame;
 	};
 	type PlaceBlocksRequest = {
