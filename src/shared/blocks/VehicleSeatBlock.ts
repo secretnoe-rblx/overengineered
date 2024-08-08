@@ -1,6 +1,6 @@
 import { RunService, Players } from "@rbxts/services";
 import { BlockLogic } from "shared/blockLogic/BlockLogic";
-import type { BlockConfigBothDefinitions, PlacedBlockData2 } from "shared/blockLogic/BlockLogic";
+import type { BlockConfigBothDefinitions } from "shared/blockLogic/BlockLogic";
 import type { SharedMachine } from "shared/blockLogic/SharedMachine";
 
 const config = {
@@ -27,7 +27,7 @@ type VehicleSeatModel = BlockModel & {
 export class VehicleSeatBlockLogic extends BlockLogic<typeof config, VehicleSeatModel> {
 	readonly vehicleSeat;
 
-	constructor(block: PlacedBlockData2, @inject machine: SharedMachine) {
+	constructor(block: PlacedBlockData, @inject machine: SharedMachine) {
 		super(block, config);
 
 		this.vehicleSeat = this.instance.VehicleSeat;

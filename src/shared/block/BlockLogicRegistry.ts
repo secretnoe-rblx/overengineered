@@ -46,7 +46,6 @@ import { WheelBlockLogic } from "shared/block/logic/WheelBlockLogic";
 import { WingLogic } from "shared/block/logic/WingLogic";
 import type { BlockLogic } from "shared/block/BlockLogic";
 import type { BlockId } from "shared/BlockDataRegistry";
-import type { PlacedBlockData } from "shared/building/BlockManager";
 
 declare global {
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any

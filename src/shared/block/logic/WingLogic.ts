@@ -3,7 +3,6 @@ import { blockConfigRegistry } from "shared/block/config/BlockConfigRegistry";
 import { ConfigurableBlockLogic } from "shared/block/ConfigurableBlockLogic";
 import { GameDefinitions } from "shared/data/GameDefinitions";
 import { GameEnvironment } from "shared/data/GameEnvironment";
-import type { PlacedBlockData } from "shared/building/BlockManager";
 
 type Wing = BlockModel & {
 	readonly WingSurface:

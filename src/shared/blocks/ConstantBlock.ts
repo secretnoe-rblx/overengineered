@@ -1,6 +1,6 @@
 import { BlockLogic } from "shared/blockLogic/BlockLogic";
 import { AutoC2SRemoteEvent } from "shared/event/C2SRemoteEvent";
-import type { BlockConfigBothDefinitions, PlacedBlockData2 } from "shared/blockLogic/BlockLogic";
+import type { BlockConfigBothDefinitions } from "shared/blockLogic/BlockLogic";
 
 // const config = {
 // 	input: {
@@ -46,7 +46,7 @@ class ConstantBlockLogic extends BlockLogic<typeof config> {
 		disconnect: new AutoC2SRemoteEvent<{ readonly block: BlockModel }>("disconnectblock_disconnect"),
 	} as const;
 
-	constructor(block: PlacedBlockData2) {
+	constructor(block: PlacedBlockData) {
 		super(block, config);
 		this.event.subscribeObservable(
 			this.input.value,

@@ -1,7 +1,6 @@
 import { blockConfigRegistry } from "shared/block/config/BlockConfigRegistry";
 import { ConfigurableBlockLogic } from "shared/block/ConfigurableBlockLogic";
 import { RadioTransmitterBlockLogic } from "shared/block/logic/RadioTransmitterBlockLogic";
-import type { PlacedBlockData } from "shared/building/BlockManager";
 
 RadioTransmitterBlockLogic.sendEvent.invoked.Connect(({ frequency, value }) => {
 	RadioRecieverBlockLogic.allRecievers.get(frequency)?.forEach((v) => {

@@ -23,7 +23,6 @@ import type { InputTooltips } from "client/gui/static/TooltipsControl";
 import type { BuildingMode } from "client/modes/build/BuildingMode";
 import type { BlockRegistry } from "shared/block/BlockRegistry";
 import type { BlockConfigRegistryNonGeneric } from "shared/block/config/BlockConfigRegistry";
-import type { PlacedBlockData } from "shared/building/BlockManager";
 import type { SharedPlot } from "shared/building/SharedPlot";
 import type { ReadonlyObservableValue } from "shared/event/ObservableValue";
 

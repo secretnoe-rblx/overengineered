@@ -8,7 +8,6 @@ import { Objects } from "shared/fixes/objects";
 import { RemoteEvents } from "shared/RemoteEvents";
 import { PartUtils } from "shared/utils/PartUtils";
 import type { IBlockLogicValue } from "shared/block/BlockLogicValue";
-import type { PlacedBlockConfig } from "shared/blockLogic/BlockConfig";
 import type { ReadonlySubscribeObservableValue } from "shared/event/ObservableValue";
 
 type Keys = BlockConfigTypes2.TypeKeys;
@@ -31,15 +30,10 @@ export type BlockConfigBothDefinitions = {
 	readonly output: BlockConfigDefinition;
 };
 
-export type PlacedBlockData2<T extends BlockModel = BlockModel> = ReplaceWith<
-	BlockDataBase,
-	{ readonly config: PlacedBlockConfig | undefined; readonly instance: T }
->;
-
 class BlockLogicBase<T extends BlockModel = BlockModel> extends InstanceComponent<T> {
-	readonly block: PlacedBlockData2<T>;
+	readonly block: PlacedBlockData<T>;
 
-	constructor(block: PlacedBlockData2) {
+	constructor(block: PlacedBlockData) {
 		super(block.instance as T);
 		this.block = block as typeof this.block;
 	}
@@ -180,7 +174,7 @@ type GenericBlockConfigBothDefinitions = {
 export type GenericBlockLogicCtor<
 	TDef extends BlockConfigBothDefinitions = GenericBlockConfigBothDefinitions,
 	TBlock extends BlockModel = BlockModel,
-> = new (block: PlacedBlockData2, ...args: any[]) => GenericBlockLogic<TDef, TBlock>;
+> = new (block: PlacedBlockData, ...args: any[]) => GenericBlockLogic<TDef, TBlock>;
 
 export type GenericBlockLogic<
 	TDef extends BlockConfigBothDefinitions = GenericBlockConfigBothDefinitions,
@@ -203,7 +197,7 @@ export abstract class BlockLogic<
 	};
 
 	constructor(
-		block: PlacedBlockData2,
+		block: PlacedBlockData,
 		readonly configDefinition: TDef,
 	) {
 		super(block as never);

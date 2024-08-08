@@ -1,6 +1,5 @@
 import { blockConfigRegistry } from "shared/block/config/BlockConfigRegistry";
 import { ConfigurableBlockLogic } from "shared/block/ConfigurableBlockLogic";
-import type { PlacedBlockData } from "shared/building/BlockManager";
 
 export class CounterBlockLogic extends ConfigurableBlockLogic<typeof blockConfigRegistry.counter> {
 	private currentValue: number = 0;

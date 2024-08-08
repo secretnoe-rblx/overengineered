@@ -1,6 +1,5 @@
 import { InstanceComponent } from "shared/component/InstanceComponent";
 import { PartUtils } from "shared/utils/PartUtils";
-import type { PlacedBlockData } from "shared/building/BlockManager";
 
 export type BlockLogicData<
 	TDef extends BlockConfigTypes.Definitions,

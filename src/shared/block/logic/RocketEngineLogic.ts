@@ -3,7 +3,6 @@ import { blockConfigRegistry } from "shared/block/config/BlockConfigRegistry";
 import { ConfigurableBlockLogic } from "shared/block/ConfigurableBlockLogic";
 import { RobloxUnit } from "shared/RobloxUnit";
 import { Sound } from "shared/Sound";
-import type { PlacedBlockData } from "shared/building/BlockManager";
 import type { ParticleEffect } from "shared/effects/ParticleEffect";
 import type { SoundEffect } from "shared/effects/SoundEffect";
 

@@ -1,6 +1,5 @@
 import { blockConfigRegistry } from "shared/block/config/BlockConfigRegistry";
 import { ConfigurableBlockLogic } from "shared/block/ConfigurableBlockLogic";
-import type { PlacedBlockData } from "shared/building/BlockManager";
 
 export class WheelBlockLogic extends ConfigurableBlockLogic<typeof blockConfigRegistry.wheel> {
 	constructor(block: PlacedBlockData) {

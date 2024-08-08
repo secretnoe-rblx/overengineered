@@ -5,7 +5,6 @@ import type { ConfigLogicValueBase } from "client/blocks/BlockLogicValues";
 import type { PlayerDataStorage } from "client/PlayerDataStorage";
 import type { BlockRegistry } from "shared/block/BlockRegistry";
 import type { ImpactController } from "shared/block/impact/ImpactController";
-import type { PlacedBlockData2 } from "shared/blockLogic/BlockLogic";
 
 @injectable
 export class ClientMachine extends SharedMachine {
@@ -22,11 +21,11 @@ export class ClientMachine extends SharedMachine {
 		this.parent(this.logicInputs);
 	}
 
-	protected initialize(blocks: readonly PlacedBlockData2[]) {
+	protected initialize(blocks: readonly PlacedBlockData[]) {
 		super.initialize(blocks);
 		//this.initializeControls();
 	}
-	protected createImpactControllerIfNeeded(blocks: readonly PlacedBlockData2[]): ImpactController | undefined {
+	protected createImpactControllerIfNeeded(blocks: readonly PlacedBlockData[]): ImpactController | undefined {
 		if (!this.playerData.config.get().impact_destruction) {
 			return undefined;
 		}

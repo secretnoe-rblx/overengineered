@@ -3,17 +3,6 @@ import { Serializer } from "shared/Serializer";
 import type { BlockId } from "shared/BlockDataRegistry";
 import type { PlacedBlockConfig } from "shared/blockLogic/BlockConfig";
 
-/** Connections to the INPUT connectors */
-export type PlacedBlockLogicConnections = {
-	readonly [k in BlockConnectionName]: PlacedBlockDataConnection;
-};
-export type PlacedBlockDataConnection = {
-	/** OUTPUT block uiid */
-	readonly blockUuid: BlockUuid;
-	/** OUTPUT connector name */
-	readonly connectionName: BlockConnectionName;
-};
-
 declare global {
 	type BlockDataBase = {
 		readonly id: BlockId;
@@ -22,13 +11,8 @@ declare global {
 		readonly material: Enum.Material;
 		readonly config: PlacedBlockConfig | undefined;
 	};
-}
 
-export type PlacedBlockData<T extends BlockModel = BlockModel> = BlockDataBase & {
-	readonly instance: T;
-};
-declare global {
-	type BlockData<T extends BlockModel = BlockModel> = PlacedBlockData<T>;
+	type PlacedBlockData<T extends BlockModel = BlockModel> = BlockDataBase & { readonly instance: T };
 }
 
 interface Manager<T> {

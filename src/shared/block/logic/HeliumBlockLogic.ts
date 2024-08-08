@@ -2,7 +2,6 @@ import { blockConfigRegistry } from "shared/block/config/BlockConfigRegistry";
 import { ConfigurableBlockLogic } from "shared/block/ConfigurableBlockLogic";
 import { GameEnvironment } from "shared/data/GameEnvironment";
 import { Physics } from "shared/Physics";
-import type { PlacedBlockData } from "shared/building/BlockManager";
 
 type HeliumBlock = BlockModel & {
 	readonly Part: BasePart & {

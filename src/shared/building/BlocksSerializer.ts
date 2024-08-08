@@ -6,13 +6,25 @@ import { Serializer } from "shared/Serializer";
 import type { BlockConfigRegistry } from "shared/block/config/BlockConfigRegistry";
 import type { BlockId } from "shared/BlockDataRegistry";
 import type { PlacedBlockConfig } from "shared/blockLogic/BlockConfig";
-import type { PlacedBlockLogicConnections } from "shared/building/BlockManager";
 import type { BuildingPlot } from "shared/building/BuildingPlot";
 import type { ReadonlyPlot } from "shared/building/ReadonlyPlot";
 
-export type PlacedBlockConfigV1 = {
-	readonly [k in string]: unknown;
-};
+namespace V1 {
+	export type PlacedBlockConfig = {
+		readonly [k in string]: unknown;
+	};
+
+	/** Connections to the INPUT connectors */
+	export type PlacedBlockLogicConnections = {
+		readonly [k in BlockConnectionName]: PlacedBlockDataConnection;
+	};
+	export type PlacedBlockDataConnection = {
+		/** OUTPUT block uiid */
+		readonly blockUuid: BlockUuid;
+		/** OUTPUT connector name */
+		readonly connectionName: BlockConnectionName;
+	};
+}
 
 type SerializedBlocks<TBlocks extends SerializedBlockBase> = {
 	readonly version: number;
@@ -26,14 +38,14 @@ interface SerializedBlockV0 extends SerializedBlockBase {
 	readonly location: CFrame;
 	readonly material?: Enum.Material | undefined;
 	readonly color?: Color3 | undefined;
-	readonly config?: PlacedBlockConfigV1 | undefined;
+	readonly config?: V1.PlacedBlockConfig | undefined;
 }
 interface SerializedBlockV2 extends SerializedBlockV0 {
 	readonly uuid: BlockUuid;
 }
 interface SerializedBlockV3 extends SerializedBlockV2 {
 	/** @deprecated Do not use; was deleted */
-	readonly connections?: PlacedBlockLogicConnections | undefined;
+	readonly connections?: V1.PlacedBlockLogicConnections | undefined;
 }
 interface SerializedBlockV4
 	extends ReplaceWith<SerializedBlockV3, { readonly config?: PlacedBlockConfig | undefined }> {}

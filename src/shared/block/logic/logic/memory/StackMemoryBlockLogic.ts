@@ -1,7 +1,6 @@
 import { blockConfigRegistry } from "shared/block/config/BlockConfigRegistry";
 import { ConfigurableBlockLogic } from "shared/block/ConfigurableBlockLogic";
 import { RemoteEvents } from "shared/RemoteEvents";
-import type { PlacedBlockData } from "shared/building/BlockManager";
 
 export class StackMemoryBlockLogic extends ConfigurableBlockLogic<typeof blockConfigRegistry.stackmemory> {
 	private readonly size = 32;

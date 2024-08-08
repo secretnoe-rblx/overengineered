@@ -1,7 +1,6 @@
 import { UserInputService, Workspace } from "@rbxts/services";
 import { blockConfigRegistry } from "shared/block/config/BlockConfigRegistry";
 import { ConfigurableBlockLogic } from "shared/block/ConfigurableBlockLogic";
-import type { PlacedBlockData } from "shared/building/BlockManager";
 
 export class MouseSensorBlockLogic extends ConfigurableBlockLogic<typeof blockConfigRegistry.mousesensor> {
 	constructor(block: PlacedBlockData) {

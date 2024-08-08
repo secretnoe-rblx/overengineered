@@ -1,7 +1,6 @@
 import { blockConfigRegistry } from "shared/block/config/BlockConfigRegistry";
 import { ConfigurableBlockLogic } from "shared/block/ConfigurableBlockLogic";
 import { RemoteEvents } from "shared/RemoteEvents";
-import type { PlacedBlockData } from "shared/building/BlockManager";
 
 export class TNTBlockLogic extends ConfigurableBlockLogic<typeof blockConfigRegistry.tnt> {
 	constructor(block: PlacedBlockData) {

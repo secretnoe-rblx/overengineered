@@ -6,7 +6,7 @@ import { ContainerComponent } from "shared/component/ContainerComponent";
 import { GameDefinitions } from "shared/data/GameDefinitions";
 import { ObservableValue } from "shared/event/ObservableValue";
 import type { BlockRegistry } from "shared/block/BlockRegistry";
-import type { GenericBlockLogic, PlacedBlockData2 } from "shared/blockLogic/BlockLogic";
+import type { GenericBlockLogic } from "shared/blockLogic/BlockLogic";
 import type { GenericBlockList } from "shared/blocks/Blocks";
 
 @injectable
@@ -22,7 +22,7 @@ export class SharedMachine extends ContainerComponent<GenericBlockLogic> {
 	}
 
 	/** Add blocks to the machine, initialize it and start */
-	init(blocks: readonly PlacedBlockData2[]) {
+	init(blocks: readonly PlacedBlockData[]) {
 		const di = this.di.beginScope();
 		di.registerSingleton(this);
 
@@ -44,7 +44,7 @@ export class SharedMachine extends ContainerComponent<GenericBlockLogic> {
 		this.initialize(blocks);
 		this.enable();
 	}
-	protected initialize(blocks: readonly PlacedBlockData2[]) {
+	protected initialize(blocks: readonly PlacedBlockData[]) {
 		this.initializeSpeedLimiter();
 		// this.initializeBlockConnections();
 
@@ -53,7 +53,7 @@ export class SharedMachine extends ContainerComponent<GenericBlockLogic> {
 			this.impactController = this.parent(impact);
 		}
 	}
-	protected createImpactControllerIfNeeded(blocks: readonly PlacedBlockData2[]): ImpactController | undefined {
+	protected createImpactControllerIfNeeded(blocks: readonly PlacedBlockData[]): ImpactController | undefined {
 		return this.di.resolveForeignClass(ImpactController, [blocks]);
 	}
 

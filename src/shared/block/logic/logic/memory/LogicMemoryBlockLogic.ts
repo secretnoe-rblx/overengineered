@@ -1,6 +1,5 @@
 import { blockConfigRegistry } from "shared/block/config/BlockConfigRegistry";
 import { ConfigurableBlockLogic } from "shared/block/ConfigurableBlockLogic";
-import type { PlacedBlockData } from "shared/building/BlockManager";
 
 export class LogicMemoryBlockLogic extends ConfigurableBlockLogic<typeof blockConfigRegistry.logicmemory> {
 	constructor(block: PlacedBlockData) {

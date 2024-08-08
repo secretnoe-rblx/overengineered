@@ -1,7 +1,6 @@
 import { blockConfigRegistry } from "shared/block/config/BlockConfigRegistry";
 import { ConfigurableBlockLogic } from "shared/block/ConfigurableBlockLogic";
 import { AutoC2SRemoteEvent } from "shared/event/C2SRemoteEvent";
-import type { PlacedBlockData } from "shared/building/BlockManager";
 
 export class BracedShaftBlockLogic extends ConfigurableBlockLogic<typeof blockConfigRegistry.bracedshaft> {
 	static readonly events = {

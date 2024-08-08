@@ -1,6 +1,5 @@
 import { blockConfigRegistry } from "shared/block/config/BlockConfigRegistry";
 import { ConfigurableBlockLogic } from "shared/block/ConfigurableBlockLogic";
-import type { PlacedBlockData } from "shared/building/BlockManager";
 
 export class ImpulseGeneratorBlockLogic extends ConfigurableBlockLogic<typeof blockConfigRegistry.impulsegenerator> {
 	private impulses = 0;

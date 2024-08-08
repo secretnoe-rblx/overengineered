@@ -1,7 +1,6 @@
 import { blockConfigRegistry } from "shared/block/config/BlockConfigRegistry";
 import { ConfigurableBlockLogic } from "shared/block/ConfigurableBlockLogic";
 import { C2CRemoteEvent } from "shared/event/PERemoteEvent";
-import type { PlacedBlockData } from "shared/building/BlockManager";
 
 export class RadioTransmitterBlockLogic extends ConfigurableBlockLogic<typeof blockConfigRegistry.radiotransmitter> {
 	static readonly sendEvent = new C2CRemoteEvent<{
