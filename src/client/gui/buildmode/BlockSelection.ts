@@ -8,7 +8,115 @@ import { Gui } from "client/gui/Gui";
 import { GuiAnimator } from "client/gui/GuiAnimator";
 import { ObservableValue } from "shared/event/ObservableValue";
 import { Localization } from "shared/Localization";
-import type { BlockRegistry } from "shared/block/BlockRegistry";
+import type { BlockCategoryPath } from "shared/blocks/Block";
+
+type Category = {
+	readonly path: BlockCategoryPath;
+	readonly name: string;
+	readonly sub: Categories;
+};
+type Categories = { readonly [k in string]: Category };
+
+namespace Categories {
+	type CategoryOnlyBlock = Pick<Block, "category">;
+
+	export function createCategoryTreeFromBlocks(blocks: readonly CategoryOnlyBlock[]): Categories {
+		// writable
+		type Categories = { [k in string]: Category };
+		type Category = {
+			readonly path: BlockCategoryPath;
+			readonly name: string;
+			readonly sub: Categories;
+		};
+
+		const treeRoot: Category = {
+			name: "_root",
+			path: [],
+			sub: {},
+		};
+
+		for (const { category: path } of blocks) {
+			let part = treeRoot;
+			const subPath: string[] = [];
+
+			for (const pathPart of path) {
+				subPath.push(pathPart);
+
+				part = part.sub[pathPart] ??= {
+					name: pathPart,
+					path: [...subPath],
+					sub: {},
+				};
+			}
+		}
+
+		return treeRoot.sub;
+	}
+
+	export function getCategoryByPath(allCategories: Categories, path: BlockCategoryPath): Category | undefined {
+		let cat: Category | undefined = undefined;
+		for (const part of path) {
+			if (!cat) {
+				cat = allCategories[part];
+				continue;
+			}
+
+			cat = cat.sub[part];
+			if (!cat) {
+				return undefined;
+			}
+		}
+
+		return cat;
+	}
+
+	export function getCategoryDescendands(category: Category): Category[] {
+		const get = (category: Category): Category[] => asMap(category.sub).flatmap((k, v) => [v, ...get(v)]);
+		return get(category);
+	}
+
+	export function getBlocksByCategory<TBlock extends CategoryOnlyBlock>(
+		allBlocks: readonly TBlock[],
+		path: BlockCategoryPath,
+	): TBlock[] {
+		const sequenceEquals = <T>(left: readonly T[], right: readonly T[]): boolean => {
+			if (left.size() !== right.size()) {
+				return false;
+			}
+
+			for (let i = 0; i < left.size(); i++) {
+				if (left[i] !== right[i]) {
+					return false;
+				}
+			}
+
+			return true;
+		};
+
+		const ret: TBlock[] = [];
+		for (const block of allBlocks) {
+			if (block.category === path) {
+				ret.push(block);
+			} else if (sequenceEquals(block.category, path)) {
+				path = block.category;
+				ret.push(block);
+			}
+		}
+
+		return ret;
+	}
+	export function getBlocksByCategoryRecursive<TBlock extends CategoryOnlyBlock>(
+		allCategories: Categories,
+		allBlocks: readonly TBlock[],
+		path: BlockCategoryPath,
+	): TBlock[] {
+		const category = getCategoryByPath(allCategories, path);
+		if (!category) return [];
+
+		const all = [category, ...getCategoryDescendands(category)];
+		return all.flatmap((c) => getBlocksByCategory(allBlocks, c.path));
+	}
+}
 
 type CategoryControlDefinition = GuiButton & {
 	readonly ViewportFrame: ViewportFrame;
@@ -35,7 +143,7 @@ type BlockControlDefinition = GuiButton & {
 	readonly TextLabel: TextLabel;
 };
 class BlockControl extends TextButtonControl<BlockControlDefinition> {
-	constructor(template: BlockControlDefinition, block: RegistryBlock) {
+	constructor(template: BlockControlDefinition, block: Block) {
 		super(template);
 
 		this.text.set(block.displayName);
@@ -72,8 +180,9 @@ export class BlockSelectionControl extends Control<BlockSelectionControlDefiniti
 	private readonly breadcrumbTemplate;
 	private readonly list;
 
-	readonly selectedCategory = new ObservableValue<CategoryPath>([]);
-	readonly selectedBlock = new ObservableValue<RegistryBlock | undefined>(undefined);
+	private readonly categories: Categories;
+	readonly selectedCategory = new ObservableValue<BlockCategoryPath>([]);
+	readonly selectedBlock = new ObservableValue<Block | undefined>(undefined);
 	readonly highlightedBlocks = new ObservableValue<readonly BlockId[] | undefined>(undefined);
 
 	readonly pipette;
@@ -81,9 +190,11 @@ export class BlockSelectionControl extends Control<BlockSelectionControlDefiniti
 
 	constructor(
 		template: BlockSelectionControlDefinition,
-		@inject readonly blockRegistry: BlockRegistry,
+		@inject readonly blockList: BlockList,
 	) {
 		super(template);
+
+		this.categories = Categories.createCategoryTreeFromBlocks(blockList.sorted);
 
 		this.list = this.add(
 			new Control<ScrollingFrame, BlockControl | CategoryControl>(this.gui.Content.ScrollingFrame),
@@ -101,7 +212,7 @@ export class BlockSelectionControl extends Control<BlockSelectionControlDefiniti
 
 		this.pipette = this.add(
 			BlockPipetteButton.forBlockId(this.gui.Header.Pipette, (id) => {
-				this.selectedBlock.set(blockRegistry.blocks.get(id));
+				this.selectedBlock.set(blockList.blocks[id]);
 				this.selectedCategory.set(this.selectedBlock.get()!.category);
 			}),
 		);
@@ -118,7 +229,7 @@ export class BlockSelectionControl extends Control<BlockSelectionControlDefiniti
 		});
 	}
 
-	private create(selectedCategory: CategoryPath, animated: boolean) {
+	private create(selectedCategory: BlockCategoryPath, animated: boolean) {
 		const highlightButton = (control: Control) =>
 			(Gui.getTemplates<{ Highlight: GuiObject }>().Highlight.Clone().Parent = control.instance);
 
@@ -131,7 +242,8 @@ export class BlockSelectionControl extends Control<BlockSelectionControlDefiniti
 			const highlightedBlocks = this.highlightedBlocks.get();
 			if (highlightedBlocks) {
 				for (const targetBlock of highlightedBlocks) {
-					const targetCategory = this.blockRegistry.blocks.get(targetBlock)!.category;
+					const targetCategory = this.blockList.blocks[targetBlock]?.category;
+					if (!targetCategory) continue;
 
 					if (targetCategory.size() < selectedCategory.size()) {
 						highlightButton(control);
@@ -153,10 +265,12 @@ export class BlockSelectionControl extends Control<BlockSelectionControlDefiniti
 			return control;
 		};
 
-		const createCategoryButton = (category: CategoryPath, activated: () => void) => {
-			const blocks = this.blockRegistry
-				.getBlocksByCategoryRecursive(category)
-				.sort((l, r) => l.model.Name > r.model.Name);
+		const createCategoryButton = (category: BlockCategoryPath, activated: () => void) => {
+			const blocks = Categories.getBlocksByCategoryRecursive(
+				this.categories,
+				this.blockList.sorted,
+				category,
+			).sort((l, r) => l.model.Name > r.model.Name);
 			const models = blocks.map((b) => b.model);
 
 			task.spawn(() => ContentProvider.PreloadAsync(models));
@@ -174,7 +288,7 @@ export class BlockSelectionControl extends Control<BlockSelectionControlDefiniti
 			return control;
 		};
 
-		const createBlockButton = (block: RegistryBlock, activated: () => void) => {
+		const createBlockButton = (block: Block, activated: () => void) => {
 			const control = new BlockControl(this.blockTemplate(), block);
 			control.activated.Connect(activated);
 			this.list.add(control);
@@ -194,7 +308,7 @@ export class BlockSelectionControl extends Control<BlockSelectionControlDefiniti
 		this.breadcrumbs.clear();
 		addSlashBreadcrumb();
 		for (let i = 0; i < selectedCategory.size(); i++) {
-			const path: CategoryPath = selectedCategory.move(0, i, 0, []);
+			const path: BlockCategoryPath = selectedCategory.move(0, i, 0, []);
 			const control = this.breadcrumbs.add(
 				new TextButtonControl(this.breadcrumbTemplate(), () => this.selectedCategory.set(path)),
 			);
@@ -220,8 +334,8 @@ export class BlockSelectionControl extends Control<BlockSelectionControlDefiniti
 		const lowerSearch = this.gui.SearchTextBox.Text.fullLower();
 		const blocks =
 			this.gui.SearchTextBox.Text === ""
-				? this.blockRegistry.getBlocksByCategory(this.selectedCategory.get())
-				: this.blockRegistry.sorted.filter(
+				? Categories.getBlocksByCategory(this.blockList.sorted, this.selectedCategory.get())
+				: this.blockList.sorted.filter(
 						(block) =>
 							block.displayName.fullLower().find(lowerSearch)[0] !== undefined ||
 							Localization.translateForPlayer(Players.LocalPlayer, block.displayName)
@@ -270,12 +384,14 @@ export class BlockSelectionControl extends Control<BlockSelectionControlDefiniti
 		}
 
 		if (this.gui.SearchTextBox.Text === "") {
-			// Category buttons
-			for (const category of asMap(
-				this.blockRegistry.getCategoryByPath(selectedCategory)?.sub ?? this.blockRegistry.categories,
+			const sorted = asMap(
+				Categories.getCategoryByPath(this.categories, selectedCategory)?.sub ?? this.categories,
 			)
 				.values()
-				.sort((l, r) => l.name < r.name)) {
+				.sort((l, r) => l.name < r.name);
+
+			// Category buttons
+			for (const category of sorted) {
 				createCategoryButton(category.path, () =>
 					this.selectedCategory.set([...selectedCategory, category.name]),
 				);

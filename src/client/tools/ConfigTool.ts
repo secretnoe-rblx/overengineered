@@ -10,7 +10,6 @@ import { SelectedBlocksHighlighter } from "client/tools/highlighters/SelectedBlo
 import { ToolBase } from "client/tools/ToolBase";
 import { blockConfigRegistry } from "shared/block/config/BlockConfigRegistry";
 import { BlockConfig } from "shared/blockLogic/BlockConfig";
-import { BlockList } from "shared/blocks/Blocks";
 import { BlockManager } from "shared/building/BlockManager";
 import { Colors } from "shared/Colors";
 import { ObservableCollectionSet } from "shared/event/ObservableCollection";
@@ -20,9 +19,7 @@ import { VectorUtils } from "shared/utils/VectorUtils";
 import type { BuildingMode } from "client/modes/build/BuildingMode";
 import type { MultiBlockSelectorConfiguration } from "client/tools/highlighters/MultiBlockSelector";
 //import type { TutorialConfigBlockHighlight } from "client/tutorial/TutorialConfigTool";
-import type { BlockRegistry } from "shared/block/BlockRegistry";
 import type { PlacedBlockConfig } from "shared/blockLogic/BlockConfig";
-import type { GenericBlockList } from "shared/blocks/Blocks";
 
 namespace Scene {
 	export type ConfigToolSceneDefinition = GuiObject & {
@@ -44,6 +41,7 @@ namespace Scene {
 		constructor(
 			gui: ConfigToolSceneDefinition,
 			private readonly tool: ConfigTool,
+			private readonly blockList: BlockList,
 		) {
 			super(gui);
 
@@ -94,7 +92,7 @@ namespace Scene {
 
 			if (!wasVisible) GuiAnimator.transition(this.gui, 0.2, "up");
 			const blockmodel = selected[0];
-			const block = (BlockList as GenericBlockList)[BlockManager.manager.id.get(blockmodel)!];
+			const block = this.blockList.blocks[BlockManager.manager.id.get(blockmodel)!];
 			if (!block) return;
 
 			const onedef = block.logic?.config.input;
@@ -105,14 +103,14 @@ namespace Scene {
 
 			this.gui.ParamsSelection.Heading.NameLabel.Text = Localization.translateForPlayer(
 				Players.LocalPlayer,
-				block.name,
+				block.displayName,
 			).fullUpper();
 			this.gui.ParamsSelection.Heading.AmountLabel.Text = `x${selected.size()}`;
 
 			const configs = selected.map((selected) => {
 				const blockmodel = selected;
 				const id = BlockManager.manager.id.get(blockmodel)!;
-				const block = (BlockList as GenericBlockList)[id];
+				const block = this.blockList.blocks[id];
 				if (!block) return undefined!;
 
 				const defs = block.logic?.config.input;
@@ -179,14 +177,14 @@ export class ConfigTool extends ToolBase {
 	readonly blocksToConfigure: TutorialConfigBlockHighlight[] = [];
 	readonly selected = new ObservableCollectionSet<BlockModel>();
 
-	constructor(
-		@inject mode: BuildingMode,
-		@inject readonly blockRegistry: BlockRegistry,
-		@inject di: DIContainer,
-	) {
+	constructor(@inject mode: BuildingMode, @inject blockList: BlockList, @inject di: DIContainer) {
 		super(mode);
 		this.parentGui(
-			new Scene.ConfigToolScene(ToolBase.getToolGui<"Config2", Scene.ConfigToolSceneDefinition>().Config2, this),
+			new Scene.ConfigToolScene(
+				ToolBase.getToolGui<"Config2", Scene.ConfigToolSceneDefinition>().Config2,
+				this,
+				blockList,
+			),
 		);
 
 		this.parent(di.resolveForeignClass(SelectedBlocksHighlighter, [this.selected]));

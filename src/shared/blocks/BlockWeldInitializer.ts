@@ -1,5 +1,14 @@
 import { Workspace, RunService } from "@rbxts/services";
+import { Element } from "shared/Element";
+import { Instances } from "shared/fixes/Instances";
 import type { AutoWeldColliderBlockShape } from "shared/BlockDataRegistry";
+import type { BlockWeldRegions } from "shared/blocks/Block";
+
+const folderName = "BlocksWeldModels";
+if (RunService.IsServer()) {
+	Element.create("Folder", { Name: folderName, Parent: Instances.assets });
+}
+const folder = Instances.waitForChild<Folder & { readonly [k in string]: BlockModel }>(Instances.assets, folderName);
 
 export namespace BlockWeldInitializer {
 	function region(center: Vector3, size: Vector3) {
@@ -16,12 +25,7 @@ export namespace BlockWeldInitializer {
 		collider.EnableFluidForces = false;
 	}
 
-	function createAutomaticWelds(
-		id: BlockId,
-		model: BlockModel,
-		parent: Model,
-		autoWeldShape: AutoWeldColliderBlockShape,
-	): void {
+	function createAutomaticWelds(model: BlockModel, parent: Model, autoWeldShape: AutoWeldColliderBlockShape): void {
 		const createRegions = (): readonly Region3[] | undefined => {
 			const offset = 0.2;
 
@@ -145,30 +149,32 @@ export namespace BlockWeldInitializer {
 	}
 
 	function createBlockWeldColliders(
-		id: BlockId,
+		blockId: string,
 		block: BlockModel,
 		autoWeldShape: AutoWeldColliderBlockShape,
 	): Model {
 		const weldParent = new Instance("Model");
 		weldParent.WorldPivot = block.GetPivot();
+		weldParent.Name = blockId;
+		weldParent.Parent = folder;
 
 		if (tryCreateWeldsFromFolder(block, weldParent)) {
 			return weldParent;
 		}
 
-		createAutomaticWelds(id, block, weldParent, autoWeldShape);
+		createAutomaticWelds(block, weldParent, autoWeldShape);
 		return weldParent;
 	}
 
-	type RegistryBlock = {
-		readonly id: BlockId;
-		readonly model: BlockModel;
-		weldColliders?: Model;
-	};
-	export function initialize<T extends RegistryBlock>(
-		block: T,
+	export function initialize(
+		block: { readonly id: string },
+		model: BlockModel,
 		autoWeldShape: AutoWeldColliderBlockShape,
-	): asserts block is T & { weldColliders: RegistryBlock["weldColliders"] & defined } {
-		block.weldColliders = createBlockWeldColliders(block.id, block.model, autoWeldShape);
+	): BlockWeldRegions {
+		if (RunService.IsClient()) {
+			return folder[block.id];
+		}
+
+		return createBlockWeldColliders(block.id, model, autoWeldShape);
 	}
 }

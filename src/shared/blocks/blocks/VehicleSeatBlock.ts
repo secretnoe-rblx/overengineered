@@ -1,7 +1,9 @@
 import { RunService, Players } from "@rbxts/services";
 import { BlockLogic } from "shared/blockLogic/BlockLogic";
+import { BlockCreation } from "shared/blocks/BlockCreation";
 import type { BlockConfigBothDefinitions } from "shared/blockLogic/BlockLogic";
 import type { SharedMachine } from "shared/blockLogic/SharedMachine";
+import type { BlockBuilder } from "shared/blocks/BlockCreation";
 
 const config = {
 	input: {},
@@ -47,9 +49,10 @@ export class VehicleSeatBlockLogic extends BlockLogic<typeof config, VehicleSeat
 }
 
 export const VehicleSeatBlock = {
+	...BlockCreation.defaults,
 	id: "vehicleseat",
-	name: "Driver seat",
+	displayName: "Driver seat",
 	description: "A seat for your vehicle. Allows you to control your contraption",
 
 	logic: { config, ctor: VehicleSeatBlockLogic },
-} as const satisfies Block;
+} as const satisfies BlockBuilder;

@@ -1,13 +1,10 @@
 import { RunService } from "@rbxts/services";
 import { ImpactController } from "shared/block/impact/ImpactController";
-import { BlockList } from "shared/blocks/Blocks";
-import { VehicleSeatBlockLogic } from "shared/blocks/VehicleSeatBlock";
+import { VehicleSeatBlockLogic } from "shared/blocks/blocks/VehicleSeatBlock";
 import { ContainerComponent } from "shared/component/ContainerComponent";
 import { GameDefinitions } from "shared/data/GameDefinitions";
 import { ObservableValue } from "shared/event/ObservableValue";
-import type { BlockRegistry } from "shared/block/BlockRegistry";
 import type { GenericBlockLogic } from "shared/blockLogic/BlockLogic";
-import type { GenericBlockList } from "shared/blocks/Blocks";
 
 @injectable
 export class SharedMachine extends ContainerComponent<GenericBlockLogic> {
@@ -15,7 +12,7 @@ export class SharedMachine extends ContainerComponent<GenericBlockLogic> {
 	private impactController?: ImpactController;
 
 	constructor(
-		@inject private readonly blockRegistry: BlockRegistry,
+		@inject private readonly blockList: BlockList,
 		@inject private readonly di: ReadonlyDIContainer,
 	) {
 		super();
@@ -29,12 +26,12 @@ export class SharedMachine extends ContainerComponent<GenericBlockLogic> {
 		for (const block of blocks) {
 			const id = block.id;
 
-			if (!this.blockRegistry.blocks.get(id)) {
+			if (!this.blockList.blocks[id]) {
 				$err(`Unknown block id ${id}`);
 				continue;
 			}
 
-			const logicctor = (BlockList as GenericBlockList)[id]?.logic?.ctor;
+			const logicctor = this.blockList.blocks[id]?.logic?.ctor;
 			if (!logicctor) continue;
 
 			const logic = di.resolveForeignClass(logicctor, [block]);

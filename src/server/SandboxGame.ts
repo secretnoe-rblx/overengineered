@@ -17,6 +17,7 @@ import { SpreadingFireController } from "server/SpreadingFireController";
 import { AutoLogicCreator } from "shared/block/AutoLogicCreator";
 import { SharedPlots } from "shared/building/SharedPlots";
 import { RemoteEvents } from "shared/RemoteEvents";
+import { CreateSandboxBlocks } from "shared/SandboxBlocks";
 
 export namespace SandboxGame {
 	export function initialize(builder: GameHostBuilder) {
@@ -41,6 +42,7 @@ export namespace SandboxGame {
 
 			return registry;
 		});
+		builder.services.registerSingleton(CreateSandboxBlocks());
 
 		builder.services.registerService(GameInfoController);
 		builder.services.registerService(ServerPlots);

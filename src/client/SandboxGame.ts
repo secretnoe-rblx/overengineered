@@ -35,6 +35,7 @@ import { SharedPlots } from "shared/building/SharedPlots";
 import { GameDefinitions } from "shared/data/GameDefinitions";
 import { RemoteEvents } from "shared/RemoteEvents";
 import { CustomRemotes } from "shared/Remotes";
+import { CreateSandboxBlocks } from "shared/SandboxBlocks";
 import type { TutorialDescriber } from "client/tutorial/TutorialController";
 import type { SharedPlot } from "shared/building/SharedPlot";
 
@@ -76,6 +77,7 @@ export namespace SandboxGame {
 			AutoLogicCreator.create();
 			return new BlockRegistry(gameInfo.blocks, gameInfo.categories);
 		});
+		builder.services.registerSingleton(CreateSandboxBlocks());
 		PlayModeController.initialize(builder);
 		ClientBuildingValidationController.initialize(builder);
 

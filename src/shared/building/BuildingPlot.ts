@@ -7,7 +7,6 @@ import { BB } from "shared/fixes/BB";
 import { JSON } from "shared/fixes/Json";
 import { Objects } from "shared/fixes/objects";
 import { Operation } from "shared/Operation";
-import type { BlockRegistry } from "shared/block/BlockRegistry";
 
 const err = (message: string): ErrorResponse => ({ success: false, message });
 const success: SuccessResponse = { success: true };
@@ -32,7 +31,7 @@ export class BuildingPlot extends ReadonlyPlot {
 		instance: Folder,
 		origin: CFrame,
 		boundingBox: BB,
-		@inject private readonly blockRegistry: BlockRegistry,
+		@inject private readonly blockList: BlockList,
 	) {
 		super(instance, origin, boundingBox);
 	}
@@ -70,7 +69,7 @@ export class BuildingPlot extends ReadonlyPlot {
 		block.Parent = this.instance;
 	}
 	private place(data: PlaceBlockRequest): BuildResponse {
-		const block = this.blockRegistry.blocks.get(data.id);
+		const block = this.blockList.blocks[data.id];
 		if (!block) {
 			return { success: false, message: `Unknown block id ${data.id}` };
 		}

@@ -669,6 +669,7 @@ export class WireTool extends ToolBase {
 	constructor(
 		@inject mode: BuildingMode,
 		@inject private readonly blockRegistry: BlockRegistry,
+		@inject private readonly blockList: BlockList,
 	) {
 		super(mode);
 
@@ -727,7 +728,7 @@ export class WireTool extends ToolBase {
 		this.markers.clear();
 
 		const components = new Map<BlockWireManager.Markers.Marker, Markers.Marker>();
-		for (const [, markers] of BlockWireManager.fromPlot(plot)) {
+		for (const [, markers] of BlockWireManager.fromPlot(plot, this.blockList)) {
 			let [ii, oi, ai] = [0, 0, 0];
 			const size = markers.size();
 

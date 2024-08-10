@@ -1,8 +1,6 @@
-import { BlockList } from "shared/blocks/Blocks";
 import { Colors } from "shared/Colors";
 import { ObservableValue } from "shared/event/ObservableValue";
 import type { PlacedBlockConfig } from "shared/blockLogic/BlockConfig";
-import type { GenericBlockList } from "shared/blocks/Blocks";
 import type { SharedPlot } from "shared/building/SharedPlot";
 
 export namespace BlockWireManager {
@@ -91,13 +89,13 @@ export namespace BlockWireManager {
 		return isNotConnected(input) && areSameType(output, input);
 	}
 
-	export function fromPlot(plot: SharedPlot) {
+	export function fromPlot(plot: SharedPlot, blockList: BlockList) {
 		const toNarrow: Markers.Marker[] = [];
 		const markersByBlock = new Map<BlockUuid, (Markers.Input | Markers.Output)[]>();
 		const markers = new Map<string, Markers.Marker>();
 
 		for (const block of plot.getBlockDatas()) {
-			const configDef = (BlockList as GenericBlockList)[block.id]?.logic?.config;
+			const configDef = blockList.blocks[block.id]?.logic?.config;
 			if (!configDef) continue;
 
 			for (const markerType of ["output", "input"] as const) {

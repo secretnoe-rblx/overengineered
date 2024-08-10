@@ -19,7 +19,6 @@ import { PartUtils } from "shared/utils/PartUtils";
 import { VectorUtils } from "shared/utils/VectorUtils";
 import type { BuildingMode } from "client/modes/build/BuildingMode";
 import type { BuildTool } from "client/tools/BuildTool";
-import type { BlockRegistry } from "shared/block/BlockRegistry";
 import type { LatestSerializedBlock, LatestSerializedBlocks } from "shared/building/BlocksSerializer";
 import type { BuildingDiffChange, DiffBlock } from "shared/building/BuildingDiffer";
 import type { ReadonlyPlot } from "shared/building/ReadonlyPlot";
@@ -31,7 +30,7 @@ class TutorialPlot extends Component {
 	private readonly plot: BuildingPlot;
 	private readonly actualPlot: ReadonlyPlot;
 
-	constructor(plot: ReadonlyPlot, @inject blockRegistry: BlockRegistry) {
+	constructor(plot: ReadonlyPlot, @inject blockList: BlockList) {
 		super();
 
 		this.actualPlot = plot;
@@ -41,7 +40,7 @@ class TutorialPlot extends Component {
 		this.instance.Parent = Workspace;
 		ComponentInstance.init(this, this.instance);
 
-		this.plot = new BuildingPlot(this.instance, plot.origin, plot.boundingBox, blockRegistry);
+		this.plot = new BuildingPlot(this.instance, plot.origin, plot.boundingBox, blockList);
 	}
 
 	build(blocks: LatestSerializedBlocks) {

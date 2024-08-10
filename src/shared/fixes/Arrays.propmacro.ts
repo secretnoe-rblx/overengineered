@@ -19,6 +19,8 @@ declare global {
 		count(this: ReadonlySet<T>, func: (value: T) => boolean): number;
 		all(this: ReadonlySet<T>, func: (value: T) => boolean): boolean;
 		any(this: ReadonlySet<T>, func: (value: T) => boolean): boolean;
+
+		asReadonly(this: ReadonlySet<T>): ReadonlySet<T>;
 	}
 }
 export const SetMacros: PropertyMacros<ReadonlySet<defined>> = {
@@ -123,6 +125,10 @@ export const SetMacros: PropertyMacros<ReadonlySet<defined>> = {
 	any: <T extends defined>(array: ReadonlySet<T>, func: (value: T) => boolean): boolean => {
 		return array.find(func) !== undefined;
 	},
+
+	asReadonly: <T extends defined>(array: ReadonlySet<T>): ReadonlySet<T> => {
+		return array;
+	},
 };
 
 declare global {
@@ -144,6 +150,8 @@ declare global {
 
 		all(this: ReadonlyMap<K, V>, func: (key: K, value: V) => boolean): boolean;
 		any(this: ReadonlyMap<K, V>, func: (key: K, value: V) => boolean): boolean;
+
+		asReadonly(this: ReadonlyMap<K, V>): ReadonlyMap<K, V>;
 	}
 }
 export const MapMacros: PropertyMacros<ReadonlyMap<defined, defined>> = {
@@ -272,6 +280,10 @@ export const MapMacros: PropertyMacros<ReadonlyMap<defined, defined>> = {
 	): boolean => {
 		return map.findKey(func) !== undefined;
 	},
+
+	asReadonly: <K extends defined, V extends defined>(map: ReadonlyMap<K, V>): ReadonlyMap<K, V> => {
+		return map;
+	},
 };
 
 declare global {
@@ -288,6 +300,8 @@ declare global {
 		count(this: ReadonlyArray<defined>, func: (value: T) => boolean): number;
 		all(this: ReadonlyArray<defined>, func: (value: T) => boolean): boolean;
 		any(this: ReadonlyArray<defined>, func: (value: T) => boolean): boolean;
+
+		asReadonly(this: ReadonlyArray<defined>): ReadonlyArray<T>;
 	}
 }
 export const ArrayMacros: PropertyMacros<ReadonlyArray<defined>> = {
@@ -368,5 +382,9 @@ export const ArrayMacros: PropertyMacros<ReadonlyArray<defined>> = {
 	},
 	any: <T extends defined>(array: readonly T[], func: (value: T) => boolean): boolean => {
 		return array.find(func) !== undefined;
+	},
+
+	asReadonly: <T extends defined>(array: readonly T[]): readonly T[] => {
+		return array;
 	},
 };

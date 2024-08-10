@@ -1,13 +1,13 @@
 import { RunService } from "@rbxts/services";
 import { BlockMarkerInitializer } from "server/blockInit/BlockMarkersInitializer";
-import { BlockWeldInitializer } from "server/blockInit/BlockWeldInitializer";
 import { SharedBlockGenerator } from "shared/block/SharedBlockGenerator";
 import { BlockDataRegistry } from "shared/BlockDataRegistry";
+import { BlockWeldInitializer } from "shared/blocks/BlockWeldInitializer";
 import { Element } from "shared/Element";
 import { AABB } from "shared/fixes/AABB";
 import { Instances } from "shared/fixes/Instances";
 import type { BlocksInitializeData, Category, Categories } from "server/blockInit/BlocksInitializer";
-import type { BlockId } from "shared/BlockDataRegistry";
+import type { AutoWeldColliderBlockShape, BlockId } from "shared/BlockDataRegistry";
 
 if (RunService.IsServer()) {
 	Element.create("Folder", { Name: "PlaceableAutomatic", Parent: Instances.assets });
@@ -236,7 +236,20 @@ export namespace BlockGenerator {
 			mirrorReplacementId: setupinfo.mirrorReplacementId as BlockId | undefined,
 			required: setupinfo.required,
 		} satisfies Partial<RegistryBlock>;
-		BlockWeldInitializer.initialize(block, setupinfo.autoWeldShape ?? "none");
+
+		type rb = {
+			readonly id: BlockId;
+			readonly model: BlockModel;
+			weldColliders?: Model;
+		};
+		function initWelds<T extends rb>(
+			block: T,
+			autoWeldShape: AutoWeldColliderBlockShape,
+		): asserts block is T & { weldColliders: rb["weldColliders"] & defined } {
+			block.weldColliders = BlockWeldInitializer.initialize(block, block.model, autoWeldShape);
+		}
+
+		initWelds(block, setupinfo.autoWeldShape ?? "none");
 		BlockMarkerInitializer.initialize(block);
 
 		return block;
