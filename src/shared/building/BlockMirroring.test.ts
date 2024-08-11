@@ -1,13 +1,12 @@
 import { RunService, Workspace } from "@rbxts/services";
 import { BuildingManager } from "shared/building/BuildingManager";
 import { EventHandler } from "shared/event/EventHandler";
-import type { BlockRegistry } from "shared/block/BlockRegistry";
 
 const parent = new Instance("Folder", Workspace);
 parent.Name = "BlockMirroringTest";
 
 const spawn = (di: DIContainer, blockid: BlockId, pos: CFrame) => {
-	const block = di.resolve<BlockRegistry>().blocks.get(blockid)!.model.Clone();
+	const block = di.resolve<BlockList>().blocks[blockid]!.model.Clone();
 	block.Parent = parent;
 	block.PivotTo(pos);
 
@@ -20,7 +19,7 @@ const mirror = (di: DIContainer, blockid: BlockId, initialRotation?: CFrame) => 
 		new CFrame(396, -16377, 359),
 		{ id: blockid, pos: main.GetPivot() },
 		{ x: 0, y: 0, z: 0 },
-		di.resolve<BlockRegistry>(),
+		di.resolve<BlockList>(),
 	);
 
 	for (const { id, pos } of mirrored) {

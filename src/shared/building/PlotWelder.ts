@@ -2,16 +2,15 @@ import { RunService, ServerStorage, Workspace } from "@rbxts/services";
 import { BlockManager } from "shared/building/BlockManager";
 import { Component } from "shared/component/Component";
 import { ComponentInstance } from "shared/component/ComponentInstance";
-import type { BlockRegistry } from "shared/block/BlockRegistry";
 import type { BuildingPlot } from "shared/building/BuildingPlot";
 
 /** {@link PlotWelder} that automatically subscribes to {@link BuildingPlot} block changing */
 @injectable
 export class AutoPlotWelder extends Component {
-	constructor(plot: BuildingPlot, @inject blockRegistry: BlockRegistry) {
+	constructor(plot: BuildingPlot, @inject blockList: BlockList) {
 		super();
 
-		const welder = this.parent(new PlotWelder(plot, blockRegistry));
+		const welder = this.parent(new PlotWelder(plot, blockList));
 
 		this.event.subscribe(plot.placeOperation.executed, (arg, result) => welder.weldOnPlot(result.model));
 		this.event.subscribe(plot.deleteOperation.executed, (arg, result) => {
@@ -44,7 +43,7 @@ export class PlotWelder extends Component {
 
 	constructor(
 		private readonly plot: BuildingPlot,
-		@inject private readonly blockRegistry: BlockRegistry,
+		@inject private readonly blockList: BlockList,
 	) {
 		super();
 
@@ -63,7 +62,10 @@ export class PlotWelder extends Component {
 	}
 
 	weldOnPlot(block: BlockModel) {
-		const collider = this.blockRegistry.blocks.get(BlockManager.manager.id.get(block)!)!.weldColliders?.Clone();
+		const id = BlockManager.manager.id.get(block);
+		if (!id) return;
+
+		const collider = this.blockList.blocks[id]?.weldRegions?.Clone();
 		if (!collider) return;
 
 		collider.Name = BlockManager.manager.uuid.get(block);

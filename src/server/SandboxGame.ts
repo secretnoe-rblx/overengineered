@@ -1,9 +1,7 @@
 import { Workspace } from "@rbxts/services";
 import { BadgeController } from "server/BadgeController";
 import { BaseGame } from "server/BaseGame";
-import { BlocksInitializer } from "server/blockInit/BlocksInitializer";
 import { ServerBlockLogicController } from "server/blocks/ServerBlockLogicController";
-import { GameInfoController } from "server/building/GameInfoController";
 import { ServerBuildingRequestController } from "server/building/ServerBuildingRequestController";
 import { PlayerDatabase } from "server/database/PlayerDatabase";
 import { SlotDatabase } from "server/database/SlotDatabase";
@@ -14,7 +12,6 @@ import { PlayersCollision } from "server/PlayersCollision";
 import { ServerPlots } from "server/plots/ServerPlots";
 import { RagdollController } from "server/RagdollController";
 import { SpreadingFireController } from "server/SpreadingFireController";
-import { AutoLogicCreator } from "shared/block/AutoLogicCreator";
 import { SharedPlots } from "shared/building/SharedPlots";
 import { RemoteEvents } from "shared/RemoteEvents";
 import { CreateSandboxBlocks } from "shared/SandboxBlocks";
@@ -35,16 +32,8 @@ export namespace SandboxGame {
 		RemoteEvents.initializeVisualEffects(builder);
 
 		builder.services.registerSingletonFunc(() => SharedPlots.initialize());
-
-		builder.services.registerSingletonFunc(() => {
-			const registry = BlocksInitializer.create();
-			AutoLogicCreator.create();
-
-			return registry;
-		});
 		builder.services.registerSingleton(CreateSandboxBlocks());
 
-		builder.services.registerService(GameInfoController);
 		builder.services.registerService(ServerPlots);
 		PlayModeController.initialize(builder);
 		builder.services.registerService(ServerBuildingRequestController);

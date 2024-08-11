@@ -2,7 +2,7 @@ import { BlockLogic } from "shared/blockLogic/BlockLogic";
 import { BlockConfigDefinitions } from "shared/blocks/BlockConfigDefinitions";
 import { BlockCreation } from "shared/blocks/BlockCreation";
 import type { BlockConfigBothDefinitions } from "shared/blockLogic/BlockLogic";
-import type { BlockBuilder } from "shared/blocks/BlockCreation";
+import type { BlockBuilder } from "shared/blocks/Block";
 
 const config = {
 	input: {
@@ -35,6 +35,6 @@ export const ConstantBlock = {
 
 	modelSource: {
 		model: BlockCreation.Model.fAutoCreated("ConstLogicBlockPrefab", "CONST"),
-		category: () => ["Logic", "Other"],
+		category: () => BlockCreation.Categories.other,
 	},
 } as const satisfies BlockBuilder;

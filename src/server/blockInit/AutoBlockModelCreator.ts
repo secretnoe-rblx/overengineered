@@ -1,26 +1,33 @@
-import { BlockGenerator } from "server/blockInit/BlockGenerator";
-import { Objects } from "shared/fixes/objects";
-import type { BlocksInitializeData } from "server/blockInit/BlocksInitializer";
-import type { BlockId } from "shared/BlockDataRegistry";
+import type { BlockCategoryPath } from "shared/blocks/Block";
+import type { BlockCreation } from "shared/blocks/BlockCreation";
 
 interface CreateInfo {
 	readonly modelTextOverride: string;
-	readonly category: CategoryPath;
-	readonly prefab: BlockGenerator.PrefabName;
+	readonly category: BlockCategoryPath;
+	readonly prefab: BlockCreation.Model.PrefabName;
 	readonly required?: boolean;
 	readonly limit?: number;
 }
 
-const prefabs = BlockGenerator.prefabNames;
+const prefabs = {
+	const: "ConstLogicBlockPrefab",
+	smallGeneric: "GenericLogicBlockPrefab",
+	doubleGeneric: "DoubleGenericLogicBlockPrefab",
+	tripleGeneric: "TripleGenericLogicBlockPrefab",
+	x4Generic: "x4GenericLogicBlockPrefab",
+	smallByte: "ByteLogicBlockPrefab",
+	doubleByte: "DoubleByteLogicBlockPrefab",
+} as const satisfies { [k in string]: `${string}BlockPrefab` };
+
 const categories = {
-	math: ["Logic", "Math"] as unknown as CategoryPath,
-	byte: ["Logic", "Math", "Byte"] as unknown as CategoryPath,
-	converterByte: ["Logic", "Converter", "Byte"] as unknown as CategoryPath,
-	converterVector: ["Logic", "Converter", "Vector"] as unknown as CategoryPath,
-	other: ["Logic", "Other"] as unknown as CategoryPath,
-	bool: ["Logic", "Gate"] as unknown as CategoryPath,
-	memory: ["Logic", "Memory"] as unknown as CategoryPath,
-} as const satisfies { [k in string]: CategoryPath };
+	math: ["Logic", "Math"],
+	byte: ["Logic", "Math", "Byte"],
+	converterByte: ["Logic", "Converter", "Byte"],
+	converterVector: ["Logic", "Converter", "Vector"],
+	other: ["Logic", "Other"],
+	bool: ["Logic", "Gate"],
+	memory: ["Logic", "Memory"],
+} as const satisfies { [k in string]: BlockCategoryPath };
 
 const operations = {
 	constant: {
@@ -396,12 +403,4 @@ export type AutoCreatedOperations = typeof operations;
 
 type NonGenericOperations = { readonly [k in string]: CreateInfo };
 
-export namespace AutoBlockModelCreator {
-	export function create(info: BlocksInitializeData) {
-		Objects.multiAwait(
-			asMap(operations as NonGenericOperations).map(
-				(name, data) => () => BlockGenerator.create(info, { id: name.lower() as BlockId, ...data }),
-			),
-		);
-	}
-}
+// TODO: delete this file; currently left for the values to be copied

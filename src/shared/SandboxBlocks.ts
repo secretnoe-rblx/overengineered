@@ -3,7 +3,7 @@ import { BuildingBlocks } from "shared/blocks/blocks/BuildingBlocks";
 import { ConstantBlock } from "shared/blocks/blocks/ConstantBlock";
 import { DisconnectBlock } from "shared/blocks/blocks/DisconnectBlock";
 import { VehicleSeatBlock } from "shared/blocks/blocks/VehicleSeatBlock";
-import type { BlockBuilder } from "shared/blocks/BlockCreation";
+import type { BlockBuilder } from "shared/blocks/Block";
 
 export const CreateSandboxBlocks = (): BlockList => {
 	const blocksArr = [

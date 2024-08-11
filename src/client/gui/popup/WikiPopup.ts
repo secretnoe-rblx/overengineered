@@ -5,7 +5,6 @@ import { Gui } from "client/gui/Gui";
 import { Popup } from "client/gui/Popup";
 import { WikiCategoriesControl, WikiContentControl } from "client/wiki/WikiControl";
 import type { WikiCategoriesControlDefinition, WikiContentControlDefinition } from "client/wiki/WikiControl";
-import type { BlockRegistry } from "shared/block/BlockRegistry";
 
 namespace WikiStorage {
 	let cache: readonly WikiEntry[] | undefined = undefined;
@@ -70,13 +69,13 @@ export class WikiPopup extends Popup<WikiPopupDefinition> {
 		host.services.registerTransientFunc((ctx) => ctx.resolveForeignClass(this, [gui.Clone()]));
 	}
 
-	constructor(gui: WikiPopupDefinition, @inject blockRegistry: BlockRegistry) {
+	constructor(gui: WikiPopupDefinition, @inject blockList: BlockList) {
 		super(gui);
 
 		this.add(new ButtonControl(gui.Heading.CloseButton, () => this.hide()));
 
 		const sidebar = this.add(new WikiCategoriesControl(gui.Content.Categories));
-		const content = this.add(new WikiContentControl(gui.Content.Content, blockRegistry));
+		const content = this.add(new WikiContentControl(gui.Content.Content, blockList));
 		content.requestedTeleport.Connect((id) => sidebar.select(id));
 		content.set({ id: "", title: "", tags: new ReadonlySet(), content: [] });
 

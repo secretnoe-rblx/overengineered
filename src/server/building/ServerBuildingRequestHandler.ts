@@ -9,7 +9,6 @@ import { PlayerWatcher } from "shared/PlayerWatcher";
 import { SlotsMeta } from "shared/SlotsMeta";
 import type { SlotDatabase } from "server/database/SlotDatabase";
 import type { ServerPlotController, ServerPlots } from "server/plots/ServerPlots";
-import type { BlockRegistry } from "shared/block/BlockRegistry";
 import type { SharedPlots } from "shared/building/SharedPlots";
 
 const err = (message: string): ErrorResponse => ({ success: false, message });
@@ -50,7 +49,7 @@ export class ServerBuildingRequestHandler extends HostedService {
 	constructor(
 		@inject readonly controller: ServerPlotController,
 		@inject private readonly serverPlots: ServerPlots,
-		@inject private readonly blockRegistry: BlockRegistry,
+		@inject private readonly blockList: BlockList,
 		@inject private readonly slots: SlotDatabase,
 	) {
 		super();
@@ -67,14 +66,10 @@ export class ServerBuildingRequestHandler extends HostedService {
 	}
 	private _placeBlocks(plotc: ServerPlotController, blocks: readonly PlaceBlockRequest[]): MultiBuildResponse {
 		for (const block of blocks) {
-			if (
-				!BuildingManager.serverBlockCanBePlacedAt(
-					plotc.plot,
-					this.blockRegistry.blocks.get(block.id)!,
-					block.location,
-					this.player,
-				)
-			) {
+			const b = this.blockList.blocks[block.id];
+			if (!b) return err("Unknown block id");
+
+			if (!BuildingManager.serverBlockCanBePlacedAt(plotc.plot, b, block.location, this.player)) {
 				return err("Can't be placed here");
 			}
 
@@ -96,12 +91,16 @@ export class ServerBuildingRequestHandler extends HostedService {
 
 		const counts = countBy(blocks, (b) => b.id);
 		for (const [id, count] of counts) {
-			const regblock = this.blockRegistry.blocks.get(id)!;
+			const regblock = this.blockList.blocks[id];
+			if (!regblock) {
+				return err("Unknown block id");
+			}
+
 			const placed = plotc.blocks
 				.getBlocks()
 				.count((placed_block) => BlockManager.manager.id.get(placed_block) === id);
 
-			if (placed + count > (regblock.limit ?? 2000)) {
+			if (placed + count > regblock.limit) {
 				return err(`Type limit exceeded for ${id}`);
 			}
 		}

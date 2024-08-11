@@ -21,7 +21,6 @@ import { ObservableValue } from "shared/event/ObservableValue";
 import { ReplicatedAssets } from "shared/ReplicatedAssets";
 import type { InputTooltips } from "client/gui/static/TooltipsControl";
 import type { BuildingMode } from "client/modes/build/BuildingMode";
-import type { BlockRegistry } from "shared/block/BlockRegistry";
 import type { BlockConfigRegistryNonGeneric } from "shared/block/config/BlockConfigRegistry";
 import type { SharedPlot } from "shared/building/SharedPlot";
 import type { ReadonlyObservableValue } from "shared/event/ObservableValue";
@@ -668,7 +667,6 @@ export class WireTool extends ToolBase {
 
 	constructor(
 		@inject mode: BuildingMode,
-		@inject private readonly blockRegistry: BlockRegistry,
 		@inject private readonly blockList: BlockList,
 	) {
 		super(mode);
@@ -743,7 +741,7 @@ export class WireTool extends ToolBase {
 				}
 
 				const blockid = (marker.data.blockData as PlacedBlockData).id;
-				const positions = this.blockRegistry.blocks.get(blockid)?.markerPositions;
+				const positions = this.blockList.blocks[blockid]?.markerPositions;
 				let markerpos = positions?.[marker.data.id];
 				if (!markerpos) {
 					if (marker instanceof BlockWireManager.Markers.Input) {

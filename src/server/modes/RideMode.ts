@@ -8,17 +8,19 @@ import { Throttler } from "shared/Throttler";
 import type { SlotDatabase } from "server/database/SlotDatabase";
 import type { PlayModeBase } from "server/modes/PlayModeBase";
 import type { ServerPlots } from "server/plots/ServerPlots";
-import type { BlockRegistry } from "shared/block/BlockRegistry";
 
 @injectable
 export class RideMode implements PlayModeBase {
 	private readonly cache = new Map<Player, Instance>();
+	private readonly required;
 
 	constructor(
 		@inject private readonly serverPlots: ServerPlots,
-		@inject private readonly blockRegistry: BlockRegistry,
+		@inject blockList: BlockList,
 		@inject private readonly slots: SlotDatabase,
 	) {
+		this.required = blockList.sorted.filter((b) => b.required);
+
 		Players.PlayerRemoving.Connect((player) => {
 			const blocks = this.cache.get(player);
 
@@ -80,7 +82,7 @@ export class RideMode implements PlayModeBase {
 
 		const blocksChildren = controller.blocks.getBlocks();
 
-		for (const block of this.blockRegistry.required) {
+		for (const block of this.required) {
 			if (!blocksChildren.find((value) => BlockManager.manager.id.get(value) === block.id)) {
 				return {
 					success: false,

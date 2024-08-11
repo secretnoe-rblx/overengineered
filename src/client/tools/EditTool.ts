@@ -32,7 +32,6 @@ import type { InputTooltips } from "client/gui/static/TooltipsControl";
 import type { Keybinds } from "client/Keybinds";
 import type { BuildingMode } from "client/modes/build/BuildingMode";
 import type { BlockSelectorModeGuiDefinition } from "client/tools/highlighters/BlockSelectorModeGui";
-import type { BlockRegistry } from "shared/block/BlockRegistry";
 import type { SharedPlot } from "shared/building/SharedPlot";
 
 namespace Scene {
@@ -369,7 +368,7 @@ namespace Controllers {
 			private readonly tool: EditTool,
 			private readonly plot: SharedPlot,
 			selected: readonly BlockModel[],
-			@inject blockRegistry: BlockRegistry,
+			@inject blockList: BlockList,
 			@inject di: ReadonlyDIContainer,
 		) {
 			super();
@@ -384,7 +383,7 @@ namespace Controllers {
 			const blocks = reGenerateUuids(plot, tool.copied.get());
 			this.blocksRequests = blocks;
 			this.blocks = blocks.map((block) => {
-				const b = blockRegistry.blocks.get(block.id)!.model.Clone();
+				const b = blockList.blocks[block.id]!.model.Clone();
 				BlockManager.manager.uuid.set(b, block.uuid);
 				b.PivotTo(block.location);
 				PartUtils.ghostModel(b, Colors.blue);
@@ -608,7 +607,7 @@ export class EditTool extends ToolBase {
 
 	constructor(
 		@inject readonly mode: BuildingMode,
-		@inject private readonly blockRegistry: BlockRegistry,
+		@inject private readonly blockList: BlockList,
 		@inject keybinds: Keybinds,
 		@inject di: DIContainer,
 	) {
@@ -741,7 +740,7 @@ export class EditTool extends ToolBase {
 					y: axis === "y" ? 0 : undefined,
 					z: axis === "z" ? 0 : undefined,
 				},
-				this.blockRegistry,
+				this.blockList,
 				false,
 			);
 

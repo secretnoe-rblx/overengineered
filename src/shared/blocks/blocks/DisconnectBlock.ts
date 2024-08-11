@@ -2,7 +2,7 @@ import { BlockLogic } from "shared/blockLogic/BlockLogic";
 import { BlockCreation } from "shared/blocks/BlockCreation";
 import { AutoC2SRemoteEvent } from "shared/event/C2SRemoteEvent";
 import type { BlockConfigBothDefinitions } from "shared/blockLogic/BlockLogic";
-import type { BlockBuilder } from "shared/blocks/BlockCreation";
+import type { BlockBuilder } from "shared/blocks/Block";
 
 const config = {
 	input: {

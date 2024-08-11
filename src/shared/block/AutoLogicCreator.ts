@@ -1,7 +1,6 @@
 import { RunService } from "@rbxts/services";
 import { connectors } from "shared/block/config/BlockConfigRegistry";
 import { ConfigurableBlockLogic } from "shared/block/ConfigurableBlockLogic";
-import { SharedBlockGenerator } from "shared/block/SharedBlockGenerator";
 import { Objects } from "shared/fixes/objects";
 import { RemoteEvents } from "shared/RemoteEvents";
 import type { BlockLogic } from "shared/block/BlockLogic";
@@ -963,16 +962,4 @@ type NonGenericOperations = {
 	};
 };
 
-export namespace AutoLogicCreator {
-	export function create() {
-		for (const [optype, ops] of pairs(operations as NonGenericOperations)) {
-			for (const [name, data] of pairs(ops)) {
-				SharedBlockGenerator.registerLogic(
-					name.lower() as BlockId,
-					logicReg[optype](data.func as never),
-					defs[optype],
-				);
-			}
-		}
-	}
-}
+// TODO: delete this file; currently left for the values to be copied

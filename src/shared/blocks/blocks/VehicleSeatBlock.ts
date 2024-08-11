@@ -3,7 +3,7 @@ import { BlockLogic } from "shared/blockLogic/BlockLogic";
 import { BlockCreation } from "shared/blocks/BlockCreation";
 import type { BlockConfigBothDefinitions } from "shared/blockLogic/BlockLogic";
 import type { SharedMachine } from "shared/blockLogic/SharedMachine";
-import type { BlockBuilder } from "shared/blocks/BlockCreation";
+import type { BlockBuilder } from "shared/blocks/Block";
 
 const config = {
 	input: {},

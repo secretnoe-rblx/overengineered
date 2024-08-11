@@ -1,6 +1,7 @@
 import { RunService } from "@rbxts/services";
+import { BlockAssertions } from "shared/blocks/BlockAssertions";
 import { C2S2CRemoteFunction } from "shared/event/PERemoteEvent";
-import type { BlockBuilder } from "shared/blocks/BlockCreation";
+import type { BlockBuilder } from "shared/blocks/Block";
 
 export namespace BlockListBuilder {
 	type RemoteBlock = Pick<Block, Exclude<keyof Block, keyof BlockBuilder>>;
@@ -37,6 +38,20 @@ export namespace BlockListBuilder {
 					});
 				}),
 			);
+
+			const throwErrors = (blocks: typeof serverBuiltBlocks & defined) => {
+				const errors: { readonly id: string; readonly errors: readonly string[] }[] = [];
+				for (const [id, block] of asMap(blocks)) {
+					const blockErrors = BlockAssertions.getAllErrors(block.model);
+					if (blockErrors.size() !== 0) {
+						errors.push({ id, errors: [...new Set(blockErrors)] });
+					}
+				}
+				if (errors.size() !== 0) {
+					throw `Found block errors:\n${errors.map(({ id, errors }) => `${id}:\n${errors.map((e) => `    ${e}`).join("\n")}`).join("\n\n")}`;
+				}
+			};
+			throwErrors(serverBuiltBlocks);
 		}
 
 		let remoteBlocks: typeof serverBuiltBlocks;

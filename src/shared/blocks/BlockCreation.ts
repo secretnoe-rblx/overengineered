@@ -3,27 +3,14 @@ import { BlockWeldInitializer } from "shared/blocks/BlockWeldInitializer";
 import { Element } from "shared/Element";
 import { Instances } from "shared/fixes/Instances";
 import { Lazy } from "shared/Lazy";
-import type { AutoWeldColliderBlockShape } from "shared/BlockDataRegistry";
-import type { BlockCategoryPath, BlockLogicInfo, BlockMarkerPositions, BlockWeldRegions } from "shared/blocks/Block";
-
-export type BlockBuilder = {
-	readonly id: string;
-	readonly displayName: string;
-	readonly description: string;
-	readonly logic?: BlockLogicInfo;
-	readonly required?: boolean;
-
-	/** @server */
-	readonly modelSource: {
-		readonly model: (self: BlockBuilder) => BlockModel;
-		readonly category: (self: BlockBuilder, model: BlockModel) => BlockCategoryPath;
-	};
-
-	/** @server */
-	readonly weldRegionsSource: (self: BlockBuilder, model: BlockModel) => BlockWeldRegions;
-	/** @server */
-	readonly markerPositionsSource: (self: BlockBuilder, model: BlockModel) => BlockMarkerPositions;
-};
+import type { AutoWeldColliderBlockShape, BlockMirrorBehaviour } from "shared/BlockDataRegistry";
+import type {
+	BlockBuilder,
+	BlockBuilderWithoutIdAndDefaults,
+	BlockCategoryPath,
+	BlockMarkerPositions,
+	BlockWeldRegions,
+} from "shared/blocks/Block";
 
 /** Tools for creating a block and its data. */
 export namespace BlockCreation {
@@ -124,6 +111,16 @@ export namespace BlockCreation {
 			return assetBlock.category;
 		}
 	}
+	export const Categories = {
+		math: ["Logic", "Math"],
+		byte: ["Logic", "Math", "Byte"],
+		converterByte: ["Logic", "Converter", "Byte"],
+		converterVector: ["Logic", "Converter", "Vector"],
+		other: ["Logic", "Other"],
+		bool: ["Logic", "Gate"],
+		memory: ["Logic", "Memory"],
+	} as const satisfies { [k in string]: BlockCategoryPath };
+
 	export namespace MarkerPositions {
 		export function fromModelFolder(block: BlockBuilder, model: BlockModel): BlockMarkerPositions {
 			const pointsFolder = model.FindFirstChild("MarkerPoints");
@@ -147,12 +144,23 @@ export namespace BlockCreation {
 		}
 	}
 
-	export const defaults: Pick<BlockBuilder, `${string}Source` & keyof BlockBuilder> = {
+	export const defaults = {
 		modelSource: {
 			model: Model.fromAssets,
 			category: Category.fromAssets,
 		},
 		markerPositionsSource: MarkerPositions.fromModelFolder,
 		weldRegionsSource: WeldRegions.fromAssetsOrAutomatic,
-	};
+		required: false as boolean,
+		limit: 2000 as number,
+		mirror: {
+			behaviour: "normal" as BlockMirrorBehaviour,
+		},
+	} as const satisfies Partial<BlockBuilder>;
+
+	export function arrayFromObject(builders: {
+		readonly [k in string]: BlockBuilderWithoutIdAndDefaults;
+	}): BlockBuilder[] {
+		return asMap(builders).map((id, b): BlockBuilder => ({ ...BlockCreation.defaults, id, ...b }));
+	}
 }
