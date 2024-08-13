@@ -4,6 +4,7 @@ import { CameraController } from "client/controller/CameraController";
 import { ChatController } from "client/controller/ChatController";
 import { DayCycleController } from "client/controller/DayCycleController";
 import { DistanceHideController } from "client/controller/DistanceHideController";
+import { EnvBlacklistsController } from "client/controller/EnvBlacklistsController";
 import { GameEnvironmentController } from "client/controller/GameEnvironmentController";
 import { GraphicsSettingsController } from "client/controller/GraphicsSettingsController";
 import { LoadingController } from "client/controller/LoadingController";
@@ -12,8 +13,10 @@ import { OtherPlayersController } from "client/controller/OtherPlayersController
 import { RagdollController } from "client/controller/RagdollController";
 import { MusicController } from "client/controller/sound/MusicController";
 import { SoundController } from "client/controller/SoundController";
+import { ActionsGui } from "client/gui/ActionsGui";
 import { AdminGui } from "client/gui/AdminGui";
 import { GuiAutoScaleController } from "client/gui/GuiAutoScaleController";
+import { HideInterfaceController } from "client/gui/HideInterfaceController";
 import { ControlsPopup } from "client/gui/popup/ControlsPopup";
 import { NewSettingsPopup } from "client/gui/popup/NewSettingsPopup";
 import { SavePopup } from "client/gui/popup/SavePopup";
@@ -70,6 +73,7 @@ export namespace SandboxGame {
 		ClientBuildingValidationController.initialize(builder);
 
 		builder.services.registerService(GameEnvironmentController);
+		builder.services.registerService(EnvBlacklistsController);
 		SoundController.initializeAll(builder);
 		builder.services.registerService(DistanceHideController);
 		AdminGui.initializeIfAdminOrStudio(builder);
@@ -81,6 +85,8 @@ export namespace SandboxGame {
 		builder.services.registerService(TerrainController);
 		builder.services.registerService(MusicController);
 		builder.services.registerService(GuiAutoScaleController);
+		builder.services.registerService(HideInterfaceController);
+		ActionsGui.initialize(builder);
 
 		ChatController.initializeAdminPrefix();
 		SettingsPopup.addAsService(builder);

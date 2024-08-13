@@ -31,6 +31,10 @@ declare global {
 		readonly blocks: readonly EditBlockRequest[];
 	};
 
+	type GuiSettingsPermissionsGetBlacklist = {
+		readonly players: readonly number[];
+	};
+
 	type LogicConnectRequest = {
 		readonly plot: PlotModel;
 		readonly outputBlock: BlockModel;
@@ -52,6 +56,10 @@ declare global {
 	};
 	type NormalizeRootpartsRequest = {
 		readonly parts: BasePart[];
+	};
+	type EnvironmentBlacklistRequest = {
+		readonly isBanned: boolean;
+		readonly plot: BasePart;
 	};
 	type ConfigUpdateRequest = {
 		readonly plot: PlotModel;
@@ -107,8 +115,14 @@ export const CustomRemotes = {
 		save: new C2S2CRemoteFunction<PlayerSaveSlotRequest, SaveSlotResponse>("rs_save"),
 	},
 	player: {
+		loaded: new C2SRemoteEvent<undefined>("client_initialized"),
 		updateSettings: new C2SRemoteEvent<PlayerUpdateSettingsRequest>("pl_updsettings"),
 		fetchData: new C2S2CRemoteFunction<undefined, Response<PlayerDataResponse>>("pl_fetchdata"),
+	},
+	gui: {
+		settings: {
+			updateBlacklist: new C2SRemoteEvent<readonly number[]>("gui_settings_updateblacklist"),
+		},
 	},
 	modes: {
 		set: new C2S2CRemoteFunction<PlayModes>("md_set").addMiddleware(PERemoteEventMiddlewares.rateLimiter(30, 60)),
@@ -116,6 +130,9 @@ export const CustomRemotes = {
 		ride: {
 			teleportOnSeat: new C2SRemoteEvent("mdr_seat"),
 		},
+	},
+	admin: {
+		setSwitch: new C2S2CRemoteFunction<{ readonly name: string; readonly value: boolean }>("adm_setsw"),
 	},
 } as const;
 export const Remotes = Definitions.Create({

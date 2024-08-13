@@ -4,8 +4,10 @@ import { RobloxUnit } from "shared/RobloxUnit";
 import { VectorUtils } from "shared/utils/VectorUtils";
 
 export class RadarSectionBlockLogic extends ConfigurableBlockLogic<typeof blockConfigRegistry.radarsection> {
+	private triggerDistanceListUpdate: boolean = false;
 	private closestDetectedPart: BasePart | undefined = undefined;
 	private readonly allTouchedBlocks: Set<BasePart> = new Set<BasePart>();
+
 	private getDistanceTo = (part: BasePart) => {
 		if (this.instance === undefined) return Vector3.zero;
 		if (part === undefined) return Vector3.zero;
@@ -17,38 +19,32 @@ export class RadarSectionBlockLogic extends ConfigurableBlockLogic<typeof blockC
 	private findClosestPart() {
 		let smallestDistance: number | undefined;
 		let closestPart: BasePart | undefined;
+		const minDist = this.input.minimalDistance.get();
 		for (const bp of this.allTouchedBlocks) {
 			const d = this.getDistanceTo(bp).Magnitude;
-			if (bp?.Parent === undefined) {
-				this.allTouchedBlocks.delete(bp);
-				continue;
-			}
 
 			if (smallestDistance === undefined) {
 				[smallestDistance, closestPart] = [d, bp];
 				continue;
 			}
 
-			if (d > smallestDistance) continue;
-			if (d < this.input.minimalDistance.get()) continue;
+			if (d > smallestDistance || d < minDist) continue;
 			[smallestDistance, closestPart] = [d, bp];
 		}
 		return closestPart;
 	}
 
-	private isCloser(part: BasePart) {
-		const d1 = this.getDistanceTo(part)?.Magnitude;
-		if (d1 < this.input.minimalDistance.get()) return false;
-		const d2 = this.getDistanceTo(this.closestDetectedPart!)?.Magnitude;
-		return d1 < d2;
-	}
-
 	tick(tick: number): void {
 		super.tick(tick);
 
-		if (this.closestDetectedPart === undefined) return;
-		if (this.closestDetectedPart?.Parent === undefined) this.closestDetectedPart = this.findClosestPart();
-		this.output.distance.set(this.getDistanceTo(this.closestDetectedPart!) ?? Vector3.zero);
+		if (this.closestDetectedPart?.Parent === undefined || this.triggerDistanceListUpdate) {
+			this.triggerDistanceListUpdate = false;
+			this.closestDetectedPart = this.findClosestPart();
+		}
+
+		this.output.distance.set(
+			this.closestDetectedPart ? this.getDistanceTo(this.closestDetectedPart) : Vector3.zero,
+		);
 	}
 
 	constructor(block: PlacedBlockData) {
@@ -84,46 +80,28 @@ export class RadarSectionBlockLogic extends ConfigurableBlockLogic<typeof blockC
 			view.Size = new Vector3(view.Size.X, sizeStuds, view.Size.Z);
 			updateDistance(this.input.detectionSize.get());
 		});
-		/*
-		this.event.subscribeObservable(this.input.angleOffset, (angle, prev) => {
-			const maxAngle = 45;
-			prev = new Vector3(
-				math.clamp(prev.X, -maxAngle, maxAngle),
-				math.clamp(prev.Y, -maxAngle, maxAngle),
-				math.clamp(prev.Z, -maxAngle, maxAngle),
-			);
-			angle = new Vector3(
-				math.clamp(angle.X, -maxAngle, maxAngle),
-				math.clamp(angle.Y, -maxAngle, maxAngle),
-				math.clamp(angle.Z, -maxAngle, maxAngle),
-			);
 
-			view.Rotation = view.Rotation.sub(prev).add(angle);
-			this.justMoved = true;
-		});
-		*/
 		this.event.subscribe(view.Touched, (part) => {
+			if (part.IsA("Terrain")) return;
+
 			if (part.CollisionGroup !== "Blocks") return;
 			if (part.HasTag("RADARVIEW")) return;
-			//if (part.IsDescendantOf(this.instance)) return; //removed check because never going to happen
 			if (this.getDistanceTo(part).Magnitude < this.input.minimalDistance.get()) return;
 			this.allTouchedBlocks.add(part);
 			if (this.closestDetectedPart === undefined) return (this.closestDetectedPart = part);
-			if (!this.isCloser(part)) return;
-			this.closestDetectedPart = part;
+			this.triggerDistanceListUpdate = true;
 		});
 
 		this.event.subscribe(view.TouchEnded, (part) => {
+			if (part.IsA("Terrain")) return;
+
 			this.allTouchedBlocks.delete(part);
-			if (part !== this.closestDetectedPart) return;
-			this.closestDetectedPart = this.findClosestPart();
-			this.output.distance.set(
-				this.closestDetectedPart ? this.getDistanceTo(this.closestDetectedPart) : Vector3.zero,
-			);
+			this.triggerDistanceListUpdate = part === this.closestDetectedPart;
 		});
 
 		this.onDescendantDestroyed(() => {
 			if (view) view.Transparency = 1;
+			this.allTouchedBlocks.clear();
 			this.disable();
 		});
 	}
