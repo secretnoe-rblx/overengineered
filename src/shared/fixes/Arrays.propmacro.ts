@@ -153,6 +153,9 @@ declare global {
 
 		asReadonly(this: ReadonlyMap<K, V>): ReadonlyMap<K, V>;
 	}
+	interface Map<K, V> {
+		getOrSet(this: Map<K, V>, key: K, create: () => V): V;
+	}
 }
 export const MapMacros: PropertyMacros<ReadonlyMap<defined, defined>> = {
 	keys: <K extends defined, V extends defined>(map: ReadonlyMap<K, V>): K[] => {
@@ -283,6 +286,18 @@ export const MapMacros: PropertyMacros<ReadonlyMap<defined, defined>> = {
 
 	asReadonly: <K extends defined, V extends defined>(map: ReadonlyMap<K, V>): ReadonlyMap<K, V> => {
 		return map;
+	},
+};
+
+export const WritableMapMacros: PropertyMacros<Map<defined, defined>> = {
+	getOrSet: <K extends defined, V extends defined>(array: Map<K, V>, key: K, create: () => V): V => {
+		const value = array.get(key);
+		if (value) return value;
+
+		const newvalue = create();
+		array.set(key, newvalue);
+
+		return newvalue;
 	},
 };
 
