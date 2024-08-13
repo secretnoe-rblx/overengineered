@@ -9,10 +9,7 @@ type ConstructorParameters<T extends abstract new (...args: any) => any> = T ext
 
 declare global {
 	type WritableDIContainer = D;
-	type DIContainer = Pick<
-		WritableDIContainer,
-		"beginScope" | "tryResolve" | (`resolve${string}` & keyof WritableDIContainer)
-	>;
+	type DIContainer = ReadonlyDIContainer;
 	type WriteonlyDIContainer = Pick<WritableDIContainer, `register${string}` & keyof WritableDIContainer>;
 
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -89,12 +86,16 @@ export type DISingletonClassRegistrationContext<T extends abstract new (...args:
 		): TThis;
 	};
 type D = DIContainer;
+type ReadonlyDIContainer = Pick<
+	WritableDIContainer,
+	"beginScope" | "tryResolve" | (`resolve${string}` & keyof WritableDIContainer)
+>;
 class DIContainer {
 	readonly registrations = new Map<string, IRegistration<unknown>>();
 
 	constructor() {
-		this.registerSingleton<WritableDIContainer>(this);
-		this.registerSingleton<DIContainer>(this);
+		this.registerSingleton(this);
+		this.registerSingleton<ReadonlyDIContainer>(this);
 	}
 
 	private assertNotNull<T>(value: T, name: string | undefined): asserts name is string {
