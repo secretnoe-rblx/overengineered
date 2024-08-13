@@ -2,7 +2,6 @@ import { BlockGhoster } from "client/tools/additional/BlockGhoster";
 import { BuildingManager } from "shared/building/BuildingManager";
 import { Component } from "shared/component/Component";
 import { ObservableValue } from "shared/event/ObservableValue";
-import type { BlockId } from "shared/BlockDataRegistry";
 
 @injectable
 export class BlockMirrorer extends Component {

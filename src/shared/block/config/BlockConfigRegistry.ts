@@ -1,5 +1,3 @@
-import type { BlockId } from "shared/BlockDataRegistry";
-
 export const connectors = {
 	boolOrNumberOrVector(
 		name: string,

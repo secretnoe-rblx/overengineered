@@ -418,65 +418,6 @@ const registry = {
 		name: "Ball in Socket",
 		description: "Ball socket for your mechanical ingenuities",
 	},
-	block: {
-		name: "Block",
-		description: "Makes you question why every engineering game has it",
-		mirrorBehaviour: "none",
-	},
-	truss: {
-		name: "Truss",
-		description: "This is a truss structure. You can climb it, and it's also cool.",
-		mirrorBehaviour: "none",
-		autoWeldShape: "cube",
-	},
-	ball: {
-		name: "Ball",
-		description: "it could be a cannon ball.. Or anything else, really..",
-		mirrorBehaviour: "none",
-	},
-	halfball: {
-		name: "Half Ball",
-		description: "It's rolling around.. half of the time..",
-		mirrorBehaviour: "offset180",
-	},
-	cone: {
-		name: "Cone",
-		description: "Filled with weird geometry jokes. Sadly, no ice cream",
-		mirrorBehaviour: "normal",
-	},
-	halfcone: {
-		name: "Half Cone",
-		description: "As half as much geometry jokes in this one. Still no ice cream tho...",
-		mirrorBehaviour: "normal",
-	},
-	concavecornerwedge: {
-		name: "Concave Corner Wedge",
-		description: "The convex corner wedge, but concave",
-		mirrorBehaviour: "offset270",
-	},
-	concaveprism: {
-		name: "Concave Prism",
-		description: "The convex prism, but concave",
-		mirrorBehaviour: "offset180",
-	},
-	convexcornerwedge: {
-		name: "Convex Corner Wedge",
-		description: "The concave corner wedge, but convex",
-		mirrorBehaviour: "offset270",
-	},
-	convexprism: {
-		name: "Convex Prism",
-		description: "The concave prism, but convex",
-		mirrorBehaviour: "offset180",
-	},
-	pyramid: {
-		name: "Pyramid",
-		description: "triangel",
-	},
-	halfblock: {
-		name: "Half Block",
-		description: "Like a block, but with a small caveat....",
-	},
 	leddisplay: {
 		name: "Display",
 		description: "Simple 8x8 pixel display. Wonder what can you do with it..",
@@ -485,42 +426,6 @@ const registry = {
 	sevensegmentdisplay: {
 		name: "7-Segment Display",
 		description: "Simple 7-Segment display. Opcode viewer? OwO",
-	},
-	cornerwedge1x1: {
-		name: "Corner Wedge 1x1",
-		description: "A simple corner wedge",
-		mirrorBehaviour: "offset270",
-	},
-	cornerwedge2x1: {
-		name: "Corner Wedge 2x1",
-		description: "A simple coorner wedge",
-		mirrorBehaviour: "offset270",
-	},
-	cornerwedge3x1: {
-		name: "Corner Wedge 3x1",
-		description: "A simple cooorner wedge",
-		mirrorBehaviour: "offset270",
-	},
-	cornerwedge4x1: {
-		name: "Corner Wedge 4x1",
-		description: "A simple coooorner wedge",
-		mirrorBehaviour: "offset270",
-	},
-	cylinder1x1: {
-		name: "Cylinder 1x1",
-		description: "A simple cyllinder",
-	},
-	cylinder1x2: {
-		name: "Cylinder 1x2",
-		description: "A no-so-simple cyllinder",
-	},
-	cylinder2x1: {
-		name: "Cylinder 2x1",
-		description: "A wider sibling of 1x1 cyllinder",
-	},
-	cylinder2x2: {
-		name: "Cylinder 2x2",
-		description: "A bigger sibling of 2x1 cyllinder",
 	},
 	disconnectblock: {
 		name: "Disconnector",
@@ -538,22 +443,6 @@ const registry = {
 		name: "Braced Shaft",
 		description: "A shaft with adjustable braces",
 	},
-	halfcylinder1x1: {
-		name: "Half Cylinder 1x1",
-		description: "A half of a sibling of 1x1 cyllinder",
-	},
-	halfcylinder1x2: {
-		name: "Half Cylinder 1x2",
-		description: "A bigger half of a sibling of 1x1 cyllinder",
-	},
-	halfcylinder2x1: {
-		name: "Half Cylinder 2x1",
-		description: "Same as 1x2 half cyllinder but wider",
-	},
-	halfcylinder2x2: {
-		name: "Half Cylinder 2x2",
-		description: "Same as 1x2 half cyllinder but wider and longer",
-	},
 	heliumblock: {
 		name: "Helium",
 		description: "I still have no idea how did they manage to pump helium into soap",
@@ -565,16 +454,6 @@ const registry = {
 	smallhingeblock: {
 		name: "Small hinge",
 		description: "Smaller hinge. La rotación compacta",
-	},
-	innercorner: {
-		name: "Inner Corner",
-		description: "An inner corner. Some long time ago it was called an Inner Wedge.. Those were the times!",
-		mirrorBehaviour: "offset270",
-	},
-	innertetra: {
-		name: "Inner Tetra",
-		description: "This name was chosen just to make the searching more inconvenient",
-		mirrorBehaviour: "offset270",
 	},
 	logicmemory: {
 		name: "Memory Cell",
@@ -622,10 +501,6 @@ const registry = {
 		name: "Sideways servo",
 		description: "Servo but sideways and with some degree of freedom",
 	},
-	shaft: {
-		name: "Shaft",
-		description: "A long thin pipe",
-	},
 	smallgear: {
 		name: "Small Gear",
 		description: "A cog for your machinery. Does it even work?",
@@ -655,16 +530,6 @@ const registry = {
 		name: "Suspension",
 		description: "Sus pension spring",
 	},
-	tetrahedron: {
-		name: "Tetrahedron",
-		description: "MAKS STOP NAMING BLOCKS LIKE THAT",
-		mirrorBehaviour: "offset90",
-	},
-	tetraround: {
-		name: "Tetra Round",
-		description: "A rounded version of the tetrahedron",
-		mirrorBehaviour: "offset270",
-	},
 	tnt: {
 		name: "TNT",
 		description: "A box of explosives. DO NOT HIT!",
@@ -685,62 +550,6 @@ const registry = {
 		description: "A seat for your vehicle. Allows you to control your contraption",
 		required: true,
 		limit: 1,
-	},
-	wedge1x1: {
-		name: "Wedge 1x1",
-		description: "A simple wedge",
-	},
-	wedge1x2: {
-		name: "Wedge 1x2",
-		description: "A longer wedge",
-	},
-	wedge1x3: {
-		name: "Wedge 1x3",
-		description: "A longer longer wedge",
-	},
-	wedge1x4: {
-		name: "Wedge 1x4",
-		description: "A loooonger wedge",
-	},
-	wedgewing1x1: {
-		name: "Wedge Wing 1x1",
-		description: "A wedge shaped wing",
-		mirrorBehaviour: "wedgeWing",
-	},
-	wedgewing1x2: {
-		name: "Wedge Wing 1x2",
-		description: "A wedge shaped wing but longer",
-		mirrorBehaviour: "wedgeWing",
-	},
-	wedgewing1x3: {
-		name: "Wedge Wing 1x3",
-		description: "A wedge shaped wing but much longer",
-		mirrorBehaviour: "wedgeWing",
-	},
-	wedgewing1x4: {
-		name: "Wedge Wing 1x4",
-		description: "A humongously long wedge shaped wing",
-		mirrorBehaviour: "wedgeWing",
-	},
-	wheel: {
-		name: "Wheel",
-		description: "circle",
-	},
-	bigwheel: {
-		name: "Big wheel",
-		description: "Wheel. Big one.",
-	},
-	smalloldwheel: {
-		name: "Small old wheel",
-		description: "smol ol whel",
-	},
-	oldwheel: {
-		name: "Old wheel",
-		description: "A ginormous old wheel",
-	},
-	bigoldwheel: {
-		name: "Big old wheel",
-		description: "Old wheel. Big one.",
 	},
 	wing1x1: {
 		name: "Wing 1x1",
@@ -770,84 +579,6 @@ const registry = {
 		name: "Wing Sharper",
 		description: "An evil brother of the wing rounding",
 	},
-	beam2x1: {
-		name: "Beam 2x1",
-		description: "A block, but 2x1!",
-	},
-	beam3x1: {
-		name: "Beam 3x1",
-		description: "A block, but 3x1!",
-	},
-	beam4x1: {
-		name: "Beam 4x1",
-		description: "A block, but 4x1!",
-	},
-	halfcornerwedge1x1: {
-		name: "Half Corner Wedge 1x1",
-		description: "A corner wedge 1x1, but it's.. half.. the size?",
-		mirrorBehaviour: "offset270",
-		mirrorReplacementId: "halfcornerwedge1x1mirrored",
-	},
-	halfcornerwedge2x1: {
-		name: "Half Corner Wedge 2x1",
-		description: "A corner wedge 2x1, but it's.. half.. the size?",
-		mirrorBehaviour: "offset270",
-		mirrorReplacementId: "halfcornerwedge2x1mirrored",
-	},
-	halfcornerwedge3x1: {
-		name: "Half Corner Wedge 3x1",
-		description: "A corner wedge 3x1, but it's.. half.. the size?",
-		mirrorBehaviour: "offset270",
-		mirrorReplacementId: "halfcornerwedge3x1mirrored",
-	},
-	halfcornerwedge4x1: {
-		name: "Half Corner Wedge 4x1",
-		description: "It stopped making any sense..",
-		mirrorBehaviour: "offset270",
-		mirrorReplacementId: "halfcornerwedge4x1mirrored",
-	},
-
-	halfcornerwedge1x1mirrored: {
-		name: "Half Corner Wedge 1x1 (Mirrored)",
-		description: "Same halved corner wedge, but mirrored!",
-		mirrorBehaviour: "offset270",
-		mirrorReplacementId: "halfcornerwedge1x1",
-	},
-	halfcornerwedge2x1mirrored: {
-		name: "Half Corner Wedge 2x1 (Mirrored)",
-		description: "Same halved corner wedge, but mirrored!",
-		mirrorBehaviour: "offset270",
-		mirrorReplacementId: "halfcornerwedge2x1",
-	},
-	halfcornerwedge3x1mirrored: {
-		name: "Half Corner Wedge 3x1 (Mirrored)",
-		description: "Same halved corner wedge, but mirrored!",
-		mirrorBehaviour: "offset270",
-		mirrorReplacementId: "halfcornerwedge3x1",
-	},
-	halfcornerwedge4x1mirrored: {
-		name: "Half Corner Wedge 4x1 (Mirrored)",
-		description: "Same halved corner wedge, but mirrored!",
-		mirrorBehaviour: "offset270",
-		mirrorReplacementId: "halfcornerwedge4x1",
-	},
-
-	halfwedge1x1: {
-		name: "Half Wedge 1x1",
-		description: "A wedge 1x1, but it's.. half.. the size?",
-	},
-	halfwedge1x2: {
-		name: "Half Wedge 1x2",
-		description: "A wedge 1x2, but it's.. half.. the size?",
-	},
-	halfwedge1x3: {
-		name: "Half Wedge 1x3",
-		description: "A wedge 1x3, but it's.. half.. the size?",
-	},
-	halfwedge1x4: {
-		name: "Half Wedge 1x4",
-		description: "A wedge 1x4, but it's.. half.. the size?",
-	},
 	radiotransmitter: {
 		name: "Radio Transmitter",
 		description: "Transmits data over air! True magic for a caveman!",
@@ -861,11 +592,6 @@ const registry = {
 } satisfies GenericBlockDataRegistry;
 
 export const BlockDataRegistry: { readonly [id in BlockId]: BlockSetupInformation } = registry;
-
-declare global {
-	type BlockId = string & keyof typeof registry;
-}
-export type BlockId = string & keyof typeof registry;
 
 for (const [key, info] of pairs(registry)) {
 	(registry as Writable<GenericBlockDataRegistry>)[key] = process(info);

@@ -283,11 +283,14 @@ const wheels = {
 
 //
 
-export const BuildingBlocks = BlockCreation.arrayFromObject({
+const list = {
 	...blocks,
 	...beams,
 	...cornerWedges,
 	...cylinders,
 	...wedges,
 	...wheels,
-});
+} satisfies { readonly [k in string]: BlockBuilderWithoutIdAndDefaults };
+export const BuildingBlocks = BlockCreation.arrayFromObject(list);
+
+export type BuildingBlockIds = keyof typeof list;

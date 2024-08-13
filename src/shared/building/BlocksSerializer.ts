@@ -4,7 +4,6 @@ import { JSON } from "shared/fixes/Json";
 import { Objects } from "shared/fixes/objects";
 import { Serializer } from "shared/Serializer";
 import type { BlockConfigRegistry } from "shared/block/config/BlockConfigRegistry";
-import type { BlockId } from "shared/BlockDataRegistry";
 import type { PlacedBlockConfig } from "shared/blockLogic/BlockConfig";
 import type { BuildingPlot } from "shared/building/BuildingPlot";
 import type { ReadonlyPlot } from "shared/building/ReadonlyPlot";

@@ -1,7 +1,7 @@
 import { Wikis } from "client/wiki/Wikis";
 
 const notags = new ReadonlySet<WikiTag>();
-type BlockWikis = { readonly [k in BlockId]?: Wikis.BlockWikiEntry };
+type BlockWikis = { readonly [k in string]?: Wikis.BlockWikiEntry };
 
 const wiki: BlockWikis = {
 	block: {
@@ -54,5 +54,5 @@ For example:
 			{ type: "ref", id: "ceil" },
 		],
 	},
-	...asMap(filledWiki(di.resolve<BlockList>())).map((k, v) => Wikis.block(k, v, di.resolve<BlockList>())),
+	...asMap(filledWiki(di.resolve<BlockList>())).map((k, v) => Wikis.block(k as string, v, di.resolve<BlockList>())),
 ];

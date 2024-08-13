@@ -1,6 +1,5 @@
 import { JSON } from "shared/fixes/Json";
 import { Serializer } from "shared/Serializer";
-import type { BlockId } from "shared/BlockDataRegistry";
 import type { PlacedBlockConfig } from "shared/blockLogic/BlockConfig";
 
 declare global {

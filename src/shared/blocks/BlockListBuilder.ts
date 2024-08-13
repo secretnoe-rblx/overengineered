@@ -22,6 +22,19 @@ export namespace BlockListBuilder {
 	}
 
 	export function buildBlockList(builders: readonly BlockBuilder[]): BlockList {
+		const endings = [".", "!", "?", " "];
+		const process = (block: BlockBuilder): BlockBuilder => {
+			if (!endings.includes(block.description.sub(block.description.size()))) {
+				return {
+					...block,
+					description: block.description + ".",
+				};
+			}
+
+			return block;
+		};
+		builders = builders.map(process);
+
 		if (RunService.IsServer()) {
 			serverBuiltBlocks = asObject(
 				builders.mapToMap((b) => {
@@ -73,9 +86,9 @@ export namespace BlockListBuilder {
 
 		const blocks = asObject(
 			builders.mapToMap((b) =>
-				$tuple(b.id as BlockId, {
+				$tuple(b.id, {
 					...b,
-					id: b.id as BlockId,
+					id: b.id,
 					...remoteBlocks[b.id],
 				} satisfies Block),
 			),

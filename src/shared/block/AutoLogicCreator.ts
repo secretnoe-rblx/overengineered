@@ -4,7 +4,6 @@ import { ConfigurableBlockLogic } from "shared/block/ConfigurableBlockLogic";
 import { Objects } from "shared/fixes/objects";
 import { RemoteEvents } from "shared/RemoteEvents";
 import type { BlockLogic } from "shared/block/BlockLogic";
-import type { BlockId } from "shared/BlockDataRegistry";
 
 interface CreateInfo<TKey extends keyof typeof logicReg> {
 	readonly func: Parameters<(typeof logicReg)[TKey]>[0];
