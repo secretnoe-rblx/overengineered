@@ -216,12 +216,7 @@ class GamepadRotater extends RotaterBase {
 }
 
 export namespace BlockRotater {
-	export function create(
-		mode: BuildingMode,
-		plot: SharedPlot,
-		blocks: readonly BlockModel[],
-		di: ReadonlyDIContainer,
-	) {
+	export function create(mode: BuildingMode, plot: SharedPlot, blocks: readonly BlockModel[], di: DIContainer) {
 		return ClientComponentChild.createOnceBasedOnInputType<RotaterBase>({
 			Desktop: () => di.resolveForeignClass(DesktopRotater, [mode, plot, blocks]),
 			Touch: () => di.resolveForeignClass(TouchRotater, [mode, plot, blocks]),

@@ -1,6 +1,4 @@
 import { Wikis } from "client/wiki/Wikis";
-import { BlockDataRegistry } from "shared/BlockDataRegistry";
-import { Objects } from "shared/fixes/objects";
 
 const notags = new ReadonlySet<WikiTag>();
 type BlockWikis = { readonly [k in BlockId]?: Wikis.BlockWikiEntry };
@@ -32,13 +30,15 @@ const wiki: BlockWikis = {
 	},
 };
 
-const filledWiki = {
-	...Objects.fromEntries(
-		asMap(BlockDataRegistry).map((k): [BlockId, Wikis.BlockWikiEntry] => [k, { tags: notags, content: [] }]),
+const filledWiki = (blockList: BlockList) => ({
+	...asObject(
+		asMap(blockList.blocks).mapToMap((k) =>
+			$tuple(k, { tags: notags, content: [] } satisfies Wikis.BlockWikiEntry),
+		),
 	),
 	...wiki,
-};
-export const _Wikis: readonly WikiEntry[] = [
+});
+export const _Wikis = (di: DIContainer): readonly WikiEntry[] => [
 	{
 		id: "blocks",
 		title: "Blocks",
@@ -54,5 +54,5 @@ For example:
 			{ type: "ref", id: "ceil" },
 		],
 	},
-	...asMap(filledWiki).map(Wikis.block),
+	...asMap(filledWiki(di.resolve<BlockList>())).map((k, v) => Wikis.block(k, v, di.resolve<BlockList>())),
 ];

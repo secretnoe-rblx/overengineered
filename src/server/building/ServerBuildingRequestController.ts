@@ -7,7 +7,6 @@ import { SlotsMeta } from "shared/SlotsMeta";
 import type { SlotDatabase } from "server/database/SlotDatabase";
 import type { PlayModeController } from "server/modes/PlayModeController";
 import type { ServerPlots } from "server/plots/ServerPlots";
-import type { DIContainer } from "shared/DI";
 import type { C2S2CRemoteFunction } from "shared/event/PERemoteEvent";
 import type { Operation } from "shared/Operation";
 
@@ -29,8 +28,7 @@ export class ServerBuildingRequestController extends HostedService {
 				if (update.kind !== "add") return;
 
 				for (const controller of update.added) {
-					container = container.beginScope();
-					container.registerSingleton(controller);
+					container = container.beginScope((di) => di.registerSingleton(controller));
 					const handler = container.resolveForeignClass(ServerBuildingRequestHandler);
 
 					children.set(controller.player, handler);

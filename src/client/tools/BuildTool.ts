@@ -728,8 +728,7 @@ namespace SinglePlaceController {
 	}
 
 	export function create(tool: BuildTool, di: DIContainer) {
-		di = di.beginScope();
-		di.registerSingleton(tool);
+		di = di.beginScope((di) => di.registerSingleton(tool));
 
 		return ClientComponentChild.createOnceBasedOnInputType({
 			Desktop: () => di.resolveForeignClass(Desktop),

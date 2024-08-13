@@ -325,7 +325,7 @@ namespace Controllers {
 		readonly step = new NumberObservableValue<number>(1, 1, 256, 1);
 		private readonly editor;
 
-		constructor(tool: EditTool, plot: SharedPlot, blocks: readonly BlockModel[], @inject di: ReadonlyDIContainer) {
+		constructor(tool: EditTool, plot: SharedPlot, blocks: readonly BlockModel[], @inject di: DIContainer) {
 			super();
 
 			this.editor = this.parent(BlockMover.create(tool.mode, plot, blocks, di));
@@ -369,7 +369,7 @@ namespace Controllers {
 			private readonly plot: SharedPlot,
 			selected: readonly BlockModel[],
 			@inject blockList: BlockList,
-			@inject di: ReadonlyDIContainer,
+			@inject di: DIContainer,
 		) {
 			super();
 
@@ -449,7 +449,7 @@ namespace Controllers {
 		readonly step = new NumberObservableValue<number>(0, 90, 180, 90);
 		private readonly editor;
 
-		constructor(tool: EditTool, plot: SharedPlot, blocks: readonly BlockModel[], @inject di: ReadonlyDIContainer) {
+		constructor(tool: EditTool, plot: SharedPlot, blocks: readonly BlockModel[], @inject di: DIContainer) {
 			super();
 
 			this.editor = this.parent(BlockRotater.create(tool.mode, plot, blocks, di));

@@ -14,7 +14,7 @@ export class ClientMachine extends SharedMachine {
 	constructor(
 		@inject private readonly playerData: PlayerDataStorage,
 		@inject blockList: BlockList,
-		@inject di: ReadonlyDIContainer,
+		@inject di: DIContainer,
 	) {
 		super(blockList, di);
 		this.parent(this.logicInputs);

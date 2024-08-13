@@ -33,8 +33,7 @@ export class BuildingMode extends PlayMode {
 	constructor(@inject di: DIContainer, @inject plot: SharedPlot) {
 		super();
 
-		di = di.beginScope();
-		di.registerSingleton(this);
+		di = di.beginScope((di) => di.registerSingleton(this));
 
 		this.event.subInput((ih) => {
 			ih.onKeyDown("LeftControl", () => this.gridEnabled.set(false));

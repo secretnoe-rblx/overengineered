@@ -1,4 +1,3 @@
-import { BlockDataRegistry } from "shared/BlockDataRegistry";
 import { AABB } from "shared/fixes/AABB";
 
 export namespace BlockAssertions {
@@ -59,11 +58,6 @@ export namespace BlockAssertions {
 
 		yield `No parts in block '${block.Name}' are anchored!`;
 	}
-	function* assertHasDataInRegistry(block: Model) {
-		if (!BlockDataRegistry[block.Name.lower() as BlockId]) {
-			yield `No registry data found for block ${block.Name}`;
-		}
-	}
 	function* assertCollisionGroup(block: Model) {
 		for (const child of block.GetDescendants()) {
 			if (child.Parent?.Name === "WeldRegions") continue;
@@ -122,7 +116,6 @@ export namespace BlockAssertions {
 			...assertColboxWeldedIfExists(block),
 			...assertValidVelds(block),
 			...assertSomethingAnchored(block),
-			...assertHasDataInRegistry(block),
 			...assertCollisionGroup(block),
 			// ...assertNoRepeatedPartNames(block), temporarily removed
 		];

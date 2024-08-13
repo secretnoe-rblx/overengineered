@@ -24,9 +24,9 @@ export namespace TestFramework {
 		return ret;
 	}
 
-	type Test = (di: ReadonlyDIContainer) => void;
+	type Test = (di: DIContainer) => void;
 	type TestList = { readonly [k in string]: Test };
-	export type Tests = TestList | ((di?: ReadonlyDIContainer) => TestList);
+	export type Tests = TestList | ((di?: DIContainer) => TestList);
 	export function loadTestsFromScript(mscript: ModuleScript): Tests {
 		const ts = require(
 			ReplicatedStorage.WaitForChild("rbxts_include").WaitForChild("RuntimeLib") as ModuleScript,
@@ -37,7 +37,7 @@ export namespace TestFramework {
 		return (ts.import(script, mscript) as { _Tests: Tests })._Tests;
 	}
 
-	export function run(name: string, test: Tests, di: ReadonlyDIContainer) {
+	export function run(name: string, test: Tests, di: DIContainer) {
 		const run = (name: string, test: Tests | Test, offset: number) => {
 			const offsetstr = string.rep(" ", offset);
 			$log(`${offsetstr}[${name}] Running`);

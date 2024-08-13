@@ -1,5 +1,5 @@
 type IRegistration<T> = {
-	get(di: ReadonlyDIContainer): T;
+	get(di: DIContainer): T;
 };
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -8,12 +8,12 @@ type ConstructorParameters<T extends abstract new (...args: any) => any> = T ext
 	: never;
 
 declare global {
-	type DIContainer = D;
-	type ReadonlyDIContainer = Pick<
-		DIContainer,
-		"beginScope" | "tryResolve" | (`resolve${string}` & keyof DIContainer)
+	type WritableDIContainer = D;
+	type DIContainer = Pick<
+		WritableDIContainer,
+		"beginScope" | "tryResolve" | (`resolve${string}` & keyof WritableDIContainer)
 	>;
-	type WriteonlyDIContainer = Pick<DIContainer, `register${string}` & keyof DIContainer>;
+	type WriteonlyDIContainer = Pick<WritableDIContainer, `register${string}` & keyof WritableDIContainer>;
 
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any
 	function injectable(...args: unknown[]): void;
@@ -23,7 +23,7 @@ declare global {
 
 type DepsCreatable<TSelf, TArgs extends readonly unknown[]> = {
 	readonly prototype: unknown;
-	_depsCreate(...args: [...TArgs, deps: ReadonlyDIContainer]): TSelf;
+	_depsCreate(...args: [...TArgs, deps: DIContainer]): TSelf;
 };
 
 const getSymbol = <T extends object>(obj: T): string => {
@@ -46,7 +46,7 @@ const getSymbol = <T extends object>(obj: T): string => {
 const instantiateClass = <TCtor extends abstract new (...args: TArgs) => unknown, TArgs extends readonly unknown[]>(
 	clazz: TCtor,
 	args: TArgs | undefined,
-	container: ReadonlyDIContainer,
+	container: DIContainer,
 ): ConstructorResult<TCtor> => {
 	const isDeps = (clazz: unknown): clazz is DepsCreatable<ConstructorResult<TCtor>, TArgs> =>
 		typeIs(clazz, "table") && "_depsCreate" in clazz;
@@ -84,17 +84,17 @@ export type DISingletonClassRegistrationContext<T extends abstract new (...args:
 		withArgs<TThis>(
 			this: TThis,
 			args:
-				| ((di: ReadonlyDIContainer) => Partial<[...ConstructorParameters<T>]>)
+				| ((di: DIContainer) => Partial<[...ConstructorParameters<T>]>)
 				| Partial<[...ConstructorParameters<T>]>,
 		): TThis;
 	};
 type D = DIContainer;
-export class DIContainer {
+class DIContainer {
 	readonly registrations = new Map<string, IRegistration<unknown>>();
 
 	constructor() {
-		this.registerSingleton(this);
-		this.registerSingleton<ReadonlyDIContainer>(this);
+		this.registerSingleton<WritableDIContainer>(this);
+		this.registerSingleton<DIContainer>(this);
 	}
 
 	private assertNotNull<T>(value: T, name: string | undefined): asserts name is string {
@@ -112,7 +112,7 @@ export class DIContainer {
 
 		let savedArgs:
 			| Partial<[...ConstructorParameters<T>]>
-			| ((di: ReadonlyDIContainer) => Partial<[...ConstructorParameters<T>]>)
+			| ((di: DIContainer) => Partial<[...ConstructorParameters<T>]>)
 			| undefined = undefined;
 		const reg = this.registerSingletonFunc((di) => {
 			const args = typeIs(savedArgs, "function") ? savedArgs(di) : savedArgs;
@@ -134,10 +134,7 @@ export class DIContainer {
 		name ??= getSymbol(value);
 		return this.registerSingletonFunc(() => value, name);
 	}
-	registerSingletonFunc<T extends defined>(
-		func: (ctx: ReadonlyDIContainer) => T,
-		name?: string,
-	): DIRegistrationContext<T> {
+	registerSingletonFunc<T extends defined>(func: (ctx: DIContainer) => T, name?: string): DIRegistrationContext<T> {
 		name ??= getSymbol(func);
 		this.assertNotNull(func, name);
 		if (this.registrations.get(name)) {
@@ -169,7 +166,7 @@ export class DIContainer {
 		};
 	}
 
-	registerTransientFunc<T extends defined>(func: (ctx: ReadonlyDIContainer) => T, name?: string): void {
+	registerTransientFunc<T extends defined>(func: (ctx: DIContainer) => T, name?: string): void {
 		this.assertNotNull(func, name);
 		if (this.registrations.get(name)) {
 			throw `Dependency ${name} is already registered`;
@@ -222,10 +219,15 @@ export class DIContainer {
 		return instantiateClass(clazz as never, args, this);
 	}
 
-	beginScope(): DIContainer {
-		return new DIContainerScope(this);
+	beginScope(setup?: (di: WritableDIContainer) => void): WritableDIContainer {
+		const scope = new DIContainerScope(this);
+		setup?.(scope);
+
+		return scope;
 	}
 }
+export { DIContainer as DIContainerClass };
+
 class DIContainerScope extends DIContainer {
 	constructor(private readonly parent: DIContainer) {
 		super();

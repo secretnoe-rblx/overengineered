@@ -75,8 +75,7 @@ export class ToolController extends ClientComponent {
 
 	constructor(@inject mode: BuildingMode, @inject di: DIContainer) {
 		super();
-		di = di.beginScope();
-		di.registerSingleton(this);
+		di = di.beginScope((di) => di.registerSingleton(this));
 
 		Signals.PLAYER.DIED.Connect(() => {
 			this.selectedTool.set(undefined);

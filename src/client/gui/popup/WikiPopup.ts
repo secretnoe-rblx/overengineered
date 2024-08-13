@@ -9,7 +9,7 @@ import type { WikiCategoriesControlDefinition, WikiContentControlDefinition } fr
 namespace WikiStorage {
 	let cache: readonly WikiEntry[] | undefined = undefined;
 
-	export function getAll(): readonly WikiEntry[] {
+	export function getAll(di: DIContainer): readonly WikiEntry[] {
 		function findAllWikis(): readonly ModuleScript[] {
 			const ret: ModuleScript[] = [];
 			const visit = (instance: Instance) => {
@@ -34,14 +34,14 @@ namespace WikiStorage {
 		for (const scr of findAllWikis()) {
 			const w = require(scr) as {
 				readonly _Wiki?: WikiEntry;
-				readonly _Wikis?: readonly WikiEntry[];
+				readonly _Wikis?: (di: DIContainer) => readonly WikiEntry[];
 			};
 
 			if (w._Wiki) {
 				found.push(w._Wiki);
 			}
 			if (w._Wikis) {
-				for (const wiki of w._Wikis) {
+				for (const wiki of w._Wikis(di)) {
 					found.push(wiki);
 				}
 			}
@@ -69,7 +69,7 @@ export class WikiPopup extends Popup<WikiPopupDefinition> {
 		host.services.registerTransientFunc((ctx) => ctx.resolveForeignClass(this, [gui.Clone()]));
 	}
 
-	constructor(gui: WikiPopupDefinition, @inject blockList: BlockList) {
+	constructor(gui: WikiPopupDefinition, @inject blockList: BlockList, @inject di: DIContainer) {
 		super(gui);
 
 		this.add(new ButtonControl(gui.Heading.CloseButton, () => this.hide()));
@@ -79,7 +79,7 @@ export class WikiPopup extends Popup<WikiPopupDefinition> {
 		content.requestedTeleport.Connect((id) => sidebar.select(id));
 		content.set({ id: "", title: "", tags: new ReadonlySet(), content: [] });
 
-		const wikis = asObject(WikiStorage.getAll().mapToMap((w) => $tuple(w.id, w)));
+		const wikis = asObject(WikiStorage.getAll(di).mapToMap((w) => $tuple(w.id, w)));
 		sidebar.addItems(
 			asMap(wikis)
 				.map((k, w) => ({ id: k, title: w.title }))

@@ -8,7 +8,7 @@ import { TestFramework } from "shared/test/TestFramework";
 
 export namespace TestRunner {
 	let destroy: (() => void) | undefined;
-	export function create(di: ReadonlyDIContainer) {
+	export function create(di: DIContainer) {
 		const parent = new InstanceComponent(
 			Element.create("ScreenGui", { AutoLocalize: false, Name: "TestScreenGui", Parent: Gui.getPlayerGui() }),
 		);
@@ -64,7 +64,7 @@ export namespace TestRunner {
 
 			return [name, control];
 		};
-		const testFrom = (name: string, tests: ((di?: ReadonlyDIContainer) => Control) | TestFramework.Tests) => {
+		const testFrom = (name: string, tests: ((di?: DIContainer) => Control) | TestFramework.Tests) => {
 			if (typeIs(tests, "function")) {
 				const test = tests(di);
 				if (test instanceof Control) {

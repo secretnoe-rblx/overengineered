@@ -1,5 +1,3 @@
-import { BlockDataRegistry } from "shared/BlockDataRegistry";
-
 /* Supported tags
 <b> bold
 <i> italic
@@ -80,13 +78,15 @@ export namespace Wikis {
 	];
 
 	export type BlockWikiEntry = Omit<WikiEntry, "id" | "title">;
-	export function block(id: BlockId, wiki: BlockWikiEntry): WikiEntry {
-		const block = BlockDataRegistry[id];
+	export function block(id: BlockId, wiki: BlockWikiEntry, blockList: BlockList): WikiEntry {
+		const block = blockList.blocks[id];
+		if (!block) throw "Unknown block";
+
 		return {
 			...wiki,
 			tags: new ReadonlySet([...wiki.tags, "block"]),
 			id,
-			title: block.name,
+			title: block.displayName,
 			content: [
 				block.description,
 				{ type: "blockPreview", id },
