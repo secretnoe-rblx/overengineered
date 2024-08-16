@@ -1,3 +1,4 @@
+import { Objects } from "shared/fixes/objects";
 import type { BlockConfigType } from "shared/blockLogic/BlockLogic";
 
 type Keys = BlockConfigTypes2.TypeKeys;
@@ -33,9 +34,11 @@ export namespace BlockConfig {
 			}
 
 			if (!obj) {
+				const defaultType = Objects.firstKey(def.types) ?? "unset";
+
 				const cfg: GenericConfig = {
-					type: def.defaultType,
-					config: def.types[def.defaultType]!.config,
+					type: defaultType,
+					config: defaultType === "unset" ? (undefined as never) : def.types[defaultType]!.config,
 				};
 				result[k] = cfg;
 

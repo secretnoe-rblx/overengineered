@@ -4,10 +4,10 @@ import { NumberBlockLogicValue } from "shared/block/NumberBlockLogicValue";
 import { Component } from "shared/component/Component";
 import { InstanceComponent } from "shared/component/InstanceComponent";
 import { ArgsSignal } from "shared/event/Signal";
-import { Objects } from "shared/fixes/objects";
 import { RemoteEvents } from "shared/RemoteEvents";
 import { PartUtils } from "shared/utils/PartUtils";
 import type { IBlockLogicValue } from "shared/block/BlockLogicValue";
+import type { BlockL } from "shared/blockLogic/BlockLogic3";
 import type { ReadonlySubscribeObservableValue } from "shared/event/ObservableValue";
 
 type Keys = BlockConfigTypes2.TypeKeys;
@@ -15,19 +15,27 @@ type Types = BlockConfigTypes2.Types;
 
 export type BlockConfigType = {
 	readonly displayName: string;
+	readonly types: { readonly [k in keyof Types]?: Omit<Types[k], "default"> };
 	readonly group?: string;
-	readonly types: { readonly [k in keyof Types]?: Types[k] };
-	readonly defaultType: keyof Types;
 	readonly connectorHidden?: boolean;
 	readonly configHidden?: boolean;
+};
+export type OutputBlockConfigType = {
+	readonly displayName: string;
+	readonly types: { readonly [k in keyof Types]?: Omit<Types[k], "config" | "default"> };
+	readonly group?: string;
+	readonly connectorHidden?: boolean;
 };
 
 export type BlockConfigDefinition = {
 	readonly [k in string]: BlockConfigType;
 };
+export type OutputBlockConfigDefinition = {
+	readonly [k in string]: OutputBlockConfigType;
+};
 export type BlockConfigBothDefinitions = {
 	readonly input: BlockConfigDefinition;
-	readonly output: BlockConfigDefinition;
+	readonly output: OutputBlockConfigDefinition;
 };
 
 class BlockLogicBase<T extends BlockModel = BlockModel> extends InstanceComponent<T> {
@@ -168,18 +176,16 @@ class BlockLogicMultiValue<TTypes extends keyof BlockConfigTypes2.Types>
 
 type GenericBlockConfigBothDefinitions = {
 	readonly input: { [k in string]: BlockConfigType };
-	readonly output: { [k in string]: BlockConfigType };
+	readonly output: { [k in string]: OutputBlockConfigType };
 };
 
-export type GenericBlockLogicCtor<
-	TDef extends BlockConfigBothDefinitions = GenericBlockConfigBothDefinitions,
-	TBlock extends BlockModel = BlockModel,
-> = new (block: PlacedBlockData, ...args: any[]) => GenericBlockLogic<TDef, TBlock>;
+export type GenericBlockLogicCtor<TDef extends BlockConfigBothDefinitions = GenericBlockConfigBothDefinitions> = new (
+	block: PlacedBlockData,
+	...args: any[]
+) => GenericBlockLogic<TDef>;
 
-export type GenericBlockLogic<
-	TDef extends BlockConfigBothDefinitions = GenericBlockConfigBothDefinitions,
-	TBlock extends BlockModel = BlockModel,
-> = BlockLogic<TDef, TBlock>;
+export type GenericBlockLogic<TDef extends BlockConfigBothDefinitions = GenericBlockConfigBothDefinitions> =
+	BlockL<TDef>;
 
 export abstract class BlockLogic<
 	TDef extends BlockConfigBothDefinitions,
@@ -202,18 +208,7 @@ export abstract class BlockLogic<
 	) {
 		super(block as never);
 
-		for (const [k, v] of pairs(configDefinition.input)) {
-			if (!(v.defaultType in v.types)) {
-				throw `Invalid default input type ${v.defaultType} on the block ${block.id} key ${k} (allowed: ${Objects.keys(v.types).join()})`;
-			}
-		}
-		for (const [k, v] of pairs(configDefinition.output)) {
-			if (!(v.defaultType in v.types)) {
-				throw `Invalid default output type ${v.defaultType} on the block ${block.id} key ${k} (allowed: ${Objects.keys(v.types).join()})`;
-			}
-		}
-
-		const create = (defs: BlockConfigDefinition) => {
+		const create = (defs: OutputBlockConfigDefinition) => {
 			const inputs: { [k in string]: IBlockLogicMultiValue<keyof BlockConfigTypes2.Types> } = {};
 			for (const [k, v] of pairs(defs)) {
 				const values: {
@@ -226,7 +221,7 @@ export abstract class BlockLogic<
 				}
 
 				const multivalue = new BlockLogicMultiValue(
-					v.defaultType,
+					"unset" as never,
 					values as BlockLogicMultiValueTypes<keyof BlockConfigTypes2.Types>,
 				);
 

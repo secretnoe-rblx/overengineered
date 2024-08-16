@@ -8,6 +8,11 @@ export namespace Objects {
 			return key;
 		}
 	}
+
+	export function firstValue<T extends readonly T[]>(object: T): T | undefined;
+	export function firstValue<T extends ReadonlyMap<defined, T>>(object: T): T | undefined;
+	export function firstValue<T extends ReadonlySet<T>>(object: T): boolean | undefined;
+	export function firstValue<T extends object>(object: T): T[keyof T] | undefined;
 	export function firstValue<T extends object>(object: T): T[keyof T] | undefined {
 		for (const [, value] of asMap(object)) {
 			return value;
@@ -24,6 +29,23 @@ export namespace Objects {
 
 	export function size(object: object): number {
 		return asMap(object).size();
+	}
+
+	/** Shorthand for `asObject(asMap(obj).mapToMap((k, v) => $tuple(k, func(v))))` */
+	export function mapValues<const TObj extends object, const V>(
+		obj: TObj,
+		func: (key: keyof TObj, value: TObj[keyof TObj] & defined) => V,
+	): object & { [k in keyof TObj]: V } {
+		return asObject(asMap(obj).mapToMap((k, v) => $tuple(k, func(k, v))));
+	}
+
+	/** Shorthand for `asObject(asMap(obj).mapToMap((k, v) => $tuple(kfunc(k), vfunc(v))))` with the key and value functions divided to simplify writing the type */
+	export function map<const TObj extends object, const K extends string | number | symbol, const V>(
+		obj: TObj,
+		keyfunc: (key: keyof TObj, value: TObj[keyof TObj] & defined) => K,
+		valuefunc: (key: keyof TObj, value: TObj[keyof TObj] & defined) => V,
+	): object & { [k in K]: V } {
+		return asObject(asMap(obj).mapToMap((k, v) => $tuple(keyfunc(k, v), valuefunc(k, v))));
 	}
 
 	export function entriesArray<T extends object>(object: T): (readonly [keyof T, T[keyof T] & defined])[] {

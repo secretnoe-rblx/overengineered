@@ -139,7 +139,7 @@ declare global {
 
 		filter(this: ReadonlyMap<K, V>, func: (key: K, value: V) => boolean): Map<K, V>;
 		map<TOut extends defined>(this: ReadonlyMap<K, V>, func: (key: K, value: V) => TOut): TOut[];
-		mapToMap<TK extends defined, TOut extends defined>(
+		mapToMap<TK extends defined, TOut>(
 			this: ReadonlyMap<K, V>,
 			func: (key: K, value: V) => LuaTuple<[TK, TOut]>,
 		): Map<TK, TOut>;
@@ -212,7 +212,7 @@ export const MapMacros: PropertyMacros<ReadonlyMap<defined, defined>> = {
 
 		return result;
 	},
-	mapToMap: <K extends defined, V extends defined, TK extends defined, TOut extends defined>(
+	mapToMap: <K extends defined, V extends defined, TK extends defined, TOut>(
 		map: ReadonlyMap<K, V>,
 		func: (key: K, value: V) => LuaTuple<[TK, TOut]>,
 	): Map<TK, TOut> => {
