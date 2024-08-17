@@ -1,7 +1,7 @@
-import { BlockLogicActor } from "shared/blockLogic/BlockLogic3";
+import { InstanceBlockLogic as InstanceBlockLogic4 } from "shared/blockLogic/BlockLogic4";
 import { BlockCreation } from "shared/blocks/BlockCreation";
 import { AutoC2SRemoteEvent } from "shared/event/C2SRemoteEvent";
-import type { BlockConfigBothDefinitions } from "shared/blockLogic/BlockLogic";
+import type { BlockLogicFullBothDefinitions, InstanceBlockLogicArgs } from "shared/blockLogic/BlockLogic4";
 import type { BlockBuilder } from "shared/blocks/Block";
 
 const config = {
@@ -9,7 +9,8 @@ const config = {
 		disconnect: {
 			displayName: "Disconnect",
 			types: {
-				keybool: {
+				bool: {
+					type: "keybool",
 					config: {
 						key: "F",
 						reversed: false,
@@ -22,18 +23,18 @@ const config = {
 		},
 	},
 	output: {},
-} satisfies BlockConfigBothDefinitions;
+} satisfies BlockLogicFullBothDefinitions;
 
 export type { DisconnectBlockLogic };
-class DisconnectBlockLogic extends BlockLogicActor<typeof config> {
+class DisconnectBlockLogic extends InstanceBlockLogic4<typeof config> {
 	static readonly events = {
 		disconnect: new AutoC2SRemoteEvent<{ readonly block: BlockModel }>("b_disconnectblock_disconnect"),
 	} as const;
 
-	constructor(block: PlacedBlockData) {
+	constructor(block: InstanceBlockLogicArgs) {
 		super(config, block);
 
-		this.on(["disconnect"], ([disconnect]) => {
+		this.on((ctx, { disconnect }) => {
 			if (disconnect) {
 				DisconnectBlockLogic.events.disconnect.send({ block: this.instance });
 				this.disable();

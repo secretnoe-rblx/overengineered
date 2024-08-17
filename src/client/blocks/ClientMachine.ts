@@ -1,4 +1,3 @@
-import { BlockConfig } from "shared/blockLogic/BlockConfig";
 import { SharedMachine } from "shared/blockLogic/SharedMachine";
 import { ContainerComponent } from "shared/component/ContainerComponent";
 import type { ConfigLogicValueBase } from "client/blocks/BlockLogicValues";
@@ -34,32 +33,28 @@ export class ClientMachine extends SharedMachine {
 
 	initializeControls() {
 		for (const logic of this.getChildren()) {
-			const configDef = logic.configDefinition;
-			const config = BlockConfig.addDefaults(logic.block.config, configDef.input);
-
-			for (const [key, observable] of pairs(logic.input)) {
-				// if already connected
-				// if (logic.block.connections !== undefined && key in logic.block.connections) continue;
-
-				const def = configDef.input[key as keyof typeof configDef.input];
-
-				// const input = this.logicInputs.add(
-				// 	new blockConfigRegistryClient[def.type](
-				// 		observable as never,
-				// 		config[key as never] as never,
-				// 		def as never,
-				// 	),
-				// );
-
-				// this.event.subscribeObservable(
-				// 	this.occupiedByLocalPlayer,
-				// 	(enabled) => {
-				// 		if (enabled) input.enable();
-				// 		else input.disable();
-				// 	},
-				// 	true,
-				// );
-			}
+			// const configDef = logic.configDefinition;
+			// const config = BlockConfig.addDefaults(logic.block.config, configDef.input);
+			// for (const [key, observable] of pairs(logic.input)) {
+			// if already connected
+			// if (logic.block.connections !== undefined && key in logic.block.connections) continue;
+			// const def = configDef.input[key as keyof typeof configDef.input];
+			// const input = this.logicInputs.add(
+			// 	new blockConfigRegistryClient[def.type](
+			// 		observable as never,
+			// 		config[key as never] as never,
+			// 		def as never,
+			// 	),
+			// );
+			// this.event.subscribeObservable(
+			// 	this.occupiedByLocalPlayer,
+			// 	(enabled) => {
+			// 		if (enabled) input.enable();
+			// 		else input.disable();
+			// 	},
+			// 	true,
+			// );
+			// }
 		}
 	}
 }

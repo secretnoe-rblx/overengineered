@@ -1,8 +1,12 @@
-import { BlockLogicOperation } from "shared/blockLogic/BlockLogic3";
+import { CalculatableBlockLogic } from "shared/blockLogic/BlockLogic4";
 import { BlockConfigDefinitions } from "shared/blocks/BlockConfigDefinitions";
 import { BlockCreation } from "shared/blocks/BlockCreation";
-import type { BlockConfigBothDefinitions } from "shared/blockLogic/BlockLogic";
-import type { BlockLogicResults, BlockLogicValues, BlockTickState } from "shared/blockLogic/BlockLogic3";
+import type {
+	AllInputKeysToObject,
+	AllOutputKeysToObject,
+	BlockLogicArgs,
+	BlockLogicFullBothDefinitions,
+} from "shared/blockLogic/BlockLogic4";
 import type { BlockBuilder } from "shared/blocks/Block";
 
 const config = {
@@ -12,20 +16,22 @@ const config = {
 	output: {
 		result: BlockConfigDefinitions.any("Result", "0"),
 	},
-} satisfies BlockConfigBothDefinitions;
+} satisfies BlockLogicFullBothDefinitions;
 
 export type { ConstantBlockLogic };
-class ConstantBlockLogic extends BlockLogicOperation<typeof config> {
-	constructor(block: PlacedBlockData) {
+class ConstantBlockLogic extends CalculatableBlockLogic<typeof config> {
+	constructor(block: BlockLogicArgs) {
 		super(config, block);
 	}
 
 	protected override calculate(
-		ctx: BlockTickState,
-		{ value }: BlockLogicValues<typeof config, "input">,
-	): BlockLogicResults<typeof config> {
+		inputs: AllInputKeysToObject<typeof config.input>,
+	): AllOutputKeysToObject<typeof config.output> {
 		return {
-			result: value.pull(ctx),
+			result: {
+				type: inputs.valueType,
+				value: inputs.value,
+			},
 		};
 	}
 }

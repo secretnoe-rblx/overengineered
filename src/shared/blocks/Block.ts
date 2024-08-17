@@ -1,11 +1,11 @@
 import type { BlockMirrorBehaviour } from "shared/BlockDataRegistry";
-import type { BlockConfigBothDefinitions, GenericBlockLogicCtor } from "shared/blockLogic/BlockLogic";
+import type { BlockLogicFullBothDefinitions, GenericBlockLogicCtor } from "shared/blockLogic/BlockLogic4";
 import type { BlockCreation } from "shared/blocks/BlockCreation";
 import type { BuildingBlockIds } from "shared/blocks/blocks/BuildingBlocks";
 
 export type BlockCategoryPath = readonly string[];
 export type BlockLogicInfo = {
-	readonly config: BlockConfigBothDefinitions;
+	readonly config: BlockLogicFullBothDefinitions;
 	readonly ctor: GenericBlockLogicCtor;
 };
 

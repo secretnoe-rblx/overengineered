@@ -1,15 +1,22 @@
 import { RunService } from "@rbxts/services";
 import { ImpactController } from "shared/block/impact/ImpactController";
+import { BlockConfig } from "shared/blockLogic/BlockConfig";
 import { VehicleSeatBlockLogic } from "shared/blocks/blocks/VehicleSeatBlock";
 import { ContainerComponent } from "shared/component/ContainerComponent";
 import { GameDefinitions } from "shared/data/GameDefinitions";
 import { ObservableValue } from "shared/event/ObservableValue";
-import type { GenericBlockLogic } from "shared/blockLogic/BlockLogic";
+import type { GenericBlockLogic } from "shared/blockLogic/BlockLogic4";
+
+type BlockData = {
+	readonly block: PlacedBlockData;
+	readonly logic: GenericBlockLogic;
+};
 
 @injectable
 export class SharedMachine extends ContainerComponent<GenericBlockLogic> {
 	readonly occupiedByLocalPlayer = new ObservableValue(true);
 	private impactController?: ImpactController;
+	private readonly blocksMap = new Map<BlockUuid, BlockData>();
 
 	constructor(
 		@inject private readonly blockList: BlockList,
@@ -35,6 +42,7 @@ export class SharedMachine extends ContainerComponent<GenericBlockLogic> {
 
 			const logic = di.resolveForeignClass(logicctor, [block]);
 			this.add(logic);
+			this.blocksMap.set(block.uuid, { block, logic });
 		}
 
 		this.initialize(blocks);
@@ -42,7 +50,7 @@ export class SharedMachine extends ContainerComponent<GenericBlockLogic> {
 	}
 	protected initialize(blocks: readonly PlacedBlockData[]) {
 		this.initializeSpeedLimiter();
-		// this.initializeBlockConnections();
+		this.initializeBlockConnections();
 
 		const impact = this.createImpactControllerIfNeeded(blocks);
 		if (impact) {
@@ -104,6 +112,20 @@ export class SharedMachine extends ContainerComponent<GenericBlockLogic> {
 				),
 			);
 		});
+	}
+
+	protected initializeBlockConnections() {
+		const logicMap = this.blocksMap.mapToMap((k, v) => $tuple(k, v.logic));
+
+		for (const [, { block, logic }] of this.blocksMap) {
+			// if (!block.instance) continue;
+
+			const def = this.blockList.blocks[block.id]?.logic?.config;
+			if (!def) continue; // should we just continue or throw because this is strange?
+
+			const config = BlockConfig.addDefaults(block.config, def.input);
+			logic.initializeInputs(config, logicMap);
+		}
 	}
 	// initializeBlockConnections() {
 	// 	for (const inputLogic of this.getChildren()) {

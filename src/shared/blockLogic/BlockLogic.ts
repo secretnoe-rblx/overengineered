@@ -7,7 +7,6 @@ import { ArgsSignal } from "shared/event/Signal";
 import { RemoteEvents } from "shared/RemoteEvents";
 import { PartUtils } from "shared/utils/PartUtils";
 import type { IBlockLogicValue } from "shared/block/BlockLogicValue";
-import type { BlockL } from "shared/blockLogic/BlockLogic3";
 import type { ReadonlySubscribeObservableValue } from "shared/event/ObservableValue";
 
 type Keys = BlockConfigTypes2.TypeKeys;
@@ -185,7 +184,7 @@ export type GenericBlockLogicCtor<TDef extends BlockConfigBothDefinitions = Gene
 ) => GenericBlockLogic<TDef>;
 
 export type GenericBlockLogic<TDef extends BlockConfigBothDefinitions = GenericBlockConfigBothDefinitions> =
-	BlockL<TDef>;
+	BlockLogic<TDef>;
 
 export abstract class BlockLogic<
 	TDef extends BlockConfigBothDefinitions,

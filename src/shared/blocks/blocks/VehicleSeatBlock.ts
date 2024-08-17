@@ -1,8 +1,7 @@
 import { RunService, Players } from "@rbxts/services";
-import { BlockLogicActor } from "shared/blockLogic/BlockLogic3";
+import { InstanceBlockLogic } from "shared/blockLogic/BlockLogic4";
 import { BlockCreation } from "shared/blocks/BlockCreation";
-import type { BlockConfigBothDefinitions } from "shared/blockLogic/BlockLogic";
-import type { BlockTickState } from "shared/blockLogic/BlockLogic3";
+import type { BlockLogicFullBothDefinitions, InstanceBlockLogicArgs } from "shared/blockLogic/BlockLogic4";
 import type { SharedMachine } from "shared/blockLogic/SharedMachine";
 import type { BlockBuilder } from "shared/blocks/Block";
 
@@ -13,22 +12,23 @@ const config = {
 			displayName: "Occupied",
 			types: {
 				bool: {
+					type: "bool",
 					config: false,
 				},
 			},
 		},
 	},
-} satisfies BlockConfigBothDefinitions;
+} satisfies BlockLogicFullBothDefinitions;
 
 type VehicleSeatModel = BlockModel & {
 	readonly VehicleSeat: VehicleSeat;
 };
 
 @injectable
-export class VehicleSeatBlockLogic extends BlockLogicActor<typeof config, VehicleSeatModel> {
+export class VehicleSeatBlockLogic extends InstanceBlockLogic<typeof config, VehicleSeatModel> {
 	readonly vehicleSeat;
 
-	constructor(block: PlacedBlockData, @inject machine: SharedMachine) {
+	constructor(block: InstanceBlockLogicArgs, @inject machine: SharedMachine) {
 		super(config, block);
 
 		this.vehicleSeat = this.instance.VehicleSeat;
@@ -45,8 +45,6 @@ export class VehicleSeatBlockLogic extends BlockLogicActor<typeof config, Vehicl
 		this.event.subscribe(this.vehicleSeat.GetPropertyChangedSignal("Occupant"), update);
 		this.onEnable(update);
 	}
-
-	protected tick(ctx: BlockTickState): void {}
 }
 
 export const VehicleSeatBlock = {

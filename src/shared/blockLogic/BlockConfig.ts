@@ -1,22 +1,32 @@
 import { Objects } from "shared/fixes/objects";
-import type { BlockConfigType } from "shared/blockLogic/BlockLogic";
+import type { BlockLogicTypes3, BlockLogicFullInputDef } from "shared/blockLogic/BlockLogic4";
 
-type Keys = BlockConfigTypes2.TypeKeys;
-type Types = BlockConfigTypes2.Types;
+type Primitives = BlockLogicTypes3.Primitives;
+type PrimitiveKeys = keyof Primitives;
 
-export type BlockConfigPart<TKey extends Keys> = {
+type AllTypes = BlockLogicTypes3.Types;
+type AllKeys = keyof AllTypes;
+
+export type BlockConfigTypesByPrimitive<TKeys extends PrimitiveKeys> = {
+	readonly [k in PrimitiveKeys]: Extract<AllTypes[AllKeys], { readonly default: AllTypes[k]["default"] }>["type"];
+}[TKeys];
+export type BlockConfigPrimitiveByType<TKeys extends AllKeys> = {
+	readonly [k in AllKeys]: Extract<AllTypes[PrimitiveKeys], { readonly default: AllTypes[k]["default"] }>["type"];
+}[TKeys];
+
+export type BlockConfigPart<TKey extends PrimitiveKeys> = {
 	readonly type: TKey;
-	readonly config: Types[TKey]["config"];
+	readonly config: AllTypes[BlockConfigTypesByPrimitive<TKey>]["config"];
 };
 
-type GenericConfig = BlockConfigPart<Keys>;
+type GenericConfig = BlockConfigPart<PrimitiveKeys>;
 export type PlacedBlockConfig = {
-	readonly [k in string]: { [k in Keys]: BlockConfigPart<k> }[Keys];
+	readonly [k in string]: { [k in PrimitiveKeys]: BlockConfigPart<k> }[PrimitiveKeys];
 };
 
 export namespace BlockConfig {
 	type Def = {
-		readonly [k in string]: BlockConfigType;
+		readonly [k in string]: BlockLogicFullInputDef;
 	};
 
 	export function addDefaults<TDef extends Def>(

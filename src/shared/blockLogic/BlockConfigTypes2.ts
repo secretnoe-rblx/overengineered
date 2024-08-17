@@ -108,13 +108,6 @@ declare global {
 
 		//
 
-		export type Definitions = ConfigTypesToDefinition<keyof Types, Types>;
-		export type Definition = ConfigTypeToDefinition<Types[keyof Types]>;
-		export type BothDefinitions = {
-			readonly input: Definitions;
-			readonly output: Definitions;
-		};
-
 		export interface Types {
 			readonly unset: Unset;
 			readonly wire: WireConnection;

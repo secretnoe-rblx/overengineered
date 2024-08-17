@@ -1,16 +1,11 @@
-import { ColorChooser } from "client/gui/ColorChooser";
 import { Colors } from "client/gui/Colors";
 import { Control } from "client/gui/Control";
-import { ButtonControl } from "client/gui/controls/Button";
-import { ByteEditor } from "client/gui/controls/ByteEditorControl";
 import { CheckBoxControl } from "client/gui/controls/CheckBoxControl";
 import { DropdownList } from "client/gui/controls/DropdownList";
 import { KeyOrStringChooserControl } from "client/gui/controls/KeyOrStringChooserControl";
 import { NumberTextBoxControl } from "client/gui/controls/NumberTextBoxControl";
 import { SliderControl } from "client/gui/controls/SliderControl";
-import { TextBoxControl } from "client/gui/controls/TextBoxControl";
 import { Gui } from "client/gui/Gui";
-import { MemoryEditorPopup } from "client/gui/popup/MemoryEditorPopup";
 import { BlockWireManager } from "shared/blockLogic/BlockWireManager";
 import { ComponentChild } from "shared/component/ComponentChild";
 import { ObservableValue } from "shared/event/ObservableValue";
@@ -23,26 +18,41 @@ import type { DropdownListDefinition } from "client/gui/controls/DropdownList";
 import type { KeyOrStringChooserControlDefinition } from "client/gui/controls/KeyOrStringChooserControl";
 import type { NumberTextBoxControlDefinition } from "client/gui/controls/NumberTextBoxControl";
 import type { TextBoxControlDefinition } from "client/gui/controls/TextBoxControl";
-import type { BlockConfigPart } from "shared/blockLogic/BlockConfig";
+import type {
+	BlockConfigPart,
+	BlockConfigPrimitiveByType,
+	BlockConfigTypesByPrimitive,
+} from "shared/blockLogic/BlockConfig";
+import type { BlockLogicDefinitionTypes, BlockLogicTypes3 } from "shared/blockLogic/BlockLogic4";
 
-type Keys = BlockConfigTypes2.TypeKeys;
-type Types = BlockConfigTypes2.Types;
-/** {@link BlockConfigTypes2.Types} without the `default` and `config` properties */
-type MiniTypes = { readonly [k in Keys]: Omit<Types[k], "default" | "config"> };
+type Primitives = BlockLogicTypes3.Primitives;
+type PrimitiveKeys = keyof Primitives;
+type NonPrimitives = BlockLogicTypes3.NonPrimitives;
+type NonPrimitiveKeys = keyof NonPrimitives;
+type AllTypes = BlockLogicTypes3.Types;
+type AllKeys = keyof AllTypes;
+
+/** {@link BlockConfigTypes3.Types} without the `default` and `config` properties */
+type AllMiniTypes = { readonly [k in AllKeys]: Omit<AllTypes[k], "default" | "config" | "type"> };
 
 type OfBlocks<T> = { readonly [k in BlockUuid]: T };
 
 export type VisualBlockConfigDefinition = {
 	readonly displayName: string;
-	readonly types: { readonly [k in Keys]?: MiniTypes[k] };
+	readonly types: Partial<BlockLogicDefinitionTypes<PrimitiveKeys>>;
 	readonly configHidden?: boolean;
 };
-export type VisualBlockConfigDefinitions = { readonly [k in string]: VisualBlockConfigDefinition };
+export type VisualBlockConfigDefinitions = {
+	readonly [k in string]: VisualBlockConfigDefinition;
+};
 
-type ConfigPart<TKey extends Keys> = Types[TKey]["config"];
-type ConfigParts<TKey extends Keys> = OfBlocks<ConfigPart<TKey>>;
+type ConfigPart<TKey extends AllKeys> = AllTypes[TKey]["config"];
+type ConfigParts<TKey extends AllKeys> = OfBlocks<ConfigPart<TKey>>;
 
-type TypedConfigPart = BlockConfigPart<Keys>;
+type _ConfigPart<TKey extends PrimitiveKeys> = AllTypes[BlockConfigTypesByPrimitive<TKey>]["config"];
+type _ConfigParts<TKey extends PrimitiveKeys> = OfBlocks<ConfigPart<TKey>>;
+
+type TypedConfigPart = BlockConfigPart<PrimitiveKeys>;
 type BlocksConfigPart = OfBlocks<TypedConfigPart>;
 type BlocksConfig = OfBlocks<{ readonly [k in string]: TypedConfigPart }>;
 
@@ -124,7 +134,10 @@ namespace Controls {
 	};
 
 	namespace Controls {
-		const addSingleTypeWrapper = <T extends Base<GuiObject, Keys>>(parent: Base<GuiObject, Keys>, control: T) => {
+		const addSingleTypeWrapper = <T extends Base<GuiObject, AllKeys>>(
+			parent: Base<GuiObject, AllKeys>,
+			control: T,
+		) => {
 			const wrapper = new ConfigValueWrapper(template.Clone());
 			wrapper.dropdown.hide();
 			wrapper.content.set(control);
@@ -133,29 +146,28 @@ namespace Controls {
 			parent.add(wrapper);
 			return $tuple(wrapper, control);
 		};
-		const addSingleTypeWrapperAuto = <TKey extends Keys>(
-			parent: Base<GuiObject, Keys>,
-			key: TKey,
+		const addSingleTypeWrapperAuto = <TKey extends AllKeys>(
+			parent: Base<GuiObject, AllKeys>,
 			displayName: string,
-			def: MiniTypes[TKey],
+			def: AllMiniTypes[TKey] & { readonly type: TKey },
 			configs: ConfigParts<TKey>,
 		) => {
-			const ctor = controls[key];
-			if (!ctor) throw `No ctor for block config visual type ${key}`;
+			const ctor = controls[def.type];
+			if (!ctor) throw `No ctor for block config visual type ${def.type}`;
 
 			const control = new ctor(templates, def, configs);
 			control.instance.HeadingLabel.Text = displayName;
 
 			const [wrapper] = addSingleTypeWrapper(parent, control);
-			wrapper.typeColor.set(BlockWireManager.typeGroups[BlockWireManager.groups[key]].color);
+			wrapper.typeColor.set(BlockWireManager.typeGroups[BlockWireManager.groups[def.type]].color);
 
-			return $tuple(wrapper, control as Control as Control & Submittable<TKey>);
+			return $tuple(wrapper, control as Control as Control & Submittable<BlockConfigPrimitiveByType<TKey>>);
 		};
 
-		type Submittable<TKey extends Keys> = {
+		type Submittable<TKey extends PrimitiveKeys> = {
 			readonly submitted: ReadonlyArgsSignal<[value: ConfigParts<TKey>]>;
 		};
-		abstract class Base<T extends GuiObject, TKey extends Keys> extends Control<ConfigValueDefinition<T>> {
+		abstract class Base<T extends GuiObject, TKey extends AllKeys> extends Control<ConfigValueDefinition<T>> {
 			readonly submitted = new ArgsSignal<[value: ConfigParts<TKey>]>();
 			readonly control: T;
 
@@ -177,7 +189,7 @@ namespace Controls {
 		}
 
 		export class bool extends Base<CheckBoxControlDefinition, "bool"> {
-			constructor(templates: templates, definition: MiniTypes["bool"], config: ConfigParts<"bool">) {
+			constructor(templates: templates, definition: AllMiniTypes["bool"], config: ConfigParts<"bool">) {
 				super(templates.Checkbox());
 
 				const control = this.add(new CheckBoxControl(this.control));
@@ -187,7 +199,7 @@ namespace Controls {
 			}
 		}
 		export class _number extends Base<NumberTextBoxControlDefinition, "number"> {
-			constructor(templates: templates, definition: MiniTypes["number"], config: ConfigParts<"number">) {
+			constructor(templates: templates, definition: AllMiniTypes["number"], config: ConfigParts<"number">) {
 				super(templates.Number());
 
 				const control = this.add(new NumberTextBoxControl<true>(this.control));
@@ -196,20 +208,24 @@ namespace Controls {
 				control.submitted.Connect((v) => this.submitted.Fire((config = map(config, (_) => v))));
 			}
 		}
-		export class _string extends Base<TextBoxControlDefinition, "string"> {
-			constructor(templates: templates, definition: MiniTypes["string"], config: ConfigParts<"string">) {
-				super(templates.Text());
+		// export class _string extends Base<TextBoxControlDefinition, "string"> {
+		// 	constructor(
+		// 		templates: templates,
+		// 		definition: MiniTypes["string"],
+		// 		config: ConfigParts<"string">,
+		// 	) {
+		// 		super(templates.Text());
 
-				const control = this.add(new TextBoxControl(this.control));
-				control.text.set(sameOrUndefined(config) ?? "");
+		// 		const control = this.add(new TextBoxControl(this.control));
+		// 		control.text.set(sameOrUndefined(config) ?? "");
 
-				control.submitted.Connect((v) => this.submitted.Fire((config = map(config, (_) => v))));
-			}
-		}
+		// 		control.submitted.Connect((v) => this.submitted.Fire((config = map(config, (_) => v))));
+		// 	}
+		// }
 		export class clampedNumber extends Base<SliderControlDefinition, "clampedNumber"> {
 			constructor(
 				templates: templates,
-				definition: MiniTypes["clampedNumber"],
+				definition: AllMiniTypes["clampedNumber"],
 				config: ConfigParts<"clampedNumber">,
 			) {
 				super(templates.Slider());
@@ -225,25 +241,29 @@ namespace Controls {
 				control.submitted.Connect((v) => this.submitted.Fire((config = map(config, (_) => v))));
 			}
 		}
-		export class byte extends Base<ByteControlDefinition, "byte"> {
-			constructor(templates: templates, definition: MiniTypes["byte"], config: ConfigParts<"byte">) {
-				super(templates.Byte());
+		// export class byte extends Base<ByteControlDefinition, "byte"> {
+		// 	constructor(
+		// 		templates: templates,
+		// 		definition: MiniTypes["byte"],
+		// 		config: ConfigParts<"byte">,
+		// 	) {
+		// 		super(templates.Byte());
 
-				const control = this.add(
-					new ByteEditor(this.control, {
-						Buttons: this.gui.Control.Bottom.Buttons,
-						TextBox: this.gui.Control.Top.TextBox,
-					}),
-				);
-				control.value.set(sameOrUndefined(config) ?? 0);
+		// 		const control = this.add(
+		// 			new ByteEditor(this.control, {
+		// 				Buttons: this.gui.Control.Bottom.Buttons,
+		// 				TextBox: this.gui.Control.Top.TextBox,
+		// 			}),
+		// 		);
+		// 		control.value.set(sameOrUndefined(config) ?? 0);
 
-				control.submitted.Connect((v) => this.submitted.Fire((config = map(config, (_) => v))));
-			}
-		}
+		// 		control.submitted.Connect((v) => this.submitted.Fire((config = map(config, (_) => v))));
+		// 	}
+		// }
 		export class key extends Base<KeyOrStringChooserControlDefinition, "key"> {
 			readonly keyChooser;
 
-			constructor(templates: templates, definition: MiniTypes["key"], config: ConfigParts<"key">) {
+			constructor(templates: templates, definition: AllMiniTypes["key"], config: ConfigParts<"key">) {
 				super(templates.Key());
 
 				this.keyChooser = this.add(new KeyOrStringChooserControl<true>(this.control));
@@ -252,57 +272,64 @@ namespace Controls {
 				this.keyChooser.submitted.Connect((v) => this.submitted.Fire((config = map(config, (_) => v))));
 			}
 		}
-		export class bytearray extends Base<GuiButton, "bytearray"> {
-			constructor(templates: templates, definition: MiniTypes["bytearray"], config: ConfigParts<"bytearray">) {
-				super(templates.ByteArray());
+		// export class bytearray extends Base<GuiButton, "bytearray"> {
+		// 	constructor(
+		// 		templates: templates,
+		// 		definition: MiniTypes["bytearray"],
+		// 		config: ConfigParts<"bytearray">,
+		// 	) {
+		// 		super(templates.ByteArray());
 
-				const value = sameOrUndefined(config, (left, right) => {
-					if (left.size() !== right.size()) {
-						return false;
-					}
+		// 		const value = sameOrUndefined(config, (left, right) => {
+		// 			if (left.size() !== right.size()) {
+		// 				return false;
+		// 			}
 
-					for (let i = 0; i < left.size(); i++) {
-						if (left[i] !== right[i]) {
-							return false;
-						}
-					}
+		// 			for (let i = 0; i < left.size(); i++) {
+		// 				if (left[i] !== right[i]) {
+		// 					return false;
+		// 				}
+		// 			}
 
-					return true;
-				});
+		// 			return true;
+		// 		});
 
-				const control = this.add(
-					new ButtonControl(this.control, () => {
-						MemoryEditorPopup.showPopup(definition.lengthLimit, [...(value ?? [])], (v) =>
-							this.submitted.Fire((config = map(config, (_) => v))),
-						);
-					}),
-				);
+		// 		const control = this.add(
+		// 			new ButtonControl(this.control, () => {
+		// 				MemoryEditorPopup.showPopup(definition.lengthLimit, [...(value ?? [])], (v) =>
+		// 					this.submitted.Fire((config = map(config, (_) => v))),
+		// 				);
+		// 			}),
+		// 		);
 
-				if (!value) {
-					control.setInteractable(false);
-				}
-			}
-		}
-		export class color extends Base<ColorChooserDefinition, "color"> {
-			constructor(templates: templates, definition: MiniTypes["color"], config: ConfigParts<"color">) {
-				super(templates.Color());
+		// 		if (!value) {
+		// 			control.setInteractable(false);
+		// 		}
+		// 	}
+		// }
+		// export class color extends Base<ColorChooserDefinition, "color"> {
+		// 	constructor(
+		// 		templates: templates,
+		// 		definition: MiniTypes["color"],
+		// 		config: ConfigParts<"color">,
+		// 	) {
+		// 		super(templates.Color());
 
-				const control = this.add(new ColorChooser(this.control));
-				control.value.set(sameOrUndefined(config) ?? Colors.white);
+		// 		const control = this.add(new ColorChooser(this.control));
+		// 		control.value.set(sameOrUndefined(config) ?? Colors.white);
 
-				control.value.submitted.Connect((v) => this.submitted.Fire((config = map(config, (_) => v))));
-			}
-		}
+		// 		control.value.submitted.Connect((v) => this.submitted.Fire((config = map(config, (_) => v))));
+		// 	}
+		// }
 
 		export class keybool extends Base<GuiObject, "keybool"> {
-			constructor(templates: templates, definition: MiniTypes["keybool"], config: ConfigParts<"keybool">) {
+			constructor(templates: templates, definition: AllMiniTypes["keybool"], config: ConfigParts<"keybool">) {
 				super(templates.Multi());
 
 				const [, ckey] = addSingleTypeWrapperAuto(
 					this,
-					"key",
 					"Key",
-					{},
+					{ type: "key" },
 					map(config, (c) => c.key),
 				);
 				ckey.submitted.Connect((v) =>
@@ -312,9 +339,8 @@ namespace Controls {
 				if (definition.canBeSwitch) {
 					const [, cswitch] = addSingleTypeWrapperAuto(
 						this,
-						"bool",
 						"Switch",
-						{},
+						{ type: "bool" },
 						map(config, (c) => c.switch),
 					);
 					cswitch.submitted.Connect((v) =>
@@ -325,9 +351,8 @@ namespace Controls {
 				if (definition.canBeReversed) {
 					const [, creversed] = addSingleTypeWrapperAuto(
 						this,
-						"bool",
 						"Reversed",
-						{},
+						{ type: "bool" },
 						map(config, (c) => c.reversed),
 					);
 					creversed.submitted.Connect((v) =>
@@ -336,182 +361,190 @@ namespace Controls {
 				}
 			}
 		}
-		export class vector3 extends Base<GuiObject, "vector3"> {
-			constructor(templates: templates, definition: MiniTypes["vector3"], config: ConfigParts<"vector3">) {
-				super(templates.Multi());
+		// export class vector3 extends Base<GuiObject, "vector3"> {
+		// 	constructor(
+		// 		templates: templates,
+		// 		definition: MiniTypes["vector3"],
+		// 		config: ConfigParts<"vector3">,
+		// 	) {
+		// 		super(templates.Multi());
 
-				const [, cx] = addSingleTypeWrapperAuto(
-					this,
-					"number",
-					"X",
-					{},
-					map(config, (c) => c.X),
-				);
-				const [, cy] = addSingleTypeWrapperAuto(
-					this,
-					"number",
-					"Y",
-					{},
-					map(config, (c) => c.Y),
-				);
-				const [, cz] = addSingleTypeWrapperAuto(
-					this,
-					"number",
-					"Z",
-					{},
-					map(config, (c) => c.Z),
-				);
+		// 		const [, cx] = addSingleTypeWrapperAuto(
+		// 			this,
+		// 			"number",
+		// 			"X",
+		// 			{},
+		// 			map(config, (c) => c.X),
+		// 		);
+		// 		const [, cy] = addSingleTypeWrapperAuto(
+		// 			this,
+		// 			"number",
+		// 			"Y",
+		// 			{},
+		// 			map(config, (c) => c.Y),
+		// 		);
+		// 		const [, cz] = addSingleTypeWrapperAuto(
+		// 			this,
+		// 			"number",
+		// 			"Z",
+		// 			{},
+		// 			map(config, (c) => c.Z),
+		// 		);
 
-				const vec = (parts: OfBlocks<number>, axis: "X" | "Y" | "Z") => {
-					if (axis === "X") return map(config, (c, uuid) => new Vector3(parts[uuid], c.Y, c.Z));
-					if (axis === "Y") return map(config, (c, uuid) => new Vector3(c.X, parts[uuid], c.Z));
-					if (axis === "Z") return map(config, (c, uuid) => new Vector3(c.X, c.Y, parts[uuid]));
+		// 		const vec = (parts: OfBlocks<number>, axis: "X" | "Y" | "Z") => {
+		// 			if (axis === "X") return map(config, (c, uuid) => new Vector3(parts[uuid], c.Y, c.Z));
+		// 			if (axis === "Y") return map(config, (c, uuid) => new Vector3(c.X, parts[uuid], c.Z));
+		// 			if (axis === "Z") return map(config, (c, uuid) => new Vector3(c.X, c.Y, parts[uuid]));
 
-					throw "what";
-				};
+		// 			throw "what";
+		// 		};
 
-				cx.submitted.Connect((n) => this.submitted.Fire((config = vec(n, "X"))));
-				cy.submitted.Connect((n) => this.submitted.Fire((config = vec(n, "Y"))));
-				cz.submitted.Connect((n) => this.submitted.Fire((config = vec(n, "Z"))));
-			}
-		}
-		export class motorRotationSpeed extends Base<GuiObject, "motorRotationSpeed"> {
-			constructor(
-				templates: templates,
-				definition: MiniTypes["motorRotationSpeed"],
-				config: ConfigParts<"motorRotationSpeed">,
-			) {
-				super(templates.Multi());
+		// 		cx.submitted.Connect((n) => this.submitted.Fire((config = vec(n, "X"))));
+		// 		cy.submitted.Connect((n) => this.submitted.Fire((config = vec(n, "Y"))));
+		// 		cz.submitted.Connect((n) => this.submitted.Fire((config = vec(n, "Z"))));
+		// 	}
+		// }
+		// export class motorRotationSpeed extends Base<GuiObject, "motorRotationSpeed"> {
+		// 	constructor(
+		// 		templates: templates,
+		// 		definition: MiniTypes["motorRotationSpeed"],
+		// 		config: ConfigParts<"motorRotationSpeed">,
+		// 	) {
+		// 		super(templates.Multi());
 
-				const mks = addMultiKeyControls(this, [
-					{ key: "add", displayName: "+", definition: {}, config: map(config, (c) => c.rotation.add) },
-					{ key: "sub", displayName: "-", definition: {}, config: map(config, (c) => c.rotation.sub) },
-				]);
-				const [, cMaxSpeed] = addSingleTypeWrapperAuto(
-					this,
-					"clampedNumber",
-					"Max speed",
-					{ min: 0, max: definition.maxSpeed, step: 0.01 },
-					map(config, (c) => c.speed),
-				);
-				const [, cSwitch] = addSingleTypeWrapperAuto(
-					this,
-					"bool",
-					"Switch mode",
-					{},
-					map(config, (c) => c.switchmode),
-				);
+		// 		const mks = addMultiKeyControls(this, [
+		// 			{ key: "add", displayName: "+", definition: {}, config: map(config, (c) => c.rotation.add) },
+		// 			{ key: "sub", displayName: "-", definition: {}, config: map(config, (c) => c.rotation.sub) },
+		// 		]);
+		// 		const [, cMaxSpeed] = addSingleTypeWrapperAuto(
+		// 			this,
+		// 			"clampedNumber",
+		// 			"Max speed",
+		// 			{ min: 0, max: definition.maxSpeed, step: 0.01 },
+		// 			map(config, (c) => c.speed),
+		// 		);
+		// 		const [, cSwitch] = addSingleTypeWrapperAuto(
+		// 			this,
+		// 			"bool",
+		// 			"Switch mode",
+		// 			{},
+		// 			map(config, (c) => c.switchmode),
+		// 		);
 
-				mks.submitted.Connect((v) =>
-					this.submitted.Fire((config = map(config, (c) => ({ ...c, rotation: { ...c.rotation, ...v } })))),
-				);
-				cMaxSpeed.submitted.Connect((v) =>
-					this.submitted.Fire((config = map(config, (c, uuid) => ({ ...c, speed: v[uuid] })))),
-				);
-				cSwitch.submitted.Connect((v) =>
-					this.submitted.Fire((config = map(config, (c, uuid) => ({ ...c, switchmode: v[uuid] })))),
-				);
-			}
-		}
-		export class servoMotorAngle extends Base<GuiObject, "servoMotorAngle"> {
-			constructor(
-				templates: templates,
-				definition: MiniTypes["servoMotorAngle"],
-				config: ConfigParts<"servoMotorAngle">,
-			) {
-				super(templates.Multi());
+		// 		mks.submitted.Connect((v) =>
+		// 			this.submitted.Fire((config = map(config, (c) => ({ ...c, rotation: { ...c.rotation, ...v } })))),
+		// 		);
+		// 		cMaxSpeed.submitted.Connect((v) =>
+		// 			this.submitted.Fire((config = map(config, (c, uuid) => ({ ...c, speed: v[uuid] })))),
+		// 		);
+		// 		cSwitch.submitted.Connect((v) =>
+		// 			this.submitted.Fire((config = map(config, (c, uuid) => ({ ...c, switchmode: v[uuid] })))),
+		// 		);
+		// 	}
+		// }
+		// export class servoMotorAngle extends Base<GuiObject, "servoMotorAngle"> {
+		// 	constructor(
+		// 		templates: templates,
+		// 		definition: MiniTypes["servoMotorAngle"],
+		// 		config: ConfigParts<"servoMotorAngle">,
+		// 	) {
+		// 		super(templates.Multi());
 
-				const mks = addMultiKeyControls(this, [
-					{ key: "add", displayName: "+", definition: {}, config: map(config, (c) => c.rotation.add) },
-					{ key: "sub", displayName: "-", definition: {}, config: map(config, (c) => c.rotation.sub) },
-				]);
-				const [, cAngle] = addSingleTypeWrapperAuto(
-					this,
-					"clampedNumber",
-					"Angle",
-					{ min: definition.minAngle, max: definition.maxAngle, step: 0.01 },
-					map(config, (c) => c.angle),
-				);
-				const [, cSwitch] = addSingleTypeWrapperAuto(
-					this,
-					"bool",
-					"Switch mode",
-					{},
-					map(config, (c) => c.switchmode),
-				);
+		// 		const mks = addMultiKeyControls(this, [
+		// 			{ key: "add", displayName: "+", definition: {}, config: map(config, (c) => c.rotation.add) },
+		// 			{ key: "sub", displayName: "-", definition: {}, config: map(config, (c) => c.rotation.sub) },
+		// 		]);
+		// 		const [, cAngle] = addSingleTypeWrapperAuto(
+		// 			this,
+		// 			"clampedNumber",
+		// 			"Angle",
+		// 			{ min: definition.minAngle, max: definition.maxAngle, step: 0.01 },
+		// 			map(config, (c) => c.angle),
+		// 		);
+		// 		const [, cSwitch] = addSingleTypeWrapperAuto(
+		// 			this,
+		// 			"bool",
+		// 			"Switch mode",
+		// 			{},
+		// 			map(config, (c) => c.switchmode),
+		// 		);
 
-				mks.submitted.Connect((v) =>
-					this.submitted.Fire((config = map(config, (c) => ({ ...c, rotation: { ...c.rotation, ...v } })))),
-				);
-				cAngle.submitted.Connect((v) =>
-					this.submitted.Fire((config = map(config, (c, uuid) => ({ ...c, angle: v[uuid] })))),
-				);
-				cSwitch.submitted.Connect((v) =>
-					this.submitted.Fire((config = map(config, (c, uuid) => ({ ...c, switchmode: v[uuid] })))),
-				);
-			}
-		}
-		export class thrust extends Base<GuiObject, "thrust"> {
-			constructor(templates: templates, definition: MiniTypes["thrust"], config: ConfigParts<"thrust">) {
-				super(templates.Multi());
+		// 		mks.submitted.Connect((v) =>
+		// 			this.submitted.Fire((config = map(config, (c) => ({ ...c, rotation: { ...c.rotation, ...v } })))),
+		// 		);
+		// 		cAngle.submitted.Connect((v) =>
+		// 			this.submitted.Fire((config = map(config, (c, uuid) => ({ ...c, angle: v[uuid] })))),
+		// 		);
+		// 		cSwitch.submitted.Connect((v) =>
+		// 			this.submitted.Fire((config = map(config, (c, uuid) => ({ ...c, switchmode: v[uuid] })))),
+		// 		);
+		// 	}
+		// }
+		// export class thrust extends Base<GuiObject, "thrust"> {
+		// 	constructor(
+		// 		templates: templates,
+		// 		definition: MiniTypes["thrust"],
+		// 		config: ConfigParts<"thrust">,
+		// 	) {
+		// 		super(templates.Multi());
 
-				const mks = addMultiKeyControls(this, [
-					{ key: "add", displayName: "+", definition: {}, config: map(config, (c) => c.thrust.add) },
-					{ key: "sub", displayName: "-", definition: {}, config: map(config, (c) => c.thrust.sub) },
-				]);
-				mks.submitted.Connect((v) =>
-					this.submitted.Fire((config = map(config, (c) => ({ ...c, thrust: { ...c.thrust, ...v } })))),
-				);
+		// 		const mks = addMultiKeyControls(this, [
+		// 			{ key: "add", displayName: "+", definition: {}, config: map(config, (c) => c.thrust.add) },
+		// 			{ key: "sub", displayName: "-", definition: {}, config: map(config, (c) => c.thrust.sub) },
+		// 		]);
+		// 		mks.submitted.Connect((v) =>
+		// 			this.submitted.Fire((config = map(config, (c) => ({ ...c, thrust: { ...c.thrust, ...v } })))),
+		// 		);
 
-				if (definition.canBeSwitch) {
-					const [, cSwitch] = addSingleTypeWrapperAuto(
-						this,
-						"bool",
-						"Switch mode",
-						{},
-						map(config, (c) => c.switchmode),
-					);
-					cSwitch.submitted.Connect((v) =>
-						this.submitted.Fire((config = map(config, (c, uuid) => ({ ...c, switchmode: v[uuid] })))),
-					);
-				}
-			}
-		}
-		export class controllableNumber extends Base<GuiObject, "controllableNumber"> {
-			constructor(
-				templates: templates,
-				definition: MiniTypes["controllableNumber"],
-				config: ConfigParts<"controllableNumber">,
-			) {
-				super(templates.Multi());
+		// 		if (definition.canBeSwitch) {
+		// 			const [, cSwitch] = addSingleTypeWrapperAuto(
+		// 				this,
+		// 				"bool",
+		// 				"Switch mode",
+		// 				{},
+		// 				map(config, (c) => c.switchmode),
+		// 			);
+		// 			cSwitch.submitted.Connect((v) =>
+		// 				this.submitted.Fire((config = map(config, (c, uuid) => ({ ...c, switchmode: v[uuid] })))),
+		// 			);
+		// 		}
+		// 	}
+		// }
+		// export class controllableNumber extends Base<GuiObject, "controllableNumber"> {
+		// 	constructor(
+		// 		templates: templates,
+		// 		definition: MiniTypes["controllableNumber"],
+		// 		config: ConfigParts<"controllableNumber">,
+		// 	) {
+		// 		super(templates.Multi());
 
-				const mks = addMultiKeyControls(this, [
-					{ key: "add", displayName: "+", definition: {}, config: map(config, (c) => c.control.add) },
-					{ key: "sub", displayName: "-", definition: {}, config: map(config, (c) => c.control.sub) },
-				]);
-				const [, cValue] = addSingleTypeWrapperAuto(
-					this,
-					"clampedNumber",
-					"Value",
-					definition,
-					map(config, (c) => c.value),
-				);
+		// 		const mks = addMultiKeyControls(this, [
+		// 			{ key: "add", displayName: "+", definition: {}, config: map(config, (c) => c.control.add) },
+		// 			{ key: "sub", displayName: "-", definition: {}, config: map(config, (c) => c.control.sub) },
+		// 		]);
+		// 		const [, cValue] = addSingleTypeWrapperAuto(
+		// 			this,
+		// 			"clampedNumber",
+		// 			"Value",
+		// 			definition,
+		// 			map(config, (c) => c.value),
+		// 		);
 
-				mks.submitted.Connect((v) =>
-					this.submitted.Fire((config = map(config, (c) => ({ ...c, control: { ...c.control, ...v } })))),
-				);
-				cValue.submitted.Connect((v) =>
-					this.submitted.Fire((config = map(config, (c, uuid) => ({ ...c, value: v[uuid] })))),
-				);
-			}
-		}
+		// 		mks.submitted.Connect((v) =>
+		// 			this.submitted.Fire((config = map(config, (c) => ({ ...c, control: { ...c.control, ...v } })))),
+		// 		);
+		// 		cValue.submitted.Connect((v) =>
+		// 			this.submitted.Fire((config = map(config, (c, uuid) => ({ ...c, value: v[uuid] })))),
+		// 		);
+		// 	}
+		// }
 
 		function addMultiKeyControls<TKeys extends string>(
-			parent: Base<GuiObject, Keys>,
+			parent: Base<GuiObject, AllKeys>,
 			stuffs: readonly {
 				readonly key: TKeys;
 				readonly displayName: string;
-				readonly definition: MiniTypes["key"];
+				readonly definition: AllMiniTypes["key"];
 				readonly config: ConfigParts<"key">;
 			}[],
 		): { readonly submitted: ReadonlyArgsSignal<[config: { readonly [k in TKeys]?: string }]> } & {
@@ -526,7 +559,12 @@ namespace Controls {
 			const prevValues: { [k in TKeys]?: string } = {};
 
 			for (const { key, displayName, definition, config } of stuffs) {
-				const [wrapper, control] = addSingleTypeWrapperAuto(parent, "key", displayName, definition, config);
+				const [wrapper, control] = addSingleTypeWrapperAuto(
+					parent,
+					displayName,
+					{ type: "key", ...definition },
+					config,
+				);
 				const keycontrol = control as key;
 				ret[key] = { wrapper, control: keycontrol };
 
@@ -566,25 +604,25 @@ namespace Controls {
 		}
 
 		export type controls = {
-			readonly [k in Keys]?: new (
+			readonly [k in AllKeys]?: new (
 				templates: templates,
-				definition: MiniTypes[k],
+				definition: AllMiniTypes[k],
 				config: ConfigParts<k>,
 			) => Base<GuiObject, k>;
 		};
 		export type genericControls = {
-			readonly [k in Keys]?: new (
+			readonly [k in AllKeys]?: new (
 				templates: templates,
-				definition: MiniTypes[Keys],
-				config: ConfigParts<Keys>,
-			) => Base<GuiObject, Keys>;
+				definition: AllMiniTypes[AllKeys],
+				config: ConfigParts<AllKeys>,
+			) => Base<GuiObject, AllKeys>;
 		};
 	}
 
 	export const controls = {
 		...Controls,
 		number: Controls._number,
-		string: Controls._string,
+		// string: Controls._string,
 	} satisfies Controls.controls as Controls.genericControls;
 }
 
@@ -598,7 +636,7 @@ type ConfigValueWrapperDefinition = GuiObject & {
 	readonly Content: GuiObject & Controls.Templates & { readonly Dropdown: DropdownListDefinition };
 };
 type m = "[multi]";
-type mk = Keys | m;
+type mk = PrimitiveKeys | m;
 
 class ConfigValueWrapper extends Control<ConfigValueWrapperDefinition> {
 	readonly typeColor = new ObservableValue<Color3>(Colors.white);
@@ -679,12 +717,12 @@ class ConfigAutoValueWrapper extends Control<ConfigValueWrapperDefinition> {
 				let cfgcontrol: InstanceType<typeof ctor> | undefined = undefined;
 
 				if (selectedType === "unset") {
-					cfgcontrol = new ctor(Controls.templates, { config: undefined as never }, {});
+					cfgcontrol = new ctor(Controls.templates, { type: "unset" }, {});
 				} else if (selectedType === "wire") {
 					cfgcontrol = new ctor(
 						Controls.templates,
-						map(configs, (c) => c.config),
-						{},
+						{ type: "wire" },
+						map(configs, (c) => c.config as BlockLogicTypes3.WireValue),
 					);
 				} else {
 					const def = definition.types[selectedType];

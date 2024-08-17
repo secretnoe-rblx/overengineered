@@ -4,3 +4,5 @@ type ReplaceWith<T, TProps extends { readonly [k in keyof T | string]?: unknown 
 >;
 
 type MakePartial<T, TKey extends keyof T> = Reconstruct<Omit<T, TKey> & { [k in TKey]?: T[k] }>;
+
+type OmitOverUnion<T, K extends keyof T> = T extends T ? Omit<T, K> : never;
