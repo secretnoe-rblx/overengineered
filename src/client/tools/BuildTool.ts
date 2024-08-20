@@ -30,13 +30,12 @@ import { Element } from "shared/Element";
 import { ObservableValue } from "shared/event/ObservableValue";
 import { AABB } from "shared/fixes/AABB";
 import { BB } from "shared/fixes/BB";
+import { MathUtils } from "shared/fixes/MathUtils";
 import { Marketplace } from "shared/Marketplace";
 import { VectorUtils } from "shared/utils/VectorUtils";
 import type { BlockSelectionControlDefinition } from "client/gui/buildmode/BlockSelection";
 import type { MaterialColorEditControlDefinition } from "client/gui/buildmode/MaterialColorEditControl";
 import type { MirrorEditorControlDefinition } from "client/gui/buildmode/MirrorEditorControl";
-import type { DropdownDefinition } from "client/gui/controls/Dropdown";
-import type { ToggleControlDefinition } from "client/gui/controls/ToggleControl";
 import type { InputTooltips } from "client/gui/static/TooltipsControl";
 import type { BuildingMode } from "client/modes/build/BuildingMode";
 import type { SharedPlot } from "shared/building/SharedPlot";
@@ -63,6 +62,7 @@ const getMouseTargetBlockPositionV2 = (
 	block: ModelOnlyBlock,
 	rotation: CFrame,
 	gridEnabled: boolean,
+	step: number,
 	info?: [target: BasePart, hit: CFrame, surface: Enum.NormalId],
 ): Vector3 | undefined => {
 	const constrainPositionToGrid = (selectedBlock: ModelOnlyBlock, normal: Vector3, pos: Vector3) => {
@@ -70,7 +70,7 @@ const getMouseTargetBlockPositionV2 = (
 			const offset = (size % 2) / 2;
 
 			coord -= offset;
-			const pos = math.round(coord);
+			const pos = MathUtils.round(coord, step);
 			return pos + offset;
 		};
 
@@ -290,14 +290,6 @@ namespace Scene {
 			readonly Content: MirrorEditorControlDefinition;
 		};
 		readonly Bottom: MaterialColorEditControlDefinition;
-		readonly Settings: DropdownDefinition & {
-			readonly Content: {
-				readonly ToggleTemplate: GuiObject & {
-					readonly HeadingLabel: GuiLabel;
-					readonly Control: ToggleControlDefinition;
-				};
-			};
-		};
 		readonly Info: BlockInfoDefinition;
 		readonly Inventory: BlockSelectionControlDefinition;
 		readonly Touch: TouchButtonsDefinition;
@@ -542,6 +534,7 @@ namespace SinglePlaceController {
 					selectedBlock,
 					this.blockRotation.get(),
 					this.state.mode.gridEnabled.get(),
+					this.state.mode.moveGrid.get(),
 				);
 			}
 			if (!mainPosition) return;
@@ -705,6 +698,7 @@ namespace SinglePlaceController {
 				selectedBlock,
 				this.blockRotation.get(),
 				this.state.mode.gridEnabled.get(),
+				this.state.mode.moveGrid.get(),
 				this.prevTarget,
 			);
 			super.updateBlockPosition(mainPosition);
@@ -1158,6 +1152,7 @@ namespace MultiPlaceController {
 			selectedBlock,
 			state.blockRotation.get(),
 			state.mode.gridEnabled.get(),
+			state.mode.moveGrid.get(),
 			prevTarget,
 		);
 		if (!pressPosition) return;

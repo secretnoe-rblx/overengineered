@@ -11,9 +11,14 @@ export class RadarSectionBlockLogic extends ConfigurableBlockLogic<typeof blockC
 	private getDistanceTo = (part: BasePart) => {
 		if (this.instance === undefined) return Vector3.zero;
 		if (part === undefined) return Vector3.zero;
-		return VectorUtils.apply(this.instance.GetPivot().ToObjectSpace(part.GetPivot()).Position, (v) =>
+		return VectorUtils.apply(part.GetPivot().Position.sub(this.instance.GetPivot().Position), (v) =>
 			RobloxUnit.Studs_To_Meters(v),
 		);
+		//bring back relative positioning if needed vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
+		/* 
+		return VectorUtils.apply(this.instance.GetPivot().ToObjectSpace(part.GetPivot()).Position, (v) =>
+			RobloxUnit.Studs_To_Meters(v),
+		);*/
 	};
 
 	private findClosestPart() {
@@ -82,9 +87,6 @@ export class RadarSectionBlockLogic extends ConfigurableBlockLogic<typeof blockC
 		});
 
 		this.event.subscribe(view.Touched, (part) => {
-			if (part.IsA("Terrain")) return;
-
-			if (part.CollisionGroup !== "Blocks") return;
 			if (part.HasTag("RADARVIEW")) return;
 			if (this.getDistanceTo(part).Magnitude < this.input.minimalDistance.get()) return;
 			this.allTouchedBlocks.add(part);
@@ -93,8 +95,6 @@ export class RadarSectionBlockLogic extends ConfigurableBlockLogic<typeof blockC
 		});
 
 		this.event.subscribe(view.TouchEnded, (part) => {
-			if (part.IsA("Terrain")) return;
-
 			this.allTouchedBlocks.delete(part);
 			this.triggerDistanceListUpdate = part === this.closestDetectedPart;
 		});

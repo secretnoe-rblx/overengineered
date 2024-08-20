@@ -1,6 +1,7 @@
 import { blockConfigRegistry } from "shared/block/config/BlockConfigRegistry";
 import { ConfigurableBlockLogic } from "shared/block/ConfigurableBlockLogic";
 import { RemoteEvents } from "shared/RemoteEvents";
+import { RobloxUnit } from "shared/RobloxUnit";
 
 type ServoMotor = BlockModel & {
 	readonly Base: Part & {
@@ -42,6 +43,13 @@ export class ServoMotorBlockLogic extends ConfigurableBlockLogic<
 			this.input.angle,
 			(targetAngle) => {
 				this.hingeConstraint.TargetAngle = targetAngle;
+			},
+			true,
+		);
+		this.event.subscribeObservable(
+			this.input.max_torque,
+			(value) => {
+				this.hingeConstraint.ServoMaxTorque = RobloxUnit.RowtonStuds_To_NewtonMeters(value * 1_000_000);
 			},
 			true,
 		);

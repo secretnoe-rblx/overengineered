@@ -1,6 +1,7 @@
 import { blockConfigRegistry } from "shared/block/config/BlockConfigRegistry";
 import { ConfigurableBlockLogic } from "shared/block/ConfigurableBlockLogic";
 import { RemoteEvents } from "shared/RemoteEvents";
+import { RobloxUnit } from "shared/RobloxUnit";
 
 type MotorBlock = BlockModel & {
 	readonly Base: Part & {
@@ -15,10 +16,19 @@ export class MotorBlockLogic extends ConfigurableBlockLogic<typeof blockConfigRe
 		super(block, blockConfigRegistry.motorblock);
 
 		this.hingeConstraint = this.instance.Base.HingeConstraint;
+
 		this.event.subscribeObservable(
 			this.input.rotationSpeed,
 			(speed) => {
 				this.hingeConstraint.AngularVelocity = speed;
+			},
+			true,
+		);
+
+		this.event.subscribeObservable(
+			this.input.max_torque,
+			(value) => {
+				this.hingeConstraint.MotorMaxTorque = RobloxUnit.RowtonStuds_To_NewtonMeters(value * 1_000_000);
 			},
 			true,
 		);

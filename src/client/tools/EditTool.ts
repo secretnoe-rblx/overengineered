@@ -322,13 +322,14 @@ const reGenerateUuids = (
 namespace Controllers {
 	@injectable
 	export class Move extends ClientComponent {
-		readonly step = new NumberObservableValue<number>(1, 1, 256, 1);
+		readonly step = new NumberObservableValue<number>(0.2, 0.01, 256, 0.01);
 		private readonly editor;
 
 		constructor(tool: EditTool, plot: SharedPlot, blocks: readonly BlockModel[], @inject di: DIContainer) {
 			super();
 
 			this.editor = this.parent(BlockMover.create(tool.mode, plot, blocks, di));
+			this.event.subscribeObservable(tool.mode.moveGrid, (grid) => this.step.set(grid), true);
 			this.step.autoSet(this.editor.step);
 
 			this.onDestroy(() => {
@@ -393,6 +394,7 @@ namespace Controllers {
 			});
 
 			this.editor = this.parent(BlockMover.create(tool.mode, plot, this.blocks, di));
+			this.event.subscribeObservable(tool.mode.moveGrid, (grid) => this.step.set(grid), true);
 			this.step.autoSet(this.editor.step);
 
 			this.onDestroy(() => this.submit(true));
@@ -446,13 +448,14 @@ namespace Controllers {
 	}
 	@injectable
 	export class Rotate extends ClientComponent {
-		readonly step = new NumberObservableValue<number>(0, 90, 180, 90);
+		readonly step = new NumberObservableValue<number>(90, 0, 360, 0.01);
 		private readonly editor;
 
 		constructor(tool: EditTool, plot: SharedPlot, blocks: readonly BlockModel[], @inject di: DIContainer) {
 			super();
 
 			this.editor = this.parent(BlockRotater.create(tool.mode, plot, blocks, di));
+			this.event.subscribeObservable(tool.mode.rotateGrid, (grid) => this.step.set(grid), true);
 			this.step.autoSet(this.editor.step);
 
 			this.onDestroy(() => {
