@@ -95,7 +95,7 @@ export namespace BlockWireManager {
 		const markers = new Map<string, Markers.Marker>();
 
 		for (const block of plot.getBlockDatas()) {
-			const configDef = blockList.blocks[block.id]?.logic?.config;
+			const configDef = blockList.blocks[block.id]?.logic?.definition;
 			if (!configDef) continue;
 
 			for (const markerType of ["output", "input"] as const) {

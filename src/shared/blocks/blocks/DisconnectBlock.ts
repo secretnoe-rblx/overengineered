@@ -4,7 +4,7 @@ import { AutoC2SRemoteEvent } from "shared/event/C2SRemoteEvent";
 import type { BlockLogicFullBothDefinitions, InstanceBlockLogicArgs } from "shared/blockLogic/BlockLogic4";
 import type { BlockBuilder } from "shared/blocks/Block";
 
-const config = {
+const definition = {
 	input: {
 		disconnect: {
 			displayName: "Disconnect",
@@ -26,13 +26,13 @@ const config = {
 } satisfies BlockLogicFullBothDefinitions;
 
 export type { DisconnectBlockLogic };
-class DisconnectBlockLogic extends InstanceBlockLogic4<typeof config> {
+class DisconnectBlockLogic extends InstanceBlockLogic4<typeof definition> {
 	static readonly events = {
 		disconnect: new AutoC2SRemoteEvent<{ readonly block: BlockModel }>("b_disconnectblock_disconnect"),
 	} as const;
 
 	constructor(block: InstanceBlockLogicArgs) {
-		super(config, block);
+		super(definition, block);
 
 		this.on((ctx, { disconnect }) => {
 			if (disconnect) {
@@ -49,5 +49,5 @@ export const DisconnectBlock = {
 	displayName: "Disconnector",
 	description: "Detaches connected parts",
 
-	logic: { config, ctor: DisconnectBlockLogic },
+	logic: { definition, ctor: DisconnectBlockLogic },
 } as const satisfies BlockBuilder;

@@ -120,7 +120,7 @@ export class SharedMachine extends ContainerComponent<GenericBlockLogic> {
 		for (const [, { block, logic }] of this.blocksMap) {
 			// if (!block.instance) continue;
 
-			const def = this.blockList.blocks[block.id]?.logic?.config;
+			const def = this.blockList.blocks[block.id]?.logic?.definition;
 			if (!def) continue; // should we just continue or throw because this is strange?
 
 			const config = BlockConfig.addDefaults(block.config, def.input);

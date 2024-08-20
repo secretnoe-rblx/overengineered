@@ -5,7 +5,7 @@ import type { BlockLogicFullBothDefinitions, InstanceBlockLogicArgs } from "shar
 import type { SharedMachine } from "shared/blockLogic/SharedMachine";
 import type { BlockBuilder } from "shared/blocks/Block";
 
-const config = {
+const definition = {
 	input: {},
 	output: {
 		occupied: {
@@ -25,11 +25,11 @@ type VehicleSeatModel = BlockModel & {
 };
 
 @injectable
-export class VehicleSeatBlockLogic extends InstanceBlockLogic<typeof config, VehicleSeatModel> {
+export class VehicleSeatBlockLogic extends InstanceBlockLogic<typeof definition, VehicleSeatModel> {
 	readonly vehicleSeat;
 
 	constructor(block: InstanceBlockLogicArgs, @inject machine: SharedMachine) {
-		super(config, block);
+		super(definition, block);
 
 		this.vehicleSeat = this.instance.VehicleSeat;
 
@@ -53,5 +53,5 @@ export const VehicleSeatBlock = {
 	displayName: "Driver seat",
 	description: "A seat for your vehicle. Allows you to control your contraption",
 
-	logic: { config, ctor: VehicleSeatBlockLogic },
+	logic: { definition, ctor: VehicleSeatBlockLogic },
 } as const satisfies BlockBuilder;

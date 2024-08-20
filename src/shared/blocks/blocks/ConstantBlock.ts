@@ -9,7 +9,7 @@ import type {
 } from "shared/blockLogic/BlockLogic4";
 import type { BlockBuilder } from "shared/blocks/Block";
 
-const config = {
+const definition = {
 	input: {
 		value: BlockConfigDefinitions.any("Value", "0"),
 	},
@@ -19,14 +19,14 @@ const config = {
 } satisfies BlockLogicFullBothDefinitions;
 
 export type { ConstantBlockLogic };
-class ConstantBlockLogic extends CalculatableBlockLogic<typeof config> {
+class ConstantBlockLogic extends CalculatableBlockLogic<typeof definition> {
 	constructor(block: BlockLogicArgs) {
-		super(config, block);
+		super(definition, block);
 	}
 
 	protected override calculate(
-		inputs: AllInputKeysToObject<typeof config.input>,
-	): AllOutputKeysToObject<typeof config.output> {
+		inputs: AllInputKeysToObject<typeof definition.input>,
+	): AllOutputKeysToObject<typeof definition.output> {
 		return {
 			result: {
 				type: inputs.valueType,
@@ -42,7 +42,7 @@ export const ConstantBlock = {
 	displayName: "Constant",
 	description: "Returns the value you've set",
 
-	logic: { config, ctor: ConstantBlockLogic },
+	logic: { definition, ctor: ConstantBlockLogic },
 
 	modelSource: {
 		model: BlockCreation.Model.fAutoCreated("ConstLogicBlockPrefab", "CONST"),

@@ -95,7 +95,7 @@ namespace Scene {
 			const block = this.blockList.blocks[BlockManager.manager.id.get(blockmodel)!];
 			if (!block) return;
 
-			const onedef = block.logic?.config.input;
+			const onedef = block.logic?.definition.input;
 			if (!onedef) return;
 
 			this.gui.Visible = Objects.size(onedef) !== 0;
@@ -113,7 +113,7 @@ namespace Scene {
 				const block = this.blockList.blocks[id];
 				if (!block) return undefined!;
 
-				const defs = block.logic?.config.input;
+				const defs = block.logic?.definition.input;
 				if (!defs) return undefined!;
 
 				const config = BlockConfig.addDefaults(

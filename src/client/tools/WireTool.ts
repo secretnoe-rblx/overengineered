@@ -706,13 +706,6 @@ export class WireTool extends ToolBase {
 			ih.onKeyDown("F", () => Visual.hideConnectedMarkers(this.markers.getAll()));
 			ih.onKeyUp("F", () => Visual.showConnectedMarkers(this.markers.getAll()));
 		});
-
-		this.event.subscribe(
-			ClientBuilding.logicDisconnectOperation.executed,
-			({ plot, inputBlock, inputConnection }) => {
-				//
-			},
-		);
 	}
 
 	stopDragging() {

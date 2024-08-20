@@ -5,7 +5,7 @@ import type { BuildingBlockIds } from "shared/blocks/blocks/BuildingBlocks";
 
 export type BlockCategoryPath = readonly string[];
 export type BlockLogicInfo = {
-	readonly config: BlockLogicFullBothDefinitions;
+	readonly definition: BlockLogicFullBothDefinitions;
 	readonly ctor: GenericBlockLogicCtor;
 };
 
