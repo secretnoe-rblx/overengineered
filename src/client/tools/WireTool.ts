@@ -11,7 +11,6 @@ import { LogControl } from "client/gui/static/LogControl";
 import { ActionController } from "client/modes/build/ActionController";
 import { ClientBuilding } from "client/modes/build/ClientBuilding";
 import { ToolBase } from "client/tools/ToolBase";
-import { blockConfigRegistry } from "shared/block/config/BlockConfigRegistry";
 import { BlockWireManager } from "shared/blockLogic/BlockWireManager";
 import { Component } from "shared/component/Component";
 import { ComponentChild } from "shared/component/ComponentChild";
@@ -21,7 +20,6 @@ import { ObservableValue } from "shared/event/ObservableValue";
 import { ReplicatedAssets } from "shared/ReplicatedAssets";
 import type { InputTooltips } from "client/gui/static/TooltipsControl";
 import type { BuildingMode } from "client/modes/build/BuildingMode";
-import type { BlockConfigRegistryNonGeneric } from "shared/block/config/BlockConfigRegistry";
 import type { SharedPlot } from "shared/building/SharedPlot";
 import type { ReadonlyObservableValue } from "shared/event/ObservableValue";
 
@@ -724,9 +722,10 @@ export class WireTool extends ToolBase {
 			const size = markers.size();
 
 			for (const marker of markers) {
-				const configDef = (blockConfigRegistry as BlockConfigRegistryNonGeneric)[
-					(marker.data.blockData as PlacedBlockData).id
-				];
+				const block = this.blockList.blocks[(marker.data.blockData as PlacedBlockData).id];
+				if (!block) continue;
+
+				const configDef = block.logic?.definition;
 				if (!configDef) continue;
 
 				if ((configDef.input[marker.data.id] ?? configDef.output[marker.data.id]).connectorHidden) {

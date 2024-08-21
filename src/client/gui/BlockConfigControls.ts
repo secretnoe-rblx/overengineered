@@ -23,7 +23,7 @@ import type {
 	BlockConfigPrimitiveByType,
 	BlockConfigTypesByPrimitive,
 } from "shared/blockLogic/BlockConfig";
-import type { BlockLogicDefinitionTypes, BlockLogicTypes3 } from "shared/blockLogic/BlockLogic4";
+import type { BlockLogicWithConfigDefinitionTypes, BlockLogicTypes3 } from "shared/blockLogic/BlockLogic4";
 
 type Primitives = BlockLogicTypes3.Primitives;
 type PrimitiveKeys = keyof Primitives;
@@ -33,13 +33,14 @@ type AllTypes = BlockLogicTypes3.Types;
 type AllKeys = keyof AllTypes;
 
 /** {@link BlockConfigTypes3.Types} without the `default` and `config` properties */
-type AllMiniTypes = { readonly [k in AllKeys]: Omit<AllTypes[k], "default" | "config" | "type"> };
+type AllMiniTypes = { readonly [k in AllKeys]: Omit<AllTypes[k], "default" | "type"> };
+type AllWithoutDefaultTypes = { readonly [k in AllKeys]: Omit<AllTypes[k], "default"> };
 
 type OfBlocks<T> = { readonly [k in BlockUuid]: T };
 
 export type VisualBlockConfigDefinition = {
 	readonly displayName: string;
-	readonly types: Partial<BlockLogicDefinitionTypes<PrimitiveKeys>>;
+	readonly types: Partial<BlockLogicWithConfigDefinitionTypes<PrimitiveKeys>>;
 	readonly configHidden?: boolean;
 };
 export type VisualBlockConfigDefinitions = {
@@ -155,7 +156,7 @@ namespace Controls {
 			const ctor = controls[def.type];
 			if (!ctor) throw `No ctor for block config visual type ${def.type}`;
 
-			const control = new ctor(templates, def, configs);
+			const control = new ctor(templates, def as AllWithoutDefaultTypes[AllKeys], configs);
 			control.instance.HeadingLabel.Text = displayName;
 
 			const [wrapper] = addSingleTypeWrapper(parent, control);
@@ -329,7 +330,7 @@ namespace Controls {
 				const [, ckey] = addSingleTypeWrapperAuto(
 					this,
 					"Key",
-					{ type: "key" },
+					{ type: "key", config: definition.config.key },
 					map(config, (c) => c.key),
 				);
 				ckey.submitted.Connect((v) =>
@@ -340,7 +341,7 @@ namespace Controls {
 					const [, cswitch] = addSingleTypeWrapperAuto(
 						this,
 						"Switch",
-						{ type: "bool" },
+						{ type: "bool", config: definition.config.switch },
 						map(config, (c) => c.switch),
 					);
 					cswitch.submitted.Connect((v) =>
@@ -352,7 +353,7 @@ namespace Controls {
 					const [, creversed] = addSingleTypeWrapperAuto(
 						this,
 						"Reversed",
-						{ type: "bool" },
+						{ type: "bool", config: definition.config.reversed },
 						map(config, (c) => c.reversed),
 					);
 					creversed.submitted.Connect((v) =>
@@ -606,14 +607,14 @@ namespace Controls {
 		export type controls = {
 			readonly [k in AllKeys]?: new (
 				templates: templates,
-				definition: AllMiniTypes[k],
+				definition: AllWithoutDefaultTypes[k],
 				config: ConfigParts<k>,
 			) => Base<GuiObject, k>;
 		};
 		export type genericControls = {
 			readonly [k in AllKeys]?: new (
 				templates: templates,
-				definition: AllMiniTypes[AllKeys],
+				definition: AllWithoutDefaultTypes[AllKeys],
 				config: ConfigParts<AllKeys>,
 			) => Base<GuiObject, AllKeys>;
 		};
@@ -700,6 +701,21 @@ class ConfigAutoValueWrapper extends Control<ConfigValueWrapperDefinition> {
 			}
 		}
 
+		this.event.subscribe(control.dropdown.submitted, (selectedType) => {
+			if (selectedType === "[multi]" || selectedType === "unset" || selectedType === "wire") {
+				return;
+			}
+
+			configs = map(
+				configs,
+				(_): TypedConfigPart => ({
+					type: selectedType,
+					config: definition.types[selectedType]!.config,
+				}),
+			);
+			this._submitted.Fire(configs);
+		});
+
 		this.event.subscribeObservable(
 			selectedType,
 			(selectedType) => {
@@ -717,12 +733,16 @@ class ConfigAutoValueWrapper extends Control<ConfigValueWrapperDefinition> {
 				let cfgcontrol: InstanceType<typeof ctor> | undefined = undefined;
 
 				if (selectedType === "unset") {
-					cfgcontrol = new ctor(Controls.templates, { type: "unset" }, {});
+					cfgcontrol = new ctor(
+						Controls.templates,
+						{ type: "unset", config: {} as BlockLogicTypes3.UnsetValue },
+						{},
+					);
 				} else if (selectedType === "wire") {
 					cfgcontrol = new ctor(
 						Controls.templates,
-						{ type: "wire" },
-						map(configs, (c) => c.config as BlockLogicTypes3.WireValue),
+						{ type: "wire", config: undefined! },
+						map(configs, (c) => c.config),
 					);
 				} else {
 					const def = definition.types[selectedType];

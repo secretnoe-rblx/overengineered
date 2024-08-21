@@ -1,11 +1,12 @@
 import { NumberObservableValue } from "shared/event/NumberObservableValue";
+import { Keys } from "shared/fixes/Keys";
 import type { BlockConfigPrimitiveByType } from "shared/blockLogic/BlockConfig";
 import type {
 	BlockLogicTickContext,
 	BlockLogicTypes3,
-	BlockLogicDefinitionTypes,
 	BlockLogic4,
 	BlockLogicBothDefinitions,
+	BlockLogicNoConfigDefinitionTypes,
 } from "shared/blockLogic/BlockLogic4";
 
 type Primitives = BlockLogicTypes3.Primitives;
@@ -37,7 +38,7 @@ const Filters: { readonly [k in NonPrimitiveKeys]: Filter<k> } = {
 };
 const filterValue = <TType extends PrimitiveKeys>(
 	value: Primitives[TType]["default"],
-	definitions: Partial<BlockLogicDefinitionTypes<TType>>,
+	definitions: Partial<BlockLogicNoConfigDefinitionTypes<TType>>,
 	valueType: AllKeys,
 ) => {
 	if (valueType in definitions) {
@@ -72,7 +73,7 @@ namespace LogicValueStoragesNamespace {
 	export type Base<TType extends AllKeys> = ReadonlyLogicValueStorage<BlockConfigPrimitiveByType<TType>>;
 	abstract class base<TType extends AllKeys> implements Base<TType> {
 		constructor(
-			protected readonly config: Primitives[BlockConfigPrimitiveByType<TType>]["config"],
+			protected readonly config: AllTypes[TType]["config"],
 			private readonly valueType: BlockConfigPrimitiveByType<TType>,
 		) {}
 
@@ -93,7 +94,7 @@ namespace LogicValueStoragesNamespace {
 	}
 	const NewPrimitiveLogicValueStorage = <TType extends PrimitiveKeys>(valueType: TType) => {
 		return class implements Base<TType> {
-			constructor(private readonly config: Primitives[BlockConfigPrimitiveByType<TType>]["config"]) {}
+			constructor(private readonly config: AllTypes[TType]["config"]) {}
 
 			isValueSet(): boolean {
 				return true;
@@ -109,7 +110,7 @@ namespace LogicValueStoragesNamespace {
 	};
 
 	export class unset extends base<"unset"> {
-		constructor(protected readonly config: Primitives[BlockConfigPrimitiveByType<"unset">]["config"]) {
+		constructor(protected readonly config: AllTypes["unset"]["config"]) {
 			super(config, "unset");
 		}
 
@@ -118,7 +119,7 @@ namespace LogicValueStoragesNamespace {
 		}
 	}
 	export class wire extends base<"wire"> {
-		constructor(protected readonly config: Primitives[BlockConfigPrimitiveByType<"wire">]["config"]) {
+		constructor(protected readonly config: AllTypes["wire"]["config"]) {
 			super(config, "wire");
 		}
 
@@ -145,18 +146,32 @@ namespace LogicValueStoragesNamespace {
 	}
 
 	export class keybool extends base<"keybool"> {
-		constructor(protected readonly config: Primitives[BlockConfigPrimitiveByType<"keybool">]["config"]) {
+		private value: boolean;
+
+		constructor(protected readonly config: AllTypes["keybool"]["config"]) {
 			super(config, "bool");
+
+			this.value = config.reversed;
+
+			const isKeyCode = (key: string): key is KeyCode => key in Keys;
+			if (isKeyCode(this.config.key)) {
+				// if (config.switch) {
+				// 	this.event.onKeyDown(this.config.key, () => (this.value = !this.value));
+				// } else {
+				// 	this.event.onKeyDown(this.config.key, () => (this.value = !config.reversed));
+				// 	this.event.onKeyUp(this.config.key, () => (this.value = config.reversed));
+				// }
+			}
 		}
 
-		protected getValue(ctx: BlockLogicTickContext): boolean {
-			throw "Method not implemented.";
+		protected getValue(): boolean {
+			return this.value;
 		}
 	}
 }
 type ConfigBackedLogicValueStorage<TType extends AllKeys> = LogicValueStoragesNamespace.Base<TType>;
 type ConfigBackedLogicValueStorageCtor<TType extends AllKeys> = new (
-	config: AllTypes[BlockConfigPrimitiveByType<TType>]["config"],
+	config: AllTypes[TType]["config"],
 ) => ConfigBackedLogicValueStorage<TType>;
 export const LogicValueStorages: { readonly [k in AllKeys]: ConfigBackedLogicValueStorageCtor<k> } = {
 	...LogicValueStoragesNamespace,
@@ -169,7 +184,7 @@ export class LogicValueStorageContainer<TType extends PrimitiveKeys>
 {
 	private value?: TypedValue<TType>;
 
-	constructor(private readonly definitions: BlockLogicDefinitionTypes<TType>) {}
+	constructor(private readonly definitions: BlockLogicNoConfigDefinitionTypes<TType>) {}
 
 	isValueSet(): boolean {
 		return this.value !== undefined;

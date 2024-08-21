@@ -196,44 +196,8 @@ export class BuildingPlot extends ReadonlyPlot {
 		return success;
 	}
 	updateConfig(configs: ConfigUpdateRequest["configs"]): Response {
-		/**
-		 * Assign only values, recursively.
-		 * @example assignValues({ a: { b: 'foo' } }, 'a', { c: 'bar' })
-		 * // returns:
-		 * { a: { b: 'foo', c: 'bar' } }
-		 */
-		const withValues = <T extends Record<string, unknown>>(object: T, value: Partial<T>): T => {
-			const setobj = <T extends Record<string, unknown>, TKey extends keyof T>(
-				object: T,
-				key: TKey,
-				value: T[TKey],
-			) => {
-				if (!typeIs(value, "table")) {
-					return { ...object, [key]: value };
-				}
-
-				return withValues(object, value);
-			};
-
-			const ret: Record<string, unknown> = { ...object };
-			for (const [key, val] of pairs(value as Record<string, object>)) {
-				const rk = ret[key];
-
-				if (typeIs(rk, "Vector3") || !typeIs(rk, "table")) {
-					ret[key] = val;
-				} else {
-					ret[key] = setobj(rk as Record<string, object>, key, val);
-				}
-			}
-
-			return ret as T;
-		};
-
 		for (const config of configs) {
-			const currentData = BlockManager.manager.config.get(config.block);
-			const newData = withValues(currentData ?? {}, { [config.key]: JSON.deserialize(config.value) });
-
-			BlockManager.manager.config.set(config.block, newData);
+			BlockManager.manager.config.set(config.block, JSON.deserialize(config.scfg));
 		}
 
 		return success;

@@ -11,10 +11,19 @@ import type { BlockBuilder } from "shared/blocks/Block";
 
 const definition = {
 	input: {
-		value: BlockConfigDefinitions.any("Value", "0"),
+		value: {
+			displayName: "Value",
+			group: "0",
+			types: BlockConfigDefinitions.any,
+			connectorHidden: true,
+		},
 	},
 	output: {
-		result: BlockConfigDefinitions.any("Result", "0"),
+		result: {
+			displayName: "Result",
+			group: "0",
+			types: BlockConfigDefinitions.any,
+		},
 	},
 } satisfies BlockLogicFullBothDefinitions;
 

@@ -1,11 +1,10 @@
 import { Component } from "shared/component/Component";
-import { ComponentChildren } from "shared/component/ComponentChildren";
 import type { BlockLogic4, BlockLogicFullBothDefinitions, BlockLogicTickContext } from "shared/blockLogic/BlockLogic4";
 
 type Logic = BlockLogic4<BlockLogicFullBothDefinitions>;
 
 export class BlockLogicRunner extends Component {
-	private readonly blocks = new ComponentChildren<Logic>(this);
+	private readonly blocks = new Set<Logic>();
 	private tickingLoop?: SignalConnection;
 	private tickNumber = 0;
 
@@ -29,7 +28,8 @@ export class BlockLogicRunner extends Component {
 			tick: this.tickNumber,
 		};
 
-		for (const block of this.blocks.getAll()) {
+		for (const block of this.blocks) {
+			if (!block.isEnabled()) continue;
 			block.tick(ctx);
 		}
 	}

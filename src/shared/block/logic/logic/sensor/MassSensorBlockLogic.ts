@@ -1,6 +1,6 @@
 import { blockConfigRegistry } from "shared/block/config/BlockConfigRegistry";
 import { ConfigurableBlockLogic } from "shared/block/ConfigurableBlockLogic";
-import { DisconnectBlockLogic } from "shared/block/logic/DisconnectBlockLogic";
+import { DisconnectBlock } from "shared/blocks/blocks/DisconnectBlock";
 import { BuildingManager } from "shared/building/BuildingManager";
 import { RemoteEvents } from "shared/RemoteEvents";
 import { RobloxUnit } from "shared/RobloxUnit";
@@ -10,7 +10,7 @@ export class MassSensorBlockLogic extends ConfigurableBlockLogic<typeof blockCon
 	constructor(block: BlockLogicData<typeof blockConfigRegistry.masssensor.input>) {
 		super(block, blockConfigRegistry.masssensor);
 
-		this.event.subscribe(DisconnectBlockLogic.events.disconnect.clientInvoked, () => this.update());
+		this.event.subscribe(DisconnectBlock.logic.ctor.events.disconnect.clientInvoked, () => this.update());
 		this.event.subscribe(RemoteEvents.ImpactBreak.clientInvoked, () => this.update());
 
 		this.onEnable(() => this.update());

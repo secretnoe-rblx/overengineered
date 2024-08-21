@@ -23,7 +23,7 @@ export namespace BlockLogicTypes3 {
 	};
 	type BCPrimitive<TType extends string, TDefault> = BCType<TType, TDefault, TDefault>;
 
-	type UnsetValue = { readonly ___nominal: "Unset" };
+	export type UnsetValue = { readonly ___nominal: "Unset" };
 	export type Unset = BCPrimitive<"unset", UnsetValue>;
 
 	export type WireValue = {
@@ -89,21 +89,32 @@ type PrimitiveKeys = keyof Primitives;
 type NonPrimitiveKeys = keyof NonPrimitives;
 type AllKeys = keyof AllTypes;
 
-export type BlockLogicDefinitionTypes<TKeys extends PrimitiveKeys> = {
+export type BlockLogicWithConfigDefinitionTypes<TKeys extends PrimitiveKeys> = {
+	readonly [k in TKeys]: OmitOverUnion<
+		Extract<AllTypes[AllKeys], { readonly default: AllTypes[k]["default"] }>,
+		"default"
+	>;
+};
+type BlockLogicInputDef = {
+	readonly displayName: string;
+	readonly types: Partial<BlockLogicWithConfigDefinitionTypes<PrimitiveKeys>>;
+	readonly group?: string;
+	readonly connectorHidden?: boolean;
+	readonly configHidden?: boolean;
+};
+
+export type BlockLogicNoConfigDefinitionTypes<TKeys extends PrimitiveKeys> = {
 	readonly [k in TKeys]: OmitOverUnion<
 		Extract<AllTypes[AllKeys], { readonly default: AllTypes[k]["default"] }>,
 		"default" | "config"
 	>;
 };
-
-type BlockLogicInputDef = {
+type BlockLogicOutputDef = {
 	readonly displayName: string;
-	readonly types: Partial<BlockLogicDefinitionTypes<PrimitiveKeys>>;
+	readonly types: Partial<BlockLogicNoConfigDefinitionTypes<PrimitiveKeys>>;
 	readonly group?: string;
 	readonly connectorHidden?: boolean;
-	readonly configHidden?: boolean;
 };
-type BlockLogicOutputDef = Omit<BlockLogicInputDef, "configHidden">;
 export type BlockLogicBothDefinitions = {
 	readonly input: { readonly [k in string]: BlockLogicInputDef };
 	readonly output: { readonly [k in string]: BlockLogicOutputDef };
@@ -239,6 +250,9 @@ export abstract class BlockLogic4<TDef extends BlockLogicBothDefinitions> extend
 			}
 
 			const cfg = config[key];
+			const def = this.definition.input[key].types[cfg.type];
+			if (!def) continue;
+
 			if (cfg.type === "wire") {
 				const outputBlock = allBlocks.get(cfg.config.blockUuid);
 				if (!outputBlock) {
@@ -260,8 +274,8 @@ export abstract class BlockLogic4<TDef extends BlockLogicBothDefinitions> extend
 				continue;
 			}
 
-			const storageCtor = LogicValueStorages[cfg.type];
-			const storage = new storageCtor(cfg as never);
+			const storageCtor = LogicValueStorages[def.type];
+			const storage = new storageCtor(cfg.config as never);
 			this.replaceInput(key, storage);
 		}
 	}
@@ -359,6 +373,7 @@ const adddef = {
 			types: {
 				number: {
 					type: "clampedNumber",
+					config: 0,
 					min: 0,
 					max: 10,
 					step: 1,
@@ -370,6 +385,7 @@ const adddef = {
 			types: {
 				number: {
 					type: "clampedNumber",
+					config: 0,
 					min: 0,
 					max: 10,
 					step: 1,

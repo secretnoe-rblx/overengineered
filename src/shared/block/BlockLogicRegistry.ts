@@ -1,6 +1,5 @@
 import { BallastBlockLogic } from "shared/block/logic/BallastBlockLogic";
 import { BracedShaftBlockLogic } from "shared/block/logic/BracedShaftBlockLogic";
-import { DisconnectBlockLogic } from "shared/block/logic/DisconnectBlockLogic";
 import { HeliumBlockLogic } from "shared/block/logic/HeliumBlockLogic";
 import { ByteMakerBlockLogic } from "shared/block/logic/logic/converter/byte/ByteMakerBlockLogic";
 import { ByteSplitterBlockLogic } from "shared/block/logic/logic/converter/byte/ByteSplitterBlockLogic";
@@ -59,7 +58,6 @@ const logicRegistry = {
 
 	vehicleseat: VehicleSeatBlockLogic,
 	passengerseat: PassengerSeatBlockLogic,
-	disconnectblock: DisconnectBlockLogic,
 
 	smallrocketengine: RocketEngineLogic,
 	rocketengine: RocketEngineLogic,

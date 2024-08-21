@@ -1,6 +1,7 @@
 import { RunService } from "@rbxts/services";
 import { ImpactController } from "shared/block/impact/ImpactController";
 import { BlockConfig } from "shared/blockLogic/BlockConfig";
+import { BlockLogicRunner } from "shared/blockLogic/BlockLogicRunner";
 import { VehicleSeatBlockLogic } from "shared/blocks/blocks/VehicleSeatBlock";
 import { ContainerComponent } from "shared/component/ContainerComponent";
 import { GameDefinitions } from "shared/data/GameDefinitions";
@@ -126,6 +127,13 @@ export class SharedMachine extends ContainerComponent<GenericBlockLogic> {
 			const config = BlockConfig.addDefaults(block.config, def.input);
 			logic.initializeInputs(config, logicMap);
 		}
+
+		const runner = this.parent(new BlockLogicRunner());
+		for (const [, { block, logic }] of this.blocksMap) {
+			runner.add(logic);
+		}
+
+		runner.startTicking();
 	}
 	// initializeBlockConnections() {
 	// 	for (const inputLogic of this.getChildren()) {

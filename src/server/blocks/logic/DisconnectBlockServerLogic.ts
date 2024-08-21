@@ -1,6 +1,6 @@
 import { ServerBlockLogic } from "server/blocks/ServerBlockLogic";
 import type { PlayModeController } from "server/modes/PlayModeController";
-import type { DisconnectBlockLogic } from "shared/block/logic/DisconnectBlockLogic";
+import type { DisconnectBlockLogic } from "shared/blocks/blocks/DisconnectBlock";
 
 @injectable
 export class DisconnectBlockServerLogic extends ServerBlockLogic<typeof DisconnectBlockLogic> {

@@ -55,6 +55,10 @@ export namespace BlockConfig {
 				continue;
 			}
 
+			if (obj.type && obj.config !== undefined) {
+				continue;
+			}
+
 			const defConfig = def.types[obj.type]!.config;
 
 			if (typeIs(defConfig, "table")) {

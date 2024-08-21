@@ -65,8 +65,7 @@ declare global {
 		readonly plot: PlotModel;
 		readonly configs: readonly {
 			readonly block: BlockModel;
-			readonly key: string;
-			readonly value: string;
+			readonly scfg: string;
 		}[];
 	};
 	type ConfigResetRequest = {

@@ -8,11 +8,11 @@ import { ClientBuilding } from "client/modes/build/ClientBuilding";
 import { MultiBlockHighlightedSelector } from "client/tools/highlighters/MultiBlockHighlightedSelector";
 import { SelectedBlocksHighlighter } from "client/tools/highlighters/SelectedBlocksHighlighter";
 import { ToolBase } from "client/tools/ToolBase";
-import { blockConfigRegistry } from "shared/block/config/BlockConfigRegistry";
 import { BlockConfig } from "shared/blockLogic/BlockConfig";
 import { BlockManager } from "shared/building/BlockManager";
 import { Colors } from "shared/Colors";
 import { ObservableCollectionSet } from "shared/event/ObservableCollection";
+import { JSON } from "shared/fixes/Json";
 import { Objects } from "shared/fixes/objects";
 import { Localization } from "shared/Localization";
 import { VectorUtils } from "shared/utils/VectorUtils";
@@ -105,7 +105,7 @@ namespace Scene {
 				Players.LocalPlayer,
 				block.displayName,
 			).fullUpper();
-			this.gui.ParamsSelection.Heading.AmountLabel.Text = `x${selected.size()}`;
+			this.gui.ParamsSelection.Heading.AmountLabel.Text = selected.size() > 1 ? `x${selected.size()}` : "";
 
 			const configs = selected.map((selected) => {
 				const blockmodel = selected;
@@ -129,7 +129,10 @@ namespace Scene {
 
 			this.currentConfigControl?.destroy();
 
+			this.gui.ParamsSelection.Content.ScrollingFrame.Visible = false;
+
 			const gui = this.gui.ParamsSelection.Content.ScrollingFrame.Clone();
+			gui.Visible = true;
 			gui.Parent = this.gui.ParamsSelection.Content;
 			const configControl = this.add(
 				new MultiBlockConfigControl(
@@ -145,28 +148,25 @@ namespace Scene {
 			// 	this.tool.unselectAll();
 			// 	this.tool.selectBlockByUuid(uuid);
 			// });
-			// configControl.configUpdated.Connect(async (key, values) => {
-			// 	const selected = this.tool.selected.get();
-			// 	$log(
-			// 		`Sending (${selected.size()}) block config values for ${Objects.keys(values).join()} .${key} ${JSON.serialize(Objects.values(values))}`,
-			// 	);
+			configControl.submitted.Connect((config) => {
+				const selected = this.tool.selected.get();
+				$log(`Sending (${selected.size()}) block config values ${JSON.serialize(asMap(config).values())}`);
 
-			// 	const response = await ClientBuilding.updateConfigOperation.execute({
-			// 		plot: this.tool.targetPlot.get(),
-			// 		configs: selected.map(
-			// 			(b) =>
-			// 				({
-			// 					block: b,
-			// 					key,
-			// 					value: JSON.serialize(values[BlockManager.manager.uuid.get(b)]),
-			// 				}) satisfies ConfigUpdateRequest["configs"][number],
-			// 		),
-			// 	});
-			// 	if (!response.success) {
-			// 		LogControl.instance.addLine(response.message, Colors.red);
-			// 		this.updateConfigs([...selected]);
-			// 	}
-			// });
+				const response = ClientBuilding.updateConfigOperation.execute({
+					plot: this.tool.targetPlot.get(),
+					configs: selected.map(
+						(b) =>
+							({
+								block: b,
+								scfg: JSON.serialize(config[BlockManager.manager.uuid.get(b)]),
+							}) satisfies ConfigUpdateRequest["configs"][number],
+					),
+				});
+				if (!response.success) {
+					LogControl.instance.addLine(response.message, Colors.red);
+					this.updateConfigs([...selected]);
+				}
+			});
 		}
 	}
 }
@@ -207,10 +207,10 @@ export class ConfigTool extends ToolBase {
 				}
 			}
 
-			const config = blockConfigRegistry[BlockManager.manager.id.get(block) as keyof typeof blockConfigRegistry];
-			if (!config) return false;
+			const configDef = blockList.blocks[BlockManager.manager.id.get(block)]?.logic?.definition;
+			if (!configDef) return false;
 
-			if (!asMap((config as BlockConfigTypes.BothDefinitions).input).findValue((k, v) => !v.configHidden)) {
+			if (!asMap((configDef as BlockConfigTypes.BothDefinitions).input).findValue((k, v) => !v.configHidden)) {
 				return false;
 			}
 

@@ -30,46 +30,46 @@ export const _Tests = () => {
 		multi: {
 			displayName: "Multi",
 			types: {
-				bool: { type: "bool" },
-				number: { type: "number" },
+				bool: { type: "bool", config: false },
+				number: { type: "number", config: 0 },
 				// string: {},
 			},
 		},
 		multiTypeMixed: {
 			displayName: "Multi Type Mixed",
 			types: {
-				bool: { type: "bool" },
-				number: { type: "number" },
+				bool: { type: "bool", config: false },
+				number: { type: "number", config: 0 },
 				// string: {},
 			},
 		},
 		multiValueMixed: {
 			displayName: "Multi Value Mixed",
 			types: {
-				bool: { type: "bool" },
-				number: { type: "number" },
+				bool: { type: "bool", config: false },
+				number: { type: "number", config: 0 },
 				// string: {},
 			},
 		},
 		boolTrue: {
 			displayName: "Bool True",
-			types: { bool: { type: "bool" } },
+			types: { bool: { type: "bool", config: false } },
 		},
 		boolFalse: {
 			displayName: "Bool False",
-			types: { bool: { type: "bool" } },
+			types: { bool: { type: "bool", config: false } },
 		},
 		boolMixed: {
 			displayName: "Bool Mixed",
-			types: { bool: { type: "bool" } },
+			types: { bool: { type: "bool", config: false } },
 		},
 		number: {
 			displayName: "Number",
-			types: { number: { type: "number" } },
+			types: { number: { type: "number", config: 0 } },
 		},
 		numberMixed: {
 			displayName: "Number Mixed",
-			types: { number: { type: "number" } },
+			types: { number: { type: "number", config: 0 } },
 		},
 		// string: {
 		// 	displayName: "String",
@@ -81,11 +81,11 @@ export const _Tests = () => {
 		// },
 		clampedNumber: {
 			displayName: "Slider",
-			types: { number: { type: "clampedNumber", min: 0, max: 63, step: 1 } },
+			types: { number: { type: "clampedNumber", config: 0, min: 0, max: 63, step: 1 } },
 		},
 		clampedNumberMixed: {
 			displayName: "Slider Mixed",
-			types: { number: { type: "clampedNumber", min: 0, max: 63, step: 1 } },
+			types: { number: { type: "clampedNumber", config: 0, min: 0, max: 63, step: 1 } },
 		},
 		// byte: {
 		// 	displayName: "Byte",
@@ -97,15 +97,22 @@ export const _Tests = () => {
 		// },
 		key: {
 			displayName: "Key",
-			types: { key: { type: "key" } },
+			types: { key: { type: "key", config: "F" } },
 		},
 		keyMixed: {
 			displayName: "Key Mixed",
-			types: { key: { type: "key" } },
+			types: { key: { type: "key", config: "F" } },
 		},
 		keyBool: {
 			displayName: "Keybool",
-			types: { bool: { type: "keybool", canBeReversed: true, canBeSwitch: true } },
+			types: {
+				bool: {
+					type: "keybool",
+					config: { key: "F", reversed: false, switch: false },
+					canBeReversed: true,
+					canBeSwitch: true,
+				},
+			},
 		},
 		// motorRotationSpeed: {
 		// 	displayName: "Motor",

@@ -432,8 +432,10 @@ namespace Steps {
 					plot: plot,
 					configs: blocksToConfigure.map(({ uuid, key, value }): ConfigUpdateRequest["configs"][number] => ({
 						block: plot.getBlock(uuid),
-						key,
-						value: JSON.serialize(value),
+						scfg: JSON.serialize({
+							...(BlockManager.manager.config.get(plot.getBlock(uuid)) ?? {}),
+							[key]: value,
+						}),
 					})),
 				});
 			},
