@@ -7,7 +7,6 @@ import { Gui } from "client/gui/Gui";
 import { LogControl } from "client/gui/static/LogControl";
 import { SandboxGame } from "client/SandboxGame";
 import { ServerRestartController } from "client/ServerRestartController";
-import { BlockLogicTests } from "shared/blockLogic/BlockLogic.test";
 import { Objects } from "shared/fixes/objects";
 import { Game } from "shared/GameHost";
 import { RemoteEvents } from "shared/RemoteEvents";
@@ -74,7 +73,3 @@ if (RunService.IsStudio() && Players.LocalPlayer.Name === "samlovebutter") {
 		task.wait(0.1);
 	}
 }
-
-//
-
-BlockLogicTests.test2();
