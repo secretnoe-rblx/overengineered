@@ -107,14 +107,12 @@ export namespace BlockWireManager {
 					{
 						const existingcfg = (block.config as PlacedBlockConfig | undefined)?.[key];
 
-						if (existingcfg === undefined || existingcfg.type === "unset") {
-							dataTypes = asMap(config.types).map((k) => groups[k]);
+						if (existingcfg === undefined || existingcfg.type === "unset" || existingcfg.type === "wire") {
+							dataTypes = asMap(config.types).map((k, v) => groups[v.type]);
 						} else {
 							dataTypes = [groups[existingcfg.type]];
 							narrow = true;
 						}
-
-						dataTypes = ["bool"];
 					}
 
 					const data: MarkerData = {

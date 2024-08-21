@@ -241,6 +241,6 @@ export const UnsetBlockLogicValueStorage: ReadonlyLogicValueStorage<PrimitiveKey
 		return false;
 	},
 	get(): never {
-		throw "Block logic value was not initialized";
+		throw "Block logic value was not initialized (SHOULD NOT HAPPEN; REPORT TO THE DEVELOPERS)";
 	},
 };
