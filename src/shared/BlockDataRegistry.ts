@@ -337,6 +337,7 @@ const registry = {
 	piston: {
 		name: "Piston",
 		description: "No Pi jokes here. It just moves stuff..",
+		limit: 200,
 	},
 	cannonbarrel100mm: {
 		name: "100mm Cannon Barrel",
@@ -361,6 +362,7 @@ const registry = {
 	anchorblock: {
 		name: "Anchor",
 		description: "An immovable block",
+		limit: 20,
 	},
 	ballinsocket: {
 		name: "Ball in Socket",
@@ -410,6 +412,7 @@ const registry = {
 	magnet: {
 		name: "Magnet",
 		description: "A magnet. Attracts to different polarity, repels from same polarity",
+		limit: 200,
 	},
 	motorblock: {
 		name: "Motor",
