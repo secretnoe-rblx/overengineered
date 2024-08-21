@@ -103,7 +103,7 @@ const defs = {
 //
 
 const constants = {
-	const: {
+	constant: {
 		displayName: "Constant",
 		description: "Returns the value you've set",
 		modelSource: autoModel("ConstLogicBlockPrefab", "CONST", BlockCreation.Categories.other),
