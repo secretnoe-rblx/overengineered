@@ -20,6 +20,7 @@ import type { BuildingMode } from "client/modes/build/BuildingMode";
 import type { MultiBlockSelectorConfiguration } from "client/tools/highlighters/MultiBlockSelector";
 //import type { TutorialConfigBlockHighlight } from "client/tutorial/TutorialConfigTool";
 import type { PlacedBlockConfig } from "shared/blockLogic/BlockConfig";
+import type { BlockLogicBothDefinitions } from "shared/blockLogic/BlockLogic";
 
 namespace Scene {
 	export type ConfigToolSceneDefinition = GuiObject & {
@@ -210,7 +211,7 @@ export class ConfigTool extends ToolBase {
 			const configDef = blockList.blocks[BlockManager.manager.id.get(block)]?.logic?.definition;
 			if (!configDef) return false;
 
-			if (!asMap((configDef as BlockConfigTypes.BothDefinitions).input).findValue((k, v) => !v.configHidden)) {
+			if (!asMap((configDef as BlockLogicBothDefinitions).input).findValue((k, v) => !v.configHidden)) {
 				return false;
 			}
 

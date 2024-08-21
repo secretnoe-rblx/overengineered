@@ -184,52 +184,6 @@ const logic = {
 			description: "Negates the input byte.",
 		},
 	},
-	math: {
-		add: {
-			name: "Addition",
-			description: "Returns a sum of input values",
-		},
-		sub: {
-			name: "Subtraction",
-			description: "Returns the result of substruction of two given values",
-		},
-		mul: {
-			name: "Multiplication",
-			description: "Returns the result of multiplication of two given values",
-		},
-		div: {
-			name: "Division",
-			description: "Returns the result of division of two given values",
-		},
-		abs: {
-			name: "Absolute",
-			description: "Returns the modulus of incoming number",
-		},
-		clamp: {
-			name: "Clamp",
-			description: "Limits the output between max and min.",
-		},
-		mod: {
-			name: "Mod",
-			description: "Returns the remainder of a division",
-		},
-		round: {
-			name: "Round",
-			description: "Returns rounded input value",
-		},
-		floor: {
-			name: "Floor",
-			description: "N/A",
-		},
-		ceil: {
-			name: "Ceil",
-			description: "N/A",
-		},
-		sign: {
-			name: "Sign",
-			description: "Returns -1 if input value is less than zero, 1 if greater than zero and zero if equals zero",
-		},
-	},
 	trigonometry: {
 		pi: {
 			name: "Pi",

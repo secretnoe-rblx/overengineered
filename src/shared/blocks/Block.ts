@@ -2,11 +2,16 @@ import type { BlockMirrorBehaviour } from "shared/BlockDataRegistry";
 import type { BlockLogicFullBothDefinitions, GenericBlockLogicCtor } from "shared/blockLogic/BlockLogic";
 import type { BlockCreation } from "shared/blocks/BlockCreation";
 import type { BuildingBlockIds } from "shared/blocks/blocks/BuildingBlocks";
+import type { MathBlockIds } from "shared/blocks/blocks/math/MathBlocks";
 
 export type BlockCategoryPath = readonly string[];
 export type BlockLogicInfo = {
 	readonly definition: BlockLogicFullBothDefinitions;
 	readonly ctor: GenericBlockLogicCtor;
+};
+export type BlockModelSource = {
+	readonly model: (self: BlockBuilder) => BlockModel;
+	readonly category: (self: BlockBuilder, model: BlockModel) => BlockCategoryPath;
 };
 
 export type BlockMarkerPositions = {
@@ -27,10 +32,7 @@ export type BlockBuilder = {
 	};
 
 	/** @server */
-	readonly modelSource: {
-		readonly model: (self: BlockBuilder) => BlockModel;
-		readonly category: (self: BlockBuilder, model: BlockModel) => BlockCategoryPath;
-	};
+	readonly modelSource: BlockModelSource;
 
 	/** @server */
 	readonly weldRegionsSource: (self: BlockBuilder, model: BlockModel) => BlockWeldRegions;
@@ -41,7 +43,7 @@ export type BlockBuilderWithoutId = Omit<BlockBuilder, "id">;
 export type BlockBuilderWithoutIdAndDefaults = MakePartial<BlockBuilderWithoutId, keyof typeof BlockCreation.defaults>;
 
 declare global {
-	type BlockId = string | (string & BuildingBlockIds);
+	type BlockId = string | (string & BuildingBlockIds & MathBlockIds);
 
 	type Block = Omit<BlockBuilder, "id" | (`${string}Source` & keyof BlockBuilder)> & {
 		readonly id: BlockId;

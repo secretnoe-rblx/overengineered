@@ -244,7 +244,7 @@ export class RideModeControls extends DictionaryControl<RideModeControlsDefiniti
 
 		const inputType = InputController.inputType.get();
 
-		const inputLogics = machine.logicInputs.getChildren();
+		const inputLogics = [] as const; //machine.logicInputs.getChildren();
 		const controls = [
 			...TouchModeButtonControl.fromBlocks(inputType, inputLogics),
 			//

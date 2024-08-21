@@ -1,14 +1,12 @@
 import { SharedMachine } from "shared/blockLogic/SharedMachine";
-import { ContainerComponent } from "shared/component/ContainerComponent";
-import type { ConfigLogicValueBase } from "client/blocks/BlockLogicValues";
 import type { PlayerDataStorage } from "client/PlayerDataStorage";
 import type { ImpactController } from "shared/block/impact/ImpactController";
 
 @injectable
 export class ClientMachine extends SharedMachine {
-	readonly logicInputs = new ContainerComponent<
-		ConfigLogicValueBase<BlockConfigTypes.Types[keyof BlockConfigTypes.Types]>
-	>();
+	// readonly logicInputs = new ContainerComponent<
+	// 	ConfigLogicValueBase<BlockLogicTypes3.Types[keyof BlockLogicTypes3.Types]>
+	// >();
 
 	constructor(
 		@inject private readonly playerData: PlayerDataStorage,
@@ -16,7 +14,7 @@ export class ClientMachine extends SharedMachine {
 		@inject di: DIContainer,
 	) {
 		super(blockList, di);
-		this.parent(this.logicInputs);
+		// this.parent(this.logicInputs);
 	}
 
 	protected initialize(blocks: readonly PlacedBlockData[]) {

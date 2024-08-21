@@ -11,10 +11,7 @@ const definition = {
 		occupied: {
 			displayName: "Occupied",
 			types: {
-				bool: {
-					type: "bool",
-					config: false,
-				},
+				bool: { type: "bool" },
 			},
 		},
 	},

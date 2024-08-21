@@ -1,15 +1,9 @@
-import type { BlockLogicFullOutputDef } from "shared/blockLogic/BlockLogic";
+import type { BlockLogicFullInputDef } from "shared/blockLogic/BlockLogic";
 
-export namespace BlockConfigDefinitions {
-	export const any = {
-		bool: {
-			type: "bool",
-			config: false as boolean,
-		},
-		number: {
-			type: "number",
-			config: 0 as number,
-		},
+export const BlockConfigDefinitions = {
+	any: {
+		bool: { type: "bool", config: false as boolean },
+		number: { type: "number", config: 0 as number },
 		// vector3: {
 		// 	config: Vector3.zero,
 		// },
@@ -19,5 +13,8 @@ export namespace BlockConfigDefinitions {
 		// byte: {
 		// 	config: 0 as number,
 		// },
-	} as const satisfies BlockLogicFullOutputDef["types"];
-}
+	},
+	number: {
+		number: { type: "number", config: 0 as number },
+	},
+} as const satisfies { readonly [k in string]: BlockLogicFullInputDef["types"] };

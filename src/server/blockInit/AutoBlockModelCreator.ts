@@ -113,46 +113,10 @@ const operations = {
 		prefab: prefabs.smallGeneric,
 	},
 
-	sign: {
-		modelTextOverride: "SIGN",
-		category: categories.math,
-		prefab: prefabs.smallGeneric,
-	},
-
-	floor: {
-		modelTextOverride: "FLOOR",
-		category: categories.math,
-		prefab: prefabs.smallGeneric,
-	},
-
-	ceil: {
-		modelTextOverride: "CEIL",
-		category: categories.math,
-		prefab: prefabs.smallGeneric,
-	},
-
-	round: {
-		modelTextOverride: "ROUND",
-		category: categories.math,
-		prefab: prefabs.smallGeneric,
-	},
-
-	abs: {
-		modelTextOverride: "ABS",
-		category: categories.math,
-		prefab: prefabs.smallGeneric,
-	},
-
 	rand: {
 		modelTextOverride: "RAND",
 		category: categories.math,
 		prefab: prefabs.doubleGeneric,
-	},
-
-	clamp: {
-		modelTextOverride: "CLAMP",
-		category: categories.math,
-		prefab: prefabs.tripleGeneric,
 	},
 
 	pow: {
@@ -169,12 +133,6 @@ const operations = {
 
 	atan2: {
 		modelTextOverride: "ATAN2",
-		category: categories.math,
-		prefab: prefabs.doubleGeneric,
-	},
-
-	mod: {
-		modelTextOverride: "MOD",
 		category: categories.math,
 		prefab: prefabs.doubleGeneric,
 	},
@@ -207,27 +165,6 @@ const operations = {
 	},
 	lessthanorequals: {
 		modelTextOverride: "≤",
-		category: categories.math,
-		prefab: prefabs.doubleGeneric,
-	},
-
-	add: {
-		modelTextOverride: "ADD",
-		category: categories.math,
-		prefab: prefabs.doubleGeneric,
-	},
-	sub: {
-		modelTextOverride: "SUB",
-		category: categories.math,
-		prefab: prefabs.doubleGeneric,
-	},
-	mul: {
-		modelTextOverride: "MUL",
-		category: categories.math,
-		prefab: prefabs.doubleGeneric,
-	},
-	div: {
-		modelTextOverride: "DIV",
 		category: categories.math,
 		prefab: prefabs.doubleGeneric,
 	},

@@ -70,10 +70,9 @@ export type BlockLogicFullInputDef = {
 	readonly connectorHidden?: boolean;
 	readonly configHidden?: boolean;
 };
-export type BlockLogicFullOutputDef = Omit<BlockLogicFullInputDef, "configHidden">;
 export type BlockLogicFullBothDefinitions = {
 	readonly input: { readonly [k in string]: BlockLogicFullInputDef };
-	readonly output: { readonly [k in string]: BlockLogicFullOutputDef };
+	readonly output: { readonly [k in string]: BlockLogicOutputDef };
 };
 
 //

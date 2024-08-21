@@ -249,29 +249,10 @@ const defs = {
 			result: defcs.number("Result"),
 		},
 	},
-	clamp: {
-		input: {
-			value: defcs.number("Value"),
-			min: defcs.number("Min"),
-			max: defcs.number("Max"),
-		},
-		output: {
-			result: defcs.number("Result"),
-		},
-	},
 	atan2: {
 		input: {
 			y: defcs.number("Y"),
 			x: defcs.number("X"),
-		},
-		output: {
-			result: defcs.number("Result"),
-		},
-	},
-	math2number: {
-		input: {
-			value1: defcs.number("Value 1"),
-			value2: defcs.number("Value 2"),
 		},
 		output: {
 			result: defcs.number("Result"),
@@ -302,15 +283,6 @@ const defs = {
 		},
 		output: {
 			result: defcs.bool("Result"),
-		},
-	},
-	math2numberVector3: {
-		input: {
-			value1: defcs.numberOrVector("Value 1", "1"),
-			value2: defcs.numberOrVector("Value 2", "1"),
-		},
-		output: {
-			result: defcs.numberOrVector("Result", "1"),
 		},
 	},
 	byte2byte: {
@@ -446,18 +418,6 @@ const logicReg = {
 			}
 		};
 	},
-	math2number: (func: (left: number, right: number, logic: BlockLogic) => number) => {
-		return class Logic extends ConfigurableBlockLogic<typeof defs.math2number> {
-			constructor(block: PlacedBlockData) {
-				super(block, defs.math2number);
-
-				const update = () =>
-					this.output.result.set(func(this.input.value1.get(), this.input.value2.get(), this));
-				this.input.value1.subscribe(update);
-				this.input.value2.subscribe(update);
-			}
-		};
-	},
 	numberOrBool2bool: (func: <T extends number | boolean>(left: T, right: T, logic: BlockLogic) => boolean) => {
 		return class Logic extends ConfigurableBlockLogic<typeof defs.numberOrBool2bool> {
 			constructor(block: PlacedBlockData) {
@@ -486,20 +446,6 @@ const logicReg = {
 		return class Logic extends ConfigurableBlockLogic<typeof defs.number2bool> {
 			constructor(block: PlacedBlockData) {
 				super(block, defs.number2bool);
-
-				const update = () =>
-					this.output.result.set(func(this.input.value1.get(), this.input.value2.get(), this));
-				this.input.value1.subscribe(update);
-				this.input.value2.subscribe(update);
-			}
-		};
-	},
-	math2numberVector3: (
-		func: <T extends number | Vector3>(left: T, right: T, logic: BlockLogic) => number | Vector3,
-	) => {
-		return class Logic extends ConfigurableBlockLogic<typeof defs.math2numberVector3> {
-			constructor(block: PlacedBlockData) {
-				super(block, defs.math2numberVector3);
 
 				const update = () =>
 					this.output.result.set(func(this.input.value1.get(), this.input.value2.get(), this));
@@ -550,22 +496,6 @@ const logicReg = {
 
 				const update = () => this.output.result.set(func(this.input.value.get(), this));
 				this.input.value.subscribe(update);
-			}
-		};
-	},
-
-	clamp: (func: (value: number, min: number, max: number, logic: BlockLogic) => number) => {
-		return class Logic extends ConfigurableBlockLogic<typeof defs.clamp> {
-			constructor(block: PlacedBlockData) {
-				super(block, defs.clamp);
-
-				const update = () =>
-					this.output.result.set(
-						func(this.input.value.get(), this.input.min.get(), this.input.max.get(), this),
-					);
-				this.input.value.subscribe(update);
-				this.input.min.subscribe(update);
-				this.input.max.subscribe(update);
 			}
 		};
 	},
@@ -738,26 +668,6 @@ const operations = {
 		rad: {
 			func: (value) => math.rad(value),
 		},
-
-		sign: {
-			func: (value) => math.sign(value),
-		},
-
-		floor: {
-			func: (value) => math.floor(value),
-		},
-
-		ceil: {
-			func: (value) => math.ceil(value),
-		},
-
-		round: {
-			func: (value) => math.round(value),
-		},
-
-		abs: {
-			func: (value) => math.abs(value),
-		},
 	},
 	rand: {
 		rand: {
@@ -770,11 +680,6 @@ const operations = {
 
 				return math.random() * (max - min) + min;
 			},
-		},
-	},
-	clamp: {
-		clamp: {
-			func: (value, min, max) => math.clamp(value, min, max),
 		},
 	},
 	pow: {
@@ -790,11 +695,6 @@ const operations = {
 	atan2: {
 		atan2: {
 			func: (y, x) => math.atan2(y, x),
-		},
-	},
-	math2number: {
-		mod: {
-			func: (value1, value2) => value1 % value2,
 		},
 	},
 	numberOrBool2bool: {},
@@ -818,46 +718,6 @@ const operations = {
 		},
 		lessthanorequals: {
 			func: (value1, value2) => value1 <= value2,
-		},
-	},
-	math2numberVector3: {
-		add: {
-			func: multiifunc({
-				number: (left, right) => left + right,
-				Vector3: (left, right) => left.add(right),
-			}),
-		},
-		sub: {
-			func: multiifunc({
-				number: (left, right) => left - right,
-				Vector3: (left, right) => left.sub(right),
-			}),
-		},
-		mul: {
-			func: multiifunc({
-				number: (left, right) => left * right,
-				Vector3: (left, right) => left.mul(right),
-			}),
-		},
-		div: {
-			func: multiifunc({
-				number: (left, right, logic) => {
-					if (right === 0) {
-						RemoteEvents.Burn.send([logic.instance.PrimaryPart!]);
-						logic.disable();
-					}
-
-					return left / right;
-				},
-				Vector3: (left, right, logic) => {
-					if (right.X === 0 && right.Y === 0 && right.Z === 0) {
-						RemoteEvents.Burn.send([logic.instance.PrimaryPart!]);
-						logic.disable();
-					}
-
-					return left.div(right);
-				},
-			}),
 		},
 	},
 	byte1byte: {

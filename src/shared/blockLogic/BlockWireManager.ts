@@ -1,6 +1,7 @@
 import { Colors } from "shared/Colors";
 import { ObservableValue } from "shared/event/ObservableValue";
 import type { PlacedBlockConfig } from "shared/blockLogic/BlockConfig";
+import type { BlockLogicTypes3 } from "shared/blockLogic/BlockLogicTypes";
 import type { SharedPlot } from "shared/building/SharedPlot";
 
 export namespace BlockWireManager {
@@ -28,23 +29,23 @@ export namespace BlockWireManager {
 		never: { color: Colors.white },
 	};
 
-	export const groups: { readonly [k in keyof BlockConfigTypes2.Types]: DataType } = {
+	export const groups: { readonly [k in keyof BlockLogicTypes3.Types]: DataType } = {
 		unset: "never",
 		wire: "never",
 		bool: "bool",
-		vector3: "vector3",
+		// vector3: "vector3",
 		keybool: "bool",
 		number: "number",
 		clampedNumber: "number",
-		thrust: "number",
-		motorRotationSpeed: "number",
-		servoMotorAngle: "number",
-		string: "string",
-		color: "color",
+		// thrust: "number",
+		// motorRotationSpeed: "number",
+		// servoMotorAngle: "number",
+		// string: "string",
+		// color: "color",
 		key: "key",
-		controllableNumber: "number",
-		byte: "byte",
-		bytearray: "bytearray",
+		// controllableNumber: "number",
+		// byte: "byte",
+		// bytearray: "bytearray",
 	};
 
 	export function intersectTypes(types: readonly (readonly DataType[])[]): readonly DataType[] {

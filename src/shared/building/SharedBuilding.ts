@@ -1,6 +1,7 @@
 import { BlockManager } from "shared/building/BlockManager";
 import { MaterialData } from "shared/data/MaterialData";
 import { PartUtils } from "shared/utils/PartUtils";
+import type { BlockLogicTypes3 } from "shared/blockLogic/BlockLogicTypes";
 
 /** Methods for editing the building */
 export namespace SharedBuilding {
@@ -10,7 +11,7 @@ export namespace SharedBuilding {
 	) {
 		const result = new Map<
 			BlockUuid,
-			(readonly [PlacedBlockData, BlockConnectionName, BlockConfigTypes2.WireConnection["config"]])[]
+			(readonly [PlacedBlockData, BlockConnectionName, BlockLogicTypes3.WireValue])[]
 		>();
 		for (const otherblock of blocks) {
 			if (!otherblock.config) continue;
