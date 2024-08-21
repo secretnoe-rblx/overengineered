@@ -51,15 +51,7 @@ const autoModel = (prefab: BlockCreation.Model.PrefabName, text: string, categor
 	} satisfies BlockModelSource;
 };
 
-const categories = {
-	math: ["Logic", "Math"],
-	byte: ["Logic", "Math", "Byte"],
-	converterByte: ["Logic", "Converter", "Byte"],
-	converterVector: ["Logic", "Converter", "Vector"],
-	other: ["Logic", "Other"],
-	bool: ["Logic", "Gate"],
-	memory: ["Logic", "Memory"],
-} as const satisfies { readonly [k in string]: BlockCategoryPath };
+const categories = BlockCreation.Categories;
 
 //
 
@@ -97,9 +89,58 @@ const defs = {
 			},
 		},
 	},
+	constnum: {
+		input: {},
+		output: {
+			value: {
+				displayName: "Value",
+				types: BlockConfigDefinitions.number,
+			},
+		},
+	},
 } as const satisfies { readonly [k in string]: BlockLogicFullBothDefinitions };
 
 //
+
+const constants = {
+	const: {
+		displayName: "Constant",
+		description: "Returns the value you've set",
+		modelSource: autoModel("ConstLogicBlockPrefab", "CONST", BlockCreation.Categories.other),
+		logic: logic(
+			{
+				input: {
+					value: {
+						displayName: "Value",
+						group: "0",
+						types: BlockConfigDefinitions.any,
+						connectorHidden: true,
+					},
+				},
+				output: {
+					result: {
+						displayName: "Result",
+						group: "0",
+						types: BlockConfigDefinitions.any,
+					},
+				},
+			},
+			(input) => ({ result: { type: input.valueType, value: input.value } }),
+		),
+	},
+	pi: {
+		displayName: "Pi",
+		description: `So called "free thinkers" will make a thousand PIe jokes as soon as they'll see the PI constant..`,
+		modelSource: autoModel("ConstLogicBlockPrefab", "π", BlockCreation.Categories.other),
+		logic: logic(defs.constnum, () => ({ value: { type: "number", value: math.pi } })),
+	},
+	e: {
+		displayName: "Euler's number (e)",
+		description: "Very useful constant you'll probably never use if you doesn't already know what it is",
+		modelSource: autoModel("ConstLogicBlockPrefab", "e", BlockCreation.Categories.other),
+		logic: logic(defs.constnum, () => ({ value: { type: "number", value: 2.718281828459 } })),
+	},
+} as const satisfies { readonly [k in string]: BlockBuilderWithoutIdAndDefaults };
 
 const mathBlocks = {
 	add: {
@@ -239,6 +280,7 @@ const mathBlocks = {
 
 const list = {
 	...mathBlocks,
+	...constants,
 } satisfies { readonly [k in string]: BlockBuilderWithoutIdAndDefaults };
 export const MathBlocks = BlockCreation.arrayFromObject(list);
 

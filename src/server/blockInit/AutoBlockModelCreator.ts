@@ -30,23 +30,6 @@ const categories = {
 } as const satisfies { [k in string]: BlockCategoryPath };
 
 const operations = {
-	constant: {
-		modelTextOverride: "CONST",
-		category: categories.other,
-		prefab: prefabs.const,
-	},
-
-	pi: {
-		modelTextOverride: "π",
-		category: categories.other,
-		prefab: prefabs.const,
-	},
-	e: {
-		modelTextOverride: "e",
-		category: categories.other,
-		prefab: prefabs.const,
-	},
-
 	sqrt: {
 		modelTextOverride: "SQRT",
 		category: categories.math,

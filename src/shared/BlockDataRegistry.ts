@@ -185,16 +185,6 @@ const logic = {
 		},
 	},
 	trigonometry: {
-		pi: {
-			name: "Pi",
-			description: `So called "free thinkers" will make a thousand PIe jokes as soon as they'll see the PI constant..`,
-			autoWeldShape: "cube",
-		},
-		e: {
-			name: "Euler's number (e)",
-			description: "Very useful constant you'll probably never use if you doesn't already know what it is",
-			autoWeldShape: "cube",
-		},
 		rand: {
 			name: "Random",
 			description: `Returns a "random" value between chosen minimum and maximum`,

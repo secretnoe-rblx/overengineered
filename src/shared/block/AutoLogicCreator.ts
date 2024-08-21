@@ -200,20 +200,6 @@ const defs = {
 			result_z: defcs.number("Z"),
 		},
 	},
-	const: {
-		input: {
-			value: connectors.any("Value", "1", { connectorHidden: true }),
-		},
-		output: {
-			result: connectors.any("Value", "1"),
-		},
-	},
-	constnumber: {
-		input: {},
-		output: {
-			value: defcs.number("Value"),
-		},
-	},
 	math1number: {
 		input: {
 			value: defcs.number("Value"),
@@ -338,31 +324,6 @@ const defs = {
 } as const satisfies Record<string, BlockConfigTypes.BothDefinitions>;
 
 const logicReg = {
-	const: (
-		func: (
-			value: ReturnType<typeof connectors.any>["default"],
-			logic: BlockLogic,
-		) => ReturnType<typeof connectors.any>["default"],
-	) => {
-		return class Logic extends ConfigurableBlockLogic<typeof defs.const> {
-			constructor(block: PlacedBlockData) {
-				super(block, defs.const);
-
-				const update = () => this.output.result.set(func(this.input.value.get(), this));
-				this.onEnable(update);
-			}
-		};
-	},
-	constnumber: (func: (logic: BlockLogic) => number) => {
-		return class Logic extends ConfigurableBlockLogic<typeof defs.constnumber> {
-			constructor(block: PlacedBlockData) {
-				super(block, defs.constnumber);
-
-				const update = () => this.output.value.set(func(this));
-				this.onEnable(update);
-			}
-		};
-	},
 	rand: (func: (min: number, max: number, logic: BlockLogic) => number) => {
 		return class Logic extends ConfigurableBlockLogic<typeof defs.rand> {
 			constructor(block: PlacedBlockData) {
@@ -612,20 +573,6 @@ const multiifunc =
 		multiif(arg, left, right, checks);
 
 const operations = {
-	const: {
-		constant: {
-			func: (value) => value,
-		},
-	},
-
-	constnumber: {
-		pi: {
-			func: () => math.pi,
-		},
-		e: {
-			func: () => 2.718281828459,
-		},
-	},
 	math1number: {
 		sqrt: {
 			func: (value) => math.sqrt(value),
