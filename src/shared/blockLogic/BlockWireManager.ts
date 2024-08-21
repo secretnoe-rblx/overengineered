@@ -33,7 +33,7 @@ export namespace BlockWireManager {
 		unset: "never",
 		wire: "never",
 		bool: "bool",
-		// vector3: "vector3",
+		vector3: "vector3",
 		keybool: "bool",
 		number: "number",
 		clampedNumber: "number",
@@ -155,9 +155,15 @@ export namespace BlockWireManager {
 				const tostr = `${connection.blockUuid} output ${connection.connectionName}`;
 
 				const from = markers.get(fromstr) as Markers.Input;
-				if (!from) throw `Not found '${fromstr}' to '${tostr}'`;
+				if (!from) {
+					$err(`Not found '${fromstr}' to '${tostr}'`);
+					continue;
+				}
 				const to = markers.get(tostr) as Markers.Output;
-				if (!to) throw `Not found '${tostr}' from '${fromstr}'`;
+				if (!to) {
+					$err(`Not found '${tostr}' from '${fromstr}'`);
+					continue;
+				}
 
 				to.connect(from);
 			}

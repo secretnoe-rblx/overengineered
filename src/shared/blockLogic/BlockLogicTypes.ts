@@ -25,6 +25,7 @@ export namespace BlockLogicTypes3 {
 	export type Bool = BCPrimitive<"bool", boolean>;
 	export type Number = BCPrimitive<"number", number>;
 	export type Key = BCPrimitive<"key", string>;
+	export type Vec3 = BCPrimitive<"vector3", Vector3>;
 
 	export type ClampedNumber = BCPrimitive<"clampedNumber", number> & {
 		readonly min: number;
@@ -54,6 +55,7 @@ export namespace BlockLogicTypes3 {
 		readonly bool: Bool;
 		readonly number: Number;
 		readonly key: Key;
+		readonly vector3: Vec3;
 	};
 	export type NonPrimitives = {
 		readonly clampedNumber: ClampedNumber;

@@ -133,6 +133,7 @@ namespace LogicValueStoragesNamespace {
 	export const _number = NewPrimitiveLogicValueStorage("number");
 	export const bool = NewPrimitiveLogicValueStorage("bool");
 	export const key = NewPrimitiveLogicValueStorage("key");
+	export const vector3 = NewPrimitiveLogicValueStorage("vector3");
 	// export const _string = NewPrimitiveLogicValueStorage("number");
 
 	export class clampedNumber extends base<"clampedNumber"> {

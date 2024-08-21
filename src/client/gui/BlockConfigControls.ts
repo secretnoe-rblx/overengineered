@@ -379,49 +379,50 @@ namespace Controls {
 				}
 			}
 		}
-		// export class vector3 extends Base<GuiObject, "vector3"> {
-		// 	constructor(
-		// 		templates: templates,
-		// 		definition: MiniTypes["vector3"],
-		// 		config: ConfigParts<"vector3">,
-		// 	) {
-		// 		super(templates.Multi());
+		export class vector3 extends Base<GuiObject, "vector3"> {
+			constructor(
+				templates: templates,
+				definition: AllMiniTypes["vector3"],
+				config: ConfigParts<"vector3">,
+				args: Args,
+			) {
+				super(templates.Multi());
 
-		// 		const [, cx] = addSingleTypeWrapperAuto(
-		// 			this,
-		// 			"number",
-		// 			"X",
-		// 			{},
-		// 			map(config, (c) => c.X),
-		// 		);
-		// 		const [, cy] = addSingleTypeWrapperAuto(
-		// 			this,
-		// 			"number",
-		// 			"Y",
-		// 			{},
-		// 			map(config, (c) => c.Y),
-		// 		);
-		// 		const [, cz] = addSingleTypeWrapperAuto(
-		// 			this,
-		// 			"number",
-		// 			"Z",
-		// 			{},
-		// 			map(config, (c) => c.Z),
-		// 		);
+				const [, cx] = addSingleTypeWrapperAuto(
+					this,
+					"X",
+					{ type: "number", config: 0 },
+					map(config, (c) => c.X),
+					args,
+				);
+				const [, cy] = addSingleTypeWrapperAuto(
+					this,
+					"Y",
+					{ type: "number", config: 0 },
+					map(config, (c) => c.Y),
+					args,
+				);
+				const [, cz] = addSingleTypeWrapperAuto(
+					this,
+					"Z",
+					{ type: "number", config: 0 },
+					map(config, (c) => c.Z),
+					args,
+				);
 
-		// 		const vec = (parts: OfBlocks<number>, axis: "X" | "Y" | "Z") => {
-		// 			if (axis === "X") return map(config, (c, uuid) => new Vector3(parts[uuid], c.Y, c.Z));
-		// 			if (axis === "Y") return map(config, (c, uuid) => new Vector3(c.X, parts[uuid], c.Z));
-		// 			if (axis === "Z") return map(config, (c, uuid) => new Vector3(c.X, c.Y, parts[uuid]));
+				const vec = (parts: OfBlocks<number>, axis: "X" | "Y" | "Z") => {
+					if (axis === "X") return map(config, (c, uuid) => new Vector3(parts[uuid], c.Y, c.Z));
+					if (axis === "Y") return map(config, (c, uuid) => new Vector3(c.X, parts[uuid], c.Z));
+					if (axis === "Z") return map(config, (c, uuid) => new Vector3(c.X, c.Y, parts[uuid]));
 
-		// 			throw "what";
-		// 		};
+					throw "what";
+				};
 
-		// 		cx.submitted.Connect((n) => this.submitted.Fire((config = vec(n, "X"))));
-		// 		cy.submitted.Connect((n) => this.submitted.Fire((config = vec(n, "Y"))));
-		// 		cz.submitted.Connect((n) => this.submitted.Fire((config = vec(n, "Z"))));
-		// 	}
-		// }
+				cx.submitted.Connect((n) => this.submitted.Fire((config = vec(n, "X"))));
+				cy.submitted.Connect((n) => this.submitted.Fire((config = vec(n, "Y"))));
+				cz.submitted.Connect((n) => this.submitted.Fire((config = vec(n, "Z"))));
+			}
+		}
 		// export class motorRotationSpeed extends Base<GuiObject, "motorRotationSpeed"> {
 		// 	constructor(
 		// 		templates: templates,
@@ -624,7 +625,7 @@ namespace Controls {
 		}
 
 		export type controls = {
-			readonly [k in AllKeys]?: new (
+			readonly [k in AllKeys]: new (
 				templates: templates,
 				definition: AllWithoutDefaultTypes[k],
 				config: ConfigParts<k>,
@@ -632,7 +633,7 @@ namespace Controls {
 			) => Base<GuiObject, k>;
 		};
 		export type genericControls = {
-			readonly [k in AllKeys]?: new (
+			readonly [k in AllKeys]: new (
 				templates: templates,
 				definition: AllWithoutDefaultTypes[AllKeys],
 				config: ConfigParts<AllKeys>,
