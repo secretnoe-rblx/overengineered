@@ -99,6 +99,8 @@ namespace Scene {
 			const onedef = block.logic?.definition.input;
 			if (!onedef) return;
 
+			const deforder = block.logic?.definition.inputOrder;
+
 			this.gui.Visible = Objects.size(onedef) !== 0;
 			if (!this.gui.Visible) return;
 
@@ -140,6 +142,7 @@ namespace Scene {
 					gui,
 					onedef,
 					asObject(configs.mapToMap((c) => $tuple(c.uuid, c.config))),
+					deforder,
 					// Objects.size(configs) === 1 ? configs[0].blockmodel : undefined,
 				),
 			);

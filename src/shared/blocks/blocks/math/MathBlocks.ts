@@ -79,6 +79,7 @@ const defs = {
 		},
 	},
 	num2_num: {
+		inputOrder: ["value1", "value2"],
 		input: {
 			value1: {
 				displayName: "Value 1",
@@ -205,6 +206,7 @@ const mathBlocks = {
 		modelSource: autoModel("TripleGenericLogicBlockPrefab", "CLAMP", categories.math),
 		logic: logic(
 			{
+				inputOrder: ["value", "min", "max"],
 				input: {
 					value: {
 						displayName: "Value",

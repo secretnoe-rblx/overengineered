@@ -227,7 +227,12 @@ export const _Tests = () => {
 
 		const list = control.add(new Control(frame));
 
-		const mcc = new MultiBlockConfigControl(frame, def, { b1, b2 } as { readonly [k in BlockUuid]: cfg[k] });
+		const mcc = new MultiBlockConfigControl(
+			frame,
+			def,
+			{ b1, b2 } as { readonly [k in BlockUuid]: cfg[k] },
+			undefined,
+		);
 		mcc.submitted.Connect(print);
 		list.add(mcc);
 	}

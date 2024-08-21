@@ -771,10 +771,31 @@ export class MultiBlockConfigControl extends Control {
 	private readonly _submitted = new ArgsSignal<[config: BlocksConfig]>();
 	readonly submitted = this._submitted.asReadonly();
 
-	constructor(gui: GuiObject, definitions: VisualBlockConfigDefinitions, configs: BlocksConfig) {
+	constructor(
+		gui: GuiObject,
+		definitions: VisualBlockConfigDefinitions,
+		configs: BlocksConfig,
+		order: readonly string[] | undefined,
+	) {
 		super(gui);
 
-		for (const [k, definition] of pairs(definitions)) {
+		if (order) {
+			const nonexistent = asMap(definitions)
+				.keys()
+				.filter((k) => !order.includes(k));
+			if (nonexistent.size() > 0) {
+				throw `Some definition keys were not present in the order (${nonexistent.join()})`;
+			}
+
+			const wrong = order.filter((k) => !(k in definitions));
+			if (wrong.size() > 0) {
+				throw `Some order keys were not present in the definitions (${wrong.join()})`;
+			}
+		}
+
+		for (const k of order ?? asMap(definitions).keys()) {
+			const definition = definitions[k];
+
 			const lconfigs = map(configs, (c) => c[k]);
 			const wrapper = this.add(new ConfigAutoValueWrapper(template.Clone(), definition, lconfigs));
 
