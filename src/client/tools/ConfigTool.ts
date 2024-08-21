@@ -148,10 +148,10 @@ namespace Scene {
 			);
 			this.currentConfigControl = configControl;
 
-			// configControl.travelToConnectedPressed.Connect((uuid) => {
-			// 	this.tool.unselectAll();
-			// 	this.tool.selectBlockByUuid(uuid);
-			// });
+			configControl.travelledTo.Connect((uuid) => {
+				this.tool.unselectAll();
+				this.tool.selectBlockByUuid(uuid);
+			});
 			configControl.submitted.Connect((config) => {
 				const selected = this.tool.selected.get();
 				$log(`Sending (${selected.size()}) block config values ${JSON.serialize(asMap(config).values())}`);

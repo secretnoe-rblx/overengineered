@@ -1,5 +1,6 @@
 import { Colors } from "client/gui/Colors";
 import { Control } from "client/gui/Control";
+import { ButtonControl } from "client/gui/controls/Button";
 import { CheckBoxControl } from "client/gui/controls/CheckBoxControl";
 import { DropdownList } from "client/gui/controls/DropdownList";
 import { KeyOrStringChooserControl } from "client/gui/controls/KeyOrStringChooserControl";
@@ -18,11 +19,7 @@ import type { DropdownListDefinition } from "client/gui/controls/DropdownList";
 import type { KeyOrStringChooserControlDefinition } from "client/gui/controls/KeyOrStringChooserControl";
 import type { NumberTextBoxControlDefinition } from "client/gui/controls/NumberTextBoxControl";
 import type { TextBoxControlDefinition } from "client/gui/controls/TextBoxControl";
-import type {
-	BlockConfigPart,
-	BlockConfigPrimitiveByType,
-	BlockConfigTypesByPrimitive,
-} from "shared/blockLogic/BlockConfig";
+import type { BlockConfigPart, BlockConfigPrimitiveByType } from "shared/blockLogic/BlockConfig";
 import type { BlockLogicWithConfigDefinitionTypes } from "shared/blockLogic/BlockLogic";
 import type { BlockLogicTypes3 } from "shared/blockLogic/BlockLogicTypes";
 
@@ -50,9 +47,6 @@ export type VisualBlockConfigDefinitions = {
 
 type ConfigPart<TKey extends AllKeys> = AllTypes[TKey]["config"];
 type ConfigParts<TKey extends AllKeys> = OfBlocks<ConfigPart<TKey>>;
-
-type _ConfigPart<TKey extends PrimitiveKeys> = AllTypes[BlockConfigTypesByPrimitive<TKey>]["config"];
-type _ConfigParts<TKey extends PrimitiveKeys> = OfBlocks<ConfigPart<TKey>>;
 
 type TypedConfigPart = BlockConfigPart<PrimitiveKeys>;
 type BlocksConfigPart = OfBlocks<TypedConfigPart>;
@@ -153,11 +147,12 @@ namespace Controls {
 			displayName: string,
 			def: AllMiniTypes[TKey] & { readonly type: TKey },
 			configs: ConfigParts<TKey>,
+			args: Args,
 		) => {
 			const ctor = controls[def.type];
 			if (!ctor) throw `No ctor for block config visual type ${def.type}`;
 
-			const control = new ctor(templates, def as AllWithoutDefaultTypes[AllKeys], configs);
+			const control = new ctor(templates, def as AllWithoutDefaultTypes[AllKeys], configs, args);
 			control.instance.HeadingLabel.Text = displayName;
 
 			const [wrapper] = addSingleTypeWrapper(parent, control);
@@ -184,9 +179,22 @@ namespace Controls {
 				super(templates.Unset());
 			}
 		}
-		export class wire extends Base<GuiObject, "wire"> {
-			constructor(templates: templates) {
+		export class wire extends Base<GuiButton, "wire"> {
+			constructor(
+				templates: templates,
+				definition: AllMiniTypes["wire"],
+				config: ConfigParts<"wire">,
+				args: Args,
+			) {
 				super(templates.Redirect());
+
+				const btn = this.add(
+					new ButtonControl(this.gui.Control, () => args.travelTo(Objects.firstValue(config)!.blockUuid)),
+				);
+
+				if (asMap(config).size() !== 1) {
+					btn.setInteractable(false);
+				}
 			}
 		}
 
@@ -325,7 +333,12 @@ namespace Controls {
 		// }
 
 		export class keybool extends Base<GuiObject, "keybool"> {
-			constructor(templates: templates, definition: AllMiniTypes["keybool"], config: ConfigParts<"keybool">) {
+			constructor(
+				templates: templates,
+				definition: AllMiniTypes["keybool"],
+				config: ConfigParts<"keybool">,
+				args: Args,
+			) {
 				super(templates.Multi());
 
 				const [, ckey] = addSingleTypeWrapperAuto(
@@ -333,6 +346,7 @@ namespace Controls {
 					"Key",
 					{ type: "key", config: definition.config.key },
 					map(config, (c) => c.key),
+					args,
 				);
 				ckey.submitted.Connect((v) =>
 					this.submitted.Fire((config = map(config, (c, uuid) => ({ ...c, key: v[uuid] })))),
@@ -344,6 +358,7 @@ namespace Controls {
 						"Switch",
 						{ type: "bool", config: definition.config.switch },
 						map(config, (c) => c.switch),
+						args,
 					);
 					cswitch.submitted.Connect((v) =>
 						this.submitted.Fire((config = map(config, (c, uuid) => ({ ...c, switch: v[uuid] })))),
@@ -356,6 +371,7 @@ namespace Controls {
 						"Reversed",
 						{ type: "bool", config: definition.config.reversed },
 						map(config, (c) => c.reversed),
+						args,
 					);
 					creversed.submitted.Connect((v) =>
 						this.submitted.Fire((config = map(config, (c, uuid) => ({ ...c, reversed: v[uuid] })))),
@@ -549,6 +565,7 @@ namespace Controls {
 				readonly definition: AllMiniTypes["key"];
 				readonly config: ConfigParts<"key">;
 			}[],
+			args: Args,
 		): { readonly submitted: ReadonlyArgsSignal<[config: { readonly [k in TKeys]?: string }]> } & {
 			readonly [k in TKeys]: {
 				readonly wrapper: ConfigValueWrapper;
@@ -566,6 +583,7 @@ namespace Controls {
 					displayName,
 					{ type: "key", ...definition },
 					config,
+					args,
 				);
 				const keycontrol = control as key;
 				ret[key] = { wrapper, control: keycontrol };
@@ -610,6 +628,7 @@ namespace Controls {
 				templates: templates,
 				definition: AllWithoutDefaultTypes[k],
 				config: ConfigParts<k>,
+				parent: Args,
 			) => Base<GuiObject, k>;
 		};
 		export type genericControls = {
@@ -617,10 +636,14 @@ namespace Controls {
 				templates: templates,
 				definition: AllWithoutDefaultTypes[AllKeys],
 				config: ConfigParts<AllKeys>,
+				parent: Args,
 			) => Base<GuiObject, AllKeys>;
 		};
 	}
 
+	export type Args = {
+		travelTo(uuid: BlockUuid): void;
+	};
 	export const controls = {
 		...Controls,
 		number: Controls._number,
@@ -664,7 +687,12 @@ class ConfigAutoValueWrapper extends Control<ConfigValueWrapperDefinition> {
 	private readonly _submitted = new ArgsSignal<[config: BlocksConfigPart]>();
 	readonly submitted = this._submitted.asReadonly();
 
-	constructor(gui: ConfigValueWrapperDefinition, definition: VisualBlockConfigDefinition, configs: BlocksConfigPart) {
+	constructor(
+		gui: ConfigValueWrapperDefinition,
+		definition: VisualBlockConfigDefinition,
+		configs: BlocksConfigPart,
+		args: Controls.Args,
+	) {
 		super(gui);
 
 		const control = this.add(new ConfigValueWrapper(gui));
@@ -738,19 +766,21 @@ class ConfigAutoValueWrapper extends Control<ConfigValueWrapperDefinition> {
 						Controls.templates,
 						{ type: "unset", config: {} as BlockLogicTypes3.UnsetValue },
 						{},
+						args,
 					);
 				} else if (selectedType === "wire") {
 					cfgcontrol = new ctor(
 						Controls.templates,
 						{ type: "wire", config: undefined! },
 						map(configs, (c) => c.config),
+						args,
 					);
 				} else {
 					const def = definition.types[selectedType];
 					if (!def) return;
 
 					const partialConfigs = map(configs, (c) => c.config);
-					cfgcontrol = new ctor(Controls.templates, def, partialConfigs);
+					cfgcontrol = new ctor(Controls.templates, def, partialConfigs, args);
 				}
 
 				cfgcontrol.instance.HeadingLabel.Text = definition.displayName;
@@ -767,7 +797,10 @@ class ConfigAutoValueWrapper extends Control<ConfigValueWrapperDefinition> {
 	}
 }
 
-export class MultiBlockConfigControl extends Control {
+export class MultiBlockConfigControl extends Control implements Controls.Args {
+	private readonly _travelledTo = new ArgsSignal<[uuid: BlockUuid]>();
+	readonly travelledTo = this._travelledTo.asReadonly();
+
 	private readonly _submitted = new ArgsSignal<[config: BlocksConfig]>();
 	readonly submitted = this._submitted.asReadonly();
 
@@ -797,11 +830,15 @@ export class MultiBlockConfigControl extends Control {
 			const definition = definitions[k];
 
 			const lconfigs = map(configs, (c) => c[k]);
-			const wrapper = this.add(new ConfigAutoValueWrapper(template.Clone(), definition, lconfigs));
+			const wrapper = this.add(new ConfigAutoValueWrapper(template.Clone(), definition, lconfigs, this));
 
 			wrapper.submitted.Connect((v) =>
 				this._submitted.Fire((configs = map(configs, (c, uuid) => ({ ...c, [k]: v[uuid] })))),
 			);
 		}
+	}
+
+	travelTo(uuid: BlockUuid): void {
+		this._travelledTo.Fire(uuid);
 	}
 }
