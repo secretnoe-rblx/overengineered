@@ -192,9 +192,6 @@ export abstract class BlockLogic<TDef extends BlockLogicBothDefinitions> extends
 			}
 
 			const cfg = config[key];
-			const def = this.definition.input[key].types[cfg.type];
-			if (!def) continue;
-
 			if (cfg.type === "wire") {
 				const outputBlock = allBlocks.get(cfg.config.blockUuid);
 				if (!outputBlock) {
@@ -215,6 +212,9 @@ export abstract class BlockLogic<TDef extends BlockLogicBothDefinitions> extends
 
 				continue;
 			}
+
+			const def = this.definition.input[key].types[cfg.type];
+			if (!def) continue;
 
 			const storageCtor = LogicValueStorages[def.type];
 			const storage = new storageCtor(cfg.config as never);

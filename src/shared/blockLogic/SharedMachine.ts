@@ -119,8 +119,6 @@ export class SharedMachine extends ContainerComponent<GenericBlockLogic> {
 		const logicMap = this.blocksMap.mapToMap((k, v) => $tuple(k, v.logic));
 
 		for (const [, { block, logic }] of this.blocksMap) {
-			// if (!block.instance) continue;
-
 			const def = this.blockList.blocks[block.id]?.logic?.definition;
 			if (!def) continue; // should we just continue or throw because this is strange?
 
