@@ -6,7 +6,7 @@ import { VehicleSeatBlockLogic } from "shared/blocks/blocks/VehicleSeatBlock";
 import { ContainerComponent } from "shared/component/ContainerComponent";
 import { GameDefinitions } from "shared/data/GameDefinitions";
 import { ObservableValue } from "shared/event/ObservableValue";
-import type { GenericBlockLogic } from "shared/blockLogic/BlockLogic4";
+import type { GenericBlockLogic } from "shared/blockLogic/BlockLogic";
 
 type BlockData = {
 	readonly block: PlacedBlockData;

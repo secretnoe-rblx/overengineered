@@ -1,5 +1,6 @@
 import { Objects } from "shared/fixes/objects";
-import type { BlockLogicTypes3, BlockLogicFullInputDef } from "shared/blockLogic/BlockLogic4";
+import type { BlockLogicFullInputDef } from "shared/blockLogic/BlockLogic";
+import type { BlockLogicTypes3 } from "shared/blockLogic/BlockLogicTypes";
 
 type Primitives = BlockLogicTypes3.Primitives;
 type PrimitiveKeys = keyof Primitives;

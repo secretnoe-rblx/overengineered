@@ -1,4 +1,4 @@
-import type { BlockLogicFullOutputDef } from "shared/blockLogic/BlockLogic4";
+import type { BlockLogicFullOutputDef } from "shared/blockLogic/BlockLogic";
 
 export namespace BlockConfigDefinitions {
 	export const any = {

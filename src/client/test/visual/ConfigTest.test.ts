@@ -3,7 +3,7 @@ import { Control } from "client/gui/Control";
 import { Element } from "shared/Element";
 import type { VisualBlockConfigDefinitions } from "client/gui/BlockConfigControls";
 import type { BlockConfigPart } from "shared/blockLogic/BlockConfig";
-import type { BlockLogicTypes3 } from "shared/blockLogic/BlockLogic4";
+import type { BlockLogicTypes3 } from "shared/blockLogic/BlockLogicTypes";
 
 export const _Tests = () => {
 	const frame = Element.create(

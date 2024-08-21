@@ -1,7 +1,7 @@
-import { InstanceBlockLogic as InstanceBlockLogic4 } from "shared/blockLogic/BlockLogic4";
+import { InstanceBlockLogic as InstanceBlockLogic } from "shared/blockLogic/BlockLogic";
 import { BlockCreation } from "shared/blocks/BlockCreation";
 import { AutoC2SRemoteEvent } from "shared/event/C2SRemoteEvent";
-import type { BlockLogicFullBothDefinitions, InstanceBlockLogicArgs } from "shared/blockLogic/BlockLogic4";
+import type { BlockLogicFullBothDefinitions, InstanceBlockLogicArgs } from "shared/blockLogic/BlockLogic";
 import type { BlockBuilder } from "shared/blocks/Block";
 
 const definition = {
@@ -27,7 +27,7 @@ const definition = {
 } satisfies BlockLogicFullBothDefinitions;
 
 export type { DisconnectBlockLogic };
-class DisconnectBlockLogic extends InstanceBlockLogic4<typeof definition> {
+class DisconnectBlockLogic extends InstanceBlockLogic<typeof definition> {
 	static readonly events = {
 		disconnect: new AutoC2SRemoteEvent<{ readonly block: BlockModel }>("b_disconnectblock_disconnect"),
 	} as const;

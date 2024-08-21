@@ -3,11 +3,11 @@ import { Keys } from "shared/fixes/Keys";
 import type { BlockConfigPrimitiveByType } from "shared/blockLogic/BlockConfig";
 import type {
 	BlockLogicTickContext,
-	BlockLogicTypes3,
-	BlockLogic4,
+	BlockLogic,
 	BlockLogicBothDefinitions,
 	BlockLogicNoConfigDefinitionTypes,
-} from "shared/blockLogic/BlockLogic4";
+} from "shared/blockLogic/BlockLogic";
+import type { BlockLogicTypes3 } from "shared/blockLogic/BlockLogicTypes";
 
 type Primitives = BlockLogicTypes3.Primitives;
 type NonPrimitives = BlockLogicTypes3.NonPrimitives;
@@ -217,7 +217,7 @@ export class BlockBackedInputLogicValueStorage<TType extends PrimitiveKeys>
 	implements ReadonlyLogicValueStorage<TType>
 {
 	constructor(
-		private readonly block: BlockLogic4<BlockLogicBothDefinitions>,
+		private readonly block: BlockLogic<BlockLogicBothDefinitions>,
 		private readonly key: string,
 	) {}
 

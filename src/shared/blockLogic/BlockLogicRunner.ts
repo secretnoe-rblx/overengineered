@@ -1,7 +1,7 @@
 import { Component } from "shared/component/Component";
-import type { BlockLogic4, BlockLogicFullBothDefinitions, BlockLogicTickContext } from "shared/blockLogic/BlockLogic4";
+import type { BlockLogic, BlockLogicFullBothDefinitions, BlockLogicTickContext } from "shared/blockLogic/BlockLogic";
 
-type Logic = BlockLogic4<BlockLogicFullBothDefinitions>;
+type Logic = BlockLogic<BlockLogicFullBothDefinitions>;
 
 export class BlockLogicRunner extends Component {
 	private readonly blocks = new Set<Logic>();

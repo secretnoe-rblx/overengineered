@@ -1,11 +1,11 @@
-import { Add } from "shared/blockLogic/BlockLogic4";
+import { Add } from "shared/blockLogic/BlockLogic";
 import { LogicValueStorages, BlockBackedInputLogicValueStorage } from "shared/blockLogic/BlockLogicValueStorage";
 import { ConstantBlock } from "shared/blocks/blocks/ConstantBlock";
-import type { BlockLogic4, BlockLogicBothDefinitions } from "shared/blockLogic/BlockLogic4";
+import type { BlockLogic, BlockLogicBothDefinitions } from "shared/blockLogic/BlockLogic";
 
-export namespace BlockLogic4Tests {
+export namespace BlockLogicTests {
 	export function test2() {
-		const blocks: readonly BlockLogic4<BlockLogicBothDefinitions>[] = [
+		const blocks: readonly BlockLogic<BlockLogicBothDefinitions>[] = [
 			new Add({}),
 			new Add({}),
 			new ConstantBlock.logic.ctor({}),
@@ -31,5 +31,5 @@ export namespace BlockLogic4Tests {
 	}
 }
 export namespace _Tests {
-	export const BlockLogic4T = BlockLogic4Tests;
+	export const BlockLogicT = BlockLogicTests;
 }

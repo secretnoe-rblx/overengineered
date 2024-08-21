@@ -1,7 +1,7 @@
 import { RunService, Players } from "@rbxts/services";
-import { InstanceBlockLogic } from "shared/blockLogic/BlockLogic4";
+import { InstanceBlockLogic } from "shared/blockLogic/BlockLogic";
 import { BlockCreation } from "shared/blocks/BlockCreation";
-import type { BlockLogicFullBothDefinitions, InstanceBlockLogicArgs } from "shared/blockLogic/BlockLogic4";
+import type { BlockLogicFullBothDefinitions, InstanceBlockLogicArgs } from "shared/blockLogic/BlockLogic";
 import type { SharedMachine } from "shared/blockLogic/SharedMachine";
 import type { BlockBuilder } from "shared/blocks/Block";
 

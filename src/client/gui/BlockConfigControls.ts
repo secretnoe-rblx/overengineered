@@ -23,7 +23,8 @@ import type {
 	BlockConfigPrimitiveByType,
 	BlockConfigTypesByPrimitive,
 } from "shared/blockLogic/BlockConfig";
-import type { BlockLogicWithConfigDefinitionTypes, BlockLogicTypes3 } from "shared/blockLogic/BlockLogic4";
+import type { BlockLogicWithConfigDefinitionTypes } from "shared/blockLogic/BlockLogic";
+import type { BlockLogicTypes3 } from "shared/blockLogic/BlockLogicTypes";
 
 type Primitives = BlockLogicTypes3.Primitives;
 type PrimitiveKeys = keyof Primitives;

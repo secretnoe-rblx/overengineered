@@ -1,4 +1,4 @@
-import { CalculatableBlockLogic } from "shared/blockLogic/BlockLogic4";
+import { CalculatableBlockLogic } from "shared/blockLogic/BlockLogic";
 import { BlockConfigDefinitions } from "shared/blocks/BlockConfigDefinitions";
 import { BlockCreation } from "shared/blocks/BlockCreation";
 import type {
@@ -6,7 +6,7 @@ import type {
 	AllOutputKeysToObject,
 	BlockLogicArgs,
 	BlockLogicFullBothDefinitions,
-} from "shared/blockLogic/BlockLogic4";
+} from "shared/blockLogic/BlockLogic";
 import type { BlockBuilder } from "shared/blocks/Block";
 
 const definition = {
