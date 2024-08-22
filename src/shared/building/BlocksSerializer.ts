@@ -268,8 +268,25 @@ const v8: UpgradableBlocksSerializer<SerializedBlocks<SerializedBlockV3>, typeof
 				return config;
 			}
 			if (block.id === "disconnectblock") {
+				type disconnect = {
+					input: {
+						disconnect: {
+							displayName: "Disconnect key";
+							type: "keybool";
+							default: boolean;
+							config: {
+								key: KeyCode;
+								switch: boolean;
+								reversed: boolean;
+							};
+							canBeSwitch: false;
+							canBeReversed: false;
+						};
+					};
+					output: {};
+				};
 				type config = partial<{
-					readonly [k in keyof reg["disconnectblock"]["input"]]: reg["disconnectblock"]["input"][k]["config"];
+					readonly [k in keyof disconnect["input"]]: disconnect["input"][k]["config"];
 				}>;
 
 				const cfg = block.config as

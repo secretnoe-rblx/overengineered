@@ -35,7 +35,7 @@ class DisconnectBlockLogic extends InstanceBlockLogic<typeof definition> {
 	constructor(block: InstanceBlockLogicArgs) {
 		super(definition, block);
 
-		this.on((ctx, { disconnect }) => {
+		this.on(({ disconnect }) => {
 			if (disconnect) {
 				DisconnectBlockLogic.events.disconnect.send({ block: this.instance });
 				this.disable();

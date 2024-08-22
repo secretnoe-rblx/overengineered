@@ -251,13 +251,13 @@ export abstract class BlockLogic<TDef extends BlockLogicBothDefinitions> extends
 	}
 	protected on(
 		func: (
-			ctx: BlockLogicTickContext,
 			inputs: AllInputKeysToArgsObject<TDef["input"]> & AllInputKeysToTypesObject<TDef["input"]>,
+			ctx: BlockLogicTickContext,
 		) => void,
 	): void {
 		this.onTick((ctx) => {
 			const inputs = inputValuesToFullObject(ctx, this.input);
-			func(ctx, inputs);
+			func(inputs, ctx);
 		});
 	}
 }

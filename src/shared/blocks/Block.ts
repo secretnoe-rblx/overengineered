@@ -3,6 +3,8 @@ import type { BlockLogicFullBothDefinitions, GenericBlockLogicCtor } from "share
 import type { BlockCreation } from "shared/blocks/BlockCreation";
 import type { BasicOperationBlockIds } from "shared/blocks/blocks/BasicOperationBlocks";
 import type { BuildingBlockIds } from "shared/blocks/blocks/BuildingBlocks";
+import type { DisconnectBlock } from "shared/blocks/blocks/DisconnectBlock";
+import type { WheelBlockIds } from "shared/blocks/blocks/WheelBlocks";
 
 export type BlockCategoryPath = readonly string[];
 export type BlockLogicInfo = {
@@ -43,7 +45,9 @@ export type BlockBuilderWithoutId = Omit<BlockBuilder, "id">;
 export type BlockBuilderWithoutIdAndDefaults = MakePartial<BlockBuilderWithoutId, keyof typeof BlockCreation.defaults>;
 
 declare global {
-	type BlockId = string | (string & BuildingBlockIds & BasicOperationBlockIds);
+	type BlockId =
+		| string
+		| (string & BuildingBlockIds & BasicOperationBlockIds & WheelBlockIds & (typeof DisconnectBlock)["id"]);
 
 	type Block = Omit<BlockBuilder, "id" | (`${string}Source` & keyof BlockBuilder)> & {
 		readonly id: BlockId;
