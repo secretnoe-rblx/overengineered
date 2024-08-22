@@ -1,6 +1,6 @@
 import type { PlacedBlockConfig } from "shared/blockLogic/BlockConfig";
 
-export namespace BlockLogicTypes3 {
+export namespace BlockLogicTypes {
 	type BCType<TType extends string, TDefault, TConfig> = {
 		readonly type: TType;
 		readonly default: TDefault;
@@ -24,8 +24,14 @@ export namespace BlockLogicTypes3 {
 
 	export type Bool = BCPrimitive<"bool", boolean>;
 	export type Number = BCPrimitive<"number", number>;
+	export type String = BCPrimitive<"string", string>;
 	export type Key = BCPrimitive<"key", string>;
 	export type Vec3 = BCPrimitive<"vector3", Vector3>;
+	export type Color = BCPrimitive<"color", Color3>;
+	export type Byte = BCPrimitive<"byte", number>;
+	export type ByteArray = BCPrimitive<"bytearray", readonly number[]> & {
+		readonly lengthLimit: number;
+	};
 
 	export type ClampedNumber = BCPrimitive<"clampedNumber", number> & {
 		readonly min: number;
@@ -54,8 +60,12 @@ export namespace BlockLogicTypes3 {
 
 		readonly bool: Bool;
 		readonly number: Number;
+		readonly string: String;
 		readonly key: Key;
 		readonly vector3: Vec3;
+		readonly color: Color;
+		readonly byte: Byte;
+		readonly bytearray: ByteArray;
 	};
 	export type NonPrimitives = {
 		readonly clampedNumber: ClampedNumber;

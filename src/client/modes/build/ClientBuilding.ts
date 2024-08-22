@@ -4,7 +4,7 @@ import { BlockManager } from "shared/building/BlockManager";
 import { SharedBuilding } from "shared/building/SharedBuilding";
 import { Operation } from "shared/Operation";
 import { CustomRemotes } from "shared/Remotes";
-import type { BlockLogicTypes3 } from "shared/blockLogic/BlockLogicTypes";
+import type { BlockLogicTypes } from "shared/blockLogic/BlockLogicTypes";
 import type { SharedPlot } from "shared/building/SharedPlot";
 
 const building = CustomRemotes.building;
@@ -370,7 +370,7 @@ export namespace ClientBuilding {
 	function logicDisconnect({ plot, inputBlock: _inputBlock, inputConnection }: LogicDisconnectArgs) {
 		const inputBlock = BlockManager.manager.uuid.get(_inputBlock);
 		const output = BlockManager.manager.config.get(_inputBlock)![inputConnection]
-			.config as BlockLogicTypes3.WireValue;
+			.config as BlockLogicTypes.WireValue;
 
 		return ActionController.instance.execute(
 			"Disconnect logic",

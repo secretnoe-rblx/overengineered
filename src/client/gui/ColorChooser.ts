@@ -136,7 +136,6 @@ class ColorChooserInputs extends Control<ColorChooserDefinition["Inputs"]> {
 	}
 }
 
-/** Color chooser, not an actual wheel */
 export class ColorChooser extends Control<ColorChooserDefinition> {
 	readonly value;
 

@@ -1,11 +1,11 @@
 import { Objects } from "shared/fixes/objects";
 import type { BlockLogicFullInputDef } from "shared/blockLogic/BlockLogic";
-import type { BlockLogicTypes3 } from "shared/blockLogic/BlockLogicTypes";
+import type { BlockLogicTypes } from "shared/blockLogic/BlockLogicTypes";
 
-type Primitives = BlockLogicTypes3.Primitives;
+type Primitives = BlockLogicTypes.Primitives;
 type PrimitiveKeys = keyof Primitives;
 
-type AllTypes = BlockLogicTypes3.Types;
+type AllTypes = BlockLogicTypes.Types;
 type AllKeys = keyof AllTypes;
 
 export type BlockConfigTypesByPrimitive<TKeys extends PrimitiveKeys> = {

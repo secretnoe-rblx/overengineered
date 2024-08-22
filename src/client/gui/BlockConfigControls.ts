@@ -1,12 +1,16 @@
+import { ColorChooser } from "client/gui/ColorChooser";
 import { Colors } from "client/gui/Colors";
 import { Control } from "client/gui/Control";
 import { ButtonControl } from "client/gui/controls/Button";
+import { ByteEditor } from "client/gui/controls/ByteEditorControl";
 import { CheckBoxControl } from "client/gui/controls/CheckBoxControl";
 import { DropdownList } from "client/gui/controls/DropdownList";
 import { KeyOrStringChooserControl } from "client/gui/controls/KeyOrStringChooserControl";
 import { NumberTextBoxControl } from "client/gui/controls/NumberTextBoxControl";
 import { SliderControl } from "client/gui/controls/SliderControl";
+import { TextBoxControl } from "client/gui/controls/TextBoxControl";
 import { Gui } from "client/gui/Gui";
+import { MemoryEditorPopup } from "client/gui/popup/MemoryEditorPopup";
 import { BlockWireManager } from "shared/blockLogic/BlockWireManager";
 import { ComponentChild } from "shared/component/ComponentChild";
 import { ObservableValue } from "shared/event/ObservableValue";
@@ -21,13 +25,13 @@ import type { NumberTextBoxControlDefinition } from "client/gui/controls/NumberT
 import type { TextBoxControlDefinition } from "client/gui/controls/TextBoxControl";
 import type { BlockConfigPart, BlockConfigPrimitiveByType } from "shared/blockLogic/BlockConfig";
 import type { BlockLogicWithConfigDefinitionTypes } from "shared/blockLogic/BlockLogic";
-import type { BlockLogicTypes3 } from "shared/blockLogic/BlockLogicTypes";
+import type { BlockLogicTypes } from "shared/blockLogic/BlockLogicTypes";
 
-type Primitives = BlockLogicTypes3.Primitives;
+type Primitives = BlockLogicTypes.Primitives;
 type PrimitiveKeys = keyof Primitives;
-type NonPrimitives = BlockLogicTypes3.NonPrimitives;
+type NonPrimitives = BlockLogicTypes.NonPrimitives;
 type NonPrimitiveKeys = keyof NonPrimitives;
-type AllTypes = BlockLogicTypes3.Types;
+type AllTypes = BlockLogicTypes.Types;
 type AllKeys = keyof AllTypes;
 
 /** {@link BlockConfigTypes3.Types} without the `default` and `config` properties */
@@ -218,20 +222,16 @@ namespace Controls {
 				control.submitted.Connect((v) => this.submitted.Fire((config = map(config, (_) => v))));
 			}
 		}
-		// export class _string extends Base<TextBoxControlDefinition, "string"> {
-		// 	constructor(
-		// 		templates: templates,
-		// 		definition: MiniTypes["string"],
-		// 		config: ConfigParts<"string">,
-		// 	) {
-		// 		super(templates.Text());
+		export class _string extends Base<TextBoxControlDefinition, "string"> {
+			constructor(templates: templates, definition: AllMiniTypes["string"], config: ConfigParts<"string">) {
+				super(templates.Text());
 
-		// 		const control = this.add(new TextBoxControl(this.control));
-		// 		control.text.set(sameOrUndefined(config) ?? "");
+				const control = this.add(new TextBoxControl(this.control));
+				control.text.set(sameOrUndefined(config) ?? "");
 
-		// 		control.submitted.Connect((v) => this.submitted.Fire((config = map(config, (_) => v))));
-		// 	}
-		// }
+				control.submitted.Connect((v) => this.submitted.Fire((config = map(config, (_) => v))));
+			}
+		}
 		export class clampedNumber extends Base<SliderControlDefinition, "clampedNumber"> {
 			constructor(
 				templates: templates,
@@ -251,25 +251,21 @@ namespace Controls {
 				control.submitted.Connect((v) => this.submitted.Fire((config = map(config, (_) => v))));
 			}
 		}
-		// export class byte extends Base<ByteControlDefinition, "byte"> {
-		// 	constructor(
-		// 		templates: templates,
-		// 		definition: MiniTypes["byte"],
-		// 		config: ConfigParts<"byte">,
-		// 	) {
-		// 		super(templates.Byte());
+		export class byte extends Base<ByteControlDefinition, "byte"> {
+			constructor(templates: templates, definition: AllMiniTypes["byte"], config: ConfigParts<"byte">) {
+				super(templates.Byte());
 
-		// 		const control = this.add(
-		// 			new ByteEditor(this.control, {
-		// 				Buttons: this.gui.Control.Bottom.Buttons,
-		// 				TextBox: this.gui.Control.Top.TextBox,
-		// 			}),
-		// 		);
-		// 		control.value.set(sameOrUndefined(config) ?? 0);
+				const control = this.add(
+					new ByteEditor(this.control, {
+						Buttons: this.gui.Control.Bottom.Buttons,
+						TextBox: this.gui.Control.Top.TextBox,
+					}),
+				);
+				control.value.set(sameOrUndefined(config) ?? 0);
 
-		// 		control.submitted.Connect((v) => this.submitted.Fire((config = map(config, (_) => v))));
-		// 	}
-		// }
+				control.submitted.Connect((v) => this.submitted.Fire((config = map(config, (_) => v))));
+			}
+		}
 		export class key extends Base<KeyOrStringChooserControlDefinition, "key"> {
 			readonly keyChooser;
 
@@ -282,55 +278,47 @@ namespace Controls {
 				this.keyChooser.submitted.Connect((v) => this.submitted.Fire((config = map(config, (_) => v))));
 			}
 		}
-		// export class bytearray extends Base<GuiButton, "bytearray"> {
-		// 	constructor(
-		// 		templates: templates,
-		// 		definition: MiniTypes["bytearray"],
-		// 		config: ConfigParts<"bytearray">,
-		// 	) {
-		// 		super(templates.ByteArray());
+		export class bytearray extends Base<GuiButton, "bytearray"> {
+			constructor(templates: templates, definition: AllMiniTypes["bytearray"], config: ConfigParts<"bytearray">) {
+				super(templates.ByteArray());
 
-		// 		const value = sameOrUndefined(config, (left, right) => {
-		// 			if (left.size() !== right.size()) {
-		// 				return false;
-		// 			}
+				const value = sameOrUndefined(config, (left, right) => {
+					if (left.size() !== right.size()) {
+						return false;
+					}
 
-		// 			for (let i = 0; i < left.size(); i++) {
-		// 				if (left[i] !== right[i]) {
-		// 					return false;
-		// 				}
-		// 			}
+					for (let i = 0; i < left.size(); i++) {
+						if (left[i] !== right[i]) {
+							return false;
+						}
+					}
 
-		// 			return true;
-		// 		});
+					return true;
+				});
 
-		// 		const control = this.add(
-		// 			new ButtonControl(this.control, () => {
-		// 				MemoryEditorPopup.showPopup(definition.lengthLimit, [...(value ?? [])], (v) =>
-		// 					this.submitted.Fire((config = map(config, (_) => v))),
-		// 				);
-		// 			}),
-		// 		);
+				const control = this.add(
+					new ButtonControl(this.control, () => {
+						MemoryEditorPopup.showPopup(definition.lengthLimit, [...(value ?? [])], (v) =>
+							this.submitted.Fire((config = map(config, (_) => v))),
+						);
+					}),
+				);
 
-		// 		if (!value) {
-		// 			control.setInteractable(false);
-		// 		}
-		// 	}
-		// }
-		// export class color extends Base<ColorChooserDefinition, "color"> {
-		// 	constructor(
-		// 		templates: templates,
-		// 		definition: MiniTypes["color"],
-		// 		config: ConfigParts<"color">,
-		// 	) {
-		// 		super(templates.Color());
+				if (!value) {
+					control.setInteractable(false);
+				}
+			}
+		}
+		export class color extends Base<ColorChooserDefinition, "color"> {
+			constructor(templates: templates, definition: AllMiniTypes["color"], config: ConfigParts<"color">) {
+				super(templates.Color());
 
-		// 		const control = this.add(new ColorChooser(this.control));
-		// 		control.value.set(sameOrUndefined(config) ?? Colors.white);
+				const control = this.add(new ColorChooser(this.control));
+				control.value.set(sameOrUndefined(config) ?? Colors.white);
 
-		// 		control.value.submitted.Connect((v) => this.submitted.Fire((config = map(config, (_) => v))));
-		// 	}
-		// }
+				control.value.submitted.Connect((v) => this.submitted.Fire((config = map(config, (_) => v))));
+			}
+		}
 
 		export class keybool extends Base<GuiObject, "keybool"> {
 			constructor(
@@ -648,7 +636,7 @@ namespace Controls {
 	export const controls = {
 		...Controls,
 		number: Controls._number,
-		// string: Controls._string,
+		string: Controls._string,
 	} satisfies Controls.controls as Controls.genericControls;
 }
 
@@ -765,7 +753,7 @@ class ConfigAutoValueWrapper extends Control<ConfigValueWrapperDefinition> {
 				if (selectedType === "unset") {
 					cfgcontrol = new ctor(
 						Controls.templates,
-						{ type: "unset", config: {} as BlockLogicTypes3.UnsetValue },
+						{ type: "unset", config: {} as BlockLogicTypes.UnsetValue },
 						{},
 						args,
 					);

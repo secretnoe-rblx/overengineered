@@ -7,11 +7,11 @@ import type {
 	BlockLogicBothDefinitions,
 	BlockLogicNoConfigDefinitionTypes,
 } from "shared/blockLogic/BlockLogic";
-import type { BlockLogicTypes3 } from "shared/blockLogic/BlockLogicTypes";
+import type { BlockLogicTypes } from "shared/blockLogic/BlockLogicTypes";
 
-type Primitives = BlockLogicTypes3.Primitives;
-type NonPrimitives = BlockLogicTypes3.NonPrimitives;
-type AllTypes = BlockLogicTypes3.Types;
+type Primitives = BlockLogicTypes.Primitives;
+type NonPrimitives = BlockLogicTypes.NonPrimitives;
+type AllTypes = BlockLogicTypes.Types;
 type MiniPrimitives = { readonly [k in PrimitiveKeys]: Omit<Primitives[k], "config" | "default"> };
 type MiniNonPrimitives = { readonly [k in NonPrimitiveKeys]: Omit<NonPrimitives[k], "config" | "default"> };
 type MiniAllTypes = { readonly [k in AllKeys]: Omit<AllTypes[k], "config" | "default"> };
@@ -123,7 +123,7 @@ namespace LogicValueStoragesNamespace {
 			super(config, "wire");
 		}
 
-		protected getValue(ctx: BlockLogicTickContext): BlockLogicTypes3.WireValue {
+		protected getValue(ctx: BlockLogicTickContext): BlockLogicTypes.WireValue {
 			throw "Method not implemented.";
 		}
 	}
@@ -134,7 +134,10 @@ namespace LogicValueStoragesNamespace {
 	export const bool = NewPrimitiveLogicValueStorage("bool");
 	export const key = NewPrimitiveLogicValueStorage("key");
 	export const vector3 = NewPrimitiveLogicValueStorage("vector3");
-	// export const _string = NewPrimitiveLogicValueStorage("number");
+	export const _string = NewPrimitiveLogicValueStorage("string");
+	export const color = NewPrimitiveLogicValueStorage("color");
+	export const byte = NewPrimitiveLogicValueStorage("byte");
+	export const bytearray = NewPrimitiveLogicValueStorage("bytearray");
 
 	export class clampedNumber extends base<"clampedNumber"> {
 		constructor(protected readonly config: Primitives[BlockConfigPrimitiveByType<"clampedNumber">]["config"]) {
@@ -177,6 +180,7 @@ type ConfigBackedLogicValueStorageCtor<TType extends AllKeys> = new (
 export const LogicValueStorages: { readonly [k in AllKeys]: ConfigBackedLogicValueStorageCtor<k> } = {
 	...LogicValueStoragesNamespace,
 	number: LogicValueStoragesNamespace._number,
+	string: LogicValueStoragesNamespace._string,
 };
 
 /** Storage for a value of a block logic. Automatically filters the value based on the type. */

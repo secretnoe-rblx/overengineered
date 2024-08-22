@@ -9,16 +9,16 @@ import { ComponentInstance } from "shared/component/ComponentInstance";
 import { ArgsSignal } from "shared/event/Signal";
 import { Objects } from "shared/fixes/objects";
 import type { PlacedBlockConfig } from "shared/blockLogic/BlockConfig";
-import type { BlockLogicTypes3 } from "shared/blockLogic/BlockLogicTypes";
+import type { BlockLogicTypes } from "shared/blockLogic/BlockLogicTypes";
 import type {
 	ReadonlyLogicValueStorage,
 	WriteonlyLogicValueStorage,
 	ILogicValueStorage,
 } from "shared/blockLogic/BlockLogicValueStorage";
 
-type Primitives = BlockLogicTypes3.Primitives;
-type NonPrimitives = BlockLogicTypes3.NonPrimitives;
-type AllTypes = BlockLogicTypes3.Types;
+type Primitives = BlockLogicTypes.Primitives;
+type NonPrimitives = BlockLogicTypes.NonPrimitives;
+type AllTypes = BlockLogicTypes.Types;
 type MiniPrimitives = { readonly [k in PrimitiveKeys]: Omit<Primitives[k], "config" | "default"> };
 type MiniNonPrimitives = { readonly [k in NonPrimitiveKeys]: Omit<NonPrimitives[k], "config" | "default"> };
 type MiniAllTypes = { readonly [k in AllKeys]: Omit<AllTypes[k], "config" | "default"> };
@@ -278,7 +278,7 @@ export abstract class CalculatableBlockLogic<TDef extends BlockLogicBothDefiniti
 	override getOutputValue(
 		ctx: BlockLogicTickContext,
 		key: keyof TDef["output"],
-	): TypedValue<keyof BlockLogicTypes3.Primitives & keyof (TDef["output"][keyof TDef["output"]]["types"] & defined)> {
+	): TypedValue<keyof BlockLogicTypes.Primitives & keyof (TDef["output"][keyof TDef["output"]]["types"] & defined)> {
 		this.recalculateOutputs(ctx);
 		return super.getOutputValue(ctx, key);
 	}
