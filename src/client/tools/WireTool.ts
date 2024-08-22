@@ -737,10 +737,24 @@ export class WireTool extends ToolBase {
 				let markerpos = positions?.[marker.data.id];
 				if (!markerpos) {
 					if (marker instanceof BlockWireManager.Markers.Input) {
-						markerpos = positions?.[`@i${ii}` as BlockConnectionName];
+						if (configDef.inputOrder) {
+							markerpos =
+								positions?.[`@i${configDef.inputOrder.indexOf(marker.data.id)}` as BlockConnectionName];
+						} else {
+							markerpos = positions?.[`@i${ii}` as BlockConnectionName];
+						}
+
 						if (markerpos) ii++;
 					} else {
-						markerpos = positions?.[`@o${oi}` as BlockConnectionName];
+						if (configDef.outputOrder) {
+							markerpos =
+								positions?.[
+									`@o${configDef.outputOrder.indexOf(marker.data.id)}` as BlockConnectionName
+								];
+						} else {
+							markerpos = positions?.[`@o${oi}` as BlockConnectionName];
+						}
+
 						if (markerpos) oi++;
 					}
 				}
