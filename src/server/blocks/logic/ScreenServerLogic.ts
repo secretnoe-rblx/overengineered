@@ -1,7 +1,7 @@
 import { TextService } from "@rbxts/services";
 import { ServerBlockLogic } from "server/blocks/ServerBlockLogic";
 import type { PlayModeController } from "server/modes/PlayModeController";
-import type { ScreenBlockLogic } from "shared/block/logic/logic/display/ScreenBlockLogic";
+import type { ScreenBlockLogic } from "shared/blocks/blocks/ScreenBlock";
 
 @injectable
 export class ScreenServerLogic extends ServerBlockLogic<typeof ScreenBlockLogic> {

@@ -75,11 +75,6 @@ const logic = {
 			description: "A simple lamp. Turns on when true is passed and turns off when false is passed",
 			autoWeldShape: "cube",
 		},
-		screen: {
-			name: "Screen",
-			description: "Display all your data for everyone to see!",
-			autoWeldShape: "cube",
-		},
 		laser: {
 			name: "Laser pointer",
 			description: "shoot beem boom target!",

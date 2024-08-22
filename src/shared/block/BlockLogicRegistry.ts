@@ -5,7 +5,6 @@ import { Vector3ObjectWorldTransformerBlockLogic } from "shared/block/logic/logi
 import { LampBlockLogic } from "shared/block/logic/logic/display/LampBlockLogic";
 import { LaserBlockLogic } from "shared/block/logic/logic/display/LaserBlockLogic";
 import { LEDDisplayBlockLogic } from "shared/block/logic/logic/display/LEDDisplayBlockLogic";
-import { ScreenBlockLogic } from "shared/block/logic/logic/display/ScreenBlockLogic";
 import { SevenSegmentDisplayBlockLogic } from "shared/block/logic/logic/display/SevenSegmentDisplayBlockLogic";
 import { LogicMemoryBlockLogic } from "shared/block/logic/logic/memory/LogicMemoryBlockLogic";
 import { RandomAccessMemoryBlockLogic } from "shared/block/logic/logic/memory/RandomAccessMemoryBlockLogic";
@@ -74,7 +73,6 @@ const logicRegistry = {
 	ballast: BallastBlockLogic,
 
 	lamp: LampBlockLogic,
-	screen: ScreenBlockLogic,
 	laser: LaserBlockLogic,
 	leddisplay: LEDDisplayBlockLogic,
 	sevensegmentdisplay: SevenSegmentDisplayBlockLogic,

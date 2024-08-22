@@ -783,13 +783,6 @@ const anyProcessing = {
 	},
 } as const satisfies BlockConfigBothDefinitions;
 
-const screen = {
-	input: {
-		data: connectors.any("Data", "1"),
-	},
-	output: {},
-} as const satisfies BlockConfigBothDefinitions;
-
 const laser = {
 	input: {
 		alwaysEnabled: {
@@ -1334,7 +1327,6 @@ export const blockConfigRegistry = {
 	lamp,
 	leddisplay,
 	sevensegmentdisplay,
-	screen,
 	laser,
 
 	ownerlocator,
