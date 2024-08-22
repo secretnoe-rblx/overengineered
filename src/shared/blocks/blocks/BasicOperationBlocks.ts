@@ -1,0 +1,910 @@
+import { CalculatableBlockLogic } from "shared/blockLogic/BlockLogic";
+import { BlockConfigDefinitions } from "shared/blocks/BlockConfigDefinitions";
+import { BlockCreation } from "shared/blocks/BlockCreation";
+import { RemoteEvents } from "shared/RemoteEvents";
+import type {
+	BlockLogicBothDefinitions,
+	BlockLogicArgs,
+	AllInputKeysToObject,
+	AllOutputKeysToObject,
+	BlockLogicFullBothDefinitions,
+	BlockLogicFullInputDef,
+} from "shared/blockLogic/BlockLogic";
+import type {
+	BlockBuilderWithoutIdAndDefaults,
+	BlockCategoryPath,
+	BlockLogicInfo,
+	BlockModelSource,
+} from "shared/blocks/Block";
+
+type CalcFunc<TDef extends BlockLogicBothDefinitions> = (
+	inputs: AllInputKeysToObject<TDef["input"]>,
+	block: AutoCalculatableBlock<TDef>,
+) => AllOutputKeysToObject<TDef["output"]>;
+
+class AutoCalculatableBlock<TDef extends BlockLogicBothDefinitions> extends CalculatableBlockLogic<TDef> {
+	constructor(
+		definition: TDef,
+		args: BlockLogicArgs,
+		private readonly calcfunc: CalcFunc<TDef>,
+	) {
+		super(definition, args);
+	}
+
+	protected override calculate(inputs: AllInputKeysToObject<TDef["input"]>): AllOutputKeysToObject<TDef["output"]> {
+		return this.calcfunc(inputs, this);
+	}
+}
+const logic = <TDef extends BlockLogicFullBothDefinitions>(definition: TDef, calcfunc: CalcFunc<TDef>) => {
+	class ctor extends AutoCalculatableBlock<TDef> {
+		constructor(args: BlockLogicArgs) {
+			super(definition, args, calcfunc);
+		}
+	}
+
+	return { definition, ctor } satisfies BlockLogicInfo;
+};
+
+const autoModel = (prefab: BlockCreation.Model.PrefabName, text: string, category: BlockCategoryPath) => {
+	return {
+		model: BlockCreation.Model.fAutoCreated(prefab, text),
+		category: () => category,
+	} satisfies BlockModelSource;
+};
+
+const categories = BlockCreation.Categories;
+
+//
+
+const defpartsf = {
+	any: (name: string, rest?: Partial<BlockLogicFullInputDef>) => ({
+		displayName: name,
+		types: BlockConfigDefinitions.any,
+		...(rest ?? {}),
+	}),
+	number: (name: string, rest?: Partial<BlockLogicFullInputDef>) => ({
+		displayName: name,
+		types: BlockConfigDefinitions.number,
+		...(rest ?? {}),
+	}),
+	bool: (name: string, rest?: Partial<BlockLogicFullInputDef>) => ({
+		displayName: name,
+		types: BlockConfigDefinitions.bool,
+		...(rest ?? {}),
+	}),
+	byte: (name: string, rest?: Partial<BlockLogicFullInputDef>) => ({
+		displayName: name,
+		types: BlockConfigDefinitions.byte,
+		...(rest ?? {}),
+	}),
+	vector3: (name: string, rest?: Partial<BlockLogicFullInputDef>) => ({
+		displayName: name,
+		types: BlockConfigDefinitions.vector3,
+		...(rest ?? {}),
+	}),
+} as const satisfies {
+	readonly [k in string]: (name: string, rest?: Partial<BlockLogicFullInputDef>) => BlockLogicFullInputDef;
+};
+const defs = {
+	equality: {
+		input: {
+			value1: {
+				displayName: "Value 1",
+				types: {
+					number: { type: "number", config: 0 as number },
+					bool: { type: "bool", config: false as boolean },
+					byte: { type: "byte", config: 0 as number },
+				},
+			},
+			value2: {
+				displayName: "Value 2",
+				types: {
+					number: { type: "number", config: 0 as number },
+					bool: { type: "bool", config: false as boolean },
+					byte: { type: "byte", config: 0 as number },
+				},
+			},
+		},
+		output: {
+			result: defpartsf.bool("Result"),
+		},
+	},
+	num2_bool: {
+		input: {
+			value1: defpartsf.number("Value"),
+			value2: defpartsf.number("Value"),
+		},
+		output: {
+			result: defpartsf.bool("Result"),
+		},
+	},
+	num1_num: {
+		input: {
+			value: defpartsf.number("Value"),
+		},
+		output: {
+			result: defpartsf.number("Result"),
+		},
+	},
+	num2_num: {
+		inputOrder: ["value1", "value2"],
+		input: {
+			value1: defpartsf.number("Value 1"),
+			value2: defpartsf.number("Value 2"),
+		},
+		output: {
+			result: defpartsf.number("Result"),
+		},
+	},
+	bool1_bool: {
+		input: {
+			value: defpartsf.bool("Value"),
+		},
+		output: {
+			result: defpartsf.bool("Result"),
+		},
+	},
+	bool2_bool: {
+		inputOrder: ["value1", "value2"],
+		input: {
+			value1: defpartsf.bool("Value 1"),
+			value2: defpartsf.bool("Value 2"),
+		},
+		output: {
+			result: defpartsf.bool("Result"),
+		},
+	},
+	byte1_byte: {
+		input: {
+			value: defpartsf.byte("Value"),
+		},
+		output: {
+			result: defpartsf.byte("Result"),
+		},
+	},
+	byte2_byte: {
+		inputOrder: ["value1", "value2"],
+		input: {
+			value1: defpartsf.byte("Value 1"),
+			value2: defpartsf.byte("Value 2"),
+		},
+		output: {
+			result: defpartsf.byte("Result"),
+		},
+	},
+	byteshift: {
+		inputOrder: ["value1", "value2"],
+		input: {
+			value1: defpartsf.byte("Value"),
+			value2: defpartsf.byte("Shift"),
+		},
+		output: {
+			result: defpartsf.byte("Result"),
+		},
+	},
+	constnum: {
+		input: {},
+		output: {
+			value: defpartsf.number("Value"),
+		},
+	},
+} as const satisfies { readonly [k in string]: BlockLogicFullBothDefinitions };
+
+//
+
+const constants = {
+	constant: {
+		displayName: "Constant",
+		description: "Returns the value you've set",
+		modelSource: autoModel("ConstLogicBlockPrefab", "CONST", BlockCreation.Categories.other),
+		logic: logic(
+			{
+				input: {
+					value: {
+						displayName: "Value",
+						group: "0",
+						types: BlockConfigDefinitions.any,
+						connectorHidden: true,
+					},
+				},
+				output: {
+					result: {
+						displayName: "Result",
+						group: "0",
+						types: BlockConfigDefinitions.any,
+					},
+				},
+			},
+			(input) => ({ result: { type: input.valueType, value: input.value } }),
+		),
+	},
+	pi: {
+		displayName: "Pi",
+		description: `So called "free thinkers" will make a thousand PIe jokes as soon as they'll see the PI constant..`,
+		modelSource: autoModel("ConstLogicBlockPrefab", "π", BlockCreation.Categories.other),
+		logic: logic(defs.constnum, () => ({ value: { type: "number", value: math.pi } })),
+	},
+	e: {
+		displayName: "Euler's number (e)",
+		description: "Very useful constant you'll probably never use if you doesn't already know what it is",
+		modelSource: autoModel("ConstLogicBlockPrefab", "e", BlockCreation.Categories.other),
+		logic: logic(defs.constnum, () => ({ value: { type: "number", value: 2.718281828459 } })),
+	},
+} as const satisfies { readonly [k in string]: BlockBuilderWithoutIdAndDefaults };
+
+const maths = {
+	abs: {
+		displayName: "Absolute",
+		description: "Returns the modulus of incoming number",
+		modelSource: autoModel("GenericLogicBlockPrefab", "ABS", categories.math),
+		logic: logic(defs.num1_num, ({ value }) => ({
+			result: { type: "number", value: math.abs(value) },
+		})),
+	},
+	round: {
+		displayName: "Round",
+		description: "Returns rounded input value",
+		modelSource: autoModel("GenericLogicBlockPrefab", "ABS", categories.math),
+		logic: logic(defs.num1_num, ({ value }) => ({
+			result: { type: "number", value: math.round(value) },
+		})),
+	},
+	floor: {
+		displayName: "Floor",
+		description: "N/A", // TODO: <
+		modelSource: autoModel("GenericLogicBlockPrefab", "FLOOR", categories.math),
+		logic: logic(defs.num1_num, ({ value }) => ({
+			result: { type: "number", value: math.floor(value) },
+		})),
+	},
+	ceil: {
+		displayName: "Ceil",
+		description: "N/A", // TODO: <
+		modelSource: autoModel("GenericLogicBlockPrefab", "CEIL", categories.math),
+		logic: logic(defs.num1_num, ({ value }) => ({
+			result: { type: "number", value: math.ceil(value) },
+		})),
+	},
+	sign: {
+		displayName: "Sign",
+		description: "Returns -1 if input value is less than zero, 1 if greater than zero and zero if equals zero",
+		modelSource: autoModel("GenericLogicBlockPrefab", "SIGN", categories.math),
+		logic: logic(defs.num1_num, ({ value }) => ({
+			result: { type: "number", value: math.sign(value) },
+		})),
+	},
+	sqrt: {
+		displayName: "Square Root",
+		description: "Square the root out of input value",
+		modelSource: autoModel("GenericLogicBlockPrefab", "SQRT", categories.math),
+		logic: logic(defs.num1_num, ({ value }) => ({
+			result: { type: "number", value: math.sqrt(value) },
+		})),
+	},
+
+	add: {
+		displayName: "Addition",
+		description: "Returns a sum of input values",
+		modelSource: autoModel("DoubleGenericLogicBlockPrefab", "ADD", categories.math),
+		logic: logic(defs.num2_num, ({ value1, value2 }) => ({
+			result: { type: "number", value: value1 + value2 },
+		})),
+	},
+	sub: {
+		displayName: "Subtraction",
+		description: "Returns the result of substruction of two given values",
+		modelSource: autoModel("DoubleGenericLogicBlockPrefab", "SUB", categories.math),
+		logic: logic(
+			{
+				inputOrder: ["value1", "value2"],
+				input: {
+					value1: defpartsf.number("Value"),
+					value2: defpartsf.number("Subtrahend"),
+				},
+				output: {
+					result: defpartsf.number("Result"),
+				},
+			},
+			({ value1, value2 }) => ({
+				result: { type: "number", value: value1 - value2 },
+			}),
+		),
+	},
+	mul: {
+		displayName: "Multiplication",
+		description: "Returns the result of multiplication of two given values",
+		modelSource: autoModel("DoubleGenericLogicBlockPrefab", "MUL", categories.math),
+		logic: logic(defs.num2_num, ({ value1, value2 }) => ({
+			result: { type: "number", value: value1 * value2 },
+		})),
+	},
+	div: {
+		displayName: "Division",
+		description: "Returns the result of division of two given values",
+		modelSource: autoModel("DoubleGenericLogicBlockPrefab", "DIV", categories.math),
+		logic: logic(
+			{
+				inputOrder: ["value1", "value2"],
+				input: {
+					value1: defpartsf.number("Value"),
+					value2: defpartsf.number("Divider"),
+				},
+				output: {
+					result: defpartsf.number("Result"),
+				},
+			},
+			({ value1, value2 }, logic) => {
+				if (value2 === 0) {
+					if (logic.instance?.PrimaryPart) {
+						RemoteEvents.Burn.send([logic.instance.PrimaryPart]);
+					}
+
+					logic.disable();
+				}
+
+				return { result: { type: "number", value: value1 / value2 } };
+			},
+		),
+	},
+	mod: {
+		displayName: "Mod",
+		description: "Returns the remainder of a division",
+		modelSource: autoModel("DoubleGenericLogicBlockPrefab", "MOD", categories.math),
+		logic: logic(defs.num2_num, (inputs, logic) => {
+			if (inputs.value2 === 0) {
+				if (logic.instance?.PrimaryPart) {
+					RemoteEvents.Burn.send([logic.instance.PrimaryPart]);
+				}
+
+				logic.disable();
+			}
+
+			return { result: { type: "number", value: inputs.value1 % inputs.value2 } };
+		}),
+	},
+
+	nsqrt: {
+		displayName: "Custom Degree Root",
+		description: "Same as the square root but you're allowed to change the degree of it",
+		modelSource: autoModel("DoubleGenericLogicBlockPrefab", "NSQRT", categories.math),
+		logic: logic(
+			{
+				inputOrder: ["value", "root"],
+				input: {
+					value: defpartsf.number("Value"),
+					root: defpartsf.number("Degree"),
+				},
+				output: {
+					result: defpartsf.number("Result"),
+				},
+			},
+			({ value, root }) => ({
+				result: { type: "number", value: value ** (1 / root) },
+			}),
+		),
+	},
+	pow: {
+		displayName: "Power",
+		description: "Buffs input values",
+		modelSource: autoModel("DoubleGenericLogicBlockPrefab", "POW", categories.math),
+		logic: logic(
+			{
+				inputOrder: ["value", "power"],
+				input: {
+					value: defpartsf.number("Value"),
+					power: defpartsf.number("Power"),
+				},
+				output: {
+					result: defpartsf.number("Result"),
+				},
+			},
+			({ value, power }) => ({
+				result: { type: "number", value: math.pow(value, power) },
+			}),
+		),
+	},
+	clamp: {
+		displayName: "Clamp",
+		description: "Limits the output between max and min.",
+		modelSource: autoModel("TripleGenericLogicBlockPrefab", "CLAMP", categories.math),
+		logic: logic(
+			{
+				inputOrder: ["value", "min", "max"],
+				input: {
+					value: defpartsf.number("Value"),
+					min: defpartsf.number("Min"),
+					max: defpartsf.number("Max"),
+				},
+				output: {
+					result: defpartsf.number("Result"),
+				},
+			},
+			({ value, min, max }) => ({
+				result: { type: "number", value: math.clamp(value, min, max) },
+			}),
+		),
+	},
+	rand: {
+		displayName: "Random",
+		description: `Returns a "random" value between chosen minimum and maximum`,
+		modelSource: autoModel("DoubleGenericLogicBlockPrefab", "RAND", categories.math),
+		logic: logic(
+			{
+				inputOrder: ["value", "min", "max"],
+				input: {
+					value: defpartsf.number("Value"),
+					min: defpartsf.number("Min"),
+					max: defpartsf.number("Max"),
+				},
+				output: {
+					result: defpartsf.number("Result"),
+				},
+			},
+			({ min, max }, logic) => {
+				if (max <= min) {
+					if (logic.instance?.PrimaryPart) {
+						RemoteEvents.Burn.send([logic.instance.PrimaryPart]);
+					}
+
+					logic.disable();
+					return { result: { type: "number", value: 727 } };
+				}
+
+				return { result: { type: "number", value: math.random() * (max - min) + min } };
+			},
+		),
+	},
+
+	equals: {
+		displayName: "Equals",
+		description: "Returns true if two given values are the exact same",
+		modelSource: autoModel("DoubleGenericLogicBlockPrefab", "=", categories.math),
+		logic: logic(defs.equality, ({ value1, value2 }) => ({
+			result: { type: "bool", value: value1 === value2 },
+		})),
+	},
+	notequals: {
+		displayName: "Not Equals",
+		description: "Returns true if two given values are not the same",
+		modelSource: autoModel("DoubleGenericLogicBlockPrefab", "≠", categories.math),
+		logic: logic(defs.equality, ({ value1, value2 }) => ({
+			result: { type: "bool", value: value1 !== value2 },
+		})),
+	},
+
+	greaterthan: {
+		displayName: "Greater Than",
+		description: "Returns true if first value greater than second one",
+		modelSource: autoModel("DoubleGenericLogicBlockPrefab", ">", categories.math),
+		logic: logic(defs.num2_bool, ({ value1, value2 }) => ({
+			result: { type: "bool", value: value1 > value2 },
+		})),
+	},
+	lessthan: {
+		displayName: "Less Than",
+		description: "Returns true if the first value or lesser than second one",
+		modelSource: autoModel("DoubleGenericLogicBlockPrefab", "<", categories.math),
+		logic: logic(defs.num2_bool, ({ value1, value2 }) => ({
+			result: { type: "bool", value: value1 < value2 },
+		})),
+	},
+	greaterthanorequals: {
+		displayName: "Greater Than or Equals",
+		description: "Returns true if the first value greater than second one",
+		modelSource: autoModel("DoubleGenericLogicBlockPrefab", "≥", categories.math),
+		logic: logic(defs.num2_bool, ({ value1, value2 }) => ({
+			result: { type: "bool", value: value1 >= value2 },
+		})),
+	},
+	lessthanorequals: {
+		displayName: "Less Than or Equals",
+		description: "Returns true if the first value equal to or lesser than second one",
+		modelSource: autoModel("DoubleGenericLogicBlockPrefab", "≤", categories.math),
+		logic: logic(defs.num2_bool, ({ value1, value2 }) => ({
+			result: { type: "bool", value: value1 <= value2 },
+		})),
+	},
+} as const satisfies { readonly [k in string]: BlockBuilderWithoutIdAndDefaults };
+
+const trigonometry = {
+	sin: {
+		displayName: "Sine",
+		description: "Calculates a sine of input",
+		modelSource: autoModel("GenericLogicBlockPrefab", "SIN", categories.trigonometry),
+		logic: logic(defs.num1_num, ({ value }) => ({
+			result: { type: "number", value: math.sin(value) },
+		})),
+	},
+	cos: {
+		displayName: "Cosine",
+		description: "Calculates a cosine of input",
+		modelSource: autoModel("GenericLogicBlockPrefab", "COS", categories.trigonometry),
+		logic: logic(defs.num1_num, ({ value }) => ({
+			result: { type: "number", value: math.cos(value) },
+		})),
+	},
+	tan: {
+		displayName: "Tangent",
+		description: "Calculates a tangent of input",
+		modelSource: autoModel("GenericLogicBlockPrefab", "TAN", categories.trigonometry),
+		logic: logic(defs.num1_num, ({ value }) => ({
+			result: { type: "number", value: math.tan(value) },
+		})),
+	},
+	asin: {
+		displayName: "Arcsine",
+		description: "The opposite of the Sine",
+		modelSource: autoModel("GenericLogicBlockPrefab", "ASIN", categories.trigonometry),
+		logic: logic(defs.num1_num, ({ value }) => ({
+			result: { type: "number", value: math.asin(value) },
+		})),
+	},
+	acos: {
+		displayName: "Arccosine",
+		description: "The opposite of the Cosine",
+		modelSource: autoModel("GenericLogicBlockPrefab", "ACOS", categories.trigonometry),
+		logic: logic(defs.num1_num, ({ value }) => ({
+			result: { type: "number", value: math.acos(value) },
+		})),
+	},
+	atan: {
+		displayName: "Arctangent",
+		description: "The opposite of the Tangent",
+		modelSource: autoModel("GenericLogicBlockPrefab", "ATAN", categories.trigonometry),
+		logic: logic(defs.num1_num, ({ value }) => ({
+			result: { type: "number", value: math.atan(value) },
+		})),
+	},
+	deg: {
+		displayName: "To degrees",
+		description: "Returns input value converted from radians to degrees",
+		modelSource: autoModel("GenericLogicBlockPrefab", "DEF", categories.trigonometry),
+		logic: logic(defs.num1_num, ({ value }) => ({
+			result: { type: "number", value: math.deg(value) },
+		})),
+	},
+	rad: {
+		displayName: "To radians",
+		description: "Returns input value converted from degrees to to radians",
+		modelSource: autoModel("GenericLogicBlockPrefab", "RAD", categories.trigonometry),
+		logic: logic(defs.num1_num, ({ value }) => ({
+			result: { type: "number", value: math.rad(value) },
+		})),
+	},
+	log: {
+		displayName: "Logarithm",
+		description: "Calculates a logarithm of the input value with selected base",
+		modelSource: autoModel("GenericLogicBlockPrefab", "LOG", categories.trigonometry),
+		logic: logic(defs.num1_num, ({ value }) => ({
+			result: { type: "number", value: math.log(value) },
+		})),
+	},
+	log10: {
+		displayName: "Logarithm (10 base)",
+		description: "Calculates a base 10 logarithm of the input value",
+		modelSource: autoModel("GenericLogicBlockPrefab", "LOG(10)", categories.trigonometry),
+		logic: logic(defs.num1_num, ({ value }) => ({
+			result: { type: "number", value: math.log10(value) },
+		})),
+	},
+	loge: {
+		displayName: "Logarithm (Natural)",
+		description: "Returns a natural Logarithm of inputed value. Unlike it's evil artificial counterparts..",
+		modelSource: autoModel("GenericLogicBlockPrefab", "LOG(E)", categories.trigonometry),
+		logic: logic(defs.num1_num, ({ value }) => ({
+			result: { type: "number", value: math.log(value, 2.718281828459) },
+		})),
+	},
+
+	atan2: {
+		displayName: "Arctangent 2",
+		description: "No way they made a sequel",
+		modelSource: autoModel("DoubleGenericLogicBlockPrefab", "ATAN2", categories.trigonometry),
+		logic: logic(
+			{
+				inputOrder: ["y", "x"],
+				input: {
+					y: defpartsf.number("Y"),
+					x: defpartsf.number("X"),
+				},
+				output: {
+					result: defpartsf.number("Result"),
+				},
+			},
+			({ y, x }) => ({
+				result: { type: "number", value: math.atan2(y, x) },
+			}),
+		),
+	},
+} as const satisfies { readonly [k in string]: BlockBuilderWithoutIdAndDefaults };
+
+const vec3 = {
+	vec3combiner: {
+		displayName: "Vector3 Combiner",
+		description: "Returns a vector combined from input values",
+		modelSource: autoModel("TripleGenericLogicBlockPrefab", "VEC3 COMB", categories.converterVector),
+		logic: logic(
+			{
+				inputOrder: ["value_x", "value_y", "value_z"],
+				input: {
+					value_x: defpartsf.number("X"),
+					value_y: defpartsf.number("Y"),
+					value_z: defpartsf.number("Z"),
+				},
+				output: {
+					result: defpartsf.vector3("Result"),
+				},
+			},
+			({ value_x, value_y, value_z }) => ({
+				result: { type: "vector3", value: new Vector3(value_x, value_y, value_z) },
+			}),
+		),
+	},
+	vec3splitter: {
+		displayName: "Vector3 Splitter",
+		description: "Returns vector values",
+		modelSource: autoModel("TripleGenericLogicBlockPrefab", "VEC3 SPLIT", categories.converterVector),
+		logic: logic(
+			{
+				outputOrder: ["result_x", "result_y", "result_z"],
+				input: {
+					value: defpartsf.vector3("Value"),
+				},
+				output: {
+					result_x: defpartsf.number("X"),
+					result_y: defpartsf.number("Y"),
+					result_z: defpartsf.number("Z"),
+				},
+			},
+			({ value }) => ({
+				result_x: { type: "number", value: value.X },
+				result_y: { type: "number", value: value.Y },
+				result_z: { type: "number", value: value.Z },
+			}),
+		),
+	},
+} as const satisfies { readonly [k in string]: BlockBuilderWithoutIdAndDefaults };
+
+const bool = {
+	not: {
+		displayName: "NOT Gate",
+		description: "Returns true when false is given, and vice versa",
+		modelSource: autoModel("GenericLogicBlockPrefab", "NOT", categories.bool),
+		logic: logic(defs.bool1_bool, ({ value }) => ({
+			result: { type: "bool", value: !value },
+		})),
+	},
+
+	and: {
+		displayName: "AND Gate",
+		description: "Returns true when both inputs are true",
+		modelSource: autoModel("DoubleGenericLogicBlockPrefab", "AND", categories.bool),
+		logic: logic(defs.bool2_bool, ({ value1, value2 }) => ({
+			result: { type: "bool", value: value1 && value2 },
+		})),
+	},
+	or: {
+		displayName: "OR Gate",
+		description: "Returns true when any of the inputs are true",
+		modelSource: autoModel("DoubleGenericLogicBlockPrefab", "OR", categories.bool),
+		logic: logic(defs.bool2_bool, ({ value1, value2 }) => ({
+			result: { type: "bool", value: value1 || value2 },
+		})),
+	},
+	xor: {
+		displayName: "XOR Gate",
+		description: "Returns true when only one of the inputs is true",
+		modelSource: autoModel("DoubleGenericLogicBlockPrefab", "XOR", categories.bool),
+		logic: logic(defs.bool2_bool, ({ value1, value2 }) => ({
+			result: { type: "bool", value: value1 !== value2 },
+		})),
+	},
+
+	nand: {
+		displayName: "NAND Gate",
+		description: "Returns true when both inputs are not true",
+		modelSource: autoModel("DoubleGenericLogicBlockPrefab", "NAND", categories.bool),
+		logic: logic(defs.bool2_bool, ({ value1, value2 }) => ({
+			result: { type: "bool", value: !(value1 && value2) },
+		})),
+	},
+	nor: {
+		displayName: "NOR Gate",
+		description: "Returns true when none of the inputs are true",
+		modelSource: autoModel("DoubleGenericLogicBlockPrefab", "NOR", categories.bool),
+		logic: logic(defs.bool2_bool, ({ value1, value2 }) => ({
+			result: { type: "bool", value: !(value1 || value2) },
+		})),
+	},
+	xnor: {
+		displayName: "XNOR Gate",
+		description: "Returns true when both of the the inputs are the same",
+		modelSource: autoModel("DoubleGenericLogicBlockPrefab", "XNOR", categories.bool),
+		logic: logic(defs.bool2_bool, ({ value1, value2 }) => ({
+			result: { type: "bool", value: !(value1 !== value2) },
+		})),
+	},
+} as const satisfies { readonly [k in string]: BlockBuilderWithoutIdAndDefaults };
+
+const byte = {
+	numbertobyte: {
+		displayName: "Number to Byte",
+		description: "Converts number value to the byte value! It's like clamping number between 0 and 255.",
+		modelSource: autoModel("ByteLogicBlockPrefab", "NUM TO BYTE", categories.converterByte),
+		logic: logic(
+			{
+				input: {
+					value: defpartsf.number("Value"),
+				},
+				output: {
+					result: defpartsf.byte("Result"),
+				},
+			},
+			({ value }) => ({
+				result: { type: "byte", value: math.clamp(value, 0, 255) },
+			}),
+		),
+	},
+	bytetonumber: {
+		displayName: "Byte To Number",
+		description: "Numbers the bytes! Oh, wait.. no.. It converts Bytes to numbers!",
+		modelSource: autoModel("ByteLogicBlockPrefab", "BYTE TO NUM", categories.converterByte),
+		logic: logic(
+			{
+				input: {
+					value: defpartsf.byte("Value"),
+				},
+				output: {
+					result: defpartsf.number("Result"),
+				},
+			},
+			({ value }) => ({
+				result: { type: "number", value: value },
+			}),
+		),
+	},
+
+	bytenot: {
+		displayName: "Byte NOT",
+		description: "It's the same NOT operation but for each bit of input bytes.",
+		modelSource: autoModel("DoubleByteLogicBlockPrefab", "BNOT", categories.byte),
+		logic: logic(defs.byte1_byte, ({ value }) => ({
+			result: { type: "byte", value: ~value & 0xff },
+		})),
+	},
+	byteneg: {
+		displayName: "Byte NEGATE",
+		description: "Negates the input byte.",
+		modelSource: autoModel("ByteLogicBlockPrefab", "BNEG", categories.byte),
+		logic: logic(defs.byte1_byte, ({ value }) => ({
+			result: { type: "byte", value: -value & 0xff },
+		})),
+	},
+
+	bytexor: {
+		displayName: "Byte XOR",
+		description: "It's the same XOR operation but for each bit of input bytes.",
+		modelSource: autoModel("DoubleByteLogicBlockPrefab", "BXOR", categories.byte),
+		logic: logic(defs.byte2_byte, ({ value1, value2 }) => ({
+			result: { type: "byte", value: value1 ^ value2 },
+		})),
+	},
+	bytexnor: {
+		displayName: "Byte XNOR",
+		description: "It's the same XNOR operation but for each bit of input bytes.",
+		modelSource: autoModel("DoubleByteLogicBlockPrefab", "BXNOR", categories.byte),
+		logic: logic(defs.byte2_byte, ({ value1, value2 }) => ({
+			result: { type: "byte", value: ~(value1 ^ value2) & 0xff },
+		})),
+	},
+	byteand: {
+		displayName: "Byte AND",
+		description: "It's the same AND operation but for each bit of input bytes.",
+		modelSource: autoModel("DoubleByteLogicBlockPrefab", "BAND", categories.byte),
+		logic: logic(defs.byte2_byte, ({ value1, value2 }) => ({
+			result: { type: "byte", value: value1 & value2 },
+		})),
+	},
+	bytenand: {
+		displayName: "Byte NAND",
+		description: "It's the same NAND operation but for each bit of input bytes.",
+		modelSource: autoModel("DoubleByteLogicBlockPrefab", "BNAND", categories.byte),
+		logic: logic(defs.byte2_byte, ({ value1, value2 }) => ({
+			result: { type: "byte", value: ~(value1 & value2) & 0xff },
+		})),
+	},
+	byteor: {
+		displayName: "Byte OR",
+		description: "It's the same OR operation but for each bit of input bytes.",
+		modelSource: autoModel("DoubleByteLogicBlockPrefab", "BOR", categories.byte),
+		logic: logic(defs.byte2_byte, ({ value1, value2 }) => ({
+			result: { type: "byte", value: value1 | value2 },
+		})),
+	},
+	bytenor: {
+		displayName: "Byte NOR",
+		description: "It's the same NOR operation but for each bit of input bytes.",
+		modelSource: autoModel("DoubleByteLogicBlockPrefab", "BNOR", categories.byte),
+		logic: logic(defs.byte2_byte, ({ value1, value2 }) => ({
+			result: { type: "byte", value: ~(value1 | value2) & 0xff },
+		})),
+	},
+	byterotateright: {
+		displayName: "Byte Rotate Right",
+		description: "It rotates the byte right! Don't ask me, don't know either",
+		modelSource: autoModel("DoubleByteLogicBlockPrefab", "BRR", categories.byte),
+		logic: logic(defs.byteshift, ({ value1: num, value2: shift }) => ({
+			result: { type: "byte", value: ((num >>> shift) | (num << (8 - shift))) & 0xff },
+		})),
+	},
+	byterotateleft: {
+		displayName: "Byte Rotate Left",
+		description: "It rotates the left! Don't ask me, don't know either",
+		modelSource: autoModel("DoubleByteLogicBlockPrefab", "BRL", categories.byte),
+		logic: logic(defs.byteshift, ({ value1: num, value2: shift }) => ({
+			result: { type: "byte", value: ((num << shift) | (num >>> (8 - shift))) & 0xff },
+		})),
+	},
+	byteshiftright: {
+		displayName: "Byte Shift Right",
+		description: "Shifts bits to right!",
+		modelSource: autoModel("DoubleByteLogicBlockPrefab", "BSHR", categories.byte),
+		logic: logic(defs.byteshift, ({ value1: num, value2: shift }) => ({
+			result: { type: "byte", value: (num >> shift) & 0xff },
+		})),
+	},
+	byteshiftleft: {
+		displayName: "Byte Shift Left",
+		description: "Shifts bits to left!",
+		modelSource: autoModel("DoubleByteLogicBlockPrefab", "BSHL", categories.byte),
+		logic: logic(defs.byteshift, ({ value1: num, value2: shift }) => ({
+			result: { type: "byte", value: (num << shift) & 0xff },
+		})),
+	},
+	bytearithmeticshiftright: {
+		displayName: "Byte Arithmetic Shift Right",
+		description: "Honestly, I have ZERO idea what it does, Maks made it.",
+		modelSource: autoModel("DoubleByteLogicBlockPrefab", "BASHR", categories.byte),
+		logic: logic(defs.byteshift, ({ value1: num, value2: shift }) => ({
+			result: { type: "byte", value: (num >> shift) | ((num & 0x80) !== 0 ? 0xff << (8 - shift) : 0) },
+		})),
+	},
+} as const satisfies { readonly [k in string]: BlockBuilderWithoutIdAndDefaults };
+
+const other = {
+	multiplexer: {
+		displayName: "Multiplexer",
+		description: "Outputs values depending on the incoming boolean",
+		modelSource: autoModel("TripleGenericLogicBlockPrefab", "MUX", categories.other),
+		logic: logic(
+			{
+				input: {
+					value: defpartsf.bool("State"),
+					truevalue: defpartsf.any("True value", { group: "1" }),
+					falsevalue: defpartsf.any("False value", { group: "1" }),
+				},
+				output: {
+					result: defpartsf.any("Result", { group: "1" }),
+				},
+			},
+			({ value, truevalue, falsevalue, truevalueType, falsevalueType }) => ({
+				result: { type: value ? truevalueType : falsevalueType, value: value ? truevalue : falsevalue },
+			}),
+		),
+	},
+} as const satisfies { readonly [k in string]: BlockBuilderWithoutIdAndDefaults };
+
+//
+
+const list = {
+	...maths,
+	...constants,
+	...trigonometry,
+	...vec3,
+	...bool,
+	...byte,
+	...other,
+} satisfies { readonly [k in string]: BlockBuilderWithoutIdAndDefaults };
+export const BasicOperationBlocks = BlockCreation.arrayFromObject(list);
+
+export type BasicOperationBlockIds = keyof typeof list;

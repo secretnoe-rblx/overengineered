@@ -1,14 +1,14 @@
 import { BlockListBuilder } from "shared/blocks/BlockListBuilder";
+import { BasicOperationBlocks } from "shared/blocks/blocks/BasicOperationBlocks";
 import { BuildingBlocks } from "shared/blocks/blocks/BuildingBlocks";
 import { DisconnectBlock } from "shared/blocks/blocks/DisconnectBlock";
-import { MathBlocks } from "shared/blocks/blocks/math/MathBlocks";
 import { VehicleSeatBlock } from "shared/blocks/blocks/VehicleSeatBlock";
 import type { BlockBuilder } from "shared/blocks/Block";
 
 export const CreateSandboxBlocks = (): BlockList => {
 	const blocksArr = [
 		...BuildingBlocks,
-		...MathBlocks,
+		...BasicOperationBlocks,
 
 		DisconnectBlock,
 		VehicleSeatBlock,

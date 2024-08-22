@@ -56,62 +56,10 @@ const logic = {
 			description: "Returns same value you gave it but with delay",
 			autoWeldShape: "cube",
 		},
-		and: {
-			name: "AND Gate",
-			description: "Returns true when both inputs are true",
-		},
-		nand: {
-			name: "NAND Gate",
-			description: "Returns true when both value are not true",
-		},
-		nor: {
-			name: "NOR Gate",
-			description: "Returns true when none of the values are true",
-		},
-		not: {
-			name: "NOT Gate",
-			description: "Returns true when false is given, and vice versa",
-		},
-		or: {
-			name: "OR Gate",
-			description: "Returns true when any of the inputs are true",
-		},
-		xnor: {
-			name: "XNOR Gate",
-			description: "Returns true only if both inputs are the same",
-		},
-		xor: {
-			name: "XOR Gate",
-			description: "Returns true only if both inputs are not the same",
-		},
 		buffer: {
 			name: "Buffer",
 			description: "Returns the same value it was given. Useful for logic organization",
 			autoWeldShape: "none",
-		},
-		equals: {
-			name: "Equals",
-			description: "Returns true if two given values are the exact same",
-		},
-		notequals: {
-			name: "NOT Equals",
-			description: "Returns true if values are not the same",
-		},
-		greaterthan: {
-			name: "Greater Than",
-			description: "Returns true if first value greater than second one",
-		},
-		greaterthanorequals: {
-			name: "Greater Than or Equals",
-			description: "Returns true if the first value greater than second one",
-		},
-		lessthanorequals: {
-			name: "Less Than or Equals",
-			description: "Returns true if the first value equal to or lesser than second one",
-		},
-		lessthan: {
-			name: "Less Than",
-			description: "Returns true if the first value or lesser than second one",
 		},
 	},
 	byte: {
@@ -123,158 +71,11 @@ const logic = {
 			name: "Byte Splitter",
 			description: "Another one bytes to bits",
 		},
-		bytetonumber: {
-			name: "Byte To Number",
-			description: "Numbers the bytes! Oh, wait.. no.. It converts Bytes to numbers!",
-		},
-		numbertobyte: {
-			name: "Number to Byte",
-			description: "Converts number value to the byte value! It's like clamping number between 0 and 255.",
-		},
-		bytexor: {
-			name: "Byte XOR",
-			description: "It's the same XOR operation but for each bit of input bytes.",
-		},
-		bytexnor: {
-			name: "Byte XNOR",
-			description: "It's the same XNOR operation but for each bit of input bytes.",
-		},
-		byteand: {
-			name: "Byte AND",
-			description: "It's the same AND operation but for each bit of input bytes.",
-		},
-		bytenand: {
-			name: "Byte NAND",
-			description: "It's the same NAND operation but for each bit of input bytes.",
-		},
-		byteor: {
-			name: "Byte OR",
-			description: "It's the same OR operation but for each bit of input bytes.",
-		},
-		bytenor: {
-			name: "Byte NOR",
-			description: "It's the same NOR operation but for each bit of input bytes.",
-		},
-		byterotateright: {
-			name: "Byte Rotate Right",
-			description: "It rotates the byte right! Don't ask me, don't know either",
-		},
-		byterotateleft: {
-			name: "Byte Rotate Left",
-			description: "It rotates the left! Don't ask me, don't know either",
-		},
-		byteshiftright: {
-			name: "Byte Shift Right",
-			description: "Shifts bits to right!",
-		},
-		byteshiftleft: {
-			name: "Byte Shift Left",
-			description: "Shifts bits to left!",
-		},
-		bytearithmeticshiftright: {
-			name: "Byte Arithmetic Shift Right",
-			description: "Honestly, I have ZERO idea what it does, Maks made it.",
-		},
-		bytenot: {
-			name: "Byte NOT",
-			description: "It's the same NOT operation but for each bit of input bytes.",
-		},
-		byteneg: {
-			name: "Byte NEGATE",
-			description: "Negates the input byte.",
-		},
-	},
-	trigonometry: {
-		rand: {
-			name: "Random",
-			description: `Returns a "random" value between chosen minimum and maximum`,
-			autoWeldShape: "cube",
-		},
-
-		sqrt: {
-			name: "Square Root",
-			description: "Square the root out of input value",
-		},
-		nsqrt: {
-			name: "Custom Degree Root",
-			description: "Same as the square root but you're allowed to change the degree of it",
-		},
-		pow: {
-			name: "Power",
-			description: "Buffs input values",
-		},
-		tan: {
-			name: "Tangent",
-			description: "Calculates a tangent of input",
-		},
-		atan: {
-			name: "Arctangent",
-			description: "The opposite of the Tangent",
-		},
-		atan2: {
-			name: "Arctangent 2",
-			description: "No way they made a sequel",
-		},
-		sin: {
-			name: "Sine",
-			description: "Calculates a sine of input",
-		},
-		asin: {
-			name: "Arcsine",
-			description: "The opposite of the Sine",
-		},
-		cos: {
-			name: "Cosine",
-			description: "Calculates a cosine of input",
-		},
-		acos: {
-			name: "Arccosine",
-			description: "The opposite of the Cosine",
-		},
-		log: {
-			name: "Logarithm",
-			description: "Calculates a logarithm of the input value with selected base",
-		},
-		log10: {
-			name: "Logarithm (10 base)",
-			description: "Calculates a base 10 logarithm of the input value",
-		},
-		loge: {
-			name: "Logarithm (natural)",
-			description: "Returns a natural Logarithm of inputed value. Unlike it's evil artificial counterparts..",
-		},
-		deg: {
-			name: "Degrees",
-			description: "Returns input value converted to degrees",
-		},
-		rad: {
-			name: "Radians",
-			description: "Returns input value converted to radians",
-		},
 	},
 	vector3: {
-		vec3combiner: {
-			name: "Vector3 Combiner",
-			description: "Returns a vector combined from input values",
-		},
-		vec3splitter: {
-			name: "Vector3 Splitter",
-			description: "Returns splitted input vector",
-		},
 		vec3objectworldtransformer: {
 			name: "Vector3 Object/World Transformer",
 			description: "Converts a vector into the world/object coordinate space of the other vector",
-		},
-	},
-	number: {
-		constant: {
-			name: "Constant",
-			description: "Always returns the value you've set",
-		},
-		multiplexer: {
-			name: "Multiplexer",
-			description: "Outputs values depending on the incoming boolean",
-			autoWeldShape: "cube",
 		},
 	},
 	output: {

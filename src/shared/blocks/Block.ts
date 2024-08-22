@@ -1,8 +1,8 @@
 import type { BlockMirrorBehaviour } from "shared/BlockDataRegistry";
 import type { BlockLogicFullBothDefinitions, GenericBlockLogicCtor } from "shared/blockLogic/BlockLogic";
 import type { BlockCreation } from "shared/blocks/BlockCreation";
+import type { BasicOperationBlockIds } from "shared/blocks/blocks/BasicOperationBlocks";
 import type { BuildingBlockIds } from "shared/blocks/blocks/BuildingBlocks";
-import type { MathBlockIds } from "shared/blocks/blocks/math/MathBlocks";
 
 export type BlockCategoryPath = readonly string[];
 export type BlockLogicInfo = {
@@ -43,7 +43,7 @@ export type BlockBuilderWithoutId = Omit<BlockBuilder, "id">;
 export type BlockBuilderWithoutIdAndDefaults = MakePartial<BlockBuilderWithoutId, keyof typeof BlockCreation.defaults>;
 
 declare global {
-	type BlockId = string | (string & BuildingBlockIds & MathBlockIds);
+	type BlockId = string | (string & BuildingBlockIds & BasicOperationBlockIds);
 
 	type Block = Omit<BlockBuilder, "id" | (`${string}Source` & keyof BlockBuilder)> & {
 		readonly id: BlockId;

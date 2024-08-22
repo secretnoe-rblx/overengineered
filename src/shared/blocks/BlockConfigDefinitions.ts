@@ -15,4 +15,13 @@ export const BlockConfigDefinitions = {
 	number: {
 		number: { type: "number", config: 0 as number },
 	},
+	bool: {
+		bool: { type: "bool", config: false as boolean },
+	},
+	byte: {
+		byte: { type: "byte", config: 0 as number },
+	},
+	vector3: {
+		vector3: { type: "vector3", config: new Vector3(0, 0, 0) },
+	},
 } as const satisfies { readonly [k in string]: BlockLogicFullInputDef["types"] };

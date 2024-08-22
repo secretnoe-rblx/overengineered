@@ -56,6 +56,9 @@ export type BlockLogicBothDefinitions = {
 	/** Visual order for the inputs */
 	readonly inputOrder?: readonly string[];
 
+	/** Visual order for the outputs (wire markers) */
+	readonly outputOrder?: readonly string[];
+
 	readonly input: { readonly [k in string]: BlockLogicInputDef };
 	readonly output: { readonly [k in string]: BlockLogicOutputDef };
 };
@@ -76,6 +79,9 @@ export type BlockLogicFullInputDef = {
 export type BlockLogicFullBothDefinitions = {
 	/** Visual order for the inputs */
 	readonly inputOrder?: readonly string[];
+
+	/** Visual order for the outputs (wire markers) */
+	readonly outputOrder?: readonly string[];
 
 	readonly input: { readonly [k in string]: BlockLogicFullInputDef };
 	readonly output: { readonly [k in string]: BlockLogicOutputDef };
