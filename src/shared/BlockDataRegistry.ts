@@ -62,16 +62,7 @@ const logic = {
 			autoWeldShape: "none",
 		},
 	},
-	byte: {
-		bytemaker: {
-			name: "Byte Maker",
-			description: "Makes bytes from bits and pieces",
-		},
-		bytesplitter: {
-			name: "Byte Splitter",
-			description: "Another one bytes to bits",
-		},
-	},
+	byte: {},
 	vector3: {
 		vec3objectworldtransformer: {
 			name: "Vector3 Object/World Transformer",

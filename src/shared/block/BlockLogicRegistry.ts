@@ -1,8 +1,6 @@
 import { BallastBlockLogic } from "shared/block/logic/BallastBlockLogic";
 import { BracedShaftBlockLogic } from "shared/block/logic/BracedShaftBlockLogic";
 import { HeliumBlockLogic } from "shared/block/logic/HeliumBlockLogic";
-import { ByteMakerBlockLogic } from "shared/block/logic/logic/converter/byte/ByteMakerBlockLogic";
-import { ByteSplitterBlockLogic } from "shared/block/logic/logic/converter/byte/ByteSplitterBlockLogic";
 import { Vector3ObjectWorldTransformerBlockLogic } from "shared/block/logic/logic/converter/byte/Vector3ObjectWorldTransformer";
 import { LampBlockLogic } from "shared/block/logic/logic/display/LampBlockLogic";
 import { LaserBlockLogic } from "shared/block/logic/logic/display/LaserBlockLogic";
@@ -115,8 +113,6 @@ const logicRegistry = {
 	buffer: BufferBlockLogic,
 	impulsegenerator: ImpulseGeneratorBlockLogic,
 
-	bytemaker: ByteMakerBlockLogic,
-	bytesplitter: ByteSplitterBlockLogic,
 	vec3objectworldtransformer: Vector3ObjectWorldTransformerBlockLogic,
 	singleimpulse: SingleImpulseBlockLogic,
 } as const satisfies { readonly [k in BlockId]?: unknown };

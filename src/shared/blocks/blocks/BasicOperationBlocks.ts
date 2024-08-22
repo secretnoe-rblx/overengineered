@@ -763,6 +763,77 @@ const byte = {
 			}),
 		),
 	},
+	bytemaker: {
+		displayName: "Byte Maker",
+		description: "Makes bytes from bits and pieces",
+		logic: logic(
+			{
+				inputOrder: ["1", "2", "4", "8", "16", "32", "64", "128"],
+				input: {
+					"1": defpartsf.bool("1"),
+					"2": defpartsf.bool("2"),
+					"4": defpartsf.bool("4"),
+					"8": defpartsf.bool("8"),
+					"16": defpartsf.bool("16"),
+					"32": defpartsf.bool("32"),
+					"64": defpartsf.bool("64"),
+					"128": defpartsf.bool("128"),
+				},
+				output: {
+					value: defpartsf.byte("Result"),
+				},
+			},
+			(inputs) => {
+				const byte =
+					((inputs["1"] ? 1 : 0) << 0) &
+					((inputs["2"] ? 1 : 0) << 1) &
+					((inputs["4"] ? 1 : 0) << 2) &
+					((inputs["8"] ? 1 : 0) << 3) &
+					((inputs["16"] ? 1 : 0) << 4) &
+					((inputs["32"] ? 1 : 0) << 5) &
+					((inputs["64"] ? 1 : 0) << 6) &
+					((inputs["128"] ? 1 : 0) << 7);
+
+				return {
+					value: { type: "byte", value: byte },
+				};
+			},
+		),
+	},
+	bytesplitter: {
+		displayName: "Byte Splitter",
+		description: "Another one bytes to bits",
+		logic: logic(
+			{
+				outputOrder: ["1", "2", "4", "8", "16", "32", "64", "128"],
+				input: {
+					value: defpartsf.byte("Byte"),
+				},
+				output: {
+					"1": defpartsf.bool("1"),
+					"2": defpartsf.bool("2"),
+					"4": defpartsf.bool("4"),
+					"8": defpartsf.bool("8"),
+					"16": defpartsf.bool("16"),
+					"32": defpartsf.bool("32"),
+					"64": defpartsf.bool("64"),
+					"128": defpartsf.bool("128"),
+				},
+			},
+			({ value }) => {
+				return {
+					"1": { type: "bool", value: ((value >> 0) & 1) === 1 },
+					"2": { type: "bool", value: ((value >> 1) & 1) === 1 },
+					"4": { type: "bool", value: ((value >> 2) & 1) === 1 },
+					"8": { type: "bool", value: ((value >> 3) & 1) === 1 },
+					"16": { type: "bool", value: ((value >> 4) & 1) === 1 },
+					"32": { type: "bool", value: ((value >> 5) & 1) === 1 },
+					"64": { type: "bool", value: ((value >> 6) & 1) === 1 },
+					"128": { type: "bool", value: ((value >> 7) & 1) === 1 },
+				};
+			},
+		),
+	},
 
 	bytenot: {
 		displayName: "Byte NOT",

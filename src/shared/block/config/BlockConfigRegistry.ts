@@ -231,128 +231,6 @@ const bracedshaft = {
 	output: {},
 } as const satisfies BlockConfigBothDefinitions;
 
-const bytesplitter = {
-	input: {
-		value: {
-			displayName: "Byte",
-			type: "byte",
-			default: 0 as number,
-			config: 0 as number,
-		},
-	},
-	output: {
-		"1": {
-			displayName: "1",
-			type: "bool",
-			default: false as boolean,
-			config: false as boolean,
-		},
-		"2": {
-			displayName: "2",
-			type: "bool",
-			default: false as boolean,
-			config: false as boolean,
-		},
-		"4": {
-			displayName: "4",
-			type: "bool",
-			default: false as boolean,
-			config: false as boolean,
-		},
-		"8": {
-			displayName: "8",
-			type: "bool",
-			default: false as boolean,
-			config: false as boolean,
-		},
-		"16": {
-			displayName: "16",
-			type: "bool",
-			default: false as boolean,
-			config: false as boolean,
-		},
-		"32": {
-			displayName: "32",
-			type: "bool",
-			default: false as boolean,
-			config: false as boolean,
-		},
-		"64": {
-			displayName: "64",
-			type: "bool",
-			default: false as boolean,
-			config: false as boolean,
-		},
-		"128": {
-			displayName: "128",
-			type: "bool",
-			default: false as boolean,
-			config: false as boolean,
-		},
-	},
-} as const satisfies BlockConfigBothDefinitions;
-
-const bytemaker = {
-	input: {
-		"1": {
-			displayName: "1",
-			type: "bool",
-			default: false as boolean,
-			config: false as boolean,
-		},
-		"2": {
-			displayName: "2",
-			type: "bool",
-			default: false as boolean,
-			config: false as boolean,
-		},
-		"4": {
-			displayName: "4",
-			type: "bool",
-			default: false as boolean,
-			config: false as boolean,
-		},
-		"8": {
-			displayName: "8",
-			type: "bool",
-			default: false as boolean,
-			config: false as boolean,
-		},
-		"16": {
-			displayName: "16",
-			type: "bool",
-			default: false as boolean,
-			config: false as boolean,
-		},
-		"32": {
-			displayName: "32",
-			type: "bool",
-			default: false as boolean,
-			config: false as boolean,
-		},
-		"64": {
-			displayName: "64",
-			type: "bool",
-			default: false as boolean,
-			config: false as boolean,
-		},
-		"128": {
-			displayName: "128",
-			type: "bool",
-			default: false as boolean,
-			config: false as boolean,
-		},
-	},
-	output: {
-		value: {
-			displayName: "Byte",
-			type: "byte",
-			default: 0 as number,
-			config: 0 as number,
-		},
-	},
-} as const satisfies BlockConfigBothDefinitions;
-
 const vec3objectworldtransformer = {
 	input: {
 		toobject: {
@@ -1492,8 +1370,6 @@ export const blockConfigRegistry = {
 	heliumblock,
 	bracedshaft,
 
-	bytemaker,
-	bytesplitter,
 	vec3objectworldtransformer,
 
 	wing1x1: wing,
