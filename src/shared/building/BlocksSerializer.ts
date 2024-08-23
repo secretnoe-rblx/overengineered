@@ -1,12 +1,14 @@
-import { blockConfigRegistry } from "shared/block/config/BlockConfigRegistry";
+import { _BlockConfigRegistrySave } from "shared/building/BlockConfigRegistrySave";
 import { BlockManager } from "shared/building/BlockManager";
 import { JSON } from "shared/fixes/Json";
 import { Objects } from "shared/fixes/objects";
 import { Serializer } from "shared/Serializer";
-import type { BlockConfigRegistry } from "shared/block/config/BlockConfigRegistry";
 import type { PlacedBlockConfig } from "shared/blockLogic/BlockConfig";
+import type { BlockConfigRegistry } from "shared/building/BlockConfigRegistrySave";
 import type { BuildingPlot } from "shared/building/BuildingPlot";
 import type { ReadonlyPlot } from "shared/building/ReadonlyPlot";
+
+const blockConfigRegistry = _BlockConfigRegistrySave;
 
 namespace V1 {
 	export type PlacedBlockConfig = {
@@ -1012,6 +1014,7 @@ const v25: UpgradableBlocksSerializer<SerializedBlocks<SerializedBlockV4>, typeo
 					: asObject(
 							asMap(block.config).mapToMap(
 								(k, v): LuaTuple<[string, PlacedBlockConfig[string] & defined]> => {
+									print(block.id);
 									const def = (blockConfigRegistry as BlockConfigRegistry)[
 										block.id as keyof BlockConfigRegistry
 									]!.input[k];
