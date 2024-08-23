@@ -224,8 +224,11 @@ export class S2C2SRemoteFunction<TArg, TResp extends Response = Response> extend
 				if (!this.invoked) {
 					return { success: false, message: `Event ${name} was not subscribed to` };
 				}
-
-				return this.invoked(arg);
+				try {
+					return this.invoked(arg);
+				} catch (err) {
+					return { success: false, message: tostring(err ?? "") };
+				}
 			};
 		}
 	}
@@ -291,7 +294,11 @@ export class C2S2CRemoteFunction<TArg, TResp extends Response = Response> extend
 					return { success: false, message: `Event ${name} was not subscribed to` };
 				}
 
-				return this.invoked(player, arg);
+				try {
+					return this.invoked(player, arg);
+				} catch (err) {
+					return { success: false, message: tostring(err ?? "") };
+				}
 			};
 		}
 	}
