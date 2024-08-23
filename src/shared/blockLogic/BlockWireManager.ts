@@ -5,7 +5,7 @@ import type { BlockLogicTypes } from "shared/blockLogic/BlockLogicTypes";
 import type { SharedPlot } from "shared/building/SharedPlot";
 
 export namespace BlockWireManager {
-	export type DataType = "bool" | "vector3" | "number" | "string" | "color" | "byte" | "bytearray" | "key" | "never";
+	export type DataType = "bool" | "vector3" | "number" | "string" | "color" | "byte" | "bytearray" | "key" | "unset";
 	export type MarkerData = {
 		readonly id: BlockConnectionName;
 		readonly name: string;
@@ -26,12 +26,12 @@ export namespace BlockWireManager {
 		color: { color: Colors.red },
 		byte: { color: Color3.fromRGB(97, 138, 255) },
 		bytearray: { color: Colors.black },
-		never: { color: Colors.white },
+		unset: { color: Colors.white },
 	};
 
 	export const groups: { readonly [k in keyof BlockLogicTypes.Types]: DataType } = {
-		unset: "never",
-		wire: "never",
+		unset: "unset",
+		wire: "unset",
 		bool: "bool",
 		vector3: "vector3",
 		number: "number",
@@ -92,7 +92,7 @@ export namespace BlockWireManager {
 		return isNotConnected(input) && areSameType(output, input);
 	}
 
-	export function fromPlot(plot: SharedPlot, blockList: BlockList) {
+	export function fromPlot(plot: SharedPlot, blockList: BlockList, treatDisconnectedAsUnset: boolean = false) {
 		const toNarrow: Markers.Marker[] = [];
 		const markersByBlock = new Map<BlockUuid, (Markers.Input | Markers.Output)[]>();
 		const markers = new Map<string, Markers.Marker>();
@@ -109,7 +109,12 @@ export namespace BlockWireManager {
 
 					{
 						const existingcfg = cfg[key];
-						if (existingcfg === undefined || existingcfg.type === "unset" || existingcfg.type === "wire") {
+						if (
+							treatDisconnectedAsUnset ||
+							existingcfg === undefined ||
+							existingcfg.type === "unset" ||
+							existingcfg.type === "wire"
+						) {
 							dataTypes = asMap(def.types).map((k, v) => groups[v.type]);
 						} else {
 							dataTypes = [groups[existingcfg.type]];

@@ -9,6 +9,7 @@ import { MultiBlockHighlightedSelector } from "client/tools/highlighters/MultiBl
 import { SelectedBlocksHighlighter } from "client/tools/highlighters/SelectedBlocksHighlighter";
 import { ToolBase } from "client/tools/ToolBase";
 import { BlockConfig } from "shared/blockLogic/BlockConfig";
+import { BlockWireManager } from "shared/blockLogic/BlockWireManager";
 import { BlockManager } from "shared/building/BlockManager";
 import { Colors } from "shared/Colors";
 import { ObservableCollectionSet } from "shared/event/ObservableCollection";
@@ -86,6 +87,7 @@ namespace Scene {
 
 		private currentConfigControl?: MultiBlockConfigControl;
 		private updateConfigs(selected: readonly BlockModel[]) {
+			print("uc");
 			const wasVisible = this.gui.Visible;
 
 			this.gui.Visible = selected.size() !== 0;
@@ -134,6 +136,8 @@ namespace Scene {
 
 			this.gui.ParamsSelection.Content.ScrollingFrame.Visible = false;
 
+			const markered = BlockWireManager.fromPlot(this.tool.targetPlot.get(), this.tool.blockList, true);
+
 			const gui = this.gui.ParamsSelection.Content.ScrollingFrame.Clone();
 			gui.Visible = true;
 			gui.Parent = this.gui.ParamsSelection.Content;
@@ -143,7 +147,7 @@ namespace Scene {
 					onedef,
 					asObject(configs.mapToMap((c) => $tuple(c.uuid, c.config))),
 					deforder,
-					// Objects.size(configs) === 1 ? configs[0].blockmodel : undefined,
+					markered,
 				),
 			);
 			this.currentConfigControl = configControl;
@@ -181,7 +185,11 @@ export class ConfigTool extends ToolBase {
 	readonly blocksToConfigure: TutorialConfigBlockHighlight[] = [];
 	readonly selected = new ObservableCollectionSet<BlockModel>();
 
-	constructor(@inject mode: BuildingMode, @inject blockList: BlockList, @inject di: DIContainer) {
+	constructor(
+		@inject mode: BuildingMode,
+		@inject readonly blockList: BlockList,
+		@inject di: DIContainer,
+	) {
 		super(mode);
 		this.parentGui(
 			new Scene.ConfigToolScene(

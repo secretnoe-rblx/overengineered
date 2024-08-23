@@ -232,6 +232,7 @@ export const _Tests = () => {
 			def,
 			{ b1, b2 } as { readonly [k in BlockUuid]: cfg[k] },
 			undefined,
+			new Map(),
 		);
 		mcc.submitted.Connect(print);
 		list.add(mcc);

@@ -681,6 +681,8 @@ class ConfigAutoValueWrapper extends Control<ConfigValueWrapperDefinition> {
 		definition: VisualBlockConfigDefinition,
 		configs: BlocksConfigPart,
 		args: Controls.Args,
+		key: string,
+		wireTypes: WireTypes,
 	) {
 		super(gui);
 
@@ -695,7 +697,20 @@ class ConfigAutoValueWrapper extends Control<ConfigValueWrapperDefinition> {
 		selectedType.subscribe((t) => control.dropdown.selectedItem.set(t), true);
 		control.dropdown.selectedItem.subscribe((t) => t && selectedType.set(t));
 
-		for (const [k, type] of pairs(definition.types)) {
+		// all the possible types of every block
+		const availableBlockTypes = asMap(configs).map(
+			(k) =>
+				wireTypes
+					.get(k)
+					?.find((t) => t.data.id === key)
+					?.availableTypes.get() ?? [],
+		);
+		// only types that every block has
+		const availableTypes = new Set(availableBlockTypes.flatmap((t) => t)).filter((t) =>
+			availableBlockTypes.all((at) => at.includes(t)),
+		);
+
+		for (const k of availableTypes) {
 			control.dropdown.addItem(k);
 		}
 
@@ -749,7 +764,7 @@ class ConfigAutoValueWrapper extends Control<ConfigValueWrapperDefinition> {
 
 				control.typeColor.set(BlockWireManager.typeGroups[BlockWireManager.groups[selectedType]].color);
 
-				const ctor = Controls.controls[definition.types[selectedType]!.type];
+				const ctor = Controls.controls[definition.types[selectedType]?.type ?? selectedType];
 				if (!ctor) return;
 
 				let cfgcontrol: InstanceType<typeof ctor> | undefined = undefined;
@@ -790,6 +805,7 @@ class ConfigAutoValueWrapper extends Control<ConfigValueWrapperDefinition> {
 	}
 }
 
+type WireTypes = ReadonlyMap<BlockUuid, readonly (BlockWireManager.Markers.Input | BlockWireManager.Markers.Output)[]>;
 export class MultiBlockConfigControl extends Control implements Controls.Args {
 	private readonly _travelledTo = new ArgsSignal<[uuid: BlockUuid]>();
 	readonly travelledTo = this._travelledTo.asReadonly();
@@ -802,6 +818,7 @@ export class MultiBlockConfigControl extends Control implements Controls.Args {
 		definitions: VisualBlockConfigDefinitions,
 		configs: BlocksConfig,
 		order: readonly string[] | undefined,
+		wireTypes: WireTypes,
 	) {
 		super(gui);
 
@@ -823,7 +840,9 @@ export class MultiBlockConfigControl extends Control implements Controls.Args {
 			const definition = definitions[k];
 
 			const lconfigs = map(configs, (c) => c[k]);
-			const wrapper = this.add(new ConfigAutoValueWrapper(template.Clone(), definition, lconfigs, this));
+			const wrapper = this.add(
+				new ConfigAutoValueWrapper(template.Clone(), definition, lconfigs, this, k, wireTypes),
+			);
 
 			wrapper.submitted.Connect((v) =>
 				this._submitted.Fire((configs = map(configs, (c, uuid) => ({ ...c, [k]: v[uuid] })))),
