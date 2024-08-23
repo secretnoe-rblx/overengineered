@@ -21,8 +21,10 @@ type VehicleSeatModel = BlockModel & {
 	readonly VehicleSeat: VehicleSeat;
 };
 
+export type { VehicleSeatBlockLogic };
+
 @injectable
-export class VehicleSeatBlockLogic extends InstanceBlockLogic<typeof definition, VehicleSeatModel> {
+class VehicleSeatBlockLogic extends InstanceBlockLogic<typeof definition, VehicleSeatModel> {
 	readonly vehicleSeat;
 
 	constructor(block: InstanceBlockLogicArgs, @inject machine: SharedMachine) {

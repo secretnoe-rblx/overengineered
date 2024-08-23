@@ -2,11 +2,12 @@ import { RunService } from "@rbxts/services";
 import { ImpactController } from "shared/block/impact/ImpactController";
 import { BlockConfig } from "shared/blockLogic/BlockConfig";
 import { BlockLogicRunner } from "shared/blockLogic/BlockLogicRunner";
-import { VehicleSeatBlockLogic } from "shared/blocks/blocks/VehicleSeatBlock";
+import { VehicleSeatBlock } from "shared/blocks/blocks/VehicleSeatBlock";
 import { ContainerComponent } from "shared/component/ContainerComponent";
 import { GameDefinitions } from "shared/data/GameDefinitions";
 import { ObservableValue } from "shared/event/ObservableValue";
 import type { GenericBlockLogic } from "shared/blockLogic/BlockLogic";
+import type { VehicleSeatBlockLogic } from "shared/blocks/blocks/VehicleSeatBlock";
 
 type BlockData = {
 	readonly block: PlacedBlockData;
@@ -67,10 +68,10 @@ export class SharedMachine extends ContainerComponent<GenericBlockLogic> {
 	}
 
 	initializeSpeedLimiter() {
-		const seat = this.getChildren().find((c) => c instanceof VehicleSeatBlockLogic) as
+		const seat = this.getChildren().find((c) => c instanceof VehicleSeatBlock.logic.ctor) as
 			| VehicleSeatBlockLogic
 			| undefined;
-		if (!seat) throw "No vehicle seat";
+		if (!seat) return;
 
 		this.event.subscribe(RunService.Heartbeat, () => {
 			// Angular speed limit
