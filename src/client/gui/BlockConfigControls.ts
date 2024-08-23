@@ -745,7 +745,7 @@ class ConfigAutoValueWrapper extends Control<ConfigValueWrapperDefinition> {
 
 				control.typeColor.set(BlockWireManager.typeGroups[BlockWireManager.groups[selectedType]].color);
 
-				const ctor = Controls.controls[selectedType];
+				const ctor = Controls.controls[definition.types[selectedType]!.type];
 				if (!ctor) return;
 
 				let cfgcontrol: InstanceType<typeof ctor> | undefined = undefined;
