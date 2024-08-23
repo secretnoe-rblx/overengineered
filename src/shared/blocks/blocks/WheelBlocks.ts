@@ -39,7 +39,7 @@ class WheelBlockLogic extends InstanceBlockLogic<typeof definition> {
 		super(definition, block);
 
 		this.on(({ friction, elasticity }) => {
-			const collider = this.instance.FindFirstChild("Collider") as BasePart;
+			const collider = this.instance.FindFirstChild("Collider") as BasePart | undefined;
 			if (!collider) return;
 
 			const props = collider.CustomPhysicalProperties;

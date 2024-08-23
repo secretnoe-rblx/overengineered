@@ -258,29 +258,6 @@ const wedges = {
 	},
 } as const satisfies { readonly [k in string]: BlockBuilderWithoutIdAndDefaults };
 
-const wheels = {
-	wheel: {
-		displayName: "Wheel",
-		description: "circle",
-	},
-	bigwheel: {
-		displayName: "Big wheel",
-		description: "Wheel. Big one.",
-	},
-	smalloldwheel: {
-		displayName: "Small old wheel",
-		description: "smol ol whel",
-	},
-	oldwheel: {
-		displayName: "Old wheel",
-		description: "A ginormous old wheel",
-	},
-	bigoldwheel: {
-		displayName: "Big old wheel",
-		description: "Old wheel. Big one.",
-	},
-} as const satisfies { readonly [k in string]: BlockBuilderWithoutIdAndDefaults };
-
 //
 
 const list = {
@@ -289,7 +266,6 @@ const list = {
 	...cornerWedges,
 	...cylinders,
 	...wedges,
-	...wheels,
 } satisfies { readonly [k in string]: BlockBuilderWithoutIdAndDefaults };
 export const BuildingBlocks = BlockCreation.arrayFromObject(list);
 
