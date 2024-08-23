@@ -1,6 +1,6 @@
+import { BlockConfig } from "shared/blockLogic/BlockConfig";
 import { Colors } from "shared/Colors";
 import { ObservableValue } from "shared/event/ObservableValue";
-import type { PlacedBlockConfig } from "shared/blockLogic/BlockConfig";
 import type { BlockLogicTypes } from "shared/blockLogic/BlockLogicTypes";
 import type { SharedPlot } from "shared/building/SharedPlot";
 
@@ -98,19 +98,19 @@ export namespace BlockWireManager {
 		const markers = new Map<string, Markers.Marker>();
 
 		for (const block of plot.getBlockDatas()) {
-			const configDef = blockList.blocks[block.id]?.logic?.definition;
-			if (!configDef) continue;
+			const definition = blockList.blocks[block.id]?.logic?.definition;
+			if (!definition) continue;
+			const cfg = BlockConfig.addDefaults(block.config, definition.input);
 
 			for (const markerType of ["output", "input"] as const) {
-				for (const [key, config] of pairs(configDef[markerType])) {
+				for (const [key, def] of pairs(definition[markerType])) {
 					let narrow = false;
 					let dataTypes: readonly DataType[];
 
 					{
-						const existingcfg = (block.config as PlacedBlockConfig | undefined)?.[key];
-
+						const existingcfg = cfg[key];
 						if (existingcfg === undefined || existingcfg.type === "unset" || existingcfg.type === "wire") {
-							dataTypes = asMap(config.types).map((k, v) => groups[v.type]);
+							dataTypes = asMap(def.types).map((k, v) => groups[v.type]);
 						} else {
 							dataTypes = [groups[existingcfg.type]];
 							narrow = true;
@@ -120,9 +120,9 @@ export namespace BlockWireManager {
 					const data: MarkerData = {
 						blockData: block,
 						dataTypes,
-						group: config.group,
+						group: def.group,
 						id: key as BlockConnectionName,
-						name: config.displayName,
+						name: def.displayName,
 					};
 
 					const marker = markerType === "input" ? new Markers.Input(data) : new Markers.Output(data);

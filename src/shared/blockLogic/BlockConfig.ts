@@ -45,7 +45,8 @@ export namespace BlockConfig {
 			}
 
 			if (!obj) {
-				const defaultType = Objects.firstKey(def.types) ?? "unset";
+				// without a connector we can only configure the value with the config tool; thus, "unset" makes zero sense
+				const defaultType = def.connectorHidden ? Objects.firstKey(def.types) ?? "unset" : "unset";
 
 				const cfg: GenericConfig = {
 					type: defaultType,

@@ -43,7 +43,7 @@ type OfBlocks<T> = { readonly [k in BlockUuid]: T };
 export type VisualBlockConfigDefinition = {
 	readonly displayName: string;
 	readonly types: Partial<BlockLogicWithConfigDefinitionTypes<PrimitiveKeys>>;
-	readonly configHidden?: boolean;
+	readonly connectorHidden?: boolean;
 };
 export type VisualBlockConfigDefinitions = {
 	readonly [k in string]: VisualBlockConfigDefinition;
@@ -685,7 +685,11 @@ class ConfigAutoValueWrapper extends Control<ConfigValueWrapperDefinition> {
 		super(gui);
 
 		const control = this.add(new ConfigValueWrapper(gui));
-		control.dropdown.addItem("unset");
+
+		// without a connector we can only configure the value with the config tool; thus, "unset" makes zero sense
+		if (!definition.connectorHidden) {
+			control.dropdown.addItem("unset");
+		}
 
 		const selectedType = new ObservableValue<mk>("unset");
 		selectedType.subscribe((t) => control.dropdown.selectedItem.set(t), true);
