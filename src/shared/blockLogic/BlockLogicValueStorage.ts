@@ -40,13 +40,21 @@ const filterValue = <TType extends PrimitiveKeys>(
 	value: Primitives[TType]["default"],
 	definitions: Partial<BlockLogicNoConfigDefinitionTypes<TType>>,
 	valueType: AllKeys,
-) => {
+): Primitives[TType]["default"] => {
 	if (valueType in definitions) {
 		const def = definitions[valueType as TType];
-		if (def && def.type in Filters) {
-			const filter = Filters[def.type as keyof typeof Filters];
-			return filter.filter(value as never, def as never);
-		}
+		return filterValueByDef(value, def as never);
+	}
+
+	return value;
+};
+const filterValueByDef = <TType extends AllKeys>(
+	value: AllTypes[TType]["default"],
+	definition: AllTypes[TType] | undefined,
+): AllTypes[TType]["default"] => {
+	if (definition && definition.type in Filters) {
+		const filter = Filters[definition.type as keyof typeof Filters];
+		return filter.filter(value as never, definition as never);
 	}
 
 	return value;
@@ -140,12 +148,15 @@ namespace LogicValueStoragesNamespace {
 	export const bytearray = NewPrimitiveLogicValueStorage("bytearray");
 
 	export class clampedNumber extends base<"clampedNumber"> {
-		constructor(protected readonly config: Primitives[BlockConfigPrimitiveByType<"clampedNumber">]["config"]) {
+		constructor(
+			protected readonly config: Primitives[BlockConfigPrimitiveByType<"clampedNumber">]["config"],
+			private readonly definition: AllTypes["clampedNumber"],
+		) {
 			super(config, "number");
 		}
 
 		protected getValue(ctx: BlockLogicTickContext): number {
-			throw "Method not implemented.";
+			return filterValueByDef<"clampedNumber">(this.config, this.definition);
 		}
 	}
 
@@ -176,6 +187,7 @@ namespace LogicValueStoragesNamespace {
 type ConfigBackedLogicValueStorage<TType extends AllKeys> = LogicValueStoragesNamespace.Base<TType>;
 type ConfigBackedLogicValueStorageCtor<TType extends AllKeys> = new (
 	config: AllTypes[TType]["config"],
+	definition: AllTypes[TType],
 ) => ConfigBackedLogicValueStorage<TType>;
 export const LogicValueStorages: { readonly [k in AllKeys]: ConfigBackedLogicValueStorageCtor<k> } = {
 	...LogicValueStoragesNamespace,

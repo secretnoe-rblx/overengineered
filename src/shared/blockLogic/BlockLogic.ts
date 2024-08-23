@@ -223,7 +223,7 @@ export abstract class BlockLogic<TDef extends BlockLogicBothDefinitions> extends
 			if (!def) continue;
 
 			const storageCtor = LogicValueStorages[def.type];
-			const storage = new storageCtor(cfg.config as never);
+			const storage = new storageCtor(cfg.config as never, def as never);
 			this.replaceInput(key, storage);
 		}
 	}
