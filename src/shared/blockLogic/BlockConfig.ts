@@ -40,13 +40,16 @@ export namespace BlockConfig {
 			assert(typeIs(k, "string"));
 
 			const obj = result[k];
-			if (obj?.type === "unset" || obj?.type === "wire") {
+			if (obj && (obj.type === "unset" || obj.type === "wire")) {
 				continue;
 			}
 
 			if (!obj) {
-				// without a connector we can only configure the value with the config tool; thus, "unset" makes zero sense
 				const defaultType = def.connectorHidden ? Objects.firstKey(def.types) ?? "unset" : "unset";
+				if (def.connectorHidden && defaultType === "unset") {
+					// without a connector we can only configure the value with the config tool; thus, "unset" makes zero sense
+					throw "Unset type is not supported without a visible marker";
+				}
 
 				const cfg: GenericConfig = {
 					type: defaultType,

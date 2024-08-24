@@ -1,7 +1,7 @@
 import { CalculatableBlockLogic } from "shared/blockLogic/BlockLogic";
+import { BlockLogicGarbageResult } from "shared/blockLogic/BlockLogicValueStorage";
 import { BlockConfigDefinitions } from "shared/blocks/BlockConfigDefinitions";
 import { BlockCreation } from "shared/blocks/BlockCreation";
-import { RemoteEvents } from "shared/RemoteEvents";
 import type {
 	BlockLogicBothDefinitions,
 	BlockLogicArgs,
@@ -20,7 +20,7 @@ import type {
 type CalcFunc<TDef extends BlockLogicBothDefinitions> = (
 	inputs: AllInputKeysToObject<TDef["input"]>,
 	block: AutoCalculatableBlock<TDef>,
-) => AllOutputKeysToObject<TDef["output"]>;
+) => AllOutputKeysToObject<TDef["output"]> | BlockLogicGarbageResult;
 
 class AutoCalculatableBlock<TDef extends BlockLogicBothDefinitions> extends CalculatableBlockLogic<TDef> {
 	constructor(
@@ -31,7 +31,9 @@ class AutoCalculatableBlock<TDef extends BlockLogicBothDefinitions> extends Calc
 		super(definition, args);
 	}
 
-	protected override calculate(inputs: AllInputKeysToObject<TDef["input"]>): AllOutputKeysToObject<TDef["output"]> {
+	protected override calculate(
+		inputs: AllInputKeysToObject<TDef["input"]>,
+	): AllOutputKeysToObject<TDef["output"]> | BlockLogicGarbageResult {
 		return this.calcfunc(inputs, this);
 	}
 }
@@ -335,11 +337,8 @@ const maths = {
 			},
 			({ value1, value2 }, logic) => {
 				if (value2 === 0) {
-					if (logic.instance?.PrimaryPart) {
-						RemoteEvents.Burn.send([logic.instance.PrimaryPart]);
-					}
-
-					logic.disable();
+					logic.disableAndBurn();
+					return BlockLogicGarbageResult;
 				}
 
 				return { result: { type: "number", value: value1 / value2 } };
@@ -352,11 +351,8 @@ const maths = {
 		modelSource: autoModel("DoubleGenericLogicBlockPrefab", "MOD", categories.math),
 		logic: logic(defs.num2_num, (inputs, logic) => {
 			if (inputs.value2 === 0) {
-				if (logic.instance?.PrimaryPart) {
-					RemoteEvents.Burn.send([logic.instance.PrimaryPart]);
-				}
-
-				logic.disable();
+				logic.disableAndBurn();
+				return BlockLogicGarbageResult;
 			}
 
 			return { result: { type: "number", value: inputs.value1 % inputs.value2 } };
@@ -442,12 +438,8 @@ const maths = {
 			},
 			({ min, max }, logic) => {
 				if (max <= min) {
-					if (logic.instance?.PrimaryPart) {
-						RemoteEvents.Burn.send([logic.instance.PrimaryPart]);
-					}
-
-					logic.disable();
-					return { result: { type: "number", value: 727 } };
+					logic.disableAndBurn();
+					return BlockLogicGarbageResult;
 				}
 
 				return { result: { type: "number", value: math.random() * (max - min) + min } };

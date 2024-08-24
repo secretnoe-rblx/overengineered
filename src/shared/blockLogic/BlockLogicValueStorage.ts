@@ -9,6 +9,10 @@ import type {
 } from "shared/blockLogic/BlockLogic";
 import type { BlockLogicTypes } from "shared/blockLogic/BlockLogicTypes";
 
+/** Block logic result that indicates that the value is not obtainable and should disable the block chain */
+export const BlockLogicGarbageResult = "BLOCKLOGICGARBAGERESULT" as const;
+export type BlockLogicGarbageResult = typeof BlockLogicGarbageResult;
+
 type Primitives = BlockLogicTypes.Primitives;
 type NonPrimitives = BlockLogicTypes.NonPrimitives;
 type AllTypes = BlockLogicTypes.Types;
@@ -68,8 +72,7 @@ type TypedValue<TTypes extends PrimitiveKeys> = {
 };
 
 export type ReadonlyLogicValueStorage<TTypes extends PrimitiveKeys> = {
-	isValueSet(): boolean;
-	get(ctx: BlockLogicTickContext): TypedValue<TTypes>;
+	get(ctx: BlockLogicTickContext): TypedValue<TTypes> | BlockLogicGarbageResult;
 };
 export type WriteonlyLogicValueStorage<TTypes extends PrimitiveKeys> = {
 	set<TType extends TTypes & PrimitiveKeys>(valueType: TType, value: Primitives[TType]["default"]): void;
@@ -85,10 +88,6 @@ namespace LogicValueStoragesNamespace {
 			private readonly valueType: BlockConfigPrimitiveByType<TType>,
 		) {}
 
-		isValueSet(): boolean {
-			return true;
-		}
-
 		/** @sealed */
 		get(ctx: BlockLogicTickContext): TypedValue<BlockConfigPrimitiveByType<TType>> {
 			return {
@@ -103,10 +102,6 @@ namespace LogicValueStoragesNamespace {
 	const NewPrimitiveLogicValueStorage = <TType extends PrimitiveKeys>(valueType: TType) => {
 		return class implements Base<TType> {
 			constructor(private readonly config: AllTypes[TType]["config"]) {}
-
-			isValueSet(): boolean {
-				return true;
-			}
 
 			get(): TypedValue<BlockConfigPrimitiveByType<TType>> {
 				return {
@@ -203,13 +198,9 @@ export class LogicValueStorageContainer<TType extends PrimitiveKeys>
 
 	constructor(private readonly definitions: BlockLogicNoConfigDefinitionTypes<TType>) {}
 
-	isValueSet(): boolean {
-		return this.value !== undefined;
-	}
-
-	get(ctx: BlockLogicTickContext): TypedValue<TType> {
-		if (!this.isValueSet() || !this.value) {
-			throw `Block logic value was not set (keys: ${asMap(this.definitions).keys().join()})`;
+	get(ctx: BlockLogicTickContext): TypedValue<TType> | BlockLogicGarbageResult {
+		if (!this.value) {
+			return BlockLogicGarbageResult;
 		}
 
 		let value = this.value.value;
@@ -238,12 +229,12 @@ export class BlockBackedInputLogicValueStorage<TType extends PrimitiveKeys>
 		private readonly key: string,
 	) {}
 
-	isValueSet(): boolean {
-		return true;
-	}
-
-	get(ctx: BlockLogicTickContext): TypedValue<TType> {
+	get(ctx: BlockLogicTickContext): TypedValue<TType> | BlockLogicGarbageResult {
 		const result = this.block.getOutputValue(ctx, this.key);
+		if (result === BlockLogicGarbageResult) {
+			return result;
+		}
+
 		const filtered = filterValue(result.value, this.block.definition.output[this.key].types, result.type);
 
 		return {
@@ -254,10 +245,7 @@ export class BlockBackedInputLogicValueStorage<TType extends PrimitiveKeys>
 }
 
 export const UnsetBlockLogicValueStorage: ReadonlyLogicValueStorage<PrimitiveKeys> = {
-	isValueSet(): boolean {
-		return false;
-	},
-	get(): never {
-		throw "Block logic value was not initialized (SHOULD NOT HAPPEN; REPORT TO THE DEVELOPERS)";
+	get(): BlockLogicGarbageResult {
+		return BlockLogicGarbageResult;
 	},
 };

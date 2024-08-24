@@ -87,7 +87,6 @@ namespace Scene {
 
 		private currentConfigControl?: MultiBlockConfigControl;
 		private updateConfigs(selected: readonly BlockModel[]) {
-			print("uc");
 			const wasVisible = this.gui.Visible;
 
 			this.gui.Visible = selected.size() !== 0;
