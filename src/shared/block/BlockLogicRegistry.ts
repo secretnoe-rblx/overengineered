@@ -10,9 +10,7 @@ import { LogicMemoryBlockLogic } from "shared/block/logic/logic/memory/LogicMemo
 import { RandomAccessMemoryBlockLogic } from "shared/block/logic/logic/memory/RandomAccessMemoryBlockLogic";
 import { ReadOnlyMemoryBlockLogic } from "shared/block/logic/logic/memory/ReadOnlyMemoryBlockLogic";
 import { StackMemoryBlockLogic } from "shared/block/logic/logic/memory/StackMemoryBlockLogic";
-import { BufferBlockLogic } from "shared/block/logic/logic/other/BufferBlockLogic";
 import { CounterBlockLogic } from "shared/block/logic/logic/other/CounterBlockLogic";
-import { DelayBlockLogic } from "shared/block/logic/logic/other/DelayBlockLogic";
 import { ImpulseGeneratorBlockLogic } from "shared/block/logic/logic/other/ImpulseGeneratorBlockLogic";
 import { SingleImpulseBlockLogic } from "shared/block/logic/logic/other/SingleImpulseBlockLogic";
 import { AltimeterBlockLogic } from "shared/block/logic/logic/sensor/AltimeterBlockLogic";
@@ -77,7 +75,6 @@ const logicRegistry = {
 	leddisplay: LEDDisplayBlockLogic,
 	sevensegmentdisplay: SevenSegmentDisplayBlockLogic,
 
-	delayblock: DelayBlockLogic,
 	counter: CounterBlockLogic,
 
 	radioreciever: RadioRecieverBlockLogic,
@@ -101,7 +98,6 @@ const logicRegistry = {
 	randomaccessmemory: RandomAccessMemoryBlockLogic,
 	readonlymemory: ReadOnlyMemoryBlockLogic,
 
-	buffer: BufferBlockLogic,
 	impulsegenerator: ImpulseGeneratorBlockLogic,
 
 	vec3objectworldtransformer: Vector3ObjectWorldTransformerBlockLogic,

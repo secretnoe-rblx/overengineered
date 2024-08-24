@@ -1,5 +1,5 @@
 import { CalculatableBlockLogic } from "shared/blockLogic/BlockLogic";
-import { BlockLogicGarbageResult } from "shared/blockLogic/BlockLogicValueStorage";
+import { BlockLogicValueResults } from "shared/blockLogic/BlockLogicValueStorage";
 import { BlockConfigDefinitions } from "shared/blocks/BlockConfigDefinitions";
 import { BlockCreation } from "shared/blocks/BlockCreation";
 import type {
@@ -20,7 +20,7 @@ import type {
 type CalcFunc<TDef extends BlockLogicBothDefinitions> = (
 	inputs: AllInputKeysToObject<TDef["input"]>,
 	block: AutoCalculatableBlock<TDef>,
-) => AllOutputKeysToObject<TDef["output"]> | BlockLogicGarbageResult;
+) => AllOutputKeysToObject<TDef["output"]> | BlockLogicValueResults;
 
 class AutoCalculatableBlock<TDef extends BlockLogicBothDefinitions> extends CalculatableBlockLogic<TDef> {
 	constructor(
@@ -33,7 +33,7 @@ class AutoCalculatableBlock<TDef extends BlockLogicBothDefinitions> extends Calc
 
 	protected override calculate(
 		inputs: AllInputKeysToObject<TDef["input"]>,
-	): AllOutputKeysToObject<TDef["output"]> | BlockLogicGarbageResult {
+	): AllOutputKeysToObject<TDef["output"]> | BlockLogicValueResults {
 		return this.calcfunc(inputs, this);
 	}
 }
@@ -338,7 +338,7 @@ const maths = {
 			({ value1, value2 }, logic) => {
 				if (value2 === 0) {
 					logic.disableAndBurn();
-					return BlockLogicGarbageResult;
+					return BlockLogicValueResults.garbage;
 				}
 
 				return { result: { type: "number", value: value1 / value2 } };
@@ -352,7 +352,7 @@ const maths = {
 		logic: logic(defs.num2_num, (inputs, logic) => {
 			if (inputs.value2 === 0) {
 				logic.disableAndBurn();
-				return BlockLogicGarbageResult;
+				return BlockLogicValueResults.garbage;
 			}
 
 			return { result: { type: "number", value: inputs.value1 % inputs.value2 } };
@@ -439,7 +439,7 @@ const maths = {
 			({ min, max }, logic) => {
 				if (max <= min) {
 					logic.disableAndBurn();
-					return BlockLogicGarbageResult;
+					return BlockLogicValueResults.garbage;
 				}
 
 				return { result: { type: "number", value: math.random() * (max - min) + min } };
@@ -935,6 +935,23 @@ const byte = {
 } as const satisfies { readonly [k in string]: BlockBuilderWithoutIdAndDefaults };
 
 const other = {
+	buffer: {
+		displayName: "Buffer",
+		description: "Returns the same value it was given. Useful for logic organization",
+		logic: logic(
+			{
+				input: {
+					value: defpartsf.any("Value", { group: "1" }),
+				},
+				output: {
+					result: defpartsf.any("Result", { group: "1" }),
+				},
+			},
+			({ value, valueType }) => ({
+				result: { type: valueType, value },
+			}),
+		),
+	},
 	multiplexer: {
 		displayName: "Multiplexer",
 		description: "Outputs values depending on the incoming boolean",

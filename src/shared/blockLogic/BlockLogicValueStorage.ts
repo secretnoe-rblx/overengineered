@@ -9,6 +9,19 @@ import type {
 } from "shared/blockLogic/BlockLogic";
 import type { BlockLogicTypes } from "shared/blockLogic/BlockLogicTypes";
 
+export type BlockLogicValueResults = (typeof BlockLogicValueResults)[keyof typeof BlockLogicValueResults];
+export const BlockLogicValueResults = {
+	/** Indicates that the value is not yet available, but will be later. Any block receiving this should defer its execution until available. */
+	availableLater: "$BLOCKLOGIC_AVAILABLELATER",
+
+	/** Indicates that the value is not available and never will be. Any block receiving this should disable and destroy itself. */
+	garbage: "$BLOCKLOGIC_GARBAGE",
+} as const;
+
+const blockLogicValueResultsBackwards = asObject(new Set(asMap(BlockLogicValueResults).map((k, v) => v)));
+export const isCustomBlockLogicValueResult = (value: unknown): value is BlockLogicValueResults =>
+	typeIs(value, "string") && value in blockLogicValueResultsBackwards;
+
 /** Block logic result that indicates that the value is not obtainable and should disable the block chain */
 export const BlockLogicGarbageResult = "BLOCKLOGICGARBAGERESULT" as const;
 export type BlockLogicGarbageResult = typeof BlockLogicGarbageResult;
@@ -72,7 +85,7 @@ type TypedValue<TTypes extends PrimitiveKeys> = {
 };
 
 export type ReadonlyLogicValueStorage<TTypes extends PrimitiveKeys> = {
-	get(ctx: BlockLogicTickContext): TypedValue<TTypes> | BlockLogicGarbageResult;
+	get(ctx: BlockLogicTickContext): TypedValue<TTypes> | BlockLogicValueResults;
 };
 export type WriteonlyLogicValueStorage<TTypes extends PrimitiveKeys> = {
 	set<TType extends TTypes & PrimitiveKeys>(valueType: TType, value: Primitives[TType]["default"]): void;
@@ -198,9 +211,9 @@ export class LogicValueStorageContainer<TType extends PrimitiveKeys>
 
 	constructor(private readonly definitions: BlockLogicNoConfigDefinitionTypes<TType>) {}
 
-	get(ctx: BlockLogicTickContext): TypedValue<TType> | BlockLogicGarbageResult {
+	get(ctx: BlockLogicTickContext): TypedValue<TType> | BlockLogicValueResults {
 		if (!this.value) {
-			return BlockLogicGarbageResult;
+			return BlockLogicValueResults.availableLater;
 		}
 
 		let value = this.value.value;
@@ -229,9 +242,9 @@ export class BlockBackedInputLogicValueStorage<TType extends PrimitiveKeys>
 		private readonly key: string,
 	) {}
 
-	get(ctx: BlockLogicTickContext): TypedValue<TType> | BlockLogicGarbageResult {
+	get(ctx: BlockLogicTickContext): TypedValue<TType> | BlockLogicValueResults {
 		const result = this.block.getOutputValue(ctx, this.key);
-		if (result === BlockLogicGarbageResult) {
+		if (isCustomBlockLogicValueResult(result)) {
 			return result;
 		}
 
@@ -245,7 +258,7 @@ export class BlockBackedInputLogicValueStorage<TType extends PrimitiveKeys>
 }
 
 export const UnsetBlockLogicValueStorage: ReadonlyLogicValueStorage<PrimitiveKeys> = {
-	get(): BlockLogicGarbageResult {
-		return BlockLogicGarbageResult;
+	get(): BlockLogicValueResults {
+		return BlockLogicValueResults.garbage;
 	},
 };

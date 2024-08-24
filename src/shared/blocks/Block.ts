@@ -1,10 +1,10 @@
 import type { BlockMirrorBehaviour } from "shared/BlockDataRegistry";
 import type { BlockLogicFullBothDefinitions, GenericBlockLogicCtor } from "shared/blockLogic/BlockLogic";
 import type { BlockCreation } from "shared/blocks/BlockCreation";
-import type { BasicOperationBlockIds } from "shared/blocks/blocks/BasicOperationBlocks";
-import type { BuildingBlockIds } from "shared/blocks/blocks/BuildingBlocks";
+import type { BasicOperationBlockIds } from "shared/blocks/blocks/grouped/BasicOperationBlocks";
+import type { BuildingBlockIds } from "shared/blocks/blocks/grouped/BuildingBlocks";
 import type { DisconnectBlock } from "shared/blocks/blocks/DisconnectBlock";
-import type { WheelBlockIds } from "shared/blocks/blocks/WheelBlocks";
+import type { WheelBlockIds } from "shared/blocks/blocks/grouped/WheelBlocks";
 
 export type BlockCategoryPath = readonly string[];
 export type BlockLogicInfo = {

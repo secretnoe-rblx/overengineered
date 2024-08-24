@@ -1,10 +1,11 @@
 import {
 	BlockBackedInputLogicValueStorage,
-	BlockLogicGarbageResult,
+	isCustomBlockLogicValueResult,
 	LogicValueStorageContainer,
 	LogicValueStorages,
 	UnsetBlockLogicValueStorage,
 } from "shared/blockLogic/BlockLogicValueStorage";
+import { BlockLogicValueResults } from "shared/blockLogic/BlockLogicValueStorage";
 import { Component } from "shared/component/Component";
 import { ComponentInstance } from "shared/component/ComponentInstance";
 import { ArgsSignal } from "shared/event/Signal";
@@ -131,7 +132,7 @@ type IBlockLogicValues<TDef extends BlockLogicBothDefinitions["output"]> = {
 const inputValuesToFullObject = <TDef extends BlockLogicBothDefinitions>(
 	ctx: BlockLogicTickContext,
 	input: ReadonlyBlockLogicValues<TDef["input"]>,
-): AllInputKeysToObject<TDef["input"]> | BlockLogicGarbageResult => {
+): AllInputKeysToObject<TDef["input"]> | BlockLogicValueResults => {
 	const inputValues: {
 		[k in keyof TDef["input"]]?: TypedValue<
 			keyof BlockLogicTypes.Primitives & keyof (TDef["input"][keyof TDef["input"]]["types"] & defined)
@@ -140,8 +141,8 @@ const inputValuesToFullObject = <TDef extends BlockLogicBothDefinitions>(
 
 	for (const [k, v] of pairs(input)) {
 		const value = v.get(ctx);
-		if (value === BlockLogicGarbageResult) {
-			return BlockLogicGarbageResult;
+		if (isCustomBlockLogicValueResult(value)) {
+			return value;
 		}
 
 		inputValues[k] = value;
@@ -260,10 +261,10 @@ export abstract class BlockLogic<TDef extends BlockLogicBothDefinitions> extends
 		key: keyof typeof this.output,
 	):
 		| TypedValue<keyof BlockLogicTypes.Primitives & keyof (TDef["output"][keyof TDef["output"]]["types"] & defined)>
-		| BlockLogicGarbageResult {
+		| BlockLogicValueResults {
 		if (this.calculatingRightNow) {
 			this.disableAndBurn();
-			return BlockLogicGarbageResult;
+			return BlockLogicValueResults.garbage;
 		}
 
 		this.calculatingRightNow = true;
@@ -287,8 +288,11 @@ export abstract class BlockLogic<TDef extends BlockLogicBothDefinitions> extends
 	): void {
 		this.onTick((ctx) => {
 			const inputs = inputValuesToFullObject(ctx, this.input);
-			if (inputs === BlockLogicGarbageResult) {
+			if (inputs === BlockLogicValueResults.garbage) {
 				this.disableAndBurn();
+				return;
+			}
+			if (inputs === BlockLogicValueResults.availableLater) {
 				return;
 			}
 
@@ -330,10 +334,10 @@ export abstract class CalculatableBlockLogic<TDef extends BlockLogicBothDefiniti
 		key: keyof TDef["output"],
 	):
 		| TypedValue<keyof BlockLogicTypes.Primitives & keyof (TDef["output"][keyof TDef["output"]]["types"] & defined)>
-		| BlockLogicGarbageResult {
+		| BlockLogicValueResults {
 		if (this.calculatingRightNow2) {
 			this.disableAndBurn();
-			return BlockLogicGarbageResult;
+			return BlockLogicValueResults.garbage;
 		}
 
 		this.calculatingRightNow2 = true;
@@ -345,19 +349,19 @@ export abstract class CalculatableBlockLogic<TDef extends BlockLogicBothDefiniti
 
 	private recalculateOutputs(
 		ctx: BlockLogicTickContext,
-	): AllOutputKeysToObject<TDef["output"]> | BlockLogicGarbageResult {
+	): AllOutputKeysToObject<TDef["output"]> | BlockLogicValueResults {
 		if (ctx.tick === this.resultsCacheTick && this.cachedResults) {
 			return this.cachedResults;
 		}
 
 		const inputs = inputValuesToFullObject(ctx, this.input);
-		if (inputs === BlockLogicGarbageResult) {
-			return BlockLogicGarbageResult;
+		if (isCustomBlockLogicValueResult(inputs)) {
+			return inputs;
 		}
 
 		const result = this.calculate(inputs, ctx);
-		if (result === BlockLogicGarbageResult) {
-			return BlockLogicGarbageResult;
+		if (isCustomBlockLogicValueResult(result)) {
+			return result;
 		}
 
 		this.cachedResults = result;
@@ -373,5 +377,5 @@ export abstract class CalculatableBlockLogic<TDef extends BlockLogicBothDefiniti
 	protected abstract calculate(
 		inputs: AllInputKeysToObject<TDef["input"]>,
 		ctx: BlockLogicTickContext,
-	): AllOutputKeysToObject<TDef["output"]> | BlockLogicGarbageResult;
+	): AllOutputKeysToObject<TDef["output"]> | BlockLogicValueResults;
 }

@@ -1280,21 +1280,6 @@ const radarsection = {
 	},
 } as const satisfies BlockConfigBothDefinitions;
 
-const delayBlock = {
-	input: {
-		value: connectors.any("Value", "1"),
-		duration: {
-			displayName: "Duration",
-			type: "number",
-			default: 0 as number,
-			config: 0 as number,
-		},
-	},
-	output: {
-		result: connectors.any("Result", "1"),
-	},
-} as const satisfies BlockConfigBothDefinitions;
-
 export const blockConfigRegistry = {
 	motorblock,
 	smallrocketengine: rocketengine,
@@ -1343,8 +1328,6 @@ export const blockConfigRegistry = {
 
 	radarsection,
 
-	delayblock: delayBlock,
-
 	impulsegenerator,
 	counter,
 	logicmemory,
@@ -1352,7 +1335,6 @@ export const blockConfigRegistry = {
 	gravitysensor,
 	randomaccessmemory,
 	readonlymemory,
-	buffer: anyProcessing,
 
 	vec3splitter,
 	vec3combiner,

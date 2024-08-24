@@ -41,11 +41,6 @@ const operations = {
 		category: categories.other,
 		prefab: prefabs.x4Generic,
 	},
-	delayblock: {
-		modelTextOverride: "DELAY",
-		category: categories.other,
-		prefab: prefabs.doubleGeneric,
-	},
 	logicmemory: {
 		modelTextOverride: "MEMORY",
 		category: categories.memory,

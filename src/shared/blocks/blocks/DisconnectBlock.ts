@@ -26,8 +26,8 @@ const definition = {
 	output: {},
 } satisfies BlockLogicFullBothDefinitions;
 
-export type { DisconnectBlockLogic };
-class DisconnectBlockLogic extends InstanceBlockLogic<typeof definition> {
+export type { Logic as DisconnectBlockLogic };
+class Logic extends InstanceBlockLogic<typeof definition> {
 	static readonly events = {
 		disconnect: new AutoC2SRemoteEvent<{ readonly block: BlockModel }>("b_disconnectblock_disconnect"),
 	} as const;
@@ -37,7 +37,7 @@ class DisconnectBlockLogic extends InstanceBlockLogic<typeof definition> {
 
 		this.on(({ disconnect }) => {
 			if (disconnect) {
-				DisconnectBlockLogic.events.disconnect.send({ block: this.instance });
+				Logic.events.disconnect.send({ block: this.instance });
 				this.disable();
 			}
 		});
@@ -50,5 +50,5 @@ export const DisconnectBlock = {
 	displayName: "Disconnector",
 	description: "Detaches connected parts",
 
-	logic: { definition, ctor: DisconnectBlockLogic },
+	logic: { definition, ctor: Logic },
 } as const satisfies BlockBuilder;

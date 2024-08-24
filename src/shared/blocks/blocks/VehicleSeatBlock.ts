@@ -21,10 +21,10 @@ type VehicleSeatModel = BlockModel & {
 	readonly VehicleSeat: VehicleSeat;
 };
 
-export type { VehicleSeatBlockLogic };
+export type { Logic as VehicleSeatBlockLogic };
 
 @injectable
-class VehicleSeatBlockLogic extends InstanceBlockLogic<typeof definition, VehicleSeatModel> {
+class Logic extends InstanceBlockLogic<typeof definition, VehicleSeatModel> {
 	readonly vehicleSeat;
 
 	constructor(block: InstanceBlockLogicArgs, @inject machine: SharedMachine) {
@@ -52,5 +52,5 @@ export const VehicleSeatBlock = {
 	displayName: "Driver seat",
 	description: "A seat for your vehicle. Allows you to control your contraption",
 
-	logic: { definition, ctor: VehicleSeatBlockLogic },
+	logic: { definition, ctor: Logic },
 } as const satisfies BlockBuilder;

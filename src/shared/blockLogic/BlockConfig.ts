@@ -45,11 +45,24 @@ export namespace BlockConfig {
 			}
 
 			if (!obj) {
-				const defaultType = def.connectorHidden ? Objects.firstKey(def.types) ?? "unset" : "unset";
-				if (def.connectorHidden && defaultType === "unset") {
-					// without a connector we can only configure the value with the config tool; thus, "unset" makes zero sense
-					throw "Unset type is not supported without a visible marker";
-				}
+				const getDefaultType = (): PrimitiveKeys => {
+					if (Objects.size(def.types) === 1) {
+						return Objects.firstKey(def.types)!;
+					}
+
+					if (def.connectorHidden) {
+						// without a connector we can only configure the value with the config tool; thus, "unset" makes zero sense
+						const t = Objects.firstKey(def.types);
+						if (!t) {
+							throw "Unset type is not supported without a visible marker";
+						}
+
+						return t;
+					}
+
+					return Objects.firstKey(def.types) ?? "unset";
+				};
+				const defaultType = getDefaultType();
 
 				const cfg: GenericConfig = {
 					type: defaultType,

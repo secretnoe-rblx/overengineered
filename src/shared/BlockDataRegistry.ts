@@ -56,11 +56,6 @@ const logic = {
 			description: "Returns same value you gave it but with delay",
 			autoWeldShape: "cube",
 		},
-		buffer: {
-			name: "Buffer",
-			description: "Returns the same value it was given. Useful for logic organization",
-			autoWeldShape: "none",
-		},
 	},
 	byte: {},
 	vector3: {
