@@ -654,32 +654,6 @@ const gravitysensor = {
 	},
 } as const satisfies BlockConfigBothDefinitions;
 
-const keysensor = {
-	input: {
-		key: {
-			displayName: "Key",
-			type: "keybool",
-			connectorHidden: true,
-			default: false as boolean,
-			config: {
-				key: "F" as KeyCode,
-				switch: false as boolean,
-				reversed: false,
-			},
-			canBeSwitch: true,
-			canBeReversed: true,
-		},
-	},
-	output: {
-		result: {
-			displayName: "Pressed",
-			type: "bool",
-			default: false as boolean,
-			config: false as boolean,
-		},
-	},
-} as const satisfies BlockConfigBothDefinitions;
-
 const mousesensor = {
 	input: {},
 	output: {
@@ -1293,7 +1267,6 @@ export const blockConfigRegistry = {
 	speedometer,
 	masssensor,
 	anglesensor,
-	keysensor,
 	mousesensor,
 	tpscounter: tpscounter,
 	altimeter,

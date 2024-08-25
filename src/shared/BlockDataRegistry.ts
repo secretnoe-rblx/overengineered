@@ -85,10 +85,6 @@ const logic = {
 			name: "Angle Sensor",
 			description: "Returns it's angle",
 		},
-		keysensor: {
-			name: "Keyboard Sensor",
-			description: "Returns true when the chosen button is pressed",
-		},
 		ownerlocator: {
 			name: "Owner Locator",
 			description: "Maks, delete this ####",
