@@ -11,7 +11,7 @@ import { ConfirmPopup } from "client/gui/popup/ConfirmPopup";
 import { TouchModeButtonControl } from "client/gui/ridemode/TouchModeButtonControl";
 import { requestMode } from "client/modes/PlayModeRequest";
 import { RocketEngineLogic } from "shared/block/logic/RocketEngineLogic";
-import { VehicleSeatBlockLogic } from "shared/block/logic/VehicleSeatBlockLogic";
+import { VehicleSeatBlock } from "shared/blocks/blocks/VehicleSeatBlock";
 import { EventHandler } from "shared/event/EventHandler";
 import { Signal } from "shared/event/Signal";
 import { CustomRemotes } from "shared/Remotes";
@@ -337,7 +337,7 @@ export class RideModeScene extends Control<RideModeSceneDefinition> {
 
 	private addMeters(machine: IReadonlyContainerComponent) {
 		this.info.clear();
-		this.actionbar.sitButton.setVisible(machine.getChildren().any((b) => b instanceof VehicleSeatBlockLogic));
+		this.actionbar.sitButton.setVisible(machine.getChildren().any((b) => b instanceof VehicleSeatBlock.logic.ctor));
 
 		const init = (
 			title: string,
