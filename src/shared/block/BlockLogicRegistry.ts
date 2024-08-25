@@ -66,6 +66,7 @@ const logicRegistry = {
 	ballast: BallastBlockLogic,
 
 	lamp: LampBlockLogic,
+	smalllamp: LampBlockLogic,
 	laser: LaserBlockLogic,
 	leddisplay: LEDDisplayBlockLogic,
 	sevensegmentdisplay: SevenSegmentDisplayBlockLogic,

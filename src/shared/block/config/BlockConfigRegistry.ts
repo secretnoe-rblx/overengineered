@@ -785,7 +785,7 @@ const laser = {
 			config: 200 as number,
 			default: 200 as number,
 			min: 0.1,
-			max: 200,
+			max: 600,
 			step: 0.1,
 		},
 		rayTransparency: {
@@ -1135,7 +1135,8 @@ const counter = {
 			configHidden: true,
 		},
 		triggerValue: {
-			displayName: "Write",
+			//a.k.a. rewrite value
+			displayName: "Rewrite",
 			type: "bool",
 			default: false as boolean,
 			config: false as boolean,
@@ -1295,7 +1296,8 @@ export const blockConfigRegistry = {
 	wedgewing1x2: wing,
 	wedgewing1x3: wing,
 	wedgewing1x4: wing,
-	lamp,
+	lamp: lamp,
+	smalllamp: lamp,
 	leddisplay,
 	sevensegmentdisplay,
 	laser,

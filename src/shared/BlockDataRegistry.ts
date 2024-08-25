@@ -70,6 +70,16 @@ const logic = {
 			description: "A simple lamp. Turns on when true is passed and turns off when false is passed",
 			autoWeldShape: "cube",
 		},
+		smalllamp: {
+			name: "Small Lamp",
+			description: "A simple lamp. Same as regular one but small!",
+			autoWeldShape: "cube",
+		},
+		screen: {
+			name: "Screen",
+			description: "Display all your data for everyone to see!",
+			autoWeldShape: "cube",
+		},
 		laser: {
 			name: "Laser pointer",
 			description: "shoot beem boom target!",
@@ -218,7 +228,13 @@ const registry = {
 		name: "Rocket Engine",
 		description: "Engines your rocket into the space and onto the ground",
 		mirrorBehaviour: "offset180",
-		limit: 30,
+		limit: 50,
+	},
+	smallrocketengine: {
+		name: "Small Rocket Engine",
+		description: "Smaller brother of a rocket engine",
+		mirrorBehaviour: "offset180",
+		limit: 50,
 	},
 	rope: {
 		name: "Rope",
@@ -237,12 +253,6 @@ const registry = {
 	smallgear: {
 		name: "Small Gear",
 		description: "A cog for your machinery. Does it even work?",
-	},
-	smallrocketengine: {
-		name: "Small Rocket Engine",
-		description: "Smaller brother of a rocket engine",
-		mirrorBehaviour: "offset180",
-		limit: 30,
 	},
 	speedometer: {
 		name: "Speedometer",
