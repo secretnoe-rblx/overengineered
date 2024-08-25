@@ -1014,7 +1014,6 @@ const v25: UpgradableBlocksSerializer<SerializedBlocks<SerializedBlockV4>, typeo
 					: asObject(
 							asMap(block.config).mapToMap(
 								(k, v): LuaTuple<[string, PlacedBlockConfig[string] & defined]> => {
-									print(block.id);
 									const def = (blockConfigRegistry as BlockConfigRegistry)[
 										block.id as keyof BlockConfigRegistry
 									]!.input[k];

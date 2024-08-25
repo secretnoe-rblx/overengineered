@@ -8,12 +8,19 @@ type PrimitiveKeys = keyof Primitives;
 type AllTypes = BlockLogicTypes.Types;
 type AllKeys = keyof AllTypes;
 
+const PrimitivesByType = {
+	clampedNumber: "number",
+	keybool: "bool",
+} as const satisfies { [k in keyof BlockLogicTypes.NonPrimitives]: PrimitiveKeys };
+type PrimitivesByType = typeof PrimitivesByType;
+
 export type BlockConfigTypesByPrimitive<TKeys extends PrimitiveKeys> = {
 	readonly [k in PrimitiveKeys]: Extract<AllTypes[AllKeys], { readonly default: AllTypes[k]["default"] }>["type"];
 }[TKeys];
-export type BlockConfigPrimitiveByType<TKeys extends AllKeys> = {
-	readonly [k in AllKeys]: Extract<AllTypes[PrimitiveKeys], { readonly default: AllTypes[k]["default"] }>["type"];
-}[TKeys];
+export type BlockConfigPrimitiveByType<TKeys extends AllKeys> = PrimitivesByType[TKeys &
+	keyof PrimitivesByType] extends never
+	? TKeys & PrimitiveKeys
+	: PrimitivesByType[TKeys & keyof PrimitivesByType];
 
 export type BlockConfigPart<TKey extends PrimitiveKeys> = {
 	readonly type: TKey;

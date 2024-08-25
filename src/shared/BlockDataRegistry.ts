@@ -201,10 +201,6 @@ const registry = {
 		description: "Rotates attached blocks",
 		limit: 100,
 	},
-	passengerseat: {
-		name: "Passenger Seat",
-		description: "Allow your friends to have immesurable fun with you",
-	},
 	randomaccessmemory: {
 		name: "RAM",
 		description: "An addressed memory. Allows you to store up to 256 values",
@@ -282,11 +278,6 @@ const registry = {
 		name: "Spherical TNT",
 		description: "Catch this anarchid-man!",
 		limit: 100,
-	},
-	vehicleseat: {
-		name: "Driver Seat",
-		description: "A seat for your vehicle. Allows you to control your contraption",
-		limit: 1,
 	},
 	wing1x1: {
 		name: "Wing 1x1",

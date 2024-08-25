@@ -82,6 +82,7 @@ const filterValueByDef = <TType extends AllKeys>(
 type TypedValue<TTypes extends PrimitiveKeys> = {
 	readonly value: Primitives[TTypes]["default"] & defined;
 	readonly type: TTypes;
+	readonly changedSinceLastTick: boolean;
 };
 
 export type ReadonlyLogicValueStorage<TTypes extends PrimitiveKeys> = {
@@ -92,6 +93,78 @@ export type WriteonlyLogicValueStorage<TTypes extends PrimitiveKeys> = {
 };
 export type ILogicValueStorage<TTypes extends PrimitiveKeys> = ReadonlyLogicValueStorage<TTypes> &
 	WriteonlyLogicValueStorage<TTypes>;
+
+/** Storage for a value of a block logic. Automatically filters the value based on the type. */
+export class LogicValueStorageContainer<TType extends PrimitiveKeys>
+	implements ReadonlyLogicValueStorage<TType>, WriteonlyLogicValueStorage<TType>
+{
+	private value?: Omit<TypedValue<TType>, "changedSinceLastTick">;
+	private lastChangeTick?: number;
+	private changedThisTick = false;
+
+	constructor(private readonly definitions: BlockLogicNoConfigDefinitionTypes<TType>) {}
+
+	get(ctx: BlockLogicTickContext): TypedValue<TType> | BlockLogicValueResults {
+		if (!this.value) {
+			return BlockLogicValueResults.availableLater;
+		}
+
+		if (this.changedThisTick) {
+			this.changedThisTick = false;
+			this.lastChangeTick = ctx.tick;
+		}
+
+		let value = this.value.value;
+		const valueType = this.value.type;
+		const changedSinceLastTick = ctx.tick === this.lastChangeTick;
+
+		value = filterValue(value, this.definitions, valueType);
+
+		return { value, type: valueType, changedSinceLastTick };
+	}
+	set<TType2 extends TType & PrimitiveKeys>(valueType: TType2, value: Primitives[TType2]["default"]): void {
+		value = filterValue(value, this.definitions, valueType);
+		this.changedThisTick = true;
+
+		this.value = {
+			type: valueType,
+			value,
+		};
+	}
+}
+
+/** Storage for a value of a block logic that gets its value from another block output. Automatically filters the value based on the type. */
+export class BlockBackedInputLogicValueStorage<TType extends PrimitiveKeys>
+	implements ReadonlyLogicValueStorage<TType>
+{
+	constructor(
+		private readonly block: BlockLogic<BlockLogicBothDefinitions>,
+		private readonly key: string,
+	) {}
+
+	get(ctx: BlockLogicTickContext): TypedValue<TType> | BlockLogicValueResults {
+		const result = this.block.getOutputValue(ctx, this.key);
+		if (isCustomBlockLogicValueResult(result)) {
+			return result;
+		}
+
+		const filtered = filterValue(result.value, this.block.definition.output[this.key].types, result.type);
+
+		return {
+			type: result.type,
+			value: filtered,
+			changedSinceLastTick: result.changedSinceLastTick,
+		} as TypedValue<TType>;
+	}
+}
+
+export const UnsetBlockLogicValueStorage: ReadonlyLogicValueStorage<PrimitiveKeys> = {
+	get(): BlockLogicValueResults {
+		return BlockLogicValueResults.garbage;
+	},
+};
+
+//
 
 namespace LogicValueStoragesNamespace {
 	export type Base<TType extends AllKeys> = ReadonlyLogicValueStorage<BlockConfigPrimitiveByType<TType>>;
@@ -106,6 +179,7 @@ namespace LogicValueStoragesNamespace {
 			return {
 				type: this.valueType,
 				value: this.getValue(ctx),
+				changedSinceLastTick: true, // TODO:
 			};
 		}
 		protected abstract getValue(
@@ -120,6 +194,9 @@ namespace LogicValueStoragesNamespace {
 				return {
 					type: valueType as never,
 					value: this.config,
+
+					// configuration values never change
+					changedSinceLastTick: false,
 				};
 			}
 		};
@@ -155,12 +232,12 @@ namespace LogicValueStoragesNamespace {
 	export const byte = NewPrimitiveLogicValueStorage("byte");
 	export const bytearray = NewPrimitiveLogicValueStorage("bytearray");
 
-	export class clampedNumber extends base<"clampedNumber"> {
+	export class clampedNumber extends LogicValueStorageContainer<BlockConfigPrimitiveByType<"clampedNumber">> {
 		constructor(
 			protected readonly config: Primitives[BlockConfigPrimitiveByType<"clampedNumber">]["config"],
 			private readonly definition: AllTypes["clampedNumber"],
 		) {
-			super(config, "number");
+			super({ number: definition });
 		}
 
 		protected getValue(ctx: BlockLogicTickContext): number {
@@ -168,16 +245,14 @@ namespace LogicValueStoragesNamespace {
 		}
 	}
 
-	export class keybool extends base<"keybool"> {
-		private value: boolean;
+	export class keybool extends LogicValueStorageContainer<BlockConfigPrimitiveByType<"keybool">> {
+		constructor(config: AllTypes["keybool"]["config"], definition: AllTypes["keybool"]) {
+			super({ bool: definition });
 
-		constructor(protected readonly config: AllTypes["keybool"]["config"]) {
-			super(config, "bool");
-
-			this.value = config.reversed;
+			this.set("bool", config.reversed);
 
 			const isKeyCode = (key: string): key is KeyCode => key in Keys;
-			if (isKeyCode(this.config.key)) {
+			if (isKeyCode(config.key)) {
 				// if (config.switch) {
 				// 	this.event.onKeyDown(this.config.key, () => (this.value = !this.value));
 				// } else {
@@ -185,10 +260,6 @@ namespace LogicValueStoragesNamespace {
 				// 	this.event.onKeyUp(this.config.key, () => (this.value = config.reversed));
 				// }
 			}
-		}
-
-		protected getValue(): boolean {
-			return this.value;
 		}
 	}
 }
@@ -201,64 +272,4 @@ export const LogicValueStorages: { readonly [k in AllKeys]: ConfigBackedLogicVal
 	...LogicValueStoragesNamespace,
 	number: LogicValueStoragesNamespace._number,
 	string: LogicValueStoragesNamespace._string,
-};
-
-/** Storage for a value of a block logic. Automatically filters the value based on the type. */
-export class LogicValueStorageContainer<TType extends PrimitiveKeys>
-	implements ReadonlyLogicValueStorage<TType>, WriteonlyLogicValueStorage<TType>
-{
-	private value?: TypedValue<TType>;
-
-	constructor(private readonly definitions: BlockLogicNoConfigDefinitionTypes<TType>) {}
-
-	get(ctx: BlockLogicTickContext): TypedValue<TType> | BlockLogicValueResults {
-		if (!this.value) {
-			return BlockLogicValueResults.availableLater;
-		}
-
-		let value = this.value.value;
-		const valueType = this.value.type;
-
-		value = filterValue(value, this.definitions, valueType);
-
-		return { value, type: valueType };
-	}
-	set<TType2 extends TType & PrimitiveKeys>(valueType: TType2, value: Primitives[TType2]["default"]): void {
-		value = filterValue(value, this.definitions, valueType);
-
-		this.value = {
-			type: valueType,
-			value,
-		};
-	}
-}
-
-/** Storage for a value of a block logic that gets its value from another block output. Automatically filters the value based on the type. */
-export class BlockBackedInputLogicValueStorage<TType extends PrimitiveKeys>
-	implements ReadonlyLogicValueStorage<TType>
-{
-	constructor(
-		private readonly block: BlockLogic<BlockLogicBothDefinitions>,
-		private readonly key: string,
-	) {}
-
-	get(ctx: BlockLogicTickContext): TypedValue<TType> | BlockLogicValueResults {
-		const result = this.block.getOutputValue(ctx, this.key);
-		if (isCustomBlockLogicValueResult(result)) {
-			return result;
-		}
-
-		const filtered = filterValue(result.value, this.block.definition.output[this.key].types, result.type);
-
-		return {
-			type: result.type,
-			value: filtered,
-		} as TypedValue<TType>;
-	}
-}
-
-export const UnsetBlockLogicValueStorage: ReadonlyLogicValueStorage<PrimitiveKeys> = {
-	get(): BlockLogicValueResults {
-		return BlockLogicValueResults.garbage;
-	},
 };

@@ -616,18 +616,6 @@ const suspensionblock = {
 	output: {},
 } as const satisfies BlockConfigBothDefinitions;
 
-const vehicleseat = {
-	input: {},
-	output: {
-		occupied: {
-			displayName: "Occupied",
-			type: "bool",
-			default: false as boolean,
-			config: false as boolean,
-		},
-	},
-} as const satisfies BlockConfigBothDefinitions;
-
 const speedometer = {
 	input: {},
 	output: {
@@ -1291,8 +1279,6 @@ export const blockConfigRegistry = {
 	cylindricaltnt: tnt,
 	sphericaltnt: tnt,
 	suspensionblock,
-	vehicleseat,
-	passengerseat: vehicleseat,
 	magnet,
 	piston,
 	ballast,

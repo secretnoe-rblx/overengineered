@@ -30,6 +30,6 @@ export class BulletProjectile extends WeaponProjectile {
 	}
 }
 BulletProjectile.spawn.invoked.Connect((player, { startPosition, baseVelocity, baseDamage }) => {
-	print("Bullet spawned");
+	// print("Bullet spawned");
 	new BulletProjectile(startPosition, baseVelocity, baseDamage);
 });

@@ -30,9 +30,13 @@ class Logic extends InstanceBlockLogic<typeof definition> {
 	constructor(block: InstanceBlockLogicArgs) {
 		super(definition, block);
 
-		this.on(({ value, valueType, duration }) => {
-			// print("delaying", value, valueType, duration);
-			task.delay(duration, () => this.output.result.set(valueType, value));
+		this.on(({ value, valueType, valueChanged, duration }) => {
+			if (!valueChanged) return;
+
+			task.delay(duration, () => {
+				if (this.isDestroyed()) return;
+				this.output.result.set(valueType, value);
+			});
 		});
 	}
 }

@@ -146,7 +146,6 @@ export namespace PERemoteEventMiddlewares {
 		return {
 			start: () => {
 				const now = os.time();
-				print(now, lastCheck, current);
 
 				lastCheck ??= now;
 				if (now - lastCheck > time) {

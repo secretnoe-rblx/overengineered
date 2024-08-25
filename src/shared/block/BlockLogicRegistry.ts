@@ -26,7 +26,6 @@ import { SpeedometerBlockLogic } from "shared/block/logic/logic/sensor/Speedomet
 import { TpsCounterBlockLogic } from "shared/block/logic/logic/sensor/TpsCounterBlockLogic";
 import { MagnetBlockLogic } from "shared/block/logic/MagnetBlockLogic";
 import { MotorBlockLogic } from "shared/block/logic/MotorBlockLogic";
-import { PassengerSeatBlockLogic } from "shared/block/logic/PassengerSeatBlockLogic";
 import { PistonLogic } from "shared/block/logic/PistonBlockLogic";
 import { RadioRecieverBlockLogic } from "shared/block/logic/RadioRecieverBlockLogic";
 import { RadioTransmitterBlockLogic } from "shared/block/logic/RadioTransmitterBlockLogic";
@@ -35,7 +34,6 @@ import { RopeLogic } from "shared/block/logic/RopeLogic";
 import { ServoMotorBlockLogic } from "shared/block/logic/ServoMotorBlockLogic";
 import { SuspensionLogic } from "shared/block/logic/SuspensionLogic";
 import { TNTBlockLogic } from "shared/block/logic/TNTBlockLogic";
-import { VehicleSeatBlockLogic } from "shared/block/logic/VehicleSeatBlockLogic";
 import { WingLogic } from "shared/block/logic/WingLogic";
 import type { BlockLogic } from "shared/block/BlockLogic";
 
@@ -49,9 +47,6 @@ const logicRegistry = {
 	wing1x2: WingLogic,
 	wing1x3: WingLogic,
 	wing1x4: WingLogic,
-
-	vehicleseat: VehicleSeatBlockLogic,
-	passengerseat: PassengerSeatBlockLogic,
 
 	smallrocketengine: RocketEngineLogic,
 	rocketengine: RocketEngineLogic,
