@@ -1,5 +1,5 @@
 import { BlockCreation } from "shared/blocks/BlockCreation";
-import type { BlockBuilderWithoutIdAndDefaults } from "shared/blocks/Block";
+import type { BlockBuildersWithoutIdAndDefaults } from "shared/blocks/Block";
 
 const blocks = {
 	block: {
@@ -44,7 +44,7 @@ const blocks = {
 		displayName: "Half Block",
 		description: "Like a block, but with a small caveat...",
 	},
-} as const satisfies { readonly [k in string]: BlockBuilderWithoutIdAndDefaults };
+} as const satisfies BlockBuildersWithoutIdAndDefaults;
 
 const beams = {
 	beam2x1: {
@@ -59,7 +59,7 @@ const beams = {
 		displayName: "Beam 4x1",
 		description: "A block, but 4x1!!!",
 	},
-} as const satisfies { readonly [k in string]: BlockBuilderWithoutIdAndDefaults };
+} as const satisfies BlockBuildersWithoutIdAndDefaults;
 
 const cornerWedges = {
 	concavecornerwedge: {
@@ -170,7 +170,7 @@ const cornerWedges = {
 
 		mirror: { behaviour: "offset270", replacementId: "halfcornerwedge4x1" },
 	},
-} as const satisfies { readonly [k in string]: BlockBuilderWithoutIdAndDefaults };
+} as const satisfies BlockBuildersWithoutIdAndDefaults;
 
 const cylinders = {
 	cylinder1x1: {
@@ -205,7 +205,7 @@ const cylinders = {
 		displayName: "Half Cylinder 2x2",
 		description: "Same as 1x2 half cyllinder but wider and longer",
 	},
-} as const satisfies { readonly [k in string]: BlockBuilderWithoutIdAndDefaults };
+} as const satisfies BlockBuildersWithoutIdAndDefaults;
 
 const wedges = {
 	concaveprism: {
@@ -256,7 +256,7 @@ const wedges = {
 		displayName: "Half Wedge 1x4",
 		description: "A wedge 1x4, but it's.. half.. the size?",
 	},
-} as const satisfies { readonly [k in string]: BlockBuilderWithoutIdAndDefaults };
+} as const satisfies BlockBuildersWithoutIdAndDefaults;
 
 //
 
@@ -266,7 +266,7 @@ const list = {
 	...cornerWedges,
 	...cylinders,
 	...wedges,
-} satisfies { readonly [k in string]: BlockBuilderWithoutIdAndDefaults };
+} satisfies BlockBuildersWithoutIdAndDefaults;
 export const BuildingBlocks = BlockCreation.arrayFromObject(list);
 
 export type BuildingBlockIds = keyof typeof list;

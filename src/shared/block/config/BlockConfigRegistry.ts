@@ -498,18 +498,6 @@ const tnt = {
 	output: {},
 } as const satisfies BlockConfigBothDefinitions;
 
-const lamp = {
-	input: {
-		enabled: {
-			displayName: "Enabled",
-			type: "bool",
-			default: false as boolean,
-			config: false as boolean,
-		},
-	},
-	output: {},
-} as const satisfies BlockConfigBothDefinitions;
-
 const singleimpulse = {
 	input: {
 		impulse: {
@@ -1296,8 +1284,6 @@ export const blockConfigRegistry = {
 	wedgewing1x2: wing,
 	wedgewing1x3: wing,
 	wedgewing1x4: wing,
-	lamp: lamp,
-	smalllamp: lamp,
 	leddisplay,
 	sevensegmentdisplay,
 	laser,

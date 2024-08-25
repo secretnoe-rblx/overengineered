@@ -4,6 +4,7 @@ import type { BlockCreation } from "shared/blocks/BlockCreation";
 import type { DisconnectBlock } from "shared/blocks/blocks/DisconnectBlock";
 import type { BasicOperationBlockIds } from "shared/blocks/blocks/grouped/BasicOperationBlocks";
 import type { BuildingBlockIds } from "shared/blocks/blocks/grouped/BuildingBlocks";
+import type { LampBlockIds } from "shared/blocks/blocks/grouped/LampBlocks";
 import type { WheelBlockIds } from "shared/blocks/blocks/grouped/WheelBlocks";
 
 export type BlockCategoryPath = readonly string[];
@@ -43,11 +44,17 @@ export type BlockBuilder = {
 };
 export type BlockBuilderWithoutId = Omit<BlockBuilder, "id">;
 export type BlockBuilderWithoutIdAndDefaults = MakePartial<BlockBuilderWithoutId, keyof typeof BlockCreation.defaults>;
+export type BlockBuildersWithoutIdAndDefaults = { readonly [k in string]: BlockBuilderWithoutIdAndDefaults };
 
 declare global {
 	type BlockId =
 		| string
-		| (string & BuildingBlockIds & BasicOperationBlockIds & WheelBlockIds & (typeof DisconnectBlock)["id"]);
+		| (string &
+				BuildingBlockIds &
+				BasicOperationBlockIds &
+				WheelBlockIds &
+				LampBlockIds &
+				(typeof DisconnectBlock)["id"]);
 
 	type Block = Omit<BlockBuilder, "id" | (`${string}Source` & keyof BlockBuilder)> & {
 		readonly id: BlockId;

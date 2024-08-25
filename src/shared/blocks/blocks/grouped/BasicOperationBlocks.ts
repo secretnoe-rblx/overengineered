@@ -11,7 +11,7 @@ import type {
 	BlockLogicFullInputDef,
 } from "shared/blockLogic/BlockLogic";
 import type {
-	BlockBuilderWithoutIdAndDefaults,
+	BlockBuildersWithoutIdAndDefaults,
 	BlockCategoryPath,
 	BlockLogicInfo,
 	BlockModelSource,
@@ -232,7 +232,7 @@ const constants = {
 		modelSource: autoModel("ConstLogicBlockPrefab", "e", BlockCreation.Categories.other),
 		logic: logic(defs.constnum, () => ({ value: { type: "number", value: 2.718281828459 } })),
 	},
-} as const satisfies { readonly [k in string]: BlockBuilderWithoutIdAndDefaults };
+} as const satisfies BlockBuildersWithoutIdAndDefaults;
 
 const maths = {
 	abs: {
@@ -496,7 +496,7 @@ const maths = {
 			result: { type: "bool", value: value1 <= value2 },
 		})),
 	},
-} as const satisfies { readonly [k in string]: BlockBuilderWithoutIdAndDefaults };
+} as const satisfies BlockBuildersWithoutIdAndDefaults;
 
 const trigonometry = {
 	sin: {
@@ -608,7 +608,7 @@ const trigonometry = {
 			}),
 		),
 	},
-} as const satisfies { readonly [k in string]: BlockBuilderWithoutIdAndDefaults };
+} as const satisfies BlockBuildersWithoutIdAndDefaults;
 
 const vec3 = {
 	vec3combiner: {
@@ -655,7 +655,7 @@ const vec3 = {
 			}),
 		),
 	},
-} as const satisfies { readonly [k in string]: BlockBuilderWithoutIdAndDefaults };
+} as const satisfies BlockBuildersWithoutIdAndDefaults;
 
 const bool = {
 	not: {
@@ -716,7 +716,7 @@ const bool = {
 			result: { type: "bool", value: !(value1 !== value2) },
 		})),
 	},
-} as const satisfies { readonly [k in string]: BlockBuilderWithoutIdAndDefaults };
+} as const satisfies BlockBuildersWithoutIdAndDefaults;
 
 const byte = {
 	numbertobyte: {
@@ -932,7 +932,7 @@ const byte = {
 			result: { type: "byte", value: (num >> shift) | ((num & 0x80) !== 0 ? 0xff << (8 - shift) : 0) },
 		})),
 	},
-} as const satisfies { readonly [k in string]: BlockBuilderWithoutIdAndDefaults };
+} as const satisfies BlockBuildersWithoutIdAndDefaults;
 
 const other = {
 	buffer: {
@@ -972,7 +972,7 @@ const other = {
 			}),
 		),
 	},
-} as const satisfies { readonly [k in string]: BlockBuilderWithoutIdAndDefaults };
+} as const satisfies BlockBuildersWithoutIdAndDefaults;
 
 //
 
@@ -984,7 +984,7 @@ const list = {
 	...bool,
 	...byte,
 	...other,
-} satisfies { readonly [k in string]: BlockBuilderWithoutIdAndDefaults };
+} satisfies BlockBuildersWithoutIdAndDefaults;
 export const BasicOperationBlocks = BlockCreation.arrayFromObject(list);
 
 export type BasicOperationBlockIds = keyof typeof list;

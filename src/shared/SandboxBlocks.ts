@@ -3,6 +3,7 @@ import { DelayBlock } from "shared/blocks/blocks/DelayBlock";
 import { DisconnectBlock } from "shared/blocks/blocks/DisconnectBlock";
 import { BasicOperationBlocks } from "shared/blocks/blocks/grouped/BasicOperationBlocks";
 import { BuildingBlocks } from "shared/blocks/blocks/grouped/BuildingBlocks";
+import { LampBlocks } from "shared/blocks/blocks/grouped/LampBlocks";
 import { WheelBlocks } from "shared/blocks/blocks/grouped/WheelBlocks";
 import { ScreenBlock } from "shared/blocks/blocks/ScreenBlock";
 import { VehicleSeatBlock } from "shared/blocks/blocks/VehicleSeatBlock";
@@ -13,6 +14,7 @@ export const CreateSandboxBlocks = (): BlockList => {
 		...BuildingBlocks,
 		...BasicOperationBlocks,
 		...WheelBlocks,
+		...LampBlocks,
 
 		DisconnectBlock,
 		DelayBlock,

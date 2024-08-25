@@ -5,7 +5,6 @@ import { LEDDisplayServerLogic } from "server/blocks/logic/LEDDisplayServerLogic
 import { PistonBlockServerLogic } from "server/blocks/logic/PistonBlockServerLogic";
 import { ScreenServerLogic } from "server/blocks/logic/ScreenServerLogic";
 import { SevenSegmentDisplayServerLogic } from "server/blocks/logic/SevenSegmentDisplayServerLogic";
-import { BlockLogicRegistry } from "shared/block/BlockLogicRegistry";
 import { HostedService } from "shared/GameHost";
 import type { ServerBlockLogic } from "server/blocks/ServerBlockLogic";
 
@@ -35,7 +34,9 @@ export class ServerBlockLogicController extends HostedService {
 		for (const [id, logic] of pairs(serverBlockLogicRegistry)) {
 			$log(`Initializing server logic for ${id}`);
 
-			const bl = BlockLogicRegistry.registry[id] ?? blockList.blocks[id]!.logic!.ctor;
+			const bl = blockList.blocks[id]?.logic?.ctor;
+			if (!bl) continue;
+
 			logics.push(container.resolveForeignClass(logic, [bl] as never));
 		}
 	}

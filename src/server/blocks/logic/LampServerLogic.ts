@@ -1,6 +1,6 @@
 import { ServerBlockLogic } from "server/blocks/ServerBlockLogic";
 import type { PlayModeController } from "server/modes/PlayModeController";
-import type { LampBlockLogic } from "shared/block/logic/logic/display/LampBlockLogic";
+import type { LampBlockLogic } from "shared/blocks/blocks/grouped/LampBlocks";
 
 @injectable
 export class LampServerLogic extends ServerBlockLogic<typeof LampBlockLogic> {

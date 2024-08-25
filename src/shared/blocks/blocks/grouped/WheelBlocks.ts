@@ -1,7 +1,7 @@
 import { InstanceBlockLogic as InstanceBlockLogic } from "shared/blockLogic/BlockLogic";
 import { BlockCreation } from "shared/blocks/BlockCreation";
 import type { BlockLogicFullBothDefinitions, InstanceBlockLogicArgs } from "shared/blockLogic/BlockLogic";
-import type { BlockBuilderWithoutIdAndDefaults, BlockLogicInfo } from "shared/blocks/Block";
+import type { BlockBuildersWithoutIdAndDefaults, BlockLogicInfo } from "shared/blocks/Block";
 
 const definition = {
 	input: {
@@ -89,7 +89,7 @@ const list = {
 		description: "Old wheel. Big one.",
 		logic,
 	},
-} satisfies { readonly [k in string]: BlockBuilderWithoutIdAndDefaults };
+} satisfies BlockBuildersWithoutIdAndDefaults;
 export const WheelBlocks = BlockCreation.arrayFromObject(list);
 
 export type WheelBlockIds = keyof typeof list;
