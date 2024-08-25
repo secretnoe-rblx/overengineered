@@ -1,6 +1,7 @@
 import { BlockConfig } from "shared/blockLogic/BlockConfig";
 import { Colors } from "shared/Colors";
 import { ObservableValue } from "shared/event/ObservableValue";
+import type { BlockLogicFullInputDef, BlockLogicFullOutputDef } from "shared/blockLogic/BlockLogic";
 import type { BlockLogicTypes } from "shared/blockLogic/BlockLogicTypes";
 import type { SharedPlot } from "shared/building/SharedPlot";
 
@@ -29,7 +30,7 @@ export namespace BlockWireManager {
 		unset: { color: Colors.white },
 	};
 
-	export const groups: { readonly [k in keyof BlockLogicTypes.Types]: DataType } = {
+	export const groups: { readonly [k in keyof BlockLogicTypes.Primitives]: DataType } = {
 		unset: "unset",
 		wire: "unset",
 		bool: "bool",
@@ -41,7 +42,7 @@ export namespace BlockWireManager {
 		byte: "byte",
 		bytearray: "bytearray",
 
-		keybool: "bool",
+		// keybool: "bool",
 		// thrust: "number",
 		// motorRotationSpeed: "number",
 		// servoMotorAngle: "number",
@@ -100,48 +101,58 @@ export namespace BlockWireManager {
 			if (!definition) continue;
 			const cfg = BlockConfig.addDefaults(block.config, definition.input);
 
-			for (const markerType of ["output", "input"] as const) {
-				for (const [key, def] of pairs(definition[markerType])) {
-					let narrow = false;
-					let dataTypes: readonly DataType[];
+			const add = (
+				key: string,
+				def: BlockLogicFullInputDef | BlockLogicFullOutputDef,
+				types: readonly (keyof BlockLogicTypes.Primitives)[],
+				markerType: "input" | "output",
+			) => {
+				let narrow = false;
+				let dataTypes: readonly DataType[];
 
-					{
-						const existingcfg = cfg[key];
-						if (
-							treatDisconnectedAsUnset ||
-							existingcfg === undefined ||
-							existingcfg.type === "unset" ||
-							existingcfg.type === "wire"
-						) {
-							dataTypes = asMap(def.types).map((k, v) => groups[v.type]);
-						} else {
-							dataTypes = [groups[existingcfg.type]];
-							narrow = true;
-						}
-					}
-
-					const data: MarkerData = {
-						blockData: block,
-						dataTypes,
-						group: def.group,
-						id: key as BlockConnectionName,
-						name: def.displayName,
-					};
-
-					const marker = markerType === "input" ? new Markers.Input(data) : new Markers.Output(data);
-					markers.set(`${block.uuid} ${markerType} ${key}`, marker);
-
-					{
-						let bb = markersByBlock.get(block.uuid);
-						if (!bb) markersByBlock.set(block.uuid, (bb = []));
-
-						bb.push(marker);
-					}
-
-					if (narrow) {
-						toNarrow.push(marker);
+				{
+					const existingcfg = cfg[key];
+					if (
+						treatDisconnectedAsUnset ||
+						existingcfg === undefined ||
+						existingcfg.type === "unset" ||
+						existingcfg.type === "wire"
+					) {
+						dataTypes = types.map((v) => groups[v]);
+					} else {
+						dataTypes = [groups[existingcfg.type]];
+						narrow = true;
 					}
 				}
+
+				const data: MarkerData = {
+					blockData: block,
+					dataTypes,
+					group: def.group,
+					id: key as BlockConnectionName,
+					name: def.displayName,
+				};
+
+				const marker = markerType === "input" ? new Markers.Input(data) : new Markers.Output(data);
+				markers.set(`${block.uuid} ${markerType} ${key}`, marker);
+
+				{
+					let bb = markersByBlock.get(block.uuid);
+					if (!bb) markersByBlock.set(block.uuid, (bb = []));
+
+					bb.push(marker);
+				}
+
+				if (narrow) {
+					toNarrow.push(marker);
+				}
+			};
+
+			for (const [key, def] of pairs(definition.input)) {
+				add(key, def, asMap(def.types).keys(), "input");
+			}
+			for (const [key, def] of pairs(definition.output)) {
+				add(key, def, def.types, "output");
 			}
 		}
 

@@ -10,14 +10,15 @@ const definition = {
 			displayName: "Disconnect",
 			types: {
 				bool: {
-					type: "keybool",
-					config: {
-						key: "F",
-						reversed: false,
-						switch: false,
-					},
-					canBeReversed: true,
-					canBeSwitch: true,
+					config: false,
+					// type: "keybool",
+					// config: {
+					// 	key: "F",
+					// 	reversed: false,
+					// 	switch: false,
+					// },
+					// canBeReversed: true,
+					// canBeSwitch: true,
 				},
 			},
 		},

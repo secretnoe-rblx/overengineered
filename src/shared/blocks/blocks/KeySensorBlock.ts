@@ -1,5 +1,4 @@
 import { BlockLogic } from "shared/blockLogic/BlockLogic";
-import { BlockConfigDefinitions } from "shared/blocks/BlockConfigDefinitions";
 import { BlockCreation } from "shared/blocks/BlockCreation";
 import type { BlockLogicArgs, BlockLogicFullBothDefinitions } from "shared/blockLogic/BlockLogic";
 import type { BlockBuilder } from "shared/blocks/Block";
@@ -10,14 +9,15 @@ const definition = {
 			displayName: "Key",
 			types: {
 				bool: {
-					type: "keybool",
-					canBeSwitch: true,
-					canBeReversed: true,
-					config: {
-						key: "F" as KeyCode,
-						switch: false as boolean,
-						reversed: false,
-					},
+					config: false,
+					// type: "keybool",
+					// config: {
+					// 	key: "F",
+					// 	switch: false,
+					// 	reversed: false,
+					// },
+					// canBeSwitch: true,
+					// canBeReversed: true,
 				},
 			},
 			connectorHidden: true,
@@ -26,7 +26,7 @@ const definition = {
 	output: {
 		result: {
 			displayName: "Pressed",
-			types: BlockConfigDefinitions.bool,
+			types: ["bool"],
 		},
 	},
 } satisfies BlockLogicFullBothDefinitions;

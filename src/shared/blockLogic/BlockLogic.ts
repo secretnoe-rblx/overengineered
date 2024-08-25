@@ -1,9 +1,9 @@
 import {
 	BlockBackedInputLogicValueStorage,
 	isCustomBlockLogicValueResult,
-	LogicValueStorageContainer,
 	LogicValueStorages,
 	UnsetBlockLogicValueStorage,
+	LogicValueOutputStorageContainer,
 } from "shared/blockLogic/BlockLogicValueStorage";
 import { BlockLogicValueResults } from "shared/blockLogic/BlockLogicValueStorage";
 import { Component } from "shared/component/Component";
@@ -11,7 +11,7 @@ import { ComponentInstance } from "shared/component/ComponentInstance";
 import { ArgsSignal } from "shared/event/Signal";
 import { Objects } from "shared/fixes/objects";
 import { RemoteEvents } from "shared/RemoteEvents";
-import type { BlockConfigTypesByPrimitive, PlacedBlockConfig } from "shared/blockLogic/BlockConfig";
+import type { PlacedBlockConfig } from "shared/blockLogic/BlockConfig";
 import type { BlockLogicTypes } from "shared/blockLogic/BlockLogicTypes";
 import type {
 	ReadonlyLogicValueStorage,
@@ -20,21 +20,12 @@ import type {
 } from "shared/blockLogic/BlockLogicValueStorage";
 
 type Primitives = BlockLogicTypes.Primitives;
-type NonPrimitives = BlockLogicTypes.NonPrimitives;
-type AllTypes = BlockLogicTypes.Types;
-type MiniPrimitives = { readonly [k in PrimitiveKeys]: Omit<Primitives[k], "config" | "default"> };
-type MiniNonPrimitives = { readonly [k in NonPrimitiveKeys]: Omit<NonPrimitives[k], "config" | "default"> };
-type MiniAllTypes = { readonly [k in AllKeys]: Omit<AllTypes[k], "config" | "default"> };
 type PrimitiveKeys = keyof Primitives;
-type NonPrimitiveKeys = keyof NonPrimitives;
-type AllKeys = keyof AllTypes;
 
 export type BlockLogicWithConfigDefinitionTypes<TKeys extends PrimitiveKeys> = {
-	readonly [k in TKeys]: OmitOverUnion<
-		Extract<AllTypes[AllKeys], { readonly type: BlockConfigTypesByPrimitive<k> }>,
-		"default"
-	>;
+	readonly [k in TKeys]: OmitOverUnion<Primitives[k], "default">;
 };
+
 type BlockLogicInputDef = {
 	readonly displayName: string;
 	readonly types: Partial<BlockLogicWithConfigDefinitionTypes<PrimitiveKeys>>;
@@ -44,17 +35,18 @@ type BlockLogicInputDef = {
 };
 
 export type BlockLogicNoConfigDefinitionTypes<TKeys extends PrimitiveKeys> = {
-	readonly [k in TKeys]: OmitOverUnion<
-		Extract<AllTypes[AllKeys], { readonly type: BlockConfigTypesByPrimitive<k> }>,
-		"default" | "config"
-	>;
+	readonly [k in TKeys]: OmitOverUnion<Primitives[k], "default" | "config">;
 };
 type BlockLogicOutputDef = {
 	readonly displayName: string;
-	readonly types: Partial<BlockLogicNoConfigDefinitionTypes<PrimitiveKeys>>;
+	readonly types: readonly PrimitiveKeys[];
 	readonly group?: string;
 	readonly connectorHidden?: boolean;
 };
+
+export type BlockLogicInputDefs = { readonly [k in string]: BlockLogicInputDef };
+export type BlockLogicOutputDefs = { readonly [k in string]: BlockLogicOutputDef };
+
 export type BlockLogicBothDefinitions = {
 	/** Visual order for the inputs */
 	readonly inputOrder?: readonly string[];
@@ -62,23 +54,18 @@ export type BlockLogicBothDefinitions = {
 	/** Visual order for the outputs (wire markers) */
 	readonly outputOrder?: readonly string[];
 
-	readonly input: { readonly [k in string]: BlockLogicInputDef };
-	readonly output: { readonly [k in string]: BlockLogicOutputDef };
+	readonly input: BlockLogicInputDefs;
+	readonly output: BlockLogicOutputDefs;
 };
 
-type BlockLogicFullDefinitionTypes<TKeys extends PrimitiveKeys> = {
-	readonly [k in TKeys]: OmitOverUnion<
-		Extract<AllTypes[AllKeys], { readonly default: AllTypes[k]["default"] }>,
-		"default"
-	>;
-};
 export type BlockLogicFullInputDef = {
 	readonly displayName: string;
-	readonly types: Partial<BlockLogicFullDefinitionTypes<PrimitiveKeys>>;
+	readonly types: Partial<BlockLogicWithConfigDefinitionTypes<PrimitiveKeys>>;
 	readonly group?: string;
 	readonly connectorHidden?: boolean;
 	readonly configHidden?: boolean;
 };
+export type BlockLogicFullOutputDef = BlockLogicOutputDef;
 export type BlockLogicFullBothDefinitions = {
 	/** Visual order for the inputs */
 	readonly inputOrder?: readonly string[];
@@ -87,7 +74,7 @@ export type BlockLogicFullBothDefinitions = {
 	readonly outputOrder?: readonly string[];
 
 	readonly input: { readonly [k in string]: BlockLogicFullInputDef };
-	readonly output: { readonly [k in string]: BlockLogicOutputDef };
+	readonly output: { readonly [k in string]: BlockLogicFullOutputDef };
 };
 
 //
@@ -108,44 +95,33 @@ type TypedValue<TTypes extends PrimitiveKeys> = {
 
 //
 
-type AllInputKeysToArgsObject<
-	TDef extends BlockLogicBothDefinitions["input"],
-	TKeys extends keyof TDef = keyof TDef,
-> = {
+type AllInputKeysToArgsObject<TDef extends BlockLogicInputDefs, TKeys extends keyof TDef = keyof TDef> = {
 	readonly [k in TKeys]: (Primitives[keyof TDef[k]["types"] & PrimitiveKeys] & defined)["default"];
 };
-type AllInputKeysToTypesObject<
-	TDef extends BlockLogicBothDefinitions["input"],
-	TKeys extends keyof TDef = keyof TDef,
-> = {
+type AllInputKeysToTypesObject<TDef extends BlockLogicInputDefs, TKeys extends keyof TDef = keyof TDef> = {
 	readonly [k in string & TKeys as `${k}Type`]: keyof TDef[k]["types"] & PrimitiveKeys;
 };
-type AllInputKeysToChangedObject<
-	TDef extends BlockLogicBothDefinitions["input"],
-	TKeys extends keyof TDef = keyof TDef,
-> = {
+type AllInputKeysToChangedObject<TDef extends BlockLogicInputDefs, TKeys extends keyof TDef = keyof TDef> = {
 	readonly [k in string & TKeys as `${k}Changed`]: boolean;
 };
 export type AllInputKeysToObject<
-	TDef extends BlockLogicBothDefinitions["input"],
+	TDef extends BlockLogicInputDefs,
 	TKeys extends keyof TDef = keyof TDef,
 > = AllInputKeysToArgsObject<TDef, TKeys> &
 	AllInputKeysToTypesObject<TDef, TKeys> &
 	AllInputKeysToChangedObject<TDef, TKeys>;
-export type AllOutputKeysToObject<TDef extends BlockLogicBothDefinitions["output"]> = {
-	readonly [k in string & keyof TDef]: Omit<
-		TypedValue<PrimitiveKeys & keyof TDef[k]["types"]>,
-		"changedSinceLastTick"
-	>;
+
+export type AllOutputKeysToObject<TDef extends BlockLogicOutputDefs> = {
+	readonly [k in string & keyof TDef]: Omit<TypedValue<TDef[k]["types"][number]>, "changedSinceLastTick">;
 };
 
-type ReadonlyBlockLogicValues<TDef extends BlockLogicBothDefinitions["output"]> = {
+type ReadonlyBlockLogicValues<TDef extends BlockLogicInputDefs> = {
 	readonly [k in keyof TDef]: ReadonlyLogicValueStorage<PrimitiveKeys & keyof (TDef[k]["types"] & defined)>;
 };
-type WriteonlyBlockLogicValues<TDef extends BlockLogicBothDefinitions["output"]> = {
-	readonly [k in keyof TDef]: WriteonlyLogicValueStorage<PrimitiveKeys & keyof (TDef[k]["types"] & defined)>;
+type WriteonlyBlockLogicValues<TDef extends BlockLogicOutputDefs> = {
+	readonly [k in keyof TDef]: WriteonlyLogicValueStorage<PrimitiveKeys & TDef[k]["types"][number]>;
 };
-type IBlockLogicValues<TDef extends BlockLogicBothDefinitions["output"]> = {
+type IBlockLogicValues<TDef extends BlockLogicOutputDefs> = {
 	readonly [k in keyof TDef]: ILogicValueStorage<PrimitiveKeys & keyof (TDef[k]["types"] & defined)>;
 };
 
@@ -233,7 +209,7 @@ export abstract class BlockLogic<TDef extends BlockLogicBothDefinitions> extends
 
 		this._output = Objects.mapValues(
 			definition.output,
-			(k, v) => new LogicValueStorageContainer<PrimitiveKeys>(v.types as Required<typeof v.types>),
+			() => new LogicValueOutputStorageContainer<PrimitiveKeys>(),
 		) as typeof this._output;
 		this.output = this._output;
 	}
@@ -294,9 +270,7 @@ export abstract class BlockLogic<TDef extends BlockLogicBothDefinitions> extends
 	getOutputValue(
 		ctx: BlockLogicTickContext,
 		key: keyof typeof this.output,
-	):
-		| TypedValue<keyof BlockLogicTypes.Primitives & keyof (TDef["output"][keyof TDef["output"]]["types"] & defined)>
-		| BlockLogicValueResults {
+	): TypedValue<TDef["output"][keyof TDef["output"]]["types"][number]> | BlockLogicValueResults {
 		if (this.calculatingRightNow) {
 			this.disableAndBurn();
 			return BlockLogicValueResults.garbage;
@@ -380,9 +354,7 @@ export abstract class CalculatableBlockLogic<TDef extends BlockLogicBothDefiniti
 	override getOutputValue(
 		ctx: BlockLogicTickContext,
 		key: keyof TDef["output"],
-	):
-		| TypedValue<keyof BlockLogicTypes.Primitives & keyof (TDef["output"][keyof TDef["output"]]["types"] & defined)>
-		| BlockLogicValueResults {
+	): TypedValue<TDef["output"][keyof TDef["output"]]["types"][number]> | BlockLogicValueResults {
 		if (this.calculatingRightNow2) {
 			this.disableAndBurn();
 			return BlockLogicValueResults.garbage;

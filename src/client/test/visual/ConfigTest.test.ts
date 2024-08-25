@@ -30,46 +30,46 @@ export const _Tests = () => {
 		multi: {
 			displayName: "Multi",
 			types: {
-				bool: { type: "bool", config: false },
-				number: { type: "number", config: 0 },
+				bool: { config: false },
+				number: { config: 0 },
 				// string: {},
 			},
 		},
 		multiTypeMixed: {
 			displayName: "Multi Type Mixed",
 			types: {
-				bool: { type: "bool", config: false },
-				number: { type: "number", config: 0 },
+				bool: { config: false },
+				number: { config: 0 },
 				// string: {},
 			},
 		},
 		multiValueMixed: {
 			displayName: "Multi Value Mixed",
 			types: {
-				bool: { type: "bool", config: false },
-				number: { type: "number", config: 0 },
+				bool: { config: false },
+				number: { config: 0 },
 				// string: {},
 			},
 		},
 		boolTrue: {
 			displayName: "Bool True",
-			types: { bool: { type: "bool", config: false } },
+			types: { bool: { config: false } },
 		},
 		boolFalse: {
 			displayName: "Bool False",
-			types: { bool: { type: "bool", config: false } },
+			types: { bool: { config: false } },
 		},
 		boolMixed: {
 			displayName: "Bool Mixed",
-			types: { bool: { type: "bool", config: false } },
+			types: { bool: { config: false } },
 		},
 		number: {
 			displayName: "Number",
-			types: { number: { type: "number", config: 0 } },
+			types: { number: { config: 0 } },
 		},
 		numberMixed: {
 			displayName: "Number Mixed",
-			types: { number: { type: "number", config: 0 } },
+			types: { number: { config: 0 } },
 		},
 		// string: {
 		// 	displayName: "String",
@@ -81,11 +81,11 @@ export const _Tests = () => {
 		// },
 		clampedNumber: {
 			displayName: "Slider",
-			types: { number: { type: "number", config: 0, clamp: { showAsSlider: true, min: 0, max: 63, step: 1 } } },
+			types: { number: { config: 0, clamp: { showAsSlider: true, min: 0, max: 63, step: 1 } } },
 		},
 		clampedNumberMixed: {
 			displayName: "Slider Mixed",
-			types: { number: { type: "number", config: 0, clamp: { showAsSlider: true, min: 0, max: 63, step: 1 } } },
+			types: { number: { config: 0, clamp: { showAsSlider: true, min: 0, max: 63, step: 1 } } },
 		},
 		// byte: {
 		// 	displayName: "Byte",
@@ -97,23 +97,23 @@ export const _Tests = () => {
 		// },
 		key: {
 			displayName: "Key",
-			types: { key: { type: "key", config: "F" } },
+			types: { key: { config: "F" } },
 		},
 		keyMixed: {
 			displayName: "Key Mixed",
-			types: { key: { type: "key", config: "F" } },
+			types: { key: { config: "F" } },
 		},
-		keyBool: {
-			displayName: "Keybool",
-			types: {
-				bool: {
-					type: "keybool",
-					config: { key: "F", reversed: false, switch: false },
-					canBeReversed: true,
-					canBeSwitch: true,
-				},
-			},
-		},
+		// keyBool: {
+		// 	displayName: "Keybool",
+		// 	types: {
+		// 		bool: {
+		// 			type: "keybool",
+		// 			config: { key: "F", reversed: false, switch: false },
+		// 			canBeReversed: true,
+		// 			canBeSwitch: true,
+		// 		},
+		// 	},
+		// },
 		// motorRotationSpeed: {
 		// 	displayName: "Motor",
 		// 	types: { motorRotationSpeed: { maxSpeed: 100 } },
@@ -171,7 +171,7 @@ export const _Tests = () => {
 		// byteMixed: { type: "byte", config: 7 },
 		key: { type: "key", config: "F" },
 		keyMixed: { type: "key", config: "F" },
-		keyBool: { type: "bool", config: { key: "F", reversed: false, switch: false } },
+		// keyBool: { type: "bool", config: { key: "F", reversed: false, switch: false } },
 		// motorRotationSpeed: {
 		// 	type: "motorRotationSpeed",
 		// 	config: { rotation: { add: "R", sub: "F" }, speed: 49, switchmode: true },
@@ -203,7 +203,7 @@ export const _Tests = () => {
 		clampedNumberMixed: { type: "number", config: 5 },
 		// byteMixed: { type: "byte", config: 9 },
 		keyMixed: { type: "key", config: "R" },
-		keyBool: { type: "bool", config: { key: "F", reversed: false, switch: false } },
+		// keyBool: { type: "bool", config: { key: "F", reversed: false, switch: false } },
 		// vector3Mixed: { type: "vector3", config: new Vector3(4, 2, 3) },
 		// colorMixed: { type: "color", config: new Color3(1, 0, 0) },
 	};

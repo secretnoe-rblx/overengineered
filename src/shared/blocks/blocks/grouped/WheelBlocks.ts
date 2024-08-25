@@ -9,7 +9,6 @@ const definition = {
 			displayName: "Tire friction",
 			types: {
 				number: {
-					type: "number",
 					config: 50,
 					clamp: {
 						showAsSlider: true,
@@ -24,7 +23,6 @@ const definition = {
 			displayName: "Tire elasticity",
 			types: {
 				number: {
-					type: "number",
 					config: 50,
 					clamp: {
 						showAsSlider: true,

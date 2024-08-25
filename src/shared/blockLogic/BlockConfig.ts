@@ -5,34 +5,13 @@ import type { BlockLogicTypes } from "shared/blockLogic/BlockLogicTypes";
 type Primitives = BlockLogicTypes.Primitives;
 type PrimitiveKeys = keyof Primitives;
 
-type AllTypes = BlockLogicTypes.Types;
-type AllKeys = keyof AllTypes;
+type Controls = BlockLogicTypes.Controls;
+type ControlKeys = keyof Controls;
 
-const PrimitivesByType = {
-	unset: "unset",
-	wire: "wire",
-
-	bool: "bool",
-	number: "number",
-	string: "string",
-	byte: "byte",
-	color: "color",
-	key: "key",
-	vector3: "vector3",
-	bytearray: "bytearray",
-
-	keybool: "bool",
-} as const satisfies { [k in AllKeys]: PrimitiveKeys };
-type PrimitivesByType = typeof PrimitivesByType;
-
-export type BlockConfigTypesByPrimitive<TKeys extends PrimitiveKeys> = {
-	readonly [k in PrimitiveKeys]: Extract<AllTypes[AllKeys], { readonly default: AllTypes[k]["default"] }>["type"];
-}[TKeys];
-export type BlockConfigPrimitiveByType<TKeys extends AllKeys> = PrimitivesByType[TKeys];
-
+export type BlockConfigPrimitiveByControl<TKeys extends ControlKeys> = Controls[TKeys]["primitive"];
 export type BlockConfigPart<TKey extends PrimitiveKeys> = {
 	readonly type: TKey;
-	readonly config: AllTypes[BlockConfigTypesByPrimitive<TKey>]["config"];
+	readonly config: Primitives[TKey]["config"];
 };
 
 type GenericConfig = BlockConfigPart<PrimitiveKeys>;
