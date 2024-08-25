@@ -208,10 +208,10 @@ export type BlockLogicArgs = {
 };
 export abstract class BlockLogic<TDef extends BlockLogicBothDefinitions> extends Component {
 	private readonly _input: Writable<ReadonlyBlockLogicValues<TDef["input"]>>;
-	protected readonly input: ReadonlyBlockLogicValues<TDef["input"]>;
+	readonly input: ReadonlyBlockLogicValues<TDef["input"]>;
 
 	private readonly _output: IBlockLogicValues<TDef["output"]>;
-	protected readonly output: WriteonlyBlockLogicValues<TDef["output"]>;
+	readonly output: WriteonlyBlockLogicValues<TDef["output"]>;
 
 	private readonly ticked = new ArgsSignal<[ctx: BlockLogicTickContext]>();
 

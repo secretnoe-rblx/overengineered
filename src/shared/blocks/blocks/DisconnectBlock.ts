@@ -20,7 +20,6 @@ const definition = {
 					canBeSwitch: true,
 				},
 			},
-			configHidden: true,
 		},
 	},
 	output: {},

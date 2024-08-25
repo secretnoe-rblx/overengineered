@@ -164,24 +164,7 @@ export const UnsetBlockLogicValueStorage: ReadonlyLogicValueStorage<PrimitiveKey
 
 namespace LogicValueStoragesNamespace {
 	export type Base<TType extends AllKeys> = ReadonlyLogicValueStorage<BlockConfigPrimitiveByType<TType>>;
-	abstract class base<TType extends AllKeys> implements Base<TType> {
-		constructor(
-			protected readonly config: AllTypes[TType]["config"],
-			private readonly valueType: BlockConfigPrimitiveByType<TType>,
-		) {}
 
-		/** @sealed */
-		get(ctx: BlockLogicTickContext): TypedValue<BlockConfigPrimitiveByType<TType>> {
-			return {
-				type: this.valueType,
-				value: this.getValue(ctx),
-				changedSinceLastTick: true, // TODO:
-			};
-		}
-		protected abstract getValue(
-			ctx: BlockLogicTickContext,
-		): Primitives[BlockConfigPrimitiveByType<TType>]["config"];
-	}
 	const NewPrimitiveLogicValueStorage = <TType extends PrimitiveKeys>(valueType: TType) => {
 		return class implements Base<TType> {
 			constructor(private readonly config: AllTypes[TType]["config"]) {}
@@ -198,27 +181,19 @@ namespace LogicValueStoragesNamespace {
 		};
 	};
 
-	export class unset extends base<"unset"> {
-		constructor(protected readonly config: AllTypes["unset"]["config"]) {
-			super(config, "unset");
-		}
-
-		protected getValue(ctx: BlockLogicTickContext): { readonly ___nominal: "Unset" } {
-			throw "Method not implemented.";
+	export class unset implements Base<"unset"> {
+		get() {
+			$warn("Trying to get a value from the type unset");
+			return BlockLogicValueResults.garbage;
 		}
 	}
-	export class wire extends base<"wire"> {
-		constructor(protected readonly config: AllTypes["wire"]["config"]) {
-			super(config, "wire");
-		}
-
-		protected getValue(ctx: BlockLogicTickContext): BlockLogicTypes.WireValue {
-			throw "Method not implemented.";
+	export class wire implements Base<"wire"> {
+		get() {
+			$warn("Trying to get a value from the type wire");
+			return BlockLogicValueResults.garbage;
 		}
 	}
 
-	//export const unset = NewPrimitiveLogicValueStorage("unset");
-	//export const wire = NewPrimitiveLogicValueStorage("wire");
 	export const _number = NewPrimitiveLogicValueStorage("number");
 	export const bool = NewPrimitiveLogicValueStorage("bool");
 	export const key = NewPrimitiveLogicValueStorage("key");

@@ -1,25 +1,24 @@
+import { ClientBlockControls } from "client/blocks/ClientBlockControls";
+import { BlockConfig } from "shared/blockLogic/BlockConfig";
 import { SharedMachine } from "shared/blockLogic/SharedMachine";
 import type { PlayerDataStorage } from "client/PlayerDataStorage";
 import type { ImpactController } from "shared/block/impact/ImpactController";
+import type { BlockLogicTypes } from "shared/blockLogic/BlockLogicTypes";
+import type { ILogicValueStorage } from "shared/blockLogic/BlockLogicValueStorage";
 
 @injectable
 export class ClientMachine extends SharedMachine {
-	// readonly logicInputs = new ContainerComponent<
-	// 	ConfigLogicValueBase<BlockLogicTypes3.Types[keyof BlockLogicTypes3.Types]>
-	// >();
-
 	constructor(
 		@inject private readonly playerData: PlayerDataStorage,
 		@inject blockList: BlockList,
 		@inject di: DIContainer,
 	) {
 		super(blockList, di);
-		// this.parent(this.logicInputs);
 	}
 
 	protected initialize(blocks: readonly PlacedBlockData[]) {
 		super.initialize(blocks);
-		//this.initializeControls();
+		this.initializeControls();
 	}
 	protected createImpactControllerIfNeeded(blocks: readonly PlacedBlockData[]): ImpactController | undefined {
 		if (!this.playerData.config.get().impact_destruction) {
@@ -30,29 +29,32 @@ export class ClientMachine extends SharedMachine {
 	}
 
 	initializeControls() {
-		for (const logic of this.getChildren()) {
-			// const configDef = logic.configDefinition;
-			// const config = BlockConfig.addDefaults(logic.block.config, configDef.input);
-			// for (const [key, observable] of pairs(logic.input)) {
-			// if already connected
-			// if (logic.block.connections !== undefined && key in logic.block.connections) continue;
-			// const def = configDef.input[key as keyof typeof configDef.input];
-			// const input = this.logicInputs.add(
-			// 	new blockConfigRegistryClient[def.type](
-			// 		observable as never,
-			// 		config[key as never] as never,
-			// 		def as never,
-			// 	),
-			// );
-			// this.event.subscribeObservable(
-			// 	this.occupiedByLocalPlayer,
-			// 	(enabled) => {
-			// 		if (enabled) input.enable();
-			// 		else input.disable();
-			// 	},
-			// 	true,
-			// );
-			// }
+		for (const [, { block, logic }] of this.blocksMap) {
+			const config = BlockConfig.addDefaults(block.config, logic.definition.input);
+			for (const [k, v] of pairs(config)) {
+				const inType = logic.definition.input[k].types[v.type]?.type;
+				if (!inType) continue;
+
+				const ctor = ClientBlockControls[inType];
+				if (!ctor) continue;
+
+				const input = logic.input[k] as
+					| (typeof logic)["input"][typeof k]
+					| ILogicValueStorage<keyof BlockLogicTypes.Primitives>;
+				if (!("set" in input)) continue;
+
+				const control = new ctor(input, config[k].config, logic.definition.input[k].types[config[k].type]!);
+				this.parent(control);
+
+				this.event.subscribeObservable(
+					this.occupiedByLocalPlayer,
+					(enabled) => {
+						if (enabled) control.enable();
+						else control.disable();
+					},
+					true,
+				);
+			}
 		}
 	}
 }

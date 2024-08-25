@@ -18,7 +18,7 @@ type BlockData = {
 export class SharedMachine extends ContainerComponent<GenericBlockLogic> {
 	readonly occupiedByLocalPlayer = new ObservableValue(true);
 	private impactController?: ImpactController;
-	private readonly blocksMap = new Map<BlockUuid, BlockData>();
+	protected readonly blocksMap = new Map<BlockUuid, BlockData>();
 
 	constructor(
 		@inject private readonly blockList: BlockList,
