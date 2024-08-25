@@ -1,3 +1,4 @@
+import { RunService } from "@rbxts/services";
 import { CalculatableBlockLogic } from "shared/blockLogic/BlockLogic";
 import { BlockLogicValueResults } from "shared/blockLogic/BlockLogicValueStorage";
 import { BlockConfigDefinitions } from "shared/blocks/BlockConfigDefinitions";
@@ -58,34 +59,35 @@ const categories = BlockCreation.Categories;
 
 //
 
+type BLFID = Partial<Omit<BlockLogicFullInputDef, "displayName" | "types">>;
 const defpartsf = {
-	any: (name: string, rest?: Partial<BlockLogicFullInputDef>) => ({
+	any: (name: string, rest?: BLFID) => ({
 		displayName: name,
 		types: BlockConfigDefinitions.any,
 		...(rest ?? {}),
 	}),
-	number: (name: string, rest?: Partial<BlockLogicFullInputDef>) => ({
+	number: (name: string, rest?: BLFID) => ({
 		displayName: name,
 		types: BlockConfigDefinitions.number,
 		...(rest ?? {}),
 	}),
-	bool: (name: string, rest?: Partial<BlockLogicFullInputDef>) => ({
+	bool: (name: string, rest?: BLFID) => ({
 		displayName: name,
 		types: BlockConfigDefinitions.bool,
 		...(rest ?? {}),
 	}),
-	byte: (name: string, rest?: Partial<BlockLogicFullInputDef>) => ({
+	byte: (name: string, rest?: BLFID) => ({
 		displayName: name,
 		types: BlockConfigDefinitions.byte,
 		...(rest ?? {}),
 	}),
-	vector3: (name: string, rest?: Partial<BlockLogicFullInputDef>) => ({
+	vector3: (name: string, rest?: BLFID) => ({
 		displayName: name,
 		types: BlockConfigDefinitions.vector3,
 		...(rest ?? {}),
 	}),
 } as const satisfies {
-	readonly [k in string]: (name: string, rest?: Partial<BlockLogicFullInputDef>) => BlockLogicFullInputDef;
+	readonly [k in string]: (name: string, rest?: BLFID) => BlockLogicFullInputDef;
 };
 const defs = {
 	equality: {
@@ -974,6 +976,46 @@ const other = {
 	},
 } as const satisfies BlockBuildersWithoutIdAndDefaults;
 
+const test: {} = !RunService.IsStudio()
+	? {}
+	: ({
+			testblock: {
+				displayName: "TEST BLOCK",
+				description: "Test block to test the block; Studio only",
+				modelSource: {
+					model: BlockCreation.Model.fAutoCreated("DoubleGenericLogicBlockPrefab", "TEST"),
+					category: () => [],
+				},
+				logic: logic(
+					{
+						input: {
+							value: {
+								displayName: "Value",
+								types: {
+									number: {
+										type: "number",
+										config: 0,
+										clamp: {
+											showAsSlider: true,
+											min: 0,
+											max: 10,
+											step: 0.1,
+										},
+									},
+								},
+							},
+						},
+						output: {
+							result: defpartsf.number("Result"),
+						},
+					},
+					({ value, valueType }) => ({
+						result: { type: valueType, value },
+					}),
+				),
+			},
+		} as const satisfies BlockBuildersWithoutIdAndDefaults);
+
 //
 
 const list = {
@@ -984,6 +1026,7 @@ const list = {
 	...bool,
 	...byte,
 	...other,
+	...test,
 } satisfies BlockBuildersWithoutIdAndDefaults;
 export const BasicOperationBlocks = BlockCreation.arrayFromObject(list);
 

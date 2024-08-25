@@ -9,11 +9,14 @@ const definition = {
 			displayName: "Tire friction",
 			types: {
 				number: {
-					type: "clampedNumber",
+					type: "number",
 					config: 50,
-					max: 100,
-					min: 0.1,
-					step: 0.1,
+					clamp: {
+						showAsSlider: true,
+						max: 100,
+						min: 0.1,
+						step: 0.1,
+					},
 				},
 			},
 		},
@@ -21,11 +24,14 @@ const definition = {
 			displayName: "Tire elasticity",
 			types: {
 				number: {
-					type: "clampedNumber",
+					type: "number",
 					config: 50,
-					max: 100,
-					min: 0.1,
-					step: 0.1,
+					clamp: {
+						showAsSlider: true,
+						max: 100,
+						min: 0.1,
+						step: 0.1,
+					},
 				},
 			},
 		},

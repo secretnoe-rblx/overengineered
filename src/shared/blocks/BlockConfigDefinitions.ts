@@ -5,12 +5,8 @@ export const BlockConfigDefinitions = {
 		bool: { type: "bool", config: false as boolean },
 		number: { type: "number", config: 0 as number },
 		vector3: { type: "vector3", config: Vector3.zero },
-		// string: {
-		// 	config: "" as string,
-		// },
-		// byte: {
-		// 	config: 0 as number,
-		// },
+		// string: { config: "" as string, },
+		// byte: { config: 0 as number, },
 	},
 	number: {
 		number: { type: "number", config: 0 as number },

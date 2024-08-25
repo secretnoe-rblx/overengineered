@@ -81,11 +81,11 @@ export const _Tests = () => {
 		// },
 		clampedNumber: {
 			displayName: "Slider",
-			types: { number: { type: "clampedNumber", config: 0, min: 0, max: 63, step: 1 } },
+			types: { number: { type: "number", config: 0, clamp: { showAsSlider: true, min: 0, max: 63, step: 1 } } },
 		},
 		clampedNumberMixed: {
 			displayName: "Slider Mixed",
-			types: { number: { type: "clampedNumber", config: 0, min: 0, max: 63, step: 1 } },
+			types: { number: { type: "number", config: 0, clamp: { showAsSlider: true, min: 0, max: 63, step: 1 } } },
 		},
 		// byte: {
 		// 	displayName: "Byte",

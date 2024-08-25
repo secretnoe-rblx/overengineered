@@ -41,8 +41,6 @@ export namespace BlockWireManager {
 		byte: "byte",
 		bytearray: "bytearray",
 
-		clampedNumber: "number",
-
 		keybool: "bool",
 		// thrust: "number",
 		// motorRotationSpeed: "number",

@@ -23,7 +23,14 @@ export namespace BlockLogicTypes {
 	export type Wire = BCPrimitive<"wire", WireValue>;
 
 	export type Bool = BCPrimitive<"bool", boolean>;
-	export type Number = BCPrimitive<"number", number>;
+	export type Number = BCPrimitive<"number", number> & {
+		readonly clamp?: {
+			readonly showAsSlider: boolean;
+			readonly min: number;
+			readonly max: number;
+			readonly step: number;
+		};
+	};
 	export type String = BCPrimitive<"string", string>;
 	export type Key = BCPrimitive<"key", string>;
 	export type Vec3 = BCPrimitive<"vector3", Vector3>;
@@ -31,12 +38,6 @@ export namespace BlockLogicTypes {
 	export type Byte = BCPrimitive<"byte", number>;
 	export type ByteArray = BCPrimitive<"bytearray", readonly number[]> & {
 		readonly lengthLimit: number;
-	};
-
-	export type ClampedNumber = BCPrimitive<"clampedNumber", number> & {
-		readonly min: number;
-		readonly max: number;
-		readonly step: number;
 	};
 
 	export type KeyBool = BCType<
@@ -68,8 +69,12 @@ export namespace BlockLogicTypes {
 		readonly bytearray: ByteArray;
 	};
 	export type NonPrimitives = {
-		readonly clampedNumber: ClampedNumber;
 		readonly keybool: KeyBool;
+	};
+	export type Controls = {
+		readonly bool: {
+			readonly keybool: KeyBool;
+		};
 	};
 
 	export type Types = Primitives & NonPrimitives;

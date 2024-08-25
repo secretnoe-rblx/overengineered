@@ -1,5 +1,4 @@
 import { NumberObservableValue } from "shared/event/NumberObservableValue";
-import { Keys } from "shared/fixes/Keys";
 import type { BlockConfigPrimitiveByType } from "shared/blockLogic/BlockConfig";
 import type {
 	BlockLogicTickContext,
@@ -34,19 +33,19 @@ type AllKeys = keyof AllTypes;
 
 //
 
-type Filter<K extends NonPrimitiveKeys> = {
-	readonly filter: (
-		value: NonPrimitives[K]["default"],
-		definition: MiniNonPrimitives[K],
-	) => NonPrimitives[K]["default"];
+type Filter<K extends AllKeys> = {
+	readonly filter: (value: AllTypes[K]["default"], definition: MiniAllTypes[K]) => AllTypes[K]["default"];
 };
-const Filters: { readonly [k in NonPrimitiveKeys]: Filter<k> } = {
-	clampedNumber: {
-		filter: (value, definition) =>
-			NumberObservableValue.clamp(value, definition.min, definition.max, definition.step),
-	},
-	keybool: {
-		filter: (value) => value,
+const Filters: { readonly [k in AllKeys]?: Filter<k> } = {
+	number: {
+		filter: (value, definition) => {
+			if (definition.clamp) {
+				const clamp = definition.clamp;
+				return NumberObservableValue.clamp(value, clamp.min, clamp.max, clamp.step);
+			}
+
+			return value;
+		},
 	},
 };
 const filterValue = <TType extends PrimitiveKeys>(
@@ -67,6 +66,8 @@ const filterValueByDef = <TType extends AllKeys>(
 ): AllTypes[TType]["default"] => {
 	if (definition && definition.type in Filters) {
 		const filter = Filters[definition.type as keyof typeof Filters];
+		if (!filter) return value;
+
 		return filter.filter(value as never, definition as never);
 	}
 
@@ -162,85 +163,31 @@ export const UnsetBlockLogicValueStorage: ReadonlyLogicValueStorage<PrimitiveKey
 
 //
 
-namespace LogicValueStoragesNamespace {
-	export type Base<TType extends AllKeys> = ReadonlyLogicValueStorage<BlockConfigPrimitiveByType<TType>>;
-
-	const NewPrimitiveLogicValueStorage = <TType extends PrimitiveKeys>(valueType: TType) => {
-		return class implements Base<TType> {
-			constructor(private readonly config: AllTypes[TType]["config"]) {}
-
-			get(): TypedValue<BlockConfigPrimitiveByType<TType>> {
-				return {
-					type: valueType as never,
-					value: this.config,
-
-					// configuration values never change
-					changedSinceLastTick: false,
-				};
-			}
-		};
+const NewPrimitiveLogicValueStorage = <TType extends PrimitiveKeys>(valueType: TType) => {
+	return class extends LogicValueStorageContainer<TType> {
+		constructor(config: Primitives[TType]["config"], definition: AllTypes[TType]) {
+			super({ [valueType]: definition } as unknown as BlockLogicNoConfigDefinitionTypes<TType>);
+			this.set(valueType, config);
+		}
 	};
+};
 
-	export class unset implements Base<"unset"> {
-		get() {
-			$warn("Trying to get a value from the type unset");
-			return BlockLogicValueResults.garbage;
-		}
-	}
-	export class wire implements Base<"wire"> {
-		get() {
-			$warn("Trying to get a value from the type wire");
-			return BlockLogicValueResults.garbage;
-		}
-	}
-
-	export const _number = NewPrimitiveLogicValueStorage("number");
-	export const bool = NewPrimitiveLogicValueStorage("bool");
-	export const key = NewPrimitiveLogicValueStorage("key");
-	export const vector3 = NewPrimitiveLogicValueStorage("vector3");
-	export const _string = NewPrimitiveLogicValueStorage("string");
-	export const color = NewPrimitiveLogicValueStorage("color");
-	export const byte = NewPrimitiveLogicValueStorage("byte");
-	export const bytearray = NewPrimitiveLogicValueStorage("bytearray");
-
-	export class clampedNumber extends LogicValueStorageContainer<BlockConfigPrimitiveByType<"clampedNumber">> {
-		constructor(
-			protected readonly config: Primitives[BlockConfigPrimitiveByType<"clampedNumber">]["config"],
-			private readonly definition: AllTypes["clampedNumber"],
-		) {
-			super({ number: definition });
-		}
-
-		protected getValue(ctx: BlockLogicTickContext): number {
-			return filterValueByDef<"clampedNumber">(this.config, this.definition);
-		}
-	}
-
-	export class keybool extends LogicValueStorageContainer<BlockConfigPrimitiveByType<"keybool">> {
-		constructor(config: AllTypes["keybool"]["config"], definition: AllTypes["keybool"]) {
-			super({ bool: definition });
-
-			this.set("bool", config.reversed);
-
-			const isKeyCode = (key: string): key is KeyCode => key in Keys;
-			if (isKeyCode(config.key)) {
-				// if (config.switch) {
-				// 	this.event.onKeyDown(this.config.key, () => (this.value = !this.value));
-				// } else {
-				// 	this.event.onKeyDown(this.config.key, () => (this.value = !config.reversed));
-				// 	this.event.onKeyUp(this.config.key, () => (this.value = config.reversed));
-				// }
-			}
-		}
-	}
-}
-type ConfigBackedLogicValueStorage<TType extends AllKeys> = LogicValueStoragesNamespace.Base<TType>;
+type ConfigBackedLogicValueStorage<TType extends AllKeys> = ReadonlyLogicValueStorage<
+	BlockConfigPrimitiveByType<TType>
+>;
 type ConfigBackedLogicValueStorageCtor<TType extends AllKeys> = new (
 	config: AllTypes[TType]["config"],
 	definition: AllTypes[TType],
 ) => ConfigBackedLogicValueStorage<TType>;
-export const LogicValueStorages: { readonly [k in AllKeys]: ConfigBackedLogicValueStorageCtor<k> } = {
-	...LogicValueStoragesNamespace,
-	number: LogicValueStoragesNamespace._number,
-	string: LogicValueStoragesNamespace._string,
+export const LogicValueStorages: {
+	readonly [k in Exclude<PrimitiveKeys, "wire" | "unset">]: ConfigBackedLogicValueStorageCtor<k>;
+} = {
+	number: NewPrimitiveLogicValueStorage("number"),
+	bool: NewPrimitiveLogicValueStorage("bool"),
+	key: NewPrimitiveLogicValueStorage("key"),
+	vector3: NewPrimitiveLogicValueStorage("vector3"),
+	string: NewPrimitiveLogicValueStorage("string"),
+	color: NewPrimitiveLogicValueStorage("color"),
+	byte: NewPrimitiveLogicValueStorage("byte"),
+	bytearray: NewPrimitiveLogicValueStorage("bytearray"),
 };

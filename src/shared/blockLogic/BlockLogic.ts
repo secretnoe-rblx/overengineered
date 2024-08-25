@@ -11,7 +11,7 @@ import { ComponentInstance } from "shared/component/ComponentInstance";
 import { ArgsSignal } from "shared/event/Signal";
 import { Objects } from "shared/fixes/objects";
 import { RemoteEvents } from "shared/RemoteEvents";
-import type { PlacedBlockConfig } from "shared/blockLogic/BlockConfig";
+import type { BlockConfigTypesByPrimitive, PlacedBlockConfig } from "shared/blockLogic/BlockConfig";
 import type { BlockLogicTypes } from "shared/blockLogic/BlockLogicTypes";
 import type {
 	ReadonlyLogicValueStorage,
@@ -31,7 +31,7 @@ type AllKeys = keyof AllTypes;
 
 export type BlockLogicWithConfigDefinitionTypes<TKeys extends PrimitiveKeys> = {
 	readonly [k in TKeys]: OmitOverUnion<
-		Extract<AllTypes[AllKeys], { readonly default: AllTypes[k]["default"] }>,
+		Extract<AllTypes[AllKeys], { readonly type: BlockConfigTypesByPrimitive<k> }>,
 		"default"
 	>;
 };
@@ -43,9 +43,9 @@ type BlockLogicInputDef = {
 	readonly configHidden?: boolean;
 };
 
-export type BlockLogicNoConfigDefinitionTypes<TKeys extends AllKeys> = {
+export type BlockLogicNoConfigDefinitionTypes<TKeys extends PrimitiveKeys> = {
 	readonly [k in TKeys]: OmitOverUnion<
-		Extract<AllTypes[AllKeys], { readonly default: AllTypes[k]["default"] }>,
+		Extract<AllTypes[AllKeys], { readonly type: BlockConfigTypesByPrimitive<k> }>,
 		"default" | "config"
 	>;
 };
@@ -273,7 +273,7 @@ export abstract class BlockLogic<TDef extends BlockLogicBothDefinitions> extends
 			const def = this.definition.input[key].types[cfg.type];
 			if (!def) continue;
 
-			const storageCtor = LogicValueStorages[def.type];
+			const storageCtor = LogicValueStorages[cfg.type];
 			const storage = new storageCtor(cfg.config as never, def as never);
 			this.replaceInput(key, storage);
 		}

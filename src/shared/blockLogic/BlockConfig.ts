@@ -21,7 +21,6 @@ const PrimitivesByType = {
 	vector3: "vector3",
 	bytearray: "bytearray",
 
-	clampedNumber: "number",
 	keybool: "bool",
 } as const satisfies { [k in AllKeys]: PrimitiveKeys };
 type PrimitivesByType = typeof PrimitivesByType;

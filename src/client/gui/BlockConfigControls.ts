@@ -212,14 +212,35 @@ namespace Controls {
 				control.submitted.Connect((v) => this.submitted.Fire((config = map(config, (_) => v))));
 			}
 		}
-		export class _number extends Base<NumberTextBoxControlDefinition, "number"> {
+		export class _number extends Base<NumberTextBoxControlDefinition | SliderControlDefinition, "number"> {
 			constructor(templates: templates, definition: AllMiniTypes["number"], config: ConfigParts<"number">) {
-				super(templates.Number());
+				if (definition.clamp) {
+					super(templates.Slider());
+				} else {
+					super(templates.Number());
+				}
 
-				const control = this.add(new NumberTextBoxControl<true>(this.control));
-				control.value.set(sameOrUndefined(config));
+				if (definition.clamp?.showAsSlider) {
+					const gui = this.control as SliderControlDefinition;
+					const clamp = definition.clamp;
 
-				control.submitted.Connect((v) => this.submitted.Fire((config = map(config, (_) => v))));
+					const control = this.add(
+						new SliderControl<true>(gui, clamp.min, clamp.max, clamp.step, {
+							Knob: gui.Control.Knob,
+							Filled: gui.Control.Filled,
+						}),
+					);
+					control.value.set(sameOrUndefined(config));
+
+					control.submitted.Connect((v) => this.submitted.Fire((config = map(config, (_) => v))));
+				} else {
+					const gui = this.control as NumberTextBoxControlDefinition;
+
+					const control = this.add(new NumberTextBoxControl<true>(gui));
+					control.value.set(sameOrUndefined(config));
+
+					control.submitted.Connect((v) => this.submitted.Fire((config = map(config, (_) => v))));
+				}
 			}
 		}
 		export class _string extends Base<TextBoxControlDefinition, "string"> {
@@ -228,25 +249,6 @@ namespace Controls {
 
 				const control = this.add(new TextBoxControl(this.control));
 				control.text.set(sameOrUndefined(config) ?? "");
-
-				control.submitted.Connect((v) => this.submitted.Fire((config = map(config, (_) => v))));
-			}
-		}
-		export class clampedNumber extends Base<SliderControlDefinition, "clampedNumber"> {
-			constructor(
-				templates: templates,
-				definition: AllMiniTypes["clampedNumber"],
-				config: ConfigParts<"clampedNumber">,
-			) {
-				super(templates.Slider());
-
-				const control = this.add(
-					new SliderControl<true>(this.control, definition.min, definition.max, definition.step, {
-						Knob: this.gui.Control.Control.Knob,
-						Filled: this.gui.Control.Control.Filled,
-					}),
-				);
-				control.value.set(sameOrUndefined(config));
 
 				control.submitted.Connect((v) => this.submitted.Fire((config = map(config, (_) => v))));
 			}
