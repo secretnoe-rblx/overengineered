@@ -22,10 +22,6 @@ const blockLogicValueResultsBackwards = asObject(new Set(asMap(BlockLogicValueRe
 export const isCustomBlockLogicValueResult = (value: unknown): value is BlockLogicValueResults =>
 	typeIs(value, "string") && value in blockLogicValueResultsBackwards;
 
-/** Block logic result that indicates that the value is not obtainable and should disable the block chain */
-export const BlockLogicGarbageResult = "BLOCKLOGICGARBAGERESULT" as const;
-export type BlockLogicGarbageResult = typeof BlockLogicGarbageResult;
-
 type Primitives = BlockLogicTypes.Primitives;
 type NonPrimitives = BlockLogicTypes.NonPrimitives;
 type AllTypes = BlockLogicTypes.Types;
