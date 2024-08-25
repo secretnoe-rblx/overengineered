@@ -153,20 +153,29 @@ const inputValuesToFullObject = <TDef extends BlockLogicBothDefinitions>(
 	ctx: BlockLogicTickContext,
 	input: ReadonlyBlockLogicValues<TDef["input"]>,
 	keys: ReadonlySet<keyof TDef["input"]> | undefined,
-): AllInputKeysToObject<TDef["input"]> | BlockLogicValueResults => {
+): AllInputKeysToObject<TDef["input"]> | BlockLogicValueResults | "$UNCHANGED" => {
 	const inputValues: {
 		[k in keyof TDef["input"]]?: TypedValue<
 			PrimitiveKeys & keyof (TDef["input"][keyof TDef["input"]]["types"] & defined)
 		>;
 	} = {};
 
+	let anyChanged = false;
 	for (const [k] of pairs(keys ? asObject(keys) : input)) {
 		const value = input[k].get(ctx);
 		if (isCustomBlockLogicValueResult(value)) {
 			return value;
 		}
 
+		if (value.changedSinceLastTick) {
+			anyChanged = true;
+		}
+
 		inputValues[k] = value;
+	}
+
+	if (!anyChanged) {
+		return "$UNCHANGED";
 	}
 
 	// Map input values to an object with keys `{key}` being the values, `{key}Type` being the types, `{key}Changed` being true if the value was changed
@@ -307,14 +316,11 @@ export abstract class BlockLogic<TDef extends BlockLogicBothDefinitions> extends
 		this.ticked.Connect(func);
 	}
 
-	protected on(func: (inputs: AllInputKeysToObject<TDef["input"]>, ctx: BlockLogicTickContext) => void): void {
-		this.onk(Objects.keys(this.definition.input) as (keyof TDef["input"])[], func);
-	}
-	protected onk<const TKeys extends keyof TDef["input"]>(
-		keys: readonly TKeys[],
+	private onInputs<const TKeys extends keyof TDef["input"]>(
+		keys: readonly TKeys[] | undefined,
 		func: (inputs: AllInputKeysToObject<TDef["input"], TKeys>, ctx: BlockLogicTickContext) => void,
 	): void {
-		const keysSet = new Set(keys);
+		const keysSet = keys && new Set(keys);
 
 		this.onTick((ctx) => {
 			const inputs = inputValuesToFullObject(ctx, this.input, keysSet);
@@ -325,9 +331,21 @@ export abstract class BlockLogic<TDef extends BlockLogicBothDefinitions> extends
 			if (inputs === BlockLogicValueResults.availableLater) {
 				return;
 			}
+			if (inputs === "$UNCHANGED") {
+				return;
+			}
 
 			func(inputs, ctx);
 		});
+	}
+	protected on(func: (inputs: AllInputKeysToObject<TDef["input"]>, ctx: BlockLogicTickContext) => void): void {
+		this.onInputs(undefined, func);
+	}
+	protected onk<const TKeys extends keyof TDef["input"]>(
+		keys: readonly TKeys[],
+		func: (inputs: AllInputKeysToObject<TDef["input"], TKeys>, ctx: BlockLogicTickContext) => void,
+	): void {
+		this.onInputs(keys, func);
 	}
 
 	disableAndBurn(): void {
@@ -387,6 +405,13 @@ export abstract class CalculatableBlockLogic<TDef extends BlockLogicBothDefiniti
 		const inputs = inputValuesToFullObject(ctx, this.input, undefined);
 		if (isCustomBlockLogicValueResult(inputs)) {
 			return inputs;
+		}
+		if (inputs === "$UNCHANGED") {
+			if (!this.cachedResults) {
+				throw "Block inputs returned $UNCHANGED on the first tick";
+			}
+
+			return this.cachedResults;
 		}
 
 		const result = this.calculate(inputs, ctx);

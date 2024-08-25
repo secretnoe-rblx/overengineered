@@ -31,6 +31,7 @@ class Logic extends InstanceBlockLogic<typeof definition> {
 		super(definition, block);
 
 		this.on(({ value, valueType, valueChanged, duration }) => {
+			// should delay only when the value is changed
 			if (!valueChanged) return;
 
 			task.delay(duration, () => {
