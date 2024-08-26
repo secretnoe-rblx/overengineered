@@ -243,6 +243,7 @@ namespace Controls {
 					new SliderControl<true>(gui, clamp.min, clamp.max, clamp.step, {
 						Knob: gui.Control.Knob,
 						Filled: gui.Control.Filled,
+						Hitbox: gui.Control,
 					}),
 				);
 				control.value.set(sameOrUndefined(config));
