@@ -222,6 +222,12 @@ const registry = {
 		mirrorBehaviour: "offset180",
 		limit: 50,
 	},
+	rcsengine: {
+		name: "RCS Engine",
+		description: "Support engines used to orient a spacecraft",
+		mirrorBehaviour: "offset180",
+		limit: 50,
+	},
 	rope: {
 		name: "Rope",
 		description: "A very VERY robust rope",
