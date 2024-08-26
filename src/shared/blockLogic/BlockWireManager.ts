@@ -159,7 +159,6 @@ export namespace BlockWireManager {
 		groupMarkers(markers.values());
 
 		for (const block of plot.getBlockDatas()) {
-			print("fp2", block.id, block.uuid);
 			if (!block.config) continue;
 
 			for (const [connectionName, config] of pairs(block.config)) {
