@@ -189,43 +189,6 @@ const bracedshaft = {
 	output: {},
 } as const satisfies BlockConfigBothDefinitions;
 
-const vec3objectworldtransformer = {
-	input: {
-		toobject: {
-			displayName: "To object?",
-			type: "bool",
-			config: true as boolean,
-			default: true as boolean,
-		},
-		originpos: {
-			displayName: "Origin position",
-			type: "vector3",
-			config: Vector3.zero,
-			default: Vector3.zero,
-		},
-		originrot: {
-			displayName: "Origin rotation",
-			type: "vector3",
-			config: Vector3.zero,
-			default: Vector3.zero,
-		},
-		position: {
-			displayName: "Position",
-			type: "vector3",
-			config: Vector3.zero,
-			default: Vector3.zero,
-		},
-	},
-	output: {
-		position: {
-			displayName: "Result",
-			type: "vector3",
-			default: Vector3.zero,
-			config: Vector3.zero,
-		},
-	},
-} as const satisfies BlockConfigBothDefinitions;
-
 const rocketengine = {
 	input: {
 		thrust: {
@@ -709,117 +672,6 @@ const wing = {
 	output: {},
 } as const satisfies BlockConfigBothDefinitions;
 
-const twoNumbersOrBooleansInputBooleanOutput = {
-	input: {
-		value1: connectors.boolOrNumber("Value 1", "1"),
-		value2: connectors.boolOrNumber("Value 2", "1"),
-	},
-	output: {
-		result: {
-			displayName: "Result",
-			type: "bool",
-			config: false as boolean,
-			default: false as boolean,
-		},
-	},
-} as const satisfies BlockConfigBothDefinitions;
-
-const anyProcessing = {
-	input: {
-		value: connectors.any("Value", "1"),
-	},
-	output: {
-		result: connectors.any("Result", "1"),
-	},
-} as const satisfies BlockConfigBothDefinitions;
-
-const twoNumbersInputBooleanOutput = {
-	input: {
-		value1: {
-			displayName: "Value 1",
-			type: "number",
-			default: 0 as number,
-			config: 0 as number,
-		},
-		value2: {
-			displayName: "Value 2",
-			type: "number",
-			default: 0 as number,
-			config: 0 as number,
-		},
-	},
-	output: {
-		result: {
-			displayName: "Result",
-			type: "bool",
-			default: false as boolean,
-			config: false as boolean,
-		},
-	},
-} as const satisfies BlockConfigBothDefinitions;
-
-const vec3combiner = {
-	input: {
-		value_x: {
-			displayName: "X",
-			type: "number",
-			default: 0 as number,
-			config: 0 as number,
-		},
-		value_y: {
-			displayName: "Y",
-			type: "number",
-			default: 0 as number,
-			config: 0 as number,
-		},
-		value_z: {
-			displayName: "Z",
-			type: "number",
-			default: 0 as number,
-			config: 0 as number,
-		},
-	},
-	output: {
-		result: {
-			displayName: "Vector",
-			type: "vector3",
-			default: Vector3.zero,
-			config: Vector3.zero,
-		},
-	},
-} as const satisfies BlockConfigBothDefinitions;
-
-const vec3splitter = {
-	input: {
-		value: {
-			displayName: "Vector",
-			type: "vector3",
-			default: Vector3.zero,
-			config: Vector3.zero,
-		},
-	},
-	output: {
-		result_x: {
-			displayName: "X",
-			type: "number",
-			default: 0 as number,
-			config: 0 as number,
-		},
-		result_y: {
-			displayName: "Y",
-			type: "number",
-			default: 0 as number,
-			config: 0 as number,
-		},
-		result_z: {
-			displayName: "Z",
-			type: "number",
-			default: 0 as number,
-			config: 0 as number,
-		},
-	},
-} as const satisfies BlockConfigBothDefinitions;
-
 const anglesensor = {
 	input: {},
 	output: {
@@ -1185,8 +1037,6 @@ export const blockConfigRegistry = {
 	heliumblock,
 	bracedshaft,
 
-	vec3objectworldtransformer,
-
 	wing1x1: wing,
 	wing1x2: wing,
 	wing1x3: wing,
@@ -1217,9 +1067,6 @@ export const blockConfigRegistry = {
 	gravitysensor,
 	randomaccessmemory,
 	readonlymemory,
-
-	vec3splitter,
-	vec3combiner,
 
 	singleimpulse,
 } as const satisfies { [k in BlockId]?: BlockConfigBothDefinitions };

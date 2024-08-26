@@ -57,13 +57,6 @@ const logic = {
 			autoWeldShape: "cube",
 		},
 	},
-	byte: {},
-	vector3: {
-		vec3objectworldtransformer: {
-			name: "Vector3 Object/World Transformer",
-			description: "Converts a vector into the world/object coordinate space of the other vector",
-		},
-	},
 	sensors: {
 		anglesensor: {
 			name: "Angle Sensor",

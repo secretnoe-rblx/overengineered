@@ -720,6 +720,46 @@ const vec3 = {
 			}),
 		),
 	},
+	vec3objectworldtransformer: {
+		displayName: "Vector3 Object/World Transformer",
+		description: "Converts a vector into the world/object coordinate space of the other vector",
+		modelSource: autoModel("DoubleGenericLogicBlockPrefab", "VEC3 OBJ/WLD", categories.converterVector),
+		logic: logic(
+			{
+				inputOrder: ["toobject", "originpos", "originrot", "position"],
+				input: {
+					toobject: {
+						displayName: "To object?",
+						types: BlockConfigDefinitions.bool,
+					},
+					originpos: {
+						displayName: "Origin position",
+						types: BlockConfigDefinitions.vector3,
+					},
+					originrot: {
+						displayName: "Origin rotation",
+						types: BlockConfigDefinitions.vector3,
+					},
+					position: {
+						displayName: "Position",
+						types: BlockConfigDefinitions.vector3,
+					},
+				},
+				output: {
+					position: {
+						displayName: "Result",
+						types: ["vector3"],
+					},
+				},
+			},
+			({ toobject, originpos, originrot, position }) => {
+				const origin = new CFrame(originpos).mul(CFrame.fromOrientation(originrot.X, originrot.Y, originrot.Z));
+				const result = toobject ? origin.PointToObjectSpace(position) : origin.PointToWorldSpace(position);
+
+				return { position: { type: "vector3", value: result } };
+			},
+		),
+	},
 } as const satisfies BlockBuildersWithoutIdAndDefaults;
 
 const bool = {

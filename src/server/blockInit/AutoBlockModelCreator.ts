@@ -30,12 +30,6 @@ const categories = {
 } as const satisfies { [k in string]: BlockCategoryPath };
 
 const operations = {
-	vec3objectworldtransformer: {
-		modelTextOverride: "VEC3 OBJ/WLD",
-		category: categories.converterVector,
-		prefab: prefabs.doubleGeneric,
-	},
-
 	counter: {
 		modelTextOverride: "COUNTER",
 		category: categories.other,

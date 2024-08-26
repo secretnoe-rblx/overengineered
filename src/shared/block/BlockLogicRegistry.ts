@@ -1,7 +1,6 @@
 import { BallastBlockLogic } from "shared/block/logic/BallastBlockLogic";
 import { BracedShaftBlockLogic } from "shared/block/logic/BracedShaftBlockLogic";
 import { HeliumBlockLogic } from "shared/block/logic/HeliumBlockLogic";
-import { Vector3ObjectWorldTransformerBlockLogic } from "shared/block/logic/logic/converter/byte/Vector3ObjectWorldTransformer";
 import { LEDDisplayBlockLogic } from "shared/block/logic/logic/display/LEDDisplayBlockLogic";
 import { SevenSegmentDisplayBlockLogic } from "shared/block/logic/logic/display/SevenSegmentDisplayBlockLogic";
 import { LogicMemoryBlockLogic } from "shared/block/logic/logic/memory/LogicMemoryBlockLogic";
@@ -87,7 +86,6 @@ const logicRegistry = {
 
 	impulsegenerator: ImpulseGeneratorBlockLogic,
 
-	vec3objectworldtransformer: Vector3ObjectWorldTransformerBlockLogic,
 	singleimpulse: SingleImpulseBlockLogic,
 } as const satisfies { readonly [k in BlockId]?: unknown };
 
