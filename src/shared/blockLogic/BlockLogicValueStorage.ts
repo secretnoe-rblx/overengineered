@@ -1,4 +1,4 @@
-import { NumberObservableValue } from "shared/event/NumberObservableValue";
+import { MathUtils } from "shared/fixes/MathUtils";
 import type {
 	BlockLogicTickContext,
 	BlockLogic,
@@ -36,7 +36,7 @@ const Filters: { readonly [k in PrimitiveKeys]?: Filter<k> } = {
 		filter: (value, definition) => {
 			if (definition.clamp) {
 				const clamp = definition.clamp;
-				return NumberObservableValue.clamp(value, clamp.min, clamp.max, clamp.step);
+				return MathUtils.clamp(value, clamp.min, clamp.max, clamp.step);
 			}
 
 			return value;

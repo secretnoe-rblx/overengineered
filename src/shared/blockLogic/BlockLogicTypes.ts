@@ -36,12 +36,47 @@ export namespace BlockLogicTypes {
 		readonly control?: BoolControls;
 	};
 
+	type NumberControlDefaults = {
+		readonly min: number;
+		readonly max: number;
+		readonly step?: number;
+	};
+	/** Hold `add` to smoothly increase the value. Hold `sub` to smoothly decrease value. */
+	export type SmoothNumberControl = NumberControlDefaults & {
+		readonly config: {
+			readonly type: "smooth";
+
+			/** Default value on start */
+			readonly startValue: number;
+			/** Speed of changing the value, 1s per second */
+			readonly speed: number;
+			/** Key to increase the value */
+			readonly add: string | KeyCode;
+			/** Key to decrease the value */
+			readonly sub: string | KeyCode;
+		};
+	};
+	/** Hold `control` to instantly set the value to max. */
+	export type HoldNumberControl = NumberControlDefaults & {
+		readonly config: {
+			readonly type: "hold";
+
+			/** Value that is set when the key is not being held */
+			readonly releasedValue: number;
+			/** Value that is set when the key is being held */
+			readonly holdingValue: number;
+			/** Key to change the value */
+			readonly key: string | KeyCode;
+		};
+	};
+	export type NumberControls = SmoothNumberControl | HoldNumberControl;
 	export type Number = BCPrimitive<number> & {
+		readonly control?: NumberControls & { readonly defaultType: NumberControls["config"]["type"] };
 		readonly clamp?: {
 			readonly showAsSlider: boolean;
 			readonly min: number;
 			readonly max: number;
-			readonly step: number;
+			readonly step?: number;
 		};
 	};
 	export type String = BCPrimitive<string>;
@@ -71,16 +106,5 @@ export namespace BlockLogicTypes {
 
 	export type Controls = {
 		readonly [k in ExtractKeys<Primitives, { readonly control?: unknown }>]: Primitives[k]["control"] & defined;
-	};
-	export type Controls2 = {
-		readonly keybool: {
-			readonly config: {
-				readonly key: string;
-				readonly switch: boolean;
-				readonly reversed: boolean;
-			};
-			readonly canBeSwitch: boolean;
-			readonly canBeReversed: boolean;
-		};
 	};
 }

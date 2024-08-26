@@ -1,5 +1,6 @@
 import { ClientComponent } from "client/component/ClientComponent";
 import { Signal } from "shared/event/Signal";
+import { isKey } from "shared/fixes/Keys";
 
 /*
 	When a key is pressed, invoke keyDown()
@@ -95,10 +96,10 @@ export class KeyPressingConflictingController<TKeys extends string> extends KeyP
 }
 
 export type KeyDefinition<TKeys extends string> = {
-	key: KeyCode;
-	keyDown?: () => void;
-	keyUp?: () => void;
-	conflicts?: TKeys;
+	readonly key: string | KeyCode;
+	readonly keyDown?: () => void;
+	readonly keyUp?: () => void;
+	readonly conflicts?: TKeys;
 };
 export type KeyDefinitions<TKeys extends string> = { readonly [k in TKeys]: KeyDefinition<TKeys> };
 
@@ -118,8 +119,10 @@ export class KeyPressingDefinitionsController<T extends KeyDefinitions<string>> 
 		});
 
 		for (const [key, def] of pairs(definitions)) {
-			this.event.onKeyDown(def.key, () => this.controller.keyDown(key as keyof T & string));
-			this.event.onKeyUp(def.key, () => this.controller.keyUp(key as keyof T & string));
+			if (isKey(def.key)) {
+				this.event.onKeyDown(def.key, () => this.controller.keyDown(key as keyof T & string));
+				this.event.onKeyUp(def.key, () => this.controller.keyUp(key as keyof T & string));
+			}
 		}
 	}
 }

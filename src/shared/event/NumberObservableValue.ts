@@ -1,4 +1,5 @@
 import { ObservableValue } from "shared/event/ObservableValue";
+import { MathUtils } from "shared/fixes/MathUtils";
 
 /** ObservableValue that stores a number that can be clamped */
 export class NumberObservableValue<T extends number | undefined = number> extends ObservableValue<T> {
@@ -6,7 +7,7 @@ export class NumberObservableValue<T extends number | undefined = number> extend
 	readonly max;
 	readonly step;
 
-	constructor(value: T, min: number, max: number, step: number) {
+	constructor(value: T, min: number, max: number, step?: number) {
 		super(value);
 
 		this.min = min;
@@ -20,11 +21,11 @@ export class NumberObservableValue<T extends number | undefined = number> extend
 
 	protected processValue(value: T) {
 		if (value === undefined) return value;
-		return NumberObservableValue.clamp(value, this.min, this.max, this.step) as T;
+		return MathUtils.clamp(value, this.min, this.max, this.step) as T;
 	}
 
+	/** @deprecated Use {@link MathUtils.clamp} instead */
 	static clamp(value: number, min: number, max: number, step: number) {
-		const halfstep = step / 2;
-		return math.clamp(value - ((value + halfstep) % step) + halfstep, min, max);
+		return MathUtils.clamp(value, min, max, step);
 	}
 }

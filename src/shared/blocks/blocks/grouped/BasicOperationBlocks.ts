@@ -1098,11 +1098,23 @@ const test: {} = !RunService.IsStudio()
 								types: {
 									number: {
 										config: 0,
-										clamp: {
-											showAsSlider: true,
+										control: {
+											defaultType: "smooth",
 											min: 0,
 											max: 10,
-											step: 0.1,
+											config: {
+												type: "smooth",
+												speed: 1,
+												startValue: 0,
+												add: "W",
+												sub: "S",
+											},
+											// config: {
+											// type: "hold",
+											// key: "F",
+											// releasedValue: 0,
+											// holdingValue: 10,
+											// }
 										},
 									},
 								},

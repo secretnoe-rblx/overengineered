@@ -222,7 +222,16 @@ namespace Controls {
 
 				const gui = this.control as NumberTextBoxControlDefinition;
 
-				const control = this.add(new NumberTextBoxControl<true>(gui));
+				const control = this.add(
+					definition.clamp
+						? new NumberTextBoxControl<true>(
+								gui,
+								definition.clamp.min,
+								definition.clamp.max,
+								definition.clamp.step,
+							)
+						: new NumberTextBoxControl<true>(gui),
+				);
 				control.value.set(sameOrUndefined(config));
 
 				control.submitted.Connect((v) => this.submitted.Fire((config = map(config, (_) => v))));
@@ -574,9 +583,119 @@ namespace Controls {
 				}
 			}
 		}
+		export class NumberSmooth extends ControlBase<GuiObject, "number"> {
+			constructor(
+				templates: templates,
+				definition: BlockLogicTypes.SmoothNumberControl,
+				config: OfBlocks<BlockLogicTypes.SmoothNumberControl["config"]>,
+				args: Args,
+			) {
+				super(templates.Multi());
+
+				const mks = addMultiKeyControls(
+					this,
+					[
+						{
+							key: "add",
+							displayName: "+",
+							definition: { config: definition.config.add },
+							config: map(config, (c) => c.add),
+						},
+						{
+							key: "sub",
+							displayName: "-",
+							definition: { config: definition.config.sub },
+							config: map(config, (c) => c.sub),
+						},
+					],
+					args,
+				);
+				mks.submitted.Connect((v) => this.submitted.Fire((config = map(config, (c) => ({ ...c, ...v })))));
+
+				const [, cSpeed] = addSingleTypeWrapperAuto(
+					this,
+					"Speed",
+					{
+						type: "number",
+						config: definition.config.speed,
+						clamp: { showAsSlider: false, min: 0.01, max: definition.max, step: 0.01 },
+					},
+					map(config, (c) => c.speed),
+					args,
+				);
+				cSpeed.submitted.Connect((v) =>
+					this.submitted.Fire((config = map(config, (c, uuid) => ({ ...c, speed: v[uuid] })))),
+				);
+
+				const [, cStartValue] = addSingleTypeWrapperAuto(
+					this,
+					"Starting value",
+					{
+						type: "number",
+						config: definition.config.startValue,
+						clamp: { showAsSlider: false, min: definition.min, max: definition.max, step: 0.01 },
+					},
+					map(config, (c) => c.startValue),
+					args,
+				);
+				cStartValue.submitted.Connect((v) =>
+					this.submitted.Fire((config = map(config, (c, uuid) => ({ ...c, startValue: v[uuid] })))),
+				);
+			}
+		}
+		export class NumberHold extends ControlBase<GuiObject, "number"> {
+			constructor(
+				templates: templates,
+				definition: BlockLogicTypes.HoldNumberControl,
+				config: OfBlocks<BlockLogicTypes.HoldNumberControl["config"]>,
+				args: Args,
+			) {
+				super(templates.Multi());
+
+				const [, cKey] = addSingleTypeWrapperAuto(
+					this,
+					"Key",
+					{ type: "key", config: definition.config.key },
+					map(config, (c) => c.key),
+					args,
+				);
+				const [, cReleased] = addSingleTypeWrapperAuto(
+					this,
+					"Released value",
+					{
+						type: "number",
+						config: definition.config.releasedValue,
+						clamp: { showAsSlider: false, min: definition.min, max: definition.max, step: definition.step },
+					},
+					map(config, (c) => c.releasedValue),
+					args,
+				);
+				const [, cHolding] = addSingleTypeWrapperAuto(
+					this,
+					"Holding value",
+					{
+						type: "number",
+						config: definition.config.holdingValue,
+						clamp: { showAsSlider: false, min: definition.min, max: definition.max, step: definition.step },
+					},
+					map(config, (c) => c.holdingValue),
+					args,
+				);
+
+				cKey.submitted.Connect((v) =>
+					this.submitted.Fire((config = map(config, (c, uuid) => ({ ...c, key: v[uuid] })))),
+				);
+				cReleased.submitted.Connect((v) =>
+					this.submitted.Fire((config = map(config, (c, uuid) => ({ ...c, releasedValue: v[uuid] })))),
+				);
+				cHolding.submitted.Connect((v) =>
+					this.submitted.Fire((config = map(config, (c, uuid) => ({ ...c, holdingValue: v[uuid] })))),
+				);
+			}
+		}
 
 		function addMultiKeyControls<TKeys extends string>(
-			parent: Base<GuiObject, PrimitiveKeys>,
+			parent: Control<GuiObject> & { readonly control: GuiObject },
 			stuffs: readonly {
 				readonly key: TKeys;
 				readonly displayName: string;
@@ -700,6 +819,20 @@ namespace Controls {
 
 	export const controlControls = {
 		bool: (templates, definition, config, parent) => new Controls.keybool(templates, definition, config, parent),
+		number: (templates, definition, config, parent) => {
+			const controlTypes = new Set(asMap(config).map((k, v) => v.type));
+			if (controlTypes.size() !== 1) {
+				//
+				throw " ???";
+			}
+
+			const controlType = Objects.firstKey(controlTypes)!;
+			if (controlType === "smooth") {
+				return new Controls.NumberSmooth(templates, definition as never, config as never, parent);
+			}
+
+			return new Controls.NumberHold(templates, definition as never, config as never, parent);
+		},
 	} satisfies Controls.controlControls as Controls.genericControlControls;
 }
 
