@@ -65,10 +65,6 @@ const logic = {
 		},
 	},
 	sensors: {
-		altimeter: {
-			name: "Altimeter",
-			description: "Returns current height",
-		},
 		anglesensor: {
 			name: "Angle Sensor",
 			description: "Returns it's angle",

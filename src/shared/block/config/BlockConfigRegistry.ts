@@ -874,18 +874,6 @@ const ownercameralocator = {
 	},
 } as const satisfies BlockConfigBothDefinitions;
 
-const altimeter = {
-	input: {},
-	output: {
-		result: {
-			displayName: "Altitude",
-			type: "number",
-			default: 0 as number,
-			config: 0 as number,
-		},
-	},
-} as const satisfies BlockConfigBothDefinitions;
-
 const logicmemory = {
 	input: {
 		set: {
@@ -1217,7 +1205,6 @@ export const blockConfigRegistry = {
 	anglesensor,
 	mousesensor,
 	tpscounter: tpscounter,
-	altimeter,
 	radiotransmitter,
 	radioreciever,
 

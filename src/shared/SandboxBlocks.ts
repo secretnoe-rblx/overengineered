@@ -1,4 +1,5 @@
 import { BlockListBuilder } from "shared/blocks/BlockListBuilder";
+import { AltimeterBlock } from "shared/blocks/blocks/AltimeterBlock";
 import { DelayBlock } from "shared/blocks/blocks/DelayBlock";
 import { DisconnectBlock } from "shared/blocks/blocks/DisconnectBlock";
 import { BasicOperationBlocks } from "shared/blocks/blocks/grouped/BasicOperationBlocks";
@@ -20,6 +21,7 @@ export const CreateSandboxBlocks = (): BlockList => {
 
 		DisconnectBlock,
 		DelayBlock,
+		AltimeterBlock,
 		ScreenBlock,
 		LaserBlock,
 		VehicleSeatBlock,

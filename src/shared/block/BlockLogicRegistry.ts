@@ -11,7 +11,6 @@ import { StackMemoryBlockLogic } from "shared/block/logic/logic/memory/StackMemo
 import { CounterBlockLogic } from "shared/block/logic/logic/other/CounterBlockLogic";
 import { ImpulseGeneratorBlockLogic } from "shared/block/logic/logic/other/ImpulseGeneratorBlockLogic";
 import { SingleImpulseBlockLogic } from "shared/block/logic/logic/other/SingleImpulseBlockLogic";
-import { AltimeterBlockLogic } from "shared/block/logic/logic/sensor/AltimeterBlockLogic";
 import { AngleSensorBlockLogic } from "shared/block/logic/logic/sensor/AngleSensorBlockLogic";
 import { GravitySensorBlockLogic } from "shared/block/logic/logic/sensor/GravitySensorBlockLogic";
 import { MassSensorBlockLogic } from "shared/block/logic/logic/sensor/MassSensorBlockLogic";
@@ -79,7 +78,6 @@ const logicRegistry = {
 	speedometer: SpeedometerBlockLogic,
 	anglesensor: AngleSensorBlockLogic,
 	mousesensor: MouseSensorBlockLogic,
-	altimeter: AltimeterBlockLogic,
 	radarsection: RadarSectionBlockLogic,
 
 	logicmemory: LogicMemoryBlockLogic,

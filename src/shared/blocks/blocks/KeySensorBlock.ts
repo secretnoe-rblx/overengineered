@@ -33,8 +33,6 @@ const definition = {
 } satisfies BlockLogicFullBothDefinitions;
 
 export type { Logic as KeySensorBlockLogic };
-
-@injectable
 class Logic extends BlockLogic<typeof definition> {
 	constructor(block: BlockLogicArgs) {
 		super(definition, block);
