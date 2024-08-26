@@ -60,6 +60,7 @@ export type BlockLogicBothDefinitions = {
 
 export type BlockLogicFullInputDef = {
 	readonly displayName: string;
+	readonly tooltip?: string;
 	readonly types: Partial<BlockLogicWithConfigDefinitionTypes<PrimitiveKeys>>;
 	readonly group?: string;
 	readonly connectorHidden?: boolean;

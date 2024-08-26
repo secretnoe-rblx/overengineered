@@ -843,7 +843,7 @@ type ConfigValueDefinition<T> = GuiObject & {
 
 type ConfigValueWrapperDefinition = GuiObject & {
 	readonly TypeLine: Frame;
-	readonly Content: GuiObject & Controls.Templates & { readonly Dropdown: DropdownListDefinition };
+	readonly Content: GuiObject & Controls.Templates & { readonly TypeDropdown: DropdownListDefinition };
 };
 type m = "[multi]";
 type mk = PrimitiveKeys | m;
@@ -858,7 +858,7 @@ class ConfigValueWrapper extends Control<ConfigValueWrapperDefinition> {
 
 		this.event.subscribeObservable(this.typeColor, (color) => (gui.TypeLine.BackgroundColor3 = color), true);
 
-		this.dropdown = this.add(new DropdownList<mk>(gui.Content.Dropdown));
+		this.dropdown = this.add(new DropdownList<mk>(gui.Content.TypeDropdown));
 
 		this.content = new ComponentChild<Control>(this);
 		this.content.childSet.Connect((child) => {
