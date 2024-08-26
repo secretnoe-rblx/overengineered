@@ -23,8 +23,8 @@ type ScreenBlock = BlockModel & {
 	};
 };
 
-export type { ScreenBlockLogic };
-class ScreenBlockLogic extends InstanceBlockLogic<typeof definition, ScreenBlock> {
+export type { Logic as ScreenBlockLogic };
+class Logic extends InstanceBlockLogic<typeof definition, ScreenBlock> {
 	static readonly events = {
 		update: new AutoC2SRemoteEvent<{
 			readonly block: ScreenBlock;
@@ -37,7 +37,7 @@ class ScreenBlockLogic extends InstanceBlockLogic<typeof definition, ScreenBlock
 		super(definition, block);
 
 		this.on(({ data }) => {
-			ScreenBlockLogic.events.update.send({
+			Logic.events.update.send({
 				block: this.instance,
 				text: tostring(data),
 				translate: typeIs(data, "string"),
@@ -52,5 +52,5 @@ export const ScreenBlock = {
 	displayName: "Screen",
 	description: "Display all your data for everyone to see!",
 
-	logic: { definition, ctor: ScreenBlockLogic },
+	logic: { definition, ctor: Logic },
 } as const satisfies BlockBuilder;

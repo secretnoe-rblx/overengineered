@@ -125,11 +125,15 @@ type IBlockLogicValues<TDef extends BlockLogicOutputDefs> = {
 	readonly [k in keyof TDef]: ILogicValueStorage<PrimitiveKeys & keyof (TDef[k]["types"] & defined)>;
 };
 
-const inputValuesToFullObject = <TDef extends BlockLogicBothDefinitions>(
+const inputValuesToFullObject = <TDef extends BlockLogicBothDefinitions, TCheckUnchanged extends boolean>(
 	ctx: BlockLogicTickContext,
 	input: ReadonlyBlockLogicValues<TDef["input"]>,
 	keys: ReadonlySet<keyof TDef["input"]> | undefined,
-): AllInputKeysToObject<TDef["input"]> | BlockLogicValueResults | "$UNCHANGED" => {
+	checkUnchanged: TCheckUnchanged,
+):
+	| AllInputKeysToObject<TDef["input"]>
+	| BlockLogicValueResults
+	| (TCheckUnchanged extends true ? "$UNCHANGED" : never) => {
 	const inputValues: {
 		[k in keyof TDef["input"]]?: TypedValue<
 			PrimitiveKeys & keyof (TDef["input"][keyof TDef["input"]]["types"] & defined)
@@ -150,8 +154,8 @@ const inputValuesToFullObject = <TDef extends BlockLogicBothDefinitions>(
 		inputValues[k] = value;
 	}
 
-	if (!anyChanged) {
-		return "$UNCHANGED";
+	if (checkUnchanged && !anyChanged) {
+		return "$UNCHANGED" as never;
 	}
 
 	// Map input values to an object with keys `{key}` being the values, `{key}Type` being the types, `{key}Changed` being true if the value was changed
@@ -293,11 +297,12 @@ export abstract class BlockLogic<TDef extends BlockLogicBothDefinitions> extends
 	private onInputs<const TKeys extends keyof TDef["input"]>(
 		keys: readonly TKeys[] | undefined,
 		func: (inputs: AllInputKeysToObject<TDef["input"], TKeys>, ctx: BlockLogicTickContext) => void,
+		skipIfUnchanged = true,
 	): void {
 		const keysSet = keys && new Set(keys);
 
 		this.onTick((ctx) => {
-			const inputs = inputValuesToFullObject(ctx, this.input, keysSet);
+			const inputs = inputValuesToFullObject(ctx, this.input, keysSet, skipIfUnchanged);
 			if (inputs === BlockLogicValueResults.garbage) {
 				this.disableAndBurn();
 				return;
@@ -305,16 +310,22 @@ export abstract class BlockLogic<TDef extends BlockLogicBothDefinitions> extends
 			if (inputs === BlockLogicValueResults.availableLater) {
 				return;
 			}
-			if (inputs === "$UNCHANGED") {
+			if (skipIfUnchanged && inputs === "$UNCHANGED") {
 				return;
 			}
 
-			func(inputs, ctx);
+			func(inputs as never, ctx);
 		});
 	}
+	/** Runs the provided function when any of the input values change, but only if all of them are available. */
 	protected on(func: (inputs: AllInputKeysToObject<TDef["input"]>, ctx: BlockLogicTickContext) => void): void {
 		this.onInputs(undefined, func);
 	}
+	/** Runs the provided function on every tick, but only if all of the input values are available. */
+	protected onAlways(func: (inputs: AllInputKeysToObject<TDef["input"]>, ctx: BlockLogicTickContext) => void): void {
+		this.onInputs(undefined, func, false);
+	}
+	/** Runs the provided function when any of the provided input values change, but only if all of them are available. */
 	protected onk<const TKeys extends keyof TDef["input"]>(
 		keys: readonly TKeys[],
 		func: (inputs: AllInputKeysToObject<TDef["input"], TKeys>, ctx: BlockLogicTickContext) => void,
@@ -374,7 +385,7 @@ export abstract class CalculatableBlockLogic<TDef extends BlockLogicBothDefiniti
 			return this.cachedResults;
 		}
 
-		const inputs = inputValuesToFullObject(ctx, this.input, undefined);
+		const inputs = inputValuesToFullObject(ctx, this.input, undefined, true);
 		if (isCustomBlockLogicValueResult(inputs)) {
 			return inputs;
 		}

@@ -6,6 +6,7 @@ import { BuildingBlocks } from "shared/blocks/blocks/grouped/BuildingBlocks";
 import { LampBlocks } from "shared/blocks/blocks/grouped/LampBlocks";
 import { WheelBlocks } from "shared/blocks/blocks/grouped/WheelBlocks";
 import { KeySensorBlock } from "shared/blocks/blocks/KeySensorBlock";
+import { LaserBlock } from "shared/blocks/blocks/LaserBlock";
 import { ScreenBlock } from "shared/blocks/blocks/ScreenBlock";
 import { VehicleSeatBlock } from "shared/blocks/blocks/VehicleSeatBlock";
 import type { BlockBuilder } from "shared/blocks/Block";
@@ -20,6 +21,7 @@ export const CreateSandboxBlocks = (): BlockList => {
 		DisconnectBlock,
 		DelayBlock,
 		ScreenBlock,
+		LaserBlock,
 		VehicleSeatBlock,
 		KeySensorBlock,
 		//

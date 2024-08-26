@@ -64,18 +64,6 @@ const logic = {
 			description: "Converts a vector into the world/object coordinate space of the other vector",
 		},
 	},
-	output: {
-		screen: {
-			name: "Screen",
-			description: "Display all your data for everyone to see!",
-			autoWeldShape: "cube",
-		},
-		laser: {
-			name: "Laser pointer",
-			description: "shoot beem boom target!",
-			autoWeldShape: "cube",
-		},
-	},
 	sensors: {
 		altimeter: {
 			name: "Altimeter",
