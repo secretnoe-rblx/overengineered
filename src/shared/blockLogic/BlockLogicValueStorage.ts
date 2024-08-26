@@ -57,6 +57,20 @@ const filterValue = <TType extends PrimitiveKeys>(
 
 	return filter.filter(value, definitionTypes[valueType]!);
 };
+const filterValueArr = <TType extends PrimitiveKeys>(
+	value: Primitives[TType]["default"],
+	definitionTypes: readonly TType[],
+	valueType: TType,
+): Primitives[TType]["default"] => {
+	if (!definitionTypes.includes(valueType)) {
+		throw "Trying to filter an unknown type";
+	}
+
+	const filter = Filters[valueType] as GenericFilter | undefined;
+	if (!filter) return value;
+
+	return filter.filter(value, {});
+};
 
 //
 
@@ -137,7 +151,7 @@ export class BlockBackedInputLogicValueStorage<TType extends PrimitiveKeys>
 			return result;
 		}
 
-		const filtered = filterValue(result.value, this.block.definition.input[this.key].types, result.type);
+		const filtered = filterValueArr(result.value, this.block.definition.output[this.key].types, result.type);
 
 		return {
 			type: result.type,

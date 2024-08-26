@@ -23,9 +23,19 @@ export namespace BlockLogicTypes {
 	};
 	export type Wire = BCPrimitive<WireValue>;
 
-	export type Bool = BCPrimitive<boolean> & {
-		readonly control?: KeyBool;
+	export type BoolControls = {
+		readonly config: {
+			readonly key: string;
+			readonly switch: boolean;
+			readonly reversed: boolean;
+		};
+		readonly canBeSwitch: boolean;
+		readonly canBeReversed: boolean;
 	};
+	export type Bool = BCPrimitive<boolean> & {
+		readonly control?: BoolControls;
+	};
+
 	export type Number = BCPrimitive<number> & {
 		readonly clamp?: {
 			readonly showAsSlider: boolean;
@@ -43,18 +53,6 @@ export namespace BlockLogicTypes {
 		readonly lengthLimit: number;
 	};
 
-	export type KeyBool = BCType<
-		boolean,
-		{
-			readonly key: string;
-			readonly switch: boolean;
-			readonly reversed: boolean;
-		}
-	> & {
-		readonly canBeSwitch: boolean;
-		readonly canBeReversed: boolean;
-	};
-
 	//
 
 	export type Primitives = {
@@ -70,9 +68,19 @@ export namespace BlockLogicTypes {
 		readonly byte: Byte;
 		readonly bytearray: ByteArray;
 	};
+
 	export type Controls = {
-		readonly keybool: KeyBool & {
-			readonly primitive: "bool";
+		readonly [k in ExtractKeys<Primitives, { readonly control?: unknown }>]: Primitives[k]["control"] & defined;
+	};
+	export type Controls2 = {
+		readonly keybool: {
+			readonly config: {
+				readonly key: string;
+				readonly switch: boolean;
+				readonly reversed: boolean;
+			};
+			readonly canBeSwitch: boolean;
+			readonly canBeReversed: boolean;
 		};
 	};
 }

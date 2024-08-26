@@ -11,14 +11,15 @@ const definition = {
 			types: {
 				bool: {
 					config: false,
-					// type: "keybool",
-					// config: {
-					// 	key: "F",
-					// 	reversed: false,
-					// 	switch: false,
-					// },
-					// canBeReversed: true,
-					// canBeSwitch: true,
+					control: {
+						config: {
+							key: "F",
+							reversed: false,
+							switch: false,
+						},
+						canBeReversed: true,
+						canBeSwitch: true,
+					},
 				},
 			},
 		},

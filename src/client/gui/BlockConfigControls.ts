@@ -30,6 +30,9 @@ import type { BlockLogicTypes } from "shared/blockLogic/BlockLogicTypes";
 type Primitives = BlockLogicTypes.Primitives;
 type PrimitiveKeys = keyof Primitives;
 
+type Controls = BlockLogicTypes.Controls;
+type ControlKeys = keyof Controls;
+
 type MiniPrimitives = { readonly [k in PrimitiveKeys]: Omit<Primitives[k], "default"> };
 type WithoutDefaultPrimitives = { readonly [k in PrimitiveKeys]: Omit<Primitives[k], "default"> };
 
@@ -46,6 +49,11 @@ export type VisualBlockConfigDefinitions = {
 
 type ConfigPart<TKey extends PrimitiveKeys> = Primitives[TKey]["config"];
 type ConfigParts<TKey extends PrimitiveKeys> = OfBlocks<ConfigPart<TKey>>;
+
+type ControlDefinition<TKey extends PrimitiveKeys> = Primitives[TKey & keyof BlockLogicTypes.Controls]["control"] &
+	defined;
+type ControlConfigPart<TKey extends PrimitiveKeys> = ControlDefinition<TKey>["config"];
+type ControlConfigParts<TKey extends PrimitiveKeys> = OfBlocks<ControlConfigPart<TKey>>;
 
 type TypedConfigPart = BlockConfigPart<PrimitiveKeys>;
 type BlocksConfigPart = OfBlocks<TypedConfigPart>;
@@ -130,7 +138,7 @@ namespace Controls {
 
 	namespace Controls {
 		const addSingleTypeWrapper = <T extends Base<GuiObject, PrimitiveKeys>>(
-			parent: Base<GuiObject, PrimitiveKeys>,
+			parent: Control<GuiObject> & { readonly control: GuiObject },
 			control: T,
 		) => {
 			const wrapper = new ConfigValueWrapper(template.Clone());
@@ -142,7 +150,7 @@ namespace Controls {
 			return $tuple(wrapper, control);
 		};
 		const addSingleTypeWrapperAuto = <TKey extends PrimitiveKeys>(
-			parent: Base<GuiObject, PrimitiveKeys>,
+			parent: Control<GuiObject> & { readonly control: GuiObject },
 			displayName: string,
 			def: MiniPrimitives[TKey] & { readonly type: TKey },
 			configs: ConfigParts<TKey>,
@@ -504,53 +512,67 @@ namespace Controls {
 		// 		);
 		// 	}
 		// }
-		// export class keybool extends Base<GuiObject, "keybool"> {
-		// 	constructor(
-		// 		templates: templates,
-		// 		definition: AllMiniTypes["keybool"],
-		// 		config: ConfigParts<"keybool">,
-		// 		args: Args,
-		// 	) {
-		// 		super(templates.Multi());
 
-		// 		const [, ckey] = addSingleTypeWrapperAuto(
-		// 			this,
-		// 			"Key",
-		// 			{ type: "key", config: definition.config.key },
-		// 			map(config, (c) => c.key),
-		// 			args,
-		// 		);
-		// 		ckey.submitted.Connect((v) =>
-		// 			this.submitted.Fire((config = map(config, (c, uuid) => ({ ...c, key: v[uuid] })))),
-		// 		);
+		abstract class ControlBase<T extends GuiObject, TKey extends ControlKeys> extends Control<
+			ConfigValueDefinition<T>
+		> {
+			readonly submitted = new ArgsSignal<[value: ControlConfigParts<TKey>]>();
+			readonly control: T;
 
-		// 		if (definition.canBeSwitch) {
-		// 			const [, cswitch] = addSingleTypeWrapperAuto(
-		// 				this,
-		// 				"Switch",
-		// 				{ type: "bool", config: definition.config.switch },
-		// 				map(config, (c) => c.switch),
-		// 				args,
-		// 			);
-		// 			cswitch.submitted.Connect((v) =>
-		// 				this.submitted.Fire((config = map(config, (c, uuid) => ({ ...c, switch: v[uuid] })))),
-		// 			);
-		// 		}
+			constructor(gui: ConfigValueDefinition<T>) {
+				super(gui);
+				this.control = gui.Control;
+			}
+		}
+		export class keybool extends ControlBase<GuiObject, "bool"> {
+			constructor(
+				templates: templates,
+				definition: ControlDefinition<"bool">,
+				config: ControlConfigParts<"bool">,
+				args: Args,
+			) {
+				super(templates.Multi());
 
-		// 		if (definition.canBeReversed) {
-		// 			const [, creversed] = addSingleTypeWrapperAuto(
-		// 				this,
-		// 				"Reversed",
-		// 				{ type: "bool", config: definition.config.reversed },
-		// 				map(config, (c) => c.reversed),
-		// 				args,
-		// 			);
-		// 			creversed.submitted.Connect((v) =>
-		// 				this.submitted.Fire((config = map(config, (c, uuid) => ({ ...c, reversed: v[uuid] })))),
-		// 			);
-		// 		}
-		// 	}
-		// }
+				const defcfg = definition.config;
+
+				const [, ckey] = addSingleTypeWrapperAuto(
+					this,
+					"Key",
+					{ type: "key", config: defcfg.key },
+					map(config, (c) => c.key),
+					args,
+				);
+				ckey.submitted.Connect((v) =>
+					this.submitted.Fire((config = map(config, (c, uuid) => ({ ...c, key: v[uuid] })))),
+				);
+
+				if (definition.canBeSwitch) {
+					const [, cswitch] = addSingleTypeWrapperAuto(
+						this,
+						"Switch",
+						{ type: "bool", config: defcfg.switch },
+						map(config, (c) => c.switch),
+						args,
+					);
+					cswitch.submitted.Connect((v) =>
+						this.submitted.Fire((config = map(config, (c, uuid) => ({ ...c, switch: v[uuid] })))),
+					);
+				}
+
+				if (definition.canBeReversed) {
+					const [, creversed] = addSingleTypeWrapperAuto(
+						this,
+						"Reversed",
+						{ type: "bool", config: defcfg.reversed },
+						map(config, (c) => c.reversed),
+						args,
+					);
+					creversed.submitted.Connect((v) =>
+						this.submitted.Fire((config = map(config, (c, uuid) => ({ ...c, reversed: v[uuid] })))),
+					);
+				}
+			}
+		}
 
 		function addMultiKeyControls<TKeys extends string>(
 			parent: Base<GuiObject, PrimitiveKeys>,
@@ -634,6 +656,23 @@ namespace Controls {
 				parent: Args,
 			) => Base<GuiObject, PrimitiveKeys>;
 		};
+
+		export type controlControls = {
+			readonly [k in ControlKeys]: (
+				templates: templates,
+				definition: ControlDefinition<k>,
+				config: ControlConfigParts<k>,
+				parent: Args,
+			) => ControlBase<GuiObject, k>;
+		};
+		export type genericControlControls = {
+			readonly [k in PrimitiveKeys]: (
+				templates: templates,
+				definition: ControlDefinition<ControlKeys>,
+				config: ControlConfigParts<PrimitiveKeys>,
+				parent: Args,
+			) => ControlBase<GuiObject, ControlKeys>;
+		};
 	}
 
 	export type Args = {
@@ -657,6 +696,10 @@ namespace Controls {
 		color: (templates, definition, config, parent) => new Controls.color(templates, definition, config),
 		vector3: (templates, definition, config, parent) => new Controls.vector3(templates, definition, config, parent),
 	} satisfies Controls.controls as Controls.genericControls;
+
+	export const controlControls = {
+		bool: (templates, definition, config, parent) => new Controls.keybool(templates, definition, config, parent),
+	} satisfies Controls.controlControls as Controls.genericControlControls;
 }
 
 type ConfigValueDefinition<T> = GuiObject & {
@@ -798,17 +841,42 @@ class ConfigAutoValueWrapper extends Control<ConfigValueWrapperDefinition> {
 						args,
 					);
 				} else {
-					const def = definition.types[selectedType];
+					const def = definition.types[selectedType] as
+						| (typeof definition.types)[typeof selectedType]
+						| Primitives[ControlKeys];
 					if (!def) return;
 
-					const partialConfigs = map(configs, (c) => c.config);
-					cfgcontrol = ctor(Controls.templates, def, partialConfigs, args);
+					if ("control" in def && def.control) {
+						const ctor = Controls.controlControls[selectedType];
+						if (!ctor) return;
+
+						const partialConfigs = map(configs, (c) => c.controlConfig!);
+						const cfgcontrol = ctor(Controls.templates, def.control, partialConfigs, args);
+
+						cfgcontrol.instance.HeadingLabel.Text = definition.displayName;
+						cfgcontrol.submitted.Connect((v) =>
+							this._submitted.Fire(
+								(configs = map(configs, (c, uuid) => ({
+									...c,
+									type: selectedType,
+									controlConfig: v[uuid],
+								}))),
+							),
+						);
+
+						control.content.set(cfgcontrol);
+
+						return;
+					} else {
+						const partialConfigs = map(configs, (c) => c.config);
+						cfgcontrol = ctor(Controls.templates, def, partialConfigs, args);
+					}
 				}
 
 				cfgcontrol.instance.HeadingLabel.Text = definition.displayName;
 				cfgcontrol.submitted.Connect((v) =>
 					this._submitted.Fire(
-						(configs = map(configs, (c, uuid) => ({ type: selectedType, config: v[uuid] }))),
+						(configs = map(configs, (c, uuid) => ({ ...c, type: selectedType, config: v[uuid] }))),
 					),
 				);
 

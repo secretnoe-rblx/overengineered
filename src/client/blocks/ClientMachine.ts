@@ -32,6 +32,9 @@ export class ClientMachine extends SharedMachine {
 		for (const [, { block, logic }] of this.blocksMap) {
 			const config = BlockConfig.addDefaults(block.config, logic.definition.input);
 			for (const [k, v] of pairs(config)) {
+				const cfg = config[k];
+				if (!cfg) continue;
+
 				if (!(v.type in ClientBlockControls)) {
 					continue;
 				}
@@ -44,7 +47,14 @@ export class ClientMachine extends SharedMachine {
 					| ILogicValueStorage<keyof BlockLogicTypes.Primitives>;
 				if (!("set" in input)) continue;
 
-				const control = ctor(input, config[k].config, logic.definition.input[k].types[config[k].type]!);
+				const def = logic.definition.input[k].types[cfg.type] as
+					| BlockLogicTypes.Primitives[keyof BlockLogicTypes.Controls]
+					| undefined;
+				if (!def) continue;
+				if (!def.control) continue;
+				if (!cfg.controlConfig) continue;
+
+				const control = ctor(input, cfg.controlConfig, def.control);
 				this.parent(control);
 
 				this.event.subscribeObservable(
