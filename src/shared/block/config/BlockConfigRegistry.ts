@@ -733,57 +733,6 @@ const anyProcessing = {
 	},
 } as const satisfies BlockConfigBothDefinitions;
 
-const laser = {
-	input: {
-		alwaysEnabled: {
-			displayName: "Laser always enabled",
-			type: "bool",
-			config: false as boolean,
-			default: false as boolean,
-		},
-		maxDistance: {
-			displayName: "Max distance",
-			type: "clampedNumber",
-			config: 200 as number,
-			default: 200 as number,
-			min: 0.1,
-			max: 600,
-			step: 0.1,
-		},
-		rayTransparency: {
-			displayName: "Transparency",
-			type: "clampedNumber",
-			config: 0 as number,
-			default: 0 as number,
-			min: 0,
-			max: 1,
-			step: 0.01,
-		},
-		rayColor: {
-			displayName: "Ray color",
-			type: "color",
-			config: Color3.fromRGB(255, 0, 0),
-			default: Color3.fromRGB(255, 0, 0),
-			connectorHidden: true,
-		},
-		dotColor: {
-			displayName: "Dot color",
-			type: "color",
-			config: Color3.fromRGB(255, 255, 0),
-			default: Color3.fromRGB(255, 255, 0),
-			connectorHidden: true,
-		},
-	},
-	output: {
-		distance: {
-			displayName: "Distance",
-			type: "number",
-			default: 0 as number,
-			config: 0 as number,
-		},
-	},
-} as const satisfies BlockConfigBothDefinitions;
-
 const twoNumbersInputBooleanOutput = {
 	input: {
 		value1: {
@@ -921,18 +870,6 @@ const ownercameralocator = {
 			type: "vector3",
 			default: Vector3.zero,
 			config: Vector3.zero,
-		},
-	},
-} as const satisfies BlockConfigBothDefinitions;
-
-const altimeter = {
-	input: {},
-	output: {
-		result: {
-			displayName: "Altitude",
-			type: "number",
-			default: 0 as number,
-			config: 0 as number,
 		},
 	},
 } as const satisfies BlockConfigBothDefinitions;
@@ -1260,7 +1197,6 @@ export const blockConfigRegistry = {
 	wedgewing1x4: wing,
 	leddisplay,
 	sevensegmentdisplay,
-	laser,
 
 	ownerlocator,
 	ownercameralocator,
@@ -1269,7 +1205,6 @@ export const blockConfigRegistry = {
 	anglesensor,
 	mousesensor,
 	tpscounter: tpscounter,
-	altimeter,
 	radiotransmitter,
 	radioreciever,
 

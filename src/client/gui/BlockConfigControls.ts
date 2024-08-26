@@ -23,20 +23,18 @@ import type { DropdownListDefinition } from "client/gui/controls/DropdownList";
 import type { KeyOrStringChooserControlDefinition } from "client/gui/controls/KeyOrStringChooserControl";
 import type { NumberTextBoxControlDefinition } from "client/gui/controls/NumberTextBoxControl";
 import type { TextBoxControlDefinition } from "client/gui/controls/TextBoxControl";
-import type { BlockConfigPart, BlockConfigPrimitiveByType } from "shared/blockLogic/BlockConfig";
+import type { BlockConfigPart } from "shared/blockLogic/BlockConfig";
 import type { BlockLogicWithConfigDefinitionTypes } from "shared/blockLogic/BlockLogic";
 import type { BlockLogicTypes } from "shared/blockLogic/BlockLogicTypes";
 
 type Primitives = BlockLogicTypes.Primitives;
 type PrimitiveKeys = keyof Primitives;
-type NonPrimitives = BlockLogicTypes.NonPrimitives;
-type NonPrimitiveKeys = keyof NonPrimitives;
-type AllTypes = BlockLogicTypes.Types;
-type AllKeys = keyof AllTypes;
 
-/** {@link BlockConfigTypes3.Types} without the `default` and `config` properties */
-type AllMiniTypes = { readonly [k in AllKeys]: Omit<AllTypes[k], "default" | "type"> };
-type AllWithoutDefaultTypes = { readonly [k in AllKeys]: Omit<AllTypes[k], "default"> };
+type Controls = BlockLogicTypes.Controls;
+type ControlKeys = keyof Controls;
+
+type MiniPrimitives = { readonly [k in PrimitiveKeys]: Omit<Primitives[k], "default"> };
+type WithoutDefaultPrimitives = { readonly [k in PrimitiveKeys]: Omit<Primitives[k], "default"> };
 
 type OfBlocks<T> = { readonly [k in BlockUuid]: T };
 
@@ -49,8 +47,13 @@ export type VisualBlockConfigDefinitions = {
 	readonly [k in string]: VisualBlockConfigDefinition;
 };
 
-type ConfigPart<TKey extends AllKeys> = AllTypes[TKey]["config"];
-type ConfigParts<TKey extends AllKeys> = OfBlocks<ConfigPart<TKey>>;
+type ConfigPart<TKey extends PrimitiveKeys> = Primitives[TKey]["config"];
+type ConfigParts<TKey extends PrimitiveKeys> = OfBlocks<ConfigPart<TKey>>;
+
+type ControlDefinition<TKey extends PrimitiveKeys> = Primitives[TKey & keyof BlockLogicTypes.Controls]["control"] &
+	defined;
+type ControlConfigPart<TKey extends PrimitiveKeys> = ControlDefinition<TKey>["config"];
+type ControlConfigParts<TKey extends PrimitiveKeys> = OfBlocks<ControlConfigPart<TKey>>;
 
 type TypedConfigPart = BlockConfigPart<PrimitiveKeys>;
 type BlocksConfigPart = OfBlocks<TypedConfigPart>;
@@ -134,8 +137,8 @@ namespace Controls {
 	};
 
 	namespace Controls {
-		const addSingleTypeWrapper = <T extends Base<GuiObject, AllKeys>>(
-			parent: Base<GuiObject, AllKeys>,
+		const addSingleTypeWrapper = <T extends Base<GuiObject, PrimitiveKeys>>(
+			parent: Control<GuiObject> & { readonly control: GuiObject },
 			control: T,
 		) => {
 			const wrapper = new ConfigValueWrapper(template.Clone());
@@ -146,29 +149,29 @@ namespace Controls {
 			parent.add(wrapper);
 			return $tuple(wrapper, control);
 		};
-		const addSingleTypeWrapperAuto = <TKey extends AllKeys>(
-			parent: Base<GuiObject, AllKeys>,
+		const addSingleTypeWrapperAuto = <TKey extends PrimitiveKeys>(
+			parent: Control<GuiObject> & { readonly control: GuiObject },
 			displayName: string,
-			def: AllMiniTypes[TKey] & { readonly type: TKey },
+			def: MiniPrimitives[TKey] & { readonly type: TKey },
 			configs: ConfigParts<TKey>,
 			args: Args,
 		) => {
 			const ctor = controls[def.type];
 			if (!ctor) throw `No ctor for block config visual type ${def.type}`;
 
-			const control = new ctor(templates, def as AllWithoutDefaultTypes[AllKeys], configs, args);
+			const control = ctor(templates, def as WithoutDefaultPrimitives[PrimitiveKeys], configs, args);
 			control.instance.HeadingLabel.Text = displayName;
 
 			const [wrapper] = addSingleTypeWrapper(parent, control);
 			wrapper.typeColor.set(BlockWireManager.typeGroups[BlockWireManager.groups[def.type]].color);
 
-			return $tuple(wrapper, control as Control as Control & Submittable<BlockConfigPrimitiveByType<TKey>>);
+			return $tuple(wrapper, control as Control as Control & Submittable<TKey>);
 		};
 
 		type Submittable<TKey extends PrimitiveKeys> = {
 			readonly submitted: ReadonlyArgsSignal<[value: ConfigParts<TKey>]>;
 		};
-		abstract class Base<T extends GuiObject, TKey extends AllKeys> extends Control<ConfigValueDefinition<T>> {
+		abstract class Base<T extends GuiObject, TKey extends PrimitiveKeys> extends Control<ConfigValueDefinition<T>> {
 			readonly submitted = new ArgsSignal<[value: ConfigParts<TKey>]>();
 			readonly control: T;
 
@@ -186,7 +189,7 @@ namespace Controls {
 		export class wire extends Base<GuiButton, "wire"> {
 			constructor(
 				templates: templates,
-				definition: AllMiniTypes["wire"],
+				definition: MiniPrimitives["wire"],
 				config: ConfigParts<"wire">,
 				args: Args,
 			) {
@@ -203,7 +206,7 @@ namespace Controls {
 		}
 
 		export class bool extends Base<CheckBoxControlDefinition, "bool"> {
-			constructor(templates: templates, definition: AllMiniTypes["bool"], config: ConfigParts<"bool">) {
+			constructor(templates: templates, definition: MiniPrimitives["bool"], config: ConfigParts<"bool">) {
 				super(templates.Checkbox());
 
 				const control = this.add(new CheckBoxControl(this.control));
@@ -212,39 +215,54 @@ namespace Controls {
 				control.submitted.Connect((v) => this.submitted.Fire((config = map(config, (_) => v))));
 			}
 		}
-		export class _number extends Base<NumberTextBoxControlDefinition | SliderControlDefinition, "number"> {
-			constructor(templates: templates, definition: AllMiniTypes["number"], config: ConfigParts<"number">) {
-				if (definition.clamp) {
-					super(templates.Slider());
-				} else {
-					super(templates.Number());
-				}
 
-				if (definition.clamp?.showAsSlider) {
-					const gui = this.control as SliderControlDefinition;
-					const clamp = definition.clamp;
+		export class Number extends Base<NumberTextBoxControlDefinition, "number"> {
+			constructor(templates: templates, definition: MiniPrimitives["number"], config: ConfigParts<"number">) {
+				super(templates.Number());
 
-					const control = this.add(
-						new SliderControl<true>(gui, clamp.min, clamp.max, clamp.step, {
-							Knob: gui.Control.Knob,
-							Filled: gui.Control.Filled,
-						}),
-					);
-					control.value.set(sameOrUndefined(config));
+				const gui = this.control as NumberTextBoxControlDefinition;
 
-					control.submitted.Connect((v) => this.submitted.Fire((config = map(config, (_) => v))));
-				} else {
-					const gui = this.control as NumberTextBoxControlDefinition;
+				const control = this.add(
+					definition.clamp
+						? new NumberTextBoxControl<true>(
+								gui,
+								definition.clamp.min,
+								definition.clamp.max,
+								definition.clamp.step,
+							)
+						: new NumberTextBoxControl<true>(gui),
+				);
+				control.value.set(sameOrUndefined(config));
 
-					const control = this.add(new NumberTextBoxControl<true>(gui));
-					control.value.set(sameOrUndefined(config));
-
-					control.submitted.Connect((v) => this.submitted.Fire((config = map(config, (_) => v))));
-				}
+				control.submitted.Connect((v) => this.submitted.Fire((config = map(config, (_) => v))));
 			}
 		}
+		export class ClampedNumber extends Base<SliderControlDefinition, "number"> {
+			constructor(
+				templates: templates,
+				definition: MakeRequired<MiniPrimitives["number"], "clamp">,
+				config: ConfigParts<"number">,
+			) {
+				super(templates.Slider());
+
+				const gui = this.control as SliderControlDefinition;
+				const clamp = definition.clamp;
+
+				const control = this.add(
+					new SliderControl<true>(gui, clamp.min, clamp.max, clamp.step, {
+						Knob: gui.Control.Knob,
+						Filled: gui.Control.Filled,
+						Hitbox: gui.Control,
+					}),
+				);
+				control.value.set(sameOrUndefined(config));
+
+				control.submitted.Connect((v) => this.submitted.Fire((config = map(config, (_) => v))));
+			}
+		}
+
 		export class _string extends Base<TextBoxControlDefinition, "string"> {
-			constructor(templates: templates, definition: AllMiniTypes["string"], config: ConfigParts<"string">) {
+			constructor(templates: templates, definition: MiniPrimitives["string"], config: ConfigParts<"string">) {
 				super(templates.Text());
 
 				const control = this.add(new TextBoxControl(this.control));
@@ -254,7 +272,7 @@ namespace Controls {
 			}
 		}
 		export class byte extends Base<ByteControlDefinition, "byte"> {
-			constructor(templates: templates, definition: AllMiniTypes["byte"], config: ConfigParts<"byte">) {
+			constructor(templates: templates, definition: MiniPrimitives["byte"], config: ConfigParts<"byte">) {
 				super(templates.Byte());
 
 				const control = this.add(
@@ -271,7 +289,7 @@ namespace Controls {
 		export class key extends Base<KeyOrStringChooserControlDefinition, "key"> {
 			readonly keyChooser;
 
-			constructor(templates: templates, definition: AllMiniTypes["key"], config: ConfigParts<"key">) {
+			constructor(templates: templates, definition: MiniPrimitives["key"], config: ConfigParts<"key">) {
 				super(templates.Key());
 
 				this.keyChooser = this.add(new KeyOrStringChooserControl<true>(this.control));
@@ -281,7 +299,11 @@ namespace Controls {
 			}
 		}
 		export class bytearray extends Base<GuiButton, "bytearray"> {
-			constructor(templates: templates, definition: AllMiniTypes["bytearray"], config: ConfigParts<"bytearray">) {
+			constructor(
+				templates: templates,
+				definition: MiniPrimitives["bytearray"],
+				config: ConfigParts<"bytearray">,
+			) {
 				super(templates.ByteArray());
 
 				const value = sameOrUndefined(config, (left, right) => {
@@ -312,7 +334,7 @@ namespace Controls {
 			}
 		}
 		export class color extends Base<ColorChooserDefinition, "color"> {
-			constructor(templates: templates, definition: AllMiniTypes["color"], config: ConfigParts<"color">) {
+			constructor(templates: templates, definition: MiniPrimitives["color"], config: ConfigParts<"color">) {
 				super(templates.Color());
 
 				const control = this.add(new ColorChooser(this.control));
@@ -322,57 +344,10 @@ namespace Controls {
 			}
 		}
 
-		export class keybool extends Base<GuiObject, "keybool"> {
-			constructor(
-				templates: templates,
-				definition: AllMiniTypes["keybool"],
-				config: ConfigParts<"keybool">,
-				args: Args,
-			) {
-				super(templates.Multi());
-
-				const [, ckey] = addSingleTypeWrapperAuto(
-					this,
-					"Key",
-					{ type: "key", config: definition.config.key },
-					map(config, (c) => c.key),
-					args,
-				);
-				ckey.submitted.Connect((v) =>
-					this.submitted.Fire((config = map(config, (c, uuid) => ({ ...c, key: v[uuid] })))),
-				);
-
-				if (definition.canBeSwitch) {
-					const [, cswitch] = addSingleTypeWrapperAuto(
-						this,
-						"Switch",
-						{ type: "bool", config: definition.config.switch },
-						map(config, (c) => c.switch),
-						args,
-					);
-					cswitch.submitted.Connect((v) =>
-						this.submitted.Fire((config = map(config, (c, uuid) => ({ ...c, switch: v[uuid] })))),
-					);
-				}
-
-				if (definition.canBeReversed) {
-					const [, creversed] = addSingleTypeWrapperAuto(
-						this,
-						"Reversed",
-						{ type: "bool", config: definition.config.reversed },
-						map(config, (c) => c.reversed),
-						args,
-					);
-					creversed.submitted.Connect((v) =>
-						this.submitted.Fire((config = map(config, (c, uuid) => ({ ...c, reversed: v[uuid] })))),
-					);
-				}
-			}
-		}
 		export class vector3 extends Base<GuiObject, "vector3"> {
 			constructor(
 				templates: templates,
-				definition: AllMiniTypes["vector3"],
+				definition: MiniPrimitives["vector3"],
 				config: ConfigParts<"vector3">,
 				args: Args,
 			) {
@@ -548,12 +523,183 @@ namespace Controls {
 		// 	}
 		// }
 
+		abstract class ControlBase<T extends GuiObject, TKey extends ControlKeys> extends Control<
+			ConfigValueDefinition<T>
+		> {
+			readonly submitted = new ArgsSignal<[value: ControlConfigParts<TKey>]>();
+			readonly control: T;
+
+			constructor(gui: ConfigValueDefinition<T>) {
+				super(gui);
+				this.control = gui.Control;
+			}
+		}
+		export class keybool extends ControlBase<GuiObject, "bool"> {
+			constructor(
+				templates: templates,
+				definition: ControlDefinition<"bool">,
+				config: ControlConfigParts<"bool">,
+				args: Args,
+			) {
+				super(templates.Multi());
+
+				const defcfg = definition.config;
+
+				const [, ckey] = addSingleTypeWrapperAuto(
+					this,
+					"Key",
+					{ type: "key", config: defcfg.key },
+					map(config, (c) => c.key),
+					args,
+				);
+				ckey.submitted.Connect((v) =>
+					this.submitted.Fire((config = map(config, (c, uuid) => ({ ...c, key: v[uuid] })))),
+				);
+
+				if (definition.canBeSwitch) {
+					const [, cswitch] = addSingleTypeWrapperAuto(
+						this,
+						"Switch",
+						{ type: "bool", config: defcfg.switch },
+						map(config, (c) => c.switch),
+						args,
+					);
+					cswitch.submitted.Connect((v) =>
+						this.submitted.Fire((config = map(config, (c, uuid) => ({ ...c, switch: v[uuid] })))),
+					);
+				}
+
+				if (definition.canBeReversed) {
+					const [, creversed] = addSingleTypeWrapperAuto(
+						this,
+						"Reversed",
+						{ type: "bool", config: defcfg.reversed },
+						map(config, (c) => c.reversed),
+						args,
+					);
+					creversed.submitted.Connect((v) =>
+						this.submitted.Fire((config = map(config, (c, uuid) => ({ ...c, reversed: v[uuid] })))),
+					);
+				}
+			}
+		}
+		export class NumberSmooth extends ControlBase<GuiObject, "number"> {
+			constructor(
+				templates: templates,
+				definition: BlockLogicTypes.SmoothNumberControl,
+				config: OfBlocks<BlockLogicTypes.SmoothNumberControl["config"]>,
+				args: Args,
+			) {
+				super(templates.Multi());
+
+				const mks = addMultiKeyControls(
+					this,
+					[
+						{
+							key: "add",
+							displayName: "+",
+							definition: { config: definition.config.add },
+							config: map(config, (c) => c.add),
+						},
+						{
+							key: "sub",
+							displayName: "-",
+							definition: { config: definition.config.sub },
+							config: map(config, (c) => c.sub),
+						},
+					],
+					args,
+				);
+				mks.submitted.Connect((v) => this.submitted.Fire((config = map(config, (c) => ({ ...c, ...v })))));
+
+				const [, cSpeed] = addSingleTypeWrapperAuto(
+					this,
+					"Speed",
+					{
+						type: "number",
+						config: definition.config.speed,
+						clamp: { showAsSlider: false, min: 0.01, max: definition.max, step: 0.01 },
+					},
+					map(config, (c) => c.speed),
+					args,
+				);
+				cSpeed.submitted.Connect((v) =>
+					this.submitted.Fire((config = map(config, (c, uuid) => ({ ...c, speed: v[uuid] })))),
+				);
+
+				const [, cStartValue] = addSingleTypeWrapperAuto(
+					this,
+					"Starting value",
+					{
+						type: "number",
+						config: definition.config.startValue,
+						clamp: { showAsSlider: false, min: definition.min, max: definition.max, step: 0.01 },
+					},
+					map(config, (c) => c.startValue),
+					args,
+				);
+				cStartValue.submitted.Connect((v) =>
+					this.submitted.Fire((config = map(config, (c, uuid) => ({ ...c, startValue: v[uuid] })))),
+				);
+			}
+		}
+		export class NumberHold extends ControlBase<GuiObject, "number"> {
+			constructor(
+				templates: templates,
+				definition: BlockLogicTypes.HoldNumberControl,
+				config: OfBlocks<BlockLogicTypes.HoldNumberControl["config"]>,
+				args: Args,
+			) {
+				super(templates.Multi());
+
+				const [, cKey] = addSingleTypeWrapperAuto(
+					this,
+					"Key",
+					{ type: "key", config: definition.config.key },
+					map(config, (c) => c.key),
+					args,
+				);
+				const [, cReleased] = addSingleTypeWrapperAuto(
+					this,
+					"Released value",
+					{
+						type: "number",
+						config: definition.config.releasedValue,
+						clamp: { showAsSlider: false, min: definition.min, max: definition.max, step: definition.step },
+					},
+					map(config, (c) => c.releasedValue),
+					args,
+				);
+				const [, cHolding] = addSingleTypeWrapperAuto(
+					this,
+					"Holding value",
+					{
+						type: "number",
+						config: definition.config.holdingValue,
+						clamp: { showAsSlider: false, min: definition.min, max: definition.max, step: definition.step },
+					},
+					map(config, (c) => c.holdingValue),
+					args,
+				);
+
+				cKey.submitted.Connect((v) =>
+					this.submitted.Fire((config = map(config, (c, uuid) => ({ ...c, key: v[uuid] })))),
+				);
+				cReleased.submitted.Connect((v) =>
+					this.submitted.Fire((config = map(config, (c, uuid) => ({ ...c, releasedValue: v[uuid] })))),
+				);
+				cHolding.submitted.Connect((v) =>
+					this.submitted.Fire((config = map(config, (c, uuid) => ({ ...c, holdingValue: v[uuid] })))),
+				);
+			}
+		}
+
 		function addMultiKeyControls<TKeys extends string>(
-			parent: Base<GuiObject, AllKeys>,
+			parent: Control<GuiObject> & { readonly control: GuiObject },
 			stuffs: readonly {
 				readonly key: TKeys;
 				readonly displayName: string;
-				readonly definition: AllMiniTypes["key"];
+				readonly definition: MiniPrimitives["key"];
 				readonly config: ConfigParts<"key">;
 			}[],
 			args: Args,
@@ -615,20 +761,37 @@ namespace Controls {
 		}
 
 		export type controls = {
-			readonly [k in AllKeys]: new (
+			readonly [k in PrimitiveKeys]: (
 				templates: templates,
-				definition: AllWithoutDefaultTypes[k],
+				definition: WithoutDefaultPrimitives[k],
 				config: ConfigParts<k>,
 				parent: Args,
 			) => Base<GuiObject, k>;
 		};
 		export type genericControls = {
-			readonly [k in AllKeys]: new (
+			readonly [k in PrimitiveKeys]: (
 				templates: templates,
-				definition: AllWithoutDefaultTypes[AllKeys],
-				config: ConfigParts<AllKeys>,
+				definition: WithoutDefaultPrimitives[PrimitiveKeys],
+				config: ConfigParts<PrimitiveKeys>,
 				parent: Args,
-			) => Base<GuiObject, AllKeys>;
+			) => Base<GuiObject, PrimitiveKeys>;
+		};
+
+		export type controlControls = {
+			readonly [k in ControlKeys]: (
+				templates: templates,
+				definition: ControlDefinition<k>,
+				config: ControlConfigParts<k>,
+				parent: Args,
+			) => ControlBase<GuiObject, k>;
+		};
+		export type genericControlControls = {
+			readonly [k in PrimitiveKeys]: (
+				templates: templates,
+				definition: ControlDefinition<ControlKeys>,
+				config: ControlConfigParts<PrimitiveKeys>,
+				parent: Args,
+			) => ControlBase<GuiObject, ControlKeys>;
 		};
 	}
 
@@ -636,10 +799,41 @@ namespace Controls {
 		travelTo(uuid: BlockUuid): void;
 	};
 	export const controls = {
-		...Controls,
-		number: Controls._number,
-		string: Controls._string,
+		unset: (templates, definition, config, parent) => new Controls.unset(templates),
+		wire: (templates, definition, config, parent) => new Controls.wire(templates, definition, config, parent),
+		bool: (templates, definition, config, parent) => new Controls.bool(templates, definition, config),
+		number: (templates, definition, config, parent) => {
+			if (definition.clamp?.showAsSlider) {
+				return new Controls.ClampedNumber(templates, definition as never, config);
+			}
+
+			return new Controls.Number(templates, definition, config);
+		},
+		string: (templates, definition, config, parent) => new Controls._string(templates, definition, config),
+		byte: (templates, definition, config, parent) => new Controls.byte(templates, definition, config),
+		key: (templates, definition, config, parent) => new Controls.key(templates, definition, config),
+		bytearray: (templates, definition, config, parent) => new Controls.bytearray(templates, definition, config),
+		color: (templates, definition, config, parent) => new Controls.color(templates, definition, config),
+		vector3: (templates, definition, config, parent) => new Controls.vector3(templates, definition, config, parent),
 	} satisfies Controls.controls as Controls.genericControls;
+
+	export const controlControls = {
+		bool: (templates, definition, config, parent) => new Controls.keybool(templates, definition, config, parent),
+		number: (templates, definition, config, parent) => {
+			const controlTypes = new Set(asMap(config).map((k, v) => v.type));
+			if (controlTypes.size() !== 1) {
+				//
+				throw " ???";
+			}
+
+			const controlType = Objects.firstKey(controlTypes)!;
+			if (controlType === "smooth") {
+				return new Controls.NumberSmooth(templates, definition as never, config as never, parent);
+			}
+
+			return new Controls.NumberHold(templates, definition as never, config as never, parent);
+		},
+	} satisfies Controls.controlControls as Controls.genericControlControls;
 }
 
 type ConfigValueDefinition<T> = GuiObject & {
@@ -766,37 +960,57 @@ class ConfigAutoValueWrapper extends Control<ConfigValueWrapperDefinition> {
 
 				control.typeColor.set(BlockWireManager.typeGroups[BlockWireManager.groups[selectedType]].color);
 
-				const ctor = Controls.controls[definition.types[selectedType]?.type ?? selectedType];
+				const ctor = Controls.controls[selectedType];
 				if (!ctor) return;
 
-				let cfgcontrol: InstanceType<typeof ctor> | undefined = undefined;
+				let cfgcontrol: ReturnType<typeof ctor> | undefined = undefined;
 
 				if (selectedType === "unset") {
-					cfgcontrol = new ctor(
-						Controls.templates,
-						{ type: "unset", config: {} as BlockLogicTypes.UnsetValue },
-						{},
-						args,
-					);
+					cfgcontrol = ctor(Controls.templates, { config: {} as BlockLogicTypes.UnsetValue }, {}, args);
 				} else if (selectedType === "wire") {
-					cfgcontrol = new ctor(
+					cfgcontrol = ctor(
 						Controls.templates,
-						{ type: "wire", config: undefined! },
+						{ config: undefined! },
 						map(configs, (c) => c.config),
 						args,
 					);
 				} else {
-					const def = definition.types[selectedType];
+					const def = definition.types[selectedType] as
+						| (typeof definition.types)[typeof selectedType]
+						| Primitives[ControlKeys];
 					if (!def) return;
 
-					const partialConfigs = map(configs, (c) => c.config);
-					cfgcontrol = new ctor(Controls.templates, def, partialConfigs, args);
+					if ("control" in def && def.control) {
+						const ctor = Controls.controlControls[selectedType];
+						if (!ctor) return;
+
+						const partialConfigs = map(configs, (c) => c.controlConfig!);
+						const cfgcontrol = ctor(Controls.templates, def.control, partialConfigs, args);
+
+						cfgcontrol.instance.HeadingLabel.Text = definition.displayName;
+						cfgcontrol.submitted.Connect((v) =>
+							this._submitted.Fire(
+								(configs = map(configs, (c, uuid) => ({
+									...c,
+									type: selectedType,
+									controlConfig: v[uuid],
+								}))),
+							),
+						);
+
+						control.content.set(cfgcontrol);
+
+						return;
+					} else {
+						const partialConfigs = map(configs, (c) => c.config);
+						cfgcontrol = ctor(Controls.templates, def, partialConfigs, args);
+					}
 				}
 
 				cfgcontrol.instance.HeadingLabel.Text = definition.displayName;
 				cfgcontrol.submitted.Connect((v) =>
 					this._submitted.Fire(
-						(configs = map(configs, (c, uuid) => ({ type: selectedType, config: v[uuid] }))),
+						(configs = map(configs, (c, uuid) => ({ ...c, type: selectedType, config: v[uuid] }))),
 					),
 				);
 

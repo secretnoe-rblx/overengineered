@@ -64,23 +64,7 @@ const logic = {
 			description: "Converts a vector into the world/object coordinate space of the other vector",
 		},
 	},
-	output: {
-		screen: {
-			name: "Screen",
-			description: "Display all your data for everyone to see!",
-			autoWeldShape: "cube",
-		},
-		laser: {
-			name: "Laser pointer",
-			description: "shoot beem boom target!",
-			autoWeldShape: "cube",
-		},
-	},
 	sensors: {
-		altimeter: {
-			name: "Altimeter",
-			description: "Returns current height",
-		},
 		anglesensor: {
 			name: "Angle Sensor",
 			description: "Returns it's angle",
@@ -219,6 +203,12 @@ const registry = {
 	smallrocketengine: {
 		name: "Small Rocket Engine",
 		description: "Smaller brother of a rocket engine",
+		mirrorBehaviour: "offset180",
+		limit: 50,
+	},
+	rcsengine: {
+		name: "RCS Engine",
+		description: "Support engines used to orient a spacecraft",
 		mirrorBehaviour: "offset180",
 		limit: 50,
 	},

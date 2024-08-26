@@ -14,6 +14,7 @@ type ToNum<TAllowNull extends boolean> = TAllowNull extends false ? number : num
 export type SliderControlDefinition = ProgressBarControlDefinition & SliderControlDefinitionParts;
 export type SliderControlDefinitionParts = ProgressBarControlDefinitionParts & {
 	readonly TextBox?: TextBox;
+	readonly Hitbox?: GuiObject;
 };
 
 /** Control that represents a number via a slider. */
@@ -25,13 +26,13 @@ export class SliderControl<TAllowNull extends boolean = false> extends Control<S
 	readonly value;
 
 	private readonly progressBar;
-	private readonly parts: SliderControlDefinitionParts;
+	private readonly parts: MakeRequired<SliderControlDefinitionParts, "Hitbox">;
 
 	constructor(
 		gui: SliderControlDefinition,
 		min: number,
 		max: number,
-		step: number,
+		step?: number,
 		parts?: SliderControlDefinitionParts,
 	) {
 		super(gui);
@@ -41,6 +42,7 @@ export class SliderControl<TAllowNull extends boolean = false> extends Control<S
 			Knob: parts?.Knob ?? Control.findFirstChild(gui, "Knob"),
 			Text: parts?.Text ?? Control.findFirstChild(gui, "Text"),
 			TextBox: parts?.TextBox ?? Control.findFirstChild(gui, "TextBox"),
+			Hitbox: parts?.Hitbox ?? this.gui,
 		};
 
 		this.progressBar = new ProgressBarControl(this.gui, min, max, step, this.parts);
@@ -68,18 +70,19 @@ export class SliderControl<TAllowNull extends boolean = false> extends Control<S
 			if (startpos === undefined) return;
 
 			if (this.progressBar.vertical) {
-				const y = this.gui.AbsoluteSize.Y - Players.LocalPlayer.GetMouse().Y;
+				const y = this.parts.Hitbox.AbsoluteSize.Y - Players.LocalPlayer.GetMouse().Y;
 
 				const value =
-					((y - startpos) / this.gui.AbsoluteSize.Y) * this.value.getRange() +
+					((y - startpos) / this.parts.Hitbox.AbsoluteSize.Y) * this.value.getRange() +
 					this.value.min +
-					this.value.step / 2;
+					(this.value.step ? this.value.step / 2 : 0);
 				this.value.set(value);
 				this._moved.Fire(value);
 			} else {
 				const x = Players.LocalPlayer.GetMouse().X;
 
-				const value = ((x - startpos) / this.gui.AbsoluteSize.X) * this.value.getRange() + this.value.min;
+				const value =
+					((x - startpos) / this.parts.Hitbox.AbsoluteSize.X) * this.value.getRange() + this.value.min;
 				this.value.set(value);
 				this._moved.Fire(value);
 			}
@@ -104,8 +107,10 @@ export class SliderControl<TAllowNull extends boolean = false> extends Control<S
 						input.UserInputType === Enum.UserInputType.Touch)
 				) {
 					startpos = this.progressBar.vertical
-						? this.gui.AbsoluteSize.Y - this.gui.AbsolutePosition.Y + this.gui.AbsoluteSize.Y
-						: this.gui.AbsolutePosition.X;
+						? this.parts.Hitbox.AbsoluteSize.Y -
+							this.parts.Hitbox.AbsolutePosition.Y +
+							this.parts.Hitbox.AbsoluteSize.Y
+						: this.parts.Hitbox.AbsolutePosition.X;
 					moveMouse();
 
 					eh.subscribe(Players.LocalPlayer.GetMouse().Move, () => moveMouse());
@@ -130,7 +135,8 @@ export class SliderControl<TAllowNull extends boolean = false> extends Control<S
 		}
 
 		const moveGamepad = (posx: boolean) => {
-			const value = (this.value.get() ?? 0) + (posx ? this.value.step : -this.value.step);
+			const step = this.value.step ?? this.value.getRange() / 10;
+			const value = (this.value.get() ?? 0) + (posx ? step : -step);
 			this.value.set(value);
 			this._moved.Fire(value);
 		};
@@ -175,6 +181,6 @@ export class SliderControl<TAllowNull extends boolean = false> extends Control<S
 			sub(this.parts.Filled.InputBegan);
 		}
 
-		sub(this.gui.InputBegan);
+		sub(this.parts.Hitbox.InputBegan);
 	}
 }

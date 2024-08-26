@@ -95,22 +95,25 @@ const defs = {
 			value1: {
 				displayName: "Value 1",
 				types: {
-					number: { type: "number", config: 0 as number },
-					bool: { type: "bool", config: false as boolean },
-					byte: { type: "byte", config: 0 as number },
+					number: { config: 0 as number },
+					bool: { config: false as boolean },
+					byte: { config: 0 as number },
 				},
 			},
 			value2: {
 				displayName: "Value 2",
 				types: {
-					number: { type: "number", config: 0 as number },
-					bool: { type: "bool", config: false as boolean },
-					byte: { type: "byte", config: 0 as number },
+					number: { config: 0 as number },
+					bool: { config: false as boolean },
+					byte: { config: 0 as number },
 				},
 			},
 		},
 		output: {
-			result: defpartsf.bool("Result"),
+			result: {
+				displayName: "Result",
+				types: ["bool"],
+			},
 		},
 	},
 	num2_bool: {
@@ -119,7 +122,10 @@ const defs = {
 			value2: defpartsf.number("Value"),
 		},
 		output: {
-			result: defpartsf.bool("Result"),
+			result: {
+				displayName: "Result",
+				types: ["bool"],
+			},
 		},
 	},
 	num1_num: {
@@ -127,7 +133,10 @@ const defs = {
 			value: defpartsf.number("Value"),
 		},
 		output: {
-			result: defpartsf.number("Result"),
+			result: {
+				displayName: "Result",
+				types: ["number"],
+			},
 		},
 	},
 	num2_num: {
@@ -137,7 +146,10 @@ const defs = {
 			value2: defpartsf.number("Value 2"),
 		},
 		output: {
-			result: defpartsf.number("Result"),
+			result: {
+				displayName: "Result",
+				types: ["number"],
+			},
 		},
 	},
 	bool1_bool: {
@@ -145,7 +157,10 @@ const defs = {
 			value: defpartsf.bool("Value"),
 		},
 		output: {
-			result: defpartsf.bool("Result"),
+			result: {
+				displayName: "Result",
+				types: ["bool"],
+			},
 		},
 	},
 	bool2_bool: {
@@ -155,7 +170,10 @@ const defs = {
 			value2: defpartsf.bool("Value 2"),
 		},
 		output: {
-			result: defpartsf.bool("Result"),
+			result: {
+				displayName: "Result",
+				types: ["bool"],
+			},
 		},
 	},
 	byte1_byte: {
@@ -163,7 +181,10 @@ const defs = {
 			value: defpartsf.byte("Value"),
 		},
 		output: {
-			result: defpartsf.byte("Result"),
+			result: {
+				displayName: "Result",
+				types: ["byte"],
+			},
 		},
 	},
 	byte2_byte: {
@@ -173,7 +194,10 @@ const defs = {
 			value2: defpartsf.byte("Value 2"),
 		},
 		output: {
-			result: defpartsf.byte("Result"),
+			result: {
+				displayName: "Result",
+				types: ["byte"],
+			},
 		},
 	},
 	byteshift: {
@@ -183,13 +207,19 @@ const defs = {
 			value2: defpartsf.byte("Shift"),
 		},
 		output: {
-			result: defpartsf.byte("Result"),
+			result: {
+				displayName: "Result",
+				types: ["byte"],
+			},
 		},
 	},
 	constnum: {
 		input: {},
 		output: {
-			value: defpartsf.number("Value"),
+			value: {
+				displayName: "Value",
+				types: ["number"],
+			},
 		},
 	},
 } as const satisfies { readonly [k in string]: BlockLogicFullBothDefinitions };
@@ -215,7 +245,7 @@ const constants = {
 					result: {
 						displayName: "Result",
 						group: "0",
-						types: BlockConfigDefinitions.any,
+						types: asMap(BlockConfigDefinitions.any).keys(),
 					},
 				},
 			},
@@ -306,7 +336,10 @@ const maths = {
 					value2: defpartsf.number("Subtrahend"),
 				},
 				output: {
-					result: defpartsf.number("Result"),
+					result: {
+						displayName: "Result",
+						types: ["number"],
+					},
 				},
 			},
 			({ value1, value2 }) => ({
@@ -334,7 +367,10 @@ const maths = {
 					value2: defpartsf.number("Divider"),
 				},
 				output: {
-					result: defpartsf.number("Result"),
+					result: {
+						displayName: "Result",
+						types: ["number"],
+					},
 				},
 			},
 			({ value1, value2 }, logic) => {
@@ -373,7 +409,10 @@ const maths = {
 					root: defpartsf.number("Degree"),
 				},
 				output: {
-					result: defpartsf.number("Result"),
+					result: {
+						displayName: "Result",
+						types: ["number"],
+					},
 				},
 			},
 			({ value, root }) => ({
@@ -393,7 +432,10 @@ const maths = {
 					power: defpartsf.number("Power"),
 				},
 				output: {
-					result: defpartsf.number("Result"),
+					result: {
+						displayName: "Result",
+						types: ["number"],
+					},
 				},
 			},
 			({ value, power }) => ({
@@ -414,7 +456,10 @@ const maths = {
 					max: defpartsf.number("Max"),
 				},
 				output: {
-					result: defpartsf.number("Result"),
+					result: {
+						displayName: "Result",
+						types: ["number"],
+					},
 				},
 			},
 			({ value, min, max }) => ({
@@ -435,7 +480,10 @@ const maths = {
 					max: defpartsf.number("Max"),
 				},
 				output: {
-					result: defpartsf.number("Result"),
+					result: {
+						displayName: "Result",
+						types: ["number"],
+					},
 				},
 			},
 			({ min, max }, logic) => {
@@ -602,7 +650,10 @@ const trigonometry = {
 					x: defpartsf.number("X"),
 				},
 				output: {
-					result: defpartsf.number("Result"),
+					result: {
+						displayName: "Result",
+						types: ["number"],
+					},
 				},
 			},
 			({ y, x }) => ({
@@ -626,7 +677,10 @@ const vec3 = {
 					value_z: defpartsf.number("Z"),
 				},
 				output: {
-					result: defpartsf.vector3("Result"),
+					result: {
+						displayName: "Result",
+						types: ["vector3"],
+					},
 				},
 			},
 			({ value_x, value_y, value_z }) => ({
@@ -645,9 +699,18 @@ const vec3 = {
 					value: defpartsf.vector3("Value"),
 				},
 				output: {
-					result_x: defpartsf.number("X"),
-					result_y: defpartsf.number("Y"),
-					result_z: defpartsf.number("Z"),
+					result_x: {
+						displayName: "X",
+						types: ["number"],
+					},
+					result_y: {
+						displayName: "Y",
+						types: ["number"],
+					},
+					result_z: {
+						displayName: "Z",
+						types: ["number"],
+					},
 				},
 			},
 			({ value }) => ({
@@ -731,7 +794,10 @@ const byte = {
 					value: defpartsf.number("Value"),
 				},
 				output: {
-					result: defpartsf.byte("Result"),
+					result: {
+						displayName: "Result",
+						types: ["byte"],
+					},
 				},
 			},
 			({ value }) => ({
@@ -749,7 +815,10 @@ const byte = {
 					value: defpartsf.byte("Value"),
 				},
 				output: {
-					result: defpartsf.number("Result"),
+					result: {
+						displayName: "Result",
+						types: ["number"],
+					},
 				},
 			},
 			({ value }) => ({
@@ -774,7 +843,10 @@ const byte = {
 					"128": defpartsf.bool("128"),
 				},
 				output: {
-					value: defpartsf.byte("Result"),
+					value: {
+						displayName: "Result",
+						types: ["byte"],
+					},
 				},
 			},
 			(inputs) => {
@@ -804,14 +876,38 @@ const byte = {
 					value: defpartsf.byte("Byte"),
 				},
 				output: {
-					"1": defpartsf.bool("1"),
-					"2": defpartsf.bool("2"),
-					"4": defpartsf.bool("4"),
-					"8": defpartsf.bool("8"),
-					"16": defpartsf.bool("16"),
-					"32": defpartsf.bool("32"),
-					"64": defpartsf.bool("64"),
-					"128": defpartsf.bool("128"),
+					"1": {
+						displayName: "1",
+						types: ["bool"],
+					},
+					"2": {
+						displayName: "2",
+						types: ["bool"],
+					},
+					"4": {
+						displayName: "4",
+						types: ["bool"],
+					},
+					"8": {
+						displayName: "8",
+						types: ["bool"],
+					},
+					"16": {
+						displayName: "16",
+						types: ["bool"],
+					},
+					"32": {
+						displayName: "32",
+						types: ["bool"],
+					},
+					"64": {
+						displayName: "64",
+						types: ["bool"],
+					},
+					"128": {
+						displayName: "128",
+						types: ["bool"],
+					},
 				},
 			},
 			({ value }) => {
@@ -946,7 +1042,11 @@ const other = {
 					value: defpartsf.any("Value", { group: "1" }),
 				},
 				output: {
-					result: defpartsf.any("Result", { group: "1" }),
+					result: {
+						displayName: "Result",
+						types: asMap(BlockConfigDefinitions.any).keys(),
+						group: "1",
+					},
 				},
 			},
 			({ value, valueType }) => ({
@@ -966,7 +1066,11 @@ const other = {
 					falsevalue: defpartsf.any("False value", { group: "1" }),
 				},
 				output: {
-					result: defpartsf.any("Result", { group: "1" }),
+					result: {
+						displayName: "Result",
+						types: asMap(BlockConfigDefinitions.any).keys(),
+						group: "1",
+					},
 				},
 			},
 			({ value, truevalue, falsevalue, truevalueType, falsevalueType }) => ({
@@ -993,20 +1097,34 @@ const test: {} = !RunService.IsStudio()
 								displayName: "Value",
 								types: {
 									number: {
-										type: "number",
 										config: 0,
-										clamp: {
-											showAsSlider: true,
+										control: {
+											defaultType: "smooth",
 											min: 0,
 											max: 10,
-											step: 0.1,
+											config: {
+												type: "smooth",
+												speed: 1,
+												startValue: 0,
+												add: "W",
+												sub: "S",
+											},
+											// config: {
+											// type: "hold",
+											// key: "F",
+											// releasedValue: 0,
+											// holdingValue: 10,
+											// }
 										},
 									},
 								},
 							},
 						},
 						output: {
-							result: defpartsf.number("Result"),
+							result: {
+								displayName: "Result",
+								types: ["number"],
+							},
 						},
 					},
 					({ value, valueType }) => ({

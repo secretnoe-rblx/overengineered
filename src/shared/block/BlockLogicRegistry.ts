@@ -2,7 +2,6 @@ import { BallastBlockLogic } from "shared/block/logic/BallastBlockLogic";
 import { BracedShaftBlockLogic } from "shared/block/logic/BracedShaftBlockLogic";
 import { HeliumBlockLogic } from "shared/block/logic/HeliumBlockLogic";
 import { Vector3ObjectWorldTransformerBlockLogic } from "shared/block/logic/logic/converter/byte/Vector3ObjectWorldTransformer";
-import { LaserBlockLogic } from "shared/block/logic/logic/display/LaserBlockLogic";
 import { LEDDisplayBlockLogic } from "shared/block/logic/logic/display/LEDDisplayBlockLogic";
 import { SevenSegmentDisplayBlockLogic } from "shared/block/logic/logic/display/SevenSegmentDisplayBlockLogic";
 import { LogicMemoryBlockLogic } from "shared/block/logic/logic/memory/LogicMemoryBlockLogic";
@@ -12,7 +11,6 @@ import { StackMemoryBlockLogic } from "shared/block/logic/logic/memory/StackMemo
 import { CounterBlockLogic } from "shared/block/logic/logic/other/CounterBlockLogic";
 import { ImpulseGeneratorBlockLogic } from "shared/block/logic/logic/other/ImpulseGeneratorBlockLogic";
 import { SingleImpulseBlockLogic } from "shared/block/logic/logic/other/SingleImpulseBlockLogic";
-import { AltimeterBlockLogic } from "shared/block/logic/logic/sensor/AltimeterBlockLogic";
 import { AngleSensorBlockLogic } from "shared/block/logic/logic/sensor/AngleSensorBlockLogic";
 import { GravitySensorBlockLogic } from "shared/block/logic/logic/sensor/GravitySensorBlockLogic";
 import { MassSensorBlockLogic } from "shared/block/logic/logic/sensor/MassSensorBlockLogic";
@@ -63,7 +61,6 @@ const logicRegistry = {
 	piston: PistonLogic,
 	ballast: BallastBlockLogic,
 
-	laser: LaserBlockLogic,
 	leddisplay: LEDDisplayBlockLogic,
 	sevensegmentdisplay: SevenSegmentDisplayBlockLogic,
 
@@ -81,7 +78,6 @@ const logicRegistry = {
 	speedometer: SpeedometerBlockLogic,
 	anglesensor: AngleSensorBlockLogic,
 	mousesensor: MouseSensorBlockLogic,
-	altimeter: AltimeterBlockLogic,
 	radarsection: RadarSectionBlockLogic,
 
 	logicmemory: LogicMemoryBlockLogic,

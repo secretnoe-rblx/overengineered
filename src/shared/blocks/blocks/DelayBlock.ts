@@ -19,7 +19,7 @@ const definition = {
 	output: {
 		result: {
 			displayName: "Result",
-			types: BlockConfigDefinitions.any,
+			types: asMap(BlockConfigDefinitions.any).keys(),
 			group: "0",
 		},
 	},

@@ -12,7 +12,7 @@ export class NumberTextBoxControl<TAllowNull extends boolean = false> extends Co
 
 	constructor(gui: NumberTextBoxControlDefinition);
 	constructor(gui: NumberTextBoxControlDefinition, value: ObservableValue<number>);
-	constructor(gui: NumberTextBoxControlDefinition, min: number, max: number, step: number);
+	constructor(gui: NumberTextBoxControlDefinition, min: number, max: number, step?: number);
 	constructor(
 		gui: NumberTextBoxControlDefinition,
 		min?: number | ObservableValue<number>,
@@ -23,7 +23,7 @@ export class NumberTextBoxControl<TAllowNull extends boolean = false> extends Co
 
 		if (min && typeIs(min, "table")) {
 			this.value = min;
-		} else if (min !== undefined && max !== undefined && step !== undefined) {
+		} else if (min !== undefined && max !== undefined) {
 			this.value = new NumberObservableValue<ToNum<TAllowNull>>(0, min, max, step);
 		} else {
 			this.value = new ObservableValue<ToNum<TAllowNull>>(0);
@@ -37,12 +37,24 @@ export class NumberTextBoxControl<TAllowNull extends boolean = false> extends Co
 					return;
 				}
 
-				let text = tostring(value ?? "");
-				if (step !== undefined) {
-					text = string.format(`%.${math.max(0, math.ceil(-math.log(step, 10)))}f`, value ?? 0);
-				}
+				const prettyNumber = (value: number) => {
+					const maxdigits = math.min(4, step ? math.max(0, math.ceil(-math.log(step, 10))) : math.huge);
 
-				this.gui.Text = text;
+					const floating = value % 1;
+					const integer = value - floating;
+
+					let floatingstr = string.format("%i", floating * math.pow(10, maxdigits));
+					const integerstr = string.format("%i", integer);
+
+					while (floatingstr.sub(-1) === "0") {
+						if (floatingstr.size() === 1) break;
+						floatingstr = floatingstr.sub(1, -2);
+					}
+
+					return `${integerstr}.${floatingstr}`;
+				};
+
+				this.gui.Text = prettyNumber(value ?? 0);
 			},
 			true,
 		);

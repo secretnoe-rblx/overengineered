@@ -10,9 +10,7 @@ const definition = {
 	output: {
 		occupied: {
 			displayName: "Occupied",
-			types: {
-				bool: { type: "bool" },
-			},
+			types: ["bool"],
 		},
 	},
 } satisfies BlockLogicFullBothDefinitions;

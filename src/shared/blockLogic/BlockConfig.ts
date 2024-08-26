@@ -5,39 +5,27 @@ import type { BlockLogicTypes } from "shared/blockLogic/BlockLogicTypes";
 type Primitives = BlockLogicTypes.Primitives;
 type PrimitiveKeys = keyof Primitives;
 
-type AllTypes = BlockLogicTypes.Types;
-type AllKeys = keyof AllTypes;
-
-const PrimitivesByType = {
-	unset: "unset",
-	wire: "wire",
-
-	bool: "bool",
-	number: "number",
-	string: "string",
-	byte: "byte",
-	color: "color",
-	key: "key",
-	vector3: "vector3",
-	bytearray: "bytearray",
-
-	keybool: "bool",
-} as const satisfies { [k in AllKeys]: PrimitiveKeys };
-type PrimitivesByType = typeof PrimitivesByType;
-
-export type BlockConfigTypesByPrimitive<TKeys extends PrimitiveKeys> = {
-	readonly [k in PrimitiveKeys]: Extract<AllTypes[AllKeys], { readonly default: AllTypes[k]["default"] }>["type"];
-}[TKeys];
-export type BlockConfigPrimitiveByType<TKeys extends AllKeys> = PrimitivesByType[TKeys];
+type Controls = BlockLogicTypes.Controls;
+type ControlKeys = keyof Controls;
 
 export type BlockConfigPart<TKey extends PrimitiveKeys> = {
 	readonly type: TKey;
-	readonly config: AllTypes[BlockConfigTypesByPrimitive<TKey>]["config"];
+	readonly config: Primitives[TKey]["config"];
+	readonly controlConfig?: Controls[TKey & ControlKeys]["config"];
 };
 
 type GenericConfig = BlockConfigPart<PrimitiveKeys>;
 export type PlacedBlockConfig = {
 	readonly [k in string]: { [k in PrimitiveKeys]: BlockConfigPart<k> }[PrimitiveKeys];
+};
+
+export type BlockConfigOf<TKey extends keyof Primitives> =
+	| Primitives[TKey]["config"]
+	| Controls[TKey & keyof Controls]["config"];
+
+// Partial but doesn't make the properties partial, just undefined
+type MiniPartial<T> = {
+	[k in keyof T]: T[k] | undefined;
 };
 
 export namespace BlockConfig {
@@ -49,73 +37,142 @@ export namespace BlockConfig {
 		config: PlacedBlockConfig | undefined,
 		definition: TDef,
 	): PlacedBlockConfig {
-		const result: { [k in string]?: GenericConfig } = { ...(config ?? {}) };
+		const result: { [k in string]?: MiniPartial<GenericConfig> } = { ...(config ?? {}) };
+
+		const getDefaultType = (def: TDef[keyof TDef]): PrimitiveKeys => {
+			if (Objects.size(def.types) === 1) {
+				return Objects.firstKey(def.types)!;
+			}
+
+			if (def.connectorHidden) {
+				// without a connector we can only configure the value with the config tool; thus, "unset" makes zero sense
+				const t = Objects.firstKey(def.types);
+				if (!t) {
+					throw "Unset type is not supported without a visible marker";
+				}
+
+				return t;
+			}
+
+			return Objects.firstKey(def.types) ?? "unset";
+		};
+		const getDefaultConfig = (objType: GenericConfig["type"], def: TDef[keyof TDef]) =>
+			objType === "unset" ? (undefined as never) : def.types[objType]!.config;
+
+		const createDefault = (def: TDef[keyof TDef]) => {
+			const defaultType = getDefaultType(def);
+
+			const cfg: GenericConfig = {
+				type: defaultType,
+				config: defaultType === "unset" ? (undefined as never) : def.types[defaultType]!.config,
+				controlConfig: (def.types[defaultType] as Primitives[ControlKeys]).control?.config,
+			};
+			return cfg;
+		};
+
+		const calculateType = (obj: MiniPartial<GenericConfig>, def: TDef[keyof TDef]): GenericConfig["type"] => {
+			// If type is nil, return the default type
+			if (obj.type === undefined) {
+				return getDefaultType(def);
+			}
+
+			// If type is not in definitions, return the default type. (Wire and Unset are not present in any definition so are skipped)
+			if (obj.type !== "unset" && obj.type !== "wire" && !(obj.type in def.types)) {
+				return getDefaultType(def);
+			}
+
+			return obj.type;
+		};
+		const calculateConfig = (
+			obj: MakeRequired<MiniPartial<GenericConfig>, "type">,
+			def: TDef[keyof TDef],
+		): GenericConfig["config"] => {
+			// Unset doesn't have/need a config
+			if (obj.type === "unset") {
+				return undefined! as BlockLogicTypes.UnsetValue;
+			}
+
+			if (obj.type === "wire") {
+				// If type is Wire but config is nil, unrecoverable situation - return the default config
+				if (obj.config === undefined) {
+					return getDefaultConfig(obj.type, def);
+				}
+
+				// Otherwise, just return the config
+				return obj.config;
+			}
+
+			const defConfig = def.types[obj.type]!.config;
+
+			// If config is nil, set the default one
+			if (obj.config === undefined) {
+				return defConfig;
+			}
+
+			// If definition config is table, merge it with the default config
+			if (typeIs(defConfig, "table")) {
+				// If config is not table, unrecoverable situation - return the default config of the same type
+				if (!typeIs(obj.config, "table")) {
+					return defConfig;
+				}
+
+				return { ...defConfig, ...obj.config };
+			}
+
+			return obj.config;
+		};
+		const calculateControlConfig = (
+			obj: MakeRequired<MiniPartial<GenericConfig>, "type" | "config">,
+			def: TDef[keyof TDef],
+		): GenericConfig["controlConfig"] => {
+			const control = def.types[obj.type] as Primitives[ControlKeys] | undefined;
+			if (!control) {
+				return obj.controlConfig;
+			}
+
+			// If not a control type, return nil
+			if (!control.control) {
+				return undefined;
+			}
+
+			const defConfig = control.control.config;
+
+			// If config is nil, set the default one
+			if (obj.controlConfig === undefined) {
+				return defConfig;
+			}
+
+			// If definition config is table, merge it with the default config
+			if (typeIs(defConfig, "table")) {
+				// If config is not table, unrecoverable situation - return the default config
+				if (!typeIs(obj.controlConfig, "table")) {
+					return defConfig;
+				}
+
+				return { ...defConfig, ...obj.controlConfig };
+			}
+
+			return obj.controlConfig;
+		};
 
 		for (const [k, def] of pairs(definition)) {
 			assert(typeIs(k, "string"));
 
 			const obj = result[k];
-			if (obj && (obj.type === "unset" || obj.type === "wire")) {
-				continue;
-			}
-
 			if (!obj) {
-				const getDefaultType = (): PrimitiveKeys => {
-					if (Objects.size(def.types) === 1) {
-						return Objects.firstKey(def.types)!;
-					}
-
-					if (def.connectorHidden) {
-						// without a connector we can only configure the value with the config tool; thus, "unset" makes zero sense
-						const t = Objects.firstKey(def.types);
-						if (!t) {
-							throw "Unset type is not supported without a visible marker";
-						}
-
-						return t;
-					}
-
-					return Objects.firstKey(def.types) ?? "unset";
-				};
-				const defaultType = getDefaultType();
-
-				const cfg: GenericConfig = {
-					type: defaultType,
-					config: defaultType === "unset" ? (undefined as never) : def.types[defaultType]!.config,
-				};
-				result[k] = cfg;
-
+				result[k] = createDefault(def);
 				continue;
 			}
 
-			if (obj.type && obj.config !== undefined) {
-				continue;
-			}
+			const rtype = calculateType(obj, def);
+			const rcfg = calculateConfig({ ...obj, type: rtype }, def);
+			const rccfg = calculateControlConfig({ ...obj, type: rtype, config: rcfg }, def);
 
-			const defConfig = def.types[obj.type]!.config;
-
-			if (typeIs(defConfig, "table")) {
-				if (obj.config !== undefined && !typeIs(obj.config, "table")) {
-					throw "wrong stuff bruh";
-				}
-
-				const cfg: GenericConfig = {
-					...obj,
-					config: {
-						...(obj.config ?? {}),
-						...defConfig,
-					},
-				};
-				result[k] = cfg;
-
-				continue;
-			}
-
-			const cfg: GenericConfig = {
-				...obj,
-				config: defConfig,
+			result[k] = {
+				type: rtype,
+				config: rcfg,
+				controlConfig: rccfg,
 			};
-			result[k] = cfg;
 		}
 
 		return result as PlacedBlockConfig;
