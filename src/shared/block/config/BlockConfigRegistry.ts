@@ -617,36 +617,6 @@ const gravitysensor = {
 	},
 } as const satisfies BlockConfigBothDefinitions;
 
-const mousesensor = {
-	input: {},
-	output: {
-		position: {
-			displayName: "Position",
-			type: "vector3",
-			default: Vector3.zero,
-			config: Vector3.zero,
-		},
-		angle: {
-			displayName: "Angle around the center",
-			type: "number",
-			default: 0 as number,
-			config: 0 as number,
-		},
-		direction: {
-			displayName: "3D Direction",
-			type: "vector3",
-			default: Vector3.zero,
-			config: Vector3.zero,
-		},
-		angle3d: {
-			displayName: "3D Angle of direction",
-			type: "vector3",
-			default: Vector3.zero,
-			config: Vector3.zero,
-		},
-	},
-} as const satisfies BlockConfigBothDefinitions;
-
 const tpscounter = {
 	input: {},
 	output: {
@@ -670,60 +640,6 @@ const wing = {
 		},
 	},
 	output: {},
-} as const satisfies BlockConfigBothDefinitions;
-
-const anglesensor = {
-	input: {},
-	output: {
-		result: {
-			displayName: "Angle",
-			type: "vector3",
-			default: Vector3.zero,
-			config: Vector3.zero,
-		},
-	},
-} as const satisfies BlockConfigBothDefinitions;
-
-const ownerlocator = {
-	input: {},
-	output: {
-		linear: {
-			displayName: "Offset",
-			type: "vector3",
-			default: Vector3.zero,
-			config: Vector3.zero,
-		},
-		angular: {
-			displayName: "Angular offset",
-			type: "vector3",
-			default: Vector3.zero,
-			config: Vector3.zero,
-		},
-	},
-} as const satisfies BlockConfigBothDefinitions;
-
-const ownercameralocator = {
-	input: {},
-	output: {
-		position: {
-			displayName: "Position",
-			type: "vector3",
-			default: Vector3.zero,
-			config: Vector3.zero,
-		},
-		direction: {
-			displayName: "Direction",
-			type: "vector3",
-			default: Vector3.zero,
-			config: Vector3.zero,
-		},
-		up: {
-			displayName: "Up vector",
-			type: "vector3",
-			default: Vector3.zero,
-			config: Vector3.zero,
-		},
-	},
 } as const satisfies BlockConfigBothDefinitions;
 
 const logicmemory = {
@@ -1048,12 +964,8 @@ export const blockConfigRegistry = {
 	leddisplay,
 	sevensegmentdisplay,
 
-	ownerlocator,
-	ownercameralocator,
 	speedometer,
 	masssensor,
-	anglesensor,
-	mousesensor,
 	tpscounter: tpscounter,
 	radiotransmitter,
 	radioreciever,

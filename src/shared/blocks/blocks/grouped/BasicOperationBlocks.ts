@@ -1142,12 +1142,14 @@ const test: {} = !RunService.IsStudio()
 											defaultType: "smooth",
 											min: 0,
 											max: 10,
+											canBeSwitch: true,
 											config: {
 												type: "smooth",
 												speed: 1,
 												startValue: 0,
 												add: "W",
 												sub: "S",
+												switchmode: false,
 											},
 											// config: {
 											// type: "hold",

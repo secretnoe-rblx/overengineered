@@ -6,6 +6,7 @@ import type { BasicOperationBlockIds } from "shared/blocks/blocks/grouped/BasicO
 import type { BuildingBlockIds } from "shared/blocks/blocks/grouped/BuildingBlocks";
 import type { LampBlockIds } from "shared/blocks/blocks/grouped/LampBlocks";
 import type { WheelBlockIds } from "shared/blocks/blocks/grouped/WheelBlocks";
+import type { RocketBlockIds } from "shared/blocks/blocks/RocketEngineBlocks";
 
 export type BlockCategoryPath = readonly string[];
 export type BlockLogicInfo = {
@@ -53,6 +54,7 @@ declare global {
 				BuildingBlockIds &
 				BasicOperationBlockIds &
 				WheelBlockIds &
+				RocketBlockIds &
 				LampBlockIds &
 				(typeof DisconnectBlock)["id"]);
 

@@ -1,7 +1,5 @@
 import { InstanceBlockLogic } from "shared/blockLogic/BlockLogic";
 import { BlockCreation } from "shared/blocks/BlockCreation";
-import { GameDefinitions } from "shared/data/GameDefinitions";
-import { RobloxUnit } from "shared/RobloxUnit";
 import type { BlockLogicFullBothDefinitions, InstanceBlockLogicArgs } from "shared/blockLogic/BlockLogic";
 import type { BlockBuilder } from "shared/blocks/Block";
 
@@ -9,31 +7,32 @@ const definition = {
 	input: {},
 	output: {
 		result: {
-			displayName: "Altitude",
-			types: ["number"],
+			displayName: "Angle",
+			unit: "Radians",
+			types: ["vector3"],
 		},
 	},
 } satisfies BlockLogicFullBothDefinitions;
 
-export type { Logic as AltimeterBlockLogic };
+export type { Logic as AngleSensorBlockLogic };
 class Logic extends InstanceBlockLogic<typeof definition> {
 	constructor(block: InstanceBlockLogicArgs) {
 		super(definition, block);
 
+		const initialRotation = this.instance.GetPivot().Rotation;
+
 		this.onTick(() => {
-			const result = RobloxUnit.Studs_To_Meters(
-				this.instance.GetPivot().Position.Y - GameDefinitions.HEIGHT_OFFSET,
-			);
-			this.output.result.set("number", result);
+			const [x, y, z] = initialRotation.ToObjectSpace(this.instance.GetPivot().Rotation).ToEulerAnglesYXZ();
+			this.output.result.set("vector3", new Vector3(x, y, z));
 		});
 	}
 }
 
-export const AltimeterBlock = {
+export const AngleSensorBlock = {
 	...BlockCreation.defaults,
-	id: "altimeter",
-	displayName: "Altimeter",
-	description: "Returns current height",
+	id: "anglesensor",
+	displayName: "Angle Sensor",
+	description: "Returns its angle",
 
 	logic: { definition, ctor: Logic },
 } as const satisfies BlockBuilder;

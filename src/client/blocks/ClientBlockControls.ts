@@ -121,6 +121,67 @@ namespace ClientBlockControlsNamespace {
 			}
 		}
 	}
+	export class NumberDoubleHold extends ClientComponent {
+		constructor(
+			value: ILogicValueStorage<"number">,
+			config: BlockLogicTypes.DoubleHoldNumberControl["config"],
+			definition: OmitOverUnion<BlockLogicTypes.DoubleHoldNumberControl, "config">,
+		) {
+			super();
+
+			let savedValue = config.releasedValue;
+			const get = () => savedValue;
+			const set = (newValue: number) => value.set("number", (savedValue = newValue));
+
+			const holdingValue = MathUtils.round(
+				math.clamp(config.holdingValue, definition.min, definition.max),
+				definition.step,
+			);
+			const releasedValue = MathUtils.round(
+				math.clamp(config.releasedValue, definition.min, definition.max),
+				definition.step,
+			);
+
+			set(releasedValue);
+
+			const def = {
+				add: {
+					key: config.add,
+					conflicts: "sub",
+					keyDown: () => {
+						if (!config.switchmode) {
+							set(-holdingValue);
+						} else {
+							set(get() === -holdingValue ? releasedValue : -holdingValue);
+						}
+					},
+					keyUp: () => {
+						if (!config.switchmode) {
+							set(releasedValue);
+						}
+					},
+				},
+				sub: {
+					key: config.sub,
+					conflicts: "add",
+					keyDown: () => {
+						if (!config.switchmode) {
+							set(holdingValue);
+						} else {
+							set(get() === holdingValue ? releasedValue : holdingValue);
+						}
+					},
+					keyUp: () => {
+						if (!config.switchmode) {
+							set(releasedValue);
+						}
+					},
+				},
+			} as const satisfies KeyDefinitions<"add" | "sub">;
+
+			this.parent(new KeyPressingDefinitionsController(def));
+		}
+	}
 }
 
 type ClientBlockControlStorage<TType extends ControlKeys> = (
@@ -140,7 +201,10 @@ export const ClientBlockControls: { readonly [k in ControlKeys]?: GenericClientB
 		if (config.type === "hold") {
 			return new ClientBlockControlsNamespace.NumberHold(value, config, definition);
 		}
+		if (config.type === "doublehold") {
+			return new ClientBlockControlsNamespace.NumberDoubleHold(value, config, definition as never);
+		}
 
-		return new ClientBlockControlsNamespace.NumberSmooth(value, config, definition);
+		return new ClientBlockControlsNamespace.NumberSmooth(value, config, definition as never);
 	},
 } satisfies { readonly [k in ControlKeys]?: ClientBlockControlStorage<k> } as never;

@@ -43,6 +43,8 @@ export namespace BlockLogicTypes {
 	};
 	/** Hold `add` to smoothly increase the value. Hold `sub` to smoothly decrease value. */
 	export type SmoothNumberControl = NumberControlDefaults & {
+		readonly canBeSwitch: boolean;
+
 		readonly config: {
 			readonly type: "smooth";
 
@@ -54,6 +56,8 @@ export namespace BlockLogicTypes {
 			readonly add: string | KeyCode;
 			/** Key to decrease the value */
 			readonly sub: string | KeyCode;
+
+			readonly switchmode: boolean;
 		};
 	};
 	/** Hold `control` to instantly set the value to max. */
@@ -69,7 +73,26 @@ export namespace BlockLogicTypes {
 			readonly key: string | KeyCode;
 		};
 	};
-	export type NumberControls = SmoothNumberControl | HoldNumberControl;
+	/** Hold `add` to instantly set the value to max. Hold `sub` to instantly set the value to min. */
+	export type DoubleHoldNumberControl = NumberControlDefaults & {
+		readonly canBeSwitch: boolean;
+
+		readonly config: {
+			readonly type: "doublehold";
+
+			/** Value that is set when no key is being held */
+			readonly releasedValue: number;
+			/** Value that is set when a key is being held */
+			readonly holdingValue: number;
+			/** Key to set the value to max */
+			readonly add: string | KeyCode;
+			/** Key to set the value to min */
+			readonly sub: string | KeyCode;
+
+			readonly switchmode: boolean;
+		};
+	};
+	export type NumberControls = SmoothNumberControl | HoldNumberControl | DoubleHoldNumberControl;
 	export type Number = BCPrimitive<number> & {
 		readonly control?: NumberControls & { readonly defaultType: NumberControls["config"]["type"] };
 		readonly clamp?: {

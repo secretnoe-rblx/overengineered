@@ -58,22 +58,6 @@ const logic = {
 		},
 	},
 	sensors: {
-		anglesensor: {
-			name: "Angle Sensor",
-			description: "Returns it's angle",
-		},
-		ownerlocator: {
-			name: "Owner Locator",
-			description: "Maks, delete this ####",
-		},
-		ownercameralocator: {
-			name: "Owner Camera Locator",
-			description: "Returns owner camera position and direction",
-		},
-		mousesensor: {
-			name: "Mouse Sensor",
-			description: "Returns the cursor position, relative to the screen",
-		},
 		radarsection: {
 			name: "Radar Section",
 			description: "Returns the closest object that got into the block's sight",
@@ -186,18 +170,6 @@ const registry = {
 	relay: {
 		name: "Relay",
 		description: "Returns an input value only when told to",
-	},
-	rocketengine: {
-		name: "Rocket Engine",
-		description: "Engines your rocket into the space and onto the ground",
-		mirrorBehaviour: "offset180",
-		limit: 50,
-	},
-	smallrocketengine: {
-		name: "Small Rocket Engine",
-		description: "Smaller brother of a rocket engine",
-		mirrorBehaviour: "offset180",
-		limit: 50,
 	},
 	rcsengine: {
 		name: "RCS Engine",

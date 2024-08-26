@@ -11,6 +11,7 @@ import { ComponentInstance } from "shared/component/ComponentInstance";
 import { ArgsSignal } from "shared/event/Signal";
 import { Objects } from "shared/fixes/objects";
 import { RemoteEvents } from "shared/RemoteEvents";
+import { PartUtils } from "shared/utils/PartUtils";
 import type { PlacedBlockConfig } from "shared/blockLogic/BlockConfig";
 import type { BlockLogicTypes } from "shared/blockLogic/BlockLogicTypes";
 import type {
@@ -39,6 +40,8 @@ export type BlockLogicNoConfigDefinitionTypes<TKeys extends PrimitiveKeys> = {
 };
 type BlockLogicOutputDef = {
 	readonly displayName: string;
+	readonly tooltip?: string;
+	readonly unit?: string;
 	readonly types: readonly PrimitiveKeys[];
 	readonly group?: string;
 	readonly connectorHidden?: boolean;
@@ -217,6 +220,28 @@ export abstract class BlockLogic<TDef extends BlockLogicBothDefinitions> extends
 			() => new LogicValueOutputStorageContainer<PrimitiveKeys>(),
 		) as typeof this._output;
 		this.output = this._output;
+	}
+
+	protected subscribeOnDestroyed(instance: Instance, func: () => void) {
+		const update = () => {
+			if (instance.IsA("BasePart") && !instance.CanTouch) return;
+
+			func();
+		};
+
+		instance.GetPropertyChangedSignal("Parent").Once(update);
+		instance.Destroying.Once(update);
+	}
+	protected onDescendantDestroyed(func: () => void) {
+		if (!this.instance) return;
+
+		const subscribe = (instance: Instance) => {
+			this.subscribeOnDestroyed(instance, func);
+		};
+
+		PartUtils.applyToAllDescendantsOfType("BasePart", this.instance, (part) => subscribe(part));
+		PartUtils.applyToAllDescendantsOfType("Constraint", this.instance, (part) => subscribe(part));
+		PartUtils.applyToAllDescendantsOfType("WeldConstraint", this.instance, (part) => subscribe(part));
 	}
 
 	initializeInputs(config: PlacedBlockConfig, allBlocks: ReadonlyMap<BlockUuid, GenericBlockLogic>) {

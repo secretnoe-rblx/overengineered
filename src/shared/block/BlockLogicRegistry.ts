@@ -10,12 +10,8 @@ import { StackMemoryBlockLogic } from "shared/block/logic/logic/memory/StackMemo
 import { CounterBlockLogic } from "shared/block/logic/logic/other/CounterBlockLogic";
 import { ImpulseGeneratorBlockLogic } from "shared/block/logic/logic/other/ImpulseGeneratorBlockLogic";
 import { SingleImpulseBlockLogic } from "shared/block/logic/logic/other/SingleImpulseBlockLogic";
-import { AngleSensorBlockLogic } from "shared/block/logic/logic/sensor/AngleSensorBlockLogic";
 import { GravitySensorBlockLogic } from "shared/block/logic/logic/sensor/GravitySensorBlockLogic";
 import { MassSensorBlockLogic } from "shared/block/logic/logic/sensor/MassSensorBlockLogic";
-import { MouseSensorBlockLogic } from "shared/block/logic/logic/sensor/MouseSensorBlockLogic";
-import { OwnerCameraLocatorBlockLogic } from "shared/block/logic/logic/sensor/OwnerCameraLocatorBlockLogic";
-import { OwnerLocatorBlockLogic } from "shared/block/logic/logic/sensor/OwnerLocatorBlockLogic";
 import { RadarSectionBlockLogic } from "shared/block/logic/logic/sensor/RadarSectionBlockLogic";
 import { SpeedometerBlockLogic } from "shared/block/logic/logic/sensor/SpeedometerBlockLogic";
 import { TpsCounterBlockLogic } from "shared/block/logic/logic/sensor/TpsCounterBlockLogic";
@@ -68,15 +64,11 @@ const logicRegistry = {
 	radioreciever: RadioRecieverBlockLogic,
 	radiotransmitter: RadioTransmitterBlockLogic,
 
-	ownerlocator: OwnerLocatorBlockLogic,
-	ownercameralocator: OwnerCameraLocatorBlockLogic,
 	masssensor: MassSensorBlockLogic,
 	gravitysensor: GravitySensorBlockLogic,
 	tpscounter: TpsCounterBlockLogic,
 
 	speedometer: SpeedometerBlockLogic,
-	anglesensor: AngleSensorBlockLogic,
-	mousesensor: MouseSensorBlockLogic,
 	radarsection: RadarSectionBlockLogic,
 
 	logicmemory: LogicMemoryBlockLogic,

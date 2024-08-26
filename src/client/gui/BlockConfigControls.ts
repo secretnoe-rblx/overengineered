@@ -641,6 +641,19 @@ namespace Controls {
 				cStartValue.submitted.Connect((v) =>
 					this.submitted.Fire((config = map(config, (c, uuid) => ({ ...c, startValue: v[uuid] })))),
 				);
+
+				if (definition.canBeSwitch) {
+					const [, cSwitchMode] = addSingleTypeWrapperAuto(
+						this,
+						"Switch",
+						{ type: "bool", config: definition.config.switchmode },
+						map(config, (c) => c.switchmode),
+						args,
+					);
+					cSwitchMode.submitted.Connect((v) =>
+						this.submitted.Fire((config = map(config, (c, uuid) => ({ ...c, switchmode: v[uuid] })))),
+					);
+				}
 			}
 		}
 		export class NumberHold extends ControlBase<GuiObject, "number"> {
@@ -691,6 +704,79 @@ namespace Controls {
 				cHolding.submitted.Connect((v) =>
 					this.submitted.Fire((config = map(config, (c, uuid) => ({ ...c, holdingValue: v[uuid] })))),
 				);
+			}
+		}
+		export class NumberDoubleHold extends ControlBase<GuiObject, "number"> {
+			constructor(
+				templates: templates,
+				definition: BlockLogicTypes.DoubleHoldNumberControl,
+				config: OfBlocks<BlockLogicTypes.DoubleHoldNumberControl["config"]>,
+				args: Args,
+			) {
+				super(templates.Multi());
+
+				const mks = addMultiKeyControls(
+					this,
+					[
+						{
+							key: "add",
+							displayName: "+",
+							definition: { config: definition.config.add },
+							config: map(config, (c) => c.add),
+						},
+						{
+							key: "sub",
+							displayName: "-",
+							definition: { config: definition.config.sub },
+							config: map(config, (c) => c.sub),
+						},
+					],
+					args,
+				);
+				mks.submitted.Connect((v) => this.submitted.Fire((config = map(config, (c) => ({ ...c, ...v })))));
+
+				const [, cReleased] = addSingleTypeWrapperAuto(
+					this,
+					"Released value",
+					{
+						type: "number",
+						config: definition.config.releasedValue,
+						clamp: { showAsSlider: false, min: definition.min, max: definition.max, step: definition.step },
+					},
+					map(config, (c) => c.releasedValue),
+					args,
+				);
+				cReleased.submitted.Connect((v) =>
+					this.submitted.Fire((config = map(config, (c, uuid) => ({ ...c, releasedValue: v[uuid] })))),
+				);
+
+				const [, cHolding] = addSingleTypeWrapperAuto(
+					this,
+					"Holding value",
+					{
+						type: "number",
+						config: definition.config.holdingValue,
+						clamp: { showAsSlider: false, min: definition.min, max: definition.max, step: definition.step },
+					},
+					map(config, (c) => c.holdingValue),
+					args,
+				);
+				cHolding.submitted.Connect((v) =>
+					this.submitted.Fire((config = map(config, (c, uuid) => ({ ...c, holdingValue: v[uuid] })))),
+				);
+
+				if (definition.canBeSwitch) {
+					const [, cSwitchMode] = addSingleTypeWrapperAuto(
+						this,
+						"Switch",
+						{ type: "bool", config: definition.config.switchmode },
+						map(config, (c) => c.switchmode),
+						args,
+					);
+					cSwitchMode.submitted.Connect((v) =>
+						this.submitted.Fire((config = map(config, (c, uuid) => ({ ...c, switchmode: v[uuid] })))),
+					);
+				}
 			}
 		}
 
@@ -829,6 +915,9 @@ namespace Controls {
 			const controlType = Objects.firstKey(controlTypes)!;
 			if (controlType === "smooth") {
 				return new Controls.NumberSmooth(templates, definition as never, config as never, parent);
+			}
+			if (controlType === "doublehold") {
+				return new Controls.NumberDoubleHold(templates, definition as never, config as never, parent);
 			}
 
 			return new Controls.NumberHold(templates, definition as never, config as never, parent);
