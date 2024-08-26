@@ -54,25 +54,29 @@ export class ArgsSignal<TArgs extends unknown[]> implements ReadonlyArgsSignal<T
 	Fire(...args: TArgs): void {
 		if (!this.subscribed) return;
 		if (this.inSelf > 10) {
-			print(`Signal self-calling overflow: ${debug.traceback()}`);
+			warn(`Signal self-calling overflow: ${debug.traceback()}`);
 			throw "Signal self-calling overflow.";
 		}
 
 		this.inSelf++;
 		try {
 			for (const sub of this.subscribed) {
-				try {
-					(sub as (...args: TArgs) => void)(...args);
-				} catch (err) {
-					warn(
-						`Exception in signal ${this} handling ${sub} with arguments`,
-						args,
-						":\n",
-						err,
-						"\nat",
-						debug.traceback(),
-					);
-					throw err;
+				const [success, result] = xpcall(
+					sub as (...args: TArgs) => void,
+					(err) => {
+						warn(
+							`Exception in signal ${tostring(this).sub("table: ".size() + 1)} handling ${tostring(sub).sub("function: ".size() + 1)}:\n${err}`,
+							`\nat`,
+							debug.traceback(undefined, 2),
+						);
+
+						return err;
+					},
+					...args,
+				);
+
+				if (!success) {
+					error(result, 2);
 				}
 			}
 		} finally {
