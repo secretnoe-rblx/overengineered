@@ -892,7 +892,7 @@ class ConfigAutoValueWrapper extends Control<ConfigValueWrapperDefinition> {
 		}
 
 		this.event.subscribe(control.dropdown.submitted, (selectedType) => {
-			if (selectedType === "[multi]" || selectedType === "unset" || selectedType === "wire") {
+			if (selectedType === "[multi]" || selectedType === "wire") {
 				return;
 			}
 
@@ -900,7 +900,7 @@ class ConfigAutoValueWrapper extends Control<ConfigValueWrapperDefinition> {
 				configs,
 				(_): TypedConfigPart => ({
 					type: selectedType,
-					config: definition.types[selectedType]!.config,
+					config: selectedType === "unset" ? undefined! : definition.types[selectedType]!.config,
 				}),
 			);
 			this._submitted.Fire(configs);

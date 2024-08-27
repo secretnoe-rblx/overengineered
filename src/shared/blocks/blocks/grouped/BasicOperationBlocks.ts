@@ -1100,6 +1100,7 @@ const other = {
 		modelSource: autoModel("TripleGenericLogicBlockPrefab", "MUX", categories.other),
 		logic: logic(
 			{
+				inputOrder: ["value", "truevalue", "falsevalue"],
 				input: {
 					value: defpartsf.bool("State"),
 					truevalue: defpartsf.any("True value", { group: "1" }),

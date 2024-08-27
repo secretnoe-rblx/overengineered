@@ -10,6 +10,7 @@ const definition = {
 			displayName: "Value",
 			types: BlockConfigDefinitions.any,
 			group: "0",
+			configHidden: true,
 		},
 		duration: {
 			displayName: "Duration",
