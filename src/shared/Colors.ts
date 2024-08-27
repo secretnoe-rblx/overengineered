@@ -19,4 +19,15 @@ export namespace Colors {
 	export function toInt(color: Color3) {
 		return math.floor(color.B * 255) + (math.floor(color.G * 255) << 8) + (math.floor(color.R * 255) << 16);
 	}
+
+	/**
+	 * @param lightening Percentage to lighten the color by, 0-1
+	 */
+	function lighten(color: Color3, lightening: number): Color3 {
+		const [h, s, v] = color.ToHSV();
+		return Color3.fromHSV(h, s, v + (1 - v) * lightening);
+	}
+	export function lightenPressed(color: Color3): Color3 {
+		return lighten(color, 0.5);
+	}
 }
