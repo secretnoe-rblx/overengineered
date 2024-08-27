@@ -1,6 +1,7 @@
 import { ClientBlockControls } from "client/blocks/ClientBlockControls";
 import { BlockConfig } from "shared/blockLogic/BlockConfig";
 import { SharedMachine } from "shared/blockLogic/SharedMachine";
+import type { IClientBlockControl } from "client/blocks/ClientBlockControls";
 import type { PlayerDataStorage } from "client/PlayerDataStorage";
 import type { ImpactController } from "shared/block/impact/ImpactController";
 import type { BlockLogicTypes } from "shared/blockLogic/BlockLogicTypes";
@@ -8,12 +9,18 @@ import type { ILogicValueStorage } from "shared/blockLogic/BlockLogicValueStorag
 
 @injectable
 export class ClientMachine extends SharedMachine {
+	private readonly logicInputs = new Set<IClientBlockControl>();
+
 	constructor(
 		@inject private readonly playerData: PlayerDataStorage,
 		@inject blockList: BlockList,
 		@inject di: DIContainer,
 	) {
 		super(blockList, di);
+	}
+
+	getLogicInputs() {
+		return this.logicInputs.asReadonly();
 	}
 
 	protected initialize(blocks: readonly PlacedBlockData[]) {
@@ -56,6 +63,8 @@ export class ClientMachine extends SharedMachine {
 
 				const control = ctor(input, cfg.controlConfig, def.control);
 				this.parent(control);
+
+				this.logicInputs.add(control);
 
 				this.event.subscribeObservable(
 					this.occupiedByLocalPlayer,

@@ -388,140 +388,8 @@ namespace Controls {
 				cz.submitted.Connect((n) => this.submitted.Fire((config = vec(n, "Z"))));
 			}
 		}
-		// export class motorRotationSpeed extends Base<GuiObject, "motorRotationSpeed"> {
-		// 	constructor(
-		// 		templates: templates,
-		// 		definition: MiniTypes["motorRotationSpeed"],
-		// 		config: ConfigParts<"motorRotationSpeed">,
-		// 	) {
-		// 		super(templates.Multi());
 
-		// 		const mks = addMultiKeyControls(this, [
-		// 			{ key: "add", displayName: "+", definition: {}, config: map(config, (c) => c.rotation.add) },
-		// 			{ key: "sub", displayName: "-", definition: {}, config: map(config, (c) => c.rotation.sub) },
-		// 		]);
-		// 		const [, cMaxSpeed] = addSingleTypeWrapperAuto(
-		// 			this,
-		// 			"clampedNumber",
-		// 			"Max speed",
-		// 			{ min: 0, max: definition.maxSpeed, step: 0.01 },
-		// 			map(config, (c) => c.speed),
-		// 		);
-		// 		const [, cSwitch] = addSingleTypeWrapperAuto(
-		// 			this,
-		// 			"bool",
-		// 			"Switch mode",
-		// 			{},
-		// 			map(config, (c) => c.switchmode),
-		// 		);
-
-		// 		mks.submitted.Connect((v) =>
-		// 			this.submitted.Fire((config = map(config, (c) => ({ ...c, rotation: { ...c.rotation, ...v } })))),
-		// 		);
-		// 		cMaxSpeed.submitted.Connect((v) =>
-		// 			this.submitted.Fire((config = map(config, (c, uuid) => ({ ...c, speed: v[uuid] })))),
-		// 		);
-		// 		cSwitch.submitted.Connect((v) =>
-		// 			this.submitted.Fire((config = map(config, (c, uuid) => ({ ...c, switchmode: v[uuid] })))),
-		// 		);
-		// 	}
-		// }
-		// export class servoMotorAngle extends Base<GuiObject, "servoMotorAngle"> {
-		// 	constructor(
-		// 		templates: templates,
-		// 		definition: MiniTypes["servoMotorAngle"],
-		// 		config: ConfigParts<"servoMotorAngle">,
-		// 	) {
-		// 		super(templates.Multi());
-
-		// 		const mks = addMultiKeyControls(this, [
-		// 			{ key: "add", displayName: "+", definition: {}, config: map(config, (c) => c.rotation.add) },
-		// 			{ key: "sub", displayName: "-", definition: {}, config: map(config, (c) => c.rotation.sub) },
-		// 		]);
-		// 		const [, cAngle] = addSingleTypeWrapperAuto(
-		// 			this,
-		// 			"clampedNumber",
-		// 			"Angle",
-		// 			{ min: definition.minAngle, max: definition.maxAngle, step: 0.01 },
-		// 			map(config, (c) => c.angle),
-		// 		);
-		// 		const [, cSwitch] = addSingleTypeWrapperAuto(
-		// 			this,
-		// 			"bool",
-		// 			"Switch mode",
-		// 			{},
-		// 			map(config, (c) => c.switchmode),
-		// 		);
-
-		// 		mks.submitted.Connect((v) =>
-		// 			this.submitted.Fire((config = map(config, (c) => ({ ...c, rotation: { ...c.rotation, ...v } })))),
-		// 		);
-		// 		cAngle.submitted.Connect((v) =>
-		// 			this.submitted.Fire((config = map(config, (c, uuid) => ({ ...c, angle: v[uuid] })))),
-		// 		);
-		// 		cSwitch.submitted.Connect((v) =>
-		// 			this.submitted.Fire((config = map(config, (c, uuid) => ({ ...c, switchmode: v[uuid] })))),
-		// 		);
-		// 	}
-		// }
-		// export class thrust extends Base<GuiObject, "thrust"> {
-		// 	constructor(
-		// 		templates: templates,
-		// 		definition: MiniTypes["thrust"],
-		// 		config: ConfigParts<"thrust">,
-		// 	) {
-		// 		super(templates.Multi());
-
-		// 		const mks = addMultiKeyControls(this, [
-		// 			{ key: "add", displayName: "+", definition: {}, config: map(config, (c) => c.thrust.add) },
-		// 			{ key: "sub", displayName: "-", definition: {}, config: map(config, (c) => c.thrust.sub) },
-		// 		]);
-		// 		mks.submitted.Connect((v) =>
-		// 			this.submitted.Fire((config = map(config, (c) => ({ ...c, thrust: { ...c.thrust, ...v } })))),
-		// 		);
-
-		// 		if (definition.canBeSwitch) {
-		// 			const [, cSwitch] = addSingleTypeWrapperAuto(
-		// 				this,
-		// 				"bool",
-		// 				"Switch mode",
-		// 				{},
-		// 				map(config, (c) => c.switchmode),
-		// 			);
-		// 			cSwitch.submitted.Connect((v) =>
-		// 				this.submitted.Fire((config = map(config, (c, uuid) => ({ ...c, switchmode: v[uuid] })))),
-		// 			);
-		// 		}
-		// 	}
-		// }
-		// export class controllableNumber extends Base<GuiObject, "controllableNumber"> {
-		// 	constructor(
-		// 		templates: templates,
-		// 		definition: MiniTypes["controllableNumber"],
-		// 		config: ConfigParts<"controllableNumber">,
-		// 	) {
-		// 		super(templates.Multi());
-
-		// 		const mks = addMultiKeyControls(this, [
-		// 			{ key: "add", displayName: "+", definition: {}, config: map(config, (c) => c.control.add) },
-		// 			{ key: "sub", displayName: "-", definition: {}, config: map(config, (c) => c.control.sub) },
-		// 		]);
-		// 		const [, cValue] = addSingleTypeWrapperAuto(
-		// 			this,
-		// 			"clampedNumber",
-		// 			"Value",
-		// 			definition,
-		// 			map(config, (c) => c.value),
-		// 		);
-
-		// 		mks.submitted.Connect((v) =>
-		// 			this.submitted.Fire((config = map(config, (c) => ({ ...c, control: { ...c.control, ...v } })))),
-		// 		);
-		// 		cValue.submitted.Connect((v) =>
-		// 			this.submitted.Fire((config = map(config, (c, uuid) => ({ ...c, value: v[uuid] })))),
-		// 		);
-		// 	}
-		// }
+		//
 
 		abstract class ControlBase<T extends GuiObject, TKey extends ControlKeys> extends Control<
 			ConfigValueDefinition<T>
@@ -534,7 +402,7 @@ namespace Controls {
 				this.control = gui.Control;
 			}
 		}
-		export class keybool extends ControlBase<GuiObject, "bool"> {
+		export class KeyBool extends ControlBase<GuiObject, "bool"> {
 			constructor(
 				templates: templates,
 				definition: ControlDefinition<"bool">,
@@ -904,7 +772,7 @@ namespace Controls {
 	} satisfies Controls.controls as Controls.genericControls;
 
 	export const controlControls = {
-		bool: (templates, definition, config, parent) => new Controls.keybool(templates, definition, config, parent),
+		bool: (templates, definition, config, parent) => new Controls.KeyBool(templates, definition, config, parent),
 		number: (templates, definition, config, parent) => {
 			const controlTypes = new Set(asMap(config).map((k, v) => v.type));
 			if (controlTypes.size() !== 1) {

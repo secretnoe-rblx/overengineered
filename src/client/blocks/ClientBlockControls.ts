@@ -3,6 +3,7 @@ import { KeyPressingDefinitionsController } from "client/controller/KeyPressingC
 import { isKey, Keys } from "shared/fixes/Keys";
 import { MathUtils } from "shared/fixes/MathUtils";
 import type { KeyDefinitions } from "client/controller/KeyPressingController";
+import type { TouchModeButtonData } from "client/gui/ridemode/TouchModeButtonControl";
 import type { BlockLogicTypes } from "shared/blockLogic/BlockLogicTypes";
 import type { ILogicValueStorage } from "shared/blockLogic/BlockLogicValueStorage";
 
@@ -10,7 +11,9 @@ type Controls = BlockLogicTypes.Controls;
 type ControlKeys = keyof Controls;
 
 namespace ClientBlockControlsNamespace {
-	export class Bool extends ClientComponent {
+	export class Bool extends ClientComponent implements IClientBlockControl {
+		private readonly touchButtonDatas: readonly TouchModeButtonData[];
+
 		constructor(
 			value: ILogicValueStorage<"bool">,
 			config: Controls["bool"]["config"],
@@ -21,7 +24,6 @@ namespace ClientBlockControlsNamespace {
 			let val = config.reversed;
 			const get = () => val;
 			const set = (newValue: boolean) => value.set("bool", (val = newValue));
-
 			set(config.reversed);
 
 			const isKeyCode = (key: string): key is KeyCode => key in Keys;
@@ -33,10 +35,26 @@ namespace ClientBlockControlsNamespace {
 					this.event.onKeyUp(config.key, () => set(config.reversed));
 				}
 			}
+
+			this.touchButtonDatas = [
+				{
+					name: config.key,
+					press: () => set(true),
+					release: () => set(false),
+					isPressed: () => get(),
+					toggleMode: definition.canBeSwitch && config.switch,
+				},
+			];
+		}
+
+		getTouchButtonDatas(): readonly TouchModeButtonData[] {
+			return this.touchButtonDatas;
 		}
 	}
 
-	export class NumberSmooth extends ClientComponent {
+	export class NumberSmooth extends ClientComponent implements IClientBlockControl {
+		private readonly touchButtonDatas: readonly TouchModeButtonData[];
+
 		constructor(
 			value: ILogicValueStorage<"number">,
 			config: BlockLogicTypes.SmoothNumberControl["config"],
@@ -92,10 +110,33 @@ namespace ClientBlockControlsNamespace {
 				},
 			} as const satisfies KeyDefinitions<"add" | "sub">;
 
-			this.parent(new KeyPressingDefinitionsController(def));
+			const controller = this.parent(new KeyPressingDefinitionsController(def));
+
+			this.touchButtonDatas = [
+				{
+					name: config.add,
+					press: () => controller.controller.keyDown("add"),
+					release: () => controller.controller.keyUp("add"),
+					isPressed: () => controller.controller.isDown("add"),
+					toggleMode: false,
+				},
+				{
+					name: config.sub,
+					press: () => controller.controller.keyDown("sub"),
+					release: () => controller.controller.keyUp("sub"),
+					isPressed: () => controller.controller.isDown("sub"),
+					toggleMode: false,
+				},
+			];
+		}
+
+		getTouchButtonDatas(): readonly TouchModeButtonData[] {
+			return this.touchButtonDatas;
 		}
 	}
-	export class NumberHold extends ClientComponent {
+	export class NumberHold extends ClientComponent implements IClientBlockControl {
+		private readonly touchButtonDatas: readonly TouchModeButtonData[];
+
 		constructor(
 			value: ILogicValueStorage<"number">,
 			config: BlockLogicTypes.HoldNumberControl["config"],
@@ -119,9 +160,17 @@ namespace ClientBlockControlsNamespace {
 				this.event.onKeyDown(config.key, () => set(holdingValue));
 				this.event.onKeyUp(config.key, () => set(releasedValue));
 			}
+
+			this.touchButtonDatas = []; // does anyone even use this?
+		}
+
+		getTouchButtonDatas(): readonly TouchModeButtonData[] {
+			return this.touchButtonDatas;
 		}
 	}
-	export class NumberDoubleHold extends ClientComponent {
+	export class NumberDoubleHold extends ClientComponent implements IClientBlockControl {
+		private readonly touchButtonDatas: readonly TouchModeButtonData[];
+
 		constructor(
 			value: ILogicValueStorage<"number">,
 			config: BlockLogicTypes.DoubleHoldNumberControl["config"],
@@ -179,21 +228,46 @@ namespace ClientBlockControlsNamespace {
 				},
 			} as const satisfies KeyDefinitions<"add" | "sub">;
 
-			this.parent(new KeyPressingDefinitionsController(def));
+			const controller = this.parent(new KeyPressingDefinitionsController(def));
+
+			this.touchButtonDatas = [
+				{
+					name: config.add,
+					press: () => controller.controller.keyDown("add"),
+					release: () => controller.controller.keyUp("add"),
+					isPressed: () => controller.controller.isDown("add"),
+					toggleMode: config.switchmode,
+				},
+				{
+					name: config.sub,
+					press: () => controller.controller.keyDown("sub"),
+					release: () => controller.controller.keyUp("sub"),
+					isPressed: () => controller.controller.isDown("sub"),
+					toggleMode: config.switchmode,
+				},
+			];
+		}
+
+		getTouchButtonDatas(): readonly TouchModeButtonData[] {
+			return this.touchButtonDatas;
 		}
 	}
 }
+
+export type IClientBlockControl = IComponent & {
+	getTouchButtonDatas(): readonly TouchModeButtonData[];
+};
 
 type ClientBlockControlStorage<TType extends ControlKeys> = (
 	value: ILogicValueStorage<TType>,
 	config: Controls[TType]["config"],
 	definition: OmitOverUnion<Controls[TType], "config">,
-) => ClientComponent;
+) => IClientBlockControl;
 type GenericClientBlockControlStorage = (
 	value: ILogicValueStorage<keyof BlockLogicTypes.Primitives>,
 	config: Controls[ControlKeys]["config"],
 	definition: OmitOverUnion<Controls[ControlKeys], "config">,
-) => ClientComponent;
+) => IClientBlockControl;
 
 export const ClientBlockControls: { readonly [k in ControlKeys]?: GenericClientBlockControlStorage } = {
 	bool: (value, config, definition) => new ClientBlockControlsNamespace.Bool(value, config, definition),

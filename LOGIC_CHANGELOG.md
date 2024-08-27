@@ -22,3 +22,34 @@ No more of that stupid "YZX" in vector blocks or "+" after "-" in the rocket eng
 No more of that stupid [Y Z X] in vector blocks
 
 - Improved reliability & latency of the rocket engine autoconfigured controls
+
+
+
+## next stuff
+- Improved controls stuff, like you can change the types or something // TODO:write
+
+
+___
+# not a changelog part
+
+## EXISTING control types
+
+- Thrust:
+hold to change (holding W to increase value, holding S to decrease value)
+configurable switch mode - pressing W to set, pressing W again to unset; pressing S to set, pressing S again to unset
+
+- Controllable number
+literally thrust but with the changeable min, max, step(?)
+
+- Motor rotation speed
+hold to set (holding R to set +value, holding F to set -value)
+configurable switch mode - pressing W to set, pressing W again to unset; pressing S to set, pressing S again to unset
+
+- Servomotor angle
+literally motor rotation speed
+
+
+## Control types
+
+- hold to change (W to increase, S to decrease)
+- press to change (W to set, W again to unset)

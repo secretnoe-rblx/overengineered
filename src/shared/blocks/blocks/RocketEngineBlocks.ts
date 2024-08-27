@@ -50,7 +50,6 @@ const definition = {
 	output: {
 		maxpower: {
 			displayName: "Force",
-			tooltip: "Rturns something sikc,mklvnfsdhkfsjnd g",
 			unit: "Newton",
 			types: ["number"],
 		},
