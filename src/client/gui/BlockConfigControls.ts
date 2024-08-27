@@ -11,6 +11,7 @@ import { SliderControl } from "client/gui/controls/SliderControl";
 import { TextBoxControl } from "client/gui/controls/TextBoxControl";
 import { Gui } from "client/gui/Gui";
 import { MemoryEditorPopup } from "client/gui/popup/MemoryEditorPopup";
+import { BlockConfig } from "shared/blockLogic/BlockConfig";
 import { BlockWireManager } from "shared/blockLogic/BlockWireManager";
 import { ComponentChild } from "shared/component/ComponentChild";
 import { ObservableValue } from "shared/event/ObservableValue";
@@ -42,6 +43,7 @@ export type VisualBlockConfigDefinition = {
 	readonly displayName: string;
 	readonly types: Partial<BlockLogicWithConfigDefinitionTypes<PrimitiveKeys>>;
 	readonly connectorHidden?: boolean;
+	readonly group?: string;
 };
 export type VisualBlockConfigDefinitions = {
 	readonly [k in string]: VisualBlockConfigDefinition;
@@ -691,20 +693,17 @@ namespace Controls {
 						if (control === otherControl) continue;
 
 						const othervalue = otherControl.keyChooser.value.get();
-						print("this", value, "other", otherkey, othervalue);
 
 						if (value === othervalue) {
 							otherControl.keyChooser.value.set(prev);
 							prevValues[otherkey] = prev;
 
-							print(`setting from ${key} to ${otherkey} ${value}=>${prev} mega child values`);
 							changed.push(otherkey);
 
 							break;
 						}
 					}
 
-					print(`FIRING ${changed.size()} changed`, changed);
 					submitted.Fire(
 						asObject(changed.mapToMap((k) => $tuple(k, ret[k]?.control.keyChooser.value.get()))),
 					);
@@ -1009,18 +1008,65 @@ export class MultiBlockConfigControl extends Control implements Controls.Args {
 			}
 		}
 
-		for (const k of order ?? asMap(definitions).keys()) {
-			const definition = definitions[k];
+		const create = () => {
+			const grouped = new Map<ConfigAutoValueWrapper, string>();
+			const grouped2 = new Map<string, { readonly wrapper: ConfigAutoValueWrapper; readonly key: string }[]>();
 
-			const lconfigs = map(configs, (c) => c[k]);
-			const wrapper = this.add(
-				new ConfigAutoValueWrapper(template.Clone(), definition, lconfigs, this, k, wireTypes),
-			);
+			for (const k of order ?? asMap(definitions).keys()) {
+				const definition = definitions[k];
 
-			wrapper.submitted.Connect((v) =>
-				this._submitted.Fire((configs = map(configs, (c, uuid) => ({ ...c, [k]: v[uuid] })))),
-			);
-		}
+				const lconfigs = map(configs, (c) => c[k]);
+				const wrapper = this.add(
+					new ConfigAutoValueWrapper(template.Clone(), definition, lconfigs, this, k, wireTypes),
+				);
+
+				if (definition.group) {
+					grouped.set(wrapper, definition.group);
+					grouped2.getOrSet(definition.group, () => []).push({ wrapper, key: k });
+				}
+
+				wrapper.submitted.Connect((v) => {
+					let needsClearing = false;
+
+					try {
+						configs = map(configs, (c, uuid) => ({ ...c, [k]: v[uuid] }));
+
+						if (!definition.group) return;
+						const setType = Objects.firstValue(v)!.type;
+						if (setType === "unset") return;
+
+						const grouped = grouped2.get(definition.group) ?? [];
+						if (grouped.size() === 1) return;
+
+						needsClearing = true;
+						configs = map(configs, (c) => {
+							const ret = { ...c };
+
+							for (const { key } of grouped) {
+								const t = c[key];
+								if (t.type === "unset") continue;
+								if (t.type === "wire") continue;
+								if (t.type === setType) continue;
+
+								ret[key] = BlockConfig.addDefaults({ [key]: { type: setType } } as never, definitions)[
+									key
+								];
+							}
+
+							return ret;
+						});
+					} finally {
+						this._submitted.Fire(configs);
+					}
+
+					if (needsClearing) {
+						this.clear();
+						create();
+					}
+				});
+			}
+		};
+		create();
 	}
 
 	travelTo(uuid: BlockUuid): void {
