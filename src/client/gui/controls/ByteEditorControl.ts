@@ -26,6 +26,9 @@ export class ByteEditor extends Control<ByteEditorDefinition> {
 
 	private readonly buttons;
 
+	private readonly buttonColor;
+	private readonly buttonColorActive;
+
 	constructor(gui: ByteEditorDefinition, parts?: ByteEditorDefinitionParts) {
 		super(gui);
 
@@ -33,6 +36,9 @@ export class ByteEditor extends Control<ByteEditorDefinition> {
 			Buttons: parts?.Buttons ?? Control.waitForChild(gui, "Buttons"),
 			TextBox: parts?.TextBox ?? Control.waitForChild(gui, "TextBox"),
 		};
+
+		this.buttonColor = parts.Buttons.b2.BackgroundColor3;
+		this.buttonColorActive = Colors.newGui.blue;
 
 		this.buttons = (parts.Buttons.GetChildren().filter((value) => value.IsA("TextButton")) as TextButton[]).sort(
 			(a, b) => a.LayoutOrder > b.LayoutOrder,
@@ -56,11 +62,11 @@ export class ByteEditor extends Control<ByteEditorDefinition> {
 		for (const button of this.buttons) {
 			this.event.subscribe(button.MouseButton1Click, () => {
 				button.BackgroundColor3 =
-					button.BackgroundColor3 === Colors.accent ? Colors.staticBackground : Colors.accent;
+					button.BackgroundColor3 === this.buttonColorActive ? this.buttonColor : this.buttonColorActive;
 
 				const bits: boolean[] = [];
 				for (let i = 0; i < 8; i++) {
-					bits.push(this.buttons[i].BackgroundColor3 === Colors.accent);
+					bits.push(this.buttons[i].BackgroundColor3 === this.buttonColorActive);
 				}
 				this.value.set(this.bitsToByte(bits));
 
@@ -73,7 +79,7 @@ export class ByteEditor extends Control<ByteEditorDefinition> {
 		const bits = this.byteToBits(this.value.get());
 
 		for (let i = 0; i < 8; i++) {
-			this.buttons[i].BackgroundColor3 = bits[i] ? Colors.accent : Colors.staticBackground;
+			this.buttons[i].BackgroundColor3 = bits[i] ? this.buttonColorActive : this.buttonColor;
 		}
 	}
 
