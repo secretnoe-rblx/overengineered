@@ -24,6 +24,7 @@ import type { DropdownListDefinition } from "client/gui/controls/DropdownList";
 import type { KeyOrStringChooserControlDefinition } from "client/gui/controls/KeyOrStringChooserControl";
 import type { NumberTextBoxControlDefinition } from "client/gui/controls/NumberTextBoxControl";
 import type { TextBoxControlDefinition } from "client/gui/controls/TextBoxControl";
+import type { TooltipController } from "client/gui/controls/Tooltip";
 import type { BlockConfigPart } from "shared/blockLogic/BlockConfig";
 import type { BlockLogicWithConfigDefinitionTypes } from "shared/blockLogic/BlockLogic";
 import type { BlockLogicTypes } from "shared/blockLogic/BlockLogicTypes";
@@ -41,6 +42,7 @@ type OfBlocks<T> = { readonly [k in BlockUuid]: T };
 
 export type VisualBlockConfigDefinition = {
 	readonly displayName: string;
+	readonly tooltip?: string;
 	readonly types: Partial<BlockLogicWithConfigDefinitionTypes<PrimitiveKeys>>;
 	readonly connectorHidden?: boolean;
 	readonly group?: string;
@@ -824,6 +826,7 @@ class ConfigValueWrapper extends Control<ConfigValueWrapperDefinition> {
 	}
 }
 
+@injectable
 class ConfigAutoValueWrapper extends Control<ConfigValueWrapperDefinition> {
 	private readonly _submitted = new ArgsSignal<[config: BlocksConfigPart]>();
 	readonly submitted = this._submitted.asReadonly();
@@ -835,6 +838,7 @@ class ConfigAutoValueWrapper extends Control<ConfigValueWrapperDefinition> {
 		args: Controls.Args,
 		key: string,
 		wireTypes: WireTypes,
+		@inject tooltipController: TooltipController,
 	) {
 		super(gui);
 
@@ -919,6 +923,12 @@ class ConfigAutoValueWrapper extends Control<ConfigValueWrapperDefinition> {
 				const ctor = Controls.controls[selectedType];
 				if (!ctor) return;
 
+				const initTooltip = (label: TextLabel) => {
+					if (definition.tooltip) {
+						tooltipController.registerControl(control.add(new Control(label)), definition.tooltip);
+					}
+				};
+
 				let cfgcontrol: ReturnType<typeof ctor> | undefined = undefined;
 
 				if (selectedType === "unset") {
@@ -944,6 +954,8 @@ class ConfigAutoValueWrapper extends Control<ConfigValueWrapperDefinition> {
 						const cfgcontrol = ctor(Controls.templates, def.control, partialConfigs, args);
 
 						cfgcontrol.instance.HeadingLabel.Text = definition.displayName;
+						initTooltip(cfgcontrol.instance.HeadingLabel);
+
 						cfgcontrol.submitted.Connect((v) =>
 							this._submitted.Fire(
 								(configs = map(configs, (c, uuid) => ({
@@ -964,6 +976,7 @@ class ConfigAutoValueWrapper extends Control<ConfigValueWrapperDefinition> {
 				}
 
 				cfgcontrol.instance.HeadingLabel.Text = definition.displayName;
+				initTooltip(cfgcontrol.instance.HeadingLabel);
 				cfgcontrol.submitted.Connect((v) =>
 					this._submitted.Fire(
 						(configs = map(configs, (c, uuid) => ({ ...c, type: selectedType, config: v[uuid] }))),
@@ -978,6 +991,7 @@ class ConfigAutoValueWrapper extends Control<ConfigValueWrapperDefinition> {
 }
 
 type WireTypes = ReadonlyMap<BlockUuid, readonly (BlockWireManager.Markers.Input | BlockWireManager.Markers.Output)[]>;
+@injectable
 export class MultiBlockConfigControl extends Control implements Controls.Args {
 	private readonly _travelledTo = new ArgsSignal<[uuid: BlockUuid]>();
 	readonly travelledTo = this._travelledTo.asReadonly();
@@ -991,6 +1005,7 @@ export class MultiBlockConfigControl extends Control implements Controls.Args {
 		configs: BlocksConfig,
 		order: readonly string[] | undefined,
 		wireTypes: WireTypes,
+		@inject di: DIContainer,
 	) {
 		super(gui);
 
@@ -1017,7 +1032,14 @@ export class MultiBlockConfigControl extends Control implements Controls.Args {
 
 				const lconfigs = map(configs, (c) => c[k]);
 				const wrapper = this.add(
-					new ConfigAutoValueWrapper(template.Clone(), definition, lconfigs, this, k, wireTypes),
+					di.resolveForeignClass(ConfigAutoValueWrapper, [
+						template.Clone(),
+						definition,
+						lconfigs,
+						this,
+						k,
+						wireTypes,
+					]),
 				);
 
 				if (definition.group) {

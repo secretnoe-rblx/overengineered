@@ -39,11 +39,13 @@ namespace Scene {
 			readonly ResetButton: TextButton;
 		};
 	};
+	@injectable
 	export class ConfigToolScene extends Control<ConfigToolSceneDefinition> {
 		constructor(
 			gui: ConfigToolSceneDefinition,
 			private readonly tool: ConfigTool,
 			private readonly blockList: BlockList,
+			@inject private readonly di: DIContainer,
 		) {
 			super(gui);
 
@@ -141,13 +143,13 @@ namespace Scene {
 			gui.Visible = true;
 			gui.Parent = this.gui.ParamsSelection.Content;
 			const configControl = this.add(
-				new MultiBlockConfigControl(
+				this.di.resolveForeignClass(MultiBlockConfigControl, [
 					gui,
 					onedef,
 					asObject(configs.mapToMap((c) => $tuple(c.uuid, c.config))),
 					deforder,
 					markered,
-				),
+				]),
 			);
 			this.currentConfigControl = configControl;
 
@@ -195,6 +197,7 @@ export class ConfigTool extends ToolBase {
 				ToolBase.getToolGui<"Config2", Scene.ConfigToolSceneDefinition>().Config2,
 				this,
 				blockList,
+				di,
 			),
 		);
 

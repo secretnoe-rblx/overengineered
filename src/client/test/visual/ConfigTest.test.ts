@@ -5,7 +5,7 @@ import type { VisualBlockConfigDefinitions } from "client/gui/BlockConfigControl
 import type { BlockConfigPart } from "shared/blockLogic/BlockConfig";
 import type { BlockLogicTypes } from "shared/blockLogic/BlockLogicTypes";
 
-export const _Tests = () => {
+export const _Tests = (di: DIContainer) => {
 	const frame = Element.create(
 		"Frame",
 		{
@@ -227,13 +227,13 @@ export const _Tests = () => {
 
 		const list = control.add(new Control(frame));
 
-		const mcc = new MultiBlockConfigControl(
+		const mcc = di.resolveForeignClass(MultiBlockConfigControl, [
 			frame,
 			def,
 			{ b1, b2 } as { readonly [k in BlockUuid]: cfg[k] },
 			undefined,
 			new Map(),
-		);
+		]);
 		mcc.submitted.Connect(print);
 		list.add(mcc);
 	}
