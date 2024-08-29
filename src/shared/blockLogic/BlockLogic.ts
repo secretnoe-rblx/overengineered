@@ -64,6 +64,7 @@ export type BlockLogicBothDefinitions = {
 export type BlockLogicFullInputDef = {
 	readonly displayName: string;
 	readonly tooltip?: string;
+	readonly unit?: string;
 	readonly types: Partial<BlockLogicWithConfigDefinitionTypes<PrimitiveKeys>>;
 	readonly group?: string;
 	readonly connectorHidden?: boolean;
@@ -198,6 +199,7 @@ export abstract class BlockLogic<TDef extends BlockLogicBothDefinitions> extends
 	readonly output: WriteonlyBlockLogicValues<TDef["output"]>;
 
 	private readonly ticked = new ArgsSignal<[ctx: BlockLogicTickContext]>();
+	private cachedInputs?: AllInputKeysToObject<TDef["input"], keyof TDef["input"]>;
 
 	readonly instance?: BlockModel;
 
@@ -220,7 +222,44 @@ export abstract class BlockLogic<TDef extends BlockLogicBothDefinitions> extends
 			() => new LogicValueOutputStorageContainer<PrimitiveKeys>(),
 		) as typeof this._output;
 		this.output = this._output;
+
+		this.on((ctx) => (this.cachedInputs = ctx));
 	}
+
+	/** Methods for getting the cached input&output values */
+	readonly cached = {
+		getFullInput: () => {
+			if (!this.cachedInputs) throw "Trying to get the unset cached inputs";
+			return this.cachedInputs;
+		},
+		tryGetFullInput: () => this.cachedInputs,
+
+		getInput: <TKey extends keyof TDef["input"]>(
+			key: TKey,
+		): Omit<TypedValue<keyof TDef["input"][TKey]["types"] & PrimitiveKeys>, "changedSinceLastTick"> => {
+			const value = this.cachedInputs?.[key];
+			const valueType = this.cachedInputs?.[`${tostring(key)}Type`];
+			if (!valueType || value === undefined) throw "Tried to get an unset cached input";
+
+			return { type: valueType as never, value: value as never };
+		},
+		tryGetInput: <TKey extends keyof TDef["input"]>(
+			key: TKey,
+		): Omit<TypedValue<keyof TDef["input"][TKey]["types"] & PrimitiveKeys>, "changedSinceLastTick"> | undefined => {
+			const value = this.cachedInputs?.[key];
+			const valueType = this.cachedInputs?.[`${tostring(key)}Type`];
+			if (!valueType || value === undefined) {
+				return undefined;
+			}
+
+			return { type: valueType as never, value: value as never };
+		},
+
+		getOutput: <TKey extends keyof TDef["output"]>(key: TKey) =>
+			(this.output[key] as LogicValueOutputStorageContainer<TDef["output"][TKey]["types"][number]>).justGet(),
+		tryGetOutput: <TKey extends keyof TDef["output"]>(key: TKey) =>
+			(this.output[key] as LogicValueOutputStorageContainer<TDef["output"][TKey]["types"][number]>).tryJustGet(),
+	} as const;
 
 	protected subscribeOnDestroyed(instance: Instance, func: () => void) {
 		const update = () => {
@@ -266,7 +305,14 @@ export abstract class BlockLogic<TDef extends BlockLogicBothDefinitions> extends
 					throw `Invalid connection to a nonexistent block ${cfg.config.blockUuid} output ${cfg.config.connectionName}`;
 				}
 
-				this.replaceInput(key, new BlockBackedInputLogicValueStorage(outputBlock, cfg.config.connectionName));
+				this.replaceInput(
+					key,
+					new BlockBackedInputLogicValueStorage(
+						this.definition.input[key],
+						outputBlock,
+						cfg.config.connectionName,
+					),
+				);
 				continue;
 			}
 
@@ -347,16 +393,45 @@ export abstract class BlockLogic<TDef extends BlockLogicBothDefinitions> extends
 	protected on(func: (inputs: AllInputKeysToObject<TDef["input"]>, ctx: BlockLogicTickContext) => void): void {
 		this.onInputs(undefined, func);
 	}
-	/** Runs the provided function on every tick, but only if all of the input values are available. */
-	protected onAlways(func: (inputs: AllInputKeysToObject<TDef["input"]>, ctx: BlockLogicTickContext) => void): void {
-		this.onInputs(undefined, func, false);
-	}
 	/** Runs the provided function when any of the provided input values change, but only if all of them are available. */
 	protected onk<const TKeys extends keyof TDef["input"]>(
 		keys: readonly TKeys[],
 		func: (inputs: AllInputKeysToObject<TDef["input"], TKeys>, ctx: BlockLogicTickContext) => void,
 	): void {
 		this.onInputs(keys, func);
+	}
+
+	private onStartWithInputs<const TKeys extends keyof TDef["input"]>(
+		keys: readonly TKeys[] | undefined,
+		func: (inputs: AllInputKeysToObject<TDef["input"]>, ctx: BlockLogicTickContext) => void,
+	): void {
+		let executed = false;
+		const prevFunc = func;
+
+		func = (...args: Parameters<typeof prevFunc>) => {
+			if (executed) return;
+
+			executed = true;
+			prevFunc(...args);
+		};
+
+		this.onInputs(keys, func);
+	}
+	/** Runs the provided function first time all of the input values are available. */
+	protected onStart(func: (inputs: AllInputKeysToObject<TDef["input"]>, ctx: BlockLogicTickContext) => void): void {
+		this.onStartWithInputs(undefined, func);
+	}
+	/** Runs the provided function first time all of the provided input values are available. */
+	protected onkStart<const TKeys extends keyof TDef["input"]>(
+		keys: readonly TKeys[],
+		func: (inputs: AllInputKeysToObject<TDef["input"], TKeys>, ctx: BlockLogicTickContext) => void,
+	): void {
+		this.onStartWithInputs(keys, func);
+	}
+
+	/** Runs the provided function on every tick, but only if all of the input values are available. */
+	protected onAlways(func: (inputs: AllInputKeysToObject<TDef["input"]>, ctx: BlockLogicTickContext) => void): void {
+		this.onInputs(undefined, func, false);
 	}
 
 	disableAndBurn(): void {

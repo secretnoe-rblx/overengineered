@@ -54,7 +54,7 @@ export namespace BlockConfig {
 				return t;
 			}
 
-			return Objects.firstKey(def.types) ?? "unset";
+			return "unset";
 		};
 		const getDefaultConfig = (objType: GenericConfig["type"], def: TDef[keyof TDef]) =>
 			objType === "unset" ? (undefined as never) : def.types[objType]!.config;
@@ -65,7 +65,7 @@ export namespace BlockConfig {
 			const cfg: GenericConfig = {
 				type: defaultType,
 				config: defaultType === "unset" ? (undefined as never) : def.types[defaultType]!.config,
-				controlConfig: (def.types[defaultType] as Primitives[ControlKeys]).control?.config,
+				controlConfig: (def.types[defaultType] as Primitives[ControlKeys])?.control?.config,
 			};
 			return cfg;
 		};

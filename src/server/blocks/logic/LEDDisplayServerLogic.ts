@@ -1,10 +1,10 @@
 import { ServerBlockLogic } from "server/blocks/ServerBlockLogic";
 import type { PlayModeController } from "server/modes/PlayModeController";
-import type { LEDDisplayBlockLogic } from "shared/block/logic/logic/display/LEDDisplayBlockLogic";
+import type { LedDisplayBlockLogic } from "shared/blocks/blocks/LedDisplayBlock";
 
 @injectable
-export class LEDDisplayServerLogic extends ServerBlockLogic<typeof LEDDisplayBlockLogic> {
-	constructor(logic: typeof LEDDisplayBlockLogic, @inject playModeController: PlayModeController) {
+export class LEDDisplayServerLogic extends ServerBlockLogic<typeof LedDisplayBlockLogic> {
+	constructor(logic: typeof LedDisplayBlockLogic, @inject playModeController: PlayModeController) {
 		super(logic, playModeController);
 
 		logic.events.prepare.invoked.Connect((player, { block }) => {
@@ -17,9 +17,9 @@ export class LEDDisplayServerLogic extends ServerBlockLogic<typeof LEDDisplayBlo
 					frame.BorderMode = Enum.BorderMode.Inset;
 					frame.BorderSizePixel = 0;
 					frame.BackgroundColor3 = Color3.fromRGB(0, 0, 0);
-					frame.Parent = gui;
 					frame.Name = `x${x}y${y}`;
 					frame.LayoutOrder = x + y * 8;
+					frame.Parent = gui;
 				}
 			}
 

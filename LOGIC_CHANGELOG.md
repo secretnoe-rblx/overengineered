@@ -8,7 +8,7 @@ Circular wire connections will result in fire now, though. Some of them. Just us
 
 
 ## Config tool
-UI of the config tool was updated to be more cool and easier to work with.
+UI of the config tool was updated to be more cool and easier to work with. ||The colors are shit though. Maks, please fix||
 
 - Improved handling for multi-type logic values
 Did you notice that you could connect a multi-typed logic marker to a single-type in the wire tool, and then still be able to change its type in the config tool? Well good if you didn't and anyways that's now fixed.
@@ -26,7 +26,8 @@ No more of that stupid [Y Z X] in vector blocks
 
 
 ## next stuff
-- Improved controls stuff, like you can change the types or something // TODO:write
+- Improved controls stuff, like you can change the types or something (yes or no?) // TODO:write
+- Added description tooltips to some configuration values (in the config tool), explaining something. Also measurement units. Sometimes.
 
 
 ___

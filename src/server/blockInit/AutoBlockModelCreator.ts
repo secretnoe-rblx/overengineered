@@ -30,22 +30,12 @@ const categories = {
 } as const satisfies { [k in string]: BlockCategoryPath };
 
 const operations = {
-	counter: {
-		modelTextOverride: "COUNTER",
-		category: categories.other,
-		prefab: prefabs.x4Generic,
-	},
 	logicmemory: {
 		modelTextOverride: "MEMORY",
 		category: categories.memory,
 		prefab: prefabs.doubleGeneric,
 	},
 
-	singleimpulse: {
-		modelTextOverride: "SINGLE IMPULSE",
-		category: categories.other,
-		prefab: prefabs.smallGeneric,
-	},
 	tpscounter: {
 		modelTextOverride: "TPS",
 		category: categories.other,

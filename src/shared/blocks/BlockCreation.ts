@@ -69,6 +69,23 @@ export namespace BlockCreation {
 
 			return clone;
 		}
+		/** @deprecated Used for a single block, should be deleted after */
+		export function fFromAssets(id: string): BlockBuilder["modelSource"]["model"] {
+			return () => {
+				if (RunService.IsClient()) {
+					return folder[id];
+				}
+
+				const model = assets.get().get(id);
+				if (!model) throw `Block ${id} was not found in assets`;
+
+				const clone = model.model.Clone() as BlockModel;
+				clone.Name = id;
+				clone.Parent = folder;
+
+				return clone;
+			};
+		}
 
 		export type PrefabName =
 			| "ConstLogicBlockPrefab"

@@ -1,6 +1,6 @@
 import { ServerBlockLogic } from "server/blocks/ServerBlockLogic";
 import type { PlayModeController } from "server/modes/PlayModeController";
-import type { BracedShaftBlockLogic } from "shared/block/logic/BracedShaftBlockLogic";
+import type { BracedShaftBlockLogic } from "shared/blocks/blocks/BracedShaftBlock";
 
 @injectable
 export class BracedShaftServerLogic extends ServerBlockLogic<typeof BracedShaftBlockLogic> {

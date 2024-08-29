@@ -4,6 +4,7 @@ import type {
 	BlockLogic,
 	BlockLogicBothDefinitions,
 	BlockLogicNoConfigDefinitionTypes,
+	BlockLogicFullInputDef,
 } from "shared/blockLogic/BlockLogic";
 import type { BlockLogicTypes } from "shared/blockLogic/BlockLogicTypes";
 
@@ -36,7 +37,11 @@ const Filters: { readonly [k in PrimitiveKeys]?: Filter<k> } = {
 		filter: (value, definition) => {
 			if (definition.clamp) {
 				const clamp = definition.clamp;
-				return MathUtils.clamp(value, clamp.min, clamp.max, clamp.step);
+				value = MathUtils.clamp(value, clamp.min, clamp.max, clamp.step);
+			}
+			if (definition.control) {
+				const clamp = definition.control;
+				value = MathUtils.clamp(value, clamp.min, clamp.max, clamp.step);
 			}
 
 			return value;
@@ -52,6 +57,7 @@ const filterValue = <TType extends PrimitiveKeys>(
 		throw "Trying to filter an unknown type";
 	}
 
+	print("FILTERING", value, "with", definitionTypes[valueType]);
 	const filter = Filters[valueType] as GenericFilter | undefined;
 	if (!filter) return value;
 
@@ -121,6 +127,17 @@ export class LogicValueOutputStorageContainer<TType extends PrimitiveKeys>
 			value,
 		};
 	}
+
+	justGet(): typeof this.value & defined {
+		if (this.value === undefined) {
+			throw "Trying to get an unset cached output";
+		}
+
+		return this.value;
+	}
+	tryJustGet(): typeof this.value {
+		return this.value;
+	}
 }
 /** Storage for a value of a block logic. Automatically filters the value based on the type. */
 export class FilteredLogicValueStorageContainer<
@@ -141,17 +158,19 @@ export class BlockBackedInputLogicValueStorage<TType extends PrimitiveKeys>
 	implements ReadonlyLogicValueStorage<TType>
 {
 	constructor(
-		private readonly block: BlockLogic<BlockLogicBothDefinitions>,
+		private readonly inputDefinitions: BlockLogicFullInputDef,
+		private readonly outputBlock: BlockLogic<BlockLogicBothDefinitions>,
 		private readonly key: string,
 	) {}
 
 	get(ctx: BlockLogicTickContext): TypedValue<TType> | BlockLogicValueResults {
-		const result = this.block.getOutputValue(ctx, this.key);
+		const result = this.outputBlock.getOutputValue(ctx, this.key);
 		if (isCustomBlockLogicValueResult(result)) {
 			return result;
 		}
 
-		const filtered = filterValueArr(result.value, this.block.definition.output[this.key].types, result.type);
+		let filtered = filterValueArr(result.value, this.outputBlock.definition.output[this.key].types, result.type);
+		filtered = filterValue(result.value, this.inputDefinitions.types, result.type);
 
 		return {
 			type: result.type,

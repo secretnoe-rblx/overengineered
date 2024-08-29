@@ -5,6 +5,7 @@ import type { BlockLogicFullBothDefinitions, InstanceBlockLogicArgs } from "shar
 import type { BlockBuilder } from "shared/blocks/Block";
 
 const definition = {
+	inputOrder: ["value", "duration"],
 	input: {
 		value: {
 			displayName: "Value",

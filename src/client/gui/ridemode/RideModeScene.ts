@@ -10,7 +10,7 @@ import { ProgressBarControl } from "client/gui/controls/ProgressBarControl";
 import { ConfirmPopup } from "client/gui/popup/ConfirmPopup";
 import { TouchModeButtonControl } from "client/gui/ridemode/TouchModeButtonControl";
 import { requestMode } from "client/modes/PlayModeRequest";
-import { RocketEngineLogic } from "shared/block/logic/RocketEngineLogic";
+import { RocketBlocks } from "shared/blocks/blocks/RocketEngineBlocks";
 import { VehicleSeatBlock } from "shared/blocks/blocks/VehicleSeatBlock";
 import { EventHandler } from "shared/event/EventHandler";
 import { Signal } from "shared/event/Signal";
@@ -21,6 +21,7 @@ import type { ClientMachine } from "client/blocks/ClientMachine";
 import type { TextButtonDefinition } from "client/gui/controls/Button";
 import type { ProgressBarControlDefinition } from "client/gui/controls/ProgressBarControl";
 import type { PlayerDataStorage } from "client/PlayerDataStorage";
+import type { RocketBlockLogic } from "shared/blocks/blocks/RocketEngineBlocks";
 
 export type ActionBarControlDefinition = GuiObject & {
 	readonly Stop: GuiButton;
@@ -374,17 +375,19 @@ export class RideModeScene extends Control<RideModeSceneDefinition> {
 		}
 
 		{
+			const rocketClass = RocketBlocks[0]!.logic!.ctor;
+
 			const rockets = machine
 				.getChildren()
-				.filter((c) => c instanceof RocketEngineLogic) as unknown as readonly RocketEngineLogic[];
+				.filter((c) => c instanceof rocketClass) as unknown as readonly RocketBlockLogic[];
 			if (rockets.size() !== 0) {
-				init("Torque", "%s %%", this.infoTemplate(), 0, 100, 1, (control) => {
+				init("Thrust", "%s %%", this.infoTemplate(), 0, 100, 1, (control) => {
 					let avgg = 0;
 					let amount = 0;
 					for (const rocket of rockets) {
 						if (!rocket.isEnabled()) continue;
 
-						avgg += rocket.getTorque();
+						avgg += rocket.getThrust();
 						amount++;
 					}
 

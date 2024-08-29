@@ -12,7 +12,8 @@ const definition = {
 	inputOrder: ["thrust", "strength"],
 	input: {
 		thrust: {
-			displayName: "Thrust (%)",
+			displayName: "Thrust",
+			unit: "Percentage",
 			types: {
 				number: {
 					config: 0,
@@ -34,7 +35,8 @@ const definition = {
 			},
 		},
 		strength: {
-			displayName: "Strength (%)",
+			displayName: "Strength",
+			unit: "Percentage",
 			types: {
 				number: {
 					config: 100,
@@ -85,6 +87,8 @@ class Logic extends InstanceBlockLogic<typeof definition, RocketModel> {
 	private readonly maxSoundVolume = 0.5;
 	private readonly maxParticlesAcceleration = 120;
 
+	private cachedThrust = 0;
+
 	constructor(
 		block: InstanceBlockLogicArgs,
 		@inject private readonly soundEffect: SoundEffect,
@@ -116,6 +120,7 @@ class Logic extends InstanceBlockLogic<typeof definition, RocketModel> {
 		this.output.maxpower.set("number", this.maxPower);
 
 		this.onAlways(({ thrust, strength }) => {
+			this.cachedThrust = thrust;
 			this.update(thrust, strength);
 		});
 
@@ -174,6 +179,10 @@ class Logic extends InstanceBlockLogic<typeof definition, RocketModel> {
 				acceleration: this.particleEmitter.Acceleration,
 			});
 		}
+	}
+
+	getThrust() {
+		return this.cachedThrust;
 	}
 }
 

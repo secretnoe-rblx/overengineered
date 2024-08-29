@@ -35,8 +35,8 @@ const definition = {
 	output: {},
 } satisfies BlockLogicFullBothDefinitions;
 
-export type { WheelBlockLogic };
-class WheelBlockLogic extends InstanceBlockLogic<typeof definition> {
+export type { Logic as WheelBlockLogic };
+class Logic extends InstanceBlockLogic<typeof definition> {
 	constructor(block: InstanceBlockLogicArgs) {
 		super(definition, block);
 
@@ -64,7 +64,7 @@ class WheelBlockLogic extends InstanceBlockLogic<typeof definition> {
 	}
 }
 
-const logic: BlockLogicInfo = { definition, ctor: WheelBlockLogic };
+const logic: BlockLogicInfo = { definition, ctor: Logic };
 const list = {
 	wheel: {
 		displayName: "Wheel",

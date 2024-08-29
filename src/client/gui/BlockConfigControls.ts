@@ -43,6 +43,7 @@ type OfBlocks<T> = { readonly [k in BlockUuid]: T };
 export type VisualBlockConfigDefinition = {
 	readonly displayName: string;
 	readonly tooltip?: string;
+	readonly unit?: string;
 	readonly types: Partial<BlockLogicWithConfigDefinitionTypes<PrimitiveKeys>>;
 	readonly connectorHidden?: boolean;
 	readonly group?: string;
@@ -925,7 +926,10 @@ class ConfigAutoValueWrapper extends Control<ConfigValueWrapperDefinition> {
 
 				const initTooltip = (label: TextLabel) => {
 					if (definition.tooltip) {
-						tooltipController.registerControl(control.add(new Control(label)), definition.tooltip);
+						let tooltip = definition.tooltip;
+						if (definition.unit) tooltip += ` (${definition.unit})`;
+
+						tooltipController.registerControl(control.add(new Control(label)), tooltip);
 					}
 				};
 
