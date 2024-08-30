@@ -1,9 +1,8 @@
 import type { ClientBlockLogic } from "client/blocks/ClientBlockLogic";
-import type { KnownBlockLogic } from "shared/block/BlockLogicRegistry";
+import type { GenericBlockLogicCtor } from "shared/blockLogic/BlockLogic";
 
-type ShareableLogic = ExtractMembers<KnownBlockLogic, { readonly clientEvents: Record<string, unknown> }>;
 type ClientBlockLogicRegistry = {
-	readonly [k in keyof ShareableLogic]: new (logic: ShareableLogic[k]) => ClientBlockLogic<ShareableLogic[k]>;
+	readonly [k in BlockId]?: new (...args: any[]) => ClientBlockLogic<GenericBlockLogicCtor>;
 };
 
 const clientBlockLogicRegistry: ClientBlockLogicRegistry = {};

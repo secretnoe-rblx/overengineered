@@ -33,6 +33,9 @@ type Filter<K extends PrimitiveKeys> = {
 };
 type GenericFilter = Filter<PrimitiveKeys>;
 const Filters: { readonly [k in PrimitiveKeys]?: Filter<k> } = {
+	byte: {
+		filter: (value) => math.clamp(value, 0, 255),
+	},
 	number: {
 		filter: (value, definition) => {
 			if (definition.clamp) {

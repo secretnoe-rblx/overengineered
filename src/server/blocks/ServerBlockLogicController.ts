@@ -7,9 +7,10 @@ import { ScreenServerLogic } from "server/blocks/logic/ScreenServerLogic";
 import { SevenSegmentDisplayServerLogic } from "server/blocks/logic/SevenSegmentDisplayServerLogic";
 import { HostedService } from "shared/GameHost";
 import type { ServerBlockLogic } from "server/blocks/ServerBlockLogic";
+import type { GenericBlockLogicCtor } from "shared/blockLogic/BlockLogic";
 
 type ServerBlockLogicRegistry = {
-	readonly [k in BlockId]?: new (...args: never) => ServerBlockLogic<new (...args: any[]) => unknown>;
+	readonly [k in BlockId]?: new (...args: never) => ServerBlockLogic<GenericBlockLogicCtor>;
 };
 
 @injectable

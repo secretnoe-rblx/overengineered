@@ -13,30 +13,6 @@ interface BlockSetupInformation {
 
 type GenericBlockDataRegistry = Record<string, BlockSetupInformation>;
 
-const flatten = <T extends Partial<Record<string, GenericBlockDataRegistry>>>(
-	data: T,
-): { [kk in { [k in keyof T]: keyof T[k] }[keyof T]]: BlockSetupInformation } => {
-	const ret: Partial<Record<string, BlockSetupInformation>> = {};
-	for (const [, items] of pairs(data)) {
-		for (const [key, value] of pairs(items as GenericBlockDataRegistry)) {
-			ret[key] = value;
-		}
-	}
-
-	return ret as never;
-};
-const process = (block: BlockSetupInformation): BlockSetupInformation => {
-	if (![".", "!", "?", " "].includes(block.description.sub(block.description.size()))) {
-		return {
-			...block,
-			description: block.description + ".",
-		};
-	}
-
-	return block;
-};
-
-/** Registry for the block information, for easier editing (compared to Roblox Studio) */
 const registry = {
 	cannonbarrel100mm: {
 		name: "100mm Cannon Barrel",
@@ -98,9 +74,3 @@ const registry = {
 		description: "An evil brother of the wing rounding",
 	},
 } satisfies GenericBlockDataRegistry;
-
-export const BlockDataRegistry: { readonly [id in BlockId]: BlockSetupInformation } = registry;
-
-for (const [key, info] of pairs(registry)) {
-	(registry as Writable<GenericBlockDataRegistry>)[key] = process(info);
-}
