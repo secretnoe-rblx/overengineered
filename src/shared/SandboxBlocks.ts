@@ -34,6 +34,7 @@ import { RandomAccessMemoryBlock } from "shared/blocks/blocks/RandomAccessMemory
 import { ReadonlyMemoryBlock } from "shared/blocks/blocks/ReadonlyMemoryBlock";
 import { RocketBlocks } from "shared/blocks/blocks/RocketEngineBlocks";
 import { RopeBlock } from "shared/blocks/blocks/RopeBlock";
+import { RCSEngineBlock } from "shared/blocks/blocks/RSCEngineBlock";
 import { ScreenBlock } from "shared/blocks/blocks/ScreenBlock";
 import { SevenSegmentDisplayBlock } from "shared/blocks/blocks/SevenSegmentDisplayBlock";
 import { SingleImpulseBlock } from "shared/blocks/blocks/SingleImpulseBlock";
@@ -57,6 +58,7 @@ export const CreateSandboxBlocks = (): BlockList => {
 
 		PistonBlock,
 		MotorBlock,
+		RCSEngineBlock,
 		DisconnectBlock,
 		RopeBlock,
 		SuspensionBlock,

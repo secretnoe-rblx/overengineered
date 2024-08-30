@@ -77,18 +77,18 @@ const list = {
 		logic,
 	},
 	smalloldwheel: {
-		displayName: "Small old wheel",
+		displayName: "Small old fashioned wheel",
 		description: "smol ol whel",
 		logic,
 	},
 	oldwheel: {
 		displayName: "Old wheel",
-		description: "A ginormous old wheel",
+		description: "An old fashioned wheel",
 		logic,
 	},
 	bigoldwheel: {
 		displayName: "Big old wheel",
-		description: "Old wheel. Big one.",
+		description: "Old fashioned wheel. Big one.",
 		logic,
 	},
 } satisfies BlockBuildersWithoutIdAndDefaults;

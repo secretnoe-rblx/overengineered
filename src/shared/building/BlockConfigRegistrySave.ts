@@ -572,6 +572,34 @@ const rocketengine = {
 	},
 } as const satisfies BlockConfigBothDefinitions;
 
+const rcsengine = {
+	input: {
+		direction: {
+			displayName: "Direction (%)",
+			type: "vector3",
+			default: Vector3.zero,
+			config: Vector3.zero,
+		},
+		trailLength: {
+			displayName: "Trail length",
+			type: "clampedNumber",
+			min: 1,
+			max: 5,
+			step: 0.1,
+			default: 1,
+			config: 1,
+		},
+		trailColor: {
+			displayName: "Trail color",
+			type: "color",
+			default: Color3.fromRGB(255, 255, 255),
+			config: Color3.fromRGB(255, 255, 255),
+			connectorHidden: true,
+		},
+	},
+	output: {},
+} as const satisfies BlockConfigBothDefinitions;
+
 const piston = {
 	input: {
 		extend: {
@@ -1970,6 +1998,7 @@ export const _BlockConfigRegistrySave = {
 	motorblock,
 	smallrocketengine: rocketengine,
 	rocketengine: rocketengine,
+	rcsengine: rcsengine,
 	rope,
 	servomotorblock,
 	sidewaysservo,

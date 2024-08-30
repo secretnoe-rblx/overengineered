@@ -39,9 +39,17 @@ const registry = {
 		name: "Ball in Socket",
 		description: "Ball socket for your mechanical ingenuities",
 	},
+	ballinsocketangled: {
+		name: "Ball in Socket (Angled)",
+		description: "Angled ball socket for your mechanical ingenuities",
+	},
 	driveshaft: {
 		name: "Driveshaft",
 		description: "A shaft that drives",
+	},
+	driveshaftangled: {
+		name: "Driveshaft (Angled)",
+		description: "An angled shaft that drives",
 	},
 	bearingshaft: {
 		name: "Bearing Shaft",

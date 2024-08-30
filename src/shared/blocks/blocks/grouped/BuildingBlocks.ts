@@ -16,6 +16,13 @@ const blocks = {
 		mirror: { behaviour: "none" },
 		weldRegionsSource: BlockCreation.WeldRegions.fAutomatic("cube"),
 	},
+	trussunsupported: {
+		displayName: "Unsupported truss",
+		description: "Climbable, but less cool than the ~normal~ one",
+
+		mirror: { behaviour: "none" },
+		weldRegionsSource: BlockCreation.WeldRegions.fAutomatic("cube"),
+	},
 	ball: {
 		displayName: "Ball",
 		description: "it could be a cannon ball.. Or anything else, really..",
@@ -111,9 +118,23 @@ const cornerWedges = {
 		mirror: { behaviour: "offset270" },
 	},
 	tetrahedron: {
-		displayName: "Tetrahedron",
-		description: "bro what is this naming",
-
+		displayName: "Tetrahedron 1x1",
+		description: "The simplest polyhedron, the faces of which are four triangles",
+		mirror: { behaviour: "offset90" },
+	},
+	tetrahedron2x1: {
+		displayName: "Tetrahedron 2x1",
+		description: "The simplest polyhedron, whose faces are four triangles, but slightly longer",
+		mirror: { behaviour: "offset90" },
+	},
+	tetrahedron3x1: {
+		displayName: "Tetrahedron 3x1",
+		description: "The simplest polyhedron, whose faces are four triangles, but much longer",
+		mirror: { behaviour: "offset90" },
+	},
+	tetrahedron4x1: {
+		displayName: "Tetrahedron 3x1",
+		description: "The simplest polyhedron, whose faces are four triangles, but unfathomably longer",
 		mirror: { behaviour: "offset90" },
 	},
 	tetraround: {

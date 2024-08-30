@@ -130,7 +130,9 @@ class Logic extends InstanceBlockLogic<typeof definition> {
 
 		this.event.subscribe(view.TouchEnded, (part) => {
 			this.allTouchedBlocks.delete(part);
-			this.triggerDistanceListUpdate = part === this.closestDetectedPart;
+			if (!this.triggerDistanceListUpdate) {
+				this.triggerDistanceListUpdate = part === this.closestDetectedPart;
+			}
 		});
 
 		this.onDescendantDestroyed(() => {
