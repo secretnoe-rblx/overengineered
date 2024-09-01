@@ -44,4 +44,8 @@ export const TpsCounterBlock = {
 	description: "Returns the Ticks per Second number",
 
 	logic: { definition, ctor: Logic },
+	modelSource: {
+		model: BlockCreation.Model.fAutoCreated("ConstLogicBlockPrefab", "TPS"),
+		category: () => BlockCreation.Categories.other,
+	},
 } as const satisfies BlockBuilder;

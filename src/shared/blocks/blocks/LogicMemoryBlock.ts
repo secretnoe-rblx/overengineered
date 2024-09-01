@@ -50,4 +50,8 @@ export const LogicMemoryBlock = {
 	description: "Stores the value you gave it",
 
 	logic: { definition, ctor: Logic },
+	modelSource: {
+		model: BlockCreation.Model.fAutoCreated("DoubleGenericLogicBlockPrefab", "MEMOTY"),
+		category: () => BlockCreation.Categories.memory,
+	},
 } as const satisfies BlockBuilder;
