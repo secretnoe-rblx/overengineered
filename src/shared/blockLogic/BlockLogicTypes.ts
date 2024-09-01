@@ -25,6 +25,7 @@ export namespace BlockLogicTypes {
 
 	export type BoolControls = {
 		readonly config: {
+			readonly enabled: boolean;
 			readonly key: string;
 			readonly switch: boolean;
 			readonly reversed: boolean;
@@ -36,65 +37,95 @@ export namespace BlockLogicTypes {
 		readonly control?: BoolControls;
 	};
 
-	type NumberControlDefaults = {
+	export type NumberControlsSimplified = {
+		readonly motorRotationSpeed: {
+			readonly type: "motorRotationSpeed";
+			readonly config: {
+				readonly rotation: {
+					readonly add: KeyCode;
+					readonly sub: KeyCode;
+				};
+				readonly speed: number;
+				readonly switchmode: boolean;
+			};
+			readonly maxSpeed: number;
+		};
+		readonly servoMotorAngle: {
+			readonly type: "servoMotorAngle";
+			readonly config: {
+				readonly rotation: {
+					readonly add: KeyCode;
+					readonly sub: KeyCode;
+				};
+				readonly switchmode: boolean;
+				readonly angle: number;
+			};
+			readonly minAngle: number;
+			readonly maxAngle: number;
+		};
+		readonly thrust: {
+			readonly type: "thrust";
+			readonly config: {
+				readonly thrust: {
+					readonly add: KeyCode;
+					readonly sub: KeyCode;
+				};
+				readonly switchmode: boolean;
+			};
+			readonly canBeSwitch: boolean;
+		};
+		readonly controllableNumber: {
+			readonly type: "controllableNumber";
+			readonly config: {
+				readonly value: number;
+				readonly control: {
+					readonly add: KeyCode;
+					readonly sub: KeyCode;
+				};
+			};
+			readonly min: number;
+			readonly max: number;
+			readonly step: number;
+		};
+	};
+
+	type NumberControlModeSmooth = {
+		readonly type: "smooth";
+		readonly speed: number;
+	};
+	type NumberControlModeHold = {
+		readonly type: "hold";
+	};
+	type NumberControlModeSwitch = {
+		readonly type: "switch";
+	};
+	type NumberControlModes = NumberControlModeSmooth | NumberControlModeHold | NumberControlModeSwitch;
+
+	export type NumberControlKey = {
+		readonly key: string | KeyCode;
+		readonly value: number;
+	};
+
+	export type NumberControlKeys = readonly NumberControlKey[];
+	export type NumberControl = {
+		/** Global minimum for the resulting value & the configuration UI */
 		readonly min: number;
+		/** Global maximum for the resulting value & the configuration UI */
 		readonly max: number;
+		/** Global step for the resulting value & the configuration UI */
 		readonly step?: number;
-	};
-	/** Hold `add` to smoothly increase the value. Hold `sub` to smoothly decrease value. */
-	export type SmoothNumberControl = NumberControlDefaults & {
-		readonly canBeSwitch: boolean;
+		/** If defined, enables the `extended` checkbox and decides which gui is shown when pressed */
+		readonly simplified?: keyof NumberControlsSimplified;
 
 		readonly config: {
-			readonly type: "smooth";
-
-			/** Default value on start */
-			readonly startValue: number;
-			/** Speed of changing the value, 1s per second */
-			readonly speed: number;
-			/** Key to increase the value */
-			readonly add: string | KeyCode;
-			/** Key to decrease the value */
-			readonly sub: string | KeyCode;
-
-			readonly switchmode: boolean;
+			readonly enabled: boolean;
+			readonly extended: boolean;
+			readonly keys: NumberControlKeys;
+			readonly mode: NumberControlModes;
 		};
 	};
-	/** Hold `control` to instantly set the value to max. */
-	export type HoldNumberControl = NumberControlDefaults & {
-		readonly config: {
-			readonly type: "hold";
-
-			/** Value that is set when the key is not being held */
-			readonly releasedValue: number;
-			/** Value that is set when the key is being held */
-			readonly holdingValue: number;
-			/** Key to change the value */
-			readonly key: string | KeyCode;
-		};
-	};
-	/** Hold `add` to instantly set the value to max. Hold `sub` to instantly set the value to min. */
-	export type DoubleHoldNumberControl = NumberControlDefaults & {
-		readonly canBeSwitch: boolean;
-
-		readonly config: {
-			readonly type: "doublehold";
-
-			/** Value that is set when no key is being held */
-			readonly releasedValue: number;
-			/** Value that is set when a key is being held */
-			readonly holdingValue: number;
-			/** Key to set the value to max */
-			readonly add: string | KeyCode;
-			/** Key to set the value to min */
-			readonly sub: string | KeyCode;
-
-			readonly switchmode: boolean;
-		};
-	};
-	export type NumberControls = SmoothNumberControl | HoldNumberControl | DoubleHoldNumberControl;
 	export type Number = BCPrimitive<number> & {
-		readonly control?: NumberControls & { readonly defaultType: NumberControls["config"]["type"] };
+		readonly control?: NumberControl;
 		readonly clamp?: {
 			readonly showAsSlider: boolean;
 			readonly min: number;

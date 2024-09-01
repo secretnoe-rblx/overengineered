@@ -22,17 +22,19 @@ const definition = {
 				number: {
 					config: 0,
 					control: {
-						defaultType: "smooth",
 						min: 0,
-						max: 10, // TODO: HIGH LEVEL CRITICAL - THIS IS CONFIGURABLE!!! (from 1 to 10)
-						canBeSwitch: true,
+						max: 10,
 						config: {
-							type: "smooth",
-							add: "R",
-							sub: "F",
-							speed: 10,
-							startValue: 0,
-							switchmode: false,
+							enabled: true,
+							extended: false,
+							mode: {
+								type: "smooth",
+								speed: 0.2,
+							},
+							keys: [
+								{ key: "R", value: 10 },
+								{ key: "F", value: 0 },
+							],
 						},
 					},
 				},

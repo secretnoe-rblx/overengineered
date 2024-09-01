@@ -1140,24 +1140,20 @@ const test: {} = !RunService.IsStudio()
 									number: {
 										config: 0,
 										control: {
-											defaultType: "smooth",
-											min: 0,
+											min: 0.15,
 											max: 10,
-											canBeSwitch: true,
 											config: {
-												type: "smooth",
-												speed: 1,
-												startValue: 0,
-												add: "W",
-												sub: "S",
-												switchmode: false,
+												enabled: true,
+												extended: false,
+												mode: {
+													type: "smooth",
+													speed: 0.2,
+												},
+												keys: [
+													{ key: "R", value: 10 },
+													{ key: "F", value: 0.15 },
+												],
 											},
-											// config: {
-											// type: "hold",
-											// key: "F",
-											// releasedValue: 0,
-											// holdingValue: 10,
-											// }
 										},
 									},
 								},

@@ -2,6 +2,35 @@
 // do NOT remove
 const _ = () => [SetMacros, MapMacros, ArrayMacros];
 
+/* Basic operations:
+
+count(t => boolean): number
+
+all(t => boolean): boolean
+any(t => boolean): boolean
+contains(t): number
+containsBy(t => boolean): number
+
+chunk(number): t[]
+distinctArr(): T[]
+distinctArrBy(t => u): T[]
+distinctSet(): Set<T>
+distinctSetBy(t => u): Set<T>
+exceptArr(t[])
+exceptSet(Set<t>)
+exceptBy(t => u)
+
+map(t => u): u[]
+mapSet(t => u): Set<u>
+flatmap(t => u[]): u[]
+flatmapSet(t => u[]): Set<u>
+filter(t => boolean): t[]
+filterSet(t => boolean): Set<t>
+
+first(): t
+firstKey(): k
+*/
+
 declare global {
 	interface ReadonlySet<T> {
 		filter(this: ReadonlySet<T>, func: (item: T) => boolean): T[];

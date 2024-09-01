@@ -14,17 +14,18 @@ const definition = {
 				number: {
 					config: 0,
 					control: {
-						canBeSwitch: true,
 						min: 0,
 						max: 150,
-						defaultType: "doublehold",
 						config: {
-							type: "doublehold",
-							add: "R",
-							sub: "F",
-							holdingValue: 15,
-							releasedValue: 0,
-							switchmode: false,
+							enabled: true,
+							extended: false,
+							mode: {
+								type: "hold",
+							},
+							keys: [
+								{ key: "R", value: 15 },
+								{ key: "F", value: -15 },
+							],
 						},
 					},
 				},

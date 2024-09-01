@@ -12,6 +12,7 @@ const definition = {
 					config: false,
 					control: {
 						config: {
+							enabled: true,
 							key: "F",
 							switch: false,
 							reversed: false,

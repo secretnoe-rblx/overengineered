@@ -13,6 +13,7 @@ const definition = {
 					config: false,
 					control: {
 						config: {
+							enabled: true,
 							key: "B",
 							switch: false,
 							reversed: false,

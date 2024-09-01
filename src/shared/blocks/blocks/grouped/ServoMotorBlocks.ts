@@ -31,15 +31,16 @@ const servoDefinition = {
 					control: {
 						min: -180,
 						max: 180,
-						canBeSwitch: true,
-						defaultType: "doublehold",
 						config: {
-							type: "doublehold",
-							add: "R",
-							sub: "F",
-							switchmode: false,
-							holdingValue: 45,
-							releasedValue: 0,
+							enabled: true,
+							extended: false,
+							mode: {
+								type: "hold",
+							},
+							keys: [
+								{ key: "R", value: 45 },
+								{ key: "F", value: -45 },
+							],
 						},
 					},
 				},

@@ -87,4 +87,39 @@ export namespace Objects {
 	export function multiAwait(funcs: (() => void)[]): void {
 		awaitThrow(Promise.all(funcs.map(Promise.try)));
 	}
+
+	export function deepEquals(left: unknown, right: unknown): boolean {
+		if (typeOf(left) !== typeOf(right)) {
+			return false;
+		}
+
+		if (typeIs(left, "Instance") && typeIs(right, "Instance")) {
+			return left === right;
+		}
+
+		if (typeIs(left, "table")) {
+			assert(typeIs(right, "table"));
+			return objectDeepEquals(left, right);
+		}
+
+		return left === right;
+	}
+	function objectDeepEquals(left: object, right: object): boolean {
+		for (const [kl] of pairs(left)) {
+			if (!(kl in right)) {
+				return false;
+			}
+
+			if (!deepEquals(left[kl], right[kl])) {
+				return false;
+			}
+		}
+		for (const [kr] of pairs(right)) {
+			if (!(kr in left)) {
+				return false;
+			}
+		}
+
+		return true;
+	}
 }

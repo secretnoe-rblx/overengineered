@@ -1,8 +1,5 @@
 import { ClientComponent } from "client/component/ClientComponent";
-import { KeyPressingDefinitionsController } from "client/controller/KeyPressingController";
-import { isKey, Keys } from "shared/fixes/Keys";
-import { MathUtils } from "shared/fixes/MathUtils";
-import type { KeyDefinitions } from "client/controller/KeyPressingController";
+import { Keys } from "shared/fixes/Keys";
 import type { TouchModeButtonData } from "client/gui/ridemode/TouchModeButtonControl";
 import type { BlockLogicTypes } from "shared/blockLogic/BlockLogicTypes";
 import type { ILogicValueStorage } from "shared/blockLogic/BlockLogicValueStorage";
@@ -52,6 +49,25 @@ namespace ClientBlockControlsNamespace {
 		}
 	}
 
+	export class Number extends ClientComponent implements IClientBlockControl {
+		private readonly touchButtonDatas: readonly TouchModeButtonData[];
+
+		constructor(
+			value: ILogicValueStorage<"number">,
+			config: BlockLogicTypes.NumberControl["config"],
+			definition: OmitOverUnion<BlockLogicTypes.NumberControl, "config">,
+		) {
+			super();
+
+			this.touchButtonDatas = [];
+		}
+
+		getTouchButtonDatas(): readonly TouchModeButtonData[] {
+			return this.touchButtonDatas;
+		}
+	}
+
+	/*
 	export class NumberSmooth extends ClientComponent implements IClientBlockControl {
 		private readonly touchButtonDatas: readonly TouchModeButtonData[];
 
@@ -252,6 +268,7 @@ namespace ClientBlockControlsNamespace {
 			return this.touchButtonDatas;
 		}
 	}
+	*/
 }
 
 export type IClientBlockControl = IComponent & {
@@ -272,13 +289,13 @@ type GenericClientBlockControlStorage = (
 export const ClientBlockControls: { readonly [k in ControlKeys]?: GenericClientBlockControlStorage } = {
 	bool: (value, config, definition) => new ClientBlockControlsNamespace.Bool(value, config, definition),
 	number: (value, config, definition) => {
-		if (config.type === "hold") {
-			return new ClientBlockControlsNamespace.NumberHold(value, config, definition);
-		}
-		if (config.type === "doublehold") {
-			return new ClientBlockControlsNamespace.NumberDoubleHold(value, config, definition as never);
-		}
-
-		return new ClientBlockControlsNamespace.NumberSmooth(value, config, definition as never);
+		return new ClientBlockControlsNamespace.Number(value, config, definition);
+		// if (config.type === "hold") {
+		// 	return new ClientBlockControlsNamespace.NumberHold(value, config, definition);
+		// }
+		// if (config.type === "doublehold") {
+		// 	return new ClientBlockControlsNamespace.NumberDoubleHold(value, config, definition as never);
+		// }
+		// return new ClientBlockControlsNamespace.NumberSmooth(value, config, definition as never);
 	},
 } satisfies { readonly [k in ControlKeys]?: ClientBlockControlStorage<k> } as never;

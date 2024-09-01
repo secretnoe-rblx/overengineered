@@ -29,6 +29,7 @@ const definition = {
 					config: false,
 					control: {
 						config: {
+							enabled: true,
 							key: "G",
 							switch: false,
 							reversed: false,

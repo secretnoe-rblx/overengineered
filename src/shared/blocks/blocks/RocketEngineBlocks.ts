@@ -18,17 +18,20 @@ const definition = {
 				number: {
 					config: 0,
 					control: {
-						defaultType: "smooth",
 						min: 0,
 						max: 100,
-						canBeSwitch: true,
+						simplified: "thrust",
 						config: {
-							type: "smooth",
-							add: "W",
-							sub: "S",
-							speed: 10,
-							startValue: 0,
-							switchmode: false,
+							enabled: true,
+							extended: false,
+							mode: {
+								type: "smooth",
+								speed: 0.2,
+							},
+							keys: [
+								{ key: "W", value: 100 },
+								{ key: "S", value: 0 },
+							],
 						},
 					},
 				},
