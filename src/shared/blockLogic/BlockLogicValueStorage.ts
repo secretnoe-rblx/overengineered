@@ -60,7 +60,6 @@ const filterValue = <TType extends PrimitiveKeys>(
 		throw "Trying to filter an unknown type";
 	}
 
-	print("FILTERING", value, "with", definitionTypes[valueType]);
 	const filter = Filters[valueType] as GenericFilter | undefined;
 	if (!filter) return value;
 

@@ -11,6 +11,9 @@ export class KeyPressingController<TKeys extends string> {
 	readonly onKeyUp = new Signal<(key: TKeys) => void>();
 	private readonly pressed: TKeys[] = [];
 
+	isAnyDown(keys: readonly TKeys[]) {
+		return keys.any((k) => this.isDown(k));
+	}
 	isDown(key: TKeys) {
 		return this.pressed.includes(key);
 	}
@@ -56,7 +59,7 @@ export class KeyPressingConflictingController<TKeys extends string> extends KeyP
 	private readonly definitions;
 	private readonly holding: TKeys[] = [];
 
-	constructor(definitions: Readonly<Partial<Record<TKeys, { readonly conflicts?: TKeys }>>>) {
+	constructor(definitions: Readonly<Partial<Record<TKeys, { readonly conflicts?: readonly TKeys[] }>>>) {
 		super();
 		this.definitions = definitions;
 	}
@@ -65,10 +68,12 @@ export class KeyPressingConflictingController<TKeys extends string> extends KeyP
 		if (this.isDown(key)) return;
 
 		const def = this.definitions[key];
-		if (def?.conflicts !== undefined && this.isDown(def.conflicts)) {
-			this.keyUp(def.conflicts);
-			this.holding.push(key);
-			this.holding.push(def.conflicts);
+		if (def?.conflicts && this.isAnyDown(def.conflicts)) {
+			for (const conflict of def.conflicts) {
+				this.keyUp(conflict);
+				this.holding.push(key);
+				this.holding.push(conflict);
+			}
 
 			return;
 		}
@@ -79,10 +84,13 @@ export class KeyPressingConflictingController<TKeys extends string> extends KeyP
 		if (!this.isDown(key) && !this.holding.includes(key)) return;
 
 		const def = this.definitions[key];
-		if (def?.conflicts !== undefined && this.holding.includes(def.conflicts)) {
+		if (def?.conflicts && this.holding.any((h) => def.conflicts!.includes(h))) {
 			this.holding.remove(this.holding.indexOf(key));
-			this.holding.remove(this.holding.indexOf(def.conflicts));
-			this.keyDown(def.conflicts);
+			for (const conflict of def.conflicts) {
+				this.holding.remove(this.holding.indexOf(conflict));
+			}
+
+			this.keyDown(def.conflicts[0]);
 			return;
 		}
 
@@ -99,7 +107,7 @@ export type KeyDefinition<TKeys extends string> = {
 	readonly key: string | KeyCode;
 	readonly keyDown?: () => void;
 	readonly keyUp?: () => void;
-	readonly conflicts?: TKeys;
+	readonly conflicts?: readonly TKeys[];
 };
 export type KeyDefinitions<TKeys extends string> = { readonly [k in TKeys]: KeyDefinition<TKeys> };
 
@@ -111,18 +119,14 @@ export class KeyPressingDefinitionsController<T extends KeyDefinitions<string>> 
 		this.controller = new KeyPressingConflictingController<keyof T & string>(definitions);
 		this.onDisable(() => this.controller.releaseAll());
 
-		this.event.subscribe(this.controller.onKeyDown, (key) => {
-			definitions[key]?.keyDown?.();
-		});
-		this.event.subscribe(this.controller.onKeyUp, (key) => {
-			definitions[key]?.keyUp?.();
-		});
+		this.event.subscribe(this.controller.onKeyDown, (key) => definitions[key]?.keyDown?.());
+		this.event.subscribe(this.controller.onKeyUp, (key) => definitions[key]?.keyUp?.());
 
 		for (const [key, def] of pairs(definitions)) {
-			if (isKey(def.key)) {
-				this.event.onKeyDown(def.key, () => this.controller.keyDown(key as keyof T & string));
-				this.event.onKeyUp(def.key, () => this.controller.keyUp(key as keyof T & string));
-			}
+			if (!isKey(def.key)) continue;
+
+			this.event.onKeyDown(def.key, () => this.controller.keyDown(key as keyof T & string));
+			this.event.onKeyUp(def.key, () => this.controller.keyUp(key as keyof T & string));
 		}
 	}
 }

@@ -2,6 +2,7 @@ import { Control } from "client/gui/Control";
 import { ButtonControl } from "client/gui/controls/Button";
 import { KeyOrStringChooserControl } from "client/gui/controls/KeyOrStringChooserControl";
 import { NumberTextBoxControl } from "client/gui/controls/NumberTextBoxControl";
+import { Tooltip } from "client/gui/controls/Tooltip";
 import { ComponentChildren } from "shared/component/ComponentChildren";
 import { ObservableValue } from "shared/event/ObservableValue";
 import { ArgsSignal } from "shared/event/Signal";
@@ -53,7 +54,8 @@ class MultiKeyPartControl extends Control<MultiKeyPartControlDefinition> {
 		numbertb.value.set(num);
 		numbertb.submitted.Connect((num) => value.submit({ ...value.get(), value: num }));
 
-		this.add(new ButtonControl(gui.DeleteButton, () => this._deleted.Fire()));
+		const delButton = this.add(new ButtonControl(gui.DeleteButton, () => this._deleted.Fire()));
+		Tooltip.init(delButton, "Remove the key from the list");
 	}
 }
 
@@ -91,7 +93,6 @@ export class MultiKeyNumberControl extends Control<MultiKeyNumberControlDefiniti
 			const values = children.getAll().map((c) => c.value.get());
 
 			config = values;
-			print("subm", values);
 			this._submitted.Fire(values);
 		};
 

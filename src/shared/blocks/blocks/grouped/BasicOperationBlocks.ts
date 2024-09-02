@@ -1145,6 +1145,7 @@ const test: {} = !RunService.IsStudio()
 											config: {
 												enabled: true,
 												extended: false,
+												startValue: 0,
 												mode: {
 													type: "smooth",
 													speed: 1,

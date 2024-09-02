@@ -35,6 +35,16 @@ export namespace Objects {
 		return asObject(asMap(obj).mapToMap((k, v) => $tuple(k, func(k, v))));
 	}
 
+	export function map<const TObj extends readonly unknown[], const K extends string | number | symbol, const V>(
+		obj: TObj,
+		keyfunc: (key: keyof TObj, value: TObj extends readonly (infer E)[] ? E : never) => K,
+		valuefunc: (key: keyof TObj, value: TObj extends readonly (infer E)[] ? E : never) => V,
+	): object & { [k in K]: V };
+	export function map<const TObj extends object, const K extends string | number | symbol, const V>(
+		obj: TObj,
+		keyfunc: (key: keyof TObj, value: TObj[keyof TObj] & defined) => K,
+		valuefunc: (key: keyof TObj, value: TObj[keyof TObj] & defined) => V,
+	): object & { [k in K]: V };
 	/** Shorthand for `asObject(asMap(obj).mapToMap((k, v) => $tuple(kfunc(k), vfunc(v))))` with the key and value functions divided to simplify writing the type */
 	export function map<const TObj extends object, const K extends string | number | symbol, const V>(
 		obj: TObj,

@@ -89,14 +89,14 @@ export namespace BlockLogicTypes {
 		};
 	};
 
-	type NumberControlModeSmooth = {
+	export type NumberControlModeSmooth = {
 		readonly type: "smooth";
 		readonly speed: number;
 	};
-	type NumberControlModeHold = {
+	export type NumberControlModeHold = {
 		readonly type: "hold";
 	};
-	type NumberControlModeSwitch = {
+	export type NumberControlModeSwitch = {
 		readonly type: "switch";
 	};
 	export type NumberControlModes = NumberControlModeSmooth | NumberControlModeHold | NumberControlModeSwitch;
@@ -118,6 +118,9 @@ export namespace BlockLogicTypes {
 		readonly simplified?: keyof NumberControlsSimplified;
 
 		readonly config: {
+			/** Starting value */
+			readonly startValue: number;
+
 			readonly enabled: boolean;
 			readonly extended: boolean;
 			readonly keys: NumberControlKeys;

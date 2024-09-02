@@ -1,5 +1,9 @@
 import { ClientComponent } from "client/component/ClientComponent";
+import { KeyPressingDefinitionsController } from "client/controller/KeyPressingController";
 import { Keys } from "shared/fixes/Keys";
+import { MathUtils } from "shared/fixes/MathUtils";
+import { Objects } from "shared/fixes/objects";
+import type { KeyDefinition, KeyDefinitions } from "client/controller/KeyPressingController";
 import type { TouchModeButtonData } from "client/gui/ridemode/TouchModeButtonControl";
 import type { BlockLogicTypes } from "shared/blockLogic/BlockLogicTypes";
 import type { ILogicValueStorage } from "shared/blockLogic/BlockLogicValueStorage";
@@ -55,11 +59,19 @@ namespace ClientBlockControlsNamespace {
 		constructor(
 			value: ILogicValueStorage<"number">,
 			config: BlockLogicTypes.NumberControl["config"],
-			definition: OmitOverUnion<BlockLogicTypes.NumberControl, "config">,
+			definition: Omit<BlockLogicTypes.NumberControl, "config">,
 		) {
 			super();
 
 			this.touchButtonDatas = [];
+
+			if (config.mode.type === "smooth") {
+				this.parent(new NumberSmooth(value, config as never, definition));
+			} else if (config.mode.type === "hold") {
+				this.parent(new NumberHold(value, config as never, definition));
+			} else if (config.mode.type === "switch") {
+				this.parent(new NumberSwitch(value, config as never, definition));
+			}
 		}
 
 		getTouchButtonDatas(): readonly TouchModeButtonData[] {
@@ -67,14 +79,16 @@ namespace ClientBlockControlsNamespace {
 		}
 	}
 
-	/*
-	export class NumberSmooth extends ClientComponent implements IClientBlockControl {
+	class NumberSmooth extends ClientComponent implements IClientBlockControl {
 		private readonly touchButtonDatas: readonly TouchModeButtonData[];
 
 		constructor(
 			value: ILogicValueStorage<"number">,
-			config: BlockLogicTypes.SmoothNumberControl["config"],
-			definition: OmitOverUnion<BlockLogicTypes.SmoothNumberControl, "config">,
+			config: ReplaceWith<
+				BlockLogicTypes.NumberControl["config"],
+				{ readonly mode: BlockLogicTypes.NumberControlModeSmooth }
+			>,
+			definition: Omit<BlockLogicTypes.NumberControl, "config">,
 		) {
 			super();
 
@@ -82,193 +96,280 @@ namespace ClientBlockControlsNamespace {
 
 			set(config.startValue);
 			let amount = config.startValue;
-			let movingUp = false;
-			let movingDown = false;
+			let movingTowards: number | undefined = 0;
 
-			const start = (up: boolean) => {
+			const start = (towards: number) => {
+				if (amount === towards) return;
+
 				task.spawn(() => {
-					const step = config.speed;
-					while (up ? movingUp : movingDown) {
+					const step = amount < towards ? config.mode.speed : -config.mode.speed;
+					const direction = math.sign(step) as -1 | 1;
+
+					while (movingTowards === towards) {
 						const dt = task.wait();
 
-						amount = math.clamp(amount + (up ? step : -step) * dt, definition.min, definition.max);
+						amount = math.clamp(amount + step * dt, definition.min, definition.max);
+
+						if (direction < 0) amount = math.max(amount, towards);
+						else amount = math.min(amount, towards);
+
 						set(MathUtils.round(amount, definition.step));
 					}
 				});
 			};
 
-			const def = {
-				add: {
-					key: config.add,
-					conflicts: "sub",
+			const allKeys = config.keys.map((k) => k.key);
+			const def: KeyDefinitions<string> = Objects.map(
+				config.keys,
+				(i, v) => v.key,
+				(i, v): KeyDefinition<string> => ({
+					key: v.key,
+					conflicts: allKeys.except([v.key]),
 					keyDown: () => {
-						if (movingUp) return;
+						if (movingTowards) return;
 
-						movingUp = true;
-						start(true);
+						movingTowards = v.value;
+						start(v.value);
 					},
-					keyUp: () => {
-						movingUp = false;
-					},
-				},
-				sub: {
-					key: config.sub,
-					conflicts: "add",
-					keyDown: () => {
-						if (movingDown) return;
-
-						movingDown = true;
-						start(false);
-					},
-					keyUp: () => {
-						movingDown = false;
-					},
-				},
-			} as const satisfies KeyDefinitions<"add" | "sub">;
+					keyUp: () => (movingTowards = undefined),
+				}),
+			);
 
 			const controller = this.parent(new KeyPressingDefinitionsController(def));
 
-			this.touchButtonDatas = [
-				{
-					name: config.add,
-					press: () => controller.controller.keyDown("add"),
-					release: () => controller.controller.keyUp("add"),
-					isPressed: () => controller.controller.isDown("add"),
+			this.touchButtonDatas = config.keys.map(
+				(k): TouchModeButtonData => ({
+					name: k.key,
+					press: () => controller.controller.keyDown(k.key),
+					release: () => controller.controller.keyUp(k.key),
+					isPressed: () => controller.controller.isDown(k.key),
 					toggleMode: false,
-				},
-				{
-					name: config.sub,
-					press: () => controller.controller.keyDown("sub"),
-					release: () => controller.controller.keyUp("sub"),
-					isPressed: () => controller.controller.isDown("sub"),
-					toggleMode: false,
-				},
-			];
+				}),
+			);
 		}
 
 		getTouchButtonDatas(): readonly TouchModeButtonData[] {
 			return this.touchButtonDatas;
 		}
 	}
-	export class NumberHold extends ClientComponent implements IClientBlockControl {
+	class NumberHold extends ClientComponent implements IClientBlockControl {
 		private readonly touchButtonDatas: readonly TouchModeButtonData[];
 
 		constructor(
 			value: ILogicValueStorage<"number">,
-			config: BlockLogicTypes.HoldNumberControl["config"],
-			definition: OmitOverUnion<BlockLogicTypes.HoldNumberControl, "config">,
+			config: ReplaceWith<
+				BlockLogicTypes.NumberControl["config"],
+				{ readonly mode: BlockLogicTypes.NumberControlModeHold }
+			>,
+			definition: Omit<BlockLogicTypes.NumberControl, "config">,
 		) {
 			super();
 
 			const set = (newValue: number) => value.set("number", newValue);
-			set(config.releasedValue);
 
-			const holdingValue = MathUtils.round(
-				math.clamp(config.holdingValue, definition.min, definition.max),
-				definition.step,
+			set(config.startValue);
+			let amount = config.startValue;
+
+			const allKeys = config.keys.map((k) => k.key);
+			const def: KeyDefinitions<string> = Objects.map(
+				config.keys,
+				(i, v) => v.key,
+				(i, v): KeyDefinition<string> => ({
+					key: v.key,
+					conflicts: allKeys.except([v.key]),
+					keyDown: () => {
+						amount = math.clamp(v.value, definition.min, definition.max);
+						set(MathUtils.round(amount, definition.step));
+					},
+					keyUp: () => set(MathUtils.round((amount = config.startValue), definition.step)),
+				}),
 			);
-			const releasedValue = MathUtils.round(
-				math.clamp(config.releasedValue, definition.min, definition.max),
-				definition.step,
+
+			const controller = this.parent(new KeyPressingDefinitionsController(def));
+
+			this.touchButtonDatas = config.keys.map(
+				(k): TouchModeButtonData => ({
+					name: k.key,
+					press: () => controller.controller.keyDown(k.key),
+					release: () => controller.controller.keyUp(k.key),
+					isPressed: () => controller.controller.isDown(k.key),
+					toggleMode: false,
+				}),
 			);
-
-			if (isKey(config.key)) {
-				this.event.onKeyDown(config.key, () => set(holdingValue));
-				this.event.onKeyUp(config.key, () => set(releasedValue));
-			}
-
-			this.touchButtonDatas = []; // does anyone even use this?
 		}
 
 		getTouchButtonDatas(): readonly TouchModeButtonData[] {
 			return this.touchButtonDatas;
 		}
 	}
-	export class NumberDoubleHold extends ClientComponent implements IClientBlockControl {
+	class NumberSwitch extends ClientComponent implements IClientBlockControl {
 		private readonly touchButtonDatas: readonly TouchModeButtonData[];
 
 		constructor(
 			value: ILogicValueStorage<"number">,
-			config: BlockLogicTypes.DoubleHoldNumberControl["config"],
-			definition: OmitOverUnion<BlockLogicTypes.DoubleHoldNumberControl, "config">,
+			config: ReplaceWith<
+				BlockLogicTypes.NumberControl["config"],
+				{ readonly mode: BlockLogicTypes.NumberControlModeSwitch }
+			>,
+			definition: Omit<BlockLogicTypes.NumberControl, "config">,
 		) {
 			super();
 
-			let savedValue = config.releasedValue;
-			const get = () => savedValue;
-			const set = (newValue: number) => value.set("number", (savedValue = newValue));
+			const set = (newValue: number) => value.set("number", newValue);
 
-			const holdingValue = MathUtils.round(
-				math.clamp(config.holdingValue, definition.min, definition.max),
-				definition.step,
-			);
-			const releasedValue = MathUtils.round(
-				math.clamp(config.releasedValue, definition.min, definition.max),
-				definition.step,
-			);
+			set(config.startValue);
+			let amount = config.startValue;
 
-			set(releasedValue);
-
-			const def = {
-				add: {
-					key: config.add,
-					conflicts: "sub",
+			const allKeys = config.keys.map((k) => k.key);
+			const def: KeyDefinitions<string> = Objects.map(
+				config.keys,
+				(i, v) => v.key,
+				(i, v): KeyDefinition<string> => ({
+					key: v.key,
+					conflicts: allKeys.except([v.key]),
 					keyDown: () => {
-						if (!config.switchmode) {
-							set(-holdingValue);
-						} else {
-							set(get() === -holdingValue ? releasedValue : -holdingValue);
-						}
+						amount = amount === v.value ? config.startValue : v.value;
+						set(MathUtils.round(amount, definition.step));
 					},
-					keyUp: () => {
-						if (!config.switchmode) {
-							set(releasedValue);
-						}
-					},
-				},
-				sub: {
-					key: config.sub,
-					conflicts: "add",
-					keyDown: () => {
-						if (!config.switchmode) {
-							set(holdingValue);
-						} else {
-							set(get() === holdingValue ? releasedValue : holdingValue);
-						}
-					},
-					keyUp: () => {
-						if (!config.switchmode) {
-							set(releasedValue);
-						}
-					},
-				},
-			} as const satisfies KeyDefinitions<"add" | "sub">;
+				}),
+			);
 
 			const controller = this.parent(new KeyPressingDefinitionsController(def));
 
-			this.touchButtonDatas = [
-				{
-					name: config.add,
-					press: () => controller.controller.keyDown("add"),
-					release: () => controller.controller.keyUp("add"),
-					isPressed: () => controller.controller.isDown("add"),
-					toggleMode: config.switchmode,
-				},
-				{
-					name: config.sub,
-					press: () => controller.controller.keyDown("sub"),
-					release: () => controller.controller.keyUp("sub"),
-					isPressed: () => controller.controller.isDown("sub"),
-					toggleMode: config.switchmode,
-				},
-			];
+			this.touchButtonDatas = config.keys.map(
+				(k): TouchModeButtonData => ({
+					name: k.key,
+					press: () => controller.controller.keyDown(k.key),
+					release: () => controller.controller.keyUp(k.key),
+					isPressed: () => controller.controller.isDown(k.key),
+					toggleMode: false,
+				}),
+			);
 		}
 
 		getTouchButtonDatas(): readonly TouchModeButtonData[] {
 			return this.touchButtonDatas;
 		}
 	}
-	*/
+
+	// class NumberHold extends ClientComponent implements IClientBlockControl {
+	// 	private readonly touchButtonDatas: readonly TouchModeButtonData[];
+
+	// 	constructor(
+	// 		value: ILogicValueStorage<"number">,
+	// 		config: BlockLogicTypes.NumberControlModeHold["config"],
+	// 		definition: OmitOverUnion<BlockLogicTypes.NumberControlModeHold, "config">,
+	// 	) {
+	// 		super();
+
+	// 		const set = (newValue: number) => value.set("number", newValue);
+	// 		set(config.releasedValue);
+
+	// 		const holdingValue = MathUtils.round(
+	// 			math.clamp(config.holdingValue, definition.min, definition.max),
+	// 			definition.step,
+	// 		);
+	// 		const releasedValue = MathUtils.round(
+	// 			math.clamp(config.releasedValue, definition.min, definition.max),
+	// 			definition.step,
+	// 		);
+
+	// 		if (isKey(config.key)) {
+	// 			this.event.onKeyDown(config.key, () => set(holdingValue));
+	// 			this.event.onKeyUp(config.key, () => set(releasedValue));
+	// 		}
+
+	// 		this.touchButtonDatas = []; // does anyone even use this?
+	// 	}
+
+	// 	getTouchButtonDatas(): readonly TouchModeButtonData[] {
+	// 		return this.touchButtonDatas;
+	// 	}
+	// }
+	// class NumberDoubleHold extends ClientComponent implements IClientBlockControl {
+	// 	private readonly touchButtonDatas: readonly TouchModeButtonData[];
+
+	// 	constructor(
+	// 		value: ILogicValueStorage<"number">,
+	// 		config: BlockLogicTypes.DoubleHoldNumberControl["config"],
+	// 		definition: OmitOverUnion<BlockLogicTypes.DoubleHoldNumberControl, "config">,
+	// 	) {
+	// 		super();
+
+	// 		let savedValue = config.releasedValue;
+	// 		const get = () => savedValue;
+	// 		const set = (newValue: number) => value.set("number", (savedValue = newValue));
+
+	// 		const holdingValue = MathUtils.round(
+	// 			math.clamp(config.holdingValue, definition.min, definition.max),
+	// 			definition.step,
+	// 		);
+	// 		const releasedValue = MathUtils.round(
+	// 			math.clamp(config.releasedValue, definition.min, definition.max),
+	// 			definition.step,
+	// 		);
+
+	// 		set(releasedValue);
+
+	// 		const def = {
+	// 			add: {
+	// 				key: config.add,
+	// 				conflicts: "sub",
+	// 				keyDown: () => {
+	// 					if (!config.switchmode) {
+	// 						set(-holdingValue);
+	// 					} else {
+	// 						set(get() === -holdingValue ? releasedValue : -holdingValue);
+	// 					}
+	// 				},
+	// 				keyUp: () => {
+	// 					if (!config.switchmode) {
+	// 						set(releasedValue);
+	// 					}
+	// 				},
+	// 			},
+	// 			sub: {
+	// 				key: config.sub,
+	// 				conflicts: "add",
+	// 				keyDown: () => {
+	// 					if (!config.switchmode) {
+	// 						set(holdingValue);
+	// 					} else {
+	// 						set(get() === holdingValue ? releasedValue : holdingValue);
+	// 					}
+	// 				},
+	// 				keyUp: () => {
+	// 					if (!config.switchmode) {
+	// 						set(releasedValue);
+	// 					}
+	// 				},
+	// 			},
+	// 		} as const satisfies KeyDefinitions<"add" | "sub">;
+
+	// 		const controller = this.parent(new KeyPressingDefinitionsController(def));
+
+	// 		this.touchButtonDatas = [
+	// 			{
+	// 				name: config.add,
+	// 				press: () => controller.controller.keyDown("add"),
+	// 				release: () => controller.controller.keyUp("add"),
+	// 				isPressed: () => controller.controller.isDown("add"),
+	// 				toggleMode: config.switchmode,
+	// 			},
+	// 			{
+	// 				name: config.sub,
+	// 				press: () => controller.controller.keyDown("sub"),
+	// 				release: () => controller.controller.keyUp("sub"),
+	// 				isPressed: () => controller.controller.isDown("sub"),
+	// 				toggleMode: config.switchmode,
+	// 			},
+	// 		];
+	// 	}
+
+	// 	getTouchButtonDatas(): readonly TouchModeButtonData[] {
+	// 		return this.touchButtonDatas;
+	// 	}
+	// }
 }
 
 export type IClientBlockControl = IComponent & {
@@ -288,14 +389,5 @@ type GenericClientBlockControlStorage = (
 
 export const ClientBlockControls: { readonly [k in ControlKeys]?: GenericClientBlockControlStorage } = {
 	bool: (value, config, definition) => new ClientBlockControlsNamespace.Bool(value, config, definition),
-	number: (value, config, definition) => {
-		return new ClientBlockControlsNamespace.Number(value, config, definition);
-		// if (config.type === "hold") {
-		// 	return new ClientBlockControlsNamespace.NumberHold(value, config, definition);
-		// }
-		// if (config.type === "doublehold") {
-		// 	return new ClientBlockControlsNamespace.NumberDoubleHold(value, config, definition as never);
-		// }
-		// return new ClientBlockControlsNamespace.NumberSmooth(value, config, definition as never);
-	},
+	number: (value, config, definition) => new ClientBlockControlsNamespace.Number(value, config, definition),
 } satisfies { readonly [k in ControlKeys]?: ClientBlockControlStorage<k> } as never;

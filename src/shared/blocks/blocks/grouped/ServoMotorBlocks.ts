@@ -35,6 +35,7 @@ const servoDefinition = {
 						config: {
 							enabled: true,
 							extended: false,
+							startValue: 0,
 							mode: {
 								type: "hold",
 							},

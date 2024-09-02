@@ -8,6 +8,7 @@ import { KeyOrStringChooserControl } from "client/gui/controls/KeyOrStringChoose
 import { NumberTextBoxControl } from "client/gui/controls/NumberTextBoxControl";
 import { SliderControl } from "client/gui/controls/SliderControl";
 import { TextBoxControl } from "client/gui/controls/TextBoxControl";
+import { Tooltip } from "client/gui/controls/Tooltip";
 import { Gui } from "client/gui/Gui";
 import { MultiKeyNumberControl } from "client/gui/MultiKeyNumberControl";
 import { MemoryEditorPopup } from "client/gui/popup/MemoryEditorPopup";
@@ -25,7 +26,6 @@ import type { DropdownListDefinition } from "client/gui/controls/DropdownList";
 import type { KeyOrStringChooserControlDefinition } from "client/gui/controls/KeyOrStringChooserControl";
 import type { NumberTextBoxControlDefinition } from "client/gui/controls/NumberTextBoxControl";
 import type { TextBoxControlDefinition } from "client/gui/controls/TextBoxControl";
-import type { TooltipController } from "client/gui/controls/Tooltip";
 import type { MultiKeyNumberControlDefinition, MultiKeyPart } from "client/gui/MultiKeyNumberControl";
 import type { BlockConfigPart } from "shared/blockLogic/BlockConfig";
 import type { BlockLogicWithConfigDefinitionTypes } from "shared/blockLogic/BlockLogic";
@@ -80,6 +80,25 @@ const sameOrUndefined = <T>(configs: OfBlocks<T>, comparer?: (left: T, right: T)
 	}
 
 	return value;
+};
+const sameOrUndefinedBy = <T, U>(config: OfBlocks<T>, func: (value: T) => U) => {
+	if (Objects.size(config) === 1) {
+		const first = firstValue(config)!;
+		return func(first);
+	}
+
+	const mapped: Writable<OfBlocks<U>> = {};
+	for (const [uuid, v] of pairs(config)) {
+		const value = func(v);
+		if (value === undefined) {
+			return undefined;
+		}
+
+		mapped[uuid] = value;
+	}
+
+	const same = sameOrUndefined(mapped);
+	return same;
 };
 
 /** Map the config values, leaving the keys as is */
@@ -743,11 +762,18 @@ namespace Controls {
 
 					const [wType, cType] = addSingleTypeWrapper(this, new DropdownList<ModeKeys>(templates.Dropdown()));
 					wType.typeColor.set(Colors.red);
-					setWrapperName(cType as never, "Control type");
+					setWrapperName(cType as never, "Type");
 
-					cType.addItem("hold");
-					cType.addItem("switch");
-					cType.addItem("smooth");
+					const chold = cType.addItem("hold");
+					const cswitch = cType.addItem("switch");
+					const csmooth = cType.addItem("smooth");
+
+					Tooltip.init(chold, "Sets the value to the target while you're holding the button");
+					Tooltip.init(
+						cswitch,
+						"Sets the value to the target when you press the button and doesn't change back until you press another",
+					);
+					Tooltip.init(csmooth, "Slowly changes the value to the target while you're holding the button");
 
 					const selectedModes = new ReadonlySet(asMap(map(controlConfig, (c) => c.mode.type)).values());
 					if (selectedModes.size() > 1) {
@@ -766,7 +792,10 @@ namespace Controls {
 						},
 						smooth: {
 							type: "smooth",
-							speed: (definition.control.max - definition.control.min) / 5,
+							speed:
+								sameOrUndefinedBy(controlConfig, (c) =>
+									"speed" in c.mode ? c.mode.speed : undefined,
+								) ?? (definition.control.max - definition.control.min) / 5,
 						},
 						[definition.control.config.mode.type]: definition.control.config.mode,
 					};
@@ -1338,7 +1367,6 @@ class ConfigValueWrapper extends Control<ConfigValueWrapperDefinition> {
 	}
 }
 
-@injectable
 class ConfigAutoValueWrapper extends Control<ConfigValueWrapperDefinition> {
 	private readonly _submitted = new ArgsSignal<[config: BlocksConfigPart]>();
 	readonly submitted = this._submitted.asReadonly();
@@ -1350,7 +1378,6 @@ class ConfigAutoValueWrapper extends Control<ConfigValueWrapperDefinition> {
 		args: Controls.Args,
 		key: string,
 		wireTypes: WireTypes,
-		@inject tooltipController: TooltipController,
 	) {
 		super(gui);
 
@@ -1469,7 +1496,9 @@ class ConfigAutoValueWrapper extends Control<ConfigValueWrapperDefinition> {
 				};
 				initControllable();
 
-				const canBeSimplified = "simplified" in def.control && def.control.simplified !== undefined;
+				// disabled because the whole "simplified" thing might be stupid
+				const canBeSimplified =
+					(false as boolean) && "simplified" in def.control && def.control.simplified !== undefined;
 				const initExtended = () => {
 					if (!canBeSimplified) {
 						// if `simplified` isn't present, always use extended variant
@@ -1572,7 +1601,7 @@ class ConfigAutoValueWrapper extends Control<ConfigValueWrapperDefinition> {
 				let tooltip = definition.tooltip;
 				if (definition.unit) tooltip += ` (${definition.unit})`;
 
-				tooltipController.registerControl(control.add(new Control(cfgcontrol.instance.HeadingLabel)), tooltip);
+				Tooltip.init(control.add(new Control(cfgcontrol.instance.HeadingLabel)), tooltip);
 			}
 
 			cfgcontrol.submitted.Connect((v) =>
