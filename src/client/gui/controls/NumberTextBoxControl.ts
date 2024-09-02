@@ -9,6 +9,7 @@ export type NumberTextBoxControlDefinition = TextBox;
 export class NumberTextBoxControl<TAllowNull extends boolean = false> extends Control<NumberTextBoxControlDefinition> {
 	readonly submitted = new Signal<(value: number) => void>();
 	readonly value;
+	private textChanged = false;
 
 	constructor(gui: NumberTextBoxControlDefinition);
 	constructor(gui: NumberTextBoxControlDefinition, value: ObservableValue<number>);
@@ -59,11 +60,16 @@ export class NumberTextBoxControl<TAllowNull extends boolean = false> extends Co
 			true,
 		);
 
+		this.event.subscribe(this.gui.Focused, () => (this.textChanged = true));
 		this.event.subscribe(this.gui.FocusLost, () => this.commit(true));
 		this.event.subscribe(this.gui.ReturnPressedFromOnScreenKeyboard, () => this.commit(false));
 	}
 
 	private commit(byLostFocus: boolean) {
+		if (!this.textChanged) {
+			return;
+		}
+
 		const text = this.gui.Text.gsub("[^-0123456789.]", "")[0];
 
 		let num = tonumber(text);
