@@ -64,6 +64,11 @@ export class Logic extends InstanceBlockLogic<typeof definition, MotorBlock> {
 		super(definition, block);
 
 		this.on((ctx) => {
+			if (!this.instance.FindFirstChild("Base")) {
+				this.disableAndBurn();
+				return;
+			}
+
 			this.instance.Base.HingeConstraint.AngularVelocity = ctx.rotationSpeed;
 			this.instance.Base.HingeConstraint.MotorMaxTorque = RobloxUnit.RowtonStuds_To_NewtonMeters(
 				ctx.max_torque * 1_000_000,
@@ -74,7 +79,7 @@ export class Logic extends InstanceBlockLogic<typeof definition, MotorBlock> {
 			const base = this.instance.FindFirstChild("Base") as BasePart | undefined;
 			const attach = this.instance.FindFirstChild("Attach") as BasePart | undefined;
 			if (!attach || !base) {
-				this.disable();
+				this.disableAndBurn();
 				return;
 			}
 
@@ -85,7 +90,10 @@ export class Logic extends InstanceBlockLogic<typeof definition, MotorBlock> {
 			}
 		});
 		this.onDescendantDestroyed(() => {
-			this.instance.Base.HingeConstraint.AngularVelocity = 0;
+			if (this.instance.FindFirstChild("Base")) {
+				this.instance.Base.HingeConstraint.AngularVelocity = 0;
+			}
+
 			this.disable();
 		});
 	}
