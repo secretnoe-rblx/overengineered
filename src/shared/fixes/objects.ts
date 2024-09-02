@@ -4,9 +4,7 @@ export namespace Objects {
 	export function firstKey<T>(object: ReadonlySet<T>): T | undefined;
 	export function firstKey<T extends object>(object: T): keyof T | undefined;
 	export function firstKey<T extends object>(object: T): keyof T | undefined {
-		for (const [key] of asMap(object)) {
-			return key;
-		}
+		return next(object)[0];
 	}
 
 	export function firstValue<T extends readonly T[]>(object: T): T | undefined;
@@ -14,9 +12,7 @@ export namespace Objects {
 	export function firstValue<T extends ReadonlySet<T>>(object: T): boolean | undefined;
 	export function firstValue<T extends object>(object: T): T[keyof T] | undefined;
 	export function firstValue<T extends object>(object: T): T[keyof T] | undefined {
-		for (const [, value] of asMap(object)) {
-			return value;
-		}
+		return next(object)[1];
 	}
 
 	export function keys<T extends object>(object: T): (keyof T)[] {

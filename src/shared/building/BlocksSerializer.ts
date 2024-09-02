@@ -1021,7 +1021,7 @@ const v25: UpgradableBlocksSerializer<SerializedBlocks<SerializedBlockV4>, typeo
 
 									let ctype = def.type;
 									if (def.type === "or") {
-										ctype = Objects.firstKey(def.types)!;
+										ctype = firstKey(def.types)!;
 									}
 
 									return $tuple(k, {

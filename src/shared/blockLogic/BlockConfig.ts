@@ -41,12 +41,12 @@ export namespace BlockConfig {
 
 		const getDefaultType = (def: TDef[keyof TDef]): PrimitiveKeys => {
 			if (Objects.size(def.types) === 1) {
-				return Objects.firstKey(def.types)!;
+				return firstKey(def.types)!;
 			}
 
 			if (def.connectorHidden) {
 				// without a connector we can only configure the value with the config tool; thus, "unset" makes zero sense
-				const t = Objects.firstKey(def.types);
+				const t = firstKey(def.types);
 				if (!t) {
 					throw "Unset type is not supported without a visible marker";
 				}
@@ -116,7 +116,7 @@ export namespace BlockConfig {
 					return defConfig;
 				}
 
-				return { ...defConfig, ...obj.config };
+				return { ...(defConfig as {}), ...(obj.config as {}) } as never;
 			}
 
 			return obj.config;

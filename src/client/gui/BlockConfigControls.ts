@@ -233,7 +233,7 @@ namespace Controls {
 				super(templates.Redirect());
 
 				const btn = this.add(
-					new ButtonControl(this.gui.Control, () => args.travelTo(Objects.firstValue(config)!.blockUuid)),
+					new ButtonControl(this.gui.Control, () => args.travelTo(firstValue(config)!.blockUuid)),
 				);
 
 				if (asMap(config).size() !== 1) {
@@ -569,15 +569,15 @@ namespace Controls {
 				const controlConfig = map(config, (c) => c.controlConfig!);
 
 				const keysConfig = map(controlConfig, (c) => c.keys);
-				const first = Objects.firstValue(keysConfig);
+				const firstval = firstValue(keysConfig);
 
 				let keys: readonly MultiKeyPart[];
-				if (!first) {
+				if (!firstval) {
 					keys = [];
 				} else {
-					const allEquals = asMap(keysConfig).all((k, v) => Objects.deepEquals(first, v));
+					const allEquals = asMap(keysConfig).all((k, v) => Objects.deepEquals(firstval, v));
 					if (!allEquals) keys = [];
-					else keys = first;
+					else keys = firstval;
 				}
 
 				const [wKeys, cKeys] = addSingleTypeWrapper(
@@ -966,7 +966,7 @@ namespace Controls {
 
 				control.submitted.Connect((values) => {
 					const changed: TKeys[] = [key];
-					const value = Objects.firstValue(values);
+					const value = firstValue(values);
 
 					const prev = prevValues[key];
 					prevValues[key] = value;
@@ -1210,7 +1210,7 @@ class ConfigAutoValueWrapper extends Control<ConfigValueWrapperDefinition> {
 		} else if (asMap(definition.types).size() === 1) {
 			// if there is only one definition type
 
-			const key = Objects.firstKey(definition.types)!;
+			const key = firstKey(definition.types)!;
 			selectedType.set(key);
 			control.dropdown.hide();
 		} else {
@@ -1219,7 +1219,7 @@ class ConfigAutoValueWrapper extends Control<ConfigValueWrapperDefinition> {
 			const types = asSet(asMap(configs).mapToMap((k, v) => $tuple(v.type, true as const)));
 			if (types.size() === 1) {
 				// if every config has the same type set
-				selectedType.set(Objects.firstKey(types)!);
+				selectedType.set(firstKey(types)!);
 			} else {
 				// if configs have different types set
 				selectedType.set("[multi]");
@@ -1267,7 +1267,7 @@ class ConfigAutoValueWrapper extends Control<ConfigValueWrapperDefinition> {
 				const controlConfigs = map(configs, (c) => c.controlConfig!);
 
 				const initControllable = () => {
-					const first = Objects.firstValue(controlConfigs);
+					const first = firstValue(controlConfigs);
 					if (first) {
 						control.controllable.value.set(first.enabled);
 						return;
@@ -1275,7 +1275,7 @@ class ConfigAutoValueWrapper extends Control<ConfigValueWrapperDefinition> {
 
 					const enableds = new Set(asMap(map(controlConfigs, (c) => c.enabled)).values());
 					if (enableds.size() === 1) {
-						if (Objects.firstKey(enableds)) {
+						if (firstKey(enableds)) {
 							// all configs are true
 							control.controllable.value.set(true);
 						} else {
@@ -1307,7 +1307,7 @@ class ConfigAutoValueWrapper extends Control<ConfigValueWrapperDefinition> {
 						asMap(map(controlConfigs, (c) => "extended" in c && c.extended)).values(),
 					);
 					if (extendeds.size() === 1) {
-						if (Objects.firstKey(extendeds)) {
+						if (firstKey(extendeds)) {
 							// all configs are true
 							control.extended.value.set(true);
 						} else {
@@ -1497,7 +1497,7 @@ export class MultiBlockConfigControl extends Control implements Controls.Args {
 						configs = map(configs, (c, uuid) => ({ ...c, [k]: v[uuid] }));
 
 						if (!definition.group) return;
-						const setType = Objects.firstValue(v)!.type;
+						const setType = firstValue(v)!.type;
 						if (setType === "unset") return;
 
 						const grouped = grouped2.get(definition.group) ?? [];
