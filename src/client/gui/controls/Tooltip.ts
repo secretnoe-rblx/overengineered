@@ -79,7 +79,7 @@ class TooltipController extends HostedService {
 
 	private showTooltip(gui: GuiObject, text: string) {
 		// delayig to allow hideTooltip to be executed first
-		task.delay(0.1, () => {
+		task.delay(0, () => {
 			this.currentObject = gui;
 
 			task.delay(0.4, () => {

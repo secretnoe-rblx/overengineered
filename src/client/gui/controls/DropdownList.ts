@@ -77,6 +77,7 @@ export class DropdownList<TValue extends string = string> extends Control<Dropdo
 		}
 
 		btn.text.set(text ?? name);
+		btn.instance.Interactable = false;
 		this.contents.add(btn);
 
 		return btn;
