@@ -459,7 +459,7 @@ export abstract class InstanceBlockLogic<
 
 /** Block logic that calculates its output only based on its logical inputs (ADD, MUX, converters, etc.) */
 export abstract class CalculatableBlockLogic<TDef extends BlockLogicBothDefinitions> extends BlockLogic<TDef> {
-	private cachedResults?: AllOutputKeysToObject<TDef["output"]>;
+	private cachedResults?: AllOutputKeysToObject<TDef["output"]> | BlockLogicValueResults;
 	private resultsCacheTick?: number;
 
 	private calculatingRightNow2 = false;
@@ -488,11 +488,12 @@ export abstract class CalculatableBlockLogic<TDef extends BlockLogicBothDefiniti
 
 		const inputs = inputValuesToFullObject(ctx, this.input, undefined, true);
 		if (isCustomBlockLogicValueResult(inputs)) {
+			this.cachedResults = inputs;
 			return inputs;
 		}
 		if (inputs === "$UNCHANGED") {
 			if (!this.cachedResults) {
-				throw "Block inputs returned $UNCHANGED on the first tick";
+				throw `Block inputs returned $UNCHANGED on tick ${ctx.tick} for block uuid ${this.instance?.Name}`;
 			}
 
 			return this.cachedResults;
