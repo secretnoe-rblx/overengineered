@@ -73,6 +73,11 @@ namespace Scene {
 				this.updateConfigs(selected.getArr());
 			});
 
+			this.onEnable(() => this.updateConfigs([]));
+			this.onDisable(() => {
+				this.currentConfigControl?.destroy();
+				this.currentConfigControl = undefined;
+			});
 			this.onPrepare((inputType) => {
 				this.gui.Bottom.DeselectButton.Visible = inputType !== "Gamepad";
 			});
@@ -83,12 +88,13 @@ namespace Scene {
 
 			GuiAnimator.transition(this.gui.ParamsSelection, 0.2, "right");
 			GuiAnimator.transition(this.gui.Bottom.DeselectButton, 0.22, "down");
-
-			this.updateConfigs([]);
 		}
 
 		private currentConfigControl?: MultiBlockConfigControl;
 		private updateConfigs(selected: readonly BlockModel[]) {
+			this.currentConfigControl?.destroy();
+			this.currentConfigControl = undefined;
+
 			const wasVisible = this.gui.Visible;
 
 			this.gui.Visible = selected.size() !== 0;
@@ -132,8 +138,6 @@ namespace Scene {
 					config,
 				} as const;
 			});
-
-			this.currentConfigControl?.destroy();
 
 			this.gui.ParamsSelection.Content.ScrollingFrame.Visible = false;
 

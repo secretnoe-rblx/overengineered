@@ -1456,15 +1456,16 @@ class ConfigAutoValueWrapper extends Control<ConfigValueWrapperDefinition> {
 
 			// initializing the top `Controllable` bar
 			const initControls = () => {
+				control.controls.hide();
+
 				const def = definition.types[stype];
 				if (!def) return;
 
 				if (!("control" in def) || !def.control) {
-					control.controls.setVisible(false);
 					return;
 				}
 
-				control.controls.setVisible(true);
+				control.controls.show();
 
 				// controlConfig should never be null if `control` is present in the definition, BlockConfig handles that.
 				const controlConfigs = map(configs, (c) => c.controlConfig!);
