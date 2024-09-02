@@ -4,6 +4,7 @@ import { JSON } from "shared/fixes/Json";
 import { Objects } from "shared/fixes/objects";
 import { Serializer } from "shared/Serializer";
 import type { PlacedBlockConfig } from "shared/blockLogic/BlockConfig";
+import type { BlockLogicTypes } from "shared/blockLogic/BlockLogicTypes";
 import type { BlockConfigRegistry } from "shared/building/BlockConfigRegistrySave";
 import type { BuildingPlot } from "shared/building/BuildingPlot";
 import type { ReadonlyPlot } from "shared/building/ReadonlyPlot";
@@ -1007,30 +1008,65 @@ const v25: UpgradableBlocksSerializer<SerializedBlocks<SerializedBlockV4>, typeo
 
 	upgradeFrom(prev: SerializedBlocks<SerializedBlockV3>): SerializedBlocks<SerializedBlockV4> {
 		const update = (block: SerializedBlockV3): SerializedBlockV4 => {
+			const config = {
+				...Objects.mapValues(block.config ?? {}, (k, v) => {
+					const def = (blockConfigRegistry as BlockConfigRegistry)[block.id as keyof BlockConfigRegistry]!
+						.input[k];
+
+					assert(def.type !== "multikey");
+
+					let ctype: keyof BlockLogicTypes.Primitives;
+					if (def.type === "or") {
+						v = (v as { value: defined }).value;
+
+						if (typeIs(v, "Vector3")) {
+							if ("color" in def.types) ctype = "color";
+							else ctype = "vector3";
+						} else if (typeIs(v, "number")) {
+							if ("number" in def.types) ctype = "number";
+							else ctype = "byte";
+						} else if (typeIs(v, "boolean")) {
+							ctype = "bool";
+						} else if (typeIs(v, "string")) {
+							if ("key" in def.types) ctype = "key";
+							else ctype = "string";
+						} else if (typeIs(v, "table")) {
+							ctype = "bytearray";
+						} else {
+							ctype = firstKey(def.types)! as never;
+						}
+					} else if (
+						def.type === "clampedNumber" ||
+						def.type === "servoMotorAngle" ||
+						def.type === "controllableNumber" ||
+						def.type === "motorRotationSpeed" ||
+						def.type === "thrust"
+					) {
+						ctype = "number";
+					} else if (def.type === "keybool") {
+						ctype = "bool";
+					} else {
+						ctype = def.type;
+					}
+
+					return {
+						type: ctype,
+						config: v as never,
+					};
+				}),
+				...Objects.mapValues(
+					block.connections ?? {},
+					(k, v): { type: "wire"; config: BlockLogicTypes.WireValue } => ({
+						type: "wire",
+						config: { ...v, prevConfig: undefined },
+					}),
+				),
+			};
+
 			const ret: SerializedBlockV4 = {
 				...block,
 				["connnections" as keyof SerializedBlockV4]: undefined!,
-				config: !block.config
-					? undefined
-					: asObject(
-							asMap(block.config).mapToMap(
-								(k, v): LuaTuple<[string, PlacedBlockConfig[string] & defined]> => {
-									const def = (blockConfigRegistry as BlockConfigRegistry)[
-										block.id as keyof BlockConfigRegistry
-									]!.input[k];
-
-									let ctype = def.type;
-									if (def.type === "or") {
-										ctype = firstKey(def.types)!;
-									}
-
-									return $tuple(k, {
-										type: ctype as (PlacedBlockConfig[string] & defined)["type"],
-										config: v as never,
-									});
-								},
-							),
-						),
+				config,
 			};
 
 			return ret;
