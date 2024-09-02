@@ -179,8 +179,11 @@ export class BuildingPlot extends ReadonlyPlot {
 		const cfg = config[inputConnection];
 		if (cfg.type === "wire") {
 			// either set it to the previous config, or delete the key by setting it to nil
-			if (!cfg.config.prevConfig) delete config[inputConnection];
-			else config[inputConnection] = cfg.config.prevConfig;
+			if (!cfg.config.prevConfig || cfg.config.prevConfig.type === "wire") {
+				delete config[inputConnection];
+			} else {
+				config[inputConnection] = cfg.config.prevConfig;
+			}
 		}
 
 		BlockManager.manager.config.set(inputBlock, config);
