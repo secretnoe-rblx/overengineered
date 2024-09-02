@@ -107,11 +107,22 @@ class TooltipController extends HostedService {
 		});
 		eh.subscribe(control.instance.MouseLeave, () => this.hideTooltip());
 
+		const hideIfShown = () => {
+			if (this.currentObject !== control.instance) {
+				return;
+			}
+
+			this.hideTooltip();
+		};
 		control.onDestroy(() => {
+			hideIfShown();
+
 			eh?.unsubscribeAll();
 			eh = undefined!;
 		});
 		this.onDestroy(() => {
+			hideIfShown();
+
 			eh?.unsubscribeAll();
 			eh = undefined!;
 		});
