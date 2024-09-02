@@ -32,7 +32,7 @@ class TooltipControl extends Control<TooltipDefinition> {
 	}
 }
 
-export class TooltipController extends HostedService {
+class TooltipController extends HostedService {
 	private readonly tooltip: TooltipControl;
 	private currentObject?: GuiObject;
 
@@ -78,11 +78,14 @@ export class TooltipController extends HostedService {
 	}
 
 	private showTooltip(gui: GuiObject, text: string) {
-		this.currentObject = gui;
+		// delayig to allow hideTooltip to be executed first
+		task.delay(0.1, () => {
+			this.currentObject = gui;
 
-		task.delay(0.4, () => {
-			if (this.currentObject !== gui) return;
-			this.tooltip.showTooltip(text);
+			task.delay(0.4, () => {
+				if (this.currentObject !== gui) return;
+				this.tooltip.showTooltip(text);
+			});
 		});
 	}
 	private hideTooltip() {
@@ -90,16 +93,16 @@ export class TooltipController extends HostedService {
 		this.tooltip.hideTooltip();
 	}
 
-	registerControl(control: Control, text: string) {
+	registerControl(control: Control, text: string | (() => string | undefined)) {
 		let eh: EventHandler = new EventHandler();
 
-		eh.subscribe(control.instance.MouseEnter, (x, y) => {
-			x;
-			this.showTooltip(control.instance, text);
+		eh.subscribe(control.instance.MouseEnter, () => {
+			const txt = typeIs(text, "function") ? text() : text;
+			if (!txt) return;
+
+			this.showTooltip(control.instance, txt);
 		});
-		eh.subscribe(control.instance.MouseLeave, (x, y) => {
-			this.hideTooltip();
-		});
+		eh.subscribe(control.instance.MouseLeave, () => this.hideTooltip());
 
 		control.onDestroy(() => {
 			eh?.unsubscribeAll();
@@ -109,5 +112,17 @@ export class TooltipController extends HostedService {
 			eh?.unsubscribeAll();
 			eh = undefined!;
 		});
+	}
+}
+
+export namespace Tooltip {
+	let instance: TooltipController | undefined;
+
+	/** Initialize a tooltip at the control */
+	export function init(...args: Parameters<TooltipController["registerControl"]>): void {
+		instance ??= new TooltipController();
+
+		instance.enable();
+		instance.registerControl(...args);
 	}
 }
