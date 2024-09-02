@@ -15,7 +15,6 @@ import { MusicController } from "client/controller/sound/MusicController";
 import { SoundController } from "client/controller/SoundController";
 import { ActionsGui } from "client/gui/ActionsGui";
 import { AdminGui } from "client/gui/AdminGui";
-import { TooltipController } from "client/gui/controls/Tooltip";
 import { GuiAutoScaleController } from "client/gui/GuiAutoScaleController";
 import { HideInterfaceController } from "client/gui/HideInterfaceController";
 import { ControlsPopup } from "client/gui/popup/ControlsPopup";
@@ -51,7 +50,6 @@ export namespace SandboxGame {
 		OtherPlayersController.initializeMassless(builder);
 		builder.services.registerService(RagdollController);
 		RemoteEvents.initializeVisualEffects(builder);
-		builder.services.registerService(TooltipController);
 
 		LoadingController.show("Waiting for server");
 		while (!(Workspace.HasTag("GameLoaded") as boolean | undefined)) {
