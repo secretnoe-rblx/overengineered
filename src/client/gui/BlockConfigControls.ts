@@ -141,6 +141,7 @@ namespace Controls {
 		readonly ByteArray: ConfigValueDefinition<GuiButton>;
 		readonly Key: ConfigValueDefinition<KeyOrStringChooserControlDefinition>;
 		readonly Color: ConfigValueDefinition<ColorChooserDefinition>;
+		readonly Dropdown: ConfigValueDefinition<undefined> & DropdownListDefinition;
 		readonly Multi: ConfigValueDefinition<GuiObject>;
 		readonly Controllable: ConfigValueDefinition<ControllableDefinition>;
 
@@ -161,6 +162,7 @@ namespace Controls {
 		ByteArray: Control.asTemplateWithMemoryLeak(template.Content.ByteArray, true),
 		Key: Control.asTemplateWithMemoryLeak(template.Content.Key, true),
 		Color: Control.asTemplateWithMemoryLeak(template.Content.Color, true),
+		Dropdown: Control.asTemplateWithMemoryLeak(template.Content.Dropdown, true),
 		Multi: Control.asTemplateWithMemoryLeak(template.Content.Multi, true),
 		Controllable: Control.asTemplateWithMemoryLeak(template.Content.Controllable, true),
 
@@ -499,10 +501,11 @@ namespace Controls {
 					}
 
 					if (keys.mapToSet((k) => k.key).size() !== keys.size()) {
-						// some keys are the same
+						// if some keys are the same
 						keys = [...definition.control.config.keys];
 					}
 
+					keys[1] = { ...keys[1], value: 0 };
 					return { ...config, keys };
 				};
 				const getKeysArr = (keys: { readonly add?: string; readonly sub?: string }) => {
@@ -557,6 +560,110 @@ namespace Controls {
 			}
 		}
 
+		export class NumberMotorRotationSpeedControl extends Base<GuiObject, "number"> {
+			constructor(
+				templates: templates,
+				definition: MakeRequired<MiniPrimitives["number"], "control">,
+				config: BlocksConfigPart<"number">,
+				args: Args,
+			) {
+				super(templates.Multi());
+
+				const processConfig = (
+					config: BlockLogicTypes.NumberControl["config"],
+				): BlockLogicTypes.NumberControl["config"] => {
+					let keys = [...config.keys];
+					while (keys.size() > 2) {
+						keys.pop();
+					}
+					while (keys.size() < 2) {
+						keys.push(definition.control.config.keys[keys.size()]);
+					}
+
+					if (keys.mapToSet((k) => k.key).size() !== keys.size()) {
+						// if some keys are the same
+						keys = [...definition.control.config.keys];
+					}
+
+					keys[1] = { ...keys[1], value: 0 };
+					return { ...config, keys };
+				};
+				const getKeysArr = (keys?: { readonly add?: string; readonly sub?: string }, speed?: number) => {
+					return map(controlConfig, (c) => [
+						{ ...c.keys[0], key: keys?.add ?? c.keys[0].key, value: speed ?? 100 },
+						{ ...c.keys[1], key: keys?.sub ?? c.keys[1].key, value: 0 },
+					]);
+				};
+
+				let controlConfig = map(config, (c) => processConfig(c.controlConfig!));
+
+				const mks = addMultiKeyControls(
+					this,
+					[
+						{
+							key: "add",
+							displayName: "+",
+							definition: { config: definition.control.config.keys[0].key },
+							config: map(controlConfig, (c) => c.keys[0].key),
+						},
+						{
+							key: "sub",
+							displayName: "-",
+							definition: { config: definition.control.config.keys[1].key },
+							config: map(controlConfig, (c) => c.keys[1].key),
+						},
+					],
+					args,
+				);
+				mks.submitted.Connect((v) => {
+					const keys = getKeysArr(v);
+					this.submittedControl.Fire(
+						(controlConfig = map(controlConfig, (c, uuid) => ({ ...c, keys: keys[uuid] }))),
+					);
+				});
+
+				const [, cMaxSpeed] = addSingleTypeWrapperAuto(
+					this,
+					"Max speed",
+					{
+						type: "number",
+						config: definition.config,
+						clamp: { showAsSlider: true, min: definition.control.min, max: definition.control.max },
+					},
+					map(controlConfig, (c) => c.keys[0].value),
+					args,
+				);
+				cMaxSpeed.submitted.Connect((v) => {
+					// on submit, all values should be the same anyways
+					const speed = firstValue(v)!;
+
+					const keys = getKeysArr(undefined, speed);
+					this.submittedControl.Fire(
+						(controlConfig = map(controlConfig, (c, uuid) => ({
+							...c,
+							keys: keys[uuid],
+						}))),
+					);
+				});
+
+				const [, cSwitch] = addSingleTypeWrapperAuto(
+					this,
+					"Switch mode",
+					{ type: "bool", config: definition.control.config.mode.type === "switch" },
+					map(controlConfig, (c) => c.mode.type === "switch"),
+					args,
+				);
+				cSwitch.submitted.Connect((v) =>
+					this.submittedControl.Fire(
+						(controlConfig = map(controlConfig, (c, uuid) => ({
+							...c,
+							mode: v[uuid] ? { type: "switch" } : definition.control.config.mode,
+						}))),
+					),
+				);
+			}
+		}
+
 		export class NumberExtendedControl extends Base<GuiObject, "number"> {
 			constructor(
 				templates: templates,
@@ -566,7 +673,7 @@ namespace Controls {
 			) {
 				super(templates.Multi());
 
-				const controlConfig = map(config, (c) => c.controlConfig!);
+				let controlConfig = map(config, (c) => c.controlConfig!);
 
 				const keysConfig = map(controlConfig, (c) => c.keys);
 				const firstval = firstValue(keysConfig);
@@ -591,6 +698,93 @@ namespace Controls {
 					),
 				);
 				wKeys.typeColor.set(Colors.red);
+				cKeys.submitted.Connect((v) =>
+					this.submittedControl.Fire((controlConfig = map(controlConfig, (c) => ({ ...c, keys: v })))),
+				);
+
+				const dropdownContent: Control[] = [];
+				const createModeDropdown = () => {
+					type Modes = BlockLogicTypes.NumberControlModes;
+					type ModeKeys = Modes["type"];
+					const redrawMode = (mode: Modes) => {
+						for (const control of dropdownContent) {
+							control.destroy();
+						}
+						dropdownContent.clear();
+
+						if (mode.type === "smooth") {
+							const [wSpeed, cSpeed] = addSingleTypeWrapperAuto(
+								this,
+								"Speed",
+								{
+									type: "number",
+									config: mode.speed,
+									clamp: {
+										showAsSlider: true,
+										min: 0,
+										max: definition.control.max,
+									},
+								},
+								map(controlConfig, () => mode.speed),
+								args,
+							);
+
+							dropdownContent.push(wSpeed);
+							cSpeed.submitted.Connect((v) =>
+								this.submittedControl.Fire(
+									(controlConfig = map(controlConfig, (c, uuid) => ({
+										...c,
+										mode: { type: "smooth", speed: v[uuid] },
+									}))),
+								),
+							);
+						}
+					};
+
+					const [wType, cType] = addSingleTypeWrapper(this, new DropdownList<ModeKeys>(templates.Dropdown()));
+					wType.typeColor.set(Colors.red);
+					setWrapperName(cType as never, "Control type");
+
+					cType.addItem("hold");
+					cType.addItem("switch");
+					cType.addItem("smooth");
+
+					const selectedModes = new ReadonlySet(asMap(map(controlConfig, (c) => c.mode.type)).values());
+					if (selectedModes.size() > 1) {
+						cType.selectedItem.set(undefined);
+					} else {
+						const selected = firstValue(controlConfig)!.mode;
+						cType.selectedItem.set(selected.type);
+					}
+
+					const modeDefaults: { readonly [k in ModeKeys]: Extract<Modes, { readonly type: k }> } = {
+						hold: {
+							type: "hold",
+						},
+						switch: {
+							type: "switch",
+						},
+						smooth: {
+							type: "smooth",
+							speed: (definition.control.max - definition.control.min) / 5,
+						},
+						[definition.control.config.mode.type]: definition.control.config.mode,
+					};
+
+					cType.submitted.Connect((item) => {
+						this.submittedControl.Fire(
+							(controlConfig = map(controlConfig, (c) => ({ ...c, mode: modeDefaults[item] }))),
+						);
+
+						redrawMode(modeDefaults[item]);
+					});
+
+					const selected = cType.selectedItem.get();
+					if (selected) {
+						redrawMode(modeDefaults[selected]);
+					}
+				};
+				createModeDropdown();
 			}
 		}
 
@@ -1013,23 +1207,6 @@ namespace Controls {
 			) => Base<GuiObject, PrimitiveKeys>;
 		};
 
-		export type simpleControls = {
-			readonly [k in ControlKeys]?: (
-				templates: templates,
-				definition: MakeRequired<WithoutDefaultControls[k] & { control?: unknown }, "control">,
-				config: BlocksConfigPart<k>,
-				parent: Args,
-			) => Base<GuiObject, k>;
-		};
-		export type simpleGenericControls = {
-			readonly [k in ControlKeys]?: (
-				templates: templates,
-				definition: MakeRequired<WithoutDefaultControls[ControlKeys], "control">,
-				config: BlocksConfigPart<PrimitiveKeys>,
-				parent: Args,
-			) => Base<GuiObject, ControlKeys>;
-		};
-
 		export type extendedControls = {
 			readonly [k in ControlKeys]?: (
 				templates: templates,
@@ -1095,10 +1272,13 @@ namespace Controls {
 			if (definition.control.simplified === "thrust") {
 				return new Controls.NumberThrustControl(templates, definition, config, parent);
 			}
+			if (definition.control.simplified === "motorRotationSpeed") {
+				return new Controls.NumberMotorRotationSpeedControl(templates, definition, config, parent);
+			}
 
 			return undefined!;
 		},
-	} satisfies Controls.simpleControls as Controls.simpleGenericControls;
+	} satisfies Controls.extendedControls as Controls.extendedGenericControls;
 
 	export const extendedControls = {
 		number: (templates, definition, config, parent) =>
@@ -1371,21 +1551,18 @@ class ConfigAutoValueWrapper extends Control<ConfigValueWrapperDefinition> {
 						args,
 					);
 				}
-				if (isExtended) {
-					if (!(stype in Controls.extendedControls)) return;
 
-					const ctor = Controls.extendedControls[stype as ControlKeys];
-					if (!ctor) return;
+				if (!(stype in Controls.extendedControls)) return;
 
-					return ctor(
-						Controls.templates,
-						def as MakeRequired<MiniPrimitives["number"], "control">,
-						configs,
-						args,
-					);
-				}
+				const ctor = Controls.extendedControls[stype as ControlKeys];
+				if (!ctor) return;
 
-				// TODO:
+				return ctor(
+					Controls.templates,
+					def as MakeRequired<MiniPrimitives["number"], "control">,
+					configs,
+					args,
+				);
 			};
 			const cfgcontrol = createGui();
 			if (!cfgcontrol) return;
@@ -1414,22 +1591,23 @@ class ConfigAutoValueWrapper extends Control<ConfigValueWrapperDefinition> {
 			control.content.set(cfgcontrol);
 		};
 
-		this.event.subscribeObservable(selectedType, reload);
-		this.event.subscribe(control.controllable.submitted, reload);
-		this.event.subscribe(control.extended.submitted, reload);
-		this.onEnable(reload);
-
-		// controlConfig will not be undefined if the controls are visible so we don't need to check that
-		this.event.subscribe(control.controllable.submitted, (enabled) =>
+		this.event.subscribe(control.controllable.submitted, (enabled) => {
+			// controlConfig will not be undefined if the controls are visible so we don't need to check that
 			this._submitted.Fire(
 				(configs = map(configs, (c) => ({ ...c, controlConfig: { ...c.controlConfig!, enabled } }))),
-			),
-		);
-		this.event.subscribe(control.extended.submitted, (extended) =>
+			);
+			reload();
+		});
+		this.event.subscribe(control.extended.submitted, (extended) => {
+			// controlConfig will not be undefined if the controls are visible so we don't need to check that
 			this._submitted.Fire(
 				(configs = map(configs, (c) => ({ ...c, controlConfig: { ...c.controlConfig!, extended } }))),
-			),
-		);
+			);
+			reload();
+		});
+
+		this.event.subscribeObservable(selectedType, reload);
+		this.onEnable(reload);
 	}
 }
 

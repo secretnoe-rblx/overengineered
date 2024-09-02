@@ -1147,7 +1147,7 @@ const test: {} = !RunService.IsStudio()
 												extended: false,
 												mode: {
 													type: "smooth",
-													speed: 0.2,
+													speed: 1,
 												},
 												keys: [
 													{ key: "R", value: 10 },

@@ -99,7 +99,7 @@ export namespace BlockLogicTypes {
 	type NumberControlModeSwitch = {
 		readonly type: "switch";
 	};
-	type NumberControlModes = NumberControlModeSmooth | NumberControlModeHold | NumberControlModeSwitch;
+	export type NumberControlModes = NumberControlModeSmooth | NumberControlModeHold | NumberControlModeSwitch;
 
 	export type NumberControlKey = {
 		readonly key: string | KeyCode;

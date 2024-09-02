@@ -89,10 +89,13 @@ export class MultiKeyNumberControl extends Control<MultiKeyNumberControlDefiniti
 
 		const submit = () => {
 			const values = children.getAll().map((c) => c.value.get());
+
+			config = values;
+			print("subm", values);
 			this._submitted.Fire(values);
 		};
 
-		const add = (key?: string | KeyCode, value?: number) => {
+		const add = (key?: string | KeyCode, value?: number, doSubmit = true) => {
 			key ??= generateKey(config);
 			if (!key) return;
 
@@ -101,8 +104,9 @@ export class MultiKeyNumberControl extends Control<MultiKeyNumberControlDefiniti
 			const control = new MultiKeyPartControl(template(), key, value, numberMin, numberMax);
 			children.add(control);
 
+			control.value.submitted.Connect(submit);
 			control.deleted.Connect(() => remove(control));
-			submit();
+			if (doSubmit) submit();
 		};
 		const remove = (control: MultiKeyPartControl) => {
 			children.remove(control);
@@ -110,7 +114,9 @@ export class MultiKeyNumberControl extends Control<MultiKeyNumberControlDefiniti
 		};
 
 		for (const { key, value } of config) {
-			add(key, value);
+			add(key, value, false);
 		}
+
+		this.add(new ButtonControl(gui.Add.Button, add));
 	}
 }

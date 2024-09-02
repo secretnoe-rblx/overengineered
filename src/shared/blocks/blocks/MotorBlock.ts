@@ -16,6 +16,7 @@ const definition = {
 					control: {
 						min: 0,
 						max: 150,
+						simplified: "motorRotationSpeed",
 						config: {
 							enabled: true,
 							extended: false,

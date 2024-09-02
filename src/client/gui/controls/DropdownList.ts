@@ -34,7 +34,7 @@ export class DropdownList<TValue extends string = string> extends Control<Dropdo
 		this.event.subscribe(this.button.activated, () => this.toggle());
 		this.event.subscribeObservable(
 			this.selectedItem,
-			(v) => this.button.text.set(v === undefined ? "" : this.names.get(v) ?? v),
+			(v) => this.button.text.set(v === undefined ? "" : (this.names.get(v) ?? v)),
 			true,
 		);
 	}
