@@ -1265,18 +1265,7 @@ namespace Controls {
 	export const controls = {
 		unset: (templates, definition, config, parent) => new Controls.unset(templates),
 		wire: (templates, definition, config, parent) => new Controls.wire(templates, definition, config, parent),
-		bool: (templates, definition, config, parent, fullConfig) => {
-			if (definition.control) {
-				return new Controls.KeyBool(
-					templates,
-					definition.control,
-					map(fullConfig, (c) => c.controlConfig!),
-					parent,
-				);
-			}
-
-			return new Controls.bool(templates, definition, config);
-		},
+		bool: (templates, definition, config, parent) => new Controls.bool(templates, definition, config),
 		number: (templates, definition, config) => {
 			if (definition.clamp?.showAsSlider) {
 				return new Controls.ClampedNumber(
@@ -1310,6 +1299,13 @@ namespace Controls {
 	} satisfies Controls.extendedControls as Controls.extendedGenericControls;
 
 	export const extendedControls = {
+		bool: (templates, definition, config, parent) =>
+			new Controls.KeyBool(
+				templates,
+				definition.control,
+				map(config, (c) => c.controlConfig!),
+				parent,
+			),
 		number: (templates, definition, config, parent) =>
 			new Controls.NumberExtendedControl(templates, definition, config, parent),
 	} satisfies Controls.extendedControls as Controls.extendedGenericControls;
