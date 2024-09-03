@@ -600,7 +600,7 @@ const trigonometry = {
 	deg: {
 		displayName: "To degrees",
 		description: "Returns input value converted from radians to degrees",
-		modelSource: autoModel("GenericLogicBlockPrefab", "DEF", categories.trigonometry),
+		modelSource: autoModel("GenericLogicBlockPrefab", "DEG", categories.trigonometry),
 		logic: logic(defs.num1_num, ({ value }) => ({
 			result: { type: "number", value: math.deg(value) },
 		})),
