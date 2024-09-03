@@ -481,18 +481,23 @@ export abstract class CalculatableBlockLogic<TDef extends BlockLogicBothDefiniti
 
 	private recalculateOutputs(
 		ctx: BlockLogicTickContext,
+		forceGet = false,
 	): AllOutputKeysToObject<TDef["output"]> | BlockLogicValueResults {
 		if (ctx.tick === this.resultsCacheTick && this.cachedResults) {
 			return this.cachedResults;
 		}
 
-		const inputs = inputValuesToFullObject(ctx, this.input, undefined, true);
+		const inputs = inputValuesToFullObject(ctx, this.input, undefined, !forceGet);
 		if (isCustomBlockLogicValueResult(inputs)) {
 			this.cachedResults = inputs;
 			return inputs;
 		}
 		if (inputs === "$UNCHANGED") {
 			if (!this.cachedResults) {
+				if (!forceGet) {
+					return this.recalculateOutputs(ctx, true);
+				}
+
 				throw `Block inputs returned $UNCHANGED on tick ${ctx.tick} for block uuid ${this.instance?.Name}`;
 			}
 
