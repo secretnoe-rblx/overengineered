@@ -46,8 +46,9 @@ class Logic extends InstanceBlockLogic<typeof definition, HeliumModel> {
 		this.part = this.instance.Part;
 		this.vectorForce = this.part.VectorForce;
 
+		const densityCache = this.initializeInputCache("density");
 		const update = () => {
-			const density = this.cached.tryGetInput("density")?.value;
+			const density = densityCache.tryGet();
 			if (!density) return;
 
 			//tick works when block works

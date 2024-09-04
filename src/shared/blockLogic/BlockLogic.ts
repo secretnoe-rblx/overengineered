@@ -120,6 +120,9 @@ export type AllOutputKeysToObject<TDef extends BlockLogicOutputDefs> = {
 	readonly [k in string & keyof TDef]: Omit<TypedValue<TDef[k]["types"][number]>, "changedSinceLastTick">;
 };
 
+type OutputBlockLogicValues<TDef extends BlockLogicOutputDefs> = {
+	readonly [k in keyof TDef]: LogicValueOutputStorageContainer<PrimitiveKeys & TDef[k]["types"][number]>;
+};
 type ReadonlyBlockLogicValues<TDef extends BlockLogicInputDefs> = {
 	readonly [k in keyof TDef]: ReadonlyLogicValueStorage<PrimitiveKeys & keyof (TDef[k]["types"] & defined)>;
 };
@@ -196,15 +199,15 @@ export type BlockLogicTickContext = {
 export type BlockLogicArgs = {
 	readonly instance?: BlockModel;
 };
+
 export abstract class BlockLogic<TDef extends BlockLogicBothDefinitions> extends Component {
 	private readonly _input: Writable<ReadonlyBlockLogicValues<TDef["input"]>>;
 	readonly input: ReadonlyBlockLogicValues<TDef["input"]>;
 
-	private readonly _output: IBlockLogicValues<TDef["output"]>;
-	readonly output: WriteonlyBlockLogicValues<TDef["output"]>;
+	private readonly _output: OutputBlockLogicValues<TDef["output"]>;
+	protected readonly output: OutputBlockLogicValues<TDef["output"]>;
 
 	private readonly ticked = new ArgsSignal<[ctx: BlockLogicTickContext]>();
-	private cachedInputs?: AllInputKeysToObject<TDef["input"], keyof TDef["input"]>;
 
 	readonly instance?: BlockModel;
 
@@ -227,49 +230,27 @@ export abstract class BlockLogic<TDef extends BlockLogicBothDefinitions> extends
 			() => new LogicValueOutputStorageContainer<PrimitiveKeys>(),
 		) as typeof this._output;
 		this.output = this._output;
-
-		this.on((ctx) => (this.cachedInputs = ctx));
 	}
 
-	/** Methods for getting the cached input&output values */
-	readonly cached = {
-		getFullInput: () => {
-			if (!this.cachedInputs) {
-				throw `Trying to get the unset cached inputs in block ${this.instance?.Name}`;
-			}
+	protected initializeInputCache<K extends keyof TDef["input"]>(key: K) {
+		type ttypes = keyof TDef["input"][K]["types"] & PrimitiveKeys;
+		type tvalue = Primitives[ttypes]["default"];
 
-			return this.cachedInputs;
-		},
-		tryGetFullInput: () => this.cachedInputs,
+		let value: unknown;
+		let valueType: unknown;
 
-		getInput: <TKey extends keyof TDef["input"]>(
-			key: TKey,
-		): Omit<TypedValue<keyof TDef["input"][TKey]["types"] & PrimitiveKeys>, "changedSinceLastTick"> => {
-			const value = this.cachedInputs?.[key];
-			const valueType = this.cachedInputs?.[`${tostring(key)}Type`];
-			if (!valueType || value === undefined) {
-				throw `Tried to get an unset cached input in block ${this.instance?.Name} `;
-			}
+		this.onk([key], (ctx) => {
+			value = ctx[key];
+			valueType = ctx[`${tostring(key)}Type` as never];
+		});
 
-			return { type: valueType as never, value: value as never };
-		},
-		tryGetInput: <TKey extends keyof TDef["input"]>(
-			key: TKey,
-		): Omit<TypedValue<keyof TDef["input"][TKey]["types"] & PrimitiveKeys>, "changedSinceLastTick"> | undefined => {
-			const value = this.cachedInputs?.[key];
-			const valueType = this.cachedInputs?.[`${tostring(key)}Type`];
-			if (!valueType || value === undefined) {
-				return undefined;
-			}
-
-			return { type: valueType as never, value: value as never };
-		},
-
-		getOutput: <TKey extends keyof TDef["output"]>(key: TKey) =>
-			(this.output[key] as LogicValueOutputStorageContainer<TDef["output"][TKey]["types"][number]>).justGet(),
-		tryGetOutput: <TKey extends keyof TDef["output"]>(key: TKey) =>
-			(this.output[key] as LogicValueOutputStorageContainer<TDef["output"][TKey]["types"][number]>).tryJustGet(),
-	} as const;
+		return {
+			get: () => value as tvalue,
+			tryGet: () => value as tvalue | undefined,
+			getType: () => valueType as ttypes,
+			tryGetType: () => valueType as ttypes | undefined,
+		};
+	}
 
 	protected subscribeOnDestroyed(instance: Instance, func: () => void) {
 		const update = () => {

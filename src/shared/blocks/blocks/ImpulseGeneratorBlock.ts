@@ -48,7 +48,7 @@ class Logic extends BlockLogic<typeof definition> {
 	constructor(block: BlockLogicArgs) {
 		super(definition, block);
 
-		const get = () => this.cached.getOutput("value").value;
+		const get = () => this.output.value.justGet().value;
 		const set = (value: boolean) => this.output.value.set("bool", value);
 
 		this.onk(["isInverted"], ({ isInverted }) => set(!isInverted));

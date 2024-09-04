@@ -5,6 +5,7 @@ import { RadioTransmitterBlock } from "shared/blocks/blocks/RadioTransmitterBloc
 import { Colors } from "shared/Colors";
 import { Objects } from "shared/fixes/objects";
 import type { BlockLogicArgs, BlockLogicFullBothDefinitions } from "shared/blockLogic/BlockLogic";
+import type { BlockLogicTypes } from "shared/blockLogic/BlockLogicTypes";
 import type { BlockBuilder } from "shared/blocks/Block";
 
 const definition = {
@@ -34,7 +35,7 @@ const definition = {
 
 RadioTransmitterBlock.logic.ctor.sendEvent.invoked.Connect(({ frequency, value, valueType }) => {
 	Logic.allReceivers.get(frequency)?.forEach((v) => {
-		v.output.value.set(valueType, value);
+		v.setOutput(valueType, value);
 		v.blinkLed();
 	});
 });
@@ -68,6 +69,13 @@ class Logic extends BlockLogic<typeof definition> {
 		});
 
 		this.onDisable(() => Logic.allReceivers.get(prevFrequency)?.delete(this));
+	}
+
+	setOutput(
+		valueType: (typeof definition.output.value.types)[number],
+		value: BlockLogicTypes.Primitives[(typeof definition.output.value.types)[number]]["default"],
+	) {
+		this.output.value.set(valueType, value);
 	}
 
 	blinkLed() {

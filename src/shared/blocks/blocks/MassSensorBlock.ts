@@ -32,25 +32,29 @@ class Logic extends InstanceBlockLogic<typeof definition> {
 	constructor(block: InstanceBlockLogicArgs) {
 		super(definition, block);
 
-		this.event.subscribe(DisconnectBlock.logic.ctor.events.disconnect.clientInvoked, () => this.update());
-		this.event.subscribe(RemoteEvents.ImpactBreak.clientInvoked, () => this.update());
+		const assemblyOnlyCache = this.initializeInputCache("assemblyonly");
 
-		this.onStart(() => this.update());
-	}
+		const update = () => {
+			if (!this.instance.PrimaryPart) {
+				this.disable();
+				return;
+			}
 
-	private update() {
-		if (!this.instance.PrimaryPart) {
-			this.disable();
-			return;
-		}
+			const assemblyOnly = assemblyOnlyCache.tryGet();
+			if (!assemblyOnly) return;
 
-		const assemblyOnly = this.cached.tryGetInput("assemblyonly")?.value;
-		if (!assemblyOnly) return;
+			this.output.result.set(
+				"number",
+				RobloxUnit.RMU_To_Kilograms(
+					assemblyOnly ? this.instance.PrimaryPart.AssemblyMass : this.getBuildingMass(),
+				),
+			);
+		};
 
-		this.output.result.set(
-			"number",
-			RobloxUnit.RMU_To_Kilograms(assemblyOnly ? this.instance.PrimaryPart.AssemblyMass : this.getBuildingMass()),
-		);
+		this.event.subscribe(DisconnectBlock.logic.ctor.events.disconnect.clientInvoked, update);
+		this.event.subscribe(RemoteEvents.ImpactBreak.clientInvoked, update);
+
+		this.onStart(update);
 	}
 
 	private getBuildingMass() {

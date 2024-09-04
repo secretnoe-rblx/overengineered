@@ -154,6 +154,8 @@ class Logic extends InstanceBlockLogic<typeof definition, RCSEngineModel> {
 		this.maxPower = this.basePower * multiplier;
 		//this.output.maxpower.set(this.maxPower);
 
+		const trailColorCache = this.initializeInputCache("trailColor");
+
 		const setEngineThrust = (engine: singleEngineConfiguration, thrustPercentage: number) => {
 			if (!engine.particleEmitter.Fire) return;
 			// Force
@@ -190,7 +192,7 @@ class Logic extends InstanceBlockLogic<typeof definition, RCSEngineModel> {
 				});
 			}
 			if (particleEmmiterHasDifference) {
-				const trailColor = this.cached.tryGetInput("trailColor")?.value;
+				const trailColor = trailColorCache.tryGet();
 
 				this.particleEffect.send(this.instance.PrimaryPart!, {
 					particle: engine.particleEmitter?.Fire,

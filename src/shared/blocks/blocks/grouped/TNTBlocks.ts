@@ -87,15 +87,24 @@ class Logic extends InstanceBlockLogic<typeof definition> {
 			doExplode(radius, pressure, flammable);
 		});
 
+		let radius: number | undefined;
+		let pressure: number | undefined;
+		let flammable: boolean | undefined;
+		this.onk(
+			["radius", "pressure", "flammable"],
+			(ctx) => ([radius, pressure, flammable] = [ctx.radius, ctx.pressure, ctx.flammable]),
+		);
+
 		this.event.subscribe(this.instance.PrimaryPart!.Touched, (part) => {
-			const ctx = this.cached.tryGetFullInput();
-			if (!ctx) return;
+			if (radius === undefined || pressure === undefined || flammable === undefined) {
+				return;
+			}
 
 			const velocity1 = this.instance.PrimaryPart!.AssemblyLinearVelocity.Magnitude;
 			const velocity2 = part.AssemblyLinearVelocity.Magnitude;
 
 			if (velocity1 > (velocity2 + 1) * 10) {
-				doExplode(ctx.radius, ctx.pressure, ctx.flammable);
+				doExplode(radius, pressure, flammable);
 			}
 		});
 	}

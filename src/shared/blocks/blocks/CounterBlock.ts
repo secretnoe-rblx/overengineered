@@ -55,7 +55,7 @@ class Logic extends BlockLogic<typeof definition> {
 	constructor(block: BlockLogicArgs) {
 		super(definition, block);
 
-		const get = () => this.cached.getOutput("value").value;
+		const get = () => this.output.value.justGet().value;
 		const set = (value: number) => this.output.value.set("number", value);
 
 		this.onkStart(["value"], ({ value }) => set(value));

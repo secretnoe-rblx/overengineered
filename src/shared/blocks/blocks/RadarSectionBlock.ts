@@ -113,9 +113,10 @@ class Logic extends InstanceBlockLogic<typeof definition> {
 			);
 		});
 
+		const minimalDistanceCache = this.initializeInputCache("minimalDistance");
 		this.event.subscribe(view.Touched, (part) => {
 			if (part.HasTag("RADARVIEW")) return;
-			const minimalDistance = this.cached.tryGetInput("minimalDistance")?.value;
+			const minimalDistance = minimalDistanceCache.tryGet();
 			if (!minimalDistance) return;
 
 			if (this.getDistanceTo(part).Magnitude < minimalDistance) return;

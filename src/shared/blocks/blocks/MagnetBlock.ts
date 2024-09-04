@@ -79,7 +79,7 @@ RunService.PostSimulation.Connect((dt) => {
 
 	for (let i = 0; i < magnets.size(); i++) {
 		const magneti = magnets[i];
-		const strength1 = (magneti.cached.tryGetFullInput()?.strength ?? 0) * magicNumber * dt;
+		const strength1 = magneti.getStrength() * magicNumber * dt;
 		if (strength1 === 0) continue;
 
 		for (let j = i + 1; j < magnets.size(); j++) {
@@ -88,7 +88,7 @@ RunService.PostSimulation.Connect((dt) => {
 				continue;
 			}
 
-			const strength2 = (magnetj.cached.tryGetFullInput()?.strength ?? 0) * magicNumber * dt;
+			const strength2 = magnetj.getStrength() * magicNumber * dt;
 			if (strength2 === 0) continue;
 
 			const calculatedForce = calculateForce(magneti, magnetj);
@@ -113,11 +113,13 @@ export type { Logic as MagnetBlockLogic };
 class Logic extends InstanceBlockLogic<typeof definition> {
 	polarity = false;
 	readonly part;
+	private strength = 0;
 
 	constructor(block: InstanceBlockLogicArgs) {
 		super(definition, block);
 		this.part = this.instance.WaitForChild("Part") as BasePart;
 
+		this.onk(["strength"], ({ strength }) => (this.strength = strength));
 		this.onk(["invertPolarity"], ({ invertPolarity }) => {
 			this.polarity = invertPolarity;
 			PartUtils.applyToAllDescendantsOfType(
@@ -129,6 +131,10 @@ class Logic extends InstanceBlockLogic<typeof definition> {
 
 		this.onEnable(() => magnets.push(this));
 		forcesApplied.set(this, Vector3.zero);
+	}
+
+	getStrength(): number {
+		return this.strength;
 	}
 
 	destroy() {
