@@ -1,4 +1,5 @@
 import { Players, ReplicatedStorage, RunService, ServerScriptService } from "@rbxts/services";
+import { Logger } from "shared/Logger";
 
 export type UnitTest = (di: DIContainer) => unknown;
 export type UnitTestList = {
@@ -42,37 +43,31 @@ export namespace TestFramework {
 		return (ts.import(script, mscript) as { _Tests: UnitTests })._Tests;
 	}
 
-	export function runMultiple(name: string, test: UnitTestList, di: DIContainer, offset?: number): void {
-		offset ??= 0;
-
-		const offsetstr = string.rep(" ", offset);
-		$log(`${offsetstr}[${name}] Running`);
+	export function runMultiple(name: string, test: UnitTestList, di: DIContainer): void {
+		Logger.beginScope(name);
+		$log("Running");
 
 		for (const [name, tests] of pairs(test)) {
-			run(name, tests, di, offset + 1);
+			run(name, tests, di);
 		}
 
-		$log(`${offsetstr}[${name}] SUCCESS`);
+		$log("SUCCESS");
+		Logger.endScope();
 	}
-	export function run<T extends UnitTest>(
-		name: string,
-		test: T,
-		di: DIContainer,
-		offset?: number,
-	): ReturnType<T> | undefined {
-		offset ??= 0;
-
-		const offsetstr = string.rep(" ", offset);
-		$log(`${offsetstr}[${name}] Running`);
+	export function run<T extends UnitTest>(name: string, test: T, di: DIContainer): ReturnType<T> | undefined {
+		Logger.beginScope(name);
+		$log("Running");
 
 		try {
 			const result = test(di) as ReturnType<T>;
-			$log(`${offsetstr}[${name}] SUCCESS`);
+			$log("SUCCESS");
 
 			return result;
 		} catch (err) {
 			$err(tostring(err ?? "Unknown error"));
 			return undefined;
+		} finally {
+			Logger.endScope();
 		}
 	}
 }
