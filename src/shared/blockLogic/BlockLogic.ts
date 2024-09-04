@@ -85,7 +85,7 @@ export type BlockLogicFullBothDefinitions = {
 //
 
 export type GenericBlockLogicCtor<TDef extends BlockLogicBothDefinitions = BlockLogicFullBothDefinitions> = new (
-	block: PlacedBlockData,
+	block: InstanceBlockLogicArgs,
 	...args: any[]
 ) => GenericBlockLogic<TDef>;
 
@@ -131,7 +131,7 @@ type IBlockLogicValues<TDef extends BlockLogicOutputDefs> = {
 };
 
 const inputValuesToFullObject = <TDef extends BlockLogicBothDefinitions, TCheckUnchanged extends boolean>(
-	ctx: BlockLogicTickContext,
+	ctx: BlockLogicTickOnlyContext,
 	input: ReadonlyBlockLogicValues<TDef["input"]>,
 	keys: ReadonlySet<keyof TDef["input"]> | undefined,
 	checkUnchanged: TCheckUnchanged,
@@ -185,8 +185,13 @@ const inputValuesToFullObject = <TDef extends BlockLogicBothDefinitions, TCheckU
 	return result;
 };
 
+export type BlockLogicTickOnlyContext = Pick<BlockLogicTickContext, "tick">;
 export type BlockLogicTickContext = {
+	/** Current tick number */
 	readonly tick: number;
+
+	/** Time between the previous tick and the current one, seconds */
+	readonly dt: number;
 };
 export type BlockLogicArgs = {
 	readonly instance?: BlockModel;
@@ -229,7 +234,10 @@ export abstract class BlockLogic<TDef extends BlockLogicBothDefinitions> extends
 	/** Methods for getting the cached input&output values */
 	readonly cached = {
 		getFullInput: () => {
-			if (!this.cachedInputs) throw "Trying to get the unset cached inputs";
+			if (!this.cachedInputs) {
+				throw `Trying to get the unset cached inputs in block ${this.instance?.Name}`;
+			}
+
 			return this.cachedInputs;
 		},
 		tryGetFullInput: () => this.cachedInputs,
@@ -239,7 +247,9 @@ export abstract class BlockLogic<TDef extends BlockLogicBothDefinitions> extends
 		): Omit<TypedValue<keyof TDef["input"][TKey]["types"] & PrimitiveKeys>, "changedSinceLastTick"> => {
 			const value = this.cachedInputs?.[key];
 			const valueType = this.cachedInputs?.[`${tostring(key)}Type`];
-			if (!valueType || value === undefined) throw "Tried to get an unset cached input";
+			if (!valueType || value === undefined) {
+				throw `Tried to get an unset cached input in block ${this.instance?.Name} `;
+			}
 
 			return { type: valueType as never, value: value as never };
 		},
@@ -344,7 +354,7 @@ export abstract class BlockLogic<TDef extends BlockLogicBothDefinitions> extends
 
 	private calculatingRightNow = false;
 	getOutputValue(
-		ctx: BlockLogicTickContext,
+		ctx: BlockLogicTickOnlyContext,
 		key: keyof typeof this.output,
 	): TypedValue<TDef["output"][keyof TDef["output"]]["types"][number]> | BlockLogicValueResults {
 		if (this.calculatingRightNow) {
@@ -464,7 +474,7 @@ export abstract class CalculatableBlockLogic<TDef extends BlockLogicBothDefiniti
 
 	private calculatingRightNow2 = false;
 	override getOutputValue(
-		ctx: BlockLogicTickContext,
+		ctx: BlockLogicTickOnlyContext,
 		key: keyof TDef["output"],
 	): TypedValue<TDef["output"][keyof TDef["output"]]["types"][number]> | BlockLogicValueResults {
 		if (this.calculatingRightNow2) {
@@ -480,7 +490,7 @@ export abstract class CalculatableBlockLogic<TDef extends BlockLogicBothDefiniti
 	}
 
 	private recalculateOutputs(
-		ctx: BlockLogicTickContext,
+		ctx: BlockLogicTickOnlyContext,
 		forceGet = false,
 	): AllOutputKeysToObject<TDef["output"]> | BlockLogicValueResults {
 		if (ctx.tick === this.resultsCacheTick && this.cachedResults) {
@@ -521,6 +531,6 @@ export abstract class CalculatableBlockLogic<TDef extends BlockLogicBothDefiniti
 
 	protected abstract calculate(
 		inputs: AllInputKeysToObject<TDef["input"]>,
-		ctx: BlockLogicTickContext,
+		ctx: BlockLogicTickOnlyContext,
 	): AllOutputKeysToObject<TDef["output"]> | BlockLogicValueResults;
 }

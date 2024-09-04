@@ -7,6 +7,25 @@ export namespace Assert {
 		return text;
 	}
 
+	export function is<T, K extends keyof CheckableTypes>(
+		value: T,
+		valueType: K,
+		message?: string,
+	): asserts value is T & CheckableTypes[K] {
+		if (!typeIs(value, valueType)) {
+			throw addMessage(`Value is ${typeOf(value)}`, message);
+		}
+	}
+	export function isNot<T, K extends keyof CheckableTypes>(
+		value: T,
+		valueType: K,
+		message?: string,
+	): asserts value is Exclude<T, CheckableTypes[K]> {
+		if (typeIs(value, valueType)) {
+			throw addMessage(`Value is ${typeOf(value)}`, message);
+		}
+	}
+
 	export function notNull<T>(value: T, message?: string): asserts value is T & defined {
 		if (value === undefined) throw addMessage(`Value is undefined`, message);
 	}
@@ -48,6 +67,21 @@ export namespace Assert {
 			if (!leftcopy.delete(item)) {
 				throw addMessage(`Left set does not containt an item from the right set: ${item}`, message);
 			}
+		}
+	}
+
+	/** Asserts that all the properties of {@link properties} are the same as in the {@link object} */
+	export function propertiesEqual<T extends object, P extends object>(
+		object: T,
+		properties: P,
+		message?: string,
+	): asserts object is T & P {
+		for (const [k, v] of pairs(properties)) {
+			if (!(k in object)) {
+				throw addMessage(`Key ${tostring(k)} was not found in object ${object}`, message);
+			}
+
+			Assert.equals(object[k as never], v);
 		}
 	}
 

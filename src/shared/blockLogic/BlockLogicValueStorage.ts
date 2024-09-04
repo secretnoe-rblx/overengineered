@@ -1,10 +1,10 @@
 import { MathUtils } from "shared/fixes/MathUtils";
 import type {
-	BlockLogicTickContext,
 	BlockLogic,
 	BlockLogicBothDefinitions,
 	BlockLogicNoConfigDefinitionTypes,
 	BlockLogicFullInputDef,
+	BlockLogicTickOnlyContext,
 } from "shared/blockLogic/BlockLogic";
 import type { BlockLogicTypes } from "shared/blockLogic/BlockLogicTypes";
 
@@ -57,7 +57,7 @@ const filterValue = <TType extends PrimitiveKeys>(
 	valueType: TType,
 ): Primitives[TType]["default"] => {
 	if (!definitionTypes[valueType]) {
-		throw "Trying to filter an unknown type";
+		throw `Trying to filter an unknown type ${valueType}`;
 	}
 
 	const filter = Filters[valueType] as GenericFilter | undefined;
@@ -71,7 +71,7 @@ const filterValueArr = <TType extends PrimitiveKeys>(
 	valueType: TType,
 ): Primitives[TType]["default"] => {
 	if (!definitionTypes.includes(valueType)) {
-		throw "Trying to filter an unknown type";
+		throw `Trying to filter an unknown type ${valueType}`;
 	}
 
 	const filter = Filters[valueType] as GenericFilter | undefined;
@@ -89,7 +89,7 @@ type TypedValue<TTypes extends PrimitiveKeys> = {
 };
 
 export type ReadonlyLogicValueStorage<TTypes extends PrimitiveKeys> = {
-	get(ctx: BlockLogicTickContext): TypedValue<TTypes> | BlockLogicValueResults;
+	get(ctx: BlockLogicTickOnlyContext): TypedValue<TTypes> | BlockLogicValueResults;
 };
 export type WriteonlyLogicValueStorage<TTypes extends PrimitiveKeys> = {
 	set<TType extends TTypes & PrimitiveKeys>(valueType: TType, value: Primitives[TType]["default"]): void;
@@ -104,8 +104,9 @@ export class LogicValueOutputStorageContainer<TType extends PrimitiveKeys>
 	private value?: Omit<TypedValue<TType>, "changedSinceLastTick">;
 	private lastChangeTick?: number;
 	private changedThisTick = false;
+	private wasChanged = false;
 
-	get(ctx: BlockLogicTickContext): TypedValue<TType> | BlockLogicValueResults {
+	get(ctx: BlockLogicTickOnlyContext): TypedValue<TType> | BlockLogicValueResults {
 		if (!this.value) {
 			return BlockLogicValueResults.availableLater;
 		}
@@ -123,6 +124,7 @@ export class LogicValueOutputStorageContainer<TType extends PrimitiveKeys>
 	}
 	set<TType2 extends TType>(valueType: TType2, value: Primitives[TType2]["default"]): void {
 		this.changedThisTick = true;
+		this.wasChanged = true;
 
 		this.value = {
 			type: valueType,
@@ -132,7 +134,7 @@ export class LogicValueOutputStorageContainer<TType extends PrimitiveKeys>
 
 	justGet(): typeof this.value & defined {
 		if (this.value === undefined) {
-			throw "Trying to get an unset cached output";
+			throw "Trying to get an unset cached output " + this.wasChanged + "\n" + debug.traceback();
 		}
 
 		return this.value;
@@ -165,7 +167,7 @@ export class BlockBackedInputLogicValueStorage<TType extends PrimitiveKeys>
 		private readonly key: string,
 	) {}
 
-	get(ctx: BlockLogicTickContext): TypedValue<TType> | BlockLogicValueResults {
+	get(ctx: BlockLogicTickOnlyContext): TypedValue<TType> | BlockLogicValueResults {
 		const result = this.outputBlock.getOutputValue(ctx, this.key);
 		if (isCustomBlockLogicValueResult(result)) {
 			return result;
@@ -192,7 +194,7 @@ export const UnsetBlockLogicValueStorage: ReadonlyLogicValueStorage<PrimitiveKey
 
 const NewPrimitiveLogicValueStorage = <TType extends PrimitiveKeys>(valueType: TType) => {
 	return class extends FilteredLogicValueStorageContainer<TType> {
-		constructor(config: Primitives[TType]["config"], definition: Primitives[TType]) {
+		constructor(config: Primitives[TType]["config"], definition: OmitOverUnion<Primitives[TType], "default">) {
 			super({ [valueType]: definition } as unknown as BlockLogicNoConfigDefinitionTypes<TType>);
 			this.set(valueType, config);
 		}
@@ -202,7 +204,7 @@ const NewPrimitiveLogicValueStorage = <TType extends PrimitiveKeys>(valueType: T
 type ConfigBackedLogicValueStorage<TType extends PrimitiveKeys> = ReadonlyLogicValueStorage<TType>;
 type ConfigBackedLogicValueStorageCtor<TType extends PrimitiveKeys> = new (
 	config: Primitives[TType]["config"],
-	definition: Primitives[TType],
+	definition: OmitOverUnion<Primitives[TType], "default">,
 ) => ConfigBackedLogicValueStorage<TType>;
 export const LogicValueStorages: {
 	readonly [k in Exclude<PrimitiveKeys, "wire" | "unset">]: ConfigBackedLogicValueStorageCtor<k>;

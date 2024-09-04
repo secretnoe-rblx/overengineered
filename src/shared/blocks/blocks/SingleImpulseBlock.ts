@@ -32,7 +32,14 @@ class Logic extends BlockLogic<typeof definition> {
 			if (!wasImpulsedLastTick) return;
 			this.output.value.set("bool", false);
 		});
-		this.on(({ impulse }) => {
+
+		let lastValue: boolean | undefined = undefined;
+		this.on(({ impulse, impulseChanged }) => {
+			if (!impulseChanged) return;
+
+			if (lastValue === impulse) return;
+			lastValue = impulse;
+
 			if (!impulse) return;
 
 			wasImpulsedLastTick = true;

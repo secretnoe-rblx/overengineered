@@ -21,6 +21,12 @@ const definition = {
 			types: BlockConfigDefinitions.any,
 			group: "1",
 		},
+		defaultValue: {
+			displayName: "Default value",
+			types: BlockConfigDefinitions.any,
+			group: "1",
+			connectorHidden: true,
+		},
 	},
 	output: {
 		result: {
@@ -36,9 +42,16 @@ class Logic extends BlockLogic<typeof definition> {
 	constructor(block: BlockLogicArgs) {
 		super(definition, block);
 
-		this.on(({ value, valueType, set }) => {
-			if (!set) return;
-			this.output.result.set(valueType, value);
+		this.onk(["defaultValue"], ({ defaultValue, defaultValueType, defaultValueChanged }) => {
+			if (defaultValueChanged) {
+				this.output.result.set(defaultValueType, defaultValue);
+			}
+		});
+		this.onk(["value", "set"], ({ value, valueType, set }) => {
+			if (set) {
+				this.output.result.set(valueType, value);
+				return;
+			}
 		});
 	}
 }

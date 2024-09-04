@@ -11,6 +11,7 @@ import { Objects } from "shared/fixes/objects";
 import { Game } from "shared/GameHost";
 import { RemoteEvents } from "shared/RemoteEvents";
 import { CustomRemotes } from "shared/Remotes";
+import { TestFramework } from "shared/test/TestFramework";
 import { BulletProjectile } from "shared/weapons/BulletProjectileLogic";
 
 LoadingController.show("Initializing");
@@ -73,3 +74,10 @@ if (RunService.IsStudio() && Players.LocalPlayer.Name === "samlovebutter" && (fa
 		task.wait(0.1);
 	}
 }
+
+const testsName = "BlockTests";
+
+const testss = TestFramework.findAllTestScripts().map(TestFramework.loadTestsFromScript);
+const tests = testss.find((t) => testsName in t)?.[testsName];
+
+TestFramework.runMultiple("BlockLogic", tests!, host.services);

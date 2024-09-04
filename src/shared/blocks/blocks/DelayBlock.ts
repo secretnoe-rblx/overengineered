@@ -5,7 +5,7 @@ import type { BlockLogicFullBothDefinitions, InstanceBlockLogicArgs } from "shar
 import type { BlockBuilder } from "shared/blocks/Block";
 
 const definition = {
-	inputOrder: ["value", "duration"],
+	inputOrder: ["value", "duration", "tickBased"],
 	input: {
 		value: {
 			displayName: "Value",
@@ -17,6 +17,12 @@ const definition = {
 			displayName: "Duration",
 			types: BlockConfigDefinitions.number,
 		},
+		tickBased: {
+			displayName: "Delaying in ticks",
+			tooltip: "Controls whether the duration is measued in ticks (true) or seconds (false)",
+			types: BlockConfigDefinitions.bool,
+			connectorHidden: true,
+		},
 	},
 	output: {
 		result: {
@@ -27,19 +33,59 @@ const definition = {
 	},
 } satisfies BlockLogicFullBothDefinitions;
 
+type Wait = {
+	left: number;
+	readonly value: string | number | boolean | Vector3;
+	readonly valueType: "string" | "number" | "bool" | "vector3" | "byte";
+	readonly tickBased: boolean;
+};
+
 export type { Logic as DelayBlockLogic };
 class Logic extends InstanceBlockLogic<typeof definition> {
+	private readonly tickWaits: Wait[] = [];
+
 	constructor(block: InstanceBlockLogicArgs) {
 		super(definition, block);
 
-		this.on(({ value, valueType, valueChanged, duration }) => {
+		// let valueWasSet = false;
+		this.on(({ value, valueType, valueChanged, duration, tickBased }) => {
 			// should delay only when the value is changed
 			if (!valueChanged) return;
 
-			task.delay(duration, () => {
-				if (this.isDestroyed()) return;
-				this.output.result.set(valueType, value);
-			});
+			// DElETE BY THE RESULTS OF THE POLL
+			// if (!valueWasSet) {
+			// 	this.output.result.set(valueType, this.definition.input.value.types[valueType].config);
+			// }
+			// valueWasSet = true;
+
+			this.tickWaits.push({ left: duration, value, valueType, tickBased });
+		});
+
+		const toRemove: Wait[] = [];
+		this.onTick(({ dt }) => {
+			for (const wait of [...this.tickWaits]) {
+				if (wait.left <= 0) {
+					toRemove.push(wait);
+					this.output.result.set(wait.valueType, wait.value);
+					continue;
+				}
+
+				if (wait.tickBased) {
+					wait.left--;
+				} else {
+					wait.left -= dt;
+
+					if (wait.left <= 0) {
+						toRemove.push(wait);
+						this.output.result.set(wait.valueType, wait.value);
+					}
+				}
+			}
+
+			for (const wait of toRemove) {
+				this.tickWaits.remove(this.tickWaits.indexOf(wait));
+			}
+			toRemove.clear();
 		});
 	}
 }

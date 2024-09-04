@@ -7,9 +7,10 @@ export class BlockLogicRunner extends Component {
 	private readonly blocks = new Set<Logic>();
 	private tickingLoop?: SignalConnection;
 	private tickNumber = 0;
+	private lastTickTime?: number;
 
-	constructor() {
-		super();
+	getTick() {
+		return this.tickNumber;
 	}
 
 	startTicking() {
@@ -21,11 +22,15 @@ export class BlockLogicRunner extends Component {
 		this.tickingLoop = undefined;
 	}
 
-	tick() {
+	tick(overriddenDt?: number) {
 		this.tickNumber++;
+
+		const now = DateTime.now().UnixTimestampMillis / 1000;
+		this.lastTickTime ??= now;
 
 		const ctx: BlockLogicTickContext = {
 			tick: this.tickNumber,
+			dt: overriddenDt ?? this.lastTickTime - now,
 		};
 
 		for (const block of this.blocks) {

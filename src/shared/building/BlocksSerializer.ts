@@ -3,7 +3,7 @@ import { BlockManager } from "shared/building/BlockManager";
 import { JSON } from "shared/fixes/Json";
 import { Objects } from "shared/fixes/objects";
 import { Serializer } from "shared/Serializer";
-import type { PlacedBlockConfig } from "shared/blockLogic/BlockConfig";
+import type { BlockConfigPart, PlacedBlockConfig } from "shared/blockLogic/BlockConfig";
 import type { BlockLogicTypes } from "shared/blockLogic/BlockLogicTypes";
 import type { BlockConfigRegistry } from "shared/building/BlockConfigRegistrySave";
 import type { BuildingPlot } from "shared/building/BuildingPlot";
@@ -1016,6 +1016,7 @@ const v25: UpgradableBlocksSerializer<SerializedBlocks<SerializedBlockV4>, typeo
 					assert(def.type !== "multikey");
 
 					let ctype: keyof BlockLogicTypes.Primitives;
+					let controlConfig: BlockConfigPart<keyof BlockLogicTypes.Controls>["controlConfig"] | undefined;
 					if (def.type === "or") {
 						v = (v as { value: defined }).value;
 
@@ -1043,8 +1044,104 @@ const v25: UpgradableBlocksSerializer<SerializedBlocks<SerializedBlockV4>, typeo
 						def.type === "thrust"
 					) {
 						ctype = "number";
+
+						if (def.type === "motorRotationSpeed") {
+							const value = v as {
+								readonly rotation: {
+									readonly add: KeyCode;
+									readonly sub: KeyCode;
+								};
+								readonly speed: number;
+								readonly switchmode: boolean;
+							};
+
+							controlConfig = {
+								enabled: true,
+								extended: true,
+								keys: [
+									{ key: value.rotation.add, value: value.speed },
+									{ key: value.rotation.sub, value: -value.speed },
+								],
+								startValue: 0,
+								mode: { type: value.switchmode ? "switch" : "hold" },
+							} satisfies BlockConfigPart<"number">["controlConfig"];
+						} else if (def.type === "thrust") {
+							const value = v as {
+								readonly thrust: {
+									readonly add: KeyCode;
+									readonly sub: KeyCode;
+								};
+								readonly switchmode: boolean;
+							};
+
+							controlConfig = {
+								enabled: true,
+								extended: true,
+								keys: [
+									{ key: value.thrust.add, value: 100 },
+									{ key: value.thrust.sub, value: 0 },
+								],
+								startValue: 0,
+								mode: value.switchmode ? { type: "switch" } : { type: "smooth", speed: 20 },
+							} satisfies BlockConfigPart<"number">["controlConfig"];
+						} else if (def.type === "controllableNumber") {
+							const value = v as {
+								readonly value: number;
+								readonly control: {
+									readonly add: KeyCode;
+									readonly sub: KeyCode;
+								};
+							};
+
+							controlConfig = {
+								enabled: true,
+								extended: true,
+								keys: [
+									{ key: value.control.add, value: value.value },
+									{ key: value.control.sub, value: def.min },
+								],
+								startValue: 0,
+								mode: { type: "smooth", speed: 20 },
+							} satisfies BlockConfigPart<"number">["controlConfig"];
+						} else if (def.type === "servoMotorAngle") {
+							const value = v as {
+								readonly rotation: {
+									readonly add: KeyCode;
+									readonly sub: KeyCode;
+								};
+								readonly switchmode: boolean;
+								readonly angle: number;
+							};
+
+							controlConfig = {
+								enabled: true,
+								extended: true,
+								keys: [
+									{ key: value.rotation.add, value: value.angle },
+									{ key: value.rotation.sub, value: -value.angle },
+								],
+								startValue: 0,
+								mode: { type: value.switchmode ? "switch" : "hold" },
+							} satisfies BlockConfigPart<"number">["controlConfig"];
+						}
+
+						v = 0;
 					} else if (def.type === "keybool") {
 						ctype = "bool";
+						const value = v as {
+							readonly key: string;
+							readonly switch: boolean;
+							readonly reversed: boolean;
+						};
+
+						controlConfig = {
+							enabled: true,
+							key: value.key,
+							switch: value.switch,
+							reversed: value.reversed,
+						} satisfies BlockConfigPart<"bool">["controlConfig"];
+
+						v = false;
 					} else {
 						ctype = def.type;
 					}
@@ -1052,6 +1149,7 @@ const v25: UpgradableBlocksSerializer<SerializedBlocks<SerializedBlockV4>, typeo
 					return {
 						type: ctype,
 						config: v as never,
+						controlConfig,
 					};
 				}),
 				...Objects.mapValues(

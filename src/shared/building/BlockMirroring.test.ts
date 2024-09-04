@@ -1,6 +1,7 @@
 import { RunService, Workspace } from "@rbxts/services";
 import { BuildingManager } from "shared/building/BuildingManager";
 import { EventHandler } from "shared/event/EventHandler";
+import type { UnitTests } from "shared/test/TestFramework";
 
 const parent = new Instance("Folder", Workspace);
 parent.Name = "BlockMirroringTest";
@@ -28,35 +29,34 @@ const mirror = (di: DIContainer, blockid: BlockId, initialRotation?: CFrame) => 
 };
 
 const eventHandler = new EventHandler();
-export namespace _Tests {
-	const id: BlockId = "halfcornerwedge2x1";
+const id: BlockId = "halfcornerwedge2x1";
 
-	export namespace BlockMirroring {
-		export function cleanup() {
-			eventHandler.unsubscribeAll();
-			_cleanup();
-		}
+namespace BlockMirroringTest {
+	export function cleanup() {
+		eventHandler.unsubscribeAll();
+		_cleanup();
+	}
 
-		export function wingRotated(di: DIContainer) {
-			let time = 0;
+	export function wingRotated(di: DIContainer) {
+		let time = 0;
 
-			eventHandler.register(
-				RunService.Heartbeat.Connect((dt) => {
-					time += dt;
-					_cleanup();
+		eventHandler.register(
+			RunService.Heartbeat.Connect((dt) => {
+				time += dt;
+				_cleanup();
 
-					const rotation = CFrame.fromEulerAnglesXYZ((math.pi / 3) * time, (math.pi / 2) * time, 0);
-					mirror(di, id, rotation);
-				}),
-			);
-		}
-		export function object(di: DIContainer) {
-			cleanup();
-			mirror(di, id);
-		}
+				const rotation = CFrame.fromEulerAnglesXYZ((math.pi / 3) * time, (math.pi / 2) * time, 0);
+				mirror(di, id, rotation);
+			}),
+		);
+	}
+	export function object(di: DIContainer) {
+		cleanup();
+		mirror(di, id);
+	}
 
-		function _cleanup() {
-			parent.ClearAllChildren();
-		}
+	function _cleanup() {
+		parent.ClearAllChildren();
 	}
 }
+export const _Tests: UnitTests = { BlockMirroringTest };

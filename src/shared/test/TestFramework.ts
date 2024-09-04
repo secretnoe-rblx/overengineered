@@ -1,5 +1,13 @@
 import { Players, ReplicatedStorage, RunService, ServerScriptService } from "@rbxts/services";
 
+export type UnitTest = (di: DIContainer) => unknown;
+export type UnitTestList = {
+	readonly [k in string]: UnitTest;
+};
+export type UnitTests = {
+	readonly [k in string]: UnitTestList;
+};
+
 export namespace TestFramework {
 	export function findAllTestScripts(): readonly ModuleScript[] {
 		const ret: ModuleScript[] = [];
@@ -24,41 +32,47 @@ export namespace TestFramework {
 		return ret;
 	}
 
-	type Test = (di: DIContainer) => void;
-	type TestList = { readonly [k in string]: Test };
-	export type Tests = TestList | ((di?: DIContainer) => TestList);
-	export function loadTestsFromScript(mscript: ModuleScript): Tests {
+	export function loadTestsFromScript(mscript: ModuleScript): UnitTests {
 		const ts = require(
 			ReplicatedStorage.WaitForChild("rbxts_include").WaitForChild("RuntimeLib") as ModuleScript,
 		) as {
 			import: (context: LuaSourceContainer, module: Instance, ...path: string[]) => unknown;
 		};
 
-		return (ts.import(script, mscript) as { _Tests: Tests })._Tests;
+		return (ts.import(script, mscript) as { _Tests: UnitTests })._Tests;
 	}
 
-	export function run(name: string, test: Tests, di: DIContainer) {
-		const run = (name: string, test: Tests | Test, offset: number) => {
-			const offsetstr = string.rep(" ", offset);
-			$log(`${offsetstr}[${name}] Running`);
+	export function runMultiple(name: string, test: UnitTestList, di: DIContainer, offset?: number): void {
+		offset ??= 0;
 
-			if (typeIs(test, "function")) {
-				try {
-					test(di);
-					return;
-				} catch (err) {
-					$err(tostring(err ?? "Unknown error"));
-					return;
-				}
-			}
+		const offsetstr = string.rep(" ", offset);
+		$log(`${offsetstr}[${name}] Running`);
 
-			for (const [name, tests] of pairs(test)) {
-				run(name, tests, offset + 1);
-			}
+		for (const [name, tests] of pairs(test)) {
+			run(name, tests, di, offset + 1);
+		}
 
+		$log(`${offsetstr}[${name}] SUCCESS`);
+	}
+	export function run<T extends UnitTest>(
+		name: string,
+		test: T,
+		di: DIContainer,
+		offset?: number,
+	): ReturnType<T> | undefined {
+		offset ??= 0;
+
+		const offsetstr = string.rep(" ", offset);
+		$log(`${offsetstr}[${name}] Running`);
+
+		try {
+			const result = test(di) as ReturnType<T>;
 			$log(`${offsetstr}[${name}] SUCCESS`);
-		};
 
-		run(name, test, 0);
+			return result;
+		} catch (err) {
+			$err(tostring(err ?? "Unknown error"));
+			return undefined;
+		}
 	}
 }

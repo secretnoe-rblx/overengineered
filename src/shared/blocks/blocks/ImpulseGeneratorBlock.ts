@@ -7,7 +7,8 @@ const definition = {
 	inputOrder: ["delay", "isInverted", "isSinglePulse"],
 	input: {
 		delay: {
-			displayName: "Delay (ticks)",
+			displayName: "Interval",
+			unit: "Tick",
 			types: {
 				number: {
 					config: 0,
@@ -21,14 +22,17 @@ const definition = {
 					config: false,
 				},
 			},
+			connectorHidden: true,
 		},
 		isSinglePulse: {
 			displayName: "Single Pulse",
+			tooltip: "",
 			types: {
 				bool: {
 					config: false,
 				},
 			},
+			connectorHidden: true,
 		},
 	},
 	output: {
@@ -47,18 +51,18 @@ class Logic extends BlockLogic<typeof definition> {
 		const get = () => this.cached.getOutput("value").value;
 		const set = (value: boolean) => this.output.value.set("bool", value);
 
-		this.onk(["isInverted"], () => set(!get()));
+		this.onk(["isInverted"], ({ isInverted }) => set(!isInverted));
 
 		let impulses = 0;
 		let didImpulse = false;
-		this.onAlways(({ delay: thisDelay, isSinglePulse }) => {
+		this.onAlways(({ delay, isSinglePulse }) => {
 			if (didImpulse) {
 				set(!get());
 				didImpulse = false;
 			}
 
 			impulses++;
-			const delay = math.max(thisDelay, 1);
+			delay = math.max(delay, 1);
 			impulses %= delay;
 			if (impulses !== 0) return;
 
