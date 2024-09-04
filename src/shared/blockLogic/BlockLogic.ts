@@ -464,8 +464,12 @@ export abstract class CalculatableBlockLogic<TDef extends BlockLogicBothDefiniti
 		}
 
 		this.calculatingRightNow2 = true;
-		this.recalculateOutputs(ctx);
+		const result = this.recalculateOutputs(ctx);
 		this.calculatingRightNow2 = false;
+
+		if (isCustomBlockLogicValueResult(result)) {
+			return result;
+		}
 
 		return super.getOutputValue(ctx, key);
 	}

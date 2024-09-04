@@ -1,6 +1,8 @@
+import { BlockTestRunner } from "shared/blocks/testing/BlockTestRunner";
 import { Objects } from "shared/fixes/objects";
 import { CreateSandboxBlocks } from "shared/SandboxBlocks";
 import type { PlacedBlockConfig } from "shared/blockLogic/BlockConfig";
+import type { GenericBlockLogic } from "shared/blockLogic/BlockLogic";
 import type { BlockLogicTypes } from "shared/blockLogic/BlockLogicTypes";
 
 export namespace BlockTesting {
@@ -32,6 +34,15 @@ export namespace BlockTesting {
 		return arr;
 	}
 
+	export function runner(...blocks: GenericBlockLogic[]) {
+		const runner = new BlockTestRunner();
+		runner.add(...blocks);
+
+		runner.tick(); // starting tick
+
+		return runner;
+	}
+
 	//
 
 	export function wire(
@@ -52,5 +63,7 @@ export namespace BlockTesting {
 	}
 	export function bool(value: boolean) {
 		return { type: "bool", config: value } as const;
+	}export function vector3(value: Vector3) {
+		return { type: "vector3", config: value } as const;
 	}
 }

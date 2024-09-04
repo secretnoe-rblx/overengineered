@@ -3,6 +3,7 @@ import { CalculatableBlockLogic } from "shared/blockLogic/BlockLogic";
 import { BlockLogicValueResults } from "shared/blockLogic/BlockLogicValueStorage";
 import { BlockConfigDefinitions } from "shared/blocks/BlockConfigDefinitions";
 import { BlockCreation } from "shared/blocks/BlockCreation";
+import { MathUtils } from "shared/fixes/MathUtils";
 import type {
 	BlockLogicBothDefinitions,
 	BlockLogicArgs,
@@ -262,7 +263,7 @@ const constants = {
 		displayName: "Euler's number (e)",
 		description: "Very useful constant you'll probably never use if you doesn't already know what it is",
 		modelSource: autoModel("ConstLogicBlockPrefab", "e", BlockCreation.Categories.other),
-		logic: logic(defs.constnum, () => ({ value: { type: "number", value: 2.718281828459 } })),
+		logic: logic(defs.constnum, () => ({ value: { type: "number", value: MathUtils.e } })),
 	},
 } as const satisfies BlockBuildersWithoutIdAndDefaults;
 

@@ -39,6 +39,19 @@ export namespace Assert {
 		if (condition) throw addMessage(`Condition is not false`, message);
 	}
 
+	export function almostEquals(
+		left: number | { get(): number },
+		right: number | { get(): number },
+		message?: string,
+	) {
+		left = typeIs(left, "table") && "get" in left ? left.get() : left;
+		right = typeIs(right, "table") && "get" in right ? right.get() : right;
+
+		if (math.abs(left - right) > 0.0001) {
+			throw addMessage(`${left} and ${right} are not (almost) equal`, message);
+		}
+	}
+
 	export function equals<T>(left: T | { get(): T }, right: T | { get(): T }, message?: string) {
 		left = typeIs(left, "table") && "get" in left ? left.get() : left;
 		right = typeIs(right, "table") && "get" in right ? right.get() : right;
@@ -81,7 +94,7 @@ export namespace Assert {
 				throw addMessage(`Key ${tostring(k)} was not found in object ${object}`, message);
 			}
 
-			Assert.equals(object[k as never], v);
+			Assert.equals(object[k as never], v, message);
 		}
 	}
 

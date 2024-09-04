@@ -1,7 +1,6 @@
 import { BlockLogicValueResults } from "shared/blockLogic/BlockLogicValueStorage";
 import { BlockAssert } from "shared/blocks/testing/BlockAssert";
 import { BlockTesting } from "shared/blocks/testing/BlockTesting";
-import { BlockTestRunner } from "shared/blocks/testing/BlockTestRunner";
 import type { UnitTests } from "shared/test/TestFramework";
 
 namespace BlockTests {
@@ -16,11 +15,7 @@ namespace BlockTests {
 				},
 			},
 		]);
-
-		const runner = new BlockTestRunner();
-		runner.add(block);
-
-		runner.tick(); // starting tick
+		const runner = BlockTesting.runner(block);
 
 		BlockAssert.resultError(block, runner, "result", BlockLogicValueResults.availableLater);
 		runner.tick(1, 0.2);
@@ -43,11 +38,7 @@ namespace BlockTests {
 				},
 			},
 		]);
-
-		const runner = new BlockTestRunner();
-		runner.add(block);
-
-		runner.tick(); // starting tick
+		const runner = BlockTesting.runner(block);
 
 		BlockAssert.resultError(block, runner, "result", BlockLogicValueResults.availableLater);
 		runner.tick();
@@ -69,11 +60,7 @@ namespace BlockTests {
 				},
 			},
 		]);
-
-		const runner = new BlockTestRunner();
-		runner.add(block);
-
-		runner.tick(); // starting tick
+		const runner = BlockTesting.runner(block);
 
 		BlockAssert.resultSuccessAndEquals(block, runner, "result", { value: 727 });
 	}
@@ -88,11 +75,7 @@ namespace BlockTests {
 				},
 			},
 		]);
-
-		const runner = new BlockTestRunner();
-		runner.add(block);
-
-		runner.tick(); // starting tick
+		const runner = BlockTesting.runner(block);
 
 		BlockAssert.resultSuccessAndEquals(block, runner, "result", { value: 727 });
 	}
