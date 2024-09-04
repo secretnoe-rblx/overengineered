@@ -27,7 +27,7 @@ const definition = {
 							startValue: 0,
 							mode: {
 								type: "smooth",
-								speed: 0.2,
+								speed: 20,
 							},
 							keys: [
 								{ key: "W", value: 100 },
