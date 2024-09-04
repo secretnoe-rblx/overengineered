@@ -35,19 +35,19 @@ export class ArgsSignal<TArgs extends unknown[]> implements ReadonlyArgsSignal<T
 	}
 
 	private destroyed = false;
-	private subscribed?: Set<unknown>; // unknown instead of T to workaround the type system
+	private subscribed?: defined[]; // defined instead of T to workaround the type system
 	private inSelf = 0;
 
 	Connect(callback: (...args: TArgs) => void): SignalConnection {
 		if (this.destroyed) return { Disconnect() {} };
 
-		this.subscribed ??= new Set();
-		this.subscribed.add(callback);
+		this.subscribed ??= [];
+		this.subscribed.push(callback);
 
-		const set = this.subscribed;
+		const arr = this.subscribed;
 		return {
 			Disconnect() {
-				set.delete(callback);
+				arr.remove(arr.indexOf(callback));
 			},
 		};
 	}
