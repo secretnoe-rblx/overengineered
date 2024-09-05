@@ -63,7 +63,7 @@ class Logic extends InstanceBlockLogic<typeof definition> {
 
 		const toRemove: Wait[] = [];
 		this.onTick(({ dt }) => {
-			for (const wait of [...this.tickWaits]) {
+			for (const wait of this.tickWaits) {
 				if (wait.left <= 0) {
 					toRemove.push(wait);
 					this.output.result.set(wait.valueType, wait.value);
