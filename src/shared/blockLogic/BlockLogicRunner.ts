@@ -1,4 +1,5 @@
 import { Component } from "shared/component/Component";
+import { ArgsSignal } from "shared/event/Signal";
 import type { BlockLogic, BlockLogicFullBothDefinitions, BlockLogicTickContext } from "shared/blockLogic/BlockLogic";
 
 type Logic = BlockLogic<BlockLogicFullBothDefinitions>;
@@ -31,12 +32,13 @@ export class BlockLogicRunner extends Component {
 	tick(overriddenDt?: number) {
 		this.tickNumber++;
 
-		const now = DateTime.now().UnixTimestampMillis / 1000;
-		this.lastTickTime ??= now;
+		const now = os.clock();
+		const dt = overriddenDt ?? now - (this.lastTickTime ?? now);
+		this.lastTickTime = now;
 
 		const ctx: BlockLogicTickContext = {
 			tick: this.tickNumber,
-			dt: overriddenDt ?? this.lastTickTime - now,
+			dt,
 		};
 
 		for (const block of this.blocks) {
