@@ -147,6 +147,11 @@ export namespace BlockCreation {
 			const positions = (pointsFolder.GetChildren() as BasePart[]).mapToMap((p) =>
 				$tuple(p.Name, model.GetPivot().PointToObjectSpace(p.GetPivot().Position)),
 			);
+
+			// immediately destroying the folder for some reason results in bad_weak_ptr so we delay it
+			pointsFolder.Parent = undefined;
+			task.delay(1, () => pointsFolder.Destroy());
+
 			return asObject(positions);
 		}
 	}
