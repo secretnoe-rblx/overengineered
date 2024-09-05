@@ -19,6 +19,7 @@ export class SharedMachine extends ContainerComponent<GenericBlockLogic> {
 	readonly occupiedByLocalPlayer = new ObservableValue(true);
 	private impactController?: ImpactController;
 	protected readonly blocksMap = new Map<BlockUuid, BlockData>();
+	protected readonly runner = this.parent(new BlockLogicRunner());
 
 	constructor(
 		@inject private readonly blockList: BlockList,
@@ -127,11 +128,10 @@ export class SharedMachine extends ContainerComponent<GenericBlockLogic> {
 			logic.initializeInputs(config, logicMap);
 		}
 
-		const runner = this.parent(new BlockLogicRunner());
 		for (const [, { block, logic }] of this.blocksMap) {
-			runner.add(logic);
+			this.runner.add(logic);
 		}
 
-		runner.startTicking();
+		this.runner.startTicking();
 	}
 }

@@ -63,7 +63,8 @@ export namespace BlockTesting {
 	}
 	export function bool(value: boolean) {
 		return { type: "bool", config: value } as const;
-	}export function vector3(value: Vector3) {
+	}
+	export function vector3(value: Vector3) {
 		return { type: "vector3", config: value } as const;
 	}
 }

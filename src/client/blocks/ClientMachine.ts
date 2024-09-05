@@ -1,4 +1,5 @@
 import { ClientBlockControls } from "client/blocks/ClientBlockControls";
+import { LogicVisualizer } from "client/blocks/LogicVisuaizer";
 import { BlockConfig } from "shared/blockLogic/BlockConfig";
 import { SharedMachine } from "shared/blockLogic/SharedMachine";
 import type { IClientBlockControl } from "client/blocks/ClientBlockControls";
@@ -26,6 +27,13 @@ export class ClientMachine extends SharedMachine {
 	protected initialize(blocks: readonly PlacedBlockData[]) {
 		super.initialize(blocks);
 		this.initializeControls();
+
+		this.parent(
+			new LogicVisualizer(
+				this.runner,
+				this.blocksMap.map((k, v) => v.logic),
+			),
+		);
 	}
 	protected createImpactControllerIfNeeded(blocks: readonly PlacedBlockData[]): ImpactController | undefined {
 		if (!this.playerData.config.get().impact_destruction) {

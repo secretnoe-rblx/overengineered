@@ -14,11 +14,7 @@ import { RemoteEvents } from "shared/RemoteEvents";
 import { PartUtils } from "shared/utils/PartUtils";
 import type { PlacedBlockConfig } from "shared/blockLogic/BlockConfig";
 import type { BlockLogicTypes } from "shared/blockLogic/BlockLogicTypes";
-import type {
-	ReadonlyLogicValueStorage,
-	WriteonlyLogicValueStorage,
-	ILogicValueStorage,
-} from "shared/blockLogic/BlockLogicValueStorage";
+import type { ReadonlyLogicValueStorage } from "shared/blockLogic/BlockLogicValueStorage";
 
 type Primitives = BlockLogicTypes.Primitives;
 type PrimitiveKeys = keyof Primitives;
@@ -125,12 +121,6 @@ type OutputBlockLogicValues<TDef extends BlockLogicOutputDefs> = {
 };
 type ReadonlyBlockLogicValues<TDef extends BlockLogicInputDefs> = {
 	readonly [k in keyof TDef]: ReadonlyLogicValueStorage<PrimitiveKeys & keyof (TDef[k]["types"] & defined)>;
-};
-type WriteonlyBlockLogicValues<TDef extends BlockLogicOutputDefs> = {
-	readonly [k in keyof TDef]: WriteonlyLogicValueStorage<PrimitiveKeys & TDef[k]["types"][number]>;
-};
-type IBlockLogicValues<TDef extends BlockLogicOutputDefs> = {
-	readonly [k in keyof TDef]: ILogicValueStorage<PrimitiveKeys & keyof (TDef[k]["types"] & defined)>;
 };
 
 const inputValuesToFullObject = <TDef extends BlockLogicBothDefinitions, TCheckUnchanged extends boolean>(
@@ -423,6 +413,29 @@ export abstract class BlockLogic<TDef extends BlockLogicBothDefinitions> extends
 	/** Runs the provided function on every tick, but only if all of the input values are available. */
 	protected onAlways(func: (inputs: AllInputKeysToObject<TDef["input"]>, ctx: BlockLogicTickContext) => void): void {
 		this.onInputs(undefined, func, false);
+	}
+
+	getDebugInfo(ctx: BlockLogicTickContext): readonly string[] {
+		const result: string[] = [];
+		for (const [k, input] of pairs(this.input)) {
+			const value = input.get(ctx);
+
+			if (isCustomBlockLogicValueResult(value)) {
+				result.push(`[${tostring(k)}] ${value.sub("$BLOCKLOGIC_".size() + 1)}`);
+			} else {
+				result.push(`[${tostring(k)}] ${value.value}`);
+			}
+		}
+
+		for (const [k, output] of pairs(this.output)) {
+			const value = output.tryJustGet();
+
+			if (value !== undefined) {
+				result.push(`[${tostring(k)}] ${value.value}`);
+			}
+		}
+
+		return result;
 	}
 
 	disableAndBurn(): void {

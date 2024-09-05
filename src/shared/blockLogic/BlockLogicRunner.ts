@@ -4,10 +4,16 @@ import type { BlockLogic, BlockLogicFullBothDefinitions, BlockLogicTickContext }
 type Logic = BlockLogic<BlockLogicFullBothDefinitions>;
 
 export class BlockLogicRunner extends Component {
+	private readonly ticked = new ArgsSignal<[ctx: BlockLogicTickContext]>();
+
 	private readonly blocks = new Set<Logic>();
 	private tickingLoop?: SignalConnection;
 	private tickNumber = 0;
 	private lastTickTime?: number;
+
+	onAfterTick(func: (ctx: BlockLogicTickContext) => void): SignalConnection {
+		return this.ticked.Connect(func);
+	}
 
 	getTick() {
 		return this.tickNumber;
@@ -37,6 +43,7 @@ export class BlockLogicRunner extends Component {
 			if (!block.isEnabled()) continue;
 			block.tick(ctx);
 		}
+		this.ticked.Fire(ctx);
 	}
 
 	add(block: Logic) {
