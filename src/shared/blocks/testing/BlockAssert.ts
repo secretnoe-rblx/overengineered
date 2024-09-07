@@ -1,18 +1,17 @@
 import { Assert } from "shared/Assert";
 import { BlockTestRunner } from "shared/blocks/testing/BlockTestRunner";
-import type { GenericBlockLogic, BlockLogicTickOnlyContext } from "shared/blockLogic/BlockLogic";
+import type { GenericBlockLogic, BlockLogicTickContext } from "shared/blockLogic/BlockLogic";
 import type { BlockLogicValueResults } from "shared/blockLogic/BlockLogicValueStorage";
 
 export namespace BlockAssert {
 	export function resultSuccess(
 		block: GenericBlockLogic,
-		ctx: BlockLogicTickOnlyContext | BlockTestRunner,
+		ctx: BlockLogicTickContext | BlockTestRunner,
 		outputName: string,
-		properties: { readonly value?: unknown },
 		message?: string,
 	) {
 		if (ctx instanceof BlockTestRunner) {
-			ctx = { tick: ctx.getTick() };
+			ctx = ctx.getContext();
 		}
 
 		const result = block.getOutputValue(ctx, outputName);
@@ -22,28 +21,28 @@ export namespace BlockAssert {
 	}
 	export function resultSuccessAndEquals(
 		block: GenericBlockLogic,
-		ctx: BlockLogicTickOnlyContext | BlockTestRunner,
+		ctx: BlockLogicTickContext | BlockTestRunner,
 		outputName: string,
 		properties: { readonly value?: unknown },
 		message?: string,
 	) {
 		if (ctx instanceof BlockTestRunner) {
-			ctx = { tick: ctx.getTick() };
+			ctx = ctx.getContext();
 		}
 
-		const result = resultSuccess(block, ctx, outputName, properties, message);
+		const result = resultSuccess(block, ctx, outputName, message);
 		Assert.propertiesEqual(result, properties, `${message} (tick ${ctx.tick})`);
 	}
 
 	export function resultError(
 		block: GenericBlockLogic,
-		ctx: BlockLogicTickOnlyContext | BlockTestRunner,
+		ctx: BlockLogicTickContext | BlockTestRunner,
 		outputName: string,
 		vresult: BlockLogicValueResults,
 		message?: string,
 	) {
 		if (ctx instanceof BlockTestRunner) {
-			ctx = { tick: ctx.getTick() };
+			ctx = ctx.getContext();
 		}
 
 		const result = block.getOutputValue(ctx, outputName);

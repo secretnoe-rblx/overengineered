@@ -16,11 +16,25 @@ export class BlockLogicRunner extends Component {
 		return this.ticked.Connect(func);
 	}
 
-	getTick() {
-		return this.tickNumber;
+	getContext(update: boolean, overriddenDt?: number): BlockLogicTickContext {
+		if (update) {
+			this.tickNumber++;
+		}
+
+		const now = os.clock();
+		const dt = overriddenDt ?? now - (this.lastTickTime ?? now);
+		if (update) {
+			this.lastTickTime = now;
+		}
+
+		return {
+			tick: this.tickNumber,
+			dt,
+		};
 	}
 
 	startTicking() {
+		print("tick order is", this.blocks.map((i) => i.instance?.Name ?? 0).join());
 		this.stopTicking();
 		this.tickingLoop = this.event.loop(0, () => this.tick());
 	}
@@ -30,16 +44,7 @@ export class BlockLogicRunner extends Component {
 	}
 
 	tick(overriddenDt?: number) {
-		this.tickNumber++;
-
-		const now = os.clock();
-		const dt = overriddenDt ?? now - (this.lastTickTime ?? now);
-		this.lastTickTime = now;
-
-		const ctx: BlockLogicTickContext = {
-			tick: this.tickNumber,
-			dt,
-		};
+		const ctx = this.getContext(true, overriddenDt);
 
 		for (const block of this.blocks) {
 			if (!block.isEnabled()) continue;

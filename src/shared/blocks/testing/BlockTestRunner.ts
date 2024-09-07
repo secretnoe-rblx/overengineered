@@ -1,5 +1,5 @@
 import { BlockLogicRunner } from "shared/blockLogic/BlockLogicRunner";
-import type { GenericBlockLogic } from "shared/blockLogic/BlockLogic";
+import type { BlockLogicTickContext, GenericBlockLogic } from "shared/blockLogic/BlockLogic";
 
 export class BlockTestRunner {
 	private readonly runner = new BlockLogicRunner();
@@ -10,8 +10,8 @@ export class BlockTestRunner {
 		}
 	}
 
-	getTick() {
-		return this.runner.getTick();
+	getContext(overriddenDt?: number): BlockLogicTickContext {
+		return this.runner.getContext(false, overriddenDt);
 	}
 	tick(amount: number = 1, dt?: number) {
 		for (let i = 0; i < amount; i++) {

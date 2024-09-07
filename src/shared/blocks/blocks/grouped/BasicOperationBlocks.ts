@@ -257,7 +257,10 @@ const constants = {
 		displayName: "Pi",
 		description: `So called "free thinkers" will make a thousand PIe jokes as soon as they'll see the PI constant..`,
 		modelSource: autoModel("ConstLogicBlockPrefab", "π", BlockCreation.Categories.other),
-		logic: logic(defs.constnum, () => ({ value: { type: "number", value: math.pi } })),
+		logic: logic(defs.constnum, (ctx) => {
+			print("pi", ctx);
+			return { value: { type: "number", value: math.pi } };
+		}),
 	},
 	e: {
 		displayName: "Euler's number (e)",

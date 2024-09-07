@@ -43,15 +43,14 @@ class Logic extends BlockLogic<typeof definition> {
 		super(definition, block);
 
 		this.onk(["defaultValue"], ({ defaultValue, defaultValueType, defaultValueChanged }) => {
-			if (defaultValueChanged) {
-				this.output.result.set(defaultValueType, defaultValue);
-			}
+			$debug("mem defaultValue", defaultValueChanged, defaultValue);
+			if (!defaultValueChanged) return;
+			this.output.result.set(defaultValueType, defaultValue);
 		});
 		this.onk(["value", "set"], ({ value, valueType, set }) => {
-			if (set) {
-				this.output.result.set(valueType, value);
-				return;
-			}
+			$debug("mem value", value, set);
+			if (!set) return;
+			this.output.result.set(valueType, value);
 		});
 	}
 }

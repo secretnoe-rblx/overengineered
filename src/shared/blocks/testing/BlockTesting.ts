@@ -38,8 +38,6 @@ export namespace BlockTesting {
 		const runner = new BlockTestRunner();
 		runner.add(...blocks);
 
-		runner.tick(); // starting tick
-
 		return runner;
 	}
 

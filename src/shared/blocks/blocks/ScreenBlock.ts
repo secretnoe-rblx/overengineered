@@ -37,6 +37,10 @@ class Logic extends InstanceBlockLogic<typeof definition, ScreenBlock> {
 		super(definition, block);
 
 		this.on(({ data }) => {
+			if (this.instance.FindFirstChild("Part")) {
+				this.instance.Part.SurfaceGui.TextLabel.Text = tostring(data);
+			}
+
 			Logic.events.update.send({
 				block: this.instance,
 				text: tostring(data),

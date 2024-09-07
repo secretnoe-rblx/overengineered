@@ -158,13 +158,7 @@ namespace BlockTests {
 		const testTrigonometry = (id: string, input: number, expectedResult: number) => {
 			const block = createBlock1(id, input);
 			const runner = BlockTesting.runner(block);
-			const result = BlockAssert.resultSuccess(
-				block,
-				runner,
-				"result",
-				{ value: expectedResult },
-				`testing block ${id}`,
-			);
+			const result = BlockAssert.resultSuccess(block, runner, "result", `testing block ${id}`);
 
 			Assert.almostEquals(result.value as number, expectedResult);
 		};

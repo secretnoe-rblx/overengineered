@@ -61,17 +61,17 @@ namespace BlockLogicTests {
 			},
 		]);
 
-		const result1 = blocks[0].getOutputValue({ tick: 1 }, "result");
+		const result1 = blocks[0].getOutputValue({ tick: 1, dt: 0 }, "result");
 		print(result1);
 		Assert.isNot(result1, "string");
 		Assert.propertiesEqual(result1, { value: 7 });
 
-		const result2 = blocks[1].getOutputValue({ tick: 1 }, "result");
+		const result2 = blocks[1].getOutputValue({ tick: 1, dt: 0 }, "result");
 		print(result2);
 		Assert.isNot(result2, "string");
 		Assert.propertiesEqual(result2, { value: 14 });
 
-		const result3 = blocks[2].getOutputValue({ tick: 1 }, "result");
+		const result3 = blocks[2].getOutputValue({ tick: 1, dt: 0 }, "result");
 		print(result3);
 		Assert.isNot(result3, "string");
 		Assert.propertiesEqual(result3, { value: 4 });

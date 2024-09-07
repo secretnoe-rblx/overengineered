@@ -1,7 +1,12 @@
-import { InstanceBlockLogic as InstanceBlockLogic } from "shared/blockLogic/BlockLogic";
+import { BlockLogic } from "shared/blockLogic/BlockLogic";
 import { BlockConfigDefinitions } from "shared/blocks/BlockConfigDefinitions";
 import { BlockCreation } from "shared/blocks/BlockCreation";
-import type { BlockLogicFullBothDefinitions, InstanceBlockLogicArgs } from "shared/blockLogic/BlockLogic";
+import { Strings } from "shared/fixes/String.propmacro";
+import type {
+	BlockLogicArgs,
+	BlockLogicFullBothDefinitions,
+	BlockLogicTickContext,
+} from "shared/blockLogic/BlockLogic";
 import type { BlockBuilder } from "shared/blocks/Block";
 
 const definition = {
@@ -15,7 +20,11 @@ const definition = {
 		},
 		duration: {
 			displayName: "Duration",
-			types: BlockConfigDefinitions.number,
+			types: {
+				number: {
+					config: 1,
+				},
+			},
 		},
 		tickBased: {
 			displayName: "Delaying in ticks",
@@ -41,23 +50,17 @@ type Wait = {
 };
 
 export type { Logic as DelayBlockLogic };
-class Logic extends InstanceBlockLogic<typeof definition> {
+class Logic extends BlockLogic<typeof definition> {
 	private readonly tickWaits: Wait[] = [];
 
-	constructor(block: InstanceBlockLogicArgs) {
+	constructor(block: BlockLogicArgs) {
 		super(definition, block);
 
-		// let valueWasSet = false;
 		this.on(({ value, valueType, valueChanged, duration, tickBased }) => {
+			$debug("delayChangeed", value, valueChanged);
+
 			// should delay only when the value is changed
 			if (!valueChanged) return;
-
-			// DElETE BY THE RESULTS OF THE POLL
-			// if (!valueWasSet) {
-			// 	this.output.result.set(valueType, this.definition.input.value.types[valueType].config);
-			// }
-			// valueWasSet = true;
-
 			this.tickWaits.push({ left: duration, value, valueType, tickBased });
 		});
 
@@ -87,6 +90,30 @@ class Logic extends InstanceBlockLogic<typeof definition> {
 			}
 			toRemove.clear();
 		});
+	}
+
+	getDebugInfo(ctx: BlockLogicTickContext): readonly string[] {
+		const minBy = <T>(arr: T[], func: (value: T) => number) => {
+			let min: T | undefined = undefined;
+			for (const value of arr) {
+				if (min === undefined) {
+					min = value;
+					continue;
+				}
+
+				if (func(min) > func(value)) {
+					min = value;
+				}
+			}
+
+			return min;
+		};
+
+		return [
+			...super.getDebugInfo(ctx),
+			`Waiting ${this.tickWaits.size()} waits`,
+			`Closest wait: ${Strings.pretty(minBy(this.tickWaits, (t) => t.left))}`,
+		];
 	}
 }
 

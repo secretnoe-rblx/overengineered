@@ -76,10 +76,13 @@ if (RunService.IsStudio() && Players.LocalPlayer.Name === "samlovebutter" && (fa
 }
 
 const testsName = "BlockTests";
+const testName: string | undefined = "testCircularConnectionsReturningGarbage";
 
 const testss = TestFramework.findAllTestScripts().map(TestFramework.loadTestsFromScript);
 const tests = Objects.fromEntries(
-	testss.filter((t) => testsName in t).flatmap((t) => Objects.entriesArray(t[testsName])),
+	testss
+		.filter((t) => testsName in t && (!testName || testName in t[testsName]))
+		.flatmap((t) => Objects.entriesArray(testName ? { [testName]: t[testsName][testName] } : t[testsName])),
 );
 
 TestFramework.runMultiple("BlockLogic", tests!, host.services);

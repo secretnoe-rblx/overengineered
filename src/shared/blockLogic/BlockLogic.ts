@@ -3,7 +3,7 @@ import {
 	isCustomBlockLogicValueResult,
 	LogicValueStorages,
 	UnsetBlockLogicValueStorage,
-	LogicValueOutputStorageContainer,
+	LogicValueStorageContainer,
 } from "shared/blockLogic/BlockLogicValueStorage";
 import { BlockLogicValueResults } from "shared/blockLogic/BlockLogicValueStorage";
 import { Component } from "shared/component/Component";
@@ -117,21 +117,18 @@ export type AllOutputKeysToObject<TDef extends BlockLogicOutputDefs> = {
 };
 
 type OutputBlockLogicValues<TDef extends BlockLogicOutputDefs> = {
-	readonly [k in keyof TDef]: LogicValueOutputStorageContainer<PrimitiveKeys & TDef[k]["types"][number]>;
+	readonly [k in keyof TDef]: LogicValueStorageContainer<PrimitiveKeys & TDef[k]["types"][number]>;
 };
 type ReadonlyBlockLogicValues<TDef extends BlockLogicInputDefs> = {
 	readonly [k in keyof TDef]: ReadonlyLogicValueStorage<PrimitiveKeys & keyof (TDef[k]["types"] & defined)>;
 };
 
-const inputValuesToFullObject = <TDef extends BlockLogicBothDefinitions, TCheckUnchanged extends boolean>(
-	ctx: BlockLogicTickOnlyContext,
+const inputValuesToFullObject = <TDef extends BlockLogicBothDefinitions>(
+	ctx: BlockLogicTickContext,
 	input: ReadonlyBlockLogicValues<TDef["input"]>,
 	keys: ReadonlySet<keyof TDef["input"]> | undefined,
-	checkUnchanged: TCheckUnchanged,
-):
-	| AllInputKeysToObject<TDef["input"]>
-	| BlockLogicValueResults
-	| (TCheckUnchanged extends true ? "$UNCHANGED" : never) => {
+	checkUnchanged: boolean,
+): AllInputKeysToObject<TDef["input"]> | BlockLogicValueResults | "$UNCHANGED" => {
 	const inputValues: {
 		[k in keyof TDef["input"]]?: TypedValue<
 			PrimitiveKeys & keyof (TDef["input"][keyof TDef["input"]]["types"] & defined)
@@ -139,8 +136,10 @@ const inputValuesToFullObject = <TDef extends BlockLogicBothDefinitions, TCheckU
 	} = {};
 
 	let anyChanged = false;
-	for (const [k] of pairs(keys ? asObject(keys) : input)) {
+	const actualKeys = keys ? asObject(keys) : input;
+	for (const [k] of pairs(actualKeys)) {
 		const value = input[k].get(ctx);
+		$debug("ivtfo", value);
 		if (isCustomBlockLogicValueResult(value)) {
 			return value;
 		}
@@ -152,8 +151,12 @@ const inputValuesToFullObject = <TDef extends BlockLogicBothDefinitions, TCheckU
 		inputValues[k] = value;
 	}
 
+	if (!asMap(actualKeys).any()) {
+		checkUnchanged = false;
+	}
+
 	if (checkUnchanged && !anyChanged) {
-		return "$UNCHANGED" as never;
+		return "$UNCHANGED";
 	}
 
 	// Map input values to an object with keys `{key}` being the values, `{key}Type` being the types, `{key}Changed` being true if the value was changed
@@ -178,7 +181,6 @@ const inputValuesToFullObject = <TDef extends BlockLogicBothDefinitions, TCheckU
 	return result;
 };
 
-export type BlockLogicTickOnlyContext = Pick<BlockLogicTickContext, "tick">;
 export type BlockLogicTickContext = {
 	/** Current tick number */
 	readonly tick: number;
@@ -217,7 +219,7 @@ export abstract class BlockLogic<TDef extends BlockLogicBothDefinitions> extends
 
 		this._output = Objects.mapValues(
 			definition.output,
-			() => new LogicValueOutputStorageContainer<PrimitiveKeys>(),
+			(k, v) => new LogicValueStorageContainer<PrimitiveKeys>(v.types),
 		) as typeof this._output;
 		this.output = this._output;
 	}
@@ -324,23 +326,53 @@ export abstract class BlockLogic<TDef extends BlockLogicBothDefinitions> extends
 	}
 
 	private calculatingRightNow = false;
+	private isGarbage = false;
 	getOutputValue(
-		ctx: BlockLogicTickOnlyContext,
+		ctx: BlockLogicTickContext,
 		key: keyof typeof this.output,
 	): TypedValue<TDef["output"][keyof TDef["output"]]["types"][number]> | BlockLogicValueResults {
+		if (this.isGarbage) {
+			return BlockLogicValueResults.garbage;
+		}
+		if (!this.isEnabled()) {
+			return this._output[key].get(ctx);
+		}
+
 		if (this.calculatingRightNow) {
 			this.disableAndBurn();
 			return BlockLogicValueResults.garbage;
 		}
 
 		this.calculatingRightNow = true;
-		const value = this._output[key].get(ctx);
-		this.calculatingRightNow = false;
+		this.tick(ctx);
 
+		if (this.isGarbage) {
+			return BlockLogicValueResults.garbage;
+		}
+
+		const value = this._output[key].get(ctx);
+		if (value === BlockLogicValueResults.garbage) {
+			this.disableAndBurn();
+		}
+
+		this.calculatingRightNow = false;
 		return value;
 	}
 
+	private prevTick?: number;
+	/** @sealed */
 	tick(ctx: BlockLogicTickContext) {
+		if (!this.isEnabled()) return;
+
+		$trace("in tick", this.prevTick, ctx.tick);
+		// execute only once per tick
+		if (this.prevTick === ctx.tick) {
+			return;
+		}
+
+		//print("ticking this", this.instance?.Name, ctx.tick);
+
+		this.prevTick = ctx.tick;
 		this.ticked.Fire(ctx);
 	}
 	protected onTick(func: (ctx: BlockLogicTickContext) => void): void {
@@ -439,11 +471,12 @@ export abstract class BlockLogic<TDef extends BlockLogicBothDefinitions> extends
 	}
 
 	disableAndBurn(): void {
+		this.isGarbage = true;
+		this.disable();
+
 		if (this.instance?.PrimaryPart) {
 			RemoteEvents.Burn.send([this.instance?.PrimaryPart]);
 		}
-
-		this.disable();
 	}
 }
 
@@ -463,72 +496,43 @@ export abstract class InstanceBlockLogic<
 
 /** Block logic that calculates its output only based on its logical inputs (ADD, MUX, converters, etc.) */
 export abstract class CalculatableBlockLogic<TDef extends BlockLogicBothDefinitions> extends BlockLogic<TDef> {
-	private cachedResults?: AllOutputKeysToObject<TDef["output"]> | BlockLogicValueResults;
-	private resultsCacheTick?: number;
+	private currentCustomResult?: BlockLogicValueResults;
 
-	private calculatingRightNow2 = false;
-	override getOutputValue(
-		ctx: BlockLogicTickOnlyContext,
-		key: keyof TDef["output"],
-	): TypedValue<TDef["output"][keyof TDef["output"]]["types"][number]> | BlockLogicValueResults {
-		if (this.calculatingRightNow2) {
-			this.disableAndBurn();
-			return BlockLogicValueResults.garbage;
-		}
+	constructor(definition: TDef, args: BlockLogicArgs) {
+		super(definition, args);
 
-		this.calculatingRightNow2 = true;
-		const result = this.recalculateOutputs(ctx);
-		this.calculatingRightNow2 = false;
+		this.on((inputs, ctx) => {
+			const results = this.calculate(inputs, ctx);
+			if (isCustomBlockLogicValueResult(results)) {
+				this.currentCustomResult = results;
 
-		if (isCustomBlockLogicValueResult(result)) {
-			return result;
-		}
-
-		return super.getOutputValue(ctx, key);
-	}
-
-	private recalculateOutputs(
-		ctx: BlockLogicTickOnlyContext,
-		forceGet = false,
-	): AllOutputKeysToObject<TDef["output"]> | BlockLogicValueResults {
-		if (ctx.tick === this.resultsCacheTick && this.cachedResults) {
-			return this.cachedResults;
-		}
-
-		const inputs = inputValuesToFullObject(ctx, this.input, undefined, !forceGet);
-		if (isCustomBlockLogicValueResult(inputs)) {
-			this.cachedResults = inputs;
-			return inputs;
-		}
-		if (inputs === "$UNCHANGED") {
-			if (!this.cachedResults) {
-				if (!forceGet) {
-					return this.recalculateOutputs(ctx, true);
+				if (results === BlockLogicValueResults.garbage) {
+					this.disableAndBurn();
 				}
 
-				throw `Block inputs returned $UNCHANGED on tick ${ctx.tick} for block uuid ${this.instance?.Name}`;
+				return;
 			}
 
-			return this.cachedResults;
-		}
+			this.currentCustomResult = undefined;
+			for (const [k, v] of pairs(results)) {
+				$debug("setting calculatable", k, v);
+				this.output[k].set(v.type, v.value);
+			}
+		});
+	}
 
-		const result = this.calculate(inputs, ctx);
-		if (isCustomBlockLogicValueResult(result)) {
-			return result;
-		}
+	override getOutputValue(
+		ctx: BlockLogicTickContext,
+		key: keyof TDef["output"],
+	): TypedValue<TDef["output"][keyof TDef["output"]]["types"][number]> | BlockLogicValueResults {
+		// super() call should happen before checking this.currentCustomResult for nil since it ticks
+		const result = super.getOutputValue(ctx, key);
 
-		this.cachedResults = result;
-		this.resultsCacheTick = ctx.tick;
-
-		for (const [k, v] of pairs(result)) {
-			this.output[k].set(v.type, v.value as never);
-		}
-
-		return result;
+		return this.currentCustomResult ?? result;
 	}
 
 	protected abstract calculate(
 		inputs: AllInputKeysToObject<TDef["input"]>,
-		ctx: BlockLogicTickOnlyContext,
+		ctx: BlockLogicTickContext,
 	): AllOutputKeysToObject<TDef["output"]> | BlockLogicValueResults;
 }
