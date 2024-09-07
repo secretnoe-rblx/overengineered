@@ -89,7 +89,7 @@ class Logic extends InstanceBlockLogic<typeof definition> {
 		this.onk(["rayColor"], ({ rayColor }) => (ray.Color = rayColor));
 		this.onk(["dotColor"], ({ dotColor }) => (dot.Color = dotColor));
 
-		this.onAlways(({ maxDistance, alwaysEnabled, rayTransparency }) => {
+		this.onAlwaysInputs(({ maxDistance, alwaysEnabled, rayTransparency }) => {
 			const raycastOrigin = this.instance.GetPivot().Position;
 			const raycastDirection = this.instance.GetPivot().UpVector.mul(RobloxUnit.Meters_To_Studs(maxDistance));
 

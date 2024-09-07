@@ -58,7 +58,7 @@ class Logic extends BlockLogic<typeof definition> {
 		const get = () => this.output.value.justGet().value;
 		const set = (value: number) => this.output.value.set("number", value);
 
-		this.onkStart(["value"], ({ value }) => set(value));
+		this.onkFirstInputs(["value"], ({ value }) => set(value));
 		this.on(({ triggerStep, triggerStepChanged, triggerValue, step, value }) => {
 			if (!triggerStep || !triggerStepChanged) return;
 

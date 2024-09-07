@@ -36,7 +36,7 @@ class Logic extends BlockLogic<typeof definition> {
 	constructor(block: BlockLogicArgs) {
 		super(definition, block);
 
-		this.onTick(() => {
+		this.onRecalcInputs(() => {
 			const mousePos = UserInputService.GetMouseLocation();
 			const relaPos = mousePos.div(Workspace.CurrentCamera!.ViewportSize);
 

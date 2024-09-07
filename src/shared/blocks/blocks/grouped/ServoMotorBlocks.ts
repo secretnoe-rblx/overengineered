@@ -134,7 +134,7 @@ class Logic extends InstanceBlockLogic<typeof servoDefinition, ServoMotorModel> 
 				(this.hingeConstraint.ServoMaxTorque = RobloxUnit.RowtonStuds_To_NewtonMeters(max_torque * 1_000_000)),
 		);
 
-		this.onTick(() => {
+		this.onTicc(() => {
 			const base = this.instance.FindFirstChild("Base") as BasePart | undefined;
 			const attach = this.instance.FindFirstChild("Attach") as BasePart | undefined;
 			if (!attach || !base) {

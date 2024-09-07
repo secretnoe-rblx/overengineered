@@ -20,10 +20,8 @@ class Logic extends InstanceBlockLogic<typeof definition> {
 	constructor(block: InstanceBlockLogicArgs) {
 		super(definition, block);
 
-		this.onTick(() => {
-			const result = RobloxUnit.Studs_To_Meters(
-				this.instance.GetPivot().Position.Y - GameDefinitions.HEIGHT_OFFSET,
-			);
+		this.onRecalcInputs(() => {
+			const result = RobloxUnit.Studs_To_Meters(this.instance.GetPivot().Y - GameDefinitions.HEIGHT_OFFSET);
 			this.output.result.set("number", result);
 		});
 	}

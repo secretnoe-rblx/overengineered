@@ -48,7 +48,7 @@ export class BlockLogicRunner extends Component {
 
 		for (const block of this.blocks) {
 			if (!block.isEnabled()) continue;
-			block.tick(ctx);
+			block.ticc(ctx);
 		}
 		this.ticked.Fire(ctx);
 	}

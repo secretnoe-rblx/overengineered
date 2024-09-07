@@ -19,21 +19,15 @@ export type { Logic as GravitySensorBlockLogic };
 class Logic extends InstanceBlockLogic<typeof definition> {
 	constructor(block: InstanceBlockLogicArgs) {
 		super(definition, block);
-		this.onTick(() => this.update());
-	}
 
-	private update() {
-		if (!this.instance.PrimaryPart) {
-			this.disable();
-			return;
-		}
-
-		this.output.result.set(
-			"number",
-			RobloxUnit.Studs_To_Meters(
-				Physics.GetGravityOnHeight(Physics.LocalHeight.fromGlobal(this.instance.PrimaryPart.Position.Y)),
-			),
-		);
+		this.onRecalcInputs(() => {
+			this.output.result.set(
+				"number",
+				RobloxUnit.Studs_To_Meters(
+					Physics.GetGravityOnHeight(Physics.LocalHeight.fromGlobal(this.instance.GetPivot().Y)),
+				),
+			);
+		});
 	}
 }
 

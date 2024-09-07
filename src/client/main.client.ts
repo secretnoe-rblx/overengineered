@@ -7,6 +7,7 @@ import { Gui } from "client/gui/Gui";
 import { LogControl } from "client/gui/static/LogControl";
 import { SandboxGame } from "client/SandboxGame";
 import { ServerRestartController } from "client/ServerRestartController";
+import { BL4 } from "shared/blockLogic4/BlockLogic";
 import { Objects } from "shared/fixes/objects";
 import { Game } from "shared/GameHost";
 import { RemoteEvents } from "shared/RemoteEvents";
@@ -76,7 +77,8 @@ if (RunService.IsStudio() && Players.LocalPlayer.Name === "samlovebutter" && (fa
 }
 
 const testsName = "BlockTests";
-const testName: string | undefined = "testCircularConnectionsReturningGarbage";
+const testName: string | undefined = undefined;
+("delayBlockZeroImmediateTickBased");
 
 const testss = TestFramework.findAllTestScripts().map(TestFramework.loadTestsFromScript);
 const tests = Objects.fromEntries(
@@ -86,3 +88,6 @@ const tests = Objects.fromEntries(
 );
 
 TestFramework.runMultiple("BlockLogic", tests!, host.services);
+
+print("-------------------------------------------");
+TestFramework.runMultiple("BL4", BL4, host.services);

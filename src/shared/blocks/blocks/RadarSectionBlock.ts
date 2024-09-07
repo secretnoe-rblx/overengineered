@@ -101,7 +101,7 @@ class Logic extends InstanceBlockLogic<typeof definition> {
 			updateDistance(detectionSize, maxDistance);
 		});
 
-		this.onAlways(({ minimalDistance }) => {
+		this.onAlwaysInputs(({ minimalDistance }) => {
 			if (this.closestDetectedPart?.Parent === undefined || this.triggerDistanceListUpdate) {
 				this.triggerDistanceListUpdate = false;
 				this.closestDetectedPart = this.findClosestPart(minimalDistance);

@@ -24,7 +24,7 @@ class Logic extends InstanceBlockLogic<typeof definition> {
 	constructor(block: InstanceBlockLogicArgs) {
 		super(definition, block);
 
-		this.onTick(() => {
+		this.onRecalcInputs(() => {
 			if (!this.instance.PrimaryPart) {
 				this.disable();
 				return;

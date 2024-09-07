@@ -54,6 +54,8 @@ namespace BlockTests {
 			BlockAssert.resultSuccessAndEquals(delay, ticker, "result", { value: true }, "DELAY");
 			BlockAssert.resultSuccessAndEquals(mem, ticker, "result", { value: true }, "MEMORY");
 			BlockAssert.resultSuccessAndEquals(notb, ticker, "result", { value: false }, "NOT");
+		} catch (err) {
+			$err(err);
 		} finally {
 			Logger.endScope();
 		}
@@ -78,6 +80,8 @@ namespace BlockTests {
 			BlockAssert.resultSuccessAndEquals(notb, ticker, "result", { value: false }, "NOT");
 			BlockAssert.resultSuccessAndEquals(mem, ticker, "result", { value: true }, "MEMORY");
 			BlockAssert.resultSuccessAndEquals(delay, ticker, "result", { value: true }, "DELAY");
+		} catch (err) {
+			$err(err);
 		} finally {
 			Logger.endScope();
 		}

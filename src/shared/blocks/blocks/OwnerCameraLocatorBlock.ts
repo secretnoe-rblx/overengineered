@@ -29,7 +29,7 @@ class Logic extends BlockLogic<typeof definition> {
 	constructor(block: BlockLogicArgs) {
 		super(definition, block);
 
-		this.onTick(() => {
+		this.onRecalcInputs(() => {
 			const camera = Workspace.CurrentCamera;
 			if (!camera) return;
 

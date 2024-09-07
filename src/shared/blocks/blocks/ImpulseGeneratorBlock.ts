@@ -1,6 +1,10 @@
 import { BlockLogic } from "shared/blockLogic/BlockLogic";
 import { BlockCreation } from "shared/blocks/BlockCreation";
-import type { BlockLogicArgs, BlockLogicFullBothDefinitions } from "shared/blockLogic/BlockLogic";
+import type {
+	BlockLogicArgs,
+	BlockLogicFullBothDefinitions,
+	BlockLogicTickContext,
+} from "shared/blockLogic/BlockLogic";
 import type { BlockBuilder } from "shared/blocks/Block";
 
 const definition = {
@@ -45,6 +49,10 @@ const definition = {
 
 export type { Logic as ImpulseGeneratorBlockLogic };
 class Logic extends BlockLogic<typeof definition> {
+	private impulseProgress = 0;
+	private didImpulse = false;
+	private impulseDelay?: number;
+
 	constructor(block: BlockLogicArgs) {
 		super(definition, block);
 
@@ -53,22 +61,26 @@ class Logic extends BlockLogic<typeof definition> {
 
 		this.onk(["isInverted"], ({ isInverted }) => set(!isInverted));
 
-		let impulses = 0;
-		let didImpulse = false;
-		this.onAlways(({ delay, isSinglePulse }) => {
-			if (didImpulse) {
+		this.onAlwaysInputs(({ delay, isSinglePulse }) => {
+			this.impulseDelay = delay;
+
+			if (this.didImpulse) {
 				set(!get());
-				didImpulse = false;
+				this.didImpulse = false;
 			}
 
-			impulses++;
+			this.impulseProgress++;
 			delay = math.max(delay, 1);
-			impulses %= delay;
-			if (impulses !== 0) return;
+			this.impulseProgress %= delay;
+			if (this.impulseProgress !== 0) return;
 
-			didImpulse = isSinglePulse;
+			this.didImpulse = isSinglePulse;
 			set(!get());
 		});
+	}
+
+	getDebugInfo(ctx: BlockLogicTickContext): readonly string[] {
+		return [...super.getDebugInfo(ctx), `Progress: ${this.impulseProgress}/${this.impulseDelay}`];
 	}
 }
 

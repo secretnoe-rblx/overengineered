@@ -51,7 +51,7 @@ class Logic extends InstanceBlockLogic<typeof definition, WingBlock> {
 			return;
 		}
 
-		this.onkStart(["enabled"], ({ enabled }) => {
+		this.onkFirstInputs(["enabled"], ({ enabled }) => {
 			if (!enabled) {
 				this.disable();
 				return;

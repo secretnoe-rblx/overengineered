@@ -91,14 +91,14 @@ const filterValueArr = <TType extends PrimitiveKeys>(
 
 //
 
-type TypedValue<TTypes extends PrimitiveKeys> = {
+export type TypedLogicValue<TTypes extends PrimitiveKeys> = {
 	readonly value: Primitives[TTypes]["default"] & defined;
 	readonly type: TTypes;
 	readonly changedSinceLastTick: boolean;
 };
 
 export type ReadonlyLogicValueStorage<TTypes extends PrimitiveKeys> = {
-	get(ctx: BlockLogicTickContext): TypedValue<TTypes> | BlockLogicValueResults;
+	get(ctx: BlockLogicTickContext): TypedLogicValue<TTypes> | BlockLogicValueResults;
 };
 export type WriteonlyLogicValueStorage<TTypes extends PrimitiveKeys> = {
 	set<TType extends TTypes & PrimitiveKeys>(valueType: TType, value: Primitives[TType]["default"]): void;
@@ -110,14 +110,14 @@ export type ILogicValueStorage<TTypes extends PrimitiveKeys> = ReadonlyLogicValu
 export class LogicValueStorageContainer<TType extends PrimitiveKeys>
 	implements ReadonlyLogicValueStorage<TType>, WriteonlyLogicValueStorage<TType>
 {
-	private value?: Omit<TypedValue<TType>, "changedSinceLastTick">;
+	private value?: Omit<TypedLogicValue<TType>, "changedSinceLastTick">;
 	private lastChangeTick?: number;
 	private changedThisTick = false;
 	private wasChanged = false;
 
 	constructor(private readonly definitions: DefinitionTypes<TType>) {}
 
-	get(ctx: BlockLogicTickContext): TypedValue<TType> | BlockLogicValueResults {
+	get(ctx: BlockLogicTickContext): TypedLogicValue<TType> | BlockLogicValueResults {
 		if (!this.value) {
 			return BlockLogicValueResults.availableLater;
 		}
@@ -127,7 +127,7 @@ export class LogicValueStorageContainer<TType extends PrimitiveKeys>
 			this.lastChangeTick = ctx.tick;
 		}
 
-		$debug("getting", ctx.tick, this.lastChangeTick, this.changedThisTick);
+		$debug("getting", ctx.tick, this.lastChangeTick);
 		return {
 			value: this.value.value,
 			type: this.value.type,
@@ -169,7 +169,7 @@ export class BlockBackedInputLogicValueStorage<TType extends PrimitiveKeys>
 		private readonly key: string,
 	) {}
 
-	get(ctx: BlockLogicTickContext): TypedValue<TType> | BlockLogicValueResults {
+	get(ctx: BlockLogicTickContext): TypedLogicValue<TType> | BlockLogicValueResults {
 		const result = this.outputBlock.getOutputValue(ctx, this.key);
 		if (isCustomBlockLogicValueResult(result)) {
 			return result;
@@ -182,7 +182,7 @@ export class BlockBackedInputLogicValueStorage<TType extends PrimitiveKeys>
 			type: result.type,
 			value: filtered,
 			changedSinceLastTick: result.changedSinceLastTick,
-		} as TypedValue<TType>;
+		} as TypedLogicValue<TType>;
 	}
 }
 

@@ -75,7 +75,7 @@ export class Logic extends InstanceBlockLogic<typeof definition, MotorBlock> {
 			);
 		});
 
-		this.onTick(() => {
+		this.onTicc(() => {
 			const base = this.instance.FindFirstChild("Base") as BasePart | undefined;
 			const attach = this.instance.FindFirstChild("Attach") as BasePart | undefined;
 			if (!attach || !base) {

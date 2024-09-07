@@ -65,7 +65,7 @@ class Logic extends BlockLogic<typeof definition> {
 		});
 
 		const toRemove: Wait[] = [];
-		this.onTick(({ dt }) => {
+		this.onTicc(({ dt }) => {
 			for (const wait of this.tickWaits) {
 				if (wait.left <= 0) {
 					toRemove.push(wait);

@@ -39,7 +39,7 @@ namespace BlockTests {
 					const id = names[i];
 
 					if (id === "screen") {
-						block.tick(ticker.getContext());
+						block.ticc(ticker.getContext());
 						Assert.isFalse(block.isEnabled(), `Block ${id} should be disabled`);
 
 						return;

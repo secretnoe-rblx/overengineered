@@ -21,7 +21,7 @@ class Logic extends InstanceBlockLogic<typeof definition> {
 
 		const initialRotation = this.instance.GetPivot().Rotation;
 
-		this.onTick(() => {
+		this.onRecalcInputs(() => {
 			const [x, y, z] = initialRotation.ToObjectSpace(this.instance.GetPivot().Rotation).ToEulerAnglesYXZ();
 			this.output.result.set("vector3", new Vector3(x, y, z));
 		});

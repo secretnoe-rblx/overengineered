@@ -123,7 +123,7 @@ class Logic extends InstanceBlockLogic<typeof definition, RocketModel> {
 		this.maxPower = this.basePower * multiplier;
 		this.output.maxpower.set("number", this.maxPower);
 
-		this.onAlways(({ thrust, strength }) => {
+		this.onAlwaysInputs(({ thrust, strength }) => {
 			this.cachedThrust = thrust;
 			this.update(thrust, strength);
 		});

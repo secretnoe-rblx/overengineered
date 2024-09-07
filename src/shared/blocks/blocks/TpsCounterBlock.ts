@@ -21,7 +21,7 @@ class Logic extends BlockLogic<typeof definition> {
 
 		let tps = 0;
 		let prevTime = 0;
-		this.onTick(() => {
+		this.onTicc(() => {
 			const time = os.clock();
 			const dt = time - prevTime;
 			prevTime = time;
@@ -31,9 +31,9 @@ class Logic extends BlockLogic<typeof definition> {
 			if (tps === math.huge || tps === -math.huge || tps !== tps) {
 				tps = 0;
 			}
-
-			this.output.fps.set("number", tps);
 		});
+
+		this.onRecalcInputs(() => this.output.fps.set("number", tps));
 	}
 }
 
