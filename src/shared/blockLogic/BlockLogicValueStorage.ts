@@ -66,7 +66,7 @@ const filterValue = <TType extends PrimitiveKeys>(
 	}
 
 	if (!definitionTypes[valueType]) {
-		throw `Trying to filter an unknown type ${valueType}`;
+		return value;
 	}
 
 	const filter = Filters[valueType] as GenericFilter | undefined;
@@ -80,7 +80,7 @@ const filterValueArr = <TType extends PrimitiveKeys>(
 	valueType: TType,
 ): Primitives[TType]["default"] => {
 	if (!definitionTypes.includes(valueType)) {
-		throw `Trying to filter an unknown type ${valueType}`;
+		return value;
 	}
 
 	const filter = Filters[valueType] as GenericFilter | undefined;
