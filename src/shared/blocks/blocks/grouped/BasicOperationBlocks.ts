@@ -479,7 +479,6 @@ const maths = {
 			{
 				inputOrder: ["value", "min", "max"],
 				input: {
-					value: defpartsf.number("Value"),
 					min: defpartsf.number("Min"),
 					max: defpartsf.number("Max"),
 				},
