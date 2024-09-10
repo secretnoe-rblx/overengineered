@@ -110,16 +110,10 @@ class ColorChooserInputs extends Control<ColorChooserDefinition["Inputs"]> {
 
 		const hextext = this.add(new TextBoxControl(this.gui.ManualHex));
 		this.event.subscribe(hextext.submitted, (hex) => {
-			if (hex.sub(1, 1) !== "#") {
-				hextext.text.set("#" + hex);
-				return;
-			}
-
 			try {
 				this._value.submit(Color3.fromHex(hex));
 			} catch {
 				hextext.text.set("#" + getColorFromRgbTextBoxes().ToHex().upper());
-				return;
 			}
 		});
 
