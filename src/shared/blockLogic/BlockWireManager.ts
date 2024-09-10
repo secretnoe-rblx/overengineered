@@ -92,11 +92,18 @@ export namespace BlockWireManager {
 	}
 
 	export function fromPlot(plot: SharedPlot, blockList: BlockList, treatDisconnectedAsUnset: boolean = false) {
+		return from(plot.getBlockDatas(), blockList, treatDisconnectedAsUnset);
+	}
+	export function from(
+		blocks: readonly PlacedBlockData[],
+		blockList: BlockList,
+		treatDisconnectedAsUnset: boolean = false,
+	) {
 		const toNarrow: Markers.Marker[] = [];
 		const markersByBlock = new Map<BlockUuid, (Markers.Input | Markers.Output)[]>();
 		const markers = new Map<string, Markers.Marker>();
 
-		for (const block of plot.getBlockDatas()) {
+		for (const block of blocks) {
 			const definition = blockList.blocks[block.id]?.logic?.definition;
 			if (!definition) continue;
 			const cfg = BlockConfig.addDefaults(block.config, definition.input);
@@ -158,7 +165,7 @@ export namespace BlockWireManager {
 
 		groupMarkers(markers.values());
 
-		for (const block of plot.getBlockDatas()) {
+		for (const block of blocks) {
 			if (!block.config) continue;
 
 			for (const [connectionName, config] of pairs(block.config)) {
