@@ -57,8 +57,6 @@ class Logic extends BlockLogic<typeof definition> {
 		super(definition, block);
 
 		this.on(({ value, valueType, valueChanged, duration, tickBased }) => {
-			$debug("delayChangeed", value, valueChanged);
-
 			// should delay only when the value is changed
 			if (!valueChanged) return;
 			this.tickWaits.push({ left: duration, value, valueType, tickBased });

@@ -156,47 +156,6 @@ const inputValuesToFullObject = <TDef extends BlockLogicBothDefinitions, K exten
 		return undefined;
 	}
 	return input as AllInputKeysToObject<TDef["input"], K>;
-
-	// const inputValues: {
-	// 	[k in keyof TDef["input"]]?: TypedLogicValue<
-	// 		PrimitiveKeys & keyof (TDef["input"][keyof TDef["input"]]["types"] & defined)
-	// 	>;
-	// } = {};
-
-	// if (keys.size() === 0) {
-	// 	return {} as never;
-	// }
-
-	// for (const k of keys) {
-	// 	const value = input[k].get(ctx);
-	// 	$debug("ivtfo", value);
-	// 	if (isCustomBlockLogicValueResult(value)) {
-	// 		return value;
-	// 	}
-
-	// 	inputValues[k] = value;
-	// }
-
-	// // Map input values to an object with keys `{key}` being the values, `{key}Type` being the types, `{key}Changed` being true if the value was changed
-	// const result: AllInputKeysToObject<TDef["input"]> = {
-	// 	...Objects.map(
-	// 		inputValues,
-	// 		(k) => k,
-	// 		(k, v) => v.value,
-	// 	),
-	// 	...Objects.map(
-	// 		inputValues,
-	// 		(k) => `${tostring(k)}Type`,
-	// 		(k, v) => v.type,
-	// 	),
-	// 	...Objects.map(
-	// 		inputValues,
-	// 		(k) => `${tostring(k)}Changed`,
-	// 		(k, v) => v.changedSinceLastTick,
-	// 	),
-	// };
-
-	// return result;
 };
 
 export type BlockLogicTickContext = {
@@ -354,7 +313,6 @@ export abstract class BlockLogic<TDef extends BlockLogicBothDefinitions> extends
 			this.recalculate(ctx);
 
 			const value = this._output[key].get(ctx);
-			$debug("got from output value,", key, value);
 			if (!isCustomBlockLogicValueResult(value)) {
 				return value;
 			}
@@ -394,7 +352,6 @@ export abstract class BlockLogic<TDef extends BlockLogicBothDefinitions> extends
 	ticc(ctx: BlockLogicTickContext) {
 		if (!this.isEnabled()) return;
 
-		$debug("in tick", this.prevTick, ctx.tick);
 		// execute only once per tick
 		if (this.prevTick === ctx.tick) {
 			return;
@@ -411,7 +368,6 @@ export abstract class BlockLogic<TDef extends BlockLogicBothDefinitions> extends
 
 		this.ticc(ctx);
 
-		$debug("in recalc", this.prevRecalcTick, ctx.tick);
 		// execute only once per tick
 		if (this.prevRecalcTick === ctx.tick) {
 			return;
@@ -581,7 +537,6 @@ export abstract class CalculatableBlockLogic<TDef extends BlockLogicBothDefiniti
 
 			this.currentCustomResult = undefined;
 			for (const [k, v] of pairs(results)) {
-				$debug("setting calculatable", k, v);
 				this.output[k].set(v.type, v.value);
 			}
 		});

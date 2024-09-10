@@ -127,7 +127,6 @@ export class LogicValueStorageContainer<TType extends PrimitiveKeys>
 			this.lastChangeTick = ctx.tick;
 		}
 
-		$debug("getting", ctx.tick, this.lastChangeTick);
 		return {
 			value: this.value.value,
 			type: this.value.type,

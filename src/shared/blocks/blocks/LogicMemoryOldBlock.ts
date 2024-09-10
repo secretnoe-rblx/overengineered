@@ -37,7 +37,6 @@ class Logic extends BlockLogic<typeof definition> {
 		super(definition, block);
 
 		this.onk(["value", "set"], ({ value, valueType, set }) => {
-			$debug("mem value", value, set);
 			if (!set) return;
 			this.output.result.set(valueType, value);
 		});
