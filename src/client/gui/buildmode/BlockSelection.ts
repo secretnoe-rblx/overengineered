@@ -344,6 +344,8 @@ export class BlockSelectionControl extends Control<BlockSelectionControlDefiniti
 					);
 
 		for (const block of blocks) {
+			if (block.hidden) continue;
+
 			const button = createBlockButton(block, () => {
 				if (this.gui.SearchTextBox.Text !== "") {
 					this.gui.SearchTextBox.Text = "";

@@ -1007,7 +1007,7 @@ const v25: UpgradableBlocksSerializer<SerializedBlocks<SerializedBlockV4>, typeo
 	version: 25,
 
 	upgradeFrom(prev: SerializedBlocks<SerializedBlockV3>): SerializedBlocks<SerializedBlockV4> {
-		const update = (block: SerializedBlockV3): SerializedBlockV4 => {
+		const updateTypes = (block: SerializedBlockV3): SerializedBlockV4 => {
 			const config = {
 				...Objects.mapValues(block.config ?? {}, (k, v) => {
 					const def = (blockConfigRegistry as BlockConfigRegistry)[block.id as keyof BlockConfigRegistry]!
@@ -1169,9 +1169,20 @@ const v25: UpgradableBlocksSerializer<SerializedBlocks<SerializedBlockV4>, typeo
 			return ret;
 		};
 
+		const updateBlock = (block: SerializedBlockV4): SerializedBlockV4 => {
+			if (block.id === "logicmemory") {
+				return {
+					...block,
+					id: "logicmemorylegacy",
+				};
+			}
+
+			return block;
+		};
+
 		return {
 			version: this.version,
-			blocks: prev.blocks.map(update),
+			blocks: prev.blocks.map((b) => updateBlock(updateTypes(b))),
 		};
 	},
 };

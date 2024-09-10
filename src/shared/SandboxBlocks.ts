@@ -20,6 +20,7 @@ import { KeySensorBlock } from "shared/blocks/blocks/KeySensorBlock";
 import { LaserBlock } from "shared/blocks/blocks/LaserBlock";
 import { LedDisplayBlock } from "shared/blocks/blocks/LedDisplayBlock";
 import { LogicMemoryBlock } from "shared/blocks/blocks/LogicMemoryBlock";
+import { LogicMemoryLegacyBlock } from "shared/blocks/blocks/LogicMemoryOldBlock";
 import { MagnetBlock } from "shared/blocks/blocks/MagnetBlock";
 import { MassSensorBlock } from "shared/blocks/blocks/MassSensorBlock";
 import { MotorBlock } from "shared/blocks/blocks/MotorBlock";
@@ -79,6 +80,7 @@ export const CreateSandboxBlocks = (): BlockList => {
 		CounterBlock,
 		TpsCounterBlock,
 		LogicMemoryBlock,
+		LogicMemoryLegacyBlock,
 		RandomAccessMemoryBlock,
 		StackMemoryBlock,
 		ReadonlyMemoryBlock,
