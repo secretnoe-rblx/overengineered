@@ -514,15 +514,16 @@ export abstract class BlockLogic<TDef extends BlockLogicBothDefinitions> extends
 
 	getDebugInfo(ctx: BlockLogicTickContext): readonly string[] {
 		const result: string[] = [];
-		// for (const [k, input] of pairs(this.input)) {
-		// 	const value = input.get(ctx);
 
-		// 	if (isCustomBlockLogicValueResult(value)) {
-		// 		result.push(`[${tostring(k)}] ${value.sub("$BLOCKLOGIC_".size() + 1)}`);
-		// 	} else {
-		// 		result.push(`[${tostring(k)}] ${value.value}`);
-		// 	}
-		// }
+		for (const [k, input] of pairs(this.input)) {
+			const value = input.get(ctx);
+
+			if (isCustomBlockLogicValueResult(value)) {
+				result.push(`[${tostring(k)}] ${value.sub("$BLOCKLOGIC_".size() + 1)}`);
+			} else {
+				result.push(`[${tostring(k)}] ${value.value}`);
+			}
+		}
 
 		for (const [k, output] of pairs(this.output)) {
 			const value = output.tryJustGet();
