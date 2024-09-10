@@ -473,7 +473,7 @@ const maths = {
 	},
 	rand: {
 		displayName: "Random",
-		description: `Returns a "random" value between chosen minimum and maximum`,
+		description: `Returns a "random" value between chosen minimum and maximum (excluding maximum)`,
 		modelSource: autoModel("DoubleGenericLogicBlockPrefab", "RAND", categories.math),
 		logic: logic(
 			{

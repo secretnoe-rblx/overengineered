@@ -317,7 +317,6 @@ export abstract class BlockLogic<TDef extends BlockLogicBothDefinitions> extends
 				return value;
 			}
 
-			//this.disableAndBurn();
 			return BlockLogicValueResults.availableLater;
 		}
 
@@ -331,9 +330,6 @@ export abstract class BlockLogic<TDef extends BlockLogicBothDefinitions> extends
 		}
 
 		const value = this._output[key].get(ctx);
-		// if (value === BlockLogicValueResults.garbage) {
-		// 	this.disableAndBurn();
-		// }
 
 		this.calculatingRightNow = false;
 		return value;
@@ -393,14 +389,7 @@ export abstract class BlockLogic<TDef extends BlockLogicBothDefinitions> extends
 			this.inputCache,
 			skipIfUnchanged,
 		);
-		if (!inputs) {
-			return;
-		}
-		if (inputs === BlockLogicValueResults.garbage) {
-			// this.disableAndBurn();
-			return;
-		}
-		if (inputs === BlockLogicValueResults.availableLater) {
+		if (!inputs || isCustomBlockLogicValueResult(inputs)) {
 			return;
 		}
 

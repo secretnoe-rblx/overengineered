@@ -3,6 +3,7 @@ import { BlockLogicValueResults } from "shared/blockLogic/BlockLogicValueStorage
 import { BlockAssert } from "shared/blocks/testing/BlockAssert";
 import { BlockTesting } from "shared/blocks/testing/BlockTesting";
 import { MathUtils } from "shared/fixes/MathUtils";
+import type { GenericBlockLogic } from "shared/blockLogic/BlockLogic";
 import type { UnitTests } from "shared/test/TestFramework";
 
 namespace BlockTests {
@@ -274,10 +275,22 @@ namespace BlockTests {
 	}
 
 	export function divisionByZeroReturningGarbage() {
-		const block = createBlock2("div", 45978, 0);
-		const runner = BlockTesting.runner(block);
+		const test = (block: GenericBlockLogic, id: string, message: string) => {
+			const runner = BlockTesting.runner(block);
 
-		BlockAssert.resultError(block, runner, "result", BlockLogicValueResults.garbage, `testing block div`);
+			BlockAssert.resultError(
+				block,
+				runner,
+				"result",
+				BlockLogicValueResults.garbage,
+				`Block ${id} should return garbage ${message}`,
+			);
+			Assert.isFalse(block.isEnabled(), `Block ${id} should be disabled after returning garbage for ${message}`);
+		};
+
+		test(createBlock2("div", 45978, 0), "div", "dividing by zero");
+		test(createBlock2("mod", 45978, 0), "mod", "modding by zero");
+		test(createBlock2("rand", 1, 0, "min", "max"), "rand", "min>max");
 	}
 }
 export const _Tests: UnitTests = { BlockTests };

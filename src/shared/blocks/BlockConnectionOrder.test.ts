@@ -40,15 +40,11 @@ namespace BlockTests {
 			Logger.beginScope("part1");
 			const [ticker, notb, mem, delay] = init();
 
-			$log(1);
 			// waiting to return true from NOT
 			BlockAssert.resultError(delay, ticker, "result", BlockLogicValueResults.availableLater, "DELAY");
-			$log(2);
 			BlockAssert.resultSuccessAndEquals(mem, ticker, "result", { value: false }, "MEMORY");
-			$log(3);
 			BlockAssert.resultSuccessAndEquals(notb, ticker, "result", { value: true }, "NOT");
 
-			$log("tick");
 			ticker.tick();
 
 			BlockAssert.resultSuccessAndEquals(delay, ticker, "result", { value: true }, "DELAY");
@@ -64,17 +60,11 @@ namespace BlockTests {
 			Logger.beginScope("part2");
 			const [ticker, notb, mem, delay] = init();
 
-			$log(1);
 			BlockAssert.resultSuccessAndEquals(notb, ticker, "result", { value: true }, "NOT");
-			$log(2);
 			BlockAssert.resultSuccessAndEquals(mem, ticker, "result", { value: false }, "MEMORY");
-			$log(3);
-			Logger.enabledLevels.enable(Logger.levels.trace);
 			// waiting to return true from NOT
 			BlockAssert.resultError(delay, ticker, "result", BlockLogicValueResults.availableLater, "DELAY");
-			Logger.enabledLevels.disable(Logger.levels.trace);
 
-			$log("tick");
 			ticker.tick();
 
 			BlockAssert.resultSuccessAndEquals(notb, ticker, "result", { value: false }, "NOT");

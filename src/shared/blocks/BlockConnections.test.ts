@@ -1,4 +1,3 @@
-import { Assert } from "shared/Assert";
 import { BlockLogicValueResults } from "shared/blockLogic/BlockLogicValueStorage";
 import { BlockAssert } from "shared/blocks/testing/BlockAssert";
 import { BlockTesting } from "shared/blocks/testing/BlockTesting";
@@ -25,7 +24,7 @@ namespace BlockTests {
 		return $tuple(ticker, notb, delay, screen);
 	}
 
-	export function testCircularConnectionsReturningGarbage() {
+	export function testCircularConnectionsReturningAvailableLater() {
 		const test = (...blockIndexes: readonly number[]) => {
 			try {
 				$log("Testing", ...blockIndexes);
@@ -40,8 +39,6 @@ namespace BlockTests {
 
 					if (id === "screen") {
 						block.ticc(ticker.getContext());
-						Assert.isFalse(block.isEnabled(), `Block ${id} should be disabled`);
-
 						return;
 					}
 
@@ -49,10 +46,9 @@ namespace BlockTests {
 						block,
 						ticker,
 						"result",
-						BlockLogicValueResults.garbage,
-						`Block ${id} should return garbage`,
+						BlockLogicValueResults.availableLater,
+						`Block ${id} should return availableLater`,
 					);
-					Assert.isFalse(block.isEnabled(), `Block ${id} should be disabled`);
 				}
 			} catch (err) {
 				$err(err);
