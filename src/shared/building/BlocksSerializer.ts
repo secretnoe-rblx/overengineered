@@ -1036,8 +1036,9 @@ const v25: UpgradableBlocksSerializer<SerializedBlocks<SerializedBlockV4>, typeo
 						} else {
 							ctype = firstKey(def.types)! as never;
 						}
+					} else if (def.type === "clampedNumber") {
+						ctype = "number";
 					} else if (
-						def.type === "clampedNumber" ||
 						def.type === "servoMotorAngle" ||
 						def.type === "controllableNumber" ||
 						def.type === "motorRotationSpeed" ||
@@ -1124,8 +1125,6 @@ const v25: UpgradableBlocksSerializer<SerializedBlocks<SerializedBlockV4>, typeo
 								mode: { type: value.switchmode ? "switch" : "hold" },
 							} satisfies BlockConfigPart<"number">["controlConfig"];
 						}
-
-						v = 0;
 					} else if (def.type === "keybool") {
 						ctype = "bool";
 						const value = v as {
