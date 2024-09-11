@@ -6,46 +6,35 @@ const blocks = {
 		displayName: "Block",
 		description: "Makes you question why every engineering game has it",
 
-		mirror: { behaviour: "none" },
 		weldRegionsSource: BlockCreation.WeldRegions.fAutomatic("cube"),
 	},
 	truss: {
 		displayName: "Truss",
 		description: "Climbable and veeeery cool.",
 
-		mirror: { behaviour: "none" },
 		weldRegionsSource: BlockCreation.WeldRegions.fAutomatic("cube"),
 	},
 	trussunsupported: {
 		displayName: "Unsupported truss",
 		description: "Climbable, but less cool than the ~normal~ one",
 
-		mirror: { behaviour: "none" },
 		weldRegionsSource: BlockCreation.WeldRegions.fAutomatic("cube"),
 	},
 	ball: {
 		displayName: "Ball",
 		description: "it could be a cannon ball.. Or anything else, really..",
-
-		mirror: { behaviour: "none" },
 	},
 	halfball: {
 		displayName: "Half Ball",
 		description: "It's rolling around.. half of the time..",
-
-		mirror: { behaviour: "offset180" },
 	},
 	cone: {
 		displayName: "Cone",
 		description: "Filled with weird geometry jokes. Sadly, no ice cream",
-
-		mirror: { behaviour: "normal" },
 	},
 	halfcone: {
 		displayName: "Half Cone",
 		description: "As half as much geometry jokes in this one. Still no ice cream tho...",
-
-		mirror: { behaviour: "normal" },
 	},
 	halfblock: {
 		displayName: "Half Block",

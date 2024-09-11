@@ -139,8 +139,6 @@ export namespace BuildingManager {
 
 				const method = block.mirror.behaviour;
 				switch (method) {
-					case "none":
-						return cframe;
 					case "offset90":
 						return normalRotation(cframe.mul(CFrame.fromEulerAnglesYXZ(0, math.pi / 2, 0)));
 					case "offset180":
