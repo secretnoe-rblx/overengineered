@@ -153,6 +153,34 @@ const defs = {
 			},
 		},
 	},
+	numvec2_numvec: {
+		inputOrder: ["value1", "value2"],
+		input: {
+			value1: {
+				displayName: "Value 1",
+				types: {
+					number: { config: 0 },
+					vector3: { config: Vector3.zero },
+				},
+				group: "0",
+			},
+			value2: {
+				displayName: "Value 2",
+				types: {
+					number: { config: 0 },
+					vector3: { config: Vector3.zero },
+				},
+				group: "0",
+			},
+		},
+		output: {
+			result: {
+				displayName: "Result",
+				types: ["number", "vector3"],
+				group: "0",
+			},
+		},
+	},
 	bool1_bool: {
 		input: {
 			value: defpartsf.bool("Value"),
@@ -324,9 +352,47 @@ const maths = {
 		displayName: "Addition",
 		description: "Returns a sum of input values",
 		modelSource: autoModel("DoubleGenericLogicBlockPrefab", "ADD", categories.math),
-		logic: logic(defs.num2_num, ({ value1, value2 }) => ({
-			result: { type: "number", value: value1 + value2 },
-		})),
+		logic: logic(
+			{
+				inputOrder: ["value1", "value2"],
+				input: {
+					value1: {
+						displayName: "Value 1",
+						types: {
+							number: { config: 0 },
+							vector3: { config: Vector3.zero },
+						},
+						group: "0",
+					},
+					value2: {
+						displayName: "Value 2",
+						types: {
+							number: { config: 0 },
+							vector3: { config: Vector3.zero },
+						},
+						group: "0",
+					},
+				},
+				output: {
+					result: {
+						displayName: "Result",
+						types: ["number", "vector3"],
+						group: "0",
+					},
+				},
+			},
+			({ value1, value2 }, logic) => {
+				if (typeIs(value1, "Vector3") && typeIs(value2, "Vector3")) {
+					return { result: { type: "vector3", value: value1.add(value2) } };
+				}
+				if (typeIs(value1, "Vector3") || typeIs(value2, "Vector3")) {
+					logic.disableAndBurn();
+					return BlockLogicValueResults.garbage;
+				}
+
+				return { result: { type: "number", value: value1 + value2 } };
+			},
+		),
 	},
 	sub: {
 		displayName: "Subtraction",
@@ -336,28 +402,88 @@ const maths = {
 			{
 				inputOrder: ["value1", "value2"],
 				input: {
-					value1: defpartsf.number("Value"),
-					value2: defpartsf.number("Subtrahend"),
+					value1: {
+						displayName: "Value",
+						types: {
+							number: { config: 0 },
+							vector3: { config: Vector3.zero },
+						},
+						group: "0",
+					},
+					value2: {
+						displayName: "Subtrahend",
+						types: {
+							number: { config: 0 },
+							vector3: { config: Vector3.zero },
+						},
+						group: "0",
+					},
 				},
 				output: {
 					result: {
 						displayName: "Result",
-						types: ["number"],
+						types: ["number", "vector3"],
+						group: "0",
 					},
 				},
 			},
-			({ value1, value2 }) => ({
-				result: { type: "number", value: value1 - value2 },
-			}),
+			({ value1, value2 }, logic) => {
+				if (typeIs(value1, "Vector3") && typeIs(value2, "Vector3")) {
+					return { result: { type: "vector3", value: value1.sub(value2) } };
+				}
+				if (typeIs(value1, "Vector3") || typeIs(value2, "Vector3")) {
+					logic.disableAndBurn();
+					return BlockLogicValueResults.garbage;
+				}
+
+				return { result: { type: "number", value: value1 - value2 } };
+			},
 		),
 	},
 	mul: {
 		displayName: "Multiplication",
 		description: "Returns the result of multiplication of two given values",
 		modelSource: autoModel("DoubleGenericLogicBlockPrefab", "MUL", categories.math),
-		logic: logic(defs.num2_num, ({ value1, value2 }) => ({
-			result: { type: "number", value: value1 * value2 },
-		})),
+		logic: logic(
+			{
+				inputOrder: ["value1", "value2"],
+				input: {
+					value1: {
+						displayName: "Value 1",
+						types: {
+							number: { config: 0 },
+							vector3: { config: Vector3.zero },
+						},
+						group: "0",
+					},
+					value2: {
+						displayName: "Value 2",
+						types: {
+							number: { config: 0 },
+							vector3: { config: Vector3.zero },
+						},
+						group: "0",
+					},
+				},
+				output: {
+					result: {
+						displayName: "Result",
+						types: ["number", "vector3"],
+						group: "0",
+					},
+				},
+			},
+			({ value1, value2 }) => {
+				if (typeIs(value1, "Vector3")) {
+					return { result: { type: "vector3", value: value1.mul(value2) } };
+				}
+				if (typeIs(value2, "Vector3")) {
+					return { result: { type: "vector3", value: value2.mul(value1) } };
+				}
+
+				return { result: { type: "number", value: value1 * value2 } };
+			},
+		),
 	},
 	div: {
 		displayName: "Division",
@@ -367,13 +493,28 @@ const maths = {
 			{
 				inputOrder: ["value1", "value2"],
 				input: {
-					value1: defpartsf.number("Value"),
-					value2: defpartsf.number("Divider"),
+					value1: {
+						displayName: "Value",
+						types: {
+							number: { config: 0 },
+							vector3: { config: Vector3.zero },
+						},
+						group: "0",
+					},
+					value2: {
+						displayName: "Divider",
+						types: {
+							number: { config: 0 },
+							vector3: { config: Vector3.zero },
+						},
+						group: "0",
+					},
 				},
 				output: {
 					result: {
 						displayName: "Result",
-						types: ["number"],
+						types: ["number", "vector3"],
+						group: "0",
 					},
 				},
 			},
@@ -381,6 +522,17 @@ const maths = {
 				if (value2 === 0) {
 					logic.disableAndBurn();
 					return BlockLogicValueResults.garbage;
+				}
+				if (typeIs(value2, "Vector3") && (value2.X === 0 || value2.Y === 0 || value2.Z === 0)) {
+					logic.disableAndBurn();
+					return BlockLogicValueResults.garbage;
+				}
+
+				if (typeIs(value1, "Vector3")) {
+					return { result: { type: "vector3", value: value1.div(value2) } };
+				}
+				if (typeIs(value2, "Vector3")) {
+					return { result: { type: "vector3", value: value2.div(value1) } };
 				}
 
 				return { result: { type: "number", value: value1 / value2 } };
