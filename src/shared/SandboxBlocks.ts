@@ -3,6 +3,7 @@ import { AltimeterBlock } from "shared/blocks/blocks/AltimeterBlock";
 import { AngleSensorBlock } from "shared/blocks/blocks/AngleSensorBlock";
 import { BallastBlock } from "shared/blocks/blocks/BallastBlock";
 import { BracedShaftBlock } from "shared/blocks/blocks/BracedShaftBlock";
+import { ControllerBlock } from "shared/blocks/blocks/ControllerBlock";
 import { CounterBlock } from "shared/blocks/blocks/CounterBlock";
 import { DelayBlock } from "shared/blocks/blocks/DelayBlock";
 import { DisconnectBlock } from "shared/blocks/blocks/DisconnectBlock";
@@ -87,6 +88,7 @@ export const CreateSandboxBlocks = (): BlockList => {
 
 		AltimeterBlock,
 		KeySensorBlock,
+		ControllerBlock,
 		AngleSensorBlock,
 		OwnerLocatorBlock,
 		OwnerCameraLocatorBlock,
