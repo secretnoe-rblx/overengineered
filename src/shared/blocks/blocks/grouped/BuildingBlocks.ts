@@ -114,17 +114,17 @@ const cornerWedges = {
 	tetrahedron2x1: {
 		displayName: "Tetrahedron 2x1",
 		description: "The simplest polyhedron, whose faces are four triangles, but slightly longer",
-		mirror: { behaviour: "offset90" },
+		mirror: { behaviour: "tetra" },
 	},
 	tetrahedron3x1: {
 		displayName: "Tetrahedron 3x1",
 		description: "The simplest polyhedron, whose faces are four triangles, but much longer",
-		mirror: { behaviour: "offset90" },
+		mirror: { behaviour: "tetra" },
 	},
 	tetrahedron4x1: {
-		displayName: "Tetrahedron 3x1",
+		displayName: "Tetrahedron 4x1",
 		description: "The simplest polyhedron, whose faces are four triangles, but unfathomably longer",
-		mirror: { behaviour: "offset90" },
+		mirror: { behaviour: "tetra" },
 	},
 	tetraround: {
 		displayName: "Tetra Round",

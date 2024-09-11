@@ -99,6 +99,9 @@ class Logic extends InstanceBlockLogic<typeof definition> {
 			if (radius === undefined || pressure === undefined || flammable === undefined) {
 				return;
 			}
+			if (part.CollisionGroup !== "Blocks" && part.CollisionGroup !== "Default") {
+				return;
+			}
 
 			const velocity1 = this.instance.PrimaryPart!.AssemblyLinearVelocity.Magnitude;
 			const velocity2 = part.AssemblyLinearVelocity.Magnitude;

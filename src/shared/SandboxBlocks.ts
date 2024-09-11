@@ -8,6 +8,7 @@ import { ControllerBlock } from "shared/blocks/blocks/ControllerBlock";
 import { CounterBlock } from "shared/blocks/blocks/CounterBlock";
 import { DelayBlock } from "shared/blocks/blocks/DelayBlock";
 import { DisconnectBlock } from "shared/blocks/blocks/DisconnectBlock";
+import { FireSensorBlock } from "shared/blocks/blocks/FireSensorBlock";
 import { GravitySensorBlock } from "shared/blocks/blocks/GravitySensorBlock";
 import { BasicOperationBlocks } from "shared/blocks/blocks/grouped/BasicOperationBlocks";
 import { BuildingBlocks } from "shared/blocks/blocks/grouped/BuildingBlocks";
@@ -94,6 +95,7 @@ export const CreateSandboxBlocks = (): BlockList => {
 		KeySensorBlock,
 		ControllerBlock,
 		AngleSensorBlock,
+		FireSensorBlock,
 		OwnerLocatorBlock,
 		OwnerCameraLocatorBlock,
 		GravitySensorBlock,

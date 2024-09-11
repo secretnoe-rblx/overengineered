@@ -46,7 +46,12 @@ const definition = {
 			connectorHidden: true,
 		},
 	},
-	output: {},
+	output: {
+		maxpower: {
+			displayName: "Max Power (Newtons)",
+			types: ["number"],
+		},
+	},
 } satisfies BlockLogicFullBothDefinitions;
 
 type Emitter = Part & {
@@ -120,7 +125,7 @@ class Logic extends InstanceBlockLogic<typeof definition, RCSEngineModel> {
 	private readonly maxPower;
 
 	// Const
-	private readonly maxSoundVolume = 0.5;
+	private readonly maxSoundVolume = 0.25;
 	private readonly maxParticlesAcceleration = 120;
 
 	private thrust: Vector3 = Vector3.zero;
@@ -132,27 +137,19 @@ class Logic extends InstanceBlockLogic<typeof definition, RCSEngineModel> {
 	) {
 		super(definition, block);
 
-		// Instances
-		const colbox = this.instance.ColBox;
-
 		for (const d of this.engineData) {
 			d.vectorForce = d.engine.VectorForce;
 			d.soundEmitter = d.engine.Sound;
 		}
 
-		// Math
-		let multiplier = math.round((colbox.Size.X * colbox.Size.Y * colbox.Size.Z) / 16);
-
-		// i dont remember why
-		if (multiplier !== 1) multiplier *= 2;
-
 		// The strength depends on the material
+
 		const material = BlockManager.manager.material.get(this.instance);
-		multiplier *= math.max(1, math.round(new PhysicalProperties(material).Density / 2));
+		const multiplier = math.max(1, math.round(new PhysicalProperties(material).Density / 2));
 
 		// Max power
 		this.maxPower = this.basePower * multiplier;
-		//this.output.maxpower.set(this.maxPower);
+		this.output.maxpower.set("number", this.maxPower);
 
 		const trailColorCache = this.initializeInputCache("trailColor");
 

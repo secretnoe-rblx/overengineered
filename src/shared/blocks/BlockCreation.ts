@@ -12,7 +12,7 @@ import type {
 } from "shared/blocks/Block";
 
 export type AutoWeldColliderBlockShape = "none" | "cube";
-export type BlockMirrorBehaviour = "offset90" | "offset180" | "offset270" | "normal" | "wedgeWing";
+export type BlockMirrorBehaviour = "offset90" | "offset180" | "offset270" | "normal" | "wedgeWing" | "tetra";
 
 /** Tools for creating a block and its data. */
 export namespace BlockCreation {

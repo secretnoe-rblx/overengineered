@@ -4,6 +4,7 @@ import type { BlockLogicFullBothDefinitions, InstanceBlockLogicArgs } from "shar
 import type { BlockBuilder } from "shared/blocks/Block";
 
 const definition = {
+	inputOrder: ["damping", "stiffness", "free_length", "max_force"],
 	input: {
 		damping: {
 			displayName: "Damping",
@@ -49,6 +50,19 @@ const definition = {
 				},
 			},
 		},
+		max_force: {
+			displayName: "Force",
+			types: {
+				number: {
+					config: 1000,
+					clamp: {
+						showAsSlider: true,
+						min: 1,
+						max: 800000,
+					},
+				},
+			},
+		},
 	},
 	output: {},
 } satisfies BlockLogicFullBothDefinitions;
@@ -65,12 +79,13 @@ class Logic extends InstanceBlockLogic<typeof definition, SuspensionModel> {
 	constructor(block: InstanceBlockLogicArgs) {
 		super(definition, block);
 
-		this.on(({ damping, stiffness, free_length }) => {
+		this.on(({ max_force, damping, stiffness, free_length }) => {
 			const spring = this.instance.FindFirstChild("SpringSide")?.FindFirstChild("Spring") as
 				| SpringConstraint
 				| undefined;
 			if (!spring) return;
 
+			spring.MaxForce = max_force;
 			spring.Damping = damping;
 			spring.Stiffness = stiffness;
 			spring.FreeLength = free_length;

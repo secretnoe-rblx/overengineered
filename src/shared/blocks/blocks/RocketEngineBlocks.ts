@@ -82,7 +82,7 @@ class Logic extends InstanceBlockLogic<typeof definition, RocketModel> {
 	private readonly sound;
 
 	// Math
-	private readonly basePower = RobloxUnit.Newton_To_Rowton(600_000);
+	private readonly basePower = RobloxUnit.Newton_To_Rowton(1_100_000);
 	private readonly maxPower;
 
 	// Const

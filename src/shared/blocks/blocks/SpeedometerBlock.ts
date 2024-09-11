@@ -47,14 +47,7 @@ class Logic extends InstanceBlockLogic<typeof definition> {
 			);
 
 			const angularVelocity = this.instance.PrimaryPart.AssemblyAngularVelocity;
-			this.output.angular.set(
-				"vector3",
-				new Vector3(
-					RobloxUnit.Studs_To_Meters(angularVelocity.X),
-					RobloxUnit.Studs_To_Meters(angularVelocity.Y),
-					RobloxUnit.Studs_To_Meters(angularVelocity.Z),
-				),
-			);
+			this.output.angular.set("vector3", new Vector3(angularVelocity.X, angularVelocity.Y, angularVelocity.Z));
 		});
 	}
 }

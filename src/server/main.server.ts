@@ -12,6 +12,7 @@ import { SandboxGame } from "server/SandboxGame";
 import { Game } from "shared/GameHost";
 import { PlasmaProjectile } from "shared/weapons/PlasmaProjectileLogic";
 import { BulletProjectile } from "shared/weapons/BulletProjectileLogic";
+import { BootFlagsController } from "server/BootFlagsController";
 
 const builder = Game.createHost();
 SandboxGame.initialize(builder);
@@ -19,8 +20,11 @@ SandboxGame.initialize(builder);
 const host = builder.build();
 host.run();
 
-// Initializing event workders
+// Initializing event workers
 RemoteEvents.initialize();
+
+// Game boot flags
+BootFlagsController.initialize();
 
 $log("Server loaded.");
 Workspace.AddTag("GameLoaded");

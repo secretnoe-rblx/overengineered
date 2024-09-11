@@ -597,7 +597,14 @@ const rcsengine = {
 			connectorHidden: true,
 		},
 	},
-	output: {},
+	output: {
+		maxpower: {
+			displayName: "Max Power (Newtons)",
+			type: "number",
+			default: 0 as number,
+			config: 0 as number,
+		},
+	},
 } as const satisfies BlockConfigBothDefinitions;
 
 const piston = {
@@ -950,6 +957,15 @@ const suspensionblock = {
 			max: 10,
 			step: 0.01,
 			config: 4.5 as number,
+		},
+		max_force: {
+			displayName: "Force",
+			type: "clampedNumber",
+			min: 1,
+			max: 800000,
+			step: 0.1,
+			default: 1000 as number,
+			config: 1000 as number,
 		},
 	},
 	output: {},
@@ -1627,6 +1643,28 @@ const radarsection = {
 	},
 } as const satisfies BlockConfigBothDefinitions;
 
+const firesensor = {
+	input: {
+		detectionradius: {
+			displayName: "Detection Radius",
+			type: "clampedNumber",
+			default: 20 as number,
+			config: 20 as number,
+			min: 1,
+			max: 100,
+			step: 1,
+		},
+	},
+	output: {
+		detected: {
+			displayName: "Detected",
+			type: "bool",
+			default: false as boolean,
+			config: false as boolean,
+		},
+	},
+} as const satisfies BlockConfigBothDefinitions;
+
 const delayBlock = {
 	input: {
 		value: connectors.any("Value", "1"),
@@ -2046,6 +2084,7 @@ export const _BlockConfigRegistrySave = {
 	radioreciever,
 
 	radarsection,
+	firesensor,
 
 	delayblock: delayBlock,
 
