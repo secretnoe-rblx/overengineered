@@ -62,7 +62,7 @@ export class Logic extends InstanceBlockLogic<typeof definition, MotorBlock> {
 		super(definition, block);
 
 		this.on((ctx) => {
-			if (!this.instance.FindFirstChild("Base")) {
+			if (!this.instance.FindFirstChild("Base")?.FindFirstChild("HingeConstraint")) {
 				this.disableAndBurn();
 				return;
 			}
