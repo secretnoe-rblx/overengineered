@@ -24,16 +24,16 @@ export class ClientMachine extends SharedMachine {
 		return this.logicInputs.asReadonly();
 	}
 
+	createVisualizer() {
+		return new LogicVisualizer(
+			this.runner,
+			this.blocksMap.map((k, v) => v.logic),
+		);
+	}
+
 	protected initialize(blocks: readonly PlacedBlockData[]) {
 		super.initialize(blocks);
 		this.initializeControls();
-
-		this.parent(
-			new LogicVisualizer(
-				this.runner,
-				this.blocksMap.map((k, v) => v.logic),
-			),
-		);
 	}
 	protected createImpactControllerIfNeeded(blocks: readonly PlacedBlockData[]): ImpactController | undefined {
 		if (!this.playerData.config.get().impact_destruction) {
