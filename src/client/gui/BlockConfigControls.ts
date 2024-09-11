@@ -586,6 +586,15 @@ namespace Controls {
 						cType.selectedItem.set(selected.type);
 					}
 
+					let smoothSpeed = sameOrUndefinedBy(controlConfig, (c) =>
+						"speed" in c.mode ? c.mode.speed : undefined,
+					);
+					smoothSpeed ??=
+						definition.control.config.mode.type === "smooth"
+							? definition.control.config.mode.speed
+							: undefined;
+					smoothSpeed ??= (definition.control.max - definition.control.min) / 5;
+
 					const modeDefaults: { readonly [k in ModeKeys]: Extract<Modes, { readonly type: k }> } = {
 						hold: {
 							type: "hold",
@@ -595,12 +604,8 @@ namespace Controls {
 						},
 						smooth: {
 							type: "smooth",
-							speed:
-								sameOrUndefinedBy(controlConfig, (c) =>
-									"speed" in c.mode ? c.mode.speed : undefined,
-								) ?? (definition.control.max - definition.control.min) / 5,
+							speed: smoothSpeed,
 						},
-						[definition.control.config.mode.type]: definition.control.config.mode,
 					};
 
 					cType.submitted.Connect((item) => {
