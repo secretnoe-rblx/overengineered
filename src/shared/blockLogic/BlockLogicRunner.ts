@@ -34,7 +34,6 @@ export class BlockLogicRunner extends Component {
 	}
 
 	startTicking() {
-		print("tick order is", this.blocks.map((i) => i.instance?.Name ?? 0).join());
 		this.stopTicking();
 		this.tickingLoop = this.event.loop(0, () => this.tick());
 	}
