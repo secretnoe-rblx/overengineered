@@ -24,7 +24,7 @@ export class ByteEditor extends Control<ByteEditorDefinition> {
 	readonly submitted = new Signal<(value: number) => void>();
 	readonly value = new ObservableValue<number>(0);
 
-	private readonly buttons;
+	private readonly buttons: readonly TextButton[];
 
 	private readonly buttonColor;
 	private readonly buttonColorActive;
@@ -40,9 +40,16 @@ export class ByteEditor extends Control<ByteEditorDefinition> {
 		this.buttonColor = parts.Buttons.b2.BackgroundColor3;
 		this.buttonColorActive = Colors.newGui.blue;
 
-		this.buttons = (parts.Buttons.GetChildren().filter((value) => value.IsA("TextButton")) as TextButton[]).sort(
-			(a, b) => a.LayoutOrder > b.LayoutOrder,
-		);
+		this.buttons = [
+			parts.Buttons.b128,
+			parts.Buttons.b64,
+			parts.Buttons.b32,
+			parts.Buttons.b16,
+			parts.Buttons.b8,
+			parts.Buttons.b4,
+			parts.Buttons.b2,
+			parts.Buttons.b1,
+		];
 		for (const button of this.buttons) {
 			this.add(new ButtonControl(button));
 		}
