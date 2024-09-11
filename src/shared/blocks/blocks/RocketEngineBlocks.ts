@@ -20,10 +20,8 @@ const definition = {
 					control: {
 						min: 0,
 						max: 100,
-						simplified: "thrust",
 						config: {
 							enabled: true,
-							extended: false,
 							startValue: 0,
 							mode: {
 								type: "smooth",

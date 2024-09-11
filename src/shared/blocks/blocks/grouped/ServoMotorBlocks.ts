@@ -31,10 +31,8 @@ const servoDefinition = {
 					control: {
 						min: -180,
 						max: 180,
-						simplified: "servoMotorAngle",
 						config: {
 							enabled: true,
-							extended: false,
 							startValue: 0,
 							mode: {
 								type: "hold",

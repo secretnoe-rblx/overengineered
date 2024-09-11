@@ -73,14 +73,14 @@ namespace ConfigTests {
 				displayName: "Number Mixed",
 				types: { number: { config: 0 } },
 			},
-			// string: {
-			// 	displayName: "String",
-			// 	types: { string: {} },
-			// },
-			// stringMixed: {
-			// 	displayName: "String Mixed",
-			// 	types: { string: {} },
-			// },
+			string: {
+				displayName: "String",
+				types: { string: { config: "" } },
+			},
+			stringMixed: {
+				displayName: "String Mixed",
+				types: { string: { config: "" } },
+			},
 			clampedNumber: {
 				displayName: "Slider",
 				types: { number: { config: 0, clamp: { showAsSlider: true, min: 0, max: 63, step: 1 } } },
@@ -89,14 +89,14 @@ namespace ConfigTests {
 				displayName: "Slider Mixed",
 				types: { number: { config: 0, clamp: { showAsSlider: true, min: 0, max: 63, step: 1 } } },
 			},
-			// byte: {
-			// 	displayName: "Byte",
-			// 	types: { byte: {} },
-			// },
-			// byteMixed: {
-			// 	displayName: "Byte Mixed",
-			// 	types: { byte: {} },
-			// },
+			byte: {
+				displayName: "Byte",
+				types: { byte: { config: 0 } },
+			},
+			byteMixed: {
+				displayName: "Byte Mixed",
+				types: { byte: { config: 0 } },
+			},
 			key: {
 				displayName: "Key",
 				types: { key: { config: "F" } },
@@ -105,49 +105,85 @@ namespace ConfigTests {
 				displayName: "Key Mixed",
 				types: { key: { config: "F" } },
 			},
-			// keyBool: {
-			// 	displayName: "Keybool",
-			// 	types: {
-			// 		bool: {
-			// 			type: "keybool",
-			// 			config: { key: "F", reversed: false, switch: false },
-			// 			canBeReversed: true,
-			// 			canBeSwitch: true,
-			// 		},
-			// 	},
-			// },
-			// motorRotationSpeed: {
-			// 	displayName: "Motor",
-			// 	types: { motorRotationSpeed: { maxSpeed: 100 } },
-			// },
-			// servoMotorAngle: {
-			// 	displayName: "Servo",
-			// 	types: { servoMotorAngle: { minAngle: 0, maxAngle: 90 } },
-			// },
-			// thrust: {
-			// 	displayName: "Thrust",
-			// 	types: { thrust: { canBeSwitch: true } },
-			// },
-			// controllableNumber: {
-			// 	displayName: "Controllable Number",
-			// 	types: { controllableNumber: { min: 0, max: 100, step: 0.01 } },
-			// },
-			// vector3: {
-			// 	displayName: "Vector3",
-			// 	types: { vector3: {} },
-			// },
-			// vector3Mixed: {
-			// 	displayName: "Vector3 Mixed",
-			// 	types: { vector3: {} },
-			// },
-			// color: {
-			// 	displayName: "Color",
-			// 	types: { color: {} },
-			// },
-			// colorMixed: {
-			// 	displayName: "Color Mixed",
-			// 	types: { color: {} },
-			// },
+			keyBool: {
+				displayName: "Keybool",
+				types: {
+					bool: {
+						config: false,
+						control: {
+							config: { enabled: true, key: "F", reversed: false, switch: false },
+							canBeReversed: true,
+							canBeSwitch: true,
+						},
+					},
+				},
+			},
+			keyBoolMixed: {
+				displayName: "Keybool Mixed",
+				types: {
+					bool: {
+						config: false,
+						control: {
+							config: { enabled: true, key: "F", reversed: false, switch: false },
+							canBeReversed: true,
+							canBeSwitch: true,
+						},
+					},
+				},
+			},
+			keyBoolMixedEnabled: {
+				displayName: "Keybool Mixed Enable",
+				types: {
+					bool: {
+						config: false,
+						control: {
+							config: { enabled: true, key: "F", reversed: false, switch: false },
+							canBeReversed: true,
+							canBeSwitch: true,
+						},
+					},
+				},
+			},
+			numberControlled: {
+				displayName: "Motor",
+				types: {
+					number: {
+						config: 0,
+						control: {
+							min: 0,
+							max: 100,
+							config: {
+								startValue: 0,
+								mode: {
+									type: "smooth",
+									speed: 25,
+								},
+								enabled: true,
+								keys: [
+									{ key: "R", value: 100 },
+									{ key: "F", value: 0 },
+								],
+							},
+						},
+					},
+				},
+			},
+			vector3: {
+				displayName: "Vector3",
+				types: { vector3: { config: new Vector3() } },
+			},
+			vector3Mixed: {
+				displayName: "Vector3 Mixed",
+				types: { vector3: { config: new Vector3() } },
+			},
+			color: {
+				displayName: "Color",
+				types: { color: { config: new Color3() } },
+			},
+			colorMixed: {
+				displayName: "Color Mixed",
+				types: { color: { config: new Color3() } },
+			},
 		} as const satisfies VisualBlockConfigDefinitions;
 
 		type cfg = {
@@ -165,35 +201,49 @@ namespace ConfigTests {
 			boolMixed: { type: "bool", config: true },
 			number: { type: "number", config: 727 },
 			numberMixed: { type: "number", config: 727 },
-			// string: { type: "string", config: "asd" },
-			// stringMixed: { type: "string", config: "asd" },
+			string: { type: "string", config: "asd" },
+			stringMixed: { type: "string", config: "asd" },
 			clampedNumber: { type: "number", config: 46 },
 			clampedNumberMixed: { type: "number", config: 0 },
-			// byte: { type: "byte", config: 7 },
-			// byteMixed: { type: "byte", config: 7 },
+			byte: { type: "byte", config: 7 },
+			byteMixed: { type: "byte", config: 7 },
 			key: { type: "key", config: "F" },
 			keyMixed: { type: "key", config: "F" },
-			// keyBool: { type: "bool", config: { key: "F", reversed: false, switch: false } },
-			// motorRotationSpeed: {
-			// 	type: "motorRotationSpeed",
-			// 	config: { rotation: { add: "R", sub: "F" }, speed: 49, switchmode: true },
-			// },
-			// servoMotorAngle: {
-			// 	type: "servoMotorAngle",
-			// 	config: { rotation: { add: "R", sub: "F" }, angle: 46, switchmode: true },
-			// },
-			// thrust: {
-			// 	type: "thrust",
-			// 	config: { thrust: { add: "R", sub: "F" }, switchmode: true },
-			// },
-			// controllableNumber: {
-			// 	type: "controllableNumber",
-			// 	config: { control: { add: "R", sub: "F" }, value: 4 },
-			// },
-			// vector3: { type: "vector3", config: new Vector3(1, 2, 3) },
-			// vector3Mixed: { type: "vector3", config: new Vector3(1, 2, 3) },
-			// color: { type: "color", config: new Color3(1, 0, 1) },
-			// colorMixed: { type: "color", config: new Color3(1, 0, 1) },
+			keyBool: {
+				type: "bool",
+				config: false,
+				controlConfig: { enabled: true, key: "F", reversed: false, switch: false },
+			},
+			keyBoolMixed: {
+				type: "bool",
+				config: false,
+				controlConfig: { enabled: true, key: "F", reversed: false, switch: false },
+			},
+			keyBoolMixedEnabled: {
+				type: "bool",
+				config: false,
+				controlConfig: { enabled: true, key: "F", reversed: false, switch: false },
+			},
+			numberControlled: {
+				type: "number",
+				config: 0,
+				controlConfig: {
+					enabled: true,
+					startValue: 0,
+					mode: {
+						type: "smooth",
+						speed: 25,
+					},
+					keys: [
+						{ key: "R", value: 100 },
+						{ key: "F", value: 0 },
+					],
+				},
+			},
+			vector3: { type: "vector3", config: new Vector3(1, 2, 3) },
+			vector3Mixed: { type: "vector3", config: new Vector3(1, 2, 3) },
+			color: { type: "color", config: new Color3(1, 0, 1) },
+			colorMixed: { type: "color", config: new Color3(1, 0, 1) },
 		};
 		const b2: cfg[string] = {
 			...b1,
@@ -201,13 +251,22 @@ namespace ConfigTests {
 			multiValueMixed: { type: "bool", config: false },
 			boolMixed: { type: "bool", config: false },
 			numberMixed: { type: "number", config: 63 },
-			// stringMixed: { type: "string", config: "asdfgh" },
+			stringMixed: { type: "string", config: "asdfgh" },
 			clampedNumberMixed: { type: "number", config: 5 },
-			// byteMixed: { type: "byte", config: 9 },
+			byteMixed: { type: "byte", config: 9 },
 			keyMixed: { type: "key", config: "R" },
-			// keyBool: { type: "bool", config: { key: "F", reversed: false, switch: false } },
-			// vector3Mixed: { type: "vector3", config: new Vector3(4, 2, 3) },
-			// colorMixed: { type: "color", config: new Color3(1, 0, 0) },
+			keyBoolMixed: {
+				type: "bool",
+				config: false,
+				controlConfig: { enabled: true, key: "R", reversed: true, switch: true },
+			},
+			keyBoolMixedEnabled: {
+				type: "bool",
+				config: false,
+				controlConfig: { enabled: false, key: "F", reversed: false, switch: false },
+			},
+			vector3Mixed: { type: "vector3", config: new Vector3(4, 2, 3) },
+			colorMixed: { type: "color", config: new Color3(1, 0, 0) },
 		};
 
 		// multiconfig

@@ -1060,7 +1060,6 @@ const v25: UpgradableBlocksSerializer<SerializedBlocks<SerializedBlockV4>, typeo
 
 							controlConfig = {
 								enabled: true,
-								extended: true,
 								keys: [
 									{ key: value.rotation.add, value: value.speed },
 									{ key: value.rotation.sub, value: -value.speed },
@@ -1079,7 +1078,6 @@ const v25: UpgradableBlocksSerializer<SerializedBlocks<SerializedBlockV4>, typeo
 
 							controlConfig = {
 								enabled: true,
-								extended: true,
 								keys: [
 									{ key: value.thrust.add, value: 100 },
 									{ key: value.thrust.sub, value: 0 },
@@ -1098,7 +1096,6 @@ const v25: UpgradableBlocksSerializer<SerializedBlocks<SerializedBlockV4>, typeo
 
 							controlConfig = {
 								enabled: true,
-								extended: true,
 								keys: [
 									{ key: value.control.add, value: value.value },
 									{ key: value.control.sub, value: def.min },
@@ -1118,7 +1115,6 @@ const v25: UpgradableBlocksSerializer<SerializedBlocks<SerializedBlockV4>, typeo
 
 							controlConfig = {
 								enabled: true,
-								extended: true,
 								keys: [
 									{ key: value.rotation.add, value: value.angle },
 									{ key: value.rotation.sub, value: -value.angle },

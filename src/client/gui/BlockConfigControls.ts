@@ -137,16 +137,6 @@ namespace Controls {
 			readonly TextBox: ByteEditorDefinition["TextBox"] & defined;
 		};
 	};
-	type ControllableDefinition = GuiObject & {
-		readonly Controllable: GuiObject & {
-			readonly Controllable: GuiObject & {
-				readonly Control: CheckBoxControlDefinition;
-			};
-			readonly Extended: GuiObject & {
-				readonly Control: CheckBoxControlDefinition;
-			};
-		};
-	};
 
 	export type Templates = {
 		readonly Unset: ConfigValueDefinition<GuiObject>;
@@ -162,7 +152,6 @@ namespace Controls {
 		readonly Color: ConfigValueDefinition<ColorChooserDefinition>;
 		readonly Dropdown: ConfigValueDefinition<undefined> & DropdownListDefinition;
 		readonly Multi: ConfigValueDefinition<GuiObject>;
-		readonly Controllable: ConfigValueDefinition<ControllableDefinition>;
 
 		readonly MultiKeys: MultiKeyNumberControlDefinition;
 	};
@@ -183,7 +172,6 @@ namespace Controls {
 		Color: Control.asTemplateWithMemoryLeak(template.Content.Color, true),
 		Dropdown: Control.asTemplateWithMemoryLeak(template.Content.Dropdown, true),
 		Multi: Control.asTemplateWithMemoryLeak(template.Content.Multi, true),
-		Controllable: Control.asTemplateWithMemoryLeak(template.Content.Controllable, true),
 
 		MultiKeys: Control.asTemplateWithMemoryLeak(template.Content.MultiKeys, true),
 	};
@@ -498,191 +486,6 @@ namespace Controls {
 				}
 			}
 		}
-
-		export class NumberThrustControl extends Base<GuiObject, "number"> {
-			constructor(
-				templates: templates,
-				definition: MakeRequired<MiniPrimitives["number"], "control">,
-				config: BlocksConfigPart<"number">,
-				args: Args,
-			) {
-				super(templates.Multi());
-
-				const processConfig = (
-					config: BlockLogicTypes.NumberControl["config"],
-				): BlockLogicTypes.NumberControl["config"] => {
-					let keys = [...config.keys];
-					while (keys.size() > 2) {
-						keys.pop();
-					}
-					while (keys.size() < 2) {
-						keys.push(definition.control.config.keys[keys.size()]);
-					}
-
-					if (keys.mapToSet((k) => k.key).size() !== keys.size()) {
-						// if some keys are the same
-						keys = [...definition.control.config.keys];
-					}
-
-					keys[1] = { ...keys[1], value: 0 };
-					return { ...config, keys };
-				};
-				const getKeysArr = (keys: { readonly add?: string; readonly sub?: string }) => {
-					return map(controlConfig, (c) => [
-						{ ...c.keys[0], key: keys.add ?? c.keys[0].key, value: 100 },
-						{ ...c.keys[1], key: keys.sub ?? c.keys[1].key, value: 0 },
-					]);
-				};
-
-				let controlConfig = map(config, (c) => processConfig(c.controlConfig!));
-
-				const mks = addMultiKeyControls(
-					this,
-					[
-						{
-							key: "add",
-							displayName: "+",
-							definition: { config: definition.control.config.keys[0].key },
-							config: map(controlConfig, (c) => c.keys[0].key),
-						},
-						{
-							key: "sub",
-							displayName: "-",
-							definition: { config: definition.control.config.keys[1].key },
-							config: map(controlConfig, (c) => c.keys[1].key),
-						},
-					],
-					args,
-				);
-				mks.submitted.Connect((v) => {
-					const keys = getKeysArr(v);
-					this.submittedControl.Fire(
-						(controlConfig = map(controlConfig, (c, uuid) => ({ ...c, keys: keys[uuid] }))),
-					);
-				});
-
-				const [, cSwitch] = addSingleTypeWrapperAuto(
-					this,
-					"Switch mode",
-					{ type: "bool", config: definition.control.config.mode.type === "switch" },
-					map(controlConfig, (c) => c.mode.type === "switch"),
-					args,
-				);
-				cSwitch.submitted.Connect((v) =>
-					this.submittedControl.Fire(
-						(controlConfig = map(controlConfig, (c, uuid) => ({
-							...c,
-							mode: v[uuid] ? { type: "switch" } : definition.control.config.mode,
-						}))),
-					),
-				);
-			}
-		}
-
-		export class NumberMotorRotationSpeedControl extends Base<GuiObject, "number"> {
-			constructor(
-				templates: templates,
-				definition: MakeRequired<MiniPrimitives["number"], "control">,
-				config: BlocksConfigPart<"number">,
-				args: Args,
-			) {
-				super(templates.Multi());
-
-				const processConfig = (
-					config: BlockLogicTypes.NumberControl["config"],
-				): BlockLogicTypes.NumberControl["config"] => {
-					let keys = [...config.keys];
-					while (keys.size() > 2) {
-						keys.pop();
-					}
-					while (keys.size() < 2) {
-						keys.push(definition.control.config.keys[keys.size()]);
-					}
-
-					if (keys.mapToSet((k) => k.key).size() !== keys.size()) {
-						// if some keys are the same
-						keys = [...definition.control.config.keys];
-					}
-
-					keys[1] = { ...keys[1], value: 0 };
-					return { ...config, keys };
-				};
-				const getKeysArr = (keys?: { readonly add?: string; readonly sub?: string }, speed?: number) => {
-					return map(controlConfig, (c) => [
-						{ ...c.keys[0], key: keys?.add ?? c.keys[0].key, value: speed ?? 100 },
-						{ ...c.keys[1], key: keys?.sub ?? c.keys[1].key, value: 0 },
-					]);
-				};
-
-				let controlConfig = map(config, (c) => processConfig(c.controlConfig!));
-
-				const mks = addMultiKeyControls(
-					this,
-					[
-						{
-							key: "add",
-							displayName: "+",
-							definition: { config: definition.control.config.keys[0].key },
-							config: map(controlConfig, (c) => c.keys[0].key),
-						},
-						{
-							key: "sub",
-							displayName: "-",
-							definition: { config: definition.control.config.keys[1].key },
-							config: map(controlConfig, (c) => c.keys[1].key),
-						},
-					],
-					args,
-				);
-				mks.submitted.Connect((v) => {
-					const keys = getKeysArr(v);
-					this.submittedControl.Fire(
-						(controlConfig = map(controlConfig, (c, uuid) => ({ ...c, keys: keys[uuid] }))),
-					);
-				});
-
-				const [, cMaxSpeed] = addSingleTypeWrapperAuto(
-					this,
-					"Max speed",
-					{
-						type: "number",
-						config: definition.config,
-						clamp: { showAsSlider: true, min: definition.control.min, max: definition.control.max },
-					},
-					map(controlConfig, (c) => c.keys[0].value),
-					args,
-				);
-				cMaxSpeed.submitted.Connect((v) => {
-					// on submit, all values should be the same anyways
-					const speed = firstValue(v)!;
-
-					const keys = getKeysArr(undefined, speed);
-					this.submittedControl.Fire(
-						(controlConfig = map(controlConfig, (c, uuid) => ({
-							...c,
-							keys: keys[uuid],
-						}))),
-					);
-				});
-
-				const [, cSwitch] = addSingleTypeWrapperAuto(
-					this,
-					"Switch mode",
-					{ type: "bool", config: definition.control.config.mode.type === "switch" },
-					map(controlConfig, (c) => c.mode.type === "switch"),
-					args,
-				);
-				cSwitch.submitted.Connect((v) =>
-					this.submittedControl.Fire(
-						(controlConfig = map(controlConfig, (c, uuid) => ({
-							...c,
-							mode: v[uuid] ? { type: "switch" } : definition.control.config.mode,
-						}))),
-					),
-				);
-			}
-		}
-
 		export class NumberExtendedControl extends Base<GuiObject, "number"> {
 			constructor(
 				templates: templates,
@@ -950,19 +753,6 @@ namespace Controls {
 		vector3: (templates, definition, config, parent) => new Controls.vector3(templates, definition, config, parent),
 	} satisfies Controls.controls as Controls.genericControls;
 
-	export const simpleControls = {
-		number: (templates, definition, config, parent) => {
-			if (definition.control.simplified === "thrust") {
-				return new Controls.NumberThrustControl(templates, definition, config, parent);
-			}
-			if (definition.control.simplified === "motorRotationSpeed") {
-				return new Controls.NumberMotorRotationSpeedControl(templates, definition, config, parent);
-			}
-
-			return undefined!;
-		},
-	} satisfies Controls.extendedControls as Controls.extendedGenericControls;
-
 	export const extendedControls = {
 		bool: (templates, definition, config, parent) =>
 			new Controls.KeyBool(
@@ -990,9 +780,6 @@ type ConfigValueWrapperDefinition = GuiObject & {
 				readonly Controllable: GuiObject & {
 					readonly Control: CheckBoxControlDefinition;
 				};
-				readonly Extended: GuiObject & {
-					readonly Control: CheckBoxControlDefinition;
-				};
 			};
 		};
 };
@@ -1005,7 +792,6 @@ class ConfigValueWrapper extends Control<ConfigValueWrapperDefinition> {
 
 	readonly controls;
 	readonly controllable;
-	readonly extended;
 
 	readonly content;
 
@@ -1024,7 +810,6 @@ class ConfigValueWrapper extends Control<ConfigValueWrapperDefinition> {
 
 		this.controls = this.add(new Control(gui.Content.TypeControllable));
 		this.controllable = this.controls.add(new CheckBoxControl(this.controls.instance.Controllable.Control));
-		this.extended = this.controls.add(new CheckBoxControl(this.controls.instance.Extended.Control));
 	}
 }
 
@@ -1157,40 +942,6 @@ class ConfigAutoValueWrapper extends Control<ConfigValueWrapperDefinition> {
 					}
 				};
 				initControllable();
-
-				// disabled because the whole "simplified" thing might be stupid
-				const canBeSimplified =
-					(false as boolean) && "simplified" in def.control && def.control.simplified !== undefined;
-				const initExtended = () => {
-					if (!canBeSimplified) {
-						// if `simplified` isn't present, always use extended variant
-						control.extended.value.set(true);
-						control.controls.instance.Extended.Visible = false;
-
-						return;
-					}
-
-					const isControllable = control.controllable.value.get() ?? false;
-					control.controls.instance.Extended.Visible = isControllable;
-					if (!isControllable) return;
-
-					const extendeds = new Set(
-						asMap(map(controlConfigs, (c) => "extended" in c && c.extended)).values(),
-					);
-					if (extendeds.size() === 1) {
-						if (firstKey(extendeds)) {
-							// all configs are true
-							control.extended.value.set(true);
-						} else {
-							// all configs are false
-							control.extended.value.set(false);
-						}
-					} else {
-						// configs have both true and false
-						control.extended.value.set(undefined);
-					}
-				};
-				initExtended();
 			};
 			initControls();
 
@@ -1218,9 +969,8 @@ class ConfigAutoValueWrapper extends Control<ConfigValueWrapperDefinition> {
 				if (!def) return;
 
 				const isControllable = control.controllable.value.get();
-				const isExtended = control.extended.value.get();
 
-				if (isControllable === undefined || isExtended === undefined) {
+				if (isControllable === undefined) {
 					// TODO: [mixed] message or somethin
 					return;
 				}
@@ -1228,19 +978,6 @@ class ConfigAutoValueWrapper extends Control<ConfigValueWrapperDefinition> {
 				if (!isControllable) {
 					const cfg = map(configs, (c) => c.config);
 					return Controls.controls[stype](Controls.templates, def, cfg, args, configs);
-				}
-				if (!isExtended) {
-					if (!(stype in Controls.simpleControls)) return;
-
-					const ctor = Controls.simpleControls[stype as ControlKeys];
-					if (!ctor) return;
-
-					return ctor(
-						Controls.templates,
-						def as MakeRequired<MiniPrimitives["number"], "control">,
-						configs,
-						args,
-					);
 				}
 
 				if (!(stype in Controls.extendedControls)) return;
@@ -1286,13 +1023,6 @@ class ConfigAutoValueWrapper extends Control<ConfigValueWrapperDefinition> {
 			// controlConfig will not be undefined if the controls are visible so we don't need to check that
 			this._submitted.Fire(
 				(configs = map(configs, (c) => ({ ...c, controlConfig: { ...c.controlConfig!, enabled } }))),
-			);
-			reload();
-		});
-		this.event.subscribe(control.extended.submitted, (extended) => {
-			// controlConfig will not be undefined if the controls are visible so we don't need to check that
-			this._submitted.Fire(
-				(configs = map(configs, (c) => ({ ...c, controlConfig: { ...c.controlConfig!, extended } }))),
 			);
 			reload();
 		});

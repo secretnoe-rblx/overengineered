@@ -37,58 +37,6 @@ export namespace BlockLogicTypes {
 		readonly control?: BoolControls;
 	};
 
-	export type NumberControlsSimplified = {
-		readonly motorRotationSpeed: {
-			readonly type: "motorRotationSpeed";
-			readonly config: {
-				readonly rotation: {
-					readonly add: KeyCode;
-					readonly sub: KeyCode;
-				};
-				readonly speed: number;
-				readonly switchmode: boolean;
-			};
-			readonly maxSpeed: number;
-		};
-		readonly servoMotorAngle: {
-			readonly type: "servoMotorAngle";
-			readonly config: {
-				readonly rotation: {
-					readonly add: KeyCode;
-					readonly sub: KeyCode;
-				};
-				readonly switchmode: boolean;
-				readonly angle: number;
-			};
-			readonly minAngle: number;
-			readonly maxAngle: number;
-		};
-		readonly thrust: {
-			readonly type: "thrust";
-			readonly config: {
-				readonly thrust: {
-					readonly add: KeyCode;
-					readonly sub: KeyCode;
-				};
-				readonly switchmode: boolean;
-			};
-			readonly canBeSwitch: boolean;
-		};
-		readonly controllableNumber: {
-			readonly type: "controllableNumber";
-			readonly config: {
-				readonly value: number;
-				readonly control: {
-					readonly add: KeyCode;
-					readonly sub: KeyCode;
-				};
-			};
-			readonly min: number;
-			readonly max: number;
-			readonly step: number;
-		};
-	};
-
 	export type NumberControlModeSmooth = {
 		readonly type: "smooth";
 		readonly speed: number;
@@ -114,15 +62,12 @@ export namespace BlockLogicTypes {
 		readonly max: number;
 		/** Global step for the resulting value & the configuration UI */
 		readonly step?: number;
-		/** If defined, enables the `extended` checkbox and decides which gui is shown when pressed */
-		readonly simplified?: keyof NumberControlsSimplified;
 
 		readonly config: {
 			/** Starting value */
 			readonly startValue: number;
 
 			readonly enabled: boolean;
-			readonly extended: boolean;
 			readonly keys: NumberControlKeys;
 			readonly mode: NumberControlModes;
 		};
