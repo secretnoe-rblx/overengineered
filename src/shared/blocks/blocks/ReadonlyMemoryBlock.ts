@@ -78,7 +78,7 @@ class Logic extends BlockLogic<typeof definition> {
 			this.output.output4.set("byte", data[address + 3] ?? 0);
 		};
 
-		this.on(({ read, address, data, dataChanged }) => {
+		this.onRecalcInputs(({ read, address, data, dataChanged }) => {
 			if (dataChanged) {
 				this.output.size.set("number", data.size());
 			}
