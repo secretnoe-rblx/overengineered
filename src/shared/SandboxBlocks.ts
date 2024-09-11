@@ -1,3 +1,4 @@
+import { RunService } from "@rbxts/services";
 import { BlockListBuilder } from "shared/blocks/BlockListBuilder";
 import { AltimeterBlock } from "shared/blocks/blocks/AltimeterBlock";
 import { AngleSensorBlock } from "shared/blocks/blocks/AngleSensorBlock";
@@ -11,7 +12,9 @@ import { GravitySensorBlock } from "shared/blocks/blocks/GravitySensorBlock";
 import { BasicOperationBlocks } from "shared/blocks/blocks/grouped/BasicOperationBlocks";
 import { BuildingBlocks } from "shared/blocks/blocks/grouped/BuildingBlocks";
 import { LampBlocks } from "shared/blocks/blocks/grouped/LampBlocks";
+import { MechanicalBlocks } from "shared/blocks/blocks/grouped/MechanicalBlocks";
 import { ServoMotorBlocks } from "shared/blocks/blocks/grouped/ServoMotorBlocks";
+import { TestBlocks } from "shared/blocks/blocks/grouped/TestBlocks";
 import { TNTBlocks } from "shared/blocks/blocks/grouped/TNTBlocks";
 import { WheelBlocks } from "shared/blocks/blocks/grouped/WheelBlocks";
 import { WingBlocks } from "shared/blocks/blocks/grouped/WingsBlocks";
@@ -48,8 +51,9 @@ import { VehicleSeatBlock } from "shared/blocks/blocks/VehicleSeatBlock";
 import type { BlockBuilder } from "shared/blocks/Block";
 
 export const CreateSandboxBlocks = (): BlockList => {
-	const blocksArr: readonly BlockBuilder[] = [
+	const blocksArr: BlockBuilder[] = [
 		...BuildingBlocks,
+		...MechanicalBlocks,
 		...BasicOperationBlocks,
 		...WheelBlocks,
 		...WingBlocks,
@@ -101,6 +105,12 @@ export const CreateSandboxBlocks = (): BlockList => {
 		SpeedometerBlock,
 		LaserBlock,
 	];
+
+	if (RunService.IsStudio()) {
+		for (const block of TestBlocks) {
+			blocksArr.push(block);
+		}
+	}
 
 	return BlockListBuilder.buildBlockList(blocksArr);
 };

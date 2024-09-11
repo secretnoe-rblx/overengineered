@@ -3,7 +3,6 @@ import { BlockWeldInitializer } from "shared/blocks/BlockWeldInitializer";
 import { Element } from "shared/Element";
 import { Instances } from "shared/fixes/Instances";
 import { Lazy } from "shared/Lazy";
-import type { AutoWeldColliderBlockShape, BlockMirrorBehaviour } from "shared/BlockDataRegistry";
 import type {
 	BlockBuilder,
 	BlockBuilderWithoutIdAndDefaults,
@@ -11,6 +10,9 @@ import type {
 	BlockMarkerPositions,
 	BlockWeldRegions,
 } from "shared/blocks/Block";
+
+export type AutoWeldColliderBlockShape = "none" | "cube";
+export type BlockMirrorBehaviour = "offset90" | "offset180" | "offset270" | "normal" | "none" | "wedgeWing";
 
 /** Tools for creating a block and its data. */
 export namespace BlockCreation {

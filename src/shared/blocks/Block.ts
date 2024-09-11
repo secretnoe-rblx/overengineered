@@ -1,10 +1,10 @@
-import type { BlockMirrorBehaviour } from "shared/BlockDataRegistry";
 import type { BlockLogicFullBothDefinitions, GenericBlockLogicCtor } from "shared/blockLogic/BlockLogic";
-import type { BlockCreation } from "shared/blocks/BlockCreation";
+import type { BlockCreation, BlockMirrorBehaviour } from "shared/blocks/BlockCreation";
 import type { DisconnectBlock } from "shared/blocks/blocks/DisconnectBlock";
 import type { BasicOperationBlockIds } from "shared/blocks/blocks/grouped/BasicOperationBlocks";
 import type { BuildingBlockIds } from "shared/blocks/blocks/grouped/BuildingBlocks";
 import type { LampBlockIds } from "shared/blocks/blocks/grouped/LampBlocks";
+import type { MechanicalBlockIds } from "shared/blocks/blocks/grouped/MechanicalBlocks";
 import type { ServoMotorBlockIds } from "shared/blocks/blocks/grouped/ServoMotorBlocks";
 import type { TNTBlockIds } from "shared/blocks/blocks/grouped/TNTBlocks";
 import type { WheelBlockIds } from "shared/blocks/blocks/grouped/WheelBlocks";
@@ -57,6 +57,7 @@ declare global {
 		| string
 		| (string &
 				BuildingBlockIds &
+				MechanicalBlockIds &
 				BasicOperationBlockIds &
 				WheelBlockIds &
 				RocketBlockIds &
