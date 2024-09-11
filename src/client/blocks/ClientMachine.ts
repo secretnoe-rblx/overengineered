@@ -54,9 +54,6 @@ export class ClientMachine extends SharedMachine {
 					continue;
 				}
 
-				const ctor = ClientBlockControls[v.type as keyof typeof ClientBlockControls];
-				if (!ctor) continue;
-
 				const input = logic.input[k] as
 					| (typeof logic)["input"][typeof k]
 					| ILogicValueStorage<keyof BlockLogicTypes.Primitives>;
@@ -68,6 +65,10 @@ export class ClientMachine extends SharedMachine {
 				if (!def) continue;
 				if (!def.control) continue;
 				if (!cfg.controlConfig) continue;
+				if (!cfg.controlConfig.enabled) continue;
+
+				const ctor = ClientBlockControls[v.type as keyof typeof ClientBlockControls];
+				if (!ctor) continue;
 
 				const control = ctor(input, cfg.controlConfig, def.control);
 				this.parent(control);
