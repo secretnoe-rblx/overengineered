@@ -1,5 +1,6 @@
 import { _BlockConfigRegistrySave } from "shared/building/BlockConfigRegistrySave";
 import { BlockManager } from "shared/building/BlockManager";
+import { Config } from "shared/config/Config";
 import { JSON } from "shared/fixes/Json";
 import { Objects } from "shared/fixes/objects";
 import { Serializer } from "shared/Serializer";
@@ -1045,6 +1046,7 @@ const v25: UpgradableBlocksSerializer<SerializedBlocks<SerializedBlockV4>, typeo
 						def.type === "thrust"
 					) {
 						ctype = "number";
+						v = Config.addDefaults({ a: v as never }, { a: def }).a;
 
 						if (def.type === "motorRotationSpeed") {
 							const value = v as {
@@ -1125,6 +1127,8 @@ const v25: UpgradableBlocksSerializer<SerializedBlocks<SerializedBlockV4>, typeo
 								mode: { type: value.switchmode ? "switch" : "hold" },
 							} satisfies BlockConfigPart<"number">["controlConfig"];
 						}
+
+						v = 0;
 					} else if (def.type === "keybool") {
 						ctype = "bool";
 						const value = v as {
