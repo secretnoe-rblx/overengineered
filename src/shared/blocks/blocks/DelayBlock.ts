@@ -90,6 +90,10 @@ class Logic extends BlockLogic<typeof definition> {
 		});
 	}
 
+	getWaits(): readonly Wait[] {
+		return this.tickWaits;
+	}
+
 	getDebugInfo(ctx: BlockLogicTickContext): readonly string[] {
 		const minBy = <T>(arr: T[], func: (value: T) => number) => {
 			let min: T | undefined = undefined;

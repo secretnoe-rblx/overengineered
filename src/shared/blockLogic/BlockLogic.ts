@@ -310,8 +310,6 @@ export abstract class BlockLogic<TDef extends BlockLogicBothDefinitions> extends
 		key: keyof typeof this.output,
 	): TypedLogicValue<TDef["output"][keyof TDef["output"]]["types"][number]> | BlockLogicValueResults {
 		if (this.calculatingRightNow) {
-			this.recalculate(ctx);
-
 			const value = this._output[key].get(ctx);
 			if (!isCustomBlockLogicValueResult(value)) {
 				return value;

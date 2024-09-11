@@ -13,6 +13,10 @@ export class BlockTestRunner {
 	getContext(overriddenDt?: number): BlockLogicTickContext {
 		return this.runner.getContext(false, overriddenDt);
 	}
+	moveContextForward(overriddenDt?: number): void {
+		this.runner.getContext(true, overriddenDt);
+	}
+
 	tick(amount: number = 1, dt?: number) {
 		for (let i = 0; i < amount; i++) {
 			this.runner.tick(dt);
