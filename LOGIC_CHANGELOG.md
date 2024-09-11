@@ -45,6 +45,7 @@ No more of that stupid [Y Z X] in vector blocks
 	The new memory block is the same but has an additional input for the default value - the value that this block will return immediately on start.
 	Maybe I'll bring back the legacy memory under a different name, idk if anyone needs it.
 - Added a basic logic (values and internal data) visualizer (button in the actionbar in ride mode, you won't miss it)
+- TODO: the tooltips
 
 
 ## Important

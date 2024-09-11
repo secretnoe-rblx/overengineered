@@ -1116,8 +1116,8 @@ const v25: UpgradableBlocksSerializer<SerializedBlocks<SerializedBlockV4>, typeo
 							controlConfig = {
 								enabled: true,
 								keys: [
-									{ key: value.rotation.add, value: value.angle },
-									{ key: value.rotation.sub, value: -value.angle },
+									{ key: value.rotation.add, value: -value.angle },
+									{ key: value.rotation.sub, value: value.angle },
 								],
 								startValue: 0,
 								mode: { type: value.switchmode ? "switch" : "hold" },
