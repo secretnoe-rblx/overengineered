@@ -1301,8 +1301,9 @@ const test: {} = !RunService.IsStudio()
 												enabled: true,
 												startValue: 0,
 												mode: {
-													type: "smooth",
-													speed: 1,
+													type: "hold",
+													smooth: true,
+													smoothSpeed: 1,
 												},
 												keys: [
 													{ key: "R", value: 10 },

@@ -53,118 +53,46 @@ namespace ClientBlockControlsNamespace {
 		}
 	}
 
-	export class Number extends ClientComponent implements IClientBlockControl {
-		private readonly controller;
+	function createNumberController(
+		value: ILogicValueStorage<"number">,
+		config: BlockLogicTypes.NumberControl["config"],
+		definition: Omit<BlockLogicTypes.NumberControl, "config">,
+	): KeyPressingDefinitionsController<KeyDefinitions<string>> {
+		let currentValue = config.startValue;
+		const actualSet = (newValue: number) => value.set("number", (currentValue = newValue));
 
-		constructor(
-			value: ILogicValueStorage<"number">,
-			config: BlockLogicTypes.NumberControl["config"],
-			definition: Omit<BlockLogicTypes.NumberControl, "config">,
-		) {
-			super();
-
-			if (config.mode.type === "smooth") {
-				this.controller = this.parent(new NumberSmooth(value, config as never, definition));
-			} else if (config.mode.type === "hold") {
-				this.controller = this.parent(new NumberHold(value, config as never, definition));
-			} else if (config.mode.type === "switch") {
-				this.controller = this.parent(new NumberSwitch(value, config as never, definition));
+		let smoothMovingTask: thread | undefined;
+		let smoothAmount = config.startValue;
+		const smoothSet = (target: number) => {
+			if (smoothMovingTask) {
+				task.cancel(smoothMovingTask);
 			}
-		}
 
-		getTouchButtonDatas(): readonly TouchModeButtonData[] {
-			return this.controller?.getTouchButtonDatas() ?? [];
-		}
-	}
+			const step = smoothAmount < target ? config.mode.smoothSpeed : -config.mode.smoothSpeed;
+			if (step === 0) return;
 
-	class NumberSmooth extends ClientComponent implements IClientBlockControl {
-		private readonly touchButtonDatas: readonly TouchModeButtonData[];
+			const direction = math.sign(step) as -1 | 1;
+			smoothMovingTask = task.spawn(() => {
+				while (true as boolean) {
+					const dt = task.wait();
 
-		constructor(
-			value: ILogicValueStorage<"number">,
-			config: ReplaceWith<
-				BlockLogicTypes.NumberControl["config"],
-				{ readonly mode: BlockLogicTypes.NumberControlModeSmooth }
-			>,
-			definition: Omit<BlockLogicTypes.NumberControl, "config">,
-		) {
-			super();
+					smoothAmount = math.clamp(smoothAmount + step * dt, definition.min, definition.max);
 
-			const set = (newValue: number) => value.set("number", newValue);
+					if (direction < 0) smoothAmount = math.max(smoothAmount, target);
+					else smoothAmount = math.min(smoothAmount, target);
 
-			set(config.startValue);
-			let amount = config.startValue;
-			let movingTowards: number | undefined = 0;
+					actualSet(MathUtils.round(smoothAmount, definition.step));
 
-			const start = (towards: number) => {
-				if (amount === towards) return;
+					// stop when reached the target
+					if (direction > 0 && smoothAmount >= target) return;
+					if (direction < 0 && smoothAmount <= target) return;
+				}
+			});
+		};
 
-				task.spawn(() => {
-					const step = amount < towards ? config.mode.speed : -config.mode.speed;
-					const direction = math.sign(step) as -1 | 1;
+		const set = config.mode.smooth ? smoothSet : actualSet;
 
-					while (movingTowards === towards) {
-						const dt = task.wait();
-
-						amount = math.clamp(amount + step * dt, definition.min, definition.max);
-
-						if (direction < 0) amount = math.max(amount, towards);
-						else amount = math.min(amount, towards);
-
-						set(MathUtils.round(amount, definition.step));
-					}
-				});
-			};
-
-			const allKeys = config.keys.map((k) => k.key);
-			const def: KeyDefinitions<string> = Objects.map(
-				config.keys,
-				(i, v) => v.key,
-				(i, v): KeyDefinition<string> => ({
-					key: v.key,
-					conflicts: allKeys.except([v.key]),
-					keyDown: () => {
-						if (movingTowards) return;
-
-						movingTowards = v.value;
-						start(v.value);
-					},
-					keyUp: () => (movingTowards = undefined),
-				}),
-			);
-
-			const controller = this.parent(new KeyPressingDefinitionsController(def));
-
-			this.touchButtonDatas = config.keys.map(
-				(k): TouchModeButtonData => ({
-					name: k.key,
-					press: () => controller.controller.keyDown(k.key),
-					release: () => controller.controller.keyUp(k.key),
-					isPressed: () => controller.controller.isDown(k.key),
-					toggleMode: false,
-				}),
-			);
-		}
-
-		getTouchButtonDatas(): readonly TouchModeButtonData[] {
-			return this.touchButtonDatas;
-		}
-	}
-	class NumberHold extends ClientComponent implements IClientBlockControl {
-		private readonly touchButtonDatas: readonly TouchModeButtonData[];
-
-		constructor(
-			value: ILogicValueStorage<"number">,
-			config: ReplaceWith<
-				BlockLogicTypes.NumberControl["config"],
-				{ readonly mode: BlockLogicTypes.NumberControlModeHold }
-			>,
-			definition: Omit<BlockLogicTypes.NumberControl, "config">,
-		) {
-			super();
-
-			const set = (newValue: number) => value.set("number", newValue);
-
+		const createNumberHold = () => {
 			set(config.startValue);
 			let amount = config.startValue;
 
@@ -183,38 +111,9 @@ namespace ClientBlockControlsNamespace {
 				}),
 			);
 
-			const controller = this.parent(new KeyPressingDefinitionsController(def));
-
-			this.touchButtonDatas = config.keys.map(
-				(k): TouchModeButtonData => ({
-					name: k.key,
-					press: () => controller.controller.keyDown(k.key),
-					release: () => controller.controller.keyUp(k.key),
-					isPressed: () => controller.controller.isDown(k.key),
-					toggleMode: false,
-				}),
-			);
-		}
-
-		getTouchButtonDatas(): readonly TouchModeButtonData[] {
-			return this.touchButtonDatas;
-		}
-	}
-	class NumberSwitch extends ClientComponent implements IClientBlockControl {
-		private readonly touchButtonDatas: readonly TouchModeButtonData[];
-
-		constructor(
-			value: ILogicValueStorage<"number">,
-			config: ReplaceWith<
-				BlockLogicTypes.NumberControl["config"],
-				{ readonly mode: BlockLogicTypes.NumberControlModeSwitch }
-			>,
-			definition: Omit<BlockLogicTypes.NumberControl, "config">,
-		) {
-			super();
-
-			const set = (newValue: number) => value.set("number", newValue);
-
+			return new KeyPressingDefinitionsController(def);
+		};
+		const createNumberSwitch = () => {
 			set(config.startValue);
 			let amount = config.startValue;
 
@@ -232,8 +131,32 @@ namespace ClientBlockControlsNamespace {
 				}),
 			);
 
-			const controller = this.parent(new KeyPressingDefinitionsController(def));
+			return new KeyPressingDefinitionsController(def);
+		};
 
+		//
+
+		if (config.mode.type === "hold") {
+			return createNumberHold();
+		}
+		if (config.mode.type === "switch") {
+			return createNumberSwitch();
+		}
+
+		throw `Unknown type ${config.mode.type}`;
+	}
+
+	export class Number extends ClientComponent implements IClientBlockControl {
+		private readonly touchButtonDatas: readonly TouchModeButtonData[];
+
+		constructor(
+			value: ILogicValueStorage<"number">,
+			config: BlockLogicTypes.NumberControl["config"],
+			definition: Omit<BlockLogicTypes.NumberControl, "config">,
+		) {
+			super();
+
+			const controller = this.parent(createNumberController(value, config, definition));
 			this.touchButtonDatas = config.keys.map(
 				(k): TouchModeButtonData => ({
 					name: k.key,

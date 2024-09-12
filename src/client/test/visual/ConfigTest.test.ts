@@ -155,8 +155,9 @@ namespace ConfigTests {
 							config: {
 								startValue: 0,
 								mode: {
-									type: "smooth",
-									speed: 25,
+									type: "hold",
+									smooth: false,
+									smoothSpeed: 25,
 								},
 								enabled: true,
 								keys: [
@@ -231,8 +232,9 @@ namespace ConfigTests {
 					enabled: true,
 					startValue: 0,
 					mode: {
-						type: "smooth",
-						speed: 25,
+						type: "hold",
+						smooth: false,
+						smoothSpeed: 25,
 					},
 					keys: [
 						{ key: "R", value: 100 },

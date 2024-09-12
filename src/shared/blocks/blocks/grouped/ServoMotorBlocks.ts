@@ -36,6 +36,8 @@ const servoDefinition = {
 							startValue: 0,
 							mode: {
 								type: "hold",
+								smooth: false,
+								smoothSpeed: 20,
 							},
 							keys: [
 								{ key: "R", value: 45 },

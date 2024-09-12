@@ -1065,7 +1065,7 @@ const v25: UpgradableBlocksSerializer<SerializedBlocks<SerializedBlockV4>, typeo
 									{ key: value.rotation.sub, value: -value.speed },
 								],
 								startValue: 0,
-								mode: { type: value.switchmode ? "switch" : "hold" },
+								mode: { type: value.switchmode ? "switch" : "hold", smooth: false, smoothSpeed: 20 },
 							} satisfies BlockConfigPart<"number">["controlConfig"];
 						} else if (def.type === "thrust") {
 							const value = v as {
@@ -1083,7 +1083,7 @@ const v25: UpgradableBlocksSerializer<SerializedBlocks<SerializedBlockV4>, typeo
 									{ key: value.thrust.sub, value: 0 },
 								],
 								startValue: 0,
-								mode: value.switchmode ? { type: "switch" } : { type: "smooth", speed: 20 },
+								mode: { type: "switch", smooth: !value.switchmode, smoothSpeed: 20 },
 							} satisfies BlockConfigPart<"number">["controlConfig"];
 						} else if (def.type === "controllableNumber") {
 							const value = v as {
@@ -1101,7 +1101,7 @@ const v25: UpgradableBlocksSerializer<SerializedBlocks<SerializedBlockV4>, typeo
 									{ key: value.control.sub, value: def.min },
 								],
 								startValue: 0,
-								mode: { type: "smooth", speed: 20 },
+								mode: { type: "switch", smooth: true, smoothSpeed: 20 },
 							} satisfies BlockConfigPart<"number">["controlConfig"];
 						} else if (def.type === "servoMotorAngle") {
 							const value = v as {
@@ -1120,7 +1120,7 @@ const v25: UpgradableBlocksSerializer<SerializedBlocks<SerializedBlockV4>, typeo
 									{ key: value.rotation.sub, value: value.angle },
 								],
 								startValue: 0,
-								mode: { type: value.switchmode ? "switch" : "hold" },
+								mode: { type: value.switchmode ? "switch" : "hold", smooth: false, smoothSpeed: 20 },
 							} satisfies BlockConfigPart<"number">["controlConfig"];
 						}
 

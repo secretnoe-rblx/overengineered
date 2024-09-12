@@ -120,6 +120,17 @@ const setWrapperColor = (wrapper: ConfigValueWrapper, valueType: PrimitiveKeys) 
 const setWrapperName = (control: Control<GuiObject & { readonly HeadingLabel: TextLabel }>, name: string) => {
 	control.instance.HeadingLabel.Text = name;
 };
+const initTooltip = (
+	control: Control<GuiObject & { readonly HeadingLabel: TextLabel }>,
+	definition: Pick<VisualBlockConfigDefinition, "tooltip" | "unit">,
+) => {
+	if (!definition.tooltip) return;
+
+	let tooltip = definition.tooltip;
+	if (definition.unit) tooltip += ` (${definition.unit})`;
+
+	Tooltip.init(control.add(new Control(control.instance.HeadingLabel)), tooltip);
+};
 
 namespace Controls {
 	type SliderControlDefinition = GuiObject & {
@@ -194,7 +205,7 @@ namespace Controls {
 		const addSingleTypeWrapperAuto = <TKey extends PrimitiveKeys>(
 			parent: Control<GuiObject> & { readonly control: GuiObject },
 			displayName: string,
-			def: MiniPrimitives[TKey] & { readonly type: TKey },
+			def: MiniPrimitives[TKey] & { readonly type: TKey } & Pick<VisualBlockConfigDefinition, "tooltip" | "unit">,
 			configs: ConfigParts<TKey>,
 			args: Args,
 			parentTo?: Control,
@@ -207,6 +218,8 @@ namespace Controls {
 
 			const [wrapper] = addSingleTypeWrapper(parent, control, parentTo);
 			setWrapperColor(wrapper, def.type);
+
+			initTooltip(control, def);
 
 			return $tuple(wrapper, control as Control as Control & Submittable<TKey>);
 		};
@@ -528,26 +541,26 @@ namespace Controls {
 				const createModeDropdown = () => {
 					type Modes = BlockLogicTypes.NumberControlModes;
 					type ModeKeys = Modes["type"];
-					const redrawMode = (mode: Modes) => {
+					const redrawMode = () => {
 						for (const control of dropdownContent) {
 							control.destroy();
 						}
 						dropdownContent.clear();
 
-						if (mode.type === "smooth") {
+						if (sameOrUndefinedBy(controlConfig, (c) => c.mode.smooth)) {
 							const [wSpeed, cSpeed] = addSingleTypeWrapperAuto(
 								this,
 								"Speed",
 								{
 									type: "number",
-									config: mode.speed,
+									config: definition.control.config.mode.smoothSpeed,
 									clamp: {
 										showAsSlider: true,
 										min: 0,
 										max: definition.control.max,
 									},
 								},
-								map(controlConfig, () => mode.speed),
+								map(controlConfig, (c) => c.mode.smoothSpeed),
 								args,
 							);
 
@@ -556,7 +569,7 @@ namespace Controls {
 								this.submittedControl.Fire(
 									(controlConfig = map(controlConfig, (c, uuid) => ({
 										...c,
-										mode: { type: "smooth", speed: v[uuid] },
+										mode: { ...c.mode, smoothSpeed: v[uuid] },
 									}))),
 								),
 							);
@@ -569,14 +582,12 @@ namespace Controls {
 
 					const chold = cType.addItem("hold");
 					const cswitch = cType.addItem("switch");
-					const csmooth = cType.addItem("smooth");
 
 					Tooltip.init(chold, "Sets the value to the target while you're holding the button");
 					Tooltip.init(
 						cswitch,
 						"Sets the value to the target when you press the button and doesn't change back until you press another",
 					);
-					Tooltip.init(csmooth, "Slowly changes the value to the target while you're holding the button");
 
 					const selectedModes = new ReadonlySet(asMap(map(controlConfig, (c) => c.mode.type)).values());
 					if (selectedModes.size() > 1) {
@@ -586,40 +597,40 @@ namespace Controls {
 						cType.selectedItem.set(selected.type);
 					}
 
-					let smoothSpeed = sameOrUndefinedBy(controlConfig, (c) =>
-						"speed" in c.mode ? c.mode.speed : undefined,
-					);
-					smoothSpeed ??=
-						definition.control.config.mode.type === "smooth"
-							? definition.control.config.mode.speed
-							: undefined;
-					smoothSpeed ??= (definition.control.max - definition.control.min) / 5;
-
-					const modeDefaults: { readonly [k in ModeKeys]: Extract<Modes, { readonly type: k }> } = {
-						hold: {
-							type: "hold",
-						},
-						switch: {
-							type: "switch",
-						},
-						smooth: {
-							type: "smooth",
-							speed: smoothSpeed,
-						},
-					};
+					let smoothSpeed = sameOrUndefinedBy(controlConfig, (c) => c.mode.smoothSpeed);
+					smoothSpeed ??= definition.control.config.mode.smoothSpeed;
 
 					cType.submitted.Connect((item) => {
 						this.submittedControl.Fire(
-							(controlConfig = map(controlConfig, (c) => ({ ...c, mode: modeDefaults[item] }))),
+							(controlConfig = map(controlConfig, (c) => ({ ...c, mode: { ...c.mode, type: item } }))),
 						);
 
-						redrawMode(modeDefaults[item]);
+						redrawMode();
 					});
 
-					const selected = cType.selectedItem.get();
-					if (selected) {
-						redrawMode(modeDefaults[selected]);
-					}
+					const [wSmooth, cSmooth] = addSingleTypeWrapperAuto(
+						this,
+						"Smooth change",
+						{
+							type: "bool",
+							config: definition.control.config.mode.smooth,
+							tooltip: "Slowly changed the value to the target instead of an instantaneous change",
+						},
+						map(controlConfig, (c) => c.mode.smooth),
+						args,
+					);
+					cSmooth.submitted.Connect((v) => {
+						this.submittedControl.Fire(
+							(controlConfig = map(controlConfig, (c, uuid) => ({
+								...c,
+								mode: { ...c.mode, smooth: v[uuid] },
+							}))),
+						);
+
+						redrawMode();
+					});
+
+					redrawMode();
 				};
 				createModeDropdown();
 			}
@@ -1001,12 +1012,7 @@ class ConfigAutoValueWrapper extends Control<ConfigValueWrapperDefinition> {
 			if (!cfgcontrol) return;
 
 			setWrapperName(cfgcontrol, definition.displayName);
-			if (definition.tooltip) {
-				let tooltip = definition.tooltip;
-				if (definition.unit) tooltip += ` (${definition.unit})`;
-
-				Tooltip.init(control.add(new Control(cfgcontrol.instance.HeadingLabel)), tooltip);
-			}
+			initTooltip(cfgcontrol, definition);
 
 			cfgcontrol.submitted.Connect((v) =>
 				this._submitted.Fire((configs = map(configs, (c, uuid) => ({ ...c, type: stype, config: v[uuid] })))),

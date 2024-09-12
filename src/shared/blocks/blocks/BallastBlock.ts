@@ -21,8 +21,9 @@ const definition = {
 							enabled: true,
 							startValue: 0,
 							mode: {
-								type: "smooth",
-								speed: 2,
+								type: "switch",
+								smooth: true,
+								smoothSpeed: 2,
 							},
 							keys: [
 								{ key: "R", value: 10 },

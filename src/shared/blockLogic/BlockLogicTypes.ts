@@ -37,22 +37,15 @@ export namespace BlockLogicTypes {
 		readonly control?: BoolControls;
 	};
 
-	export type NumberControlModeSmooth = {
-		readonly type: "smooth";
-		readonly speed: number;
-	};
-	export type NumberControlModeHold = {
-		readonly type: "hold";
-	};
-	export type NumberControlModeSwitch = {
-		readonly type: "switch";
-	};
-	export type NumberControlModes = NumberControlModeSmooth | NumberControlModeHold | NumberControlModeSwitch;
-
-	export type NumberControlKey = {
+	export interface NumberControlModes {
+		readonly type: "hold" | "switch";
+		readonly smooth: boolean;
+		readonly smoothSpeed: number;
+	}
+	export interface NumberControlKey {
 		readonly key: string | KeyCode;
 		readonly value: number;
-	};
+	}
 
 	export type NumberControlKeys = readonly NumberControlKey[];
 	export type NumberControl = {
