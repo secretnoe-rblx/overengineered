@@ -69,6 +69,10 @@ class Logic extends InstanceBlockLogic<typeof definition, WingBlock> {
 
 			const surface = this.findWingSurface(this.instance.WingSurface);
 			this.event.subscribe(RunService.Heartbeat, () => {
+				if (!this.instance.FindFirstChild("WingSurface")) {
+					return;
+				}
+
 				const force = surface
 					.mul(
 						this.instance.WingSurface.CFrame.PointToObjectSpace(
