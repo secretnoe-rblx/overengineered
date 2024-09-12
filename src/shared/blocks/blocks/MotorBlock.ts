@@ -93,7 +93,7 @@ export class Logic extends InstanceBlockLogic<typeof definition, MotorBlock> {
 			}
 		});
 		this.onDescendantDestroyed(() => {
-			if (this.instance.FindFirstChild("Base")) {
+			if (this.instance.FindFirstChild("Base")?.FindFirstChild("HingeConstraint")) {
 				this.instance.Base.HingeConstraint.AngularVelocity = 0;
 			}
 
