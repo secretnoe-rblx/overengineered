@@ -49,6 +49,7 @@ export const VehicleSeatBlock = {
 	id: "vehicleseat",
 	displayName: "Driver seat",
 	description: "A seat for your vehicle. Allows you to control your contraption",
+	limit: 1,
 
 	logic: { definition, ctor: Logic },
 } as const satisfies BlockBuilder;
