@@ -1,6 +1,6 @@
 import { Players } from "@rbxts/services";
 import { InputController } from "client/controller/InputController";
-import { MultiConfigControl } from "client/gui/BlockConfigControls";
+import { MultiBlockConfigControl } from "client/gui/BlockConfigControls";
 import { Control } from "client/gui/Control";
 import { GuiAnimator } from "client/gui/GuiAnimator";
 import { LogControl } from "client/gui/static/LogControl";
@@ -8,10 +8,10 @@ import { ClientBuilding } from "client/modes/build/ClientBuilding";
 import { MultiBlockHighlightedSelector } from "client/tools/highlighters/MultiBlockHighlightedSelector";
 import { SelectedBlocksHighlighter } from "client/tools/highlighters/SelectedBlocksHighlighter";
 import { ToolBase } from "client/tools/ToolBase";
-import { blockConfigRegistry } from "shared/block/config/BlockConfigRegistry";
+import { BlockConfig } from "shared/blockLogic/BlockConfig";
+import { BlockWireManager } from "shared/blockLogic/BlockWireManager";
 import { BlockManager } from "shared/building/BlockManager";
 import { Colors } from "shared/Colors";
-import { Config } from "shared/config/Config";
 import { ObservableCollectionSet } from "shared/event/ObservableCollection";
 import { JSON } from "shared/fixes/Json";
 import { Objects } from "shared/fixes/objects";
@@ -20,12 +20,15 @@ import { VectorUtils } from "shared/utils/VectorUtils";
 import type { BuildingMode } from "client/modes/build/BuildingMode";
 import type { MultiBlockSelectorConfiguration } from "client/tools/highlighters/MultiBlockSelector";
 //import type { TutorialConfigBlockHighlight } from "client/tutorial/TutorialConfigTool";
-import type { BlockRegistry } from "shared/block/BlockRegistry";
+import type { PlacedBlockConfig } from "shared/blockLogic/BlockConfig";
+import type { BlockLogicBothDefinitions } from "shared/blockLogic/BlockLogic";
 
 namespace Scene {
 	export type ConfigToolSceneDefinition = GuiObject & {
 		readonly ParamsSelection: Frame & {
-			readonly Buttons: GuiObject;
+			readonly Content: GuiObject & {
+				readonly ScrollingFrame: GuiObject;
+			};
 			readonly Heading: GuiObject & {
 				readonly NameLabel: TextLabel;
 				readonly AmountLabel: TextLabel;
@@ -36,10 +39,13 @@ namespace Scene {
 			readonly ResetButton: TextButton;
 		};
 	};
+	@injectable
 	export class ConfigToolScene extends Control<ConfigToolSceneDefinition> {
 		constructor(
 			gui: ConfigToolSceneDefinition,
 			private readonly tool: ConfigTool,
+			private readonly blockList: BlockList,
+			@inject private readonly di: DIContainer,
 		) {
 			super(gui);
 
@@ -67,6 +73,11 @@ namespace Scene {
 				this.updateConfigs(selected.getArr());
 			});
 
+			this.onEnable(() => this.updateConfigs([]));
+			this.onDisable(() => {
+				this.currentConfigControl?.destroy();
+				this.currentConfigControl = undefined;
+			});
 			this.onPrepare((inputType) => {
 				this.gui.Bottom.DeselectButton.Visible = inputType !== "Gamepad";
 			});
@@ -77,12 +88,13 @@ namespace Scene {
 
 			GuiAnimator.transition(this.gui.ParamsSelection, 0.2, "right");
 			GuiAnimator.transition(this.gui.Bottom.DeselectButton, 0.22, "down");
-
-			this.updateConfigs([]);
 		}
 
-		private currentConfigControl?: MultiConfigControl<BlockConfigTypes.Definitions>;
+		private currentConfigControl?: MultiBlockConfigControl;
 		private updateConfigs(selected: readonly BlockModel[]) {
+			this.currentConfigControl?.destroy();
+			this.currentConfigControl = undefined;
+
 			const wasVisible = this.gui.Visible;
 
 			this.gui.Visible = selected.size() !== 0;
@@ -90,9 +102,13 @@ namespace Scene {
 
 			if (!wasVisible) GuiAnimator.transition(this.gui, 0.2, "up");
 			const blockmodel = selected[0];
-			const block = this.tool.blockRegistry.blocks.get(BlockManager.manager.id.get(blockmodel))!;
-			const onedef = blockConfigRegistry[block.id as keyof typeof blockConfigRegistry]
-				.input as BlockConfigTypes.Definitions;
+			const block = this.blockList.blocks[BlockManager.manager.id.get(blockmodel)!];
+			if (!block) return;
+
+			const onedef = block.logic?.definition.input;
+			if (!onedef) return;
+
+			const deforder = block.logic?.definition.inputOrder;
 
 			this.gui.Visible = Objects.size(onedef) !== 0;
 			if (!this.gui.Visible) return;
@@ -101,63 +117,61 @@ namespace Scene {
 				Players.LocalPlayer,
 				block.displayName,
 			).fullUpper();
-			this.gui.ParamsSelection.Heading.AmountLabel.Text = `x${selected.size()}`;
+			this.gui.ParamsSelection.Heading.AmountLabel.Text = selected.size() > 1 ? `x${selected.size()}` : "";
 
 			const configs = selected.map((selected) => {
 				const blockmodel = selected;
 				const id = BlockManager.manager.id.get(blockmodel)!;
-				const block = this.tool.blockRegistry.blocks.get(id)!;
+				const block = this.blockList.blocks[id];
+				if (!block) return undefined!;
 
-				const defs = blockConfigRegistry[block.id as keyof typeof blockConfigRegistry]
-					.input as BlockConfigTypes.Definitions;
+				const defs = block.logic?.definition.input;
 				if (!defs) return undefined!;
 
-				const config = Config.addDefaults(
-					BlockManager.manager.config.get(blockmodel) as Record<string, number> | undefined,
+				const config = BlockConfig.addDefaults(
+					BlockManager.manager.config.get(blockmodel) as PlacedBlockConfig,
 					defs,
 				);
-				const connections = BlockManager.manager.connections.get(blockmodel);
 				return {
 					blockmodel,
 					uuid: BlockManager.manager.uuid.get(blockmodel),
 					config,
-					connections: connections ? Objects.keys(connections) : [],
 				} as const;
 			});
 
-			this.currentConfigControl?.destroy();
+			this.gui.ParamsSelection.Content.ScrollingFrame.Visible = false;
 
-			const gui = this.gui.ParamsSelection.Buttons.Clone();
-			gui.Parent = this.gui.ParamsSelection;
+			const markered = BlockWireManager.fromPlot(this.tool.targetPlot.get(), this.tool.blockList, true);
+
+			const gui = this.gui.ParamsSelection.Content.ScrollingFrame.Clone();
+			gui.Visible = true;
+			gui.Parent = this.gui.ParamsSelection.Content;
 			const configControl = this.add(
-				new MultiConfigControl(
+				this.di.resolveForeignClass(MultiBlockConfigControl, [
 					gui,
-					Objects.fromEntries(configs.map((c) => [c.uuid, c.config] as const)),
 					onedef,
-					configs[0].connections,
-					Objects.size(configs) === 1 ? configs[0].blockmodel : undefined,
-				),
+					asObject(configs.mapToMap((c) => $tuple(c.uuid, c.config))),
+					deforder,
+					markered,
+				]),
 			);
 			this.currentConfigControl = configControl;
 
-			configControl.travelToConnectedPressed.Connect((uuid) => {
+			configControl.travelledTo.Connect((uuid) => {
 				this.tool.unselectAll();
 				this.tool.selectBlockByUuid(uuid);
 			});
-			configControl.configUpdated.Connect(async (key, values) => {
+			configControl.submitted.Connect((config) => {
 				const selected = this.tool.selected.get();
-				$log(
-					`Sending (${selected.size()}) block config values for ${Objects.keys(values).join()} .${key} ${JSON.serialize(Objects.values(values))}`,
-				);
+				$log(`Sending (${selected.size()}) block config values ${JSON.serialize(asMap(config).values())}`);
 
-				const response = await ClientBuilding.updateConfigOperation.execute({
+				const response = ClientBuilding.updateConfigOperation.execute({
 					plot: this.tool.targetPlot.get(),
 					configs: selected.map(
 						(b) =>
 							({
 								block: b,
-								key,
-								value: JSON.serialize(values[BlockManager.manager.uuid.get(b)]),
+								scfg: JSON.serialize(config[BlockManager.manager.uuid.get(b)]),
 							}) satisfies ConfigUpdateRequest["configs"][number],
 					),
 				});
@@ -175,16 +189,20 @@ type TutorialConfigBlockHighlight = { position: Vector3 }; // TODO: config tool 
 export class ConfigTool extends ToolBase {
 	readonly blocksToConfigure: TutorialConfigBlockHighlight[] = [];
 	readonly selected = new ObservableCollectionSet<BlockModel>();
-	private readonly gui;
 
 	constructor(
 		@inject mode: BuildingMode,
-		@inject readonly blockRegistry: BlockRegistry,
+		@inject readonly blockList: BlockList,
 		@inject di: DIContainer,
 	) {
 		super(mode);
-		this.gui = this.parentGui(
-			new Scene.ConfigToolScene(ToolBase.getToolGui<"Config", Scene.ConfigToolSceneDefinition>().Config, this),
+		this.parentGui(
+			new Scene.ConfigToolScene(
+				ToolBase.getToolGui<"Config2", Scene.ConfigToolSceneDefinition>().Config2,
+				this,
+				blockList,
+				di,
+			),
 		);
 
 		this.parent(di.resolveForeignClass(SelectedBlocksHighlighter, [this.selected]));
@@ -207,10 +225,10 @@ export class ConfigTool extends ToolBase {
 				}
 			}
 
-			const config = blockConfigRegistry[BlockManager.manager.id.get(block) as keyof typeof blockConfigRegistry];
-			if (!config) return false;
+			const configDef = blockList.blocks[BlockManager.manager.id.get(block)]?.logic?.definition;
+			if (!configDef) return false;
 
-			if (!asMap((config as BlockConfigTypes.BothDefinitions).input).findValue((k, v) => !v.configHidden)) {
+			if (!asMap((configDef as BlockLogicBothDefinitions).input).findValue((k, v) => !v.configHidden)) {
 				return false;
 			}
 

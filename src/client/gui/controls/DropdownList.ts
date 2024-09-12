@@ -2,7 +2,8 @@ import { Control } from "client/gui/Control";
 import { TextButtonControl } from "client/gui/controls/Button";
 import { TransformService } from "shared/component/TransformService";
 import { ObservableValue } from "shared/event/ObservableValue";
-import type { TextButtonDefinition } from "client/gui/controls/Button";
+import { ArgsSignal } from "shared/event/Signal";
+import type { ButtonControl, TextButtonDefinition } from "client/gui/controls/Button";
 import type { DropdownDefinition } from "client/gui/controls/Dropdown";
 
 export type DropdownListDefinition = DropdownDefinition & {
@@ -12,6 +13,9 @@ export type DropdownListDefinition = DropdownDefinition & {
 	};
 };
 export class DropdownList<TValue extends string = string> extends Control<DropdownListDefinition> {
+	private readonly _submitted = new ArgsSignal<[item: TValue]>();
+	readonly submitted = this._submitted.asReadonly();
+
 	readonly selectedItem = new ObservableValue<TValue | undefined>(undefined);
 
 	private readonly itemTemplate;
@@ -30,7 +34,7 @@ export class DropdownList<TValue extends string = string> extends Control<Dropdo
 		this.event.subscribe(this.button.activated, () => this.toggle());
 		this.event.subscribeObservable(
 			this.selectedItem,
-			(v) => this.button.text.set(v === undefined ? "" : this.names.get(v) ?? v),
+			(v) => this.button.text.set(v === undefined ? "" : (this.names.get(v) ?? v)),
 			true,
 		);
 	}
@@ -61,8 +65,9 @@ export class DropdownList<TValue extends string = string> extends Control<Dropdo
 		}
 	}
 
-	addItem(name: TValue, text?: string) {
+	addItem(name: TValue, text?: string): ButtonControl {
 		const btn = new TextButtonControl(this.itemTemplate(), () => {
+			this._submitted.Fire(name);
 			this.selectedItem.set(name);
 			this.toggle();
 		});
@@ -72,6 +77,9 @@ export class DropdownList<TValue extends string = string> extends Control<Dropdo
 		}
 
 		btn.text.set(text ?? name);
+		btn.instance.Interactable = false;
 		this.contents.add(btn);
+
+		return btn;
 	}
 }

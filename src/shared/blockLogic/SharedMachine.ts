@@ -1,45 +1,51 @@
 import { RunService } from "@rbxts/services";
 import { ImpactController } from "shared/block/impact/ImpactController";
-import { BlockList } from "shared/blocks/Blocks";
-import { VehicleSeatBlockLogic } from "shared/blocks/VehicleSeatBlock";
+import { BlockConfig } from "shared/blockLogic/BlockConfig";
+import { BlockLogicRunner } from "shared/blockLogic/BlockLogicRunner";
+import { VehicleSeatBlock } from "shared/blocks/blocks/VehicleSeatBlock";
 import { ContainerComponent } from "shared/component/ContainerComponent";
 import { GameDefinitions } from "shared/data/GameDefinitions";
 import { ObservableValue } from "shared/event/ObservableValue";
-import type { BlockRegistry } from "shared/block/BlockRegistry";
-import type { GenericBlockLogic, PlacedBlockData2 } from "shared/blockLogic/BlockLogic";
-import type { GenericBlockList } from "shared/blocks/Blocks";
-import type { PlacedBlockData } from "shared/building/BlockManager";
+import type { GenericBlockLogic } from "shared/blockLogic/BlockLogic";
+import type { VehicleSeatBlockLogic } from "shared/blocks/blocks/VehicleSeatBlock";
+
+type BlockData = {
+	readonly block: PlacedBlockData;
+	readonly logic: GenericBlockLogic;
+};
 
 @injectable
 export class SharedMachine extends ContainerComponent<GenericBlockLogic> {
 	readonly occupiedByLocalPlayer = new ObservableValue(true);
 	private impactController?: ImpactController;
+	protected readonly blocksMap = new Map<BlockUuid, BlockData>();
+	protected readonly runner = this.parent(new BlockLogicRunner());
 
 	constructor(
-		@inject private readonly blockRegistry: BlockRegistry,
-		@inject private readonly di: ReadonlyDIContainer,
+		@inject private readonly blockList: BlockList,
+		@inject private readonly di: DIContainer,
 	) {
 		super();
 	}
 
 	/** Add blocks to the machine, initialize it and start */
-	init(blocks: readonly PlacedBlockData2[]) {
-		const di = this.di.beginScope();
-		di.registerSingleton(this);
+	init(blocks: readonly PlacedBlockData[]) {
+		const di = this.di.beginScope((di) => di.registerSingleton(this));
 
 		for (const block of blocks) {
 			const id = block.id;
 
-			if (!this.blockRegistry.blocks.get(id)) {
+			if (!this.blockList.blocks[id]) {
 				$err(`Unknown block id ${id}`);
 				continue;
 			}
 
-			const logicctor = (BlockList as GenericBlockList)[id]?.logic?.ctor;
+			const logicctor = this.blockList.blocks[id]?.logic?.ctor;
 			if (!logicctor) continue;
 
 			const logic = di.resolveForeignClass(logicctor, [block]);
 			this.add(logic);
+			this.blocksMap.set(block.uuid, { block, logic });
 		}
 
 		this.initialize(blocks);
@@ -47,7 +53,7 @@ export class SharedMachine extends ContainerComponent<GenericBlockLogic> {
 	}
 	protected initialize(blocks: readonly PlacedBlockData[]) {
 		this.initializeSpeedLimiter();
-		// this.initializeBlockConnections();
+		this.initializeBlockConnections();
 
 		const impact = this.createImpactControllerIfNeeded(blocks);
 		if (impact) {
@@ -63,10 +69,10 @@ export class SharedMachine extends ContainerComponent<GenericBlockLogic> {
 	}
 
 	initializeSpeedLimiter() {
-		const seat = this.getChildren().find((c) => c instanceof VehicleSeatBlockLogic) as
+		const seat = this.getChildren().find((c) => c instanceof VehicleSeatBlock.logic.ctor) as
 			| VehicleSeatBlockLogic
 			| undefined;
-		if (!seat) throw "No vehicle seat";
+		if (!seat) return;
 
 		this.event.subscribe(RunService.Heartbeat, () => {
 			// Angular speed limit
@@ -110,74 +116,22 @@ export class SharedMachine extends ContainerComponent<GenericBlockLogic> {
 			);
 		});
 	}
-	// initializeBlockConnections() {
-	// 	for (const inputLogic of this.getChildren()) {
-	// 		if (!(inputLogic instanceof ConfigurableBlockLogic)) continue;
-	// 		if (inputLogic.block.connections === undefined) continue;
 
-	// 		for (const [connectionFrom, connection] of pairs(inputLogic.block.connections)) {
-	// 			const outputLogic = this.childMap.get(connection.blockUuid);
-	// 			if (!outputLogic) {
-	// 				throw "No logic found for connecting block " + connection.blockUuid;
-	// 			}
-	// 			if (!(outputLogic instanceof ConfigurableBlockLogic)) {
-	// 				throw "Connecting block is not configurable: " + connection.blockUuid;
-	// 			}
+	protected initializeBlockConnections() {
+		const logicMap = this.blocksMap.mapToMap((k, v) => $tuple(k, v.logic));
 
-	// 			const input = inputLogic.input[connectionFrom as BlockConnectionName] as BlockLogicValue<defined>;
-	// 			const output = outputLogic.output[connection.connectionName] as BlockLogicValue<defined>;
+		for (const [, { block, logic }] of this.blocksMap) {
+			const def = this.blockList.blocks[block.id]?.logic?.definition;
+			if (!def) continue; // should we just continue or throw because this is strange?
 
-	// 			output.connectTo(input);
-	// 		}
-	// 	}
+			const config = BlockConfig.addDefaults(block.config, def.input);
+			logic.initializeInputs(config, logicMap);
+		}
 
-	// 	type t = {
-	// 		readonly original: BlockLogicValue<defined>;
-	// 		readonly holderId: BlockUuid;
-	// 		connections: readonly t[];
-	// 	};
+		for (const [, { block, logic }] of this.blocksMap) {
+			this.runner.add(logic);
+		}
 
-	// 	const toValue = (blockUuid: BlockUuid, logic: BlockLogicValue<defined>): t => {
-	// 		return {
-	// 			original: logic,
-	// 			holderId: blockUuid,
-	// 			connections: undefined!,
-	// 		};
-	// 	};
-
-	// 	const blocksValues = new Map(
-	// 		this.blocks.flatmap((b) => {
-	// 			if (!(b instanceof ConfigurableBlockLogic)) {
-	// 				return [];
-	// 			}
-
-	// 			return [...Objects.values(b.input), ...Objects.values(b.output)].map(
-	// 				(c) => [c, toValue(b.block.uuid, c as BlockLogicValue<defined>)] as const,
-	// 			);
-	// 		}),
-	// 	);
-	// 	for (const [, t] of blocksValues) {
-	// 		t.connections = t.original.connections.map((c) => blocksValues.get(c)!);
-	// 	}
-
-	// 	const grouped = BlockLogicValueGroup.group(blocksValues.values());
-
-	// 	const mappedBlocks = new ReadonlyMap(
-	// 		this.blocks
-	// 			.filter((b) => b instanceof ConfigurableBlockLogic)
-	// 			.map((b) => [b.block.uuid, b as ConfigurableBlockLogic<BlockConfigTypes.BothDefinitions>] as const),
-	// 	);
-	// 	const order = grouped.map((g) => g.map((g) => mappedBlocks.get(g.id as BlockUuid)!));
-
-	// 	let tick = 0;
-	// 	this.event.subscribe(RunService.Heartbeat, () => {
-	// 		for (const group of order) {
-	// 			for (const block of group) {
-	// 				block.tick(tick);
-	// 			}
-	// 		}
-
-	// 		tick++;
-	// 	});
-	// }
+		this.runner.startTicking();
+	}
 }

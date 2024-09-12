@@ -344,7 +344,7 @@ const create = (program: ts.Program, context: ts.TransformationContext) => {
 							factory.createIdentifier("deps"),
 							undefined,
 							factory.createTypeReferenceNode(
-								factory.createIdentifier("ReadonlyDIContainer"),
+								factory.createIdentifier("DIContainer"),
 								undefined,
 							),
 							undefined,
@@ -392,7 +392,7 @@ const create = (program: ts.Program, context: ts.TransformationContext) => {
 							factory.createIdentifier("deps"),
 							undefined,
 							factory.createTypeReferenceNode(
-								factory.createIdentifier("ReadonlyDIContainer"),
+								factory.createIdentifier("DIContainer"),
 								undefined,
 							),
 							undefined,

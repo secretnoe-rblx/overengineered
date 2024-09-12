@@ -1,30 +1,39 @@
+import { ClientBlockControls } from "client/blocks/ClientBlockControls";
+import { LogicVisualizer } from "client/blocks/LogicVisuaizer";
 import { BlockConfig } from "shared/blockLogic/BlockConfig";
 import { SharedMachine } from "shared/blockLogic/SharedMachine";
-import { ContainerComponent } from "shared/component/ContainerComponent";
-import type { ConfigLogicValueBase } from "client/blocks/BlockLogicValues";
+import type { IClientBlockControl } from "client/blocks/ClientBlockControls";
 import type { PlayerDataStorage } from "client/PlayerDataStorage";
-import type { BlockRegistry } from "shared/block/BlockRegistry";
 import type { ImpactController } from "shared/block/impact/ImpactController";
-import type { PlacedBlockData } from "shared/building/BlockManager";
+import type { BlockLogicTypes } from "shared/blockLogic/BlockLogicTypes";
+import type { ILogicValueStorage } from "shared/blockLogic/BlockLogicValueStorage";
 
 @injectable
 export class ClientMachine extends SharedMachine {
-	readonly logicInputs = new ContainerComponent<
-		ConfigLogicValueBase<BlockConfigTypes.Types[keyof BlockConfigTypes.Types]>
-	>();
+	private readonly logicInputs = new Set<IClientBlockControl>();
 
 	constructor(
-		@inject blockRegistry: BlockRegistry,
 		@inject private readonly playerData: PlayerDataStorage,
-		@inject di: ReadonlyDIContainer,
+		@inject blockList: BlockList,
+		@inject di: DIContainer,
 	) {
-		super(blockRegistry, di);
-		this.parent(this.logicInputs);
+		super(blockList, di);
+	}
+
+	getLogicInputs() {
+		return this.logicInputs.asReadonly();
+	}
+
+	createVisualizer() {
+		return new LogicVisualizer(
+			this.runner,
+			this.blocksMap.map((k, v) => v.logic),
+		);
 	}
 
 	protected initialize(blocks: readonly PlacedBlockData[]) {
 		super.initialize(blocks);
-		//this.initializeControls();
+		this.initializeControls();
 	}
 	protected createImpactControllerIfNeeded(blocks: readonly PlacedBlockData[]): ImpactController | undefined {
 		if (!this.playerData.config.get().impact_destruction) {
@@ -35,32 +44,45 @@ export class ClientMachine extends SharedMachine {
 	}
 
 	initializeControls() {
-		for (const logic of this.getChildren()) {
-			const configDef = logic.configDefinition;
-			const config = BlockConfig.addDefaults(logic.block.config, configDef.input);
+		for (const [, { block, logic }] of this.blocksMap) {
+			const config = BlockConfig.addDefaults(block.config, logic.definition.input);
+			for (const [k, v] of pairs(config)) {
+				const cfg = config[k];
+				if (!cfg) continue;
 
-			for (const [key, observable] of pairs(logic.input)) {
-				// if already connected
-				if (logic.block.connections !== undefined && key in logic.block.connections) continue;
+				if (!(v.type in ClientBlockControls)) {
+					continue;
+				}
 
-				const def = configDef.input[key as keyof typeof configDef.input];
+				const input = logic.input[k] as
+					| (typeof logic)["input"][typeof k]
+					| ILogicValueStorage<keyof BlockLogicTypes.Primitives>;
+				if (!("set" in input)) continue;
 
-				// const input = this.logicInputs.add(
-				// 	new blockConfigRegistryClient[def.type](
-				// 		observable as never,
-				// 		config[key as never] as never,
-				// 		def as never,
-				// 	),
-				// );
+				const def = logic.definition.input[k].types[cfg.type] as
+					| BlockLogicTypes.Primitives[keyof BlockLogicTypes.Controls]
+					| undefined;
+				if (!def) continue;
+				if (!def.control) continue;
+				if (!cfg.controlConfig) continue;
+				if (!cfg.controlConfig.enabled) continue;
 
-				// this.event.subscribeObservable(
-				// 	this.occupiedByLocalPlayer,
-				// 	(enabled) => {
-				// 		if (enabled) input.enable();
-				// 		else input.disable();
-				// 	},
-				// 	true,
-				// );
+				const ctor = ClientBlockControls[v.type as keyof typeof ClientBlockControls];
+				if (!ctor) continue;
+
+				const control = ctor(input, cfg.controlConfig, def as MakeRequired<typeof def, "control">);
+				this.parent(control);
+
+				this.logicInputs.add(control);
+
+				this.event.subscribeObservable(
+					this.occupiedByLocalPlayer,
+					(enabled) => {
+						if (enabled) control.enable();
+						else control.disable();
+					},
+					true,
+				);
 			}
 		}
 	}

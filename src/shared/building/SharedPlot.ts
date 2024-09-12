@@ -3,7 +3,6 @@ import { BlockManager } from "shared/building/BlockManager";
 import { InstanceComponent } from "shared/component/InstanceComponent";
 import { Signal } from "shared/event/Signal";
 import { BB } from "shared/fixes/BB";
-import type { PlacedBlockData } from "shared/building/BlockManager";
 
 const getPlotBuildingRegion = (plot: PlotModel): BB => {
 	const heightLimit = 400;

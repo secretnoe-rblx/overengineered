@@ -74,6 +74,6 @@ export class PlasmaProjectile extends WeaponProjectile {
 }
 
 PlasmaProjectile.spawn.invoked.Connect((player, { startPosition, baseVelocity, baseDamage }) => {
-	print("Plasma ball spawned");
+	// print("Plasma ball spawned");
 	new PlasmaProjectile(startPosition, baseVelocity, baseDamage);
 });

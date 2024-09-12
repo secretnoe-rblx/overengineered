@@ -6,7 +6,7 @@ import type { HideInterfaceController } from "client/gui/HideInterfaceController
 
 @injectable
 class Starter extends Component {
-	constructor(@inject di: ReadonlyDIContainer) {
+	constructor(@inject di: DIContainer) {
 		super();
 
 		const gui = Gui.getGameUI<{ Action: ActionsGuiDefinition }>().Action;

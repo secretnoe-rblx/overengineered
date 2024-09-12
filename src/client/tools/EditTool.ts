@@ -32,7 +32,6 @@ import type { InputTooltips } from "client/gui/static/TooltipsControl";
 import type { Keybinds } from "client/Keybinds";
 import type { BuildingMode } from "client/modes/build/BuildingMode";
 import type { BlockSelectorModeGuiDefinition } from "client/tools/highlighters/BlockSelectorModeGui";
-import type { BlockRegistry } from "shared/block/BlockRegistry";
 import type { SharedPlot } from "shared/building/SharedPlot";
 
 namespace Scene {
@@ -264,33 +263,57 @@ const reGenerateUuids = (
 	const plotBlocks = plot.getBlocks().mapToSet(BlockManager.manager.uuid.get);
 
 	for (const [olduuid, newblock] of uuidmap) {
-		const connections = asObject(
-			new Map(
-				asMap(existingBlocks.get(olduuid)?.connections ?? {}).map((k, v) => [
-					k,
-					{ ...v } as Writable<typeof v>,
-				]),
-			),
-		);
+		const config = existingBlocks.get(olduuid)?.config;
+		if (!config) continue;
 
-		for (const [key, connection] of [...asMap(connections)]) {
+		const keysToDelete: string[] = [];
+		for (const [key, cfg] of [...asMap(config)]) {
+			if (cfg.type !== "wire") continue;
+			const connection = cfg.config;
+
 			if (!plotBlocks.has(connection.blockUuid) && !uuidmap.has(connection.blockUuid)) {
 				$log(
-					`Deleting nonexistent connection ${olduuid} ${key} -> ${connection.blockUuid} ${connection.connectionName}`,
+					`Deleting a nonexistent connection ${olduuid} ${key} -> ${connection.blockUuid} ${connection.connectionName}`,
 				);
-				delete connections[key];
+
+				keysToDelete.push(key);
 			}
 		}
 
-		for (const [key, connection] of pairs(connections)) {
+		const keysToChange = new Map<string, BlockUuid>();
+		for (const [key, cfg] of pairs(config)) {
+			if (cfg.type !== "wire") continue;
+			if (keysToDelete.includes(key)) continue;
+			const connection = cfg.config;
+
 			const neww = uuidmap.get(connection.blockUuid);
 			if (!neww) continue;
 
-			$log(`Rerouting the connection ${olduuid} ${key} -> ${connection.blockUuid} ${connection.connectionName}`);
-			connection.blockUuid = neww.uuid;
+			$log(`Rerouting a connection ${olduuid} ${key} -> ${connection.blockUuid} ${connection.connectionName}`);
+			keysToChange.set(key, neww.uuid);
 		}
 
-		newblock.connections = connections;
+		const copy: Writable<typeof config> = {};
+		for (const [key, cfg] of pairs(config)) {
+			if (cfg.type !== "wire") {
+				copy[key] = cfg;
+				continue;
+			}
+
+			if (keysToDelete.includes(key)) {
+				continue;
+			}
+
+			const keyToChange = keysToChange.get(key);
+			if (keyToChange) {
+				copy[key] = { ...cfg, config: { ...cfg.config, blockUuid: keyToChange } };
+				continue;
+			}
+
+			copy[key] = cfg;
+		}
+
+		newblock.config = copy;
 	}
 
 	return newblocks;
@@ -302,7 +325,7 @@ namespace Controllers {
 		readonly step = new NumberObservableValue<number>(0.2, 0.01, 256, 0.01);
 		private readonly editor;
 
-		constructor(tool: EditTool, plot: SharedPlot, blocks: readonly BlockModel[], @inject di: ReadonlyDIContainer) {
+		constructor(tool: EditTool, plot: SharedPlot, blocks: readonly BlockModel[], @inject di: DIContainer) {
 			super();
 
 			this.editor = this.parent(BlockMover.create(tool.mode, plot, blocks, di));
@@ -346,8 +369,8 @@ namespace Controllers {
 			private readonly tool: EditTool,
 			private readonly plot: SharedPlot,
 			selected: readonly BlockModel[],
-			@inject blockRegistry: BlockRegistry,
-			@inject di: ReadonlyDIContainer,
+			@inject blockList: BlockList,
+			@inject di: DIContainer,
 		) {
 			super();
 
@@ -361,7 +384,7 @@ namespace Controllers {
 			const blocks = reGenerateUuids(plot, tool.copied.get());
 			this.blocksRequests = blocks;
 			this.blocks = blocks.map((block) => {
-				const b = blockRegistry.blocks.get(block.id)!.model.Clone();
+				const b = blockList.blocks[block.id]!.model.Clone();
 				BlockManager.manager.uuid.set(b, block.uuid);
 				b.PivotTo(block.location);
 				PartUtils.ghostModel(b, Colors.blue);
@@ -428,7 +451,7 @@ namespace Controllers {
 		readonly step = new NumberObservableValue<number>(90, 0, 360, 0.01);
 		private readonly editor;
 
-		constructor(tool: EditTool, plot: SharedPlot, blocks: readonly BlockModel[], @inject di: ReadonlyDIContainer) {
+		constructor(tool: EditTool, plot: SharedPlot, blocks: readonly BlockModel[], @inject di: DIContainer) {
 			super();
 
 			this.editor = this.parent(BlockRotater.create(tool.mode, plot, blocks, di));
@@ -587,7 +610,7 @@ export class EditTool extends ToolBase {
 
 	constructor(
 		@inject readonly mode: BuildingMode,
-		@inject private readonly blockRegistry: BlockRegistry,
+		@inject private readonly blockList: BlockList,
 		@inject keybinds: Keybinds,
 		@inject di: DIContainer,
 	) {
@@ -720,7 +743,7 @@ export class EditTool extends ToolBase {
 					y: axis === "y" ? 0 : undefined,
 					z: axis === "z" ? 0 : undefined,
 				},
-				this.blockRegistry,
+				this.blockList,
 				false,
 			);
 

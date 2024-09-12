@@ -7,6 +7,25 @@ export namespace Assert {
 		return text;
 	}
 
+	export function is<T, K extends keyof CheckableTypes>(
+		value: T,
+		valueType: K,
+		message?: string,
+	): asserts value is T & CheckableTypes[K] {
+		if (!typeIs(value, valueType)) {
+			throw addMessage(`Value is ${typeOf(value)}`, message);
+		}
+	}
+	export function isNot<T, K extends keyof CheckableTypes>(
+		value: T,
+		valueType: K,
+		message?: string,
+	): asserts value is Exclude<T, CheckableTypes[K]> {
+		if (typeIs(value, valueType)) {
+			throw addMessage(`Value is ${typeOf(value)}`, message);
+		}
+	}
+
 	export function notNull<T>(value: T, message?: string): asserts value is T & defined {
 		if (value === undefined) throw addMessage(`Value is undefined`, message);
 	}
@@ -18,6 +37,19 @@ export namespace Assert {
 	}
 	export function isFalse(condition: boolean, message?: string): asserts condition is false {
 		if (condition) throw addMessage(`Condition is not false`, message);
+	}
+
+	export function almostEquals(
+		left: number | { get(): number },
+		right: number | { get(): number },
+		message?: string,
+	) {
+		left = typeIs(left, "table") && "get" in left ? left.get() : left;
+		right = typeIs(right, "table") && "get" in right ? right.get() : right;
+
+		if (math.abs(left - right) > 0.0001) {
+			throw addMessage(`${left} and ${right} are not (almost) equal`, message);
+		}
 	}
 
 	export function equals<T>(left: T | { get(): T }, right: T | { get(): T }, message?: string) {
@@ -48,6 +80,21 @@ export namespace Assert {
 			if (!leftcopy.delete(item)) {
 				throw addMessage(`Left set does not containt an item from the right set: ${item}`, message);
 			}
+		}
+	}
+
+	/** Asserts that all the properties of {@link properties} are the same as in the {@link object} */
+	export function propertiesEqual<T extends object, P extends object>(
+		object: T,
+		properties: P,
+		message?: string,
+	): asserts object is T & P {
+		for (const [k, v] of pairs(properties)) {
+			if (!(k in object)) {
+				throw addMessage(`Key ${tostring(k)} was not found in object ${object}`, message);
+			}
+
+			Assert.equals(object[k as never], v, message);
 		}
 	}
 

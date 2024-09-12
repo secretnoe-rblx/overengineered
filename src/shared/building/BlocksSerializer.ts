@@ -1,12 +1,34 @@
+import { _BlockConfigRegistrySave } from "shared/building/BlockConfigRegistrySave";
 import { BlockManager } from "shared/building/BlockManager";
+import { Config } from "shared/config/Config";
 import { JSON } from "shared/fixes/Json";
 import { Objects } from "shared/fixes/objects";
 import { Serializer } from "shared/Serializer";
-import type { blockConfigRegistry } from "shared/block/config/BlockConfigRegistry";
-import type { BlockId } from "shared/BlockDataRegistry";
-import type { PlacedBlockConfig, PlacedBlockLogicConnections } from "shared/building/BlockManager";
+import type { BlockConfigPart, PlacedBlockConfig } from "shared/blockLogic/BlockConfig";
+import type { BlockLogicTypes } from "shared/blockLogic/BlockLogicTypes";
+import type { BlockConfigRegistry } from "shared/building/BlockConfigRegistrySave";
 import type { BuildingPlot } from "shared/building/BuildingPlot";
 import type { ReadonlyPlot } from "shared/building/ReadonlyPlot";
+
+const blockConfigRegistry = _BlockConfigRegistrySave as BlockConfigRegistry;
+type blockConfigRegistry = typeof _BlockConfigRegistrySave;
+
+namespace V1 {
+	export type PlacedBlockConfig = {
+		readonly [k in string]: unknown;
+	};
+
+	/** Connections to the INPUT connectors */
+	export type PlacedBlockLogicConnections = {
+		readonly [k in BlockConnectionName]: PlacedBlockDataConnection;
+	};
+	export type PlacedBlockDataConnection = {
+		/** OUTPUT block uiid */
+		readonly blockUuid: BlockUuid;
+		/** OUTPUT connector name */
+		readonly connectionName: BlockConnectionName;
+	};
+}
 
 type SerializedBlocks<TBlocks extends SerializedBlockBase> = {
 	readonly version: number;
@@ -20,23 +42,26 @@ interface SerializedBlockV0 extends SerializedBlockBase {
 	readonly location: CFrame;
 	readonly material?: Enum.Material | undefined;
 	readonly color?: Color3 | undefined;
-	readonly config?: PlacedBlockConfig | undefined;
+	readonly config?: V1.PlacedBlockConfig | undefined;
 }
 interface SerializedBlockV2 extends SerializedBlockV0 {
 	readonly uuid: BlockUuid;
 }
 interface SerializedBlockV3 extends SerializedBlockV2 {
-	readonly connections?: PlacedBlockLogicConnections | undefined;
+	/** @deprecated Do not use; was deleted */
+	readonly connections?: V1.PlacedBlockLogicConnections | undefined;
 }
+interface SerializedBlockV4
+	extends ReplaceWith<SerializedBlockV3, { readonly config?: PlacedBlockConfig | undefined }> {}
 
-export type LatestSerializedBlock = SerializedBlockV3;
+export type LatestSerializedBlock = SerializedBlockV4;
 export type LatestSerializedBlocks = SerializedBlocks<LatestSerializedBlock>;
 
 namespace Filter {
 	const white = Color3.fromRGB(255, 255, 255);
 	const plastic = Enum.Material.Plastic;
 
-	export function deleteDefaultValues(block: Writable<LatestSerializedBlock>) {
+	export function deleteDefaultValues(block: Writable<ReplaceWith<LatestSerializedBlock, { config?: {} }>>) {
 		if (block.color === white) {
 			delete block.color;
 		}
@@ -163,7 +188,7 @@ const v8: UpgradableBlocksSerializer<SerializedBlocks<SerializedBlockV3>, typeof
 	version: 8,
 
 	upgradeFrom(prev: SerializedBlocks<SerializedBlockV3>): SerializedBlocks<SerializedBlockV3> {
-		type reg = typeof blockConfigRegistry;
+		type reg = blockConfigRegistry;
 		type partial<T extends object> = {
 			readonly [k in keyof T]?: T[k] extends object ? partial<T[k]> : T[k];
 		};
@@ -248,8 +273,25 @@ const v8: UpgradableBlocksSerializer<SerializedBlocks<SerializedBlockV3>, typeof
 				return config;
 			}
 			if (block.id === "disconnectblock") {
+				type disconnect = {
+					input: {
+						disconnect: {
+							displayName: "Disconnect key";
+							type: "keybool";
+							default: boolean;
+							config: {
+								key: KeyCode;
+								switch: boolean;
+								reversed: boolean;
+							};
+							canBeSwitch: false;
+							canBeReversed: false;
+						};
+					};
+					output: {};
+				};
 				type config = partial<{
-					readonly [k in keyof reg["disconnectblock"]["input"]]: reg["disconnectblock"]["input"][k]["config"];
+					readonly [k in keyof disconnect["input"]]: disconnect["input"][k]["config"];
 				}>;
 
 				const cfg = block.config as
@@ -314,7 +356,7 @@ const v9: UpgradableBlocksSerializer<SerializedBlocks<SerializedBlockV3>, typeof
 	version: 9,
 
 	upgradeFrom(prev: SerializedBlocks<SerializedBlockV3>): SerializedBlocks<SerializedBlockV3> {
-		type reg = typeof blockConfigRegistry;
+		type reg = blockConfigRegistry;
 		type partial<T extends object> = {
 			readonly [k in keyof T]?: T[k] extends object ? partial<T[k]> : T[k];
 		};
@@ -961,11 +1003,195 @@ const v24: UpgradableBlocksSerializer<SerializedBlocks<SerializedBlockV3>, typeo
 	},
 };
 
+// update config structure
+const v25: UpgradableBlocksSerializer<SerializedBlocks<SerializedBlockV4>, typeof v24> = {
+	version: 25,
+
+	upgradeFrom(prev: SerializedBlocks<SerializedBlockV3>): SerializedBlocks<SerializedBlockV4> {
+		const updateTypes = (block: SerializedBlockV3): SerializedBlockV4 => {
+			const config = {
+				...Objects.mapValues(block.config ?? {}, (k, v) => {
+					const def = (blockConfigRegistry as BlockConfigRegistry)[block.id as keyof BlockConfigRegistry]!
+						.input[k];
+
+					assert(def.type !== "multikey");
+
+					let ctype: keyof BlockLogicTypes.Primitives;
+					let controlConfig: BlockConfigPart<keyof BlockLogicTypes.Controls>["controlConfig"] | undefined;
+					if (def.type === "or") {
+						v = (v as { value: defined }).value;
+
+						if (typeIs(v, "Vector3")) {
+							if ("color" in def.types) ctype = "color";
+							else ctype = "vector3";
+						} else if (typeIs(v, "number")) {
+							if ("number" in def.types) ctype = "number";
+							else ctype = "byte";
+						} else if (typeIs(v, "boolean")) {
+							ctype = "bool";
+						} else if (typeIs(v, "string")) {
+							if ("key" in def.types) ctype = "key";
+							else ctype = "string";
+						} else if (typeIs(v, "table")) {
+							ctype = "bytearray";
+						} else {
+							ctype = firstKey(def.types)! as never;
+						}
+					} else if (def.type === "clampedNumber") {
+						ctype = "number";
+					} else if (
+						def.type === "servoMotorAngle" ||
+						def.type === "controllableNumber" ||
+						def.type === "motorRotationSpeed" ||
+						def.type === "thrust"
+					) {
+						ctype = "number";
+						v = Config.addDefaults({ a: v as never }, { a: def }).a;
+
+						if (def.type === "motorRotationSpeed") {
+							const value = v as {
+								readonly rotation: {
+									readonly add: KeyCode;
+									readonly sub: KeyCode;
+								};
+								readonly speed: number;
+								readonly switchmode: boolean;
+							};
+
+							controlConfig = {
+								enabled: true,
+								keys: [
+									{ key: value.rotation.add, value: value.speed },
+									{ key: value.rotation.sub, value: -value.speed },
+								],
+								startValue: 0,
+								mode: { type: value.switchmode ? "switch" : "hold", smooth: false, smoothSpeed: 20 },
+							} satisfies BlockConfigPart<"number">["controlConfig"];
+						} else if (def.type === "thrust") {
+							const value = v as {
+								readonly thrust: {
+									readonly add: KeyCode;
+									readonly sub: KeyCode;
+								};
+								readonly switchmode: boolean;
+							};
+
+							controlConfig = {
+								enabled: true,
+								keys: [
+									{ key: value.thrust.add, value: 100 },
+									{ key: value.thrust.sub, value: 0 },
+								],
+								startValue: 0,
+								mode: { type: "switch", smooth: !value.switchmode, smoothSpeed: 20 },
+							} satisfies BlockConfigPart<"number">["controlConfig"];
+						} else if (def.type === "controllableNumber") {
+							const value = v as {
+								readonly value: number;
+								readonly control: {
+									readonly add: KeyCode;
+									readonly sub: KeyCode;
+								};
+							};
+
+							controlConfig = {
+								enabled: true,
+								keys: [
+									{ key: value.control.add, value: value.value },
+									{ key: value.control.sub, value: def.min },
+								],
+								startValue: 0,
+								mode: { type: "switch", smooth: true, smoothSpeed: 20 },
+							} satisfies BlockConfigPart<"number">["controlConfig"];
+						} else if (def.type === "servoMotorAngle") {
+							const value = v as {
+								readonly rotation: {
+									readonly add: KeyCode;
+									readonly sub: KeyCode;
+								};
+								readonly switchmode: boolean;
+								readonly angle: number;
+							};
+
+							controlConfig = {
+								enabled: true,
+								keys: [
+									{ key: value.rotation.add, value: -value.angle },
+									{ key: value.rotation.sub, value: value.angle },
+								],
+								startValue: 0,
+								mode: { type: value.switchmode ? "switch" : "hold", smooth: false, smoothSpeed: 20 },
+							} satisfies BlockConfigPart<"number">["controlConfig"];
+						}
+
+						v = 0;
+					} else if (def.type === "keybool") {
+						ctype = "bool";
+						const value = v as {
+							readonly key: string;
+							readonly switch: boolean;
+							readonly reversed: boolean;
+						};
+
+						controlConfig = {
+							enabled: true,
+							key: value.key,
+							switch: value.switch,
+							reversed: value.reversed,
+						} satisfies BlockConfigPart<"bool">["controlConfig"];
+
+						v = false;
+					} else {
+						ctype = def.type;
+					}
+
+					return {
+						type: ctype,
+						config: v as never,
+						controlConfig,
+					};
+				}),
+				...Objects.mapValues(
+					block.connections ?? {},
+					(k, v): { type: "wire"; config: BlockLogicTypes.WireValue } => ({
+						type: "wire",
+						config: { ...v, prevConfig: undefined },
+					}),
+				),
+			};
+
+			const ret: SerializedBlockV4 = {
+				...block,
+				["connnections" as keyof SerializedBlockV4]: undefined!,
+				config,
+			};
+
+			return ret;
+		};
+
+		const updateBlock = (block: SerializedBlockV4): SerializedBlockV4 => {
+			if (block.id === "logicmemory") {
+				return {
+					...block,
+					id: "logicmemorylegacy",
+				};
+			}
+
+			return block;
+		};
+
+		return {
+			version: this.version,
+			blocks: prev.blocks.map((b) => updateBlock(updateTypes(b))),
+		};
+	},
+};
+
 //
 
 const versions = [
 	...([v4, v5, v6, v7, v8, v9, v10, v11, v12, v13, v14, v15, v16, v17, v18, v19, v20, v21, v22] as const),
-	...([v23, v24] as const),
+	...([v23, v24, v25] as const),
 ] as const;
 const current = versions[versions.size() - 1] as typeof versions extends readonly [...unknown[], infer T] ? T : never;
 
@@ -1057,7 +1283,6 @@ export namespace BlocksSerializer {
 			material: blockData.material ?? Enum.Material.Plastic,
 			config: blockData.config,
 			uuid: blockData.uuid,
-			connections: blockData.connections,
 		};
 	}
 }

@@ -9,7 +9,6 @@ import { Element } from "shared/Element";
 import { ArgsSignal } from "shared/event/Signal";
 import type { TextButtonDefinition } from "client/gui/controls/Button";
 import type { DropdownDefinition } from "client/gui/controls/Dropdown";
-import type { BlockRegistry } from "shared/block/BlockRegistry";
 
 export type WikiCategoriesControlDefinition = GuiObject & {
 	readonly ScrollingFrame: ScrollingFrame & {
@@ -94,7 +93,7 @@ export class WikiContentControl extends Control<WikiContentControlDefinition> {
 
 	constructor(
 		gui: WikiContentControlDefinition,
-		@inject private readonly blockRegistry: BlockRegistry,
+		@inject private readonly blockList: BlockList,
 	) {
 		super(gui);
 
@@ -149,10 +148,7 @@ export class WikiContentControl extends Control<WikiContentControlDefinition> {
 		}
 		if (typeIs(entry, "table")) {
 			if (entry.type === "blockPreview") {
-				return new BlockPreviewControl(
-					this.blockPreviewTemplate(),
-					this.blockRegistry.blocks.get(entry.id)!.model,
-				);
+				return new BlockPreviewControl(this.blockPreviewTemplate(), this.blockList.blocks[entry.id]!.model);
 			}
 			if (entry.type === "ref") {
 				const gui = this.refTemplate();

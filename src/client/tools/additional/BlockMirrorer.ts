@@ -2,15 +2,13 @@ import { BlockGhoster } from "client/tools/additional/BlockGhoster";
 import { BuildingManager } from "shared/building/BuildingManager";
 import { Component } from "shared/component/Component";
 import { ObservableValue } from "shared/event/ObservableValue";
-import type { BlockRegistry } from "shared/block/BlockRegistry";
-import type { BlockId } from "shared/BlockDataRegistry";
 
 @injectable
 export class BlockMirrorer extends Component {
 	readonly blocks = new ObservableValue<readonly { readonly id: BlockId; readonly model: Model }[]>([]);
 	private readonly tracking = new Map<Model, Partial<Record<BlockId, Model[]>>>();
 
-	constructor(@inject private readonly blockRegistry: BlockRegistry) {
+	constructor(@inject private readonly blockList: BlockList) {
 		super();
 		this.onDisable(() => this.destroyMirrors());
 	}
@@ -59,7 +57,7 @@ export class BlockMirrorer extends Component {
 				plot.BuildingArea.GetPivot(),
 				{ id: block.id, pos: block.model.GetPivot() },
 				mode,
-				this.blockRegistry,
+				this.blockList,
 			).filter((m) => m.pos.Position !== block.model.GetPivot().Position);
 
 			let tracked = this.tracking.get(block.model);
@@ -82,14 +80,15 @@ export class BlockMirrorer extends Component {
 			}
 
 			const types: Partial<Record<BlockId, number>> = {};
-			for (let i = 0; i < mirrored.size(); i++) {
-				const mirror = mirrored[i];
+			for (const mirror of mirrored) {
 				const id = mirror.id;
 
 				types[id] ??= 0;
 				const track = (tracked[id] ??= []);
 				if (track.size() <= types[id]!) {
-					const instance = this.blockRegistry.blocks.get(mirror.id)!.model.Clone();
+					const instance = this.blockList.blocks[mirror.id]?.model.Clone();
+					if (!instance) continue;
+
 					BlockGhoster.ghostModel(instance);
 					track.push(instance);
 				}

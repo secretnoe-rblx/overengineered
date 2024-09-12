@@ -96,6 +96,57 @@ class TweenTransform<T, TKey extends TweenableProperties<T>> implements Transfor
 	}
 }
 
+class TextTransform<T, TKey extends ExtractKeys<T, string>> implements Transform {
+	constructor(
+		private readonly instance: T,
+		private readonly key: TKey,
+		private readonly value: T[TKey] | (() => T[TKey]),
+		private readonly duration: number,
+		private readonly style: EasingStyle,
+		private readonly direction: EasingDirection,
+	) {
+		this.instance = instance;
+		this.key = key;
+		this.value = value;
+	}
+
+	private startValue?: string;
+	private actualValue?: string;
+
+	runFrame(time: number): boolean {
+		if (time >= this.duration) {
+			this.finish();
+			return true;
+		}
+
+		this.startValue ??= this.instance[this.key] as string;
+		this.actualValue ??= (typeIs(this.value, "function") ? this.value() : this.value) as string;
+
+		if (this.actualValue.size() === 0) {
+			// erasing the current text
+
+			const min = 1;
+			const max = this.startValue.size();
+			const num = Easing.easeValue(time / this.duration, max, min, this.style, this.direction);
+			this.instance[this.key] = this.startValue.sub(1, num) as never;
+		} else {
+			// writing the new text
+
+			const min = 1;
+			const max = this.actualValue.size();
+			const num = Easing.easeValue(time / this.duration, min, max, this.style, this.direction);
+			this.instance[this.key] = this.actualValue.sub(1, num) as never;
+		}
+
+		return false;
+	}
+
+	finish() {
+		this.instance[this.key] = (this.actualValue ??
+			(typeIs(this.value, "function") ? this.value() : this.value)) as never;
+	}
+}
+
 class ParallelTransformSequence implements Transform {
 	private readonly sequence: Transform[];
 
@@ -319,6 +370,24 @@ export class TransformBuilder<T extends object> {
 				this.instance,
 				key,
 				value,
+				params?.duration ?? 0,
+				params?.style ?? "Quad",
+				params?.direction ?? "Out",
+			),
+		);
+	}
+
+	setText<TKey extends ExtractKeys<T, string>>(
+		this: TransformBuilder<T>,
+		text: T[TKey],
+		property: TKey,
+		params?: TransformProps,
+	): TransformBuilder<T> {
+		return this.push(
+			new TextTransform(
+				this.instance,
+				property,
+				text,
 				params?.duration ?? 0,
 				params?.style ?? "Quad",
 				params?.direction ?? "Out",

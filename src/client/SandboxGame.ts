@@ -31,13 +31,11 @@ import { BasicCarTutorial } from "client/tutorial/tutorials/BasicCarTutorial";
 import { BasicPlaneTutorial } from "client/tutorial/tutorials/BasicPlaneTutorial";
 import { TestTutorial } from "client/tutorial/tutorials/TestTutorial";
 import { TutorialServiceInitializer } from "client/tutorial/TutorialService";
-import { AutoLogicCreator } from "shared/block/AutoLogicCreator";
-import { BlockRegistry } from "shared/block/BlockRegistry";
 import { ReadonlyPlot } from "shared/building/ReadonlyPlot";
 import { SharedPlots } from "shared/building/SharedPlots";
 import { GameDefinitions } from "shared/data/GameDefinitions";
 import { RemoteEvents } from "shared/RemoteEvents";
-import { CustomRemotes } from "shared/Remotes";
+import { CreateSandboxBlocks } from "shared/SandboxBlocks";
 import type { TutorialDescriber } from "client/tutorial/TutorialController";
 import type { SharedPlot } from "shared/building/SharedPlot";
 
@@ -70,15 +68,7 @@ export namespace SandboxGame {
 			return new ReadonlyPlot(plot.instance.Blocks, plot.getCenter(), plot.bounds);
 		});
 
-		builder.services.registerSingletonFunc((): BlockRegistry => {
-			const gameInfo = CustomRemotes.getGameInfo.send();
-			if (!gameInfo.success) {
-				throw gameInfo.message;
-			}
-
-			AutoLogicCreator.create();
-			return new BlockRegistry(gameInfo.blocks, gameInfo.categories);
-		});
+		builder.services.registerSingleton(CreateSandboxBlocks());
 		PlayModeController.initialize(builder);
 		ClientBuildingValidationController.initialize(builder);
 

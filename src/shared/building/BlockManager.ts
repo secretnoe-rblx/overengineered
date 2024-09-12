@@ -1,21 +1,6 @@
 import { JSON } from "shared/fixes/Json";
 import { Serializer } from "shared/Serializer";
-import type { BlockId } from "shared/BlockDataRegistry";
-
-/** Connections to the INPUT connectors */
-export type PlacedBlockLogicConnections = {
-	readonly [k in BlockConnectionName]: PlacedBlockDataConnection;
-};
-export type PlacedBlockDataConnection = {
-	/** OUTPUT block uiid */
-	readonly blockUuid: BlockUuid;
-	/** OUTPUT connector name */
-	readonly connectionName: BlockConnectionName;
-};
-
-export type PlacedBlockConfig = {
-	readonly [k in string]: unknown;
-};
+import type { PlacedBlockConfig } from "shared/blockLogic/BlockConfig";
 
 declare global {
 	type BlockDataBase = {
@@ -24,15 +9,9 @@ declare global {
 		readonly color: Color3;
 		readonly material: Enum.Material;
 		readonly config: PlacedBlockConfig | undefined;
-		readonly connections: PlacedBlockLogicConnections | undefined;
 	};
-}
 
-export type PlacedBlockData<T extends BlockModel = BlockModel> = BlockDataBase & {
-	readonly instance: T;
-};
-declare global {
-	type BlockData<T extends BlockModel = BlockModel> = PlacedBlockData<T>;
+	type PlacedBlockData<T extends BlockModel = BlockModel> = BlockDataBase & { readonly instance: T };
 }
 
 interface Manager<T> {
@@ -110,16 +89,6 @@ export namespace BlockManager {
 				return JSON.deserialize<PlacedBlockConfig>(attribute);
 			},
 		},
-		connections: {
-			set: (block, value: PlacedBlockLogicConnections | undefined) =>
-				block.SetAttribute("connections", value !== undefined ? JSON.serialize(value) : undefined),
-			get: (block) => {
-				const attribute = block.GetAttribute("connections") as string | undefined;
-				if (attribute === undefined) return undefined;
-
-				return JSON.deserialize<PlacedBlockLogicConnections>(attribute);
-			},
-		},
 	} satisfies { readonly [k in Exclude<keyof PlacedBlockData, "instance">]: Manager<PlacedBlockData[k]> };
 
 	export function getBlockDataByBlockModel(model: BlockModel): PlacedBlockData {
@@ -129,7 +98,6 @@ export namespace BlockManager {
 			color: manager.color.get(model),
 			material: manager.material.get(model),
 			uuid: manager.uuid.get(model),
-			connections: manager.connections.get(model),
 			config: manager.config.get(model),
 		};
 	}

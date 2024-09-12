@@ -41,8 +41,7 @@ export class BuildingMode extends PlayMode {
 	) {
 		super();
 
-		di = di.beginScope();
-		di.registerSingleton(this);
+		di = di.beginScope((di) => di.registerSingleton(this));
 
 		this.event.subInput((ih) => {
 			ih.onKeyDown("LeftControl", () => this.gridEnabled.set(false));

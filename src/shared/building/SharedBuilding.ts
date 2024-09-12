@@ -1,7 +1,7 @@
 import { BlockManager } from "shared/building/BlockManager";
 import { MaterialData } from "shared/data/MaterialData";
 import { PartUtils } from "shared/utils/PartUtils";
-import type { PlacedBlockData, PlacedBlockDataConnection } from "shared/building/BlockManager";
+import type { BlockLogicTypes } from "shared/blockLogic/BlockLogicTypes";
 
 /** Methods for editing the building */
 export namespace SharedBuilding {
@@ -11,12 +11,15 @@ export namespace SharedBuilding {
 	) {
 		const result = new Map<
 			BlockUuid,
-			(readonly [PlacedBlockData, BlockConnectionName, PlacedBlockDataConnection])[]
+			(readonly [PlacedBlockData, BlockConnectionName, BlockLogicTypes.WireValue])[]
 		>();
 		for (const otherblock of blocks) {
-			if (otherblock.connections === undefined) continue;
+			if (!otherblock.config) continue;
 
-			for (const [connectionName, connection] of pairs(otherblock.connections)) {
+			for (const [connectionName, cfg] of pairs(otherblock.config)) {
+				if (cfg.type !== "wire") continue;
+				const connection = cfg.config;
+
 				if (!uuids.has(connection.blockUuid)) continue;
 
 				let ret = result.get(connection.blockUuid);
@@ -24,7 +27,7 @@ export namespace SharedBuilding {
 					result.set(connection.blockUuid, (ret = []));
 				}
 
-				ret.push([otherblock, connectionName, connection] as const);
+				ret.push([otherblock, connectionName as BlockConnectionName, connection] as const);
 			}
 		}
 

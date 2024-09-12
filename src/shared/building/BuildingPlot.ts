@@ -7,8 +7,6 @@ import { BB } from "shared/fixes/BB";
 import { JSON } from "shared/fixes/Json";
 import { Objects } from "shared/fixes/objects";
 import { Operation } from "shared/Operation";
-import type { BlockRegistry } from "shared/block/BlockRegistry";
-import type { PlacedBlockLogicConnections } from "shared/building/BlockManager";
 
 const err = (message: string): ErrorResponse => ({ success: false, message });
 const success: SuccessResponse = { success: true };
@@ -33,7 +31,7 @@ export class BuildingPlot extends ReadonlyPlot {
 		instance: Folder,
 		origin: CFrame,
 		boundingBox: BB,
-		@inject private readonly blockRegistry: BlockRegistry,
+		@inject private readonly blockList: BlockList,
 	) {
 		super(instance, origin, boundingBox);
 	}
@@ -71,7 +69,7 @@ export class BuildingPlot extends ReadonlyPlot {
 		block.Parent = this.instance;
 	}
 	private place(data: PlaceBlockRequest): BuildResponse {
-		const block = this.blockRegistry.blocks.get(data.id);
+		const block = this.blockList.blocks[data.id];
 		if (!block) {
 			return { success: false, message: `Unknown block id ${data.id}` };
 		}
@@ -87,12 +85,8 @@ export class BuildingPlot extends ReadonlyPlot {
 
 		model.PivotTo(data.location);
 
-		// Set material & color
 		if (data.config && Objects.size(data.config) !== 0) {
 			BlockManager.manager.config.set(model, data.config);
-		}
-		if (data.connections !== undefined && Objects.size(data.connections) !== 0) {
-			BlockManager.manager.connections.set(model, data.connections);
 		}
 
 		BlockManager.manager.uuid.set(model, uuid);
@@ -162,27 +156,37 @@ export class BuildingPlot extends ReadonlyPlot {
 	}
 
 	logicConnect(request: Omit<LogicConnectRequest, "plot">): Response {
-		const inputInfo = BlockManager.manager.connections.get(request.inputBlock);
+		const config = BlockManager.manager.config.get(request.inputBlock) ?? {};
 		const outputInfo = BlockManager.manager.uuid.get(request.outputBlock);
 
-		const connections: PlacedBlockLogicConnections = {
-			...inputInfo,
+		const newConfig: typeof config = {
+			...config,
 			[request.inputConnection]: {
-				blockUuid: outputInfo,
-				connectionName: request.outputConnection,
+				type: "wire",
+				config: {
+					prevConfig: config[request.inputConnection],
+					blockUuid: outputInfo,
+					connectionName: request.outputConnection,
+				},
 			},
 		};
 
-		BlockManager.manager.connections.set(request.inputBlock, connections);
+		BlockManager.manager.config.set(request.inputBlock, newConfig);
 		return success;
 	}
 	logicDisconnect({ inputBlock, inputConnection }: Omit<LogicDisconnectRequest, "plot">): Response {
-		const connections = { ...BlockManager.manager.connections.get(inputBlock) };
-		if (connections[inputConnection]) {
-			delete connections[inputConnection];
+		const config = { ...BlockManager.manager.config.get(inputBlock) };
+		const cfg = config[inputConnection];
+		if (cfg.type === "wire") {
+			// either set it to the previous config, or delete the key by setting it to nil
+			if (!cfg.config.prevConfig || cfg.config.prevConfig.type === "wire") {
+				delete config[inputConnection];
+			} else {
+				config[inputConnection] = cfg.config.prevConfig;
+			}
 		}
 
-		BlockManager.manager.connections.set(inputBlock, connections);
+		BlockManager.manager.config.set(inputBlock, config);
 		return success;
 	}
 	paintBlocks({ blocks, color, material }: Omit<PaintBlocksRequest, "plot">): Response {
@@ -195,44 +199,8 @@ export class BuildingPlot extends ReadonlyPlot {
 		return success;
 	}
 	updateConfig(configs: ConfigUpdateRequest["configs"]): Response {
-		/**
-		 * Assign only values, recursively.
-		 * @example assignValues({ a: { b: 'foo' } }, 'a', { c: 'bar' })
-		 * // returns:
-		 * { a: { b: 'foo', c: 'bar' } }
-		 */
-		const withValues = <T extends Record<string, unknown>>(object: T, value: Partial<T>): T => {
-			const setobj = <T extends Record<string, unknown>, TKey extends keyof T>(
-				object: T,
-				key: TKey,
-				value: T[TKey],
-			) => {
-				if (!typeIs(value, "table")) {
-					return { ...object, [key]: value };
-				}
-
-				return withValues(object, value);
-			};
-
-			const ret: Record<string, unknown> = { ...object };
-			for (const [key, val] of pairs(value as Record<string, object>)) {
-				const rk = ret[key];
-
-				if (typeIs(rk, "Vector3") || !typeIs(rk, "table")) {
-					ret[key] = val;
-				} else {
-					ret[key] = setobj(rk as Record<string, object>, key, val);
-				}
-			}
-
-			return ret as T;
-		};
-
 		for (const config of configs) {
-			const currentData = BlockManager.manager.config.get(config.block);
-			const newData = withValues(currentData ?? {}, { [config.key]: JSON.deserialize(config.value) });
-
-			BlockManager.manager.config.set(config.block, newData);
+			BlockManager.manager.config.set(config.block, JSON.deserialize(config.scfg));
 		}
 
 		return success;

@@ -1,18 +1,41 @@
 import { Control } from "client/gui/Control";
-import { NumberObservableValue } from "shared/event/NumberObservableValue";
 import { ObservableValue } from "shared/event/ObservableValue";
 import { Signal } from "shared/event/Signal";
+import { MathUtils } from "shared/fixes/MathUtils";
+
+/** ObservableValue that stores a number that can be clamped */
+class NumberObservableValue<T extends number | undefined = number> extends ObservableValue<T> {
+	constructor(
+		value: T,
+		readonly min: number | undefined,
+		readonly max: number | undefined,
+		readonly step?: number,
+	) {
+		super(value);
+	}
+
+	protected processValue(value: T) {
+		if (value === undefined) return value;
+		return MathUtils.clamp(value, this.min, this.max, this.step) as T;
+	}
+
+	/** @deprecated Use {@link MathUtils.clamp} instead */
+	static clamp(value: number, min: number, max: number, step: number) {
+		return MathUtils.clamp(value, min, max, step);
+	}
+}
 
 type ToNum<TAllowNull extends boolean> = TAllowNull extends false ? number : number | undefined;
 export type NumberTextBoxControlDefinition = TextBox;
 /** Control that represents a number via a text input */
 export class NumberTextBoxControl<TAllowNull extends boolean = false> extends Control<NumberTextBoxControlDefinition> {
 	readonly submitted = new Signal<(value: number) => void>();
-	readonly value;
+	readonly value: ObservableValue<ToNum<TAllowNull>>;
+	private textChanged = false;
 
 	constructor(gui: NumberTextBoxControlDefinition);
 	constructor(gui: NumberTextBoxControlDefinition, value: ObservableValue<number>);
-	constructor(gui: NumberTextBoxControlDefinition, min: number, max: number, step: number);
+	constructor(gui: NumberTextBoxControlDefinition, min: number | undefined, max: number | undefined, step?: number);
 	constructor(
 		gui: NumberTextBoxControlDefinition,
 		min?: number | ObservableValue<number>,
@@ -23,10 +46,8 @@ export class NumberTextBoxControl<TAllowNull extends boolean = false> extends Co
 
 		if (min && typeIs(min, "table")) {
 			this.value = min;
-		} else if (min !== undefined && max !== undefined && step !== undefined) {
-			this.value = new NumberObservableValue<ToNum<TAllowNull>>(0, min, max, step);
 		} else {
-			this.value = new ObservableValue<ToNum<TAllowNull>>(0);
+			this.value = new NumberObservableValue<ToNum<TAllowNull>>(0, min, max, step);
 		}
 
 		this.event.subscribeObservable(
@@ -37,21 +58,38 @@ export class NumberTextBoxControl<TAllowNull extends boolean = false> extends Co
 					return;
 				}
 
-				let text = tostring(value ?? "");
-				if (step !== undefined) {
-					text = string.format(`%.${math.max(0, math.ceil(-math.log(step, 10)))}f`, value ?? 0);
-				}
+				const prettyNumber = (value: number) => {
+					const maxdigits = math.min(4, step ? math.max(0, math.ceil(-math.log(step, 10))) : math.huge);
 
-				this.gui.Text = text;
+					const floating = value % 1;
+					const integer = value - floating;
+
+					let floatingstr = string.format("%i", floating * math.pow(10, maxdigits));
+					const integerstr = string.format("%i", integer);
+
+					while (floatingstr.sub(-1) === "0") {
+						if (floatingstr.size() === 1) break;
+						floatingstr = floatingstr.sub(1, -2);
+					}
+
+					return `${integerstr}.${floatingstr}`;
+				};
+
+				this.gui.Text = prettyNumber(value ?? 0);
 			},
 			true,
 		);
 
+		this.event.subscribe(this.gui.Focused, () => (this.textChanged = true));
 		this.event.subscribe(this.gui.FocusLost, () => this.commit(true));
 		this.event.subscribe(this.gui.ReturnPressedFromOnScreenKeyboard, () => this.commit(false));
 	}
 
 	private commit(byLostFocus: boolean) {
+		if (!this.textChanged) {
+			return;
+		}
+
 		const text = this.gui.Text.gsub("[^-0123456789.]", "")[0];
 
 		let num = tonumber(text);

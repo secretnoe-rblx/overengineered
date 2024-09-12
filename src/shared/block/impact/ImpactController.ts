@@ -5,7 +5,6 @@ import { Objects } from "shared/fixes/objects";
 import { RemoteEvents } from "shared/RemoteEvents";
 import { TerrainDataInfo } from "shared/TerrainDataInfo";
 import { PlayerUtils } from "shared/utils/PlayerUtils";
-import type { PlacedBlockData } from "shared/building/BlockManager";
 import type { SparksEffect } from "shared/effects/SparksEffect";
 
 const overlapParams = new OverlapParams();
@@ -46,7 +45,7 @@ export class ImpactController extends Component {
 	}
 
 	constructor(
-		blocks: readonly PlacedBlockData[],
+		blocks: readonly { readonly instance: BlockModel }[],
 		@inject private readonly sparksEffect: SparksEffect,
 	) {
 		super();
@@ -70,7 +69,7 @@ export class ImpactController extends Component {
 		});
 	}
 
-	subscribeOnBlock(block: PlacedBlockData) {
+	subscribeOnBlock(block: { readonly instance: BlockModel }) {
 		for (const part of block.instance.GetDescendants()) {
 			if (!part.IsA("BasePart")) continue;
 			if (!ImpactController.isImpactAllowed(part)) continue;

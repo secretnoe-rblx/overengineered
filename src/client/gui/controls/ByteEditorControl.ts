@@ -24,7 +24,10 @@ export class ByteEditor extends Control<ByteEditorDefinition> {
 	readonly submitted = new Signal<(value: number) => void>();
 	readonly value = new ObservableValue<number>(0);
 
-	private readonly buttons;
+	private readonly buttons: readonly TextButton[];
+
+	private readonly buttonColor;
+	private readonly buttonColorActive;
 
 	constructor(gui: ByteEditorDefinition, parts?: ByteEditorDefinitionParts) {
 		super(gui);
@@ -34,9 +37,19 @@ export class ByteEditor extends Control<ByteEditorDefinition> {
 			TextBox: parts?.TextBox ?? Control.waitForChild(gui, "TextBox"),
 		};
 
-		this.buttons = (parts.Buttons.GetChildren().filter((value) => value.IsA("TextButton")) as TextButton[]).sort(
-			(a, b) => a.LayoutOrder > b.LayoutOrder,
-		);
+		this.buttonColor = parts.Buttons.b2.BackgroundColor3;
+		this.buttonColorActive = Colors.newGui.blue;
+
+		this.buttons = [
+			parts.Buttons.b128,
+			parts.Buttons.b64,
+			parts.Buttons.b32,
+			parts.Buttons.b16,
+			parts.Buttons.b8,
+			parts.Buttons.b4,
+			parts.Buttons.b2,
+			parts.Buttons.b1,
+		];
 		for (const button of this.buttons) {
 			this.add(new ButtonControl(button));
 		}
@@ -56,11 +69,11 @@ export class ByteEditor extends Control<ByteEditorDefinition> {
 		for (const button of this.buttons) {
 			this.event.subscribe(button.MouseButton1Click, () => {
 				button.BackgroundColor3 =
-					button.BackgroundColor3 === Colors.accent ? Colors.staticBackground : Colors.accent;
+					button.BackgroundColor3 === this.buttonColorActive ? this.buttonColor : this.buttonColorActive;
 
 				const bits: boolean[] = [];
 				for (let i = 0; i < 8; i++) {
-					bits.push(this.buttons[i].BackgroundColor3 === Colors.accent);
+					bits.push(this.buttons[i].BackgroundColor3 === this.buttonColorActive);
 				}
 				this.value.set(this.bitsToByte(bits));
 
@@ -73,7 +86,7 @@ export class ByteEditor extends Control<ByteEditorDefinition> {
 		const bits = this.byteToBits(this.value.get());
 
 		for (let i = 0; i < 8; i++) {
-			this.buttons[i].BackgroundColor3 = bits[i] ? Colors.accent : Colors.staticBackground;
+			this.buttons[i].BackgroundColor3 = bits[i] ? this.buttonColorActive : this.buttonColor;
 		}
 	}
 

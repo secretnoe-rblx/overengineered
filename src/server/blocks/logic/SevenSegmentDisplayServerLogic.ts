@@ -1,6 +1,6 @@
 import { ServerBlockLogic } from "server/blocks/ServerBlockLogic";
 import type { PlayModeController } from "server/modes/PlayModeController";
-import type { SevenSegmentDisplayBlockLogic } from "shared/block/logic/logic/display/SevenSegmentDisplayBlockLogic";
+import type { SevenSegmentDisplayBlockLogic } from "shared/blocks/blocks/SevenSegmentDisplayBlock";
 
 @injectable
 export class SevenSegmentDisplayServerLogic extends ServerBlockLogic<typeof SevenSegmentDisplayBlockLogic> {

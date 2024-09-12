@@ -28,20 +28,26 @@ type CustomRemoteFunctionBase<TArgToClient, TArgToServer, TRet = void> = Instanc
 };
 type CustomRemoteEvent<TArg> = CustomRemoteEventBase<TArg, TArg>;
 
+type RemoteName = string | Instances[CreatableRemoteEvents | CreatableRemoteFunctions];
+
 abstract class PERemoveEvent<TEvent extends Instance> {
 	protected readonly event: TEvent;
 
-	protected constructor(name: string, eventType: CreatableRemoteEvents | CreatableRemoteFunctions) {
-		if (RunService.IsServer()) {
-			if (ReplicatedStorage.FindFirstChild(name)) {
-				throw `${eventType} ${name} already exists.`;
-			}
-
-			this.event = new Instance(eventType) as unknown as TEvent;
-			this.event.Name = name;
-			this.event.Parent = ReplicatedStorage;
+	protected constructor(name: RemoteName, eventType: CreatableRemoteEvents | CreatableRemoteFunctions) {
+		if (typeIs(name, "Instance")) {
+			this.event = name as Instance as TEvent;
 		} else {
-			this.event = ReplicatedStorage.WaitForChild(name) as TEvent;
+			if (RunService.IsServer()) {
+				if (ReplicatedStorage.FindFirstChild(name)) {
+					throw `${eventType} ${name} already exists.`;
+				}
+
+				this.event = new Instance(eventType) as unknown as TEvent;
+				this.event.Name = name;
+				this.event.Parent = ReplicatedStorage;
+			} else {
+				this.event = ReplicatedStorage.WaitForChild(name) as TEvent;
+			}
 		}
 	}
 }
@@ -50,10 +56,7 @@ export class BidirectionalRemoteEvent<TArg = undefined> {
 	readonly s2c;
 	readonly c2s;
 
-	constructor(
-		readonly name: string,
-		eventType: CreatableRemoteEvents = "RemoteEvent",
-	) {
+	constructor(name: string, eventType: CreatableRemoteEvents = "RemoteEvent") {
 		this.s2c = new S2CRemoteEvent<TArg>(name + "_s2c", eventType);
 		this.c2s = new C2SRemoteEvent<TArg>(name + "_c2s", eventType);
 	}
@@ -63,7 +66,7 @@ export class C2SRemoteEvent<TArg = undefined> extends PERemoveEvent<CustomRemote
 	/** @server */
 	readonly invoked = new ArgsSignal<[player: Player, arg: TArg]>();
 
-	constructor(name: string, eventType: CreatableRemoteEvents = "RemoteEvent") {
+	constructor(name: RemoteName, eventType: CreatableRemoteEvents = "RemoteEvent") {
 		super(name, eventType);
 
 		if (RunService.IsServer()) {
@@ -89,7 +92,7 @@ export class S2CRemoteEvent<TArg = undefined> extends PERemoveEvent<CustomRemote
 	/** @client */
 	readonly invoked = new ArgsSignal<[arg: TArg]>();
 
-	constructor(name: string, eventType: CreatableRemoteEvents = "RemoteEvent") {
+	constructor(name: RemoteName, eventType: CreatableRemoteEvents = "RemoteEvent") {
 		super(name, eventType);
 
 		if (RunService.IsClient()) {
@@ -143,7 +146,6 @@ export namespace PERemoteEventMiddlewares {
 		return {
 			start: () => {
 				const now = os.time();
-				print(now, lastCheck, current);
 
 				lastCheck ??= now;
 				if (now - lastCheck > time) {
@@ -213,7 +215,7 @@ export class S2C2SRemoteFunction<TArg, TResp extends Response = Response> extend
 	private invoked?: (arg: TArg) => TResp;
 	private readonly middlewares: WaiterMiddleware[] = [];
 
-	constructor(name: string) {
+	constructor(name: RemoteName) {
 		super(name, "RemoteFunction");
 
 		if (RunService.IsClient()) {
@@ -221,8 +223,11 @@ export class S2C2SRemoteFunction<TArg, TResp extends Response = Response> extend
 				if (!this.invoked) {
 					return { success: false, message: `Event ${name} was not subscribed to` };
 				}
-
-				return this.invoked(arg);
+				try {
+					return this.invoked(arg);
+				} catch (err) {
+					return { success: false, message: tostring(err ?? "") };
+				}
 			};
 		}
 	}
@@ -279,7 +284,7 @@ export class C2S2CRemoteFunction<TArg, TResp extends Response = Response> extend
 
 	private readonly middlewares: WaiterMiddleware[] = [];
 
-	constructor(name: string) {
+	constructor(name: RemoteName) {
 		super(name, "RemoteFunction");
 
 		if (RunService.IsServer()) {
@@ -288,7 +293,11 @@ export class C2S2CRemoteFunction<TArg, TResp extends Response = Response> extend
 					return { success: false, message: `Event ${name} was not subscribed to` };
 				}
 
-				return this.invoked(player, arg);
+				try {
+					return this.invoked(player, arg);
+				} catch (err) {
+					return { success: false, message: tostring(err ?? "") };
+				}
 			};
 		}
 	}
@@ -346,7 +355,7 @@ export class C2CRemoteEvent<TArg = undefined> extends PERemoveEvent<CustomRemote
 	/** @client */
 	readonly invoked = new ArgsSignal<[arg: TArg]>();
 
-	constructor(name: string, eventType: CreatableRemoteEvents) {
+	constructor(name: RemoteName, eventType: CreatableRemoteEvents) {
 		super(name, eventType);
 
 		if (RunService.IsServer()) {

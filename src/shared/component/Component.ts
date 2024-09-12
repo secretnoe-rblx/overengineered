@@ -122,9 +122,11 @@ export class Component extends ComponentBase implements IComponent, IDebuggableC
 	private parented?: IDebuggableComponent[];
 
 	/** Subscribe a child to this component state. Return the child. */
-	protected parent<T extends IDebuggableComponent | (IComponent & IDebuggableComponent)>(child: T): T {
-		this.parented ??= [];
-		this.parented.push(child);
+	protected parent<T extends IComponent | IDebuggableComponent>(child: T): T {
+		if ("getDebugChildren" in child) {
+			this.parented ??= [];
+			this.parented.push(child);
+		}
 
 		if ("isDestroyed" in child || child instanceof ComponentBase) {
 			ComponentChild.init(this, child);

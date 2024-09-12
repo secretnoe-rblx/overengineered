@@ -62,7 +62,7 @@ export namespace Logger {
 	export const enabledLevels = new ComponentDisabler(Objects.values(levels));
 
 	{
-		const logDebug = new ObservableValue(RunService.IsStudio());
+		const logDebug = new ObservableValue(false);
 		logDebug.subscribe((enabled) => enabledLevels.set(enabled, levels.debug), true);
 		Switches.register("logDebug", logDebug);
 

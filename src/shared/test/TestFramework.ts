@@ -1,4 +1,13 @@
 import { Players, ReplicatedStorage, RunService, ServerScriptService } from "@rbxts/services";
+import { Logger } from "shared/Logger";
+
+export type UnitTest = (di: DIContainer) => unknown;
+export type UnitTestList = {
+	readonly [k in string]: UnitTest;
+};
+export type UnitTests = {
+	readonly [k in string]: UnitTestList;
+};
 
 export namespace TestFramework {
 	export function findAllTestScripts(): readonly ModuleScript[] {
@@ -24,41 +33,41 @@ export namespace TestFramework {
 		return ret;
 	}
 
-	type Test = (di: ReadonlyDIContainer) => void;
-	type TestList = { readonly [k in string]: Test };
-	export type Tests = TestList | ((di?: ReadonlyDIContainer) => TestList);
-	export function loadTestsFromScript(mscript: ModuleScript): Tests {
+	export function loadTestsFromScript(mscript: ModuleScript): UnitTests {
 		const ts = require(
 			ReplicatedStorage.WaitForChild("rbxts_include").WaitForChild("RuntimeLib") as ModuleScript,
 		) as {
 			import: (context: LuaSourceContainer, module: Instance, ...path: string[]) => unknown;
 		};
 
-		return (ts.import(script, mscript) as { _Tests: Tests })._Tests;
+		return (ts.import(script, mscript) as { _Tests: UnitTests })._Tests;
 	}
 
-	export function run(name: string, test: Tests, di: ReadonlyDIContainer) {
-		const run = (name: string, test: Tests | Test, offset: number) => {
-			const offsetstr = string.rep(" ", offset);
-			$log(`${offsetstr}[${name}] Running`);
+	export function runMultiple(name: string, test: UnitTestList, di: DIContainer): void {
+		Logger.beginScope(name);
+		$log("Running");
 
-			if (typeIs(test, "function")) {
-				try {
-					test(di);
-					return;
-				} catch (err) {
-					$err(tostring(err ?? "Unknown error"));
-					return;
-				}
-			}
+		for (const [name, tests] of pairs(test)) {
+			run(name, tests, di);
+		}
 
-			for (const [name, tests] of pairs(test)) {
-				run(name, tests, offset + 1);
-			}
+		$log("SUCCESS");
+		Logger.endScope();
+	}
+	export function run<T extends UnitTest>(name: string, test: T, di: DIContainer): ReturnType<T> | undefined {
+		Logger.beginScope(name);
+		$log("Running");
 
-			$log(`${offsetstr}[${name}] SUCCESS`);
-		};
+		try {
+			const result = test(di) as ReturnType<T>;
+			$log("SUCCESS");
 
-		run(name, test, 0);
+			return result;
+		} catch (err) {
+			$err(tostring(err ?? "Unknown error"));
+			return undefined;
+		} finally {
+			Logger.endScope();
+		}
 	}
 }

@@ -2,6 +2,35 @@
 // do NOT remove
 const _ = () => [SetMacros, MapMacros, ArrayMacros];
 
+/* Basic operations:
+
+count(t => boolean): number
+
+all(t => boolean): boolean
+any(t => boolean): boolean
+contains(t): number
+containsBy(t => boolean): number
+
+chunk(number): t[]
+distinctArr(): T[]
+distinctArrBy(t => u): T[]
+distinctSet(): Set<T>
+distinctSetBy(t => u): Set<T>
+exceptArr(t[])
+exceptSet(Set<t>)
+exceptBy(t => u)
+
+map(t => u): u[]
+mapSet(t => u): Set<u>
+flatmap(t => u[]): u[]
+flatmapSet(t => u[]): Set<u>
+filter(t => boolean): t[]
+filterSet(t => boolean): Set<t>
+
+first(): t
+firstKey(): k
+*/
+
 declare global {
 	interface ReadonlySet<T> {
 		filter(this: ReadonlySet<T>, func: (item: T) => boolean): T[];
@@ -18,7 +47,11 @@ declare global {
 
 		count(this: ReadonlySet<T>, func: (value: T) => boolean): number;
 		all(this: ReadonlySet<T>, func: (value: T) => boolean): boolean;
+
+		any(this: ReadonlySet<T>): boolean;
 		any(this: ReadonlySet<T>, func: (value: T) => boolean): boolean;
+
+		asReadonly(this: ReadonlySet<T>): ReadonlySet<T>;
 	}
 }
 export const SetMacros: PropertyMacros<ReadonlySet<defined>> = {
@@ -120,8 +153,16 @@ export const SetMacros: PropertyMacros<ReadonlySet<defined>> = {
 	all: <T extends defined>(array: ReadonlySet<T>, func: (value: T) => boolean): boolean => {
 		return !array.any((v) => !func(v));
 	},
-	any: <T extends defined>(array: ReadonlySet<T>, func: (value: T) => boolean): boolean => {
+	any: <T extends defined>(array: ReadonlySet<T>, func?: (value: T) => boolean): boolean => {
+		if (!func) {
+			return next(array)[0] !== undefined;
+		}
+
 		return array.find(func) !== undefined;
+	},
+
+	asReadonly: <T extends defined>(array: ReadonlySet<T>): ReadonlySet<T> => {
+		return array;
 	},
 };
 
@@ -133,7 +174,7 @@ declare global {
 
 		filter(this: ReadonlyMap<K, V>, func: (key: K, value: V) => boolean): Map<K, V>;
 		map<TOut extends defined>(this: ReadonlyMap<K, V>, func: (key: K, value: V) => TOut): TOut[];
-		mapToMap<TK extends defined, TOut extends defined>(
+		mapToMap<TK extends defined, TOut>(
 			this: ReadonlyMap<K, V>,
 			func: (key: K, value: V) => LuaTuple<[TK, TOut]>,
 		): Map<TK, TOut>;
@@ -143,7 +184,14 @@ declare global {
 		findValue(this: ReadonlyMap<K, V>, func: (key: K, value: V) => boolean): V | undefined;
 
 		all(this: ReadonlyMap<K, V>, func: (key: K, value: V) => boolean): boolean;
+
+		any(this: ReadonlyMap<K, V>): boolean;
 		any(this: ReadonlyMap<K, V>, func: (key: K, value: V) => boolean): boolean;
+
+		asReadonly(this: ReadonlyMap<K, V>): ReadonlyMap<K, V>;
+	}
+	interface Map<K, V> {
+		getOrSet(this: Map<K, V>, key: K, create: () => V): V;
 	}
 }
 export const MapMacros: PropertyMacros<ReadonlyMap<defined, defined>> = {
@@ -201,7 +249,7 @@ export const MapMacros: PropertyMacros<ReadonlyMap<defined, defined>> = {
 
 		return result;
 	},
-	mapToMap: <K extends defined, V extends defined, TK extends defined, TOut extends defined>(
+	mapToMap: <K extends defined, V extends defined, TK extends defined, TOut>(
 		map: ReadonlyMap<K, V>,
 		func: (key: K, value: V) => LuaTuple<[TK, TOut]>,
 	): Map<TK, TOut> => {
@@ -268,9 +316,29 @@ export const MapMacros: PropertyMacros<ReadonlyMap<defined, defined>> = {
 	},
 	any: <K extends defined, V extends defined>(
 		map: ReadonlyMap<K, V>,
-		func: (key: K, value: V) => boolean,
+		func?: (key: K, value: V) => boolean,
 	): boolean => {
+		if (!func) {
+			return next(map)[0] !== undefined;
+		}
+
 		return map.findKey(func) !== undefined;
+	},
+
+	asReadonly: <K extends defined, V extends defined>(map: ReadonlyMap<K, V>): ReadonlyMap<K, V> => {
+		return map;
+	},
+};
+
+export const WritableMapMacros: PropertyMacros<Map<defined, defined>> = {
+	getOrSet: <K extends defined, V extends defined>(array: Map<K, V>, key: K, create: () => V): V => {
+		const value = array.get(key);
+		if (value) return value;
+
+		const newvalue = create();
+		array.set(key, newvalue);
+
+		return newvalue;
 	},
 };
 
@@ -287,7 +355,10 @@ declare global {
 
 		count(this: ReadonlyArray<defined>, func: (value: T) => boolean): number;
 		all(this: ReadonlyArray<defined>, func: (value: T) => boolean): boolean;
+		any(this: ReadonlyArray<defined>): boolean;
 		any(this: ReadonlyArray<defined>, func: (value: T) => boolean): boolean;
+
+		asReadonly(this: ReadonlyArray<defined>): ReadonlyArray<T>;
 	}
 }
 export const ArrayMacros: PropertyMacros<ReadonlyArray<defined>> = {
@@ -366,7 +437,15 @@ export const ArrayMacros: PropertyMacros<ReadonlyArray<defined>> = {
 	all: <T extends defined>(array: readonly T[], func: (value: T) => boolean): boolean => {
 		return !array.any((v) => !func(v));
 	},
-	any: <T extends defined>(array: readonly T[], func: (value: T) => boolean): boolean => {
+	any: <T extends defined>(array: readonly T[], func?: (value: T) => boolean): boolean => {
+		if (!func) {
+			return next(array)[0] !== undefined;
+		}
+
 		return array.find(func) !== undefined;
+	},
+
+	asReadonly: <T extends defined>(array: readonly T[]): readonly T[] => {
+		return array;
 	},
 };

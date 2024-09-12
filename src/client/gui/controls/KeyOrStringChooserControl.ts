@@ -1,8 +1,8 @@
 import { ContextActionService } from "@rbxts/services";
 import { InputController } from "client/controller/InputController";
-import { Colors } from "client/gui/Colors";
 import { Control } from "client/gui/Control";
 import { SelectButtonPopup } from "client/gui/popup/SelectButtonPopup";
+import { Colors } from "shared/Colors";
 import { ObservableValue } from "shared/event/ObservableValue";
 import { Signal } from "shared/event/Signal";
 
@@ -16,14 +16,13 @@ export class KeyOrStringChooserControl<
 	readonly submitted = new Signal<(value: string, prev: ToStr<TAllowNull>) => void>();
 	readonly value = new ObservableValue<ToStr<TAllowNull>>("P");
 
-	private readonly color = Colors.accentDark;
-	private readonly activeColor = Colors.accent;
-
 	constructor(gui: KeyOrStringChooserControlDefinition) {
 		super(gui);
 
+		const buttonColor = this.gui.BackgroundColor3;
+		const buttonColorActive = Colors.lightenPressed(this.gui.BackgroundColor3);
+
 		this.value.subscribe((value) => (this.gui.Text = value ?? ""));
-		this.event.onPrepare(() => (this.gui.BackgroundColor3 = this.color));
 
 		this.gui.Activated.Connect(() => {
 			if (InputController.inputType.get() === "Touch") {
@@ -37,7 +36,7 @@ export class KeyOrStringChooserControl<
 					() => {},
 				);
 			} else {
-				this.gui.BackgroundColor3 = this.activeColor;
+				this.gui.BackgroundColor3 = buttonColorActive;
 
 				const actionName = "peKeySelection";
 				ContextActionService.BindActionAtPriority(
@@ -53,7 +52,7 @@ export class KeyOrStringChooserControl<
 							const prev = this.value.get();
 							this.value.set(input.KeyCode.Name);
 							this.submitted.Fire(input.KeyCode.Name, prev);
-							this.gui.BackgroundColor3 = this.color;
+							this.gui.BackgroundColor3 = buttonColor;
 						}
 					},
 					false,

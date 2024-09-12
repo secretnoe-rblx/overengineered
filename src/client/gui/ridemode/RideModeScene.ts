@@ -10,29 +10,32 @@ import { ProgressBarControl } from "client/gui/controls/ProgressBarControl";
 import { ConfirmPopup } from "client/gui/popup/ConfirmPopup";
 import { TouchModeButtonControl } from "client/gui/ridemode/TouchModeButtonControl";
 import { requestMode } from "client/modes/PlayModeRequest";
-import { RocketEngineLogic } from "shared/block/logic/RocketEngineLogic";
-import { VehicleSeatBlockLogic } from "shared/block/logic/VehicleSeatBlockLogic";
+import { RocketBlocks } from "shared/blocks/blocks/RocketEngineBlocks";
+import { VehicleSeatBlock } from "shared/blocks/blocks/VehicleSeatBlock";
+import { ComponentChild } from "shared/component/ComponentChild";
 import { EventHandler } from "shared/event/EventHandler";
 import { Signal } from "shared/event/Signal";
 import { CustomRemotes } from "shared/Remotes";
 import { RobloxUnit } from "shared/RobloxUnit";
 import { SlotsMeta } from "shared/SlotsMeta";
 import type { ClientMachine } from "client/blocks/ClientMachine";
-import type { Machine } from "client/blocks/Machine";
 import type { TextButtonDefinition } from "client/gui/controls/Button";
 import type { ProgressBarControlDefinition } from "client/gui/controls/ProgressBarControl";
+import type { RideMode } from "client/modes/ride/RideMode";
 import type { PlayerDataStorage } from "client/PlayerDataStorage";
+import type { RocketBlockLogic } from "shared/blocks/blocks/RocketEngineBlocks";
 
 export type ActionBarControlDefinition = GuiObject & {
 	readonly Stop: GuiButton;
 	readonly Sit: GuiButton;
 	readonly ControlSettings: GuiButton;
 	readonly ControlReset: GuiButton;
+	readonly LogicVisualizer: GuiButton;
 };
 export class ActionBarControl extends Control<ActionBarControlDefinition> {
 	readonly sitButton;
 
-	constructor(gui: ActionBarControlDefinition, controls: RideModeControls) {
+	constructor(gui: ActionBarControlDefinition, mode: RideMode, controls: RideModeControls) {
 		super(gui);
 
 		const stopButton = this.add(new ButtonControl(this.gui.Stop));
@@ -73,6 +76,17 @@ export class ActionBarControl extends Control<ActionBarControlDefinition> {
 			sitButton.show();
 			controlResetButton.hide();
 		});
+
+		const visualizer = new ComponentChild(this, true);
+		this.add(
+			new ButtonControl(this.gui.LogicVisualizer, () => {
+				if (visualizer.get()) {
+					visualizer.clear();
+				} else {
+					visualizer.set(mode.getCurrentMachine()?.createVisualizer());
+				}
+			}),
+		);
 	}
 }
 
@@ -235,7 +249,7 @@ export class RideModeControls extends DictionaryControl<RideModeControlsDefiniti
 		};
 	}
 
-	start(machine: Machine | ClientMachine) {
+	start(machine: ClientMachine) {
 		this.clear();
 		machine.onDestroy(() => this.clear());
 		machine.occupiedByLocalPlayer.subscribe((occupied) => {
@@ -245,7 +259,7 @@ export class RideModeControls extends DictionaryControl<RideModeControlsDefiniti
 
 		const inputType = InputController.inputType.get();
 
-		const inputLogics = machine.logicInputs.getChildren();
+		const inputLogics = machine.getLogicInputs();
 		const controls = [
 			...TouchModeButtonControl.fromBlocks(inputType, inputLogics),
 			//
@@ -317,13 +331,17 @@ export class RideModeScene extends Control<RideModeSceneDefinition> {
 	private readonly infoTemplate;
 	private readonly infoTextTemplate;
 
-	constructor(gui: RideModeSceneDefinition, playerData: PlayerDataStorage) {
+	constructor(
+		readonly mode: RideMode,
+		gui: RideModeSceneDefinition,
+		playerData: PlayerDataStorage,
+	) {
 		super(gui);
 
 		this.controls = new RideModeControls(this.gui.Controls, playerData);
 		this.add(this.controls);
 
-		this.actionbar = new ActionBarControl(gui.ActionBar, this.controls);
+		this.actionbar = new ActionBarControl(gui.ActionBar, mode, this.controls);
 		this.add(this.actionbar);
 		const updateActionBarVisibility = () => this.actionbar.setVisible(!LoadingController.isLoading.get());
 		this.event.subscribeObservable(LoadingController.isLoading, updateActionBarVisibility);
@@ -338,7 +356,7 @@ export class RideModeScene extends Control<RideModeSceneDefinition> {
 
 	private addMeters(machine: IReadonlyContainerComponent) {
 		this.info.clear();
-		this.actionbar.sitButton.setVisible(machine.getChildren().any((b) => b instanceof VehicleSeatBlockLogic));
+		this.actionbar.sitButton.setVisible(machine.getChildren().any((b) => b instanceof VehicleSeatBlock.logic.ctor));
 
 		const init = (
 			title: string,
@@ -375,17 +393,19 @@ export class RideModeScene extends Control<RideModeSceneDefinition> {
 		}
 
 		{
+			const rocketClass = RocketBlocks[0]!.logic!.ctor;
+
 			const rockets = machine
 				.getChildren()
-				.filter((c) => c instanceof RocketEngineLogic) as unknown as readonly RocketEngineLogic[];
+				.filter((c) => c instanceof rocketClass) as unknown as readonly RocketBlockLogic[];
 			if (rockets.size() !== 0) {
-				init("Torque", "%s %%", this.infoTemplate(), 0, 100, 1, (control) => {
+				init("Thrust", "%s %%", this.infoTemplate(), 0, 100, 1, (control) => {
 					let avgg = 0;
 					let amount = 0;
 					for (const rocket of rockets) {
 						if (!rocket.isEnabled()) continue;
 
-						avgg += rocket.getTorque();
+						avgg += rocket.getThrust();
 						amount++;
 					}
 
@@ -446,7 +466,7 @@ export class RideModeScene extends Control<RideModeSceneDefinition> {
 		}
 	}
 
-	start(machine: Machine | ClientMachine) {
+	start(machine: ClientMachine) {
 		if (InputController.inputType.get() === "Touch") {
 			this.controls.start(machine);
 		}

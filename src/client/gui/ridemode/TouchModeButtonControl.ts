@@ -1,7 +1,7 @@
 import { TextButtonControl } from "client/gui/controls/Button";
 import { Gui } from "client/gui/Gui";
 import { Signal } from "shared/event/Signal";
-import type { ConfigLogicValueBase } from "client/blocks/BlockLogicValues";
+import type { IClientBlockControl } from "client/blocks/ClientBlockControls";
 import type { TextButtonDefinition } from "client/gui/controls/Button";
 
 export type TouchModeButtonData = {
@@ -59,7 +59,7 @@ export class TouchModeButtonControl extends TextButtonControl {
 
 	static fromBlocks(
 		inputType: InputType,
-		logics: readonly ConfigLogicValueBase[],
+		logics: ReadonlySet<IClientBlockControl>,
 	): readonly TouchModeButtonControl[] {
 		if (inputType !== "Touch") return [];
 

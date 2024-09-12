@@ -2,8 +2,6 @@ import { Players } from "@rbxts/services";
 import { BlockManager } from "shared/building/BlockManager";
 import { BB } from "shared/fixes/BB";
 import { VectorUtils } from "shared/utils/VectorUtils";
-import type { BlockRegistry } from "shared/block/BlockRegistry";
-import type { BlockId } from "shared/BlockDataRegistry";
 import type { SharedPlot } from "shared/building/SharedPlot";
 
 /** Methods for for getting information about blocks in a building */
@@ -121,7 +119,7 @@ export namespace BuildingManager {
 		center: CFrame,
 		origBlock: MirroredBlock,
 		mode: MirrorMode,
-		blockRegistry: BlockRegistry,
+		blockList: BlockList,
 		filterSamePositions = false,
 	): readonly MirroredBlock[] {
 		const reflect = (block: MirroredBlock, mode: "x" | "y" | "z", mirrorCFrame: CFrame): MirroredBlock => {
@@ -136,10 +134,11 @@ export namespace BuildingManager {
 					return reflectedCFrame.Rotation;
 				}
 
-				const method = blockRegistry.blocks.get(origBlock.id)?.mirrorBehaviour ?? "normal";
+				const block = blockList.blocks[origBlock.id];
+				if (!block) return cframe;
+
+				const method = block.mirror.behaviour;
 				switch (method) {
-					case "none":
-						return cframe;
 					case "offset90":
 						return normalRotation(cframe.mul(CFrame.fromEulerAnglesYXZ(0, math.pi / 2, 0)));
 					case "offset180":
@@ -171,7 +170,7 @@ export namespace BuildingManager {
 			const pos = mirrorCFrame.PointToObjectSpace(block.pos.Position);
 
 			return {
-				id: (blockRegistry.blocks.get(block.id)?.mirrorReplacementId as BlockId | undefined) ?? block.id,
+				id: (blockList.blocks[block.id]?.mirror.replacementId as BlockId | undefined) ?? block.id,
 				pos: new CFrame(mirrorCFrame.ToWorldSpace(new CFrame(pos.X, pos.Y, -pos.Z)).Position).mul(
 					rotated.Rotation,
 				),

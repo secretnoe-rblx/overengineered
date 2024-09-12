@@ -1,5 +1,4 @@
 import { BlockManager } from "shared/building/BlockManager";
-import type { PlacedBlockData } from "shared/building/BlockManager";
 import type { BB } from "shared/fixes/BB";
 
 /** Reading a plot. */

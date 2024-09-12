@@ -38,7 +38,6 @@ import type { MaterialColorEditControlDefinition } from "client/gui/buildmode/Ma
 import type { MirrorEditorControlDefinition } from "client/gui/buildmode/MirrorEditorControl";
 import type { InputTooltips } from "client/gui/static/TooltipsControl";
 import type { BuildingMode } from "client/modes/build/BuildingMode";
-import type { BlockRegistry } from "shared/block/BlockRegistry";
 import type { SharedPlot } from "shared/building/SharedPlot";
 import type { ReadonlyObservableValue } from "shared/event/ObservableValue";
 
@@ -46,7 +45,9 @@ const allowedColor = Colors.blue;
 const forbiddenColor = Colors.red;
 const mouse = Players.LocalPlayer.GetMouse();
 
-const createBlockGhost = (block: RegistryBlock): Model => {
+type ModelOnlyBlock = Pick<Block, "model">;
+
+const createBlockGhost = (block: ModelOnlyBlock): Model => {
 	const model = block.model.Clone();
 	BlockGhoster.ghostModel(model);
 
@@ -58,13 +59,13 @@ const createBlockGhost = (block: RegistryBlock): Model => {
 };
 
 const getMouseTargetBlockPositionV2 = (
-	block: RegistryBlock,
+	block: ModelOnlyBlock,
 	rotation: CFrame,
 	gridEnabled: boolean,
 	step: number,
 	info?: [target: BasePart, hit: CFrame, surface: Enum.NormalId],
 ): Vector3 | undefined => {
-	const constrainPositionToGrid = (selectedBlock: RegistryBlock, normal: Vector3, pos: Vector3) => {
+	const constrainPositionToGrid = (selectedBlock: ModelOnlyBlock, normal: Vector3, pos: Vector3) => {
 		const from = (coord: number, size: number) => {
 			const offset = (size % 2) / 2;
 
@@ -96,14 +97,14 @@ const getMouseTargetBlockPositionV2 = (
 
 		return pos.sub(pos.sub(position).mul(VectorUtils.apply(normal, math.abs))).add(size.div(2).mul(normal));
 	};
-	const offsetBlockPivotToCenter = (selectedBlock: RegistryBlock, pos: Vector3) => {
+	const offsetBlockPivotToCenter = (selectedBlock: ModelOnlyBlock, pos: Vector3) => {
 		const pivot = selectedBlock.model.GetPivot().Position;
 		const center = AABB.fromModel(selectedBlock.model).getCenter();
 		const offset = rotation.mul(center.sub(pivot));
 
 		return pos.sub(offset);
 	};
-	const addBlockSize = (selectedBlock: RegistryBlock, normal: Vector3, pos: Vector3) => {
+	const addBlockSize = (selectedBlock: ModelOnlyBlock, normal: Vector3, pos: Vector3) => {
 		return pos.add(AABB.fromModel(selectedBlock.model, rotation).getSize().mul(normal).div(2));
 	};
 
@@ -157,7 +158,7 @@ namespace Scene {
 		readonly NameLabel: TextLabel;
 	};
 	class BlockInfo extends Control<BlockInfoDefinition> {
-		constructor(gui: BlockInfoDefinition, selectedBlock: ReadonlyObservableValue<RegistryBlock | undefined>) {
+		constructor(gui: BlockInfoDefinition, selectedBlock: ReadonlyObservableValue<Block | undefined>) {
 			super(gui);
 
 			const preview = this.add(new BlockPreviewControl(this.gui.ViewportFrame));
@@ -169,7 +170,7 @@ namespace Scene {
 
 					if (block) {
 						this.gui.NameLabel.Text = block.displayName;
-						this.gui.DescriptionLabel.Text = block.info;
+						this.gui.DescriptionLabel.Text = block.description;
 					} else {
 						this.gui.NameLabel.Text = "";
 						this.gui.DescriptionLabel.Text = "";
@@ -244,7 +245,7 @@ namespace Scene {
 	class TouchButtons extends Control<TouchButtonsDefinition> {
 		private readonly visibilityOverlay = new ObjectOverlayStorage({ visible: false });
 
-		constructor(gui: TouchButtonsDefinition, selectedBlock: ReadonlyObservableValue<RegistryBlock | undefined>) {
+		constructor(gui: TouchButtonsDefinition, selectedBlock: ReadonlyObservableValue<Block | undefined>) {
 			super(gui);
 
 			const visibilityState = TransformService.boolStateMachine(
@@ -630,7 +631,6 @@ namespace SinglePlaceController {
 					location: g.pos,
 					uuid: undefined,
 					config: undefined,
-					connections: undefined,
 				}),
 			);
 
@@ -724,8 +724,7 @@ namespace SinglePlaceController {
 	}
 
 	export function create(tool: BuildTool, di: DIContainer) {
-		di = di.beginScope();
-		di.registerSingleton(tool);
+		di = di.beginScope((di) => di.registerSingleton(tool));
 
 		return ClientComponentChild.createOnceBasedOnInputType({
 			Desktop: () => di.resolveForeignClass(Desktop),
@@ -845,7 +844,7 @@ namespace MultiPlaceController {
 
 		protected constructor(
 			protected readonly pressPosition: Vector3,
-			private readonly selectedBlock: RegistryBlock,
+			private readonly selectedBlock: Block,
 			private readonly selectedColor: Color3,
 			private readonly selectedMaterial: Enum.Material,
 			private readonly mirrorModes: MirrorMode,
@@ -1013,7 +1012,6 @@ namespace MultiPlaceController {
 						location: loc.pos,
 						uuid: undefined,
 						config: undefined,
-						connections: undefined,
 					}),
 				),
 			});
@@ -1026,7 +1024,7 @@ namespace MultiPlaceController {
 	class Desktop extends Base {
 		constructor(
 			pressPosition: Vector3,
-			selectedBlock: RegistryBlock,
+			selectedBlock: Block,
 			selectedColor: Color3,
 			selectedMaterial: Enum.Material,
 			mirrorModes: MirrorMode,
@@ -1061,7 +1059,7 @@ namespace MultiPlaceController {
 
 		constructor(
 			pressPosition: Vector3,
-			selectedBlock: RegistryBlock,
+			selectedBlock: Block,
 			selectedColor: Color3,
 			selectedMaterial: Enum.Material,
 			mirrorModes: MirrorMode,
@@ -1185,7 +1183,7 @@ namespace MultiPlaceController {
 export class BuildTool extends ToolBase {
 	readonly selectedMaterial = new ObservableValue<Enum.Material>(Enum.Material.Plastic);
 	readonly selectedColor = new ObservableValue<Color3>(Color3.fromRGB(255, 255, 255));
-	readonly selectedBlock = new ObservableValue<RegistryBlock | undefined>(undefined);
+	readonly selectedBlock = new ObservableValue<Block | undefined>(undefined);
 	readonly currentMode = new ComponentChild<IController>(this, true);
 	readonly blockRotation = new ObservableValue<CFrame>(CFrame.identity);
 	readonly controller;
@@ -1194,7 +1192,7 @@ export class BuildTool extends ToolBase {
 	constructor(
 		@inject readonly mode: BuildingMode,
 		@inject readonly di: DIContainer,
-		@inject readonly blockRegistry: BlockRegistry,
+		@inject readonly blockList: BlockList,
 	) {
 		super(mode);
 
@@ -1255,7 +1253,8 @@ export class BuildTool extends ToolBase {
 		const id = BlockManager.manager.id.get(model);
 		if (id === undefined) return; // not a block
 
-		const block = this.blockRegistry.blocks.get(id)!;
+		const block = this.blockList.blocks[id];
+		if (!block) return;
 
 		this.selectedBlock.set(block);
 

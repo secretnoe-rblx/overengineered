@@ -5,19 +5,17 @@ import { LEDDisplayServerLogic } from "server/blocks/logic/LEDDisplayServerLogic
 import { PistonBlockServerLogic } from "server/blocks/logic/PistonBlockServerLogic";
 import { ScreenServerLogic } from "server/blocks/logic/ScreenServerLogic";
 import { SevenSegmentDisplayServerLogic } from "server/blocks/logic/SevenSegmentDisplayServerLogic";
-import { BlockLogicRegistry } from "shared/block/BlockLogicRegistry";
 import { HostedService } from "shared/GameHost";
 import type { ServerBlockLogic } from "server/blocks/ServerBlockLogic";
-import type { KnownBlockLogic } from "shared/block/BlockLogicRegistry";
+import type { GenericBlockLogicCtor } from "shared/blockLogic/BlockLogic";
 
-type ShareableLogic = ExtractMembers<KnownBlockLogic, { readonly events: Record<string, unknown> }>;
 type ServerBlockLogicRegistry = {
-	readonly [k in keyof ShareableLogic]: new (...args: never) => ServerBlockLogic<ShareableLogic[k]>;
+	readonly [k in BlockId]?: new (...args: never) => ServerBlockLogic<GenericBlockLogicCtor>;
 };
 
 @injectable
 export class ServerBlockLogicController extends HostedService {
-	constructor(@inject container: DIContainer) {
+	constructor(@inject blockList: BlockList, @inject container: DIContainer) {
 		super();
 		container = container.beginScope();
 
@@ -36,7 +34,11 @@ export class ServerBlockLogicController extends HostedService {
 		const logics: object[] = [];
 		for (const [id, logic] of pairs(serverBlockLogicRegistry)) {
 			$log(`Initializing server logic for ${id}`);
-			logics.push(container.resolveForeignClass(logic, [BlockLogicRegistry.registry[id]] as never));
+
+			const bl = blockList.blocks[id]?.logic?.ctor;
+			if (!bl) continue;
+
+			logics.push(container.resolveForeignClass(logic, [bl] as never));
 		}
 	}
 }

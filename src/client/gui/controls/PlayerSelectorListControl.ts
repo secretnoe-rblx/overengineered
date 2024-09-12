@@ -77,10 +77,11 @@ export class PlayerSelectorColumnControl extends Control<PlayerSelectorColumnCon
 		for (const player of Players.GetPlayers()) {
 			this.addPlayer(player);
 		}
-		const pl: Player[] = [];
-		for (const player of pl) {
-			this.addPlayer(player);
-		}
+		// const pl: FakePlayer[] = [
+		// ];
+		// for (const player of pl) {
+		// 	this.addPlayer(player);
+		// }
 	}
 	private addPlayer(player: FakePlayer | Player) {
 		if (player === Players.LocalPlayer) return;

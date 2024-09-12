@@ -6,13 +6,12 @@ import {
 	S2C2SRemoteFunction,
 	S2CRemoteEvent,
 } from "shared/event/PERemoteEvent";
-import type { Categories } from "server/blockInit/BlocksInitializer";
 
 declare global {
 	type BuildResponse = Response<{ readonly model: BlockModel }>;
 	type MultiBuildResponse = Response<{ readonly models: readonly BlockModel[] }>;
 
-	type PlaceBlockRequest = MakePartial<BlockDataBase, "uuid" | "config" | "connections"> & {
+	type PlaceBlockRequest = MakePartial<BlockDataBase, "uuid" | "config"> & {
 		readonly location: CFrame;
 	};
 	type PlaceBlocksRequest = {
@@ -66,8 +65,7 @@ declare global {
 		readonly plot: PlotModel;
 		readonly configs: readonly {
 			readonly block: BlockModel;
-			readonly key: string;
-			readonly value: string;
+			readonly scfg: string;
 		}[];
 	};
 	type ConfigResetRequest = {
@@ -92,11 +90,6 @@ declare global {
 	type PlayerLoadAdminSlotRequest = PlayerLoadSlotRequest & {
 		readonly userid: number;
 		readonly imported: boolean;
-	};
-
-	type GameInfo = {
-		readonly blocks: readonly RegistryBlock[];
-		readonly categories: Categories;
 	};
 }
 
@@ -143,7 +136,6 @@ export const CustomRemotes = {
 	admin: {
 		setSwitch: new C2S2CRemoteFunction<{ readonly name: string; readonly value: boolean }>("adm_setsw"),
 	},
-	getGameInfo: new C2S2CRemoteFunction<undefined, Response<GameInfo>>("getgameinfo"),
 } as const;
 export const Remotes = Definitions.Create({
 	Admin: Definitions.Namespace({

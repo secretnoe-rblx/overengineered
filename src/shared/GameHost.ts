@@ -1,5 +1,5 @@
 import { ComponentEvents } from "shared/component/ComponentEvents";
-import { DIContainer } from "shared/DI";
+import { DIContainerClass } from "shared/DI";
 import { SlimSignal } from "shared/event/SlimSignal";
 import type { DISingletonClassRegistrationContext } from "shared/DI";
 
@@ -18,7 +18,7 @@ declare global {
 	}
 	type GameHostBuilder = HostBuilder;
 	interface GameHost {
-		readonly services: ReadonlyDIContainer;
+		readonly services: DIContainer;
 
 		parent<T extends IEnableableComponent & IDestroyableComponent>(child: T): T;
 		run(): void;
@@ -85,7 +85,7 @@ export type DIHostedSingletonClassRegistrationContext<T extends abstract new (..
 	};
 
 type HostedServiceCtor = abstract new (...args: never) => IHostedService;
-class DIContainerBuilder extends DIContainer implements GameHostBuilderDIContainer {
+class DIContainerBuilder extends DIContainerClass implements GameHostBuilderDIContainer {
 	readonly services: HostedServiceCtor[] = [];
 	readonly init: (() => void)[] = [];
 
@@ -131,9 +131,9 @@ class HostBuilder implements GameHostBuilder {
 	}
 }
 class Host extends HostedService implements GameHost {
-	readonly services: ReadonlyDIContainer;
+	readonly services: DIContainer;
 
-	constructor(services: ReadonlyDIContainer) {
+	constructor(services: DIContainer) {
 		super();
 		this.services = services;
 	}

@@ -20,7 +20,7 @@ export class ProgressBarControl extends Control<ProgressBarControlDefinition> {
 		gui: ProgressBarControlDefinition,
 		min: number,
 		max: number,
-		step: number,
+		step?: number,
 		parts?: ProgressBarControlDefinitionParts,
 	) {
 		super(gui);

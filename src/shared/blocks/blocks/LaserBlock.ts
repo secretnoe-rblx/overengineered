@@ -1,0 +1,129 @@
+import { Workspace } from "@rbxts/services";
+import { InstanceBlockLogic as InstanceBlockLogic } from "shared/blockLogic/BlockLogic";
+import { BlockCreation } from "shared/blocks/BlockCreation";
+import { RobloxUnit } from "shared/RobloxUnit";
+import type { BlockLogicFullBothDefinitions, InstanceBlockLogicArgs } from "shared/blockLogic/BlockLogic";
+import type { BlockBuilder } from "shared/blocks/Block";
+
+const definition = {
+	input: {
+		alwaysEnabled: {
+			displayName: "Laser always enabled",
+			types: {
+				bool: {
+					config: false as boolean,
+				},
+			},
+		},
+		maxDistance: {
+			displayName: "Max distance",
+			types: {
+				number: {
+					config: 200 as number,
+					clamp: {
+						showAsSlider: true,
+						min: 0.1,
+						max: 600,
+					},
+				},
+			},
+		},
+		rayTransparency: {
+			displayName: "Transparency",
+			types: {
+				number: {
+					config: 0 as number,
+					clamp: {
+						showAsSlider: true,
+						min: 0,
+						max: 1,
+					},
+				},
+			},
+		},
+		rayColor: {
+			displayName: "Ray color",
+			types: {
+				color: {
+					config: Color3.fromRGB(255, 0, 0),
+				},
+			},
+			connectorHidden: true,
+		},
+		dotColor: {
+			displayName: "Dot color",
+			types: {
+				color: {
+					config: Color3.fromRGB(255, 255, 0),
+				},
+			},
+			connectorHidden: true,
+		},
+	},
+	output: {
+		distance: {
+			displayName: "Distance",
+			types: ["number"],
+		},
+	},
+} satisfies BlockLogicFullBothDefinitions;
+
+export type { Logic as LaserBlockLogic };
+class Logic extends InstanceBlockLogic<typeof definition> {
+	constructor(block: InstanceBlockLogicArgs) {
+		super(definition, block);
+
+		const dotSize = 0.3;
+
+		const ray = this.instance.FindFirstChild("Ray") as BasePart;
+		ray.Anchored = true;
+
+		const dot = this.instance.FindFirstChild("Dot") as BasePart;
+		dot.Anchored = true;
+		dot.Size = new Vector3(dotSize, dotSize, dotSize);
+
+		const raycastParams = new RaycastParams();
+		raycastParams.FilterDescendantsInstances = [this.instance];
+		raycastParams.FilterType = Enum.RaycastFilterType.Exclude;
+
+		this.onk(["rayColor"], ({ rayColor }) => (ray.Color = rayColor));
+		this.onk(["dotColor"], ({ dotColor }) => (dot.Color = dotColor));
+
+		this.onAlwaysInputs(({ maxDistance, alwaysEnabled, rayTransparency }) => {
+			const raycastOrigin = this.instance.GetPivot().Position;
+			const raycastDirection = this.instance.GetPivot().UpVector.mul(RobloxUnit.Meters_To_Studs(maxDistance));
+
+			const raycastResult = Workspace.Raycast(raycastOrigin, raycastDirection, raycastParams);
+			const distance = raycastResult?.Distance ?? maxDistance;
+			const endpos = raycastOrigin.add(this.instance.GetPivot().UpVector.mul(distance));
+
+			this.output.distance.set(
+				"number",
+				raycastResult?.Distance !== undefined ? RobloxUnit.Studs_To_Meters(raycastResult?.Distance) : -1,
+			);
+
+			if (raycastResult?.Distance !== undefined || alwaysEnabled) {
+				ray.Transparency = rayTransparency;
+				ray.Size = new Vector3(distance, 0.1, 0.1);
+				ray.CFrame = new CFrame(raycastOrigin, endpos)
+					.mul(new CFrame(0, 0, -distance / 2))
+					.mul(CFrame.Angles(0, math.rad(90), 0));
+
+				dot.Transparency = rayTransparency;
+				dot.CFrame = CFrame.lookAlong(endpos, raycastDirection);
+			} else {
+				ray.Transparency = 1;
+				dot.Transparency = 1;
+			}
+		});
+	}
+}
+
+export const LaserBlock = {
+	...BlockCreation.defaults,
+	id: "laser",
+	displayName: "Laser pointer",
+	description: "shoot beem boom target!",
+
+	logic: { definition, ctor: Logic },
+} as const satisfies BlockBuilder;

@@ -5,6 +5,11 @@ export namespace Colors {
 	export const accent = Color3.fromRGB(125, 128, 218); // #7D80DA
 	export const accentLight = Color3.fromRGB(220, 220, 255);
 
+	export const newGui = {
+		staticBackground: Color3.fromRGB(1, 4, 9),
+		blue: Color3.fromRGB(18, 68, 144),
+	} as const;
+
 	export const white = Color3.fromRGB(255, 255, 255);
 	export const black = Color3.fromRGB(0, 0, 0);
 
@@ -18,5 +23,16 @@ export namespace Colors {
 
 	export function toInt(color: Color3) {
 		return math.floor(color.B * 255) + (math.floor(color.G * 255) << 8) + (math.floor(color.R * 255) << 16);
+	}
+
+	/**
+	 * @param lightening Percentage to lighten the color by, 0-1
+	 */
+	function lighten(color: Color3, lightening: number): Color3 {
+		const [h, s, v] = color.ToHSV();
+		return Color3.fromHSV(h, s, v + (1 - v) * lightening);
+	}
+	export function lightenPressed(color: Color3): Color3 {
+		return lighten(color, 0.5);
 	}
 }

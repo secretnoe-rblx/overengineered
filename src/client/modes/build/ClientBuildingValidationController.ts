@@ -4,7 +4,6 @@ import { BuildingManager } from "shared/building/BuildingManager";
 import { HostedService } from "shared/GameHost";
 import { errorResponse, successResponse } from "shared/types/network/Responses";
 import { PlayerUtils } from "shared/utils/PlayerUtils";
-import type { BlockRegistry } from "shared/block/BlockRegistry";
 
 @injectable
 export class ClientBuildingValidationController extends HostedService {
@@ -12,7 +11,7 @@ export class ClientBuildingValidationController extends HostedService {
 		host.services.registerService(this);
 	}
 
-	constructor(@inject blockRegistry: BlockRegistry) {
+	constructor(@inject blockList: BlockList) {
 		super();
 
 		this.event.eventHandler.register(
@@ -25,9 +24,13 @@ export class ClientBuildingValidationController extends HostedService {
 					return errorResponse("No blocks to place");
 				}
 
+				if (!blocks.all((b) => b.id in blockList.blocks)) {
+					return errorResponse("Unknown block id");
+				}
+
 				if (
 					!blocks.all((block) =>
-						BuildingManager.blockCanBePlacedAt(plot, blockRegistry.blocks.get(block.id)!, block.location),
+						BuildingManager.blockCanBePlacedAt(plot, blockList.blocks[block.id]!, block.location),
 					)
 				) {
 					return errorResponse("Can't be placed here");

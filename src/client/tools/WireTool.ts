@@ -11,8 +11,7 @@ import { LogControl } from "client/gui/static/LogControl";
 import { ActionController } from "client/modes/build/ActionController";
 import { ClientBuilding } from "client/modes/build/ClientBuilding";
 import { ToolBase } from "client/tools/ToolBase";
-import { BlockWireManager } from "shared/block/BlockWireManager";
-import { blockConfigRegistry } from "shared/block/config/BlockConfigRegistry";
+import { BlockWireManager } from "shared/blockLogic/BlockWireManager";
 import { Component } from "shared/component/Component";
 import { ComponentChild } from "shared/component/ComponentChild";
 import { ComponentChildren } from "shared/component/ComponentChildren";
@@ -21,25 +20,10 @@ import { ObservableValue } from "shared/event/ObservableValue";
 import { ReplicatedAssets } from "shared/ReplicatedAssets";
 import type { InputTooltips } from "client/gui/static/TooltipsControl";
 import type { BuildingMode } from "client/modes/build/BuildingMode";
-import type { BlockRegistry } from "shared/block/BlockRegistry";
-import type { BlockConfigRegistryNonGeneric } from "shared/block/config/BlockConfigRegistry";
-import type { PlacedBlockData } from "shared/building/BlockManager";
 import type { SharedPlot } from "shared/building/SharedPlot";
 import type { ReadonlyObservableValue } from "shared/event/ObservableValue";
 
-type TypeGroup = {
-	readonly color: Color3;
-};
-const typeGroups: { readonly [k in BlockWireManager.DataType]: TypeGroup } = {
-	bool: { color: Colors.yellow },
-	vector3: { color: Colors.pink },
-	number: { color: Colors.green },
-	string: { color: Colors.purple },
-	color: { color: Colors.red },
-	byte: { color: Color3.fromRGB(97, 138, 255) },
-	bytearray: { color: Colors.black },
-	never: { color: Colors.black },
-};
+const typeGroups = BlockWireManager.typeGroups;
 
 const markerParent = Element.create("ScreenGui", {
 	Name: "WireToolMarkers",
@@ -681,7 +665,7 @@ export class WireTool extends ToolBase {
 
 	constructor(
 		@inject mode: BuildingMode,
-		@inject private readonly blockRegistry: BlockRegistry,
+		@inject private readonly blockList: BlockList,
 	) {
 		super(mode);
 
@@ -720,13 +704,6 @@ export class WireTool extends ToolBase {
 			ih.onKeyDown("F", () => Visual.hideConnectedMarkers(this.markers.getAll()));
 			ih.onKeyUp("F", () => Visual.showConnectedMarkers(this.markers.getAll()));
 		});
-
-		this.event.subscribe(
-			ClientBuilding.logicDisconnectOperation.executed,
-			({ plot, inputBlock, inputConnection }) => {
-				//
-			},
-		);
 	}
 
 	stopDragging() {
@@ -740,14 +717,15 @@ export class WireTool extends ToolBase {
 		this.markers.clear();
 
 		const components = new Map<BlockWireManager.Markers.Marker, Markers.Marker>();
-		for (const [, markers] of BlockWireManager.fromPlot(plot)) {
+		for (const [, markers] of BlockWireManager.fromPlot(plot, this.blockList)) {
 			let [ii, oi, ai] = [0, 0, 0];
 			const size = markers.size();
 
 			for (const marker of markers) {
-				const configDef = (blockConfigRegistry as BlockConfigRegistryNonGeneric)[
-					(marker.data.blockData as PlacedBlockData).id
-				];
+				const block = this.blockList.blocks[(marker.data.blockData as PlacedBlockData).id];
+				if (!block) continue;
+
+				const configDef = block.logic?.definition;
 				if (!configDef) continue;
 
 				if ((configDef.input[marker.data.id] ?? configDef.output[marker.data.id]).connectorHidden) {
@@ -755,14 +733,28 @@ export class WireTool extends ToolBase {
 				}
 
 				const blockid = (marker.data.blockData as PlacedBlockData).id;
-				const positions = this.blockRegistry.blocks.get(blockid)?.markerPositions;
+				const positions = this.blockList.blocks[blockid]?.markerPositions;
 				let markerpos = positions?.[marker.data.id];
 				if (!markerpos) {
 					if (marker instanceof BlockWireManager.Markers.Input) {
-						markerpos = positions?.[`@i${ii}` as BlockConnectionName];
+						if (configDef.inputOrder) {
+							markerpos =
+								positions?.[`@i${configDef.inputOrder.indexOf(marker.data.id)}` as BlockConnectionName];
+						} else {
+							markerpos = positions?.[`@i${ii}` as BlockConnectionName];
+						}
+
 						if (markerpos) ii++;
 					} else {
-						markerpos = positions?.[`@o${oi}` as BlockConnectionName];
+						if (configDef.outputOrder) {
+							markerpos =
+								positions?.[
+									`@o${configDef.outputOrder.indexOf(marker.data.id)}` as BlockConnectionName
+								];
+						} else {
+							markerpos = positions?.[`@o${oi}` as BlockConnectionName];
+						}
+
 						if (markerpos) oi++;
 					}
 				}

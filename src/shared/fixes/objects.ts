@@ -1,13 +1,18 @@
 export namespace Objects {
+	export function firstKey<T>(object: readonly T[]): number | undefined;
+	export function firstKey<T>(object: ReadonlyMap<T, defined>): T | undefined;
+	export function firstKey<T>(object: ReadonlySet<T>): T | undefined;
+	export function firstKey<T extends object>(object: T): keyof T | undefined;
 	export function firstKey<T extends object>(object: T): keyof T | undefined {
-		for (const [key] of asMap(object)) {
-			return key;
-		}
+		return next(object)[0];
 	}
+
+	export function firstValue<T extends readonly T[]>(object: T): T | undefined;
+	export function firstValue<T extends ReadonlyMap<defined, T>>(object: T): T | undefined;
+	export function firstValue<T extends ReadonlySet<T>>(object: T): boolean | undefined;
+	export function firstValue<T extends object>(object: T): T[keyof T] | undefined;
 	export function firstValue<T extends object>(object: T): T[keyof T] | undefined {
-		for (const [, value] of asMap(object)) {
-			return value;
-		}
+		return next(object)[1];
 	}
 
 	export function keys<T extends object>(object: T): (keyof T)[] {
@@ -20,6 +25,33 @@ export namespace Objects {
 
 	export function size(object: object): number {
 		return asMap(object).size();
+	}
+
+	/** Shorthand for `asObject(asMap(obj).mapToMap((k, v) => $tuple(k, func(v))))` */
+	export function mapValues<const TObj extends object, const V>(
+		obj: TObj,
+		func: (key: keyof TObj, value: TObj[keyof TObj] & defined) => V,
+	): object & { [k in keyof TObj]: V } {
+		return asObject(asMap(obj).mapToMap((k, v) => $tuple(k, func(k, v))));
+	}
+
+	export function map<const TObj extends readonly unknown[], const K extends string | number | symbol, const V>(
+		obj: TObj,
+		keyfunc: (key: keyof TObj, value: TObj extends readonly (infer E)[] ? E : never) => K,
+		valuefunc: (key: keyof TObj, value: TObj extends readonly (infer E)[] ? E : never) => V,
+	): object & { [k in K]: V };
+	export function map<const TObj extends object, const K extends string | number | symbol, const V>(
+		obj: TObj,
+		keyfunc: (key: keyof TObj, value: TObj[keyof TObj] & defined) => K,
+		valuefunc: (key: keyof TObj, value: TObj[keyof TObj] & defined) => V,
+	): object & { [k in K]: V };
+	/** Shorthand for `asObject(asMap(obj).mapToMap((k, v) => $tuple(kfunc(k), vfunc(v))))` with the key and value functions divided to simplify writing the type */
+	export function map<const TObj extends object, const K extends string | number | symbol, const V>(
+		obj: TObj,
+		keyfunc: (key: keyof TObj, value: TObj[keyof TObj] & defined) => K,
+		valuefunc: (key: keyof TObj, value: TObj[keyof TObj] & defined) => V,
+	): object & { [k in K]: V } {
+		return asObject(asMap(obj).mapToMap((k, v) => $tuple(keyfunc(k, v), valuefunc(k, v))));
 	}
 
 	export function entriesArray<T extends object>(object: T): (readonly [keyof T, T[keyof T] & defined])[] {
@@ -60,5 +92,40 @@ export namespace Objects {
 	/** Wrap all the provided functions in promises, immediately run them all and wait for completion */
 	export function multiAwait(funcs: (() => void)[]): void {
 		awaitThrow(Promise.all(funcs.map(Promise.try)));
+	}
+
+	export function deepEquals(left: unknown, right: unknown): boolean {
+		if (typeOf(left) !== typeOf(right)) {
+			return false;
+		}
+
+		if (typeIs(left, "Instance") && typeIs(right, "Instance")) {
+			return left === right;
+		}
+
+		if (typeIs(left, "table")) {
+			assert(typeIs(right, "table"));
+			return objectDeepEquals(left, right);
+		}
+
+		return left === right;
+	}
+	function objectDeepEquals(left: object, right: object): boolean {
+		for (const [kl] of pairs(left)) {
+			if (!(kl in right)) {
+				return false;
+			}
+
+			if (!deepEquals(left[kl], right[kl])) {
+				return false;
+			}
+		}
+		for (const [kr] of pairs(right)) {
+			if (!(kr in left)) {
+				return false;
+			}
+		}
+
+		return true;
 	}
 }

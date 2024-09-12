@@ -1,5 +1,7 @@
 import { HttpService, Players, Workspace } from "@rbxts/services";
 import { LoadingController } from "client/controller/LoadingController";
+import { Colors } from "client/gui/Colors";
+import { LogControl } from "client/gui/static/LogControl";
 import { Config } from "shared/config/Config";
 import { PlayerConfigDefinition } from "shared/config/PlayerConfig";
 import { GameDefinitions } from "shared/data/GameDefinitions";
@@ -116,6 +118,9 @@ export class PlayerDataStorage {
 			const response = CustomRemotes.slots[isImported ? "loadImported" : "load"].send({ index });
 			if (response.success && !response.isEmpty) {
 				this.loadedSlot.set(index);
+			} else if (!response.success) {
+				LogControl.instance.addLine("Error while loading a slot", Colors.red);
+				$warn(response.message);
 			}
 
 			return response;

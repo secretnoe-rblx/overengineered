@@ -273,12 +273,7 @@ class GamepadMove extends MoveBase {
 }
 
 export namespace BlockMover {
-	export function create(
-		mode: BuildingMode,
-		plot: SharedPlot,
-		blocks: readonly BlockModel[],
-		di: ReadonlyDIContainer,
-	) {
+	export function create(mode: BuildingMode, plot: SharedPlot, blocks: readonly BlockModel[], di: DIContainer) {
 		return ClientComponentChild.createOnceBasedOnInputType<MoveBase>({
 			Desktop: () => di.resolveForeignClass(DesktopMove, [mode, plot, blocks]),
 			Touch: () => di.resolveForeignClass(TouchMove, [mode, plot, blocks]),

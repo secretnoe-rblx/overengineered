@@ -1,298 +1,546 @@
-import { BlockLogicValue } from "shared/block/BlockLogicValue";
-import { ByteBlockLogicValue } from "shared/block/ByteBlockLogicValue";
-import { NumberBlockLogicValue } from "shared/block/NumberBlockLogicValue";
+import {
+	BlockBackedInputLogicValueStorage,
+	isCustomBlockLogicValueResult,
+	LogicValueStorages,
+	UnsetBlockLogicValueStorage,
+	LogicValueStorageContainer,
+} from "shared/blockLogic/BlockLogicValueStorage";
+import { BlockLogicValueResults } from "shared/blockLogic/BlockLogicValueStorage";
 import { Component } from "shared/component/Component";
-import { InstanceComponent } from "shared/component/InstanceComponent";
+import { ComponentInstance } from "shared/component/ComponentInstance";
 import { ArgsSignal } from "shared/event/Signal";
 import { Objects } from "shared/fixes/objects";
 import { RemoteEvents } from "shared/RemoteEvents";
 import { PartUtils } from "shared/utils/PartUtils";
-import type { IBlockLogicValue } from "shared/block/BlockLogicValue";
-import type { PlacedBlockConfig2 } from "shared/blockLogic/BlockConfig";
-import type { ReadonlySubscribeObservableValue } from "shared/event/ObservableValue";
+import type { PlacedBlockConfig } from "shared/blockLogic/BlockConfig";
+import type { BlockLogicTypes } from "shared/blockLogic/BlockLogicTypes";
+import type { ReadonlyLogicValueStorage, TypedLogicValue } from "shared/blockLogic/BlockLogicValueStorage";
 
-type Keys = BlockConfigTypes2.TypeKeys;
-type Types = BlockConfigTypes2.Types;
+type Primitives = BlockLogicTypes.Primitives;
+type PrimitiveKeys = keyof Primitives;
 
-type ConfigPart<TKey extends Keys> = BlockConfigTypes2.Types[TKey]["config"];
-export type BlockConfigTypedPart<T extends Keys> = {
-	readonly type: T;
-	readonly config: ConfigPart<T>;
+export type BlockLogicWithConfigDefinitionTypes<TKeys extends PrimitiveKeys> = {
+	readonly [k in TKeys]: OmitOverUnion<Primitives[k], "default">;
 };
 
-export type BlockConfigType = {
+type BlockLogicInputDef = {
 	readonly displayName: string;
+	readonly types: Partial<BlockLogicWithConfigDefinitionTypes<PrimitiveKeys>>;
 	readonly group?: string;
-	readonly types: { readonly [k in keyof BlockConfigTypes2.Types]?: BlockConfigTypes2.Types[k] };
-	readonly defaultType: keyof BlockConfigTypes2.Types;
 	readonly connectorHidden?: boolean;
 	readonly configHidden?: boolean;
 };
 
-export type BlockConfigDefinition = {
-	readonly [k in string]: BlockConfigType;
+export type BlockLogicNoConfigDefinitionTypes<TKeys extends PrimitiveKeys> = {
+	readonly [k in TKeys]: OmitOverUnion<Primitives[k], "default" | "config">;
 };
-export type BlockConfigBothDefinitions = {
-	readonly input: BlockConfigDefinition;
-	readonly output: BlockConfigDefinition;
+type BlockLogicOutputDef = {
+	readonly displayName: string;
+	readonly tooltip?: string;
+	readonly unit?: string;
+	readonly types: readonly PrimitiveKeys[];
+	readonly group?: string;
+	readonly connectorHidden?: boolean;
 };
 
-export type PlacedBlockData2<T extends BlockModel = BlockModel> = ReplaceWith<
-	BlockDataBase,
-	{ readonly config: PlacedBlockConfig2; readonly instance: T }
->;
+export type BlockLogicInputDefs = { readonly [k in string]: BlockLogicInputDef };
+export type BlockLogicOutputDefs = { readonly [k in string]: BlockLogicOutputDef };
 
-class BlockLogicBase<T extends BlockModel = BlockModel> extends InstanceComponent<T> {
-	readonly block: PlacedBlockData2<T>;
+export type BlockLogicBothDefinitions = {
+	/** Visual order for the inputs */
+	readonly inputOrder?: readonly string[];
 
-	constructor(block: PlacedBlockData2) {
-		super(block.instance as T);
-		this.block = block as typeof this.block;
+	/** Visual order for the outputs (wire markers) */
+	readonly outputOrder?: readonly string[];
+
+	readonly input: BlockLogicInputDefs;
+	readonly output: BlockLogicOutputDefs;
+};
+
+export type BlockLogicFullInputDef = {
+	readonly displayName: string;
+	readonly tooltip?: string;
+	readonly unit?: string;
+	readonly types: Partial<BlockLogicWithConfigDefinitionTypes<PrimitiveKeys>>;
+	readonly group?: string;
+	readonly connectorHidden?: boolean;
+	readonly configHidden?: boolean;
+};
+export type BlockLogicFullOutputDef = BlockLogicOutputDef;
+export type BlockLogicFullBothDefinitions = {
+	/** Visual order for the inputs */
+	readonly inputOrder?: readonly string[];
+
+	/** Visual order for the outputs (wire markers) */
+	readonly outputOrder?: readonly string[];
+
+	readonly input: { readonly [k in string]: BlockLogicFullInputDef };
+	readonly output: { readonly [k in string]: BlockLogicFullOutputDef };
+};
+
+//
+
+export type GenericBlockLogicCtor<TDef extends BlockLogicBothDefinitions = BlockLogicFullBothDefinitions> = new (
+	block: InstanceBlockLogicArgs,
+	...args: any[]
+) => GenericBlockLogic<TDef>;
+
+export type GenericBlockLogic<TDef extends BlockLogicBothDefinitions = BlockLogicFullBothDefinitions> =
+	BlockLogic<TDef>;
+
+//
+
+type AllInputKeysToArgsObject<TDef extends BlockLogicInputDefs, TKeys extends keyof TDef = keyof TDef> = {
+	readonly [k in TKeys]: (Primitives[keyof TDef[k]["types"] & PrimitiveKeys] & defined)["default"];
+};
+type AllInputKeysToTypesObject<TDef extends BlockLogicInputDefs, TKeys extends keyof TDef = keyof TDef> = {
+	readonly [k in string & TKeys as `${k}Type`]: keyof TDef[k]["types"] & PrimitiveKeys;
+};
+type AllInputKeysToChangedObject<TDef extends BlockLogicInputDefs, TKeys extends keyof TDef = keyof TDef> = {
+	readonly [k in string & TKeys as `${k}Changed`]: boolean;
+};
+export type AllInputKeysToObject<
+	TDef extends BlockLogicInputDefs,
+	TKeys extends keyof TDef = keyof TDef,
+> = AllInputKeysToArgsObject<TDef, TKeys> &
+	AllInputKeysToTypesObject<TDef, TKeys> &
+	AllInputKeysToChangedObject<TDef, TKeys>;
+
+export type AllOutputKeysToObject<TDef extends BlockLogicOutputDefs> = {
+	readonly [k in string & keyof TDef]: Omit<TypedLogicValue<TDef[k]["types"][number]>, "changedSinceLastTick">;
+};
+
+type OutputBlockLogicValues<TDef extends BlockLogicOutputDefs> = {
+	readonly [k in keyof TDef]: LogicValueStorageContainer<PrimitiveKeys & TDef[k]["types"][number]>;
+};
+type ReadonlyBlockLogicValues<TDef extends BlockLogicInputDefs> = {
+	readonly [k in keyof TDef]: ReadonlyLogicValueStorage<PrimitiveKeys & keyof (TDef[k]["types"] & defined)>;
+};
+
+const inputValuesToFullObject = <TDef extends BlockLogicBothDefinitions, K extends keyof TDef["input"] & string>(
+	ctx: BlockLogicTickContext,
+	inputs: {
+		readonly [k in K]: ReadonlyLogicValueStorage<
+			keyof BlockLogicTypes.Primitives & keyof (TDef["input"][k]["types"] & defined)
+		>;
+	},
+	keys: readonly K[],
+	inputCache: { [k in string]: unknown },
+	returnUndefinedIfUnchanged: boolean,
+): AllInputKeysToObject<TDef["input"], K> | BlockLogicValueResults | undefined => {
+	if (keys.size() === 0) {
+		return {} as never;
 	}
 
+	const input: { [k in string | number | symbol]: unknown } = {};
+	let anyChanged = false;
+
+	for (const k of keys) {
+		const value = inputs[k].get(ctx);
+		if (isCustomBlockLogicValueResult(value)) {
+			return value;
+		}
+
+		const changed = inputCache[k] !== value.value || inputCache[`${tostring(k)}Type`] !== value.type;
+		anyChanged ||= changed;
+
+		input[k] = value.value;
+		input[`${tostring(k)}Type`] = value.type;
+		input[`${tostring(k)}Changed`] = changed;
+
+		inputCache[k] = value.value;
+		inputCache[`${tostring(k)}Type`] = value.type;
+	}
+
+	if (returnUndefinedIfUnchanged && !anyChanged) {
+		return undefined;
+	}
+	return input as AllInputKeysToObject<TDef["input"], K>;
+};
+
+export type BlockLogicTickContext = {
+	/** Current tick number */
+	readonly tick: number;
+
+	/** Time between the previous tick and the current one, seconds */
+	readonly dt: number;
+};
+export type BlockLogicArgs = {
+	readonly instance?: BlockModel;
+};
+
+export abstract class BlockLogic<TDef extends BlockLogicBothDefinitions> extends Component {
+	private readonly _input: Writable<ReadonlyBlockLogicValues<TDef["input"]>>;
+	readonly input: ReadonlyBlockLogicValues<TDef["input"]>;
+
+	private readonly _output: OutputBlockLogicValues<TDef["output"]>;
+	protected readonly output: OutputBlockLogicValues<TDef["output"]>;
+
+	private readonly ticked = new ArgsSignal<[ctx: BlockLogicTickContext]>();
+	private readonly recalculated = new ArgsSignal<[ctx: BlockLogicTickContext]>();
+
+	readonly instance?: BlockModel;
+
+	constructor(
+		readonly definition: TDef,
+		args: BlockLogicArgs,
+	) {
+		super();
+
+		this.instance = args.instance;
+		if (args.instance) {
+			ComponentInstance.init(this, args.instance);
+		}
+
+		this._input = Objects.mapValues(definition.input, () => UnsetBlockLogicValueStorage) as typeof this._input;
+		this.input = this._input;
+
+		this._output = Objects.mapValues(
+			definition.output,
+			(k, v) => new LogicValueStorageContainer<PrimitiveKeys>(v.types),
+		) as typeof this._output;
+		this.output = this._output;
+	}
+
+	protected initializeInputCache<K extends keyof TDef["input"]>(key: K) {
+		type ttypes = keyof TDef["input"][K]["types"] & PrimitiveKeys;
+		type tvalue = Primitives[ttypes]["default"];
+
+		let value: unknown;
+		let valueType: unknown;
+
+		this.onk([key], (ctx) => {
+			value = ctx[key];
+			valueType = ctx[`${tostring(key)}Type` as never];
+		});
+
+		return {
+			get: () => value as tvalue,
+			tryGet: () => value as tvalue | undefined,
+			getType: () => valueType as ttypes,
+			tryGetType: () => valueType as ttypes | undefined,
+		};
+	}
+
+	protected subscribeOnDestroyed(instance: Instance, func: () => void) {
+		const update = () => {
+			if (instance.IsA("BasePart") && !instance.CanTouch) return;
+
+			func();
+		};
+
+		instance.GetPropertyChangedSignal("Parent").Once(update);
+		instance.Destroying.Once(update);
+	}
 	protected onDescendantDestroyed(func: () => void) {
+		if (!this.instance) return;
+
 		const subscribe = (instance: Instance) => {
-			const update = () => {
-				if (instance.IsA("BasePart") && !instance.CanTouch) {
-					return;
-				}
-
-				func();
-			};
-
-			instance.GetPropertyChangedSignal("Parent").Once(update);
-			instance.Destroying.Once(update);
+			this.subscribeOnDestroyed(instance, func);
 		};
 
 		PartUtils.applyToAllDescendantsOfType("BasePart", this.instance, (part) => subscribe(part));
 		PartUtils.applyToAllDescendantsOfType("Constraint", this.instance, (part) => subscribe(part));
 		PartUtils.applyToAllDescendantsOfType("WeldConstraint", this.instance, (part) => subscribe(part));
 	}
+
+	initializeInputs(config: PlacedBlockConfig, allBlocks: ReadonlyMap<BlockUuid, GenericBlockLogic>) {
+		// explicit copying is needed
+		for (const key of asMap(this.input).keys()) {
+			if (!typeIs(key, "string")) {
+				throw `Invalid key type ${typeOf(key)}`;
+			}
+			if (!(key in config)) {
+				throw `Invalid block config provided; Key ${tostring(key)} was not found in config keys ${asMap(config).keys().join()}`;
+			}
+
+			const cfg = config[key];
+			if (cfg.type === "wire") {
+				const outputBlock = allBlocks.get(cfg.config.blockUuid);
+				if (!outputBlock) {
+					throw `Invalid connection to a nonexistent block ${cfg.config.blockUuid}`;
+				}
+
+				const output = outputBlock.output[cfg.config.connectionName];
+				if (!output) {
+					throw `Invalid connection to a nonexistent block ${cfg.config.blockUuid} output ${cfg.config.connectionName}`;
+				}
+
+				this.replaceInput(
+					key,
+					new BlockBackedInputLogicValueStorage(
+						this.definition.input[key],
+						outputBlock,
+						cfg.config.connectionName,
+					),
+				);
+				continue;
+			}
+
+			if (cfg.type === "unset") {
+				//
+
+				continue;
+			}
+
+			const def = this.definition.input[key].types[cfg.type];
+			if (!def) continue;
+
+			const storageCtor = LogicValueStorages[cfg.type];
+			const storage = new storageCtor(cfg.config as never, def as never);
+			this.replaceInput(key, storage);
+		}
+	}
+
+	replaceInput(
+		key: keyof TDef["input"],
+		value: ReadonlyLogicValueStorage<PrimitiveKeys & keyof TDef["input"][keyof TDef["input"]]["types"]>,
+	) {
+		if (!(key in this._input)) {
+			throw `Key ${tostring(key)} is not in input definition (${asMap(this.definition.input).keys().join()})`;
+		}
+
+		this._input[key] = value;
+	}
+
+	private calculatingRightNow = false;
+	private isGarbage = false;
+	getOutputValue(
+		ctx: BlockLogicTickContext,
+		key: keyof typeof this.output,
+	): TypedLogicValue<TDef["output"][keyof TDef["output"]]["types"][number]> | BlockLogicValueResults {
+		if (this.calculatingRightNow) {
+			const value = this._output[key].get(ctx);
+			if (!isCustomBlockLogicValueResult(value)) {
+				return value;
+			}
+
+			return BlockLogicValueResults.availableLater;
+		}
+
+		this.calculatingRightNow = true;
+		if (this.isEnabled()) {
+			this.recalculate(ctx);
+		}
+
+		if (this.isGarbage) {
+			return BlockLogicValueResults.garbage;
+		}
+
+		const value = this._output[key].get(ctx);
+
+		this.calculatingRightNow = false;
+		return value;
+	}
+
+	protected onTicc(func: (ctx: BlockLogicTickContext) => void): SignalConnection {
+		return this.ticked.Connect(func);
+	}
+	/** Runs the provided function when another block requests a value from this one, but no more than once per tick. */
+	private onRecalc(func: (ctx: BlockLogicTickContext) => void): SignalConnection {
+		return this.recalculated.Connect(func);
+	}
+
+	private prevTick?: number;
+	/** @sealed */
+	ticc(ctx: BlockLogicTickContext) {
+		if (!this.isEnabled()) return;
+
+		// execute only once per tick
+		if (this.prevTick === ctx.tick) {
+			return;
+		}
+
+		this.prevTick = ctx.tick;
+		this.ticked.Fire(ctx);
+	}
+
+	private prevRecalcTick?: number;
+	/** @sealed */
+	recalculate(ctx: BlockLogicTickContext) {
+		if (!this.isEnabled()) return;
+
+		this.ticc(ctx);
+
+		// execute only once per tick
+		if (this.prevRecalcTick === ctx.tick) {
+			return;
+		}
+
+		this.prevRecalcTick = ctx.tick;
+		this.recalculated.Fire(ctx);
+	}
+
+	//
+
+	private readonly inputCache: { [k in string]: unknown } = {};
+	private executeFuncWithValues<TKeys extends keyof TDef["input"]>(
+		ctx: BlockLogicTickContext,
+		keys: readonly TKeys[],
+		func: (inputs: AllInputKeysToObject<TDef["input"], TKeys>, ctx: BlockLogicTickContext) => void,
+		skipIfUnchanged: boolean,
+	) {
+		const inputs = inputValuesToFullObject(
+			ctx,
+			this.input,
+			keys as (TKeys & string)[],
+			this.inputCache,
+			skipIfUnchanged,
+		);
+		if (!inputs || isCustomBlockLogicValueResult(inputs)) {
+			return;
+		}
+
+		func(inputs as never, ctx);
+	}
+
+	/** Runs the provided function when any of the input values change, but only if all of them are available. */
+	protected on(
+		func: (inputs: AllInputKeysToObject<TDef["input"]>, ctx: BlockLogicTickContext) => void,
+	): SignalConnection {
+		return this.onTicc((ctx) => this.executeFuncWithValues(ctx, Objects.keys(this.input), func, true));
+	}
+	/** Runs the provided function when any of the provided input values change, but only if all of them are available. */
+	protected onk<const TKeys extends keyof TDef["input"]>(
+		keys: readonly TKeys[],
+		func: (inputs: AllInputKeysToObject<TDef["input"], TKeys>, ctx: BlockLogicTickContext) => void,
+	): SignalConnection {
+		return this.onTicc((ctx) => this.executeFuncWithValues(ctx, keys, func, true));
+	}
+
+	private onStartWithInputs<const TKeys extends keyof TDef["input"]>(
+		keys: readonly TKeys[],
+		func: (inputs: AllInputKeysToObject<TDef["input"]>, ctx: BlockLogicTickContext) => void,
+	): void {
+		const prevFunc = func;
+		func = (...args: Parameters<typeof prevFunc>) => {
+			prevFunc(...args);
+			connection.Disconnect();
+		};
+
+		const connection = this.onTicc((ctx) => this.executeFuncWithValues(ctx, keys, func, false));
+	}
+	/** Runs the provided function first time all of the input values are available. */
+	protected onFirstInputs(
+		func: (inputs: AllInputKeysToObject<TDef["input"]>, ctx: BlockLogicTickContext) => void,
+	): void {
+		this.onStartWithInputs(Objects.keys(this.input), func);
+	}
+	/** Runs the provided function first time all of the provided input values are available. */
+	protected onkFirstInputs<const TKeys extends keyof TDef["input"]>(
+		keys: readonly TKeys[],
+		func: (inputs: AllInputKeysToObject<TDef["input"], TKeys>, ctx: BlockLogicTickContext) => void,
+	): void {
+		this.onStartWithInputs(keys, func);
+	}
+
+	/** Runs the provided function when another block requests a value from this one, but no more than once per tick, if all of the input values are available and only when any input value changes. */
+	protected onRecalcInputs(
+		func: (inputs: AllInputKeysToObject<TDef["input"]>, ctx: BlockLogicTickContext) => void,
+	): SignalConnection {
+		const empty = {} as AllInputKeysToObject<TDef["input"], keyof TDef["input"]>;
+		if (!asMap(this.input).any()) {
+			return this.onRecalc((ctx) => func(empty, ctx));
+		}
+
+		const keys = Objects.keys(this.input);
+		return this.onRecalc((ctx) => this.executeFuncWithValues(ctx, keys, func, true));
+	}
+
+	/** Runs the provided function on every tick, but only if all of the input values are available. */
+	protected onAlwaysInputs(
+		func: (inputs: AllInputKeysToObject<TDef["input"]>, ctx: BlockLogicTickContext) => void,
+	): void {
+		const keys = Objects.keys(this.input);
+		this.onTicc((ctx) => this.executeFuncWithValues(ctx, keys, func, false));
+	}
+
+	getDebugInfo(ctx: BlockLogicTickContext): readonly string[] {
+		const result: string[] = [];
+
+		for (const [k, input] of pairs(this.input)) {
+			const value = input.get(ctx);
+
+			if (isCustomBlockLogicValueResult(value)) {
+				result.push(`[${tostring(k)}] ${value.sub("$BLOCKLOGIC_".size() + 1)}`);
+			} else {
+				result.push(`[${tostring(k)}] ${value.value}`);
+			}
+		}
+
+		for (const [k, output] of pairs(this.output)) {
+			const value = output.tryJustGet();
+
+			if (value !== undefined) {
+				result.push(`[${tostring(k)}] ${value.value}`);
+			}
+		}
+
+		return result;
+	}
+
+	disableAndBurn(): void {
+		this.isGarbage = true;
+		this.disable();
+
+		if (this.instance?.PrimaryPart) {
+			RemoteEvents.Burn.send([this.instance?.PrimaryPart]);
+		}
+	}
 }
 
-const createObservable = <TDef extends BlockConfigTypes2.Types[keyof BlockConfigTypes2.Types]>(
-	definition: TDef,
-): IBlockLogicValue<TDef["default"]> => {
-	return new BlockLogicValue(definition.default);
-};
-const BlockConfigValueRegistry: BlockConfigValueRegistry = {
-	unset: createObservable,
-	bool: createObservable,
-	vector3: createObservable,
-	key: createObservable,
-	keybool: createObservable,
-	number: createObservable,
-	string: createObservable,
-	color: createObservable,
-	byte: (definition) => new ByteBlockLogicValue(definition.default),
-	clampedNumber: (definition) =>
-		new NumberBlockLogicValue(definition.default, definition.min, definition.max, definition.step),
-	thrust: () => new NumberBlockLogicValue(0, 0, 100, 0.001),
-	motorRotationSpeed: (def) => new NumberBlockLogicValue(0, -def.maxSpeed, def.maxSpeed, 0.001),
-	servoMotorAngle: (def) => new NumberBlockLogicValue(def.default, def.minAngle, def.maxAngle, 0.001),
-	controllableNumber: (definition) =>
-		new NumberBlockLogicValue(definition.config.value, definition.min, definition.max, definition.step),
-	bytearray: createObservable,
-};
-type BlockConfigValueRegistry = {
-	readonly [k in keyof BlockConfigTypes2.Types]: (
-		definition: BlockConfigTypes2.Types[k],
-	) => IBlockLogicValue<BlockConfigTypes2.Types[k]["default"]>;
-};
+export type InstanceBlockLogicArgs = ReplaceWith<BlockLogicArgs, { readonly instance: BlockModel }>;
+/** Block logic with a required block model instance */
+export abstract class InstanceBlockLogic<
+	TDef extends BlockLogicFullBothDefinitions,
+	TBlock extends BlockModel = BlockModel,
+> extends BlockLogic<TDef> {
+	readonly instance: TBlock;
 
-type ReadonlyBlockLogicMultiValue<TTypes extends keyof BlockConfigTypes2.Types> = {
-	readonly changed: ReadonlyArgsSignal<
-		[
-			value: { readonly valueType: TTypes; readonly value: BlockConfigTypes2.Types[TTypes]["default"] },
-			prev: { readonly valueType: TTypes; readonly value: BlockConfigTypes2.Types[TTypes]["default"] },
-		]
-	>;
+	constructor(definition: TDef, args: InstanceBlockLogicArgs) {
+		super(definition, args);
+		this.instance = args.instance as TBlock;
+	}
+}
 
-	get(): { readonly valueType: TTypes; readonly value: BlockConfigTypes2.Types[TTypes]["default"] };
-};
-type WriteonlyBlockLogicMultiValue<TTypes extends keyof BlockConfigTypes2.Types> = {
-	set<TType extends TTypes>(vtype: TType, value: BlockConfigTypes2.Types[TType]["default"]): void;
-};
-type IBlockLogicMultiValue<TTypes extends keyof BlockConfigTypes2.Types> = ReadonlyBlockLogicMultiValue<TTypes> &
-	WriteonlyBlockLogicMultiValue<TTypes>;
+/** Block logic that calculates its output only based on its logical inputs (ADD, MUX, converters, etc.) */
+export abstract class CalculatableBlockLogic<TDef extends BlockLogicBothDefinitions> extends BlockLogic<TDef> {
+	private currentCustomResult?: BlockLogicValueResults;
 
-type BlockLogicMultiValueTypes<TTypes extends keyof BlockConfigTypes2.Types> = {
-	readonly [k in TTypes]: IBlockLogicValue<BlockConfigTypes2.Types[k]["default"]>;
-};
-class BlockLogicMultiValue<TTypes extends keyof BlockConfigTypes2.Types>
-	extends Component
-	implements
-		ReadonlySubscribeObservableValue<{
-			readonly valueType: TTypes;
-			readonly value: BlockConfigTypes2.Types[TTypes]["default"];
-		}>,
-		IBlockLogicMultiValue<TTypes>
-{
-	private readonly _changed = new ArgsSignal<
-		[
-			value: { readonly valueType: TTypes; readonly value: BlockConfigTypes2.Types[TTypes]["default"] },
-			prev: { readonly valueType: TTypes; readonly value: BlockConfigTypes2.Types[TTypes]["default"] },
-		]
-	>();
-	readonly changed = this._changed.asReadonly();
+	constructor(definition: TDef, args: BlockLogicArgs) {
+		super(definition, args);
 
-	private currentType: TTypes;
+		this.onRecalcInputs((inputs, ctx) => {
+			const results = this.calculate(inputs, ctx);
+			if (isCustomBlockLogicValueResult(results)) {
+				this.currentCustomResult = results;
 
-	constructor(
-		defaultType: TTypes,
-		private readonly logics: BlockLogicMultiValueTypes<TTypes>,
-	) {
-		super();
-		this.currentType = defaultType;
+				if (results === BlockLogicValueResults.garbage) {
+					this.disableAndBurn();
+				}
 
-		let prev:
-			| {
-					readonly valueType: TTypes;
-					readonly value: BlockConfigTypes2.Types[TTypes]["default"];
-			  }
-			| undefined;
-		this.onEnable(() => {
-			for (const [k, v] of pairs(logics)) {
-				this.eventHandler.register(
-					v.subscribe((value) => {
-						const v = { valueType: k, value };
-						this._changed.Fire(v, prev ?? v);
+				return;
+			}
 
-						prev = v;
-					}),
-				);
+			this.currentCustomResult = undefined;
+			for (const [k, v] of pairs(results)) {
+				this.output[k].set(v.type, v.value);
 			}
 		});
 	}
 
-	set<TType extends TTypes>(vtype: TType, value: BlockConfigTypes2.Types[TType]["default"]): void {
-		if (!this.isEnabled()) return;
+	override getOutputValue(
+		ctx: BlockLogicTickContext,
+		key: keyof TDef["output"],
+	): TypedLogicValue<TDef["output"][keyof TDef["output"]]["types"][number]> | BlockLogicValueResults {
+		// super() call should happen before checking this.currentCustomResult for nil since it ticks
+		const result = super.getOutputValue(ctx, key);
 
-		this.currentType = vtype;
-		this.logics[vtype].set(value);
-	}
-	get(): { readonly valueType: TTypes; readonly value: BlockConfigTypes2.Types[TTypes]["default"] } {
-		return { valueType: this.currentType, value: this.logics[this.currentType].get() };
-	}
-}
-
-type GenericBlockConfigBothDefinitions = {
-	readonly input: { [k in string]: BlockConfigType };
-	readonly output: { [k in string]: BlockConfigType };
-};
-
-export type GenericBlockLogicCtor<
-	TDef extends BlockConfigBothDefinitions = GenericBlockConfigBothDefinitions,
-	TBlock extends BlockModel = BlockModel,
-> = new (block: PlacedBlockData2, ...args: any[]) => GenericBlockLogic<TDef, TBlock>;
-
-export type GenericBlockLogic<
-	TDef extends BlockConfigBothDefinitions = GenericBlockConfigBothDefinitions,
-	TBlock extends BlockModel = BlockModel,
-> = BlockLogic<TDef, TBlock>;
-
-export abstract class BlockLogic<
-	TDef extends BlockConfigBothDefinitions,
-	TBlock extends BlockModel = BlockModel,
-> extends BlockLogicBase<TBlock> {
-	readonly input: {
-		readonly [k in keyof TDef["input"]]: IBlockLogicMultiValue<
-			keyof TDef["input"][k]["types"] & keyof BlockConfigTypes2.Types
-		>;
-	};
-	readonly output: {
-		readonly [k in keyof TDef["output"]]: IBlockLogicMultiValue<
-			keyof TDef["output"][k]["types"] & keyof BlockConfigTypes2.Types
-		>;
-	};
-
-	constructor(
-		block: PlacedBlockData2,
-		readonly configDefinition: TDef,
-	) {
-		super(block as never);
-
-		for (const [k, v] of pairs(configDefinition.input)) {
-			if (!(v.defaultType in v.types)) {
-				throw `Invalid default input type ${v.defaultType} on the block ${block.id} key ${k} (allowed: ${Objects.keys(v.types).join()})`;
-			}
-		}
-		for (const [k, v] of pairs(configDefinition.output)) {
-			if (!(v.defaultType in v.types)) {
-				throw `Invalid default output type ${v.defaultType} on the block ${block.id} key ${k} (allowed: ${Objects.keys(v.types).join()})`;
-			}
-		}
-
-		const create = (defs: BlockConfigDefinition) => {
-			const inputs: { [k in string]: IBlockLogicMultiValue<keyof BlockConfigTypes2.Types> } = {};
-			for (const [k, v] of pairs(defs)) {
-				const values: {
-					-readonly [k in keyof BlockConfigTypes2.Types]?: IBlockLogicValue<
-						BlockConfigTypes2.Types[keyof BlockConfigTypes2.Types]["default"]
-					>;
-				} = {};
-				for (const [ctype, cval] of pairs(v.types)) {
-					values[ctype] = BlockConfigValueRegistry[ctype](cval as never);
-				}
-
-				const multivalue = new BlockLogicMultiValue(
-					v.defaultType,
-					values as BlockLogicMultiValueTypes<keyof BlockConfigTypes2.Types>,
-				);
-
-				this.parent(multivalue);
-				inputs[k] = multivalue;
-			}
-
-			return inputs;
-		};
-		this.input = create(configDefinition.input) as typeof this.input;
-		this.output = create(configDefinition.output) as typeof this.output;
-
-		if (this.diesFromNanOrInf()) {
-			const subInvalidValue = (values: {
-				readonly [k in string]: IBlockLogicMultiValue<keyof BlockConfigTypes2.Types>;
-			}) => {
-				for (const [, input] of pairs(values)) {
-					input.changed.Connect(({ value }) => {
-						// if infinity or nan
-						if (value === math.huge || value === -math.huge || value !== value) {
-							RemoteEvents.Burn.send([this.instance.PrimaryPart!]);
-							this.disable();
-						}
-					});
-				}
-			};
-
-			subInvalidValue(this.input);
-			subInvalidValue(this.output);
-		}
+		return this.currentCustomResult ?? result;
 	}
 
-	/** @returns Does this block light itself on fire upon receiving a `NaN`, `+INF` or `-INF` on any of the inputs/outputs */
-	protected diesFromNanOrInf(): boolean {
-		return true;
-	}
-
-	tick(tick: number): void {
-		if (!this.isEnabled()) return;
-
-		for (const [, value] of pairs(this.input)) {
-			(value as unknown as BlockLogicValue<defined>).tick(tick);
-		}
-		for (const [, value] of pairs(this.output)) {
-			(value as unknown as BlockLogicValue<defined>).tick(tick);
-		}
-	}
-
-	disable(): void {
-		for (const [, value] of pairs(this.input)) {
-			//	value.destroy();
-		}
-		for (const [, value] of pairs(this.output)) {
-			//	value.destroy();
-		}
-
-		super.disable();
-	}
+	protected abstract calculate(
+		inputs: AllInputKeysToObject<TDef["input"]>,
+		ctx: BlockLogicTickContext,
+	): AllOutputKeysToObject<TDef["output"]> | BlockLogicValueResults;
 }
