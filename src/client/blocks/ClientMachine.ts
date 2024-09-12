@@ -70,7 +70,7 @@ export class ClientMachine extends SharedMachine {
 				const ctor = ClientBlockControls[v.type as keyof typeof ClientBlockControls];
 				if (!ctor) continue;
 
-				const control = ctor(input, cfg.controlConfig, def.control);
+				const control = ctor(input, cfg.controlConfig, def as MakeRequired<typeof def, "control">);
 				this.parent(control);
 
 				this.logicInputs.add(control);

@@ -528,8 +528,8 @@ namespace Controls {
 						templates.MultiKeys(),
 						keys,
 						definition.config,
-						definition.control.min,
-						definition.control.max,
+						definition.clamp?.min,
+						definition.clamp?.max,
 					),
 				);
 				wKeys.typeColor.set(Colors.red);
@@ -554,11 +554,13 @@ namespace Controls {
 								{
 									type: "number",
 									config: definition.control.config.mode.smoothSpeed,
-									clamp: {
-										showAsSlider: true,
-										min: 0,
-										max: definition.control.max,
-									},
+									clamp: !definition.clamp
+										? undefined
+										: {
+												showAsSlider: true,
+												min: 0,
+												max: definition.clamp.max,
+											},
 								},
 								map(controlConfig, (c) => c.mode.smoothSpeed),
 								args,

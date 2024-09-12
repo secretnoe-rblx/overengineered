@@ -1,19 +1,41 @@
 import { Control } from "client/gui/Control";
-import { NumberObservableValue } from "shared/event/NumberObservableValue";
 import { ObservableValue } from "shared/event/ObservableValue";
 import { Signal } from "shared/event/Signal";
+import { MathUtils } from "shared/fixes/MathUtils";
+
+/** ObservableValue that stores a number that can be clamped */
+class NumberObservableValue<T extends number | undefined = number> extends ObservableValue<T> {
+	constructor(
+		value: T,
+		readonly min: number | undefined,
+		readonly max: number | undefined,
+		readonly step?: number,
+	) {
+		super(value);
+	}
+
+	protected processValue(value: T) {
+		if (value === undefined) return value;
+		return MathUtils.clamp(value, this.min, this.max, this.step) as T;
+	}
+
+	/** @deprecated Use {@link MathUtils.clamp} instead */
+	static clamp(value: number, min: number, max: number, step: number) {
+		return MathUtils.clamp(value, min, max, step);
+	}
+}
 
 type ToNum<TAllowNull extends boolean> = TAllowNull extends false ? number : number | undefined;
 export type NumberTextBoxControlDefinition = TextBox;
 /** Control that represents a number via a text input */
 export class NumberTextBoxControl<TAllowNull extends boolean = false> extends Control<NumberTextBoxControlDefinition> {
 	readonly submitted = new Signal<(value: number) => void>();
-	readonly value;
+	readonly value: ObservableValue<ToNum<TAllowNull>>;
 	private textChanged = false;
 
 	constructor(gui: NumberTextBoxControlDefinition);
 	constructor(gui: NumberTextBoxControlDefinition, value: ObservableValue<number>);
-	constructor(gui: NumberTextBoxControlDefinition, min: number, max: number, step?: number);
+	constructor(gui: NumberTextBoxControlDefinition, min: number | undefined, max: number | undefined, step?: number);
 	constructor(
 		gui: NumberTextBoxControlDefinition,
 		min?: number | ObservableValue<number>,
@@ -24,10 +46,8 @@ export class NumberTextBoxControl<TAllowNull extends boolean = false> extends Co
 
 		if (min && typeIs(min, "table")) {
 			this.value = min;
-		} else if (min !== undefined && max !== undefined) {
-			this.value = new NumberObservableValue<ToNum<TAllowNull>>(0, min, max, step);
 		} else {
-			this.value = new ObservableValue<ToNum<TAllowNull>>(0);
+			this.value = new NumberObservableValue<ToNum<TAllowNull>>(0, min, max, step);
 		}
 
 		this.event.subscribeObservable(

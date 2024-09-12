@@ -42,10 +42,6 @@ const Filters: { readonly [k in PrimitiveKeys]?: Filter<k> } = {
 				const clamp = definition.clamp;
 				value = MathUtils.clamp(value, clamp.min, clamp.max, clamp.step);
 			}
-			if (definition.control) {
-				const clamp = definition.control;
-				value = MathUtils.clamp(value, clamp.min, clamp.max, clamp.step);
-			}
 
 			return value;
 		},

@@ -49,13 +49,6 @@ export namespace BlockLogicTypes {
 
 	export type NumberControlKeys = readonly NumberControlKey[];
 	export type NumberControl = {
-		/** Global minimum for the resulting value & the configuration UI */
-		readonly min: number;
-		/** Global maximum for the resulting value & the configuration UI */
-		readonly max: number;
-		/** Global step for the resulting value & the configuration UI */
-		readonly step?: number;
-
 		readonly config: {
 			/** Starting value */
 			readonly startValue: number;

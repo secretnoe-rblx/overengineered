@@ -28,9 +28,12 @@ const servoDefinition = {
 			types: {
 				number: {
 					config: 0,
-					control: {
+					clamp: {
+						showAsSlider: false,
 						min: -180,
 						max: 180,
+					},
+					control: {
 						config: {
 							enabled: true,
 							startValue: 0,
@@ -91,8 +94,8 @@ const sidewaysServoDefinition = {
 				...servoDefinition.input.angle.types,
 				number: {
 					...servoDefinition.input.angle.types.number,
-					control: {
-						...servoDefinition.input.angle.types.number.control,
+					clamp: {
+						...servoDefinition.input.angle.types.number.clamp,
 						min: -90,
 						max: 90,
 					},

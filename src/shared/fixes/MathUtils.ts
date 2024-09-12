@@ -9,7 +9,11 @@ export namespace MathUtils {
 		const halfstep = step / 2;
 		return value - ((value + halfstep) % step) + halfstep;
 	}
-	export function clamp(value: number, min: number, max: number, step: number | undefined) {
-		return math.clamp(round(value, step), min, max);
+	export function clamp(value: number, min: number | undefined, max: number | undefined, step?: number) {
+		value = round(value, step);
+		if (min) value = math.max(value, min);
+		if (max) value = math.min(value, max);
+
+		return value;
 	}
 }

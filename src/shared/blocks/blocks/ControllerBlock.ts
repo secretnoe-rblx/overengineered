@@ -10,9 +10,12 @@ const definition = {
 			types: {
 				number: {
 					config: 0,
-					control: {
+					clamp: {
+						showAsSlider: false,
 						min: -1000,
 						max: 1000,
+					},
+					control: {
 						config: {
 							enabled: true,
 							startValue: 0,

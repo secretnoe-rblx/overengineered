@@ -57,9 +57,12 @@ namespace ClientBlockControlsNamespace {
 		value: ILogicValueStorage<"number">,
 		config: BlockLogicTypes.NumberControl["config"],
 		definition: Omit<BlockLogicTypes.NumberControl, "config">,
+		configDefinition: Omit<BlockLogicTypes.Number, "config">,
 	): KeyPressingDefinitionsController<KeyDefinitions<string>> {
 		let currentValue = config.startValue;
 		const actualSet = (newValue: number) => value.set("number", (currentValue = newValue));
+
+		const clamp = configDefinition.clamp;
 
 		let smoothMovingTask: thread | undefined;
 		let smoothAmount = config.startValue;
@@ -76,12 +79,12 @@ namespace ClientBlockControlsNamespace {
 				while (true as boolean) {
 					const dt = task.wait();
 
-					smoothAmount = math.clamp(smoothAmount + step * dt, definition.min, definition.max);
+					smoothAmount = MathUtils.clamp(smoothAmount + step * dt, clamp?.min, clamp?.max);
 
 					if (direction < 0) smoothAmount = math.max(smoothAmount, target);
 					else smoothAmount = math.min(smoothAmount, target);
 
-					actualSet(MathUtils.round(smoothAmount, definition.step));
+					actualSet(MathUtils.round(smoothAmount, clamp?.step));
 
 					// stop when reached the target
 					if (direction > 0 && smoothAmount >= target) return;
@@ -104,10 +107,10 @@ namespace ClientBlockControlsNamespace {
 					key: v.key,
 					conflicts: allKeys.except([v.key]),
 					keyDown: () => {
-						amount = math.clamp(v.value, definition.min, definition.max);
-						set(MathUtils.round(amount, definition.step));
+						amount = MathUtils.clamp(v.value, clamp?.min, clamp?.max);
+						set(MathUtils.round(amount, clamp?.step));
 					},
-					keyUp: () => set(MathUtils.round((amount = config.startValue), definition.step)),
+					keyUp: () => set(MathUtils.round((amount = config.startValue), clamp?.step)),
 				}),
 			);
 
@@ -126,7 +129,7 @@ namespace ClientBlockControlsNamespace {
 					conflicts: allKeys.except([v.key]),
 					keyDown: () => {
 						amount = amount === v.value ? config.startValue : v.value;
-						set(MathUtils.round(amount, definition.step));
+						set(MathUtils.round(amount, clamp?.step));
 					},
 				}),
 			);
@@ -153,10 +156,11 @@ namespace ClientBlockControlsNamespace {
 			value: ILogicValueStorage<"number">,
 			config: BlockLogicTypes.NumberControl["config"],
 			definition: Omit<BlockLogicTypes.NumberControl, "config">,
+			configDefinition: Omit<BlockLogicTypes.Number, "config">,
 		) {
 			super();
 
-			const controller = this.parent(createNumberController(value, config, definition));
+			const controller = this.parent(createNumberController(value, config, definition, configDefinition));
 			this.touchButtonDatas = config.keys.map(
 				(k): TouchModeButtonData => ({
 					name: k.key,
@@ -181,15 +185,16 @@ export type IClientBlockControl = IComponent & {
 type ClientBlockControlStorage<TType extends ControlKeys> = (
 	value: ILogicValueStorage<TType>,
 	config: Controls[TType]["config"],
-	definition: OmitOverUnion<Controls[TType], "config">,
+	definition: MakeRequired<OmitOverUnion<BlockLogicTypes.Primitives[TType], "config">, "control">,
 ) => IClientBlockControl;
 type GenericClientBlockControlStorage = (
 	value: ILogicValueStorage<keyof BlockLogicTypes.Primitives>,
 	config: Controls[ControlKeys]["config"],
-	definition: OmitOverUnion<Controls[ControlKeys], "config">,
+	definition: MakeRequired<OmitOverUnion<BlockLogicTypes.Primitives[ControlKeys], "config">, "control">,
 ) => IClientBlockControl;
 
 export const ClientBlockControls: { readonly [k in ControlKeys]?: GenericClientBlockControlStorage } = {
-	bool: (value, config, definition) => new ClientBlockControlsNamespace.Bool(value, config, definition),
-	number: (value, config, definition) => new ClientBlockControlsNamespace.Number(value, config, definition),
+	bool: (value, config, definition) => new ClientBlockControlsNamespace.Bool(value, config, definition.control),
+	number: (value, config, definition) =>
+		new ClientBlockControlsNamespace.Number(value, config, definition.control, definition),
 } satisfies { readonly [k in ControlKeys]?: ClientBlockControlStorage<k> } as never;

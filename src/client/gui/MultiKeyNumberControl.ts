@@ -40,7 +40,13 @@ class MultiKeyPartControl extends Control<MultiKeyPartControlDefinition> {
 
 	readonly value;
 
-	constructor(gui: MultiKeyPartControlDefinition, key: string | KeyCode, num: number, min: number, max: number) {
+	constructor(
+		gui: MultiKeyPartControlDefinition,
+		key: string | KeyCode,
+		num: number,
+		min: number | undefined,
+		max: number | undefined,
+	) {
 		super(gui);
 
 		const value = new SubmittableValue(new ObservableValue<MultiKeyPart>({ key, value: num }));
@@ -77,8 +83,8 @@ export class MultiKeyNumberControl extends Control<MultiKeyNumberControlDefiniti
 		gui: MultiKeyNumberControlDefinition,
 		config: readonly MultiKeyPart[],
 		defaultValue: number,
-		numberMin: number,
-		numberMax: number,
+		numberMin: number | undefined,
+		numberMax: number | undefined,
 	) {
 		super(gui);
 
