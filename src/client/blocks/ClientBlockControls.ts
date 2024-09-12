@@ -54,7 +54,7 @@ namespace ClientBlockControlsNamespace {
 	}
 
 	export class Number extends ClientComponent implements IClientBlockControl {
-		private readonly touchButtonDatas: readonly TouchModeButtonData[];
+		private readonly controller;
 
 		constructor(
 			value: ILogicValueStorage<"number">,
@@ -63,19 +63,17 @@ namespace ClientBlockControlsNamespace {
 		) {
 			super();
 
-			this.touchButtonDatas = [];
-
 			if (config.mode.type === "smooth") {
-				this.parent(new NumberSmooth(value, config as never, definition));
+				this.controller = this.parent(new NumberSmooth(value, config as never, definition));
 			} else if (config.mode.type === "hold") {
-				this.parent(new NumberHold(value, config as never, definition));
+				this.controller = this.parent(new NumberHold(value, config as never, definition));
 			} else if (config.mode.type === "switch") {
-				this.parent(new NumberSwitch(value, config as never, definition));
+				this.controller = this.parent(new NumberSwitch(value, config as never, definition));
 			}
 		}
 
 		getTouchButtonDatas(): readonly TouchModeButtonData[] {
-			return this.touchButtonDatas;
+			return this.controller?.getTouchButtonDatas() ?? [];
 		}
 	}
 
