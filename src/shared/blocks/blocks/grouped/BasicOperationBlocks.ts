@@ -310,7 +310,7 @@ const maths = {
 	round: {
 		displayName: "Round",
 		description: "Returns rounded input value",
-		modelSource: autoModel("GenericLogicBlockPrefab", "ABS", categories.math),
+		modelSource: autoModel("GenericLogicBlockPrefab", "ROUND", categories.math),
 		logic: logic(defs.num1_num, ({ value }) => ({
 			result: { type: "number", value: math.round(value) },
 		})),
