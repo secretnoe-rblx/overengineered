@@ -61,6 +61,8 @@ LoadingController.hide();
 CustomRemotes.player.loaded.send();
 $log("Client loaded.");
 
+//host.services.resolveForeignClass(CenterOfMassController).enable();
+
 //testing
 if (RunService.IsStudio() && Players.LocalPlayer.Name === "samlovebutter" && (false as boolean)) {
 	while (true as boolean) {

@@ -2,13 +2,15 @@ import { ReplicatedStorage, Workspace } from "@rbxts/services";
 import { ClientComponent } from "client/component/ClientComponent";
 import { Colors } from "client/gui/Colors";
 import { Gui } from "client/gui/Gui";
+import { BuildingManager } from "shared/building/BuildingManager";
 import { SharedPlot } from "shared/building/SharedPlot";
 
+@injectable
 export class CenterOfMassController extends ClientComponent {
 	private readonly viewportFrame;
 	private renderedBalls: Model[] = [];
 
-	constructor(plot: SharedPlot) {
+	constructor(@inject plot: SharedPlot) {
 		super();
 
 		this.viewportFrame = new Instance("ViewportFrame");
@@ -25,16 +27,18 @@ export class CenterOfMassController extends ClientComponent {
 			const blocks = plot.getBlocks();
 			const pos = this.calculateCentersOfMass(blocks);
 
+			print(pos.size(), this.renderedBalls.size());
+
 			if (pos.size() > this.renderedBalls.size()) {
 				for (let i = 0; i < pos.size() - this.renderedBalls.size(); i++)
 					this.renderedBalls.push(ReplicatedStorage.Assets.CenterOfMass.Clone());
 			}
 
 			if (pos.size() < this.renderedBalls.size()) {
-				const size = this.renderedBalls.size();
-				for (let i = size; i > size - pos.size(); i--) {
-					this.renderedBalls[i].Destroy();
-					this.renderedBalls.remove(i);
+				while (this.renderedBalls.size() > pos.size()) {
+					const index = this.renderedBalls.size() - 1;
+					this.renderedBalls[index].Destroy();
+					this.renderedBalls.remove(index);
 				}
 			}
 
@@ -45,28 +49,31 @@ export class CenterOfMassController extends ClientComponent {
 			}
 		};
 
+		//no way to trigger block placement by save file loading
 		this.event.subscribe(SharedPlot.anyChanged, update);
 		this.event.onEnable(update);
 		this.onDisable(() => {
-			this.renderedBalls.forEach((element) => {
-				element.Destroy();
-			});
+			for (const b of this.renderedBalls) b.Destroy();
 			this.renderedBalls.clear();
 		});
 	}
 
 	private calculateCentersOfMass(blocks: readonly BlockModel[]) {
-		const results: Vector3[] = [];
-		const ass: Set<BasePart> = new Set<BasePart>();
+		const partsInUse: Set<BlockModel> = new Set();
+		const ass: Vector3[] = [];
 		for (const block of blocks) {
-			for (const part of block.GetChildren().filter((c) => c.IsA("BasePart")) as unknown as readonly BasePart[]) {
-				const root = part.AssemblyRootPart;
-				if (!root) continue;
-				if (ass.has(root)) continue;
-				results.push(root.AssemblyCenterOfMass);
-				ass.add(root);
+			if (partsInUse.has(block)) continue;
+
+			let result = new Vector3(0, 0, 0);
+			const assembly = BuildingManager.getAssemblyBlocks(block);
+			for (const b of assembly) {
+				partsInUse.add(b);
+				if (!b.PrimaryPart) continue;
+				result = result.add(b.PrimaryPart.AssemblyCenterOfMass);
 			}
+			const length = assembly.size();
+			ass.push(result.div(new Vector3(length, length, length)));
 		}
-		return results;
+		return ass;
 	}
 }
