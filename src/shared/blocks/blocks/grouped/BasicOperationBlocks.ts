@@ -1302,7 +1302,7 @@ const test: {} = !RunService.IsStudio()
 												startValue: 0,
 												mode: {
 													stopOnRelease: true,
-													resetOnRelease: false,
+													resetOnStop: false,
 													smooth: true,
 													smoothSpeed: 1,
 												},

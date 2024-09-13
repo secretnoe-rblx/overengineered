@@ -102,7 +102,7 @@ namespace ClientBlockControlsNamespace {
 			set(value);
 		};
 		const keyReset = () => {
-			if (config.mode.resetOnRelease) {
+			if (config.mode.resetOnStop) {
 				set(config.startValue);
 			} else {
 				smoothCancel();

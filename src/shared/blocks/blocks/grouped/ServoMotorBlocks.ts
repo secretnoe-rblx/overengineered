@@ -39,7 +39,7 @@ const servoDefinition = {
 							startValue: 0,
 							mode: {
 								stopOnRelease: true,
-								resetOnRelease: true,
+								resetOnStop: true,
 								smooth: false,
 								smoothSpeed: 20,
 							},

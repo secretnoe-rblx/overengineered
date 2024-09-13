@@ -40,7 +40,7 @@ export namespace BlockLogicTypes {
 	export interface NumberControlModes {
 		readonly smooth: boolean;
 		readonly smoothSpeed: number;
-		readonly resetOnRelease: boolean;
+		readonly resetOnStop: boolean;
 		readonly stopOnRelease: boolean;
 	}
 	export interface NumberControlKey {

@@ -28,7 +28,7 @@ const definition = {
 							startValue: 0,
 							mode: {
 								stopOnRelease: false,
-								resetOnRelease: false,
+								resetOnStop: true,
 								smooth: true,
 								smoothSpeed: 20,
 							},

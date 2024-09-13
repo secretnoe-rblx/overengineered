@@ -609,17 +609,17 @@ namespace Controls {
 						"Reset on stop",
 						{
 							type: "bool",
-							config: definition.control.config.mode.resetOnRelease,
+							config: definition.control.config.mode.resetOnStop,
 							tooltip: "Sets the value to the default upon stopping",
 						},
-						map(controlConfig, (c) => c.mode.resetOnRelease),
+						map(controlConfig, (c) => c.mode.resetOnStop),
 						args,
 					);
 					cResetReleased.submitted.Connect((v) => {
 						this.submittedControl.Fire(
 							(controlConfig = map(controlConfig, (c, uuid): BlockLogicTypes.NumberControl["config"] => ({
 								...c,
-								mode: { ...c.mode, resetOnRelease: v[uuid] },
+								mode: { ...c.mode, resetOnStop: v[uuid] },
 							}))),
 						);
 

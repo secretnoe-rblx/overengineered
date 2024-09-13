@@ -1067,7 +1067,7 @@ const v25: UpgradableBlocksSerializer<SerializedBlocks<SerializedBlockV4>, typeo
 								startValue: 0,
 								mode: {
 									stopOnRelease: !value.switchmode,
-									resetOnRelease: true,
+									resetOnStop: true,
 									smooth: false,
 									smoothSpeed: 20,
 								},
@@ -1090,7 +1090,7 @@ const v25: UpgradableBlocksSerializer<SerializedBlocks<SerializedBlockV4>, typeo
 								startValue: 0,
 								mode: {
 									stopOnRelease: false,
-									resetOnRelease: false,
+									resetOnStop: false,
 									smooth: !value.switchmode,
 									smoothSpeed: 20,
 								},
@@ -1111,7 +1111,7 @@ const v25: UpgradableBlocksSerializer<SerializedBlocks<SerializedBlockV4>, typeo
 									{ key: value.control.sub, value: def.min },
 								],
 								startValue: 0,
-								mode: { stopOnRelease: false, resetOnRelease: false, smooth: true, smoothSpeed: 20 },
+								mode: { stopOnRelease: false, resetOnStop: false, smooth: true, smoothSpeed: 20 },
 							} satisfies BlockConfigPart<"number">["controlConfig"];
 						} else if (def.type === "servoMotorAngle") {
 							const value = v as {
@@ -1132,7 +1132,7 @@ const v25: UpgradableBlocksSerializer<SerializedBlocks<SerializedBlockV4>, typeo
 								startValue: 0,
 								mode: {
 									stopOnRelease: !value.switchmode,
-									resetOnRelease: true,
+									resetOnStop: true,
 									smooth: false,
 									smoothSpeed: 20,
 								},

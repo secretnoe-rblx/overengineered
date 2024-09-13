@@ -159,7 +159,7 @@ namespace ConfigTests {
 								startValue: 0,
 								mode: {
 									stopOnRelease: true,
-									resetOnRelease: false,
+									resetOnStop: false,
 									smooth: false,
 									smoothSpeed: 25,
 								},
@@ -237,7 +237,7 @@ namespace ConfigTests {
 					startValue: 0,
 					mode: {
 						stopOnRelease: false,
-						resetOnRelease: false,
+						resetOnStop: false,
 						smooth: false,
 						smoothSpeed: 25,
 					},
