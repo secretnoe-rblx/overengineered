@@ -1301,7 +1301,8 @@ const test: {} = !RunService.IsStudio()
 												enabled: true,
 												startValue: 0,
 												mode: {
-													type: "hold",
+													stopOnRelease: true,
+													resetOnRelease: false,
 													smooth: true,
 													smoothSpeed: 1,
 												},

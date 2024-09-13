@@ -20,7 +20,8 @@ const definition = {
 							enabled: true,
 							startValue: 0,
 							mode: {
-								type: "switch",
+								stopOnRelease: false,
+								resetOnRelease: false,
 								smooth: true,
 								smoothSpeed: 20,
 							},

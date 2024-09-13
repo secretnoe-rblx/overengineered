@@ -68,7 +68,7 @@ namespace ClientBlockControlsNamespace {
 		let smoothAmount = config.startValue;
 		const smoothSet = (target: number) => {
 			if (smoothMovingTask) {
-				task.cancel(smoothMovingTask);
+				smoothCancel();
 			}
 
 			const step = smoothAmount < target ? config.mode.smoothSpeed : -config.mode.smoothSpeed;
@@ -92,61 +92,57 @@ namespace ClientBlockControlsNamespace {
 				}
 			});
 		};
+		const smoothCancel = () => smoothMovingTask && task.cancel(smoothMovingTask);
 
 		const set = config.mode.smooth ? smoothSet : actualSet;
 
-		const createNumberHold = () => {
-			set(config.startValue);
-			let amount = config.startValue;
+		//
 
-			const allKeys = config.keys.map((k) => k.key);
-			const def: KeyDefinitions<string> = Objects.map(
-				config.keys,
-				(i, v) => v.key,
-				(i, v): KeyDefinition<string> => ({
-					key: v.key,
-					conflicts: allKeys.except([v.key]),
-					keyDown: () => {
-						amount = MathUtils.clamp(v.value, clamp?.min, clamp?.max);
-						set(MathUtils.round(amount, clamp?.step));
-					},
-					keyUp: () => set(MathUtils.round((amount = config.startValue), clamp?.step)),
-				}),
-			);
-
-			return new KeyPressingDefinitionsController(def);
+		const keySet = (value: number) => {
+			set(value);
 		};
-		const createNumberSwitch = () => {
-			set(config.startValue);
-			let amount = config.startValue;
-
-			const allKeys = config.keys.map((k) => k.key);
-			const def: KeyDefinitions<string> = Objects.map(
-				config.keys,
-				(i, v) => v.key,
-				(i, v): KeyDefinition<string> => ({
-					key: v.key,
-					conflicts: allKeys.except([v.key]),
-					keyDown: () => {
-						amount = amount === v.value ? config.startValue : v.value;
-						set(MathUtils.round(amount, clamp?.step));
-					},
-				}),
-			);
-
-			return new KeyPressingDefinitionsController(def);
+		const keyReset = () => {
+			if (config.mode.resetOnRelease) {
+				set(config.startValue);
+			} else {
+				smoothCancel();
+			}
 		};
 
 		//
 
-		if (config.mode.type === "hold") {
-			return createNumberHold();
-		}
-		if (config.mode.type === "switch") {
-			return createNumberSwitch();
-		}
+		set(config.startValue);
 
-		throw `Unknown type ${config.mode.type}`;
+		const mapKeyHold = (_: unknown, v: BlockLogicTypes.NumberControlKey): KeyDefinition<string> => ({
+			key: v.key,
+			conflicts: allKeys.except([v.key]),
+			keyDown: () => keySet(v.value),
+			keyUp: () => keyReset(),
+		});
+
+		let movingTo: string | undefined;
+		const mapKeySwitch = (_: unknown, v: BlockLogicTypes.NumberControlKey): KeyDefinition<string> => ({
+			key: v.key,
+			conflicts: allKeys.except([v.key]),
+			keyDown: () => {
+				if (movingTo === v.key) {
+					keyReset();
+					movingTo = undefined;
+				} else {
+					keySet(v.value);
+					movingTo = v.key;
+				}
+			},
+		});
+
+		const allKeys = config.keys.map((k) => k.key);
+		const def: KeyDefinitions<string> = Objects.map(
+			config.keys,
+			(i, v) => v.key,
+			config.mode.stopOnRelease ? mapKeyHold : mapKeySwitch,
+		);
+
+		return new KeyPressingDefinitionsController(def);
 	}
 
 	export class Number extends ClientComponent implements IClientBlockControl {

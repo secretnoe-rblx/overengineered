@@ -38,9 +38,10 @@ export namespace BlockLogicTypes {
 	};
 
 	export interface NumberControlModes {
-		readonly type: "hold" | "switch";
 		readonly smooth: boolean;
 		readonly smoothSpeed: number;
+		readonly resetOnRelease: boolean;
+		readonly stopOnRelease: boolean;
 	}
 	export interface NumberControlKey {
 		readonly key: string | KeyCode;

@@ -38,7 +38,8 @@ const servoDefinition = {
 							enabled: true,
 							startValue: 0,
 							mode: {
-								type: "hold",
+								stopOnRelease: true,
+								resetOnRelease: true,
 								smooth: false,
 								smoothSpeed: 20,
 							},

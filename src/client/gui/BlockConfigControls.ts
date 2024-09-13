@@ -539,8 +539,6 @@ namespace Controls {
 
 				const dropdownContent: Control[] = [];
 				const createModeDropdown = () => {
-					type Modes = BlockLogicTypes.NumberControlModes;
-					type ModeKeys = Modes["type"];
 					const redrawMode = () => {
 						for (const control of dropdownContent) {
 							control.destroy();
@@ -548,6 +546,32 @@ namespace Controls {
 						dropdownContent.clear();
 
 						if (sameOrUndefinedBy(controlConfig, (c) => c.mode.smooth)) {
+							const [wStopOnRelease, cStopOnRelease] = addSingleTypeWrapperAuto(
+								this,
+								"Stop on release",
+								{
+									type: "bool",
+									config: definition.control.config.mode.stopOnRelease,
+									tooltip: "Stops changing the value when all the keys are released",
+								},
+								map(controlConfig, (c) => c.mode.stopOnRelease),
+								args,
+							);
+							dropdownContent.push(wStopOnRelease);
+							cStopOnRelease.submitted.Connect((v) => {
+								this.submittedControl.Fire(
+									(controlConfig = map(
+										controlConfig,
+										(c, uuid): BlockLogicTypes.NumberControl["config"] => ({
+											...c,
+											mode: { ...c.mode, stopOnRelease: v[uuid] },
+										}),
+									)),
+								);
+
+								redrawMode();
+							});
+
 							const [wSpeed, cSpeed] = addSingleTypeWrapperAuto(
 								this,
 								"Speed",
@@ -565,51 +589,45 @@ namespace Controls {
 								map(controlConfig, (c) => c.mode.smoothSpeed),
 								args,
 							);
-
 							dropdownContent.push(wSpeed);
 							cSpeed.submitted.Connect((v) =>
 								this.submittedControl.Fire(
-									(controlConfig = map(controlConfig, (c, uuid) => ({
-										...c,
-										mode: { ...c.mode, smoothSpeed: v[uuid] },
-									}))),
+									(controlConfig = map(
+										controlConfig,
+										(c, uuid): BlockLogicTypes.NumberControl["config"] => ({
+											...c,
+											mode: { ...c.mode, smoothSpeed: v[uuid] },
+										}),
+									)),
 								),
 							);
 						}
 					};
 
-					const [wType, cType] = addSingleTypeWrapper(this, new DropdownList<ModeKeys>(templates.Dropdown()));
-					wType.typeColor.set(Colors.red);
-					setWrapperName(cType as never, "Type");
-
-					const chold = cType.addItem("hold");
-					const cswitch = cType.addItem("switch");
-
-					Tooltip.init(chold, "Sets the value to the target while you're holding the button");
-					Tooltip.init(
-						cswitch,
-						"Sets the value to the target when you press the button and doesn't change back until you press another",
+					const [wResetReleased, cResetReleased] = addSingleTypeWrapperAuto(
+						this,
+						"Reset on stop",
+						{
+							type: "bool",
+							config: definition.control.config.mode.resetOnRelease,
+							tooltip: "Sets the value to the default upon stopping",
+						},
+						map(controlConfig, (c) => c.mode.resetOnRelease),
+						args,
 					);
-
-					const selectedModes = new ReadonlySet(asMap(map(controlConfig, (c) => c.mode.type)).values());
-					if (selectedModes.size() > 1) {
-						cType.selectedItem.set(undefined);
-					} else {
-						const selected = firstValue(controlConfig)!.mode;
-						cType.selectedItem.set(selected.type);
-					}
-
-					let smoothSpeed = sameOrUndefinedBy(controlConfig, (c) => c.mode.smoothSpeed);
-					smoothSpeed ??= definition.control.config.mode.smoothSpeed;
-
-					cType.submitted.Connect((item) => {
+					cResetReleased.submitted.Connect((v) => {
 						this.submittedControl.Fire(
-							(controlConfig = map(controlConfig, (c) => ({ ...c, mode: { ...c.mode, type: item } }))),
+							(controlConfig = map(controlConfig, (c, uuid): BlockLogicTypes.NumberControl["config"] => ({
+								...c,
+								mode: { ...c.mode, resetOnRelease: v[uuid] },
+							}))),
 						);
 
 						redrawMode();
 					});
 
+					let smoothSpeed = sameOrUndefinedBy(controlConfig, (c) => c.mode.smoothSpeed);
+					smoothSpeed ??= definition.control.config.mode.smoothSpeed;
 					const [wSmooth, cSmooth] = addSingleTypeWrapperAuto(
 						this,
 						"Smooth change",
@@ -623,7 +641,7 @@ namespace Controls {
 					);
 					cSmooth.submitted.Connect((v) => {
 						this.submittedControl.Fire(
-							(controlConfig = map(controlConfig, (c, uuid) => ({
+							(controlConfig = map(controlConfig, (c, uuid): BlockLogicTypes.NumberControl["config"] => ({
 								...c,
 								mode: { ...c.mode, smooth: v[uuid] },
 							}))),
