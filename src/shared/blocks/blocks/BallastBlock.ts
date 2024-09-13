@@ -24,8 +24,8 @@ const definition = {
 							enabled: true,
 							startValue: 0,
 							mode: {
-								stopOnRelease: false,
-								resetOnStop: true,
+								stopOnRelease: true,
+								resetOnStop: false,
 								smooth: true,
 								smoothSpeed: 2,
 							},
