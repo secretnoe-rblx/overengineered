@@ -57,7 +57,6 @@ namespace LoggingMetrics {
 			embeds: [
 				{
 					description: content,
-					title: GameDefinitions.isTestPlace() ? "⚠️ Internal" : undefined,
 					color: 0,
 					timestamp: DateTime.now().ToIsoDate(),
 					author: {
@@ -66,7 +65,7 @@ namespace LoggingMetrics {
 					},
 					footer: {
 						text:
-							`🔨 Build ${game.PlaceVersion}` +
+							`🔨 ${GameDefinitions.isTestPlace() ? "⚠️ Test" : ""} Build ${game.PlaceVersion}` +
 							(game.PrivateServerOwnerId !== 0 ? ", Private Server" : "") +
 							` (${game.JobId.sub(game.JobId.size() - 4)})`,
 					},
