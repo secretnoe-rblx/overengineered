@@ -34,11 +34,9 @@ export class RideMode extends PlayMode {
 			this.currentMachine.getImpactController()?.disable();
 		});
 
-		const alignPositionInstance = new Instance("AlignPosition");
-		alignPositionInstance.Mode = Enum.PositionAlignmentMode.OneAttachment;
-		alignPositionInstance.MaxForce = math.huge;
-		alignPositionInstance.MaxVelocity = math.huge;
-		alignPositionInstance.Responsiveness = 200;
+		const linearVelocity = new Instance("LinearVelocity");
+		linearVelocity.ForceLimitsEnabled = false;
+		linearVelocity.VectorVelocity = Vector3.zero;
 
 		const alignOrientationInstance = new Instance("AlignOrientation");
 		alignOrientationInstance.Mode = Enum.OrientationAlignmentMode.OneAttachment;
@@ -50,7 +48,7 @@ export class RideMode extends PlayMode {
 			for (const part of data.parts) {
 				const attachment = new Instance("Attachment", part);
 
-				const alignPosition = alignPositionInstance.Clone();
+				const alignPosition = linearVelocity.Clone();
 				const alignOrientation = alignOrientationInstance.Clone();
 
 				alignPosition.Attachment0 = attachment;
