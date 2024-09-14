@@ -9,6 +9,8 @@ export type BootFlag = {
 export namespace BootFlagsController {
 	export function initialize() {
 		Players.PlayerAdded.Connect((player) => {
+			if (player.GetJoinData().SourcePlaceId) return;
+
 			const rawData = player.GetJoinData().LaunchData;
 			if (!rawData) return;
 
