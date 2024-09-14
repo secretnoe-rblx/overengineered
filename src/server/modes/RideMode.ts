@@ -129,13 +129,6 @@ export class RideMode implements PlayModeBase {
 			ServerPartUtils.switchDescendantsNetworkOwner(block, player);
 		}
 
-		// TODO: move this somewhere
-		for (const block of blocksChildren) {
-			if (BlockManager.manager.id.get(block) === "anchorblock") {
-				ServerPartUtils.switchDescendantsAnchor(block, true);
-			}
-		}
-
 		this.initializePhysics(player, controller.blocks.getBlocks());
 
 		return { success: true };
