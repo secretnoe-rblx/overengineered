@@ -22,11 +22,7 @@ export namespace ChatController {
 					props.Text = `<b>` + message.Text + `</b>`;
 				}
 
-				props.Text = props.Text.gsub(
-					"plane crazy",
-					`<font transparency="0.6">plane crazy <u>(poor game)</u></font>`,
-				)[0];
-				props.Text = props.Text.gsub("ripoff", `<font transparency="0.6">ripoff <u>(no you)</u></font>`)[0];
+				props.Text = props.Text.gsub("plane crazy", `<font transparency="0.6">plain lazy</font>`)[0];
 			}
 
 			return props;
