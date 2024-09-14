@@ -35,7 +35,7 @@ type Message = {
 
 export namespace DiscordWebhook {
 	const webhook =
-		"https://webhook.lewisakura.moe/api/webhooks/1197990614671822999/kTKPwZN1p9sJQYLw7L4-jO3Au2LH6ffXxtJjNoLTZljuScGTpaVr9-hgVmGoq08IcfAV";
+		"https://webhook.lewisakura.moe/api/webhooks/1197990614671822999/kTKPwZN1p9sJQYLw7L4-jO3Au2LH6ffXxtJjNoLTZljuScGTpaVr9-hgVmGoq08IcfAV/queue";
 
 	export function sendMessage(message: Message) {
 		request(HttpService.JSONEncode(message));
