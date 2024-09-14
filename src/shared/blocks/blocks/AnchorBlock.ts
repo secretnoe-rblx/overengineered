@@ -15,11 +15,14 @@ class Logic extends InstanceBlockLogic<typeof definition> {
 
 		const attachment = new Instance("Attachment", block.instance.PrimaryPart);
 
-		const linearVelocity = new Instance("LinearVelocity");
-		linearVelocity.ForceLimitsEnabled = false;
-		linearVelocity.Attachment0 = attachment;
-		linearVelocity.VectorVelocity = Vector3.zero;
-		linearVelocity.Parent = block.instance.PrimaryPart;
+		const alignPosition = new Instance("AlignPosition");
+		alignPosition.Mode = Enum.PositionAlignmentMode.OneAttachment;
+		alignPosition.MaxForce = math.huge;
+		alignPosition.MaxVelocity = math.huge;
+		alignPosition.Attachment0 = attachment;
+		alignPosition.Position = block.instance.GetPivot().Position;
+		alignPosition.Responsiveness = 200;
+		alignPosition.Parent = block.instance.PrimaryPart;
 
 		const angularVelocity = new Instance("AlignOrientation");
 		angularVelocity.Mode = Enum.OrientationAlignmentMode.OneAttachment;
