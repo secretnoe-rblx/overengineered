@@ -875,7 +875,7 @@ const vec3 = {
 			}),
 		),
 	},
-	/*
+
 	vec3magnitude: {
 		displayName: "Vector3 Magnitude",
 		description: "Returns magnitude of the given vector",
@@ -918,7 +918,7 @@ const vec3 = {
 			}),
 		),
 	},
-	*/
+
 	vec3objectworldtransformer: {
 		displayName: "Vector3 Object/World Transformer",
 		description: "Converts a vector into the world/object coordinate space of the other vector",
