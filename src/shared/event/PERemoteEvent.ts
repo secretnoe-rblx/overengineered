@@ -279,6 +279,10 @@ export class C2S2CRemoteFunction<TArg, TResp extends Response = Response> extend
 	/** @client */
 	readonly sent = this._sent.asReadonly();
 
+	private readonly _completed = new ArgsSignal<[result: ErrorResponse | TResp]>();
+	/** @client */
+	readonly completed = this._completed.asReadonly();
+
 	/** @server */
 	private invoked?: (player: Player, arg: TArg) => TResp;
 
@@ -338,6 +342,8 @@ export class C2S2CRemoteFunction<TArg, TResp extends Response = Response> extend
 		promise.andThen(ret);
 
 		const result = wait();
+		this._completed.Fire(result);
+
 		if (isCanceled(result)) {
 			promise.cancel();
 			return errCanceled;

@@ -4,6 +4,7 @@ import { Colors } from "client/gui/Colors";
 import { Gui } from "client/gui/Gui";
 import { BuildingManager } from "shared/building/BuildingManager";
 import { SharedPlot } from "shared/building/SharedPlot";
+import { CustomRemotes } from "shared/Remotes";
 
 @injectable
 export class CenterOfMassController extends ClientComponent {
@@ -49,7 +50,7 @@ export class CenterOfMassController extends ClientComponent {
 			}
 		};
 
-		//no way to trigger block placement by save file loading
+		this.event.subscribe(CustomRemotes.slots.load.completed, (v) => (v.success ? update : ""));
 		this.event.subscribe(SharedPlot.anyChanged, update);
 		this.event.onEnable(update);
 		this.onDisable(() => {

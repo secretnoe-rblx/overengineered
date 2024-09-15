@@ -875,6 +875,50 @@ const vec3 = {
 			}),
 		),
 	},
+	/*
+	vec3magnitude: {
+		displayName: "Vector3 Magnitude",
+		description: "Returns magnitude of the given vector",
+		modelSource: autoModel("TripleGenericLogicBlockPrefab", "VEC3 MAG", categories.converterVector),
+		logic: logic(
+			{
+				input: {
+					value: defpartsf.vector3("Value"),
+				},
+				output: {
+					result: {
+						displayName: "Magnitude",
+						types: ["number"],
+					},
+				},
+			},
+			({ value }) => ({
+				result: { type: "number", value: value.Magnitude },
+			}),
+		),
+	},
+	vec3normalize: {
+		displayName: "Vector3 Normalize",
+		description: "Returns normalized vector from the given vector",
+		modelSource: autoModel("TripleGenericLogicBlockPrefab", "VEC3 NORM", categories.converterVector),
+		logic: logic(
+			{
+				input: {
+					value: defpartsf.vector3("Value"),
+				},
+				output: {
+					result: {
+						displayName: "Normalized",
+						types: ["vector3"],
+					},
+				},
+			},
+			({ value }) => ({
+				result: { type: "vector3", value: value.Unit },
+			}),
+		),
+	},
+	*/
 	vec3objectworldtransformer: {
 		displayName: "Vector3 Object/World Transformer",
 		description: "Converts a vector into the world/object coordinate space of the other vector",
