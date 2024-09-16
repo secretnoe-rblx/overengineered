@@ -18,11 +18,6 @@ class NumberObservableValue<T extends number | undefined = number> extends Obser
 		if (value === undefined) return value;
 		return MathUtils.clamp(value, this.min, this.max, this.step) as T;
 	}
-
-	/** @deprecated Use {@link MathUtils.clamp} instead */
-	static clamp(value: number, min: number, max: number, step: number) {
-		return MathUtils.clamp(value, min, max, step);
-	}
 }
 
 type ToNum<TAllowNull extends boolean> = TAllowNull extends false ? number : number | undefined;

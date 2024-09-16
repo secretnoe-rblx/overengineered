@@ -56,13 +56,12 @@ namespace ClientBlockControlsNamespace {
 	function createNumberController(
 		value: ILogicValueStorage<"number">,
 		config: BlockLogicTypes.NumberControl["config"],
-		definition: Omit<BlockLogicTypes.NumberControl, "config">,
-		configDefinition: Omit<BlockLogicTypes.Number, "config">,
+		definition: Omit<BlockLogicTypes.Number, "config">,
 	): KeyPressingDefinitionsController<KeyDefinitions<string>> {
 		let currentValue = config.startValue;
 		const actualSet = (newValue: number) => value.set("number", (currentValue = newValue));
 
-		const clamp = configDefinition.clamp;
+		const clamp = definition.clamp;
 
 		let smoothMovingTask: thread | undefined;
 		let smoothAmount = config.startValue;
@@ -151,12 +150,11 @@ namespace ClientBlockControlsNamespace {
 		constructor(
 			value: ILogicValueStorage<"number">,
 			config: BlockLogicTypes.NumberControl["config"],
-			definition: Omit<BlockLogicTypes.NumberControl, "config">,
-			configDefinition: Omit<BlockLogicTypes.Number, "config">,
+			definition: Omit<BlockLogicTypes.Number, "config">,
 		) {
 			super();
 
-			const controller = this.parent(createNumberController(value, config, definition, configDefinition));
+			const controller = this.parent(createNumberController(value, config, definition));
 			this.touchButtonDatas = config.keys.map(
 				(k): TouchModeButtonData => ({
 					name: k.key,
@@ -191,6 +189,5 @@ type GenericClientBlockControlStorage = (
 
 export const ClientBlockControls: { readonly [k in ControlKeys]?: GenericClientBlockControlStorage } = {
 	bool: (value, config, definition) => new ClientBlockControlsNamespace.Bool(value, config, definition.control),
-	number: (value, config, definition) =>
-		new ClientBlockControlsNamespace.Number(value, config, definition.control, definition),
+	number: (value, config, definition) => new ClientBlockControlsNamespace.Number(value, config, definition),
 } satisfies { readonly [k in ControlKeys]?: ClientBlockControlStorage<k> } as never;

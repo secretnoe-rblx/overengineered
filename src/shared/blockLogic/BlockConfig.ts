@@ -33,13 +33,10 @@ export namespace BlockConfig {
 		readonly [k in string]: BlockLogicFullInputDef;
 	};
 
-	export function addDefaults<TDef extends Def>(
-		config: PlacedBlockConfig | undefined,
-		definition: TDef,
-	): PlacedBlockConfig {
+	export function addDefaults(config: PlacedBlockConfig | undefined, definition: Def): PlacedBlockConfig {
 		const result: { [k in string]?: MiniPartial<GenericConfig> } = { ...(config ?? {}) };
 
-		const getDefaultType = (def: TDef[keyof TDef]): PrimitiveKeys => {
+		const getDefaultType = (def: BlockLogicFullInputDef): PrimitiveKeys => {
 			if (Objects.size(def.types) === 1) {
 				return firstKey(def.types)!;
 			}
@@ -56,10 +53,10 @@ export namespace BlockConfig {
 
 			return "unset";
 		};
-		const getDefaultConfig = (objType: GenericConfig["type"], def: TDef[keyof TDef]) =>
+		const getDefaultConfig = (objType: GenericConfig["type"], def: BlockLogicFullInputDef) =>
 			objType === "unset" ? (undefined as never) : def.types[objType]!.config;
 
-		const createDefault = (def: TDef[keyof TDef]) => {
+		const createDefault = (def: BlockLogicFullInputDef) => {
 			const defaultType = getDefaultType(def);
 
 			const cfg: GenericConfig = {
@@ -70,7 +67,7 @@ export namespace BlockConfig {
 			return cfg;
 		};
 
-		const calculateType = (obj: MiniPartial<GenericConfig>, def: TDef[keyof TDef]): GenericConfig["type"] => {
+		const calculateType = (obj: MiniPartial<GenericConfig>, def: BlockLogicFullInputDef): GenericConfig["type"] => {
 			// If type is nil, return the default type
 			if (obj.type === undefined) {
 				return getDefaultType(def);
@@ -85,7 +82,7 @@ export namespace BlockConfig {
 		};
 		const calculateConfig = (
 			obj: MakeRequired<MiniPartial<GenericConfig>, "type">,
-			def: TDef[keyof TDef],
+			def: BlockLogicFullInputDef,
 		): GenericConfig["config"] => {
 			// Unset doesn't have/need a config
 			if (obj.type === "unset") {
@@ -123,7 +120,7 @@ export namespace BlockConfig {
 		};
 		const calculateControlConfig = (
 			obj: MakeRequired<MiniPartial<GenericConfig>, "type" | "config">,
-			def: TDef[keyof TDef],
+			def: BlockLogicFullInputDef,
 		): GenericConfig["controlConfig"] => {
 			const control = def.types[obj.type] as Primitives[ControlKeys] | undefined;
 			if (!control) {
