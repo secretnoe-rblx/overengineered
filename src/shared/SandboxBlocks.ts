@@ -1,7 +1,6 @@
 import { RunService } from "@rbxts/services";
 import { BlockListBuilder } from "shared/blocks/BlockListBuilder";
 import { AltimeterBlock } from "shared/blocks/blocks/AltimeterBlock";
-import { AnchorBlock } from "shared/blocks/blocks/AnchorBlock";
 import { AngleSensorBlock } from "shared/blocks/blocks/AngleSensorBlock";
 import { BallastBlock } from "shared/blocks/blocks/BallastBlock";
 import { BracedShaftBlock } from "shared/blocks/blocks/BracedShaftBlock";
@@ -64,7 +63,6 @@ export const CreateSandboxBlocks = (): BlockList => {
 		...ServoMotorBlocks,
 		...TNTBlocks,
 
-		AnchorBlock,
 		PistonBlock,
 		MotorBlock,
 		RCSEngineBlock,

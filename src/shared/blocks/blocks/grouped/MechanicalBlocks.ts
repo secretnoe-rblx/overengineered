@@ -2,6 +2,14 @@ import { BlockCreation } from "shared/blocks/BlockCreation";
 import type { BlockBuildersWithoutIdAndDefaults } from "shared/blocks/Block";
 
 const blocks = {
+	anchorblock: {
+		displayName: "Anchor",
+		description: "An immovable block",
+		limit: 20,
+
+		weldRegionsSource: BlockCreation.WeldRegions.fAutomatic("cube"),
+	},
+
 	ballinsocket: {
 		displayName: "Ball in Socket",
 		description: "Ball socket for your mechanical ingenuities",
