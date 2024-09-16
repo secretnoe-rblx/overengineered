@@ -22,7 +22,7 @@ export interface ReadonlyObservableValue<T> {
 
 /** Stores a value and provides and event of it being changed */
 export class ObservableValue<T> implements ReadonlyObservableValue<T> {
-	readonly _changed = new Signal<(value: T, prev: T) => void>();
+	private readonly _changed = new Signal<(value: T, prev: T) => void>();
 	readonly changed = this._changed.asReadonly();
 
 	private value: T;
