@@ -50,6 +50,23 @@ export const TestTutorialDiff = {
 			{ uuid: "b8", type: "removed" },
 			{ block: { uuid: "bbb1", location: new CFrame(29, 5.5, 10), id: "block" }, type: "added" },
 		],
-		d5cfgtest: [{ uuid: "s1", key: "angle", value: { rotation: { add: "W", sub: "S" } }, type: "configChanged" }],
+		d5cfgtest: [
+			{
+				uuid: "s1",
+				key: "angle",
+				value: {
+					controlConfig: {
+						enabled: true,
+						mode: { resetOnStop: true, stopOnRelease: true, smoothSpeed: 20, smooth: false },
+						keys: [
+							{ key: "W", value: 45 },
+							{ key: "S", value: -45 },
+						],
+						startValue: 0,
+					},
+				},
+				type: "configChanged",
+			},
+		],
 	},
 } satisfies TutorialDiffList;

@@ -4,15 +4,14 @@ import { Colors } from "client/gui/Colors";
 import { Control } from "client/gui/Control";
 import { ButtonControl } from "client/gui/controls/Button";
 import { Gui } from "client/gui/Gui";
-import { ConfirmPopup } from "client/gui/popup/ConfirmPopup";
 import { ClientBuilding } from "client/modes/build/ClientBuilding";
+import { BlockConfig } from "shared/blockLogic/BlockConfig";
 import { BlockManager } from "shared/building/BlockManager";
 import { BlocksSerializer } from "shared/building/BlocksSerializer";
 import { BuildingPlot } from "shared/building/BuildingPlot";
 import { Component } from "shared/component/Component";
 import { ComponentInstance } from "shared/component/ComponentInstance";
 import { ArgsSignal, Signal } from "shared/event/Signal";
-import { JSON } from "shared/fixes/Json";
 import { Objects } from "shared/fixes/objects";
 import { Localization } from "shared/Localization";
 import { CustomRemotes } from "shared/Remotes";
@@ -20,6 +19,7 @@ import { PartUtils } from "shared/utils/PartUtils";
 import { VectorUtils } from "shared/utils/VectorUtils";
 import type { BuildingMode } from "client/modes/build/BuildingMode";
 import type { BuildTool } from "client/tools/BuildTool";
+import type { PlacedBlockConfig } from "shared/blockLogic/BlockConfig";
 import type { LatestSerializedBlock, LatestSerializedBlocks } from "shared/building/BlocksSerializer";
 import type { BuildingDiffChange, DiffBlock } from "shared/building/BuildingDiffer";
 import type { ReadonlyPlot } from "shared/building/ReadonlyPlot";
@@ -109,14 +109,15 @@ export class TutorialControl extends Control<TutorialControlDefinition> {
 		this.add(new ButtonControl(this.gui.Header.Next, () => this._nextPressed.Fire()));
 		this.add(
 			new ButtonControl(this.gui.Header.Skip, () => {
-				ConfirmPopup.showPopup(
-					"Are you sure you want to skip this step?",
-					"This way you will learn this lesson worse!",
-					() => {
-						this._skipPressed.Fire();
-					},
-					() => {},
-				);
+				this._skipPressed.Fire();
+				// ConfirmPopup.showPopup(
+				// 	"Are you sure you want to skip this step?",
+				// 	"This way you will learn this lesson worse!",
+				// 	() => {
+				// 		this._skipPressed.Fire();
+				// 	},
+				// 	() => {},
+				// );
 			}),
 		);
 	}
@@ -381,11 +382,12 @@ namespace Steps {
 	export type BlockToConfigure = {
 		readonly uuid: BlockUuid;
 		readonly key: string;
-		readonly value: unknown;
+		readonly value: Partial<PlacedBlockConfig[string]> | undefined;
 	};
 	export function waitForConfigure(
 		blocksToConfigure: readonly BlockToConfigure[],
 		plot: SharedPlot,
+		blockList: BlockList,
 		resolve: Resolver,
 	): Reg {
 		const sameProperties = (object: object, properties: object): boolean => {
@@ -413,7 +415,34 @@ namespace Steps {
 			return true;
 		};
 
+		// const getRelevantConfig = (uuid: BlockUuid, key: string) => {
+		// 	const block = plot.tryGetBlock(uuid);
+		// 	if (!block) return;
+
+		// 	const b = blockList.blocks[BlockManager.manager.id.get(block)];
+		// 	if (!b) return;
+
+		// 	return {
+		// 		key,
+		// 		config: BlockConfig.addDefaults(BlockManager.manager.config.get(block), b.logic!.definition.input)[key],
+		// 	};
+		// };
+		// const savedConfigs = asObject(
+		// 	blocksToConfigure.mapToMap((b) => $tuple(b.uuid, getRelevantConfig(b.uuid, b.key))),
+		// );
+
 		const c1 = ClientBuilding.updateConfigOperation.addMiddleware((args) => {
+			// for (const { block, cfg: config } of args.configs) {
+			// 	const uuid = BlockManager.manager.uuid.get(block);
+			// 	const savedcfg = savedConfigs[uuid];
+			// 	if (!savedcfg) {
+			// 		return { success: false, message: "Wrong block!" };
+			// 	}
+
+			// 	const cfg = config[savedcfg.key];
+			// 	print(cfg, savedcfg.config);
+			// }
+
 			return { success: true, arg: args };
 		});
 		const c2 = ClientBuilding.updateConfigOperation.executed.Connect(({ plot }) => {
@@ -442,13 +471,19 @@ namespace Steps {
 			autoComplete: () => {
 				ClientBuilding.updateConfigOperation.execute({
 					plot: plot,
-					configs: blocksToConfigure.map(({ uuid, key, value }): ConfigUpdateRequest["configs"][number] => ({
-						block: plot.getBlock(uuid),
-						scfg: JSON.serialize({
-							...(BlockManager.manager.config.get(plot.getBlock(uuid)) ?? {}),
-							[key]: value,
+					configs: blocksToConfigure.map(
+						({ uuid, key, value }): ClientBuilding.UpdateConfigArgs["configs"][number] => ({
+							block: plot.getBlock(uuid),
+							cfg: {
+								...(BlockManager.manager.config.get(plot.getBlock(uuid)) ?? {}),
+								[key]: BlockConfig.addDefaults(
+									{ [key]: value },
+									blockList.blocks[BlockManager.manager.id.get(plot.getBlock(uuid))]!.logic!
+										.definition.input,
+								)[key],
+							},
 						}),
-					})),
+					),
 				});
 			},
 		};
@@ -635,6 +670,7 @@ export class TutorialController extends Component {
 		@inject private readonly sharedPlot: SharedPlot,
 		@inject private readonly plot: ReadonlyPlot,
 		@inject readonly buildingMode: BuildingMode,
+		@inject private readonly blockList: BlockList,
 		@inject di: DIContainer,
 	) {
 		super();
@@ -813,7 +849,7 @@ export class TutorialController extends Component {
 	/** Wait for blocks configuring */
 	partConfigure(blocks: readonly Steps.BlockToConfigure[]): TutorialPartRegistration {
 		const hc = this.highlightBlocks(blocks.map((b) => b.uuid));
-		const exec = Steps.execute(Steps.waitForConfigure, blocks, this.sharedPlot);
+		const exec = Steps.execute(Steps.waitForConfigure, blocks, this.sharedPlot, this.blockList);
 
 		return {
 			...exec,
@@ -874,14 +910,14 @@ export class TutorialController extends Component {
 		});
 		while (!completed) {
 			if (canceled) {
-				print("Cancelling the tutorial");
+				$log("Cancelling the tutorial");
 				task.cancel(thr);
 
 				break;
 			}
 
 			if (skipped) {
-				print("Skipping a part");
+				$log("Skipping a part");
 				task.cancel(thr);
 				reg.autoComplete?.();
 

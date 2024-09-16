@@ -506,13 +506,33 @@ export const BasicPlaneTutorialDiffs = {
 		front_wings_config: [
 			{
 				uuid: "ee6022aa-5f60-4e77-b140-cc3ea10135d2",
-				value: { rotation: { sub: "D", add: "A" }, angle: 45, switchmode: false },
+				value: {
+					controlConfig: {
+						enabled: true,
+						mode: { resetOnStop: true, stopOnRelease: true, smoothSpeed: 20, smooth: false },
+						keys: [
+							{ key: "A", value: 45 },
+							{ key: "D", value: -45 },
+						],
+						startValue: 0,
+					},
+				},
 				key: "angle",
 				type: "configChanged",
 			},
 			{
 				uuid: "f383c25b-cb33-4a25-8791-9e459814e836",
-				value: { rotation: { sub: "D", add: "A" }, angle: 45, switchmode: false },
+				value: {
+					controlConfig: {
+						enabled: true,
+						mode: { resetOnStop: true, stopOnRelease: true, smoothSpeed: 20, smooth: false },
+						keys: [
+							{ key: "A", value: 45 },
+							{ key: "D", value: -45 },
+						],
+						startValue: 0,
+					},
+				},
 				key: "angle",
 				type: "configChanged",
 			},
@@ -520,7 +540,17 @@ export const BasicPlaneTutorialDiffs = {
 		back_wings_config_1: [
 			{
 				uuid: "9c96dded-ef70-4a76-ad1d-88927be98b55",
-				value: { rotation: { sub: "W", add: "S" }, angle: 45, switchmode: false },
+				value: {
+					controlConfig: {
+						enabled: true,
+						mode: { resetOnStop: true, stopOnRelease: true, smoothSpeed: 20, smooth: false },
+						keys: [
+							{ key: "W", value: 45 },
+							{ key: "S", value: -45 },
+						],
+						startValue: 0,
+					},
+				},
 				key: "angle",
 				type: "configChanged",
 			},
@@ -528,7 +558,17 @@ export const BasicPlaneTutorialDiffs = {
 		back_wings_config_2: [
 			{
 				uuid: "94135bc9-3dc2-4d2a-9951-76d442c7b489",
-				value: { rotation: { sub: "S", add: "W" }, angle: 45, switchmode: false },
+				value: {
+					controlConfig: {
+						enabled: true,
+						mode: { resetOnStop: true, stopOnRelease: true, smoothSpeed: 20, smooth: false },
+						keys: [
+							{ key: "W", value: 45 },
+							{ key: "S", value: -45 },
+						],
+						startValue: 0,
+					},
+				},
 				key: "angle",
 				type: "configChanged",
 			},
@@ -536,13 +576,33 @@ export const BasicPlaneTutorialDiffs = {
 		rocket_config: [
 			{
 				uuid: "60236278-ee14-4d38-8b3e-5363bebceddc",
-				value: { thrust: { sub: "F", add: "R" }, switchmode: false },
+				value: {
+					controlConfig: {
+						enabled: true,
+						mode: { resetOnStop: true, stopOnRelease: false, smoothSpeed: 20, smooth: false },
+						keys: [
+							{ key: "F", value: 100 },
+							{ key: "R", value: 0 },
+						],
+						startValue: 0,
+					},
+				},
 				key: "thrust",
 				type: "configChanged",
 			},
 			{
 				uuid: "c677258e-4a00-4c90-aad8-a273aea90cee",
-				value: { thrust: { sub: "F", add: "R" }, switchmode: false },
+				value: {
+					controlConfig: {
+						enabled: true,
+						mode: { resetOnStop: true, stopOnRelease: false, smoothSpeed: 20, smooth: false },
+						keys: [
+							{ key: "F", value: 100 },
+							{ key: "R", value: 0 },
+						],
+						startValue: 0,
+					},
+				},
 				key: "thrust",
 				type: "configChanged",
 			},

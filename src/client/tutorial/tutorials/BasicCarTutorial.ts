@@ -120,8 +120,8 @@ export class BasicCarTutorial implements TutorialDescriber {
 				t.hintsPart(
 					"Select the config tool",
 					"Select right side motors",
-					"Set Rotation+ to key W",
-					"Set Rotation- to key S",
+					"Set the first key to W",
+					"Set the second key to S",
 				),
 			],
 
@@ -134,8 +134,8 @@ export class BasicCarTutorial implements TutorialDescriber {
 				t.hintsPart(
 					"Select the config tool",
 					"Select left side motors",
-					"Set Rotation+ to key S",
-					"Set Rotation- to key W",
+					"Set the first key to S",
+					"Set the second key to W",
 				),
 			],
 
@@ -153,8 +153,8 @@ export class BasicCarTutorial implements TutorialDescriber {
 				t.hintsPart(
 					"Select the config tool",
 					"Select left side motors",
-					"Set Rotation+ to key D",
-					"Set Rotation- to key A",
+					"Set the first key to D",
+					"Set the second key to A",
 				),
 			],
 

@@ -171,8 +171,8 @@ namespace Scene {
 						(b) =>
 							({
 								block: b,
-								scfg: JSON.serialize(config[BlockManager.manager.uuid.get(b)]),
-							}) satisfies ConfigUpdateRequest["configs"][number],
+								cfg: config[BlockManager.manager.uuid.get(b)] as never,
+							}) satisfies ClientBuilding.UpdateConfigArgs["configs"][number],
 					),
 				});
 				if (!response.success) {

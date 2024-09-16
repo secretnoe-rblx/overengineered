@@ -18,6 +18,9 @@ type GenericConfig = BlockConfigPart<PrimitiveKeys>;
 export type PlacedBlockConfig = {
 	readonly [k in string]: { [k in PrimitiveKeys]: BlockConfigPart<k> }[PrimitiveKeys];
 };
+type PartialPlacedBlockConfig = {
+	readonly [k in string]?: Partial<{ [k in PrimitiveKeys]: BlockConfigPart<k> }[PrimitiveKeys]>;
+};
 
 export type BlockConfigOf<TKey extends keyof Primitives> =
 	| Primitives[TKey]["config"]
@@ -33,8 +36,8 @@ export namespace BlockConfig {
 		readonly [k in string]: BlockLogicFullInputDef;
 	};
 
-	export function addDefaults(config: PlacedBlockConfig | undefined, definition: Def): PlacedBlockConfig {
-		const result: { [k in string]?: MiniPartial<GenericConfig> } = { ...(config ?? {}) };
+	export function addDefaults(config: PartialPlacedBlockConfig | undefined, definition: Def): PlacedBlockConfig {
+		const result: { [k in string]?: Partial<GenericConfig> } = { ...(config ?? {}) };
 
 		const getDefaultType = (def: BlockLogicFullInputDef): PrimitiveKeys => {
 			if (Objects.size(def.types) === 1) {
@@ -67,7 +70,7 @@ export namespace BlockConfig {
 			return cfg;
 		};
 
-		const calculateType = (obj: MiniPartial<GenericConfig>, def: BlockLogicFullInputDef): GenericConfig["type"] => {
+		const calculateType = (obj: Partial<GenericConfig>, def: BlockLogicFullInputDef): GenericConfig["type"] => {
 			// If type is nil, return the default type
 			if (obj.type === undefined) {
 				return getDefaultType(def);
@@ -81,7 +84,7 @@ export namespace BlockConfig {
 			return obj.type;
 		};
 		const calculateConfig = (
-			obj: MakeRequired<MiniPartial<GenericConfig>, "type">,
+			obj: MakeRequired<Partial<GenericConfig>, "type">,
 			def: BlockLogicFullInputDef,
 		): GenericConfig["config"] => {
 			// Unset doesn't have/need a config

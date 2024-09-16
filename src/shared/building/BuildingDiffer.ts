@@ -1,3 +1,4 @@
+import type { PlacedBlockConfig } from "shared/blockLogic/BlockConfig";
 import type { LatestSerializedBlock } from "shared/building/BlocksSerializer";
 
 export type DiffBlock = Replace<LatestSerializedBlock, "uuid", string>;
@@ -18,7 +19,7 @@ type ConfigChangedChange = {
 	readonly type: "configChanged";
 	readonly uuid: DiffBlock["uuid"];
 	readonly key: string;
-	readonly value: unknown;
+	readonly value: Partial<PlacedBlockConfig[string]> | undefined;
 };
 type MovedChange = {
 	readonly type: "moved";

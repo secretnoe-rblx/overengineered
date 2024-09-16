@@ -2,8 +2,10 @@ import { LoadingController } from "client/controller/LoadingController";
 import { ActionController } from "client/modes/build/ActionController";
 import { BlockManager } from "shared/building/BlockManager";
 import { SharedBuilding } from "shared/building/SharedBuilding";
+import { JSON } from "shared/fixes/Json";
 import { Operation } from "shared/Operation";
 import { CustomRemotes } from "shared/Remotes";
+import type { PlacedBlockConfig } from "shared/blockLogic/BlockConfig";
 import type { BlockLogicTypes } from "shared/blockLogic/BlockLogicTypes";
 import type { SharedPlot } from "shared/building/SharedPlot";
 
@@ -308,12 +310,18 @@ export namespace ClientBuilding {
 		return result;
 	}
 
-	type UpdateConfigArgs = {
+	export type UpdateConfigArgs = {
 		readonly plot: SharedPlot;
-		readonly configs: ConfigUpdateRequest["configs"];
+		readonly configs: readonly {
+			readonly block: BlockModel;
+			readonly cfg: PlacedBlockConfig;
+		}[];
 	};
 	function updateConfig({ plot, configs }: UpdateConfigArgs) {
-		return building.updateConfig.send({ plot: plot.instance, configs });
+		return building.updateConfig.send({
+			plot: plot.instance,
+			configs: configs.map(({ block, cfg }) => ({ block: block, scfg: JSON.serialize(cfg) })),
+		});
 	}
 
 	type ResetConfigArgs = {

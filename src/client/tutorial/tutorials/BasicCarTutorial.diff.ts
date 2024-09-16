@@ -278,13 +278,33 @@ export const BasicCarTutorialDiffs = {
 		c8cfgmotorsright: [
 			{
 				uuid: "245637aa-4f8e-4f20-9812-07411935c49e",
-				value: { rotation: { sub: "S", add: "W" } },
+				value: {
+					controlConfig: {
+						enabled: true,
+						mode: { resetOnStop: true, stopOnRelease: true, smoothSpeed: 20, smooth: false },
+						keys: [
+							{ key: "W", value: 15 },
+							{ key: "S", value: -15 },
+						],
+						startValue: 0,
+					},
+				},
 				type: "configChanged",
 				key: "rotationSpeed",
 			},
 			{
 				uuid: "22332875-fafb-4628-826d-050dd1a82964",
-				value: { rotation: { sub: "S", add: "W" } },
+				value: {
+					controlConfig: {
+						enabled: true,
+						mode: { resetOnStop: true, stopOnRelease: true, smoothSpeed: 20, smooth: false },
+						keys: [
+							{ key: "W", value: 15 },
+							{ key: "S", value: -15 },
+						],
+						startValue: 0,
+					},
+				},
 				type: "configChanged",
 				key: "rotationSpeed",
 			},
@@ -292,13 +312,33 @@ export const BasicCarTutorialDiffs = {
 		c9cfgmotorsleft: [
 			{
 				uuid: "2a3848c8-eb5b-43f7-a4c9-bf2cc86dd1db",
-				value: { rotation: { sub: "W", add: "S" } },
+				value: {
+					controlConfig: {
+						enabled: true,
+						mode: { resetOnStop: true, stopOnRelease: true, smoothSpeed: 20, smooth: false },
+						keys: [
+							{ key: "W", value: -15 },
+							{ key: "S", value: 15 },
+						],
+						startValue: 0,
+					},
+				},
 				type: "configChanged",
 				key: "rotationSpeed",
 			},
 			{
 				uuid: "bca94069-a628-479f-8ddc-11982468a151",
-				value: { rotation: { sub: "W", add: "S" } },
+				value: {
+					controlConfig: {
+						enabled: true,
+						mode: { resetOnStop: true, stopOnRelease: true, smoothSpeed: 20, smooth: false },
+						keys: [
+							{ key: "W", value: -15 },
+							{ key: "S", value: 15 },
+						],
+						startValue: 0,
+					},
+				},
 				type: "configChanged",
 				key: "rotationSpeed",
 			},
@@ -306,13 +346,33 @@ export const BasicCarTutorialDiffs = {
 		c10cfgservo: [
 			{
 				uuid: "17046da5-4bd5-4cb6-a670-a41b355f94c0",
-				value: { rotation: { sub: "A", add: "D" } },
+				value: {
+					controlConfig: {
+						enabled: true,
+						mode: { resetOnStop: true, stopOnRelease: true, smoothSpeed: 20, smooth: false },
+						keys: [
+							{ key: "A", value: 45 },
+							{ key: "D", value: -45 },
+						],
+						startValue: 0,
+					},
+				},
 				type: "configChanged",
 				key: "angle",
 			},
 			{
 				uuid: "4ee61dd5-ec46-4bc2-8e50-678eddabc65c",
-				value: { rotation: { sub: "A", add: "D" } },
+				value: {
+					controlConfig: {
+						enabled: true,
+						mode: { resetOnStop: true, stopOnRelease: true, smoothSpeed: 20, smooth: false },
+						keys: [
+							{ key: "A", value: 45 },
+							{ key: "D", value: -45 },
+						],
+						startValue: 0,
+					},
+				},
 				type: "configChanged",
 				key: "angle",
 			},
