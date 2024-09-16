@@ -21,13 +21,9 @@ class Logic extends InstanceBlockLogic<typeof definition> {
 		linearVelocity.VectorVelocity = Vector3.zero;
 		linearVelocity.Parent = block.instance.PrimaryPart;
 
-		const angularVelocity = new Instance("AlignOrientation");
-		angularVelocity.Mode = Enum.OrientationAlignmentMode.OneAttachment;
-		angularVelocity.MaxAngularVelocity = math.huge;
-		angularVelocity.MaxTorque = math.huge;
-		angularVelocity.Responsiveness = 200;
+		const angularVelocity = new Instance("AngularVelocity");
 		angularVelocity.Attachment0 = attachment;
-		angularVelocity.CFrame = block.instance.GetPivot().Rotation;
+		angularVelocity.AngularVelocity = Vector3.zero;
 		angularVelocity.Parent = block.instance.PrimaryPart;
 	}
 }
