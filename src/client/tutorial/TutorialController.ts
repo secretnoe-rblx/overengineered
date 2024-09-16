@@ -707,7 +707,14 @@ export class TutorialController extends Component {
 
 	/** Same as {@link hintsPart} but auto-translates the strings */
 	translatedHintsPart(...tasks: readonly (readonly string[])[]): TutorialPartRegistration {
-		return this.hintsPart(...tasks.map((tasks) => Localization.translateForPlayer(Players.LocalPlayer, ...tasks)));
+		return this.hintsPart(
+			...tasks.map((tasks) =>
+				Localization.translateForPlayer(
+					Players.LocalPlayer,
+					...tasks.map((v) => (v.size() !== 0 ? "• " : "") + v),
+				),
+			),
+		);
 	}
 	/** Show hints on the "hints" gui */
 	hintsPart(...tasks: readonly string[]): TutorialPartRegistration {
