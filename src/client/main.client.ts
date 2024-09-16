@@ -79,15 +79,17 @@ if (RunService.IsStudio() && Players.LocalPlayer.Name === "samlovebutter" && (fa
 	}
 }
 
-const testsName = "BlockTests";
-const testName: string | undefined = undefined;
-("delayBlockZeroImmediateTickBased");
+if (RunService.IsStudio() && Players.LocalPlayer.Name === "i3ymm") {
+	const testsName = "BlockTests";
+	const testName: string | undefined = undefined;
+	("delayBlockZeroImmediateTickBased");
 
-const testss = TestFramework.findAllTestScripts().map(TestFramework.loadTestsFromScript);
-const tests = Objects.fromEntries(
-	testss
-		.filter((t) => testsName in t && (!testName || testName in t[testsName]))
-		.flatmap((t) => Objects.entriesArray(testName ? { [testName]: t[testsName][testName] } : t[testsName])),
-);
+	const testss = TestFramework.findAllTestScripts().map(TestFramework.loadTestsFromScript);
+	const tests = Objects.fromEntries(
+		testss
+			.filter((t) => testsName in t && (!testName || testName in t[testsName]))
+			.flatmap((t) => Objects.entriesArray(testName ? { [testName]: t[testsName][testName] } : t[testsName])),
+	);
 
-TestFramework.runMultiple("BlockLogic", tests!, host.services);
+	TestFramework.runMultiple("BlockLogic", tests!, host.services);
+}
