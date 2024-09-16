@@ -13,18 +13,15 @@ class Logic extends InstanceBlockLogic<typeof definition> {
 	constructor(block: InstanceBlockLogicArgs) {
 		super(definition, block);
 
+		const initialPosition = this.instance.GetPivot().Position;
+
 		const attachment = new Instance("Attachment", block.instance.PrimaryPart);
 
 		const linearVelocity = new Instance("LinearVelocity");
 		linearVelocity.ForceLimitsEnabled = false;
 		linearVelocity.Attachment0 = attachment;
-		linearVelocity.VectorVelocity = Vector3.zero;
+		linearVelocity.VectorVelocity = initialPosition;
 		linearVelocity.Parent = block.instance.PrimaryPart;
-
-		const angularVelocity = new Instance("AngularVelocity");
-		angularVelocity.Attachment0 = attachment;
-		angularVelocity.AngularVelocity = Vector3.zero;
-		angularVelocity.Parent = block.instance.PrimaryPart;
 	}
 }
 
