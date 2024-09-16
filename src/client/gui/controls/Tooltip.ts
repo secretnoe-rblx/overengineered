@@ -98,7 +98,6 @@ class TooltipController extends HostedService {
 
 		eh.subscribe(control.instance.MouseEnter, () => {
 			if (!control.instance.Interactable) return;
-			if (!control.instance.Active) return;
 
 			const txt = typeIs(text, "function") ? text() : text;
 			if (!txt) return;
