@@ -44,8 +44,8 @@ export class HotbarButtonControl extends Control<HotbarToolButtonControlDefiniti
 
 export type HotbarControlDefinition = GuiObject & {
 	readonly Tools: GuiObject & {
-		readonly GamepadLeft: ImageLabel;
-		readonly GamepadRight: ImageLabel;
+		readonly GamepadLeft: Frame & { ImageLabel: ImageLabel };
+		readonly GamepadRight: Frame & { ImageLabel: ImageLabel };
 		readonly ToolTemplate: HotbarToolButtonControlDefinition;
 	};
 	readonly NameLabel: TextLabel;
@@ -101,8 +101,8 @@ export class HotbarControl extends Control<HotbarControlDefinition> {
 		);
 
 		this.event.onPrepare((inputType) => {
-			for (const button of toolButtons.getChildren()) {
-				button.instance.NumLabel.Visible = inputType === "Desktop";
+			for (const button of toolButtons.keyedChildren.getAll()) {
+				button[1].instance.NumLabel.Visible = inputType === "Desktop";
 			}
 
 			this.gui.Tools.GamepadLeft.Visible = inputType === "Gamepad";
@@ -110,8 +110,8 @@ export class HotbarControl extends Control<HotbarControlDefinition> {
 		});
 
 		this.event.onPrepareGamepad(() => {
-			this.gui.Tools.GamepadLeft.Image = UserInputService.GetImageForKeyCode(Enum.KeyCode.ButtonL1);
-			this.gui.Tools.GamepadRight.Image = UserInputService.GetImageForKeyCode(Enum.KeyCode.ButtonR1);
+			this.gui.Tools.GamepadLeft.ImageLabel.Image = UserInputService.GetImageForKeyCode(Enum.KeyCode.ButtonL1);
+			this.gui.Tools.GamepadRight.ImageLabel.Image = UserInputService.GetImageForKeyCode(Enum.KeyCode.ButtonR1);
 		});
 
 		this.event.subscribeObservable(tools.selectedTool, (tool, prev) => this.toolChanged(tool, prev));
