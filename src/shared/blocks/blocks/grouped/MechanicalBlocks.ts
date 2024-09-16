@@ -13,10 +13,12 @@ const blocks = {
 	ballinsocket: {
 		displayName: "Ball in Socket",
 		description: "Ball socket for your mechanical ingenuities",
+		limit: 50,
 	},
 	ballinsocketangled: {
 		displayName: "Ball in Socket (Angled)",
 		description: "Angled ball socket for your mechanical ingenuities",
+		limit: 50,
 	},
 
 	shaft: {
@@ -26,6 +28,7 @@ const blocks = {
 	driveshaft: {
 		displayName: "Driveshaft",
 		description: "A shaft that drives",
+		limit: 50,
 	},
 	bearingshaft: {
 		displayName: "Bearing Shaft",
@@ -34,6 +37,7 @@ const blocks = {
 	hingeblock: {
 		displayName: "Hinge",
 		description: "A simple hinge. Allows things to rotate in one plane",
+		limit: 50,
 	},
 	smallhingeblock: {
 		displayName: "Small hinge",
