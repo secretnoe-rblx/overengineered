@@ -1,0 +1,630 @@
+import type { TutorialDiffList } from "client/tutorial/TutorialController";
+
+export const NewBasicPlaneTutorialDiffs = {
+	saveVersion: 24,
+	diffs: {
+		base: [
+			{
+				block: {
+					uuid: "8356a6b0-5f0c-4a4d-ac5e-3b8194553685",
+					id: "block",
+					location: new CFrame(-11.999755859375, 1.5, -4, -1, 0, 0, 0, 1, 0, 0, 0, -1),
+				},
+				type: "added",
+			},
+		],
+		engineAndSeat: [
+			{
+				block: {
+					uuid: "b36b920d-6d56-43c5-b63e-12af744b400d",
+					id: "smallrocketengine",
+					location: new CFrame(10, 1.5, 0),
+				},
+				type: "added",
+			},
+			{
+				block: {
+					uuid: "dcd89f4b-3200-447c-b7e6-5191c4fc9d32",
+					id: "vehicleseat",
+					location: new CFrame(-9, 2.5, 0, 0, 0, 1, 0, 1, 0, -1, 0, 0),
+				},
+				type: "added",
+			},
+		],
+		basicWings: [
+			{
+				block: {
+					uuid: "d6d1fe31-0722-48e8-b0b7-4b0d2e863505",
+					id: "wedgewing1x4",
+					location: new CFrame(-6, 1.5, 5, 0, 0, 1, 0, 1, 0, -1, 0, 0),
+				},
+				type: "added",
+			},
+			{
+				block: {
+					uuid: "b9a00089-bd0f-4d35-95eb-c6da82362d20",
+					id: "wedgewing1x4",
+					location: new CFrame(-6, 1.5, -5, 0, 0, 1, 0, -1, 0, 1, 0, 0),
+				},
+				type: "added",
+			},
+			{
+				block: {
+					uuid: "cbf2a70c-d246-45c4-bb90-cef7ce4c5745",
+					id: "wing1x4",
+					location: new CFrame(-4, 1.5, -5, 0, 0, 1, 0, -1, 0, 1, 0, 0),
+				},
+				type: "added",
+			},
+			{
+				block: {
+					uuid: "e037d14f-239b-47cb-b35d-9bc6bb04b0b2",
+					id: "wing1x4",
+					location: new CFrame(-4, 1.5, 5, 0, 0, 1, 0, 1, 0, -1, 0, 0),
+				},
+				type: "added",
+			},
+		],
+		moveAll: [
+			{ uuid: "d6d1fe31-0722-48e8-b0b7-4b0d2e863505", type: "moved", to: new Vector3(-6, 9.5, 5) },
+			{ uuid: "54f82b66-b6a4-4490-a26d-0b9614a6bd8e", type: "moved", to: new Vector3(-4, 9.5, 0) },
+			{ uuid: "b36b920d-6d56-43c5-b63e-12af744b400d", type: "moved", to: new Vector3(10, 9.5, 0) },
+			{ uuid: "0dc6bce8-d96d-428f-a70c-4dfd997be562", type: "moved", to: new Vector3(4, 9.5, 0) },
+			{ uuid: "b9a00089-bd0f-4d35-95eb-c6da82362d20", type: "moved", to: new Vector3(-6, 9.5, -5) },
+			{ uuid: "cbf2a70c-d246-45c4-bb90-cef7ce4c5745", type: "moved", to: new Vector3(-4, 9.5, -5) },
+			{ uuid: "e037d14f-239b-47cb-b35d-9bc6bb04b0b2", type: "moved", to: new Vector3(-4, 9.5, 5) },
+			{ uuid: "dcd89f4b-3200-447c-b7e6-5191c4fc9d32", type: "moved", to: new Vector3(-9, 10.5, 0) },
+		],
+		servo: [
+			{
+				block: {
+					uuid: "b11c87ba-291b-44f0-8ce7-8cf0678c0ffc",
+					id: "servomotorblock",
+					location: new CFrame(7, 11.5, 0),
+				},
+				type: "added",
+			},
+			{
+				block: {
+					uuid: "8b587f06-688c-4d36-9e53-42f463260a13",
+					id: "servomotorblock",
+					location: new CFrame(-9, 7.5, 1, 0, 0, 1, 0, 1, 0, -1, 0, 0),
+				},
+				type: "added",
+			},
+			{
+				block: {
+					uuid: "5271ad05-e960-4c45-bf62-52b2a0d5873d",
+					id: "servomotorblock",
+					location: new CFrame(-2, 9.5, 2, -1, 0, 0, 0, 0, 1, 0, 1, 0),
+				},
+				type: "added",
+			},
+			{
+				block: {
+					uuid: "9a9c54c8-601c-41ec-b755-c5d14db1db37",
+					id: "servomotorblock",
+					location: new CFrame(-2, 9.5, -2, 1, 0, 0, 0, 0, 1, 0, -1, 0),
+				},
+				type: "added",
+			},
+			{
+				block: {
+					uuid: "826fc8a9-4fb6-4401-8c76-21610e67c637",
+					id: "servomotorblock",
+					location: new CFrame(7, 9.5, 2, -1, 0, 0, 0, 0, 1, 0, 1, 0),
+				},
+				type: "added",
+			},
+			{
+				block: {
+					uuid: "f957d4b6-6a1c-407d-a6d1-9dfff2abda1e",
+					id: "servomotorblock",
+					location: new CFrame(7, 9.5, -2, 1, 0, 0, 0, 0, 1, 0, -1, 0),
+				},
+				type: "added",
+			},
+			{
+				block: {
+					uuid: "18db45c8-7f7a-4610-97f3-c1af6c8625d6",
+					id: "servomotorblock",
+					location: new CFrame(-9, 7.5, -1, 0, 0, 1, 0, 1, 0, -1, 0, 0),
+				},
+				type: "added",
+			},
+		],
+		removeExtraServo: [{ uuid: "8b587f06-688c-4d36-9e53-42f463260a13", type: "removed" }],
+		controlWings: [
+			{
+				block: {
+					uuid: "81affaf4-5a6c-4949-a585-9e4771653334",
+					id: "wing1x3",
+					location: new CFrame(9, 15.5, 0, 0, 0, -1, -1, 0, 0, 0, 1, 0),
+				},
+				type: "added",
+			},
+			{
+				block: {
+					uuid: "a78b9c23-c081-45f0-865d-826bd56cc3df",
+					id: "wing1x3",
+					location: new CFrame(7, 15.5, 0, 0, 0, -1, -1, 0, 0, 0, 1, 0),
+				},
+				type: "added",
+			},
+			{
+				block: {
+					uuid: "1213590b-ab22-4117-9d6e-f2f1f8099a13",
+					id: "wing1x3",
+					location: new CFrame(9, 9.5, 6, 0, 0, -1, 0, 1, 0, 1, 0, 0),
+				},
+				type: "added",
+			},
+			{
+				block: {
+					uuid: "ca95f3a2-ea9b-4a42-a58c-f12dba1d11cb",
+					id: "wing1x3",
+					location: new CFrame(7, 9.5, -6, 0, 0, -1, 0, -1, -0, -1, 0, -0),
+				},
+				type: "added",
+			},
+			{
+				block: {
+					uuid: "c4ed1049-989b-4800-9bcb-087f252ccf66",
+					id: "wing1x3",
+					location: new CFrame(7, 9.5, 6, 0, 0, -1, 0, 1, 0, 1, 0, 0),
+				},
+				type: "added",
+			},
+			{
+				block: {
+					uuid: "06eaa521-feca-40d7-a28e-d9d7b06abf8a",
+					id: "wing1x3",
+					location: new CFrame(-1, 9.5, -6, 0, 0, -1, 0, -1, -0, -1, 0, -0),
+				},
+				type: "added",
+			},
+			{
+				block: {
+					uuid: "5e48fac3-6dae-4769-b5a2-7191aa08b831",
+					id: "wing1x3",
+					location: new CFrame(-1, 9.5, 6, 0, 0, -1, 0, 1, 0, 1, 0, 0),
+				},
+				type: "added",
+			},
+			{
+				block: {
+					uuid: "4c960203-659e-4116-88ed-d87bd69c5472",
+					id: "wing1x3",
+					location: new CFrame(9, 9.5, -6, 0, 0, -1, 0, -1, -0, -1, 0, -0),
+				},
+				type: "added",
+			},
+		],
+		prepareForWheels: [
+			{
+				block: {
+					uuid: "24622645-9525-44a2-b7b8-8220eeecd74c",
+					id: "bearingshaft",
+					location: new CFrame(5, 7.5, 2, -1, 0, 0, 0, 1, 0, 0, 0, -1),
+				},
+				type: "added",
+			},
+			{
+				block: {
+					uuid: "ff1beb04-e46b-445c-b407-8dcd06aa1258",
+					id: "wedge1x1",
+					location: new CFrame(5, 9.5, -2),
+				},
+				type: "added",
+			},
+			{
+				block: {
+					uuid: "4cac21a9-0faf-45c3-bd81-943fb2f6758c",
+					id: "smallhingeblock",
+					location: new CFrame(-9, 6.5, 0.5, 0, 0, 1, 1, 0, 0, 0, 1, 0),
+				},
+				type: "added",
+			},
+			{
+				block: {
+					uuid: "dbbd3aea-4382-4acf-adc9-e190d56f8c9a",
+					id: "wedge1x1",
+					location: new CFrame(5, 9.5, 2, -1, 0, 0, 0, 1, 0, 0, 0, -1),
+				},
+				type: "added",
+			},
+			{
+				block: {
+					uuid: "d70db767-ddd3-4135-be92-78a76789fa86",
+					id: "bearingshaft",
+					location: new CFrame(5, 7.5, -2),
+				},
+				type: "added",
+			},
+		],
+		placeWheels: [
+			{
+				block: {
+					uuid: "b4c141ad-9881-45db-ab60-08112d380be6",
+					id: "oldwheel",
+					location: new CFrame(5, 7.5, -3.498046875, 0, 0, 1, 1, 0, 0, 0, 1, 0),
+				},
+				type: "added",
+			},
+			{
+				block: {
+					uuid: "5a070b85-9fc9-4104-9aae-2eccf051d310",
+					id: "oldwheel",
+					location: new CFrame(5, 7.5, 3.501953125, 0, 0, 1, 1, 0, 0, 0, 1, 0),
+				},
+				type: "added",
+			},
+			{
+				block: {
+					uuid: "1c5846a8-cca9-4c92-9e18-bec57a8d6859",
+					id: "oldwheel",
+					location: new CFrame(-9, 6.5, 1.501953125, 0, 0, 1, 1, 0, 0, 0, 1, 0),
+				},
+				type: "added",
+			},
+		],
+		configureAllServos: [
+			{
+				uuid: "b11c87ba-291b-44f0-8ce7-8cf0678c0ffc",
+				value: { type: "number", config: 15 },
+				type: "configChanged",
+				key: "speed",
+			},
+			{
+				uuid: "b11c87ba-291b-44f0-8ce7-8cf0678c0ffc",
+				value: {
+					type: "number",
+					controlConfig: {
+						enabled: true,
+						mode: { resetOnStop: true, stopOnRelease: true, smoothSpeed: 20, smooth: false },
+						keys: [
+							{ key: "R", value: 15 },
+							{ key: "F", value: -15 },
+						],
+						startValue: 0,
+					},
+					config: 0,
+				},
+				type: "configChanged",
+				key: "angle",
+			},
+			{
+				uuid: "b11c87ba-291b-44f0-8ce7-8cf0678c0ffc",
+				value: { type: "number", config: 200 },
+				type: "configChanged",
+				key: "max_torque",
+			},
+			{
+				uuid: "b11c87ba-291b-44f0-8ce7-8cf0678c0ffc",
+				value: { type: "number", config: 45 },
+				type: "configChanged",
+				key: "stiffness",
+			},
+			{
+				uuid: "5271ad05-e960-4c45-bf62-52b2a0d5873d",
+				value: { type: "number", config: 15 },
+				type: "configChanged",
+				key: "speed",
+			},
+			{
+				uuid: "5271ad05-e960-4c45-bf62-52b2a0d5873d",
+				value: {
+					type: "number",
+					controlConfig: {
+						enabled: true,
+						mode: { resetOnStop: true, stopOnRelease: true, smoothSpeed: 20, smooth: false },
+						keys: [
+							{ key: "R", value: 15 },
+							{ key: "F", value: -15 },
+						],
+						startValue: 0,
+					},
+					config: 0,
+				},
+				type: "configChanged",
+				key: "angle",
+			},
+			{
+				uuid: "5271ad05-e960-4c45-bf62-52b2a0d5873d",
+				value: { type: "number", config: 200 },
+				type: "configChanged",
+				key: "max_torque",
+			},
+			{
+				uuid: "5271ad05-e960-4c45-bf62-52b2a0d5873d",
+				value: { type: "number", config: 45 },
+				type: "configChanged",
+				key: "stiffness",
+			},
+			{
+				uuid: "9a9c54c8-601c-41ec-b755-c5d14db1db37",
+				value: { type: "number", config: 15 },
+				type: "configChanged",
+				key: "speed",
+			},
+			{
+				uuid: "9a9c54c8-601c-41ec-b755-c5d14db1db37",
+				value: {
+					type: "number",
+					controlConfig: {
+						enabled: true,
+						mode: { resetOnStop: true, stopOnRelease: true, smoothSpeed: 20, smooth: false },
+						keys: [
+							{ key: "R", value: 15 },
+							{ key: "F", value: -15 },
+						],
+						startValue: 0,
+					},
+					config: 0,
+				},
+				type: "configChanged",
+				key: "angle",
+			},
+			{
+				uuid: "9a9c54c8-601c-41ec-b755-c5d14db1db37",
+				value: { type: "number", config: 200 },
+				type: "configChanged",
+				key: "max_torque",
+			},
+			{
+				uuid: "9a9c54c8-601c-41ec-b755-c5d14db1db37",
+				value: { type: "number", config: 45 },
+				type: "configChanged",
+				key: "stiffness",
+			},
+			{
+				uuid: "826fc8a9-4fb6-4401-8c76-21610e67c637",
+				value: { type: "number", config: 15 },
+				type: "configChanged",
+				key: "speed",
+			},
+			{
+				uuid: "826fc8a9-4fb6-4401-8c76-21610e67c637",
+				value: {
+					type: "number",
+					controlConfig: {
+						enabled: true,
+						mode: { resetOnStop: true, stopOnRelease: true, smoothSpeed: 20, smooth: false },
+						keys: [
+							{ key: "R", value: 15 },
+							{ key: "F", value: -15 },
+						],
+						startValue: 0,
+					},
+					config: 0,
+				},
+				type: "configChanged",
+				key: "angle",
+			},
+			{
+				uuid: "826fc8a9-4fb6-4401-8c76-21610e67c637",
+				value: { type: "number", config: 200 },
+				type: "configChanged",
+				key: "max_torque",
+			},
+			{
+				uuid: "826fc8a9-4fb6-4401-8c76-21610e67c637",
+				value: { type: "number", config: 45 },
+				type: "configChanged",
+				key: "stiffness",
+			},
+			{
+				uuid: "f957d4b6-6a1c-407d-a6d1-9dfff2abda1e",
+				value: { type: "number", config: 15 },
+				type: "configChanged",
+				key: "speed",
+			},
+			{
+				uuid: "f957d4b6-6a1c-407d-a6d1-9dfff2abda1e",
+				value: {
+					type: "number",
+					controlConfig: {
+						enabled: true,
+						mode: { resetOnStop: true, stopOnRelease: true, smoothSpeed: 20, smooth: false },
+						keys: [
+							{ key: "R", value: 15 },
+							{ key: "F", value: -15 },
+						],
+						startValue: 0,
+					},
+					config: 0,
+				},
+				type: "configChanged",
+				key: "angle",
+			},
+			{
+				uuid: "f957d4b6-6a1c-407d-a6d1-9dfff2abda1e",
+				value: { type: "number", config: 200 },
+				type: "configChanged",
+				key: "max_torque",
+			},
+			{
+				uuid: "f957d4b6-6a1c-407d-a6d1-9dfff2abda1e",
+				value: { type: "number", config: 45 },
+				type: "configChanged",
+				key: "stiffness",
+			},
+			{
+				uuid: "18db45c8-7f7a-4610-97f3-c1af6c8625d6",
+				value: { type: "number", config: 15 },
+				type: "configChanged",
+				key: "speed",
+			},
+			{
+				uuid: "18db45c8-7f7a-4610-97f3-c1af6c8625d6",
+				value: {
+					type: "number",
+					controlConfig: {
+						enabled: true,
+						mode: { resetOnStop: true, stopOnRelease: true, smoothSpeed: 20, smooth: false },
+						keys: [
+							{ key: "R", value: 15 },
+							{ key: "F", value: -15 },
+						],
+						startValue: 0,
+					},
+					config: 0,
+				},
+				type: "configChanged",
+				key: "angle",
+			},
+			{
+				uuid: "18db45c8-7f7a-4610-97f3-c1af6c8625d6",
+				value: { type: "number", config: 200 },
+				type: "configChanged",
+				key: "max_torque",
+			},
+			{
+				uuid: "18db45c8-7f7a-4610-97f3-c1af6c8625d6",
+				value: { type: "number", config: 45 },
+				type: "configChanged",
+				key: "stiffness",
+			},
+		],
+		configureRoll: [
+			{
+				uuid: "5271ad05-e960-4c45-bf62-52b2a0d5873d",
+				value: {
+					type: "number",
+					controlConfig: {
+						enabled: true,
+						mode: { resetOnStop: true, stopOnRelease: true, smoothSpeed: 20, smooth: false },
+						keys: [
+							{ key: "D", value: 15 },
+							{ key: "A", value: -15 },
+						],
+						startValue: 0,
+					},
+					config: 0,
+				},
+				type: "configChanged",
+				key: "angle",
+			},
+			{
+				uuid: "9a9c54c8-601c-41ec-b755-c5d14db1db37",
+				value: {
+					type: "number",
+					controlConfig: {
+						enabled: true,
+						mode: { resetOnStop: true, stopOnRelease: true, smoothSpeed: 20, smooth: false },
+						keys: [
+							{ key: "D", value: 15 },
+							{ key: "A", value: -15 },
+						],
+						startValue: 0,
+					},
+					config: 0,
+				},
+				type: "configChanged",
+				key: "angle",
+			},
+		],
+		configurePitch: [
+			{
+				uuid: "826fc8a9-4fb6-4401-8c76-21610e67c637",
+				value: {
+					type: "number",
+					controlConfig: {
+						enabled: true,
+						mode: { resetOnStop: true, stopOnRelease: true, smoothSpeed: 20, smooth: false },
+						keys: [
+							{ key: "W", value: 15 },
+							{ key: "S", value: -15 },
+						],
+						startValue: 0,
+					},
+					config: 0,
+				},
+				type: "configChanged",
+				key: "angle",
+			},
+			{
+				uuid: "f957d4b6-6a1c-407d-a6d1-9dfff2abda1e",
+				value: {
+					type: "number",
+					controlConfig: {
+						enabled: true,
+						mode: { resetOnStop: true, stopOnRelease: true, smoothSpeed: 20, smooth: false },
+						keys: [
+							{ key: "S", value: 15 },
+							{ key: "W", value: -15 },
+						],
+						startValue: 0,
+					},
+					config: 0,
+				},
+				type: "configChanged",
+				key: "angle",
+			},
+		],
+		configureYaw: [
+			{
+				uuid: "b11c87ba-291b-44f0-8ce7-8cf0678c0ffc",
+				value: {
+					type: "number",
+					controlConfig: {
+						enabled: true,
+						mode: { resetOnStop: true, stopOnRelease: true, smoothSpeed: 20, smooth: false },
+						keys: [
+							{ key: "Q", value: 15 },
+							{ key: "E", value: -15 },
+						],
+						startValue: 0,
+					},
+					config: 0,
+				},
+				type: "configChanged",
+				key: "angle",
+			},
+			{
+				uuid: "18db45c8-7f7a-4610-97f3-c1af6c8625d6",
+				value: {
+					type: "number",
+					controlConfig: {
+						enabled: true,
+						mode: { resetOnStop: true, stopOnRelease: true, smoothSpeed: 20, smooth: false },
+						keys: [
+							{ key: "Q", value: 15 },
+							{ key: "E", value: -15 },
+						],
+						startValue: 0,
+					},
+					config: 0,
+				},
+				type: "configChanged",
+				key: "angle",
+			},
+		],
+		configureEngine: [
+			{
+				uuid: "b36b920d-6d56-43c5-b63e-12af744b400d",
+				value: {
+					type: "number",
+					controlConfig: {
+						enabled: true,
+						mode: { resetOnStop: true, stopOnRelease: false, smoothSpeed: 20, smooth: true },
+						keys: [
+							{ key: "Z", value: 100 },
+							{ key: "X", value: 0 },
+						],
+						startValue: 0,
+					},
+					config: 0,
+				},
+				type: "configChanged",
+				key: "thrust",
+			},
+			{
+				uuid: "b36b920d-6d56-43c5-b63e-12af744b400d",
+				value: { type: "number", config: 100 },
+				type: "configChanged",
+				key: "strength",
+			},
+		],
+	},
+} satisfies TutorialDiffList;

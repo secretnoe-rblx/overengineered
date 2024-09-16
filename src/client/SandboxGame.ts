@@ -96,7 +96,11 @@ export namespace SandboxGame {
 		WikiPopup.addAsService(builder);
 
 		{
-			const tutorials: (new (...args: any[]) => TutorialDescriber)[] = [BasicCarTutorial, BasicPlaneTutorial];
+			const tutorials: (new (...args: any[]) => TutorialDescriber)[] = [
+				BasicCarTutorial,
+				BasicPlaneTutorial,
+				// NewPlaneTutorial,
+			];
 			if (GameDefinitions.isAdmin(Players.LocalPlayer)) {
 				tutorials.push(TestTutorial);
 			}
