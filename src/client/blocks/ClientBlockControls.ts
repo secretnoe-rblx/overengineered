@@ -111,7 +111,7 @@ namespace ClientBlockControlsNamespace {
 
 		//
 
-		set(config.startValue);
+		actualSet(config.startValue);
 
 		const mapKeyHold = (_: unknown, v: BlockLogicTypes.NumberControlKey): KeyDefinition<string> => ({
 			key: v.key,
