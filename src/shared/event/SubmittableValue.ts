@@ -4,7 +4,7 @@ import type { ReadonlyObservableValue } from "shared/event/ObservableValue";
 import type { ReadonlyArgsSignal } from "shared/event/Signal";
 
 interface SubmittableValueBase<T> {
-	readonly submitted: ReadonlyArgsSignal<[value: T]>;
+	readonly submitted: ReadonlyArgsSignal<[value: T, prev: T]>;
 
 	get(): T;
 }
@@ -23,7 +23,7 @@ export class SubmittableValue<T> implements ReadonlySubmittableValue<T>, SignalR
 	}
 
 	readonly value;
-	readonly _submitted = new ArgsSignal<[value: T]>();
+	readonly _submitted = new ArgsSignal<[value: T, prev: T]>();
 	readonly submitted = this._submitted.asReadonly();
 
 	constructor(observable: ObservableValue<T>) {
@@ -38,8 +38,9 @@ export class SubmittableValue<T> implements ReadonlySubmittableValue<T>, SignalR
 		this.value.set(value);
 	}
 	submit(value: T): void {
+		const prev = this.get();
 		this.set(value);
-		this._submitted.Fire(value);
+		this._submitted.Fire(value, prev);
 	}
 
 	asFullReadonly(): ReadonlySubmittableValue<T> {

@@ -50,15 +50,22 @@ class MultiKeyPartControl extends Control<MultiKeyPartControlDefinition> {
 		super(gui);
 
 		const value = new SubmittableValue(new ObservableValue<MultiKeyPart>({ key, value: num }));
-		this.value = value.asFullReadonly();
+		this.value = value.asHalfReadonly();
 
 		const keyChooser = this.add(new KeyOrStringChooserControl(gui.Button));
-		keyChooser.value.set(key);
 		keyChooser.submitted.Connect((key) => value.submit({ ...value.get(), key }));
 
 		const numbertb = this.add(new NumberTextBoxControl(gui.Number, min, max));
-		numbertb.value.set(num);
 		numbertb.submitted.Connect((num) => value.submit({ ...value.get(), value: num }));
+
+		this.event.subscribeObservable(
+			value.value,
+			({ key, value }) => {
+				keyChooser.value.set(key);
+				numbertb.value.set(value);
+			},
+			true,
+		);
 
 		const delButton = this.add(new ButtonControl(gui.DeleteButton, () => this._deleted.Fire()));
 		Tooltip.init(delButton, "Remove the key from the list");
@@ -88,8 +95,6 @@ export class MultiKeyNumberControl extends Control<MultiKeyNumberControlDefiniti
 	) {
 		super(gui);
 
-		// TODO: multiple keys the same key restrict
-
 		const template = this.asTemplate(gui.Template, true);
 
 		const children = new ComponentChildren<MultiKeyPartControl>(this);
@@ -102,7 +107,7 @@ export class MultiKeyNumberControl extends Control<MultiKeyNumberControlDefiniti
 			this._submitted.Fire(values);
 		};
 
-		const add = (key?: string | KeyCode, value?: number, doSubmit = true) => {
+		const add = (key?: string | KeyCode, value?: number) => {
 			key ??= generateKey(config);
 			if (!key) return;
 
@@ -111,9 +116,20 @@ export class MultiKeyNumberControl extends Control<MultiKeyNumberControlDefiniti
 			const control = new MultiKeyPartControl(template(), key, value, numberMin, numberMax);
 			children.add(control);
 
-			control.value.submitted.Connect(submit);
+			control.value.submitted.Connect(({ key }, { key: prevKey }) => {
+				const same = children.getAll().filter((c) => c !== control && c.value.get().key === key);
+				if (same.size() === 1) {
+					const otherControl = same[0];
+					otherControl.value.set({ ...otherControl.value.get(), key: prevKey });
+				} else if (same.size() > 1) {
+					// impossible situation, just stop from changing
+					control.value.set({ ...control.value.get(), key: prevKey });
+					return;
+				}
+
+				submit();
+			});
 			control.deleted.Connect(() => remove(control));
-			if (doSubmit) submit();
 		};
 		const remove = (control: MultiKeyPartControl) => {
 			children.remove(control);
@@ -121,9 +137,14 @@ export class MultiKeyNumberControl extends Control<MultiKeyNumberControlDefiniti
 		};
 
 		for (const { key, value } of config) {
-			add(key, value, false);
+			add(key, value);
 		}
 
-		this.add(new ButtonControl(gui.Add.Button, add));
+		this.add(
+			new ButtonControl(gui.Add.Button, () => {
+				add();
+				submit();
+			}),
+		);
 	}
 }
