@@ -125,7 +125,8 @@ const inputValuesToFullObject = <TDef extends BlockLogicBothDefinitions, K exten
 		>;
 	},
 	keys: readonly K[],
-	inputCache: { [k in string]: unknown },
+	inputCachePrev: { [k in string]: unknown },
+	inputCacheNext: { [k in string]: unknown },
 	returnUndefinedIfUnchanged: boolean,
 ): AllInputKeysToObject<TDef["input"], K> | BlockLogicValueResults | undefined => {
 	if (keys.size() === 0) {
@@ -141,15 +142,15 @@ const inputValuesToFullObject = <TDef extends BlockLogicBothDefinitions, K exten
 			return value;
 		}
 
-		const changed = inputCache[k] !== value.value || inputCache[`${tostring(k)}Type`] !== value.type;
+		const changed = inputCachePrev[k] !== value.value || inputCachePrev[`${tostring(k)}Type`] !== value.type;
 		anyChanged ||= changed;
 
 		input[k] = value.value;
 		input[`${tostring(k)}Type`] = value.type;
 		input[`${tostring(k)}Changed`] = changed;
 
-		inputCache[k] = value.value;
-		inputCache[`${tostring(k)}Type`] = value.type;
+		inputCacheNext[k] = value.value;
+		inputCacheNext[`${tostring(k)}Type`] = value.type;
 	}
 
 	if (returnUndefinedIfUnchanged && !anyChanged) {
@@ -373,7 +374,8 @@ export abstract class BlockLogic<TDef extends BlockLogicBothDefinitions> extends
 
 	//
 
-	private readonly inputCache: { [k in string]: unknown } = {};
+	private readonly inputCache1: { [k in string]: unknown } = {};
+	private readonly inputCache2: { [k in string]: unknown } = {};
 	private executeFuncWithValues<TKeys extends keyof TDef["input"]>(
 		ctx: BlockLogicTickContext,
 		keys: readonly TKeys[],
@@ -384,7 +386,9 @@ export abstract class BlockLogic<TDef extends BlockLogicBothDefinitions> extends
 			ctx,
 			this.input,
 			keys as (TKeys & string)[],
-			this.inputCache,
+			// alternating between caches so that multiple calls to this in the same tick don't get stuck thinking the values aren't changed
+			ctx.tick % 2 === 0 ? this.inputCache1 : this.inputCache2,
+			ctx.tick % 2 === 0 ? this.inputCache2 : this.inputCache1,
 			skipIfUnchanged,
 		);
 		if (!inputs || isCustomBlockLogicValueResult(inputs)) {
