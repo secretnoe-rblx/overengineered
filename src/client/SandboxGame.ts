@@ -29,6 +29,7 @@ import { PlayerDataInitializer } from "client/PlayerDataStorage";
 import { TerrainController } from "client/terrain/TerrainController";
 import { BasicCarTutorial } from "client/tutorial/tutorials/BasicCarTutorial";
 import { BasicPlaneTutorial } from "client/tutorial/tutorials/BasicPlaneTutorial";
+import { NewBasicPlaneTutorial } from "client/tutorial/tutorials/NewBasicPlaneTutorial";
 import { TestTutorial } from "client/tutorial/tutorials/TestTutorial";
 import { TutorialServiceInitializer } from "client/tutorial/TutorialService";
 import { ReadonlyPlot } from "shared/building/ReadonlyPlot";
@@ -99,7 +100,7 @@ export namespace SandboxGame {
 			const tutorials: (new (...args: any[]) => TutorialDescriber)[] = [
 				BasicCarTutorial,
 				BasicPlaneTutorial,
-				// NewPlaneTutorial,
+				NewBasicPlaneTutorial,
 			];
 			if (GameDefinitions.isAdmin(Players.LocalPlayer)) {
 				tutorials.push(TestTutorial);

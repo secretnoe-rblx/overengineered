@@ -6,9 +6,17 @@ export const NewBasicPlaneTutorialDiffs = {
 		base: [
 			{
 				block: {
-					uuid: "8356a6b0-5f0c-4a4d-ac5e-3b8194553685",
-					id: "block",
-					location: new CFrame(-11.999755859375, 1.5, -4, -1, 0, 0, 0, 1, 0, 0, 0, -1),
+					uuid: "f2dadc75-74ff-480c-b97e-8fa30a062c16",
+					id: "beam4x1",
+					location: new CFrame(-4, 1.5, 0, 0, -1, 0, 1, 0, 0, 0, 0, 1),
+				},
+				type: "added",
+			},
+			{
+				block: {
+					uuid: "36cda2b0-66e2-4d0a-b939-deb93f7c0eef",
+					id: "beam4x1",
+					location: new CFrame(4, 1.5, 0, 0, -1, 0, 1, 0, 0, 0, 0, 1),
 				},
 				type: "added",
 			},
@@ -34,7 +42,7 @@ export const NewBasicPlaneTutorialDiffs = {
 		basicWings: [
 			{
 				block: {
-					uuid: "d6d1fe31-0722-48e8-b0b7-4b0d2e863505",
+					uuid: "54f82b66-b6a4-4490-a26d-0b9614a6bd8e",
 					id: "wedgewing1x4",
 					location: new CFrame(-6, 1.5, 5, 0, 0, 1, 0, 1, 0, -1, 0, 0),
 				},
@@ -66,10 +74,10 @@ export const NewBasicPlaneTutorialDiffs = {
 			},
 		],
 		moveAll: [
-			{ uuid: "d6d1fe31-0722-48e8-b0b7-4b0d2e863505", type: "moved", to: new Vector3(-6, 9.5, 5) },
-			{ uuid: "54f82b66-b6a4-4490-a26d-0b9614a6bd8e", type: "moved", to: new Vector3(-4, 9.5, 0) },
+			{ uuid: "54f82b66-b6a4-4490-a26d-0b9614a6bd8e", type: "moved", to: new Vector3(-6, 9.5, 5) },
+			{ uuid: "f2dadc75-74ff-480c-b97e-8fa30a062c16", type: "moved", to: new Vector3(-4, 9.5, 0) },
 			{ uuid: "b36b920d-6d56-43c5-b63e-12af744b400d", type: "moved", to: new Vector3(10, 9.5, 0) },
-			{ uuid: "0dc6bce8-d96d-428f-a70c-4dfd997be562", type: "moved", to: new Vector3(4, 9.5, 0) },
+			{ uuid: "36cda2b0-66e2-4d0a-b939-deb93f7c0eef", type: "moved", to: new Vector3(4, 9.5, 0) },
 			{ uuid: "b9a00089-bd0f-4d35-95eb-c6da82362d20", type: "moved", to: new Vector3(-6, 9.5, -5) },
 			{ uuid: "cbf2a70c-d246-45c4-bb90-cef7ce4c5745", type: "moved", to: new Vector3(-4, 9.5, -5) },
 			{ uuid: "e037d14f-239b-47cb-b35d-9bc6bb04b0b2", type: "moved", to: new Vector3(-4, 9.5, 5) },
