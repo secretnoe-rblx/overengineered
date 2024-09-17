@@ -1,12 +1,12 @@
 import { LoadingController } from "client/controller/LoadingController";
-import { ToolbarControl } from "client/gui/buildmode/ToolbarControl";
+import { HotbarControl } from "client/gui/buildmode/HotbarControl";
 import { Control } from "client/gui/Control";
 import { ButtonControl } from "client/gui/controls/Button";
 import { TouchActionControllerGui } from "client/gui/TouchActionControllerGui";
 import { ActionController } from "client/modes/build/ActionController";
 import { requestMode } from "client/modes/PlayModeRequest";
 import { ComponentDisabler } from "shared/component/ComponentDisabler";
-import type { ToolbarControlDefinition } from "client/gui/buildmode/ToolbarControl";
+import type { HotbarControlDefinition } from "client/gui/buildmode/HotbarControl";
 import type { SavePopup } from "client/gui/popup/SavePopup";
 import type { SettingsPopup } from "client/gui/popup/SettingsPopup";
 import type { TouchActionControllerGuiDefinition } from "client/gui/TouchActionControllerGui";
@@ -83,7 +83,7 @@ class ActionBarControl extends Control<ActionBarControlDefinition> {
 export type BuildingModeSceneDefinition = GuiObject & {
 	readonly Action: TouchActionControllerGuiDefinition;
 	readonly ActionBar: ActionBarControlDefinition;
-	readonly Hotbar: ToolbarControlDefinition;
+	readonly HotbarNew: HotbarControlDefinition;
 };
 export class BuildingModeScene extends Control<BuildingModeSceneDefinition> {
 	readonly actionbar;
@@ -119,7 +119,7 @@ export class BuildingModeScene extends Control<BuildingModeSceneDefinition> {
 		this.event.subscribeObservable(tools.selectedTool, updateActionBarVisibility);
 		this.onEnable(updateActionBarVisibility);
 
-		const toolbar = this.add(new ToolbarControl(tools, gui.Hotbar));
+		const toolbar = this.add(new HotbarControl(tools, gui.HotbarNew));
 		const updateToolbarVisibility = () => toolbar.setVisible(!LoadingController.isLoading.get());
 		this.event.subscribeObservable(LoadingController.isLoading, updateToolbarVisibility);
 		this.onEnable(updateToolbarVisibility);

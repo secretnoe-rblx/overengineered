@@ -8,7 +8,7 @@ import { BlockPreviewControl } from "client/gui/buildmode/BlockPreviewControl";
 import { BlockSelectionControl } from "client/gui/buildmode/BlockSelection";
 import { MaterialColorEditControl } from "client/gui/buildmode/MaterialColorEditControl";
 import { MirrorEditorControl } from "client/gui/buildmode/MirrorEditorControl";
-import { Colors } from "client/gui/Colors";
+import { Colors } from "shared/Colors";
 import { Control } from "client/gui/Control";
 import { ButtonControl } from "client/gui/controls/Button";
 import { DebugLog } from "client/gui/DebugLog";

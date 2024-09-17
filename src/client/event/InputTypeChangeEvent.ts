@@ -1,7 +1,7 @@
 import { UserInputService } from "@rbxts/services";
 import { InputController } from "client/controller/InputController";
-import { Colors } from "client/gui/Colors";
 import { LogControl } from "client/gui/static/LogControl";
+import { Colors } from "shared/Colors";
 
 /** A permanent event that monitors the change in the type of input type, which makes the game more flexible */
 export namespace InputTypeChangeEvent {

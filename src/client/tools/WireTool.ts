@@ -2,7 +2,7 @@ import { GamepadService, GuiService, Players, ReplicatedStorage, RunService, Wor
 import { ClientComponent } from "client/component/ClientComponent";
 import { ClientInstanceComponent } from "client/component/ClientInstanceComponent";
 import { InputController } from "client/controller/InputController";
-import { Colors } from "client/gui/Colors";
+import { Colors } from "shared/Colors";
 import { Control } from "client/gui/Control";
 import { ButtonControl } from "client/gui/controls/Button";
 import { Gui } from "client/gui/Gui";

@@ -1,4 +1,4 @@
-import { Colors } from "client/gui/Colors";
+import { Colors } from "shared/Colors";
 import { Control } from "client/gui/Control";
 import { Gui } from "client/gui/Gui";
 import { GuiAnimator } from "client/gui/GuiAnimator";

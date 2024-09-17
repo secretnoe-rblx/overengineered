@@ -1,25 +1,25 @@
 import { StarterGui, UserInputService } from "@rbxts/services";
 import { LoadingController } from "client/controller/LoadingController";
 import { SoundController } from "client/controller/SoundController";
-import { Colors } from "client/gui/Colors";
 import { Control } from "client/gui/Control";
 import { DictionaryControl } from "client/gui/controls/DictionaryControl";
+import { Colors } from "shared/Colors";
 import { TransformService } from "shared/component/TransformService";
 import type { ToolBase } from "client/tools/ToolBase";
 import type { ToolController } from "client/tools/ToolController";
 
-export type ToolbarButtonControlDefinition = TextButton & {
+export type HotbarToolButtonControlDefinition = TextButton & {
 	readonly ImageLabel: ImageLabel;
-	readonly KeyboardNumberLabel: TextLabel;
+	readonly NumLabel: TextLabel;
 };
 
-export class ToolbarButtonControl extends Control<ToolbarButtonControlDefinition> {
-	constructor(gui: ToolbarButtonControlDefinition, tools: ToolController, tool: ToolBase, index: number) {
+export class HotbarButtonControl extends Control<HotbarToolButtonControlDefinition> {
+	constructor(gui: HotbarToolButtonControlDefinition, tools: ToolController, tool: ToolBase, index: number) {
 		super(gui);
 
 		this.gui.Name = tool.getDisplayName();
 		this.gui.ImageLabel.Image = tool.getImageID();
-		this.gui.KeyboardNumberLabel.Text = tostring(index);
+		this.gui.NumLabel.Text = tostring(index);
 
 		this.event.subscribe(this.gui.Activated, () => {
 			if (LoadingController.isLoading.get()) return;
@@ -30,20 +30,8 @@ export class ToolbarButtonControl extends Control<ToolbarButtonControlDefinition
 			TransformService.boolStateMachine(
 				this.gui,
 				TransformService.commonProps.quadOut02,
-				{ BackgroundColor3: Colors.accent },
-				{ BackgroundColor3: Colors.staticBackground },
-			),
-			TransformService.boolStateMachine(
-				this.gui.ImageLabel,
-				TransformService.commonProps.quadOut02,
-				{ ImageColor3: Colors.black },
-				{ ImageColor3: Colors.accentLight },
-			),
-			TransformService.boolStateMachine(
-				this.gui.KeyboardNumberLabel,
-				TransformService.commonProps.quadOut02,
-				{ TextColor3: Colors.staticBackground, TextTransparency: 0.4 },
-				{ TextColor3: Colors.accentLight, TextTransparency: 0 },
+				{ BackgroundColor3: Colors.newGui.blue },
+				{ BackgroundColor3: Colors.newGui.staticBackground },
 			),
 		);
 		this.event.subscribeObservable(
@@ -54,33 +42,31 @@ export class ToolbarButtonControl extends Control<ToolbarButtonControlDefinition
 	}
 }
 
-export type ToolbarControlDefinition = GuiObject & {
-	readonly Buttons: GuiObject & {
-		readonly Template: ToolbarButtonControlDefinition;
+export type HotbarControlDefinition = GuiObject & {
+	readonly Tools: GuiObject & {
+		readonly GamepadLeft: Frame & { ImageLabel: ImageLabel };
+		readonly GamepadRight: Frame & { ImageLabel: ImageLabel };
+		readonly ToolTemplate: HotbarToolButtonControlDefinition;
 	};
-	readonly Info: {
-		readonly NameLabel: TextLabel;
-		readonly GamepadBack: ImageLabel;
-		readonly GamepadNext: ImageLabel;
-	};
+	readonly NameLabel: TextLabel;
 };
 
-export class ToolbarControl extends Control<ToolbarControlDefinition> {
+export class HotbarControl extends Control<HotbarControlDefinition> {
 	private readonly tools;
 	private readonly nameLabel;
 
-	constructor(tools: ToolController, gui: ToolbarControlDefinition) {
+	constructor(tools: ToolController, gui: HotbarControlDefinition) {
 		super(gui);
 		this.tools = tools;
 
 		// Disable roblox native backpack
 		StarterGui.SetCoreGuiEnabled(Enum.CoreGuiType.Backpack, false);
 
-		const template = this.asTemplate(this.gui.Buttons.Template);
-		const toolButtons = new DictionaryControl<GuiObject, ToolBase, ToolbarButtonControl>(this.gui.Buttons);
+		const template = this.asTemplate(this.gui.Tools.ToolTemplate);
+		const toolButtons = new DictionaryControl<GuiObject, ToolBase, HotbarButtonControl>(this.gui.Tools);
 		this.add(toolButtons);
 
-		this.nameLabel = this.add(new Control(this.gui.Info.NameLabel));
+		this.nameLabel = this.add(new Control(this.gui.NameLabel));
 
 		this.event.subscribeObservable(
 			tools.visibleTools.enabled,
@@ -93,7 +79,7 @@ export class ToolbarControl extends Control<ToolbarControlDefinition> {
 						continue;
 					}
 
-					const button = new ToolbarButtonControl(template(), tools, tool, ++index);
+					const button = new HotbarButtonControl(template(), tools, tool, ++index);
 					toolButtons.keyedChildren.add(tool, button);
 				}
 			},
@@ -105,7 +91,7 @@ export class ToolbarControl extends Control<ToolbarControlDefinition> {
 				for (const [tool, control] of toolButtons.keyedChildren.getAll()) {
 					const isenabled = enabled.includes(tool);
 
-					control.instance.BackgroundTransparency = isenabled ? 0.2 : 0.8;
+					control.instance.BackgroundTransparency = isenabled ? 0.2 : 0.6;
 					control.instance.Active = isenabled;
 					control.instance.Interactable = isenabled;
 					control.instance.AutoButtonColor = isenabled;
@@ -115,17 +101,17 @@ export class ToolbarControl extends Control<ToolbarControlDefinition> {
 		);
 
 		this.event.onPrepare((inputType) => {
-			for (const button of toolButtons.getChildren()) {
-				button.instance.KeyboardNumberLabel.Visible = inputType === "Desktop";
+			for (const button of toolButtons.keyedChildren.getAll()) {
+				button[1].instance.NumLabel.Visible = inputType === "Desktop";
 			}
 
-			this.gui.Info.GamepadBack.Visible = inputType === "Gamepad";
-			this.gui.Info.GamepadNext.Visible = inputType === "Gamepad";
+			this.gui.Tools.GamepadLeft.Visible = inputType === "Gamepad";
+			this.gui.Tools.GamepadRight.Visible = inputType === "Gamepad";
 		});
 
 		this.event.onPrepareGamepad(() => {
-			this.gui.Info.GamepadBack.Image = UserInputService.GetImageForKeyCode(Enum.KeyCode.ButtonL1);
-			this.gui.Info.GamepadNext.Image = UserInputService.GetImageForKeyCode(Enum.KeyCode.ButtonR1);
+			this.gui.Tools.GamepadLeft.ImageLabel.Image = UserInputService.GetImageForKeyCode(Enum.KeyCode.ButtonL1);
+			this.gui.Tools.GamepadRight.ImageLabel.Image = UserInputService.GetImageForKeyCode(Enum.KeyCode.ButtonR1);
 		});
 
 		this.event.subscribeObservable(tools.selectedTool, (tool, prev) => this.toolChanged(tool, prev));
@@ -154,14 +140,14 @@ export class ToolbarControl extends Control<ToolbarControlDefinition> {
 					.transform("TextTransparency", 1, { duration: duration * 0.8 });
 			}
 
-			transform.then().func(() => (this.instance.Info.NameLabel.Text = tool?.getDisplayName() ?? ""));
+			transform.then().func(() => (this.instance.NameLabel.Text = tool?.getDisplayName() ?? ""));
 
 			if (tool) {
 				transform
 					.then()
 					.moveY(new UDim(1, 0))
 					.transform("TextTransparency", 1)
-					.moveY(new UDim(0.5, 0), { duration })
+					.moveY(new UDim(0.05, 0), { duration })
 					.transform("TextTransparency", 0, { duration: duration * 0.8 })
 					.then();
 			}
@@ -172,6 +158,6 @@ export class ToolbarControl extends Control<ToolbarControlDefinition> {
 	}
 
 	private resetLabels() {
-		this.instance.Info.NameLabel.Text = "";
+		this.instance.NameLabel.Text = "";
 	}
 }

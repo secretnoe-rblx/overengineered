@@ -1,6 +1,6 @@
 import { HttpService, Players, Workspace } from "@rbxts/services";
 import { LoadingController } from "client/controller/LoadingController";
-import { Colors } from "client/gui/Colors";
+import { Colors } from "shared/Colors";
 import { LogControl } from "client/gui/static/LogControl";
 import { Config } from "shared/config/Config";
 import { PlayerConfigDefinition } from "shared/config/PlayerConfig";

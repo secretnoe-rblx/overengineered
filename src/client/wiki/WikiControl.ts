@@ -1,5 +1,5 @@
 import { BlockPreviewControl } from "client/gui/buildmode/BlockPreviewControl";
-import { Colors } from "client/gui/Colors";
+import { Colors } from "shared/Colors";
 import { Control } from "client/gui/Control";
 import { TextButtonControl } from "client/gui/controls/Button";
 import { DictionaryControl } from "client/gui/controls/DictionaryControl";
