@@ -1,7 +1,7 @@
 import { BlockCreation } from "shared/blocks/BlockCreation";
 import type { BlockBuildersWithoutIdAndDefaults } from "shared/blocks/Block";
 
-const blocks = {
+const blocks: BlockBuildersWithoutIdAndDefaults = {
 	anchorblock: {
 		displayName: "Anchor",
 		description: "An immovable block",
@@ -56,13 +56,8 @@ const blocks = {
 		displayName: "Wing Sharper",
 		description: "An evil brother of the wing rounding",
 	},
-} as const satisfies BlockBuildersWithoutIdAndDefaults;
+};
 
 //
 
-const list = {
-	...blocks,
-} satisfies BlockBuildersWithoutIdAndDefaults;
-export const MechanicalBlocks = BlockCreation.arrayFromObject(list);
-
-export type MechanicalBlockIds = keyof typeof list;
+export const MechanicalBlocks = BlockCreation.arrayFromObject(blocks);

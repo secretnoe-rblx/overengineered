@@ -79,7 +79,7 @@ export class Logic extends InstanceBlockLogic<typeof definition> {
 //
 
 const logic: BlockLogicInfo = { definition, ctor: Logic };
-const list = {
+const list: BlockBuildersWithoutIdAndDefaults = {
 	lamp: {
 		displayName: "Lamp",
 		description: "A simple lamp. Turns on and off, but doesn't produce light yet.",
@@ -94,7 +94,5 @@ const list = {
 		logic,
 		limit: 150,
 	},
-} as const satisfies BlockBuildersWithoutIdAndDefaults;
+};
 export const LampBlocks = BlockCreation.arrayFromObject(list);
-
-export type LampBlockIds = keyof typeof list;

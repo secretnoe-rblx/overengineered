@@ -194,7 +194,7 @@ class Logic extends InstanceBlockLogic<typeof definition, RocketModel> {
 }
 
 const logic: BlockLogicInfo = { definition, ctor: Logic };
-const list = {
+const list: BlockBuildersWithoutIdAndDefaults = {
 	rocketengine: {
 		displayName: "Rocket Engine",
 		description: "Engines your rocket into the space and onto the ground",
@@ -207,7 +207,5 @@ const list = {
 		logic,
 		limit: 50,
 	},
-} satisfies BlockBuildersWithoutIdAndDefaults;
+};
 export const RocketBlocks = BlockCreation.arrayFromObject(list);
-
-export type RocketBlockIds = keyof typeof list;

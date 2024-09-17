@@ -270,13 +270,11 @@ const wedges = {
 
 //
 
-const list = {
+const list: BlockBuildersWithoutIdAndDefaults = {
 	...blocks,
 	...beams,
 	...cornerWedges,
 	...cylinders,
 	...wedges,
-} satisfies BlockBuildersWithoutIdAndDefaults;
+};
 export const BuildingBlocks = BlockCreation.arrayFromObject(list);
-
-export type BuildingBlockIds = keyof typeof list;

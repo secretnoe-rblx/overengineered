@@ -111,7 +111,7 @@ class Logic extends InstanceBlockLogic<typeof definition, WingBlock> {
 }
 
 const logic: BlockLogicInfo = { definition, ctor: Logic };
-const list = {
+const list: BlockBuildersWithoutIdAndDefaults = {
 	wing1x1: {
 		displayName: "Wing 1x1",
 		description: "A part with advanced aerodynamic properties",
@@ -176,7 +176,5 @@ const list = {
 			behaviour: "wedgeWing",
 		},
 	},
-} satisfies BlockBuildersWithoutIdAndDefaults;
+};
 export const WingBlocks = BlockCreation.arrayFromObject(list);
-
-export type WingBlockIds = keyof typeof list;

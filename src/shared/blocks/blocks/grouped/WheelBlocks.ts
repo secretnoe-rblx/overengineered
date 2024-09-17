@@ -65,7 +65,7 @@ class Logic extends InstanceBlockLogic<typeof definition> {
 }
 
 const logic: BlockLogicInfo = { definition, ctor: Logic };
-const list = {
+const list: BlockBuildersWithoutIdAndDefaults = {
 	wheel: {
 		displayName: "Wheel",
 		description: "circle",
@@ -91,7 +91,5 @@ const list = {
 		description: "Old fashioned wheel. Big one.",
 		logic,
 	},
-} satisfies BlockBuildersWithoutIdAndDefaults;
+};
 export const WheelBlocks = BlockCreation.arrayFromObject(list);
-
-export type WheelBlockIds = keyof typeof list;

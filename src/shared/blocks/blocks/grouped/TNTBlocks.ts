@@ -114,7 +114,7 @@ class Logic extends InstanceBlockLogic<typeof definition> {
 }
 
 const logic: BlockLogicInfo = { definition, ctor: Logic };
-const list = {
+const list: BlockBuildersWithoutIdAndDefaults = {
 	tnt: {
 		displayName: "TNT",
 		description: "A box of explosives. DO NOT HIT!",
@@ -133,7 +133,5 @@ const list = {
 		limit: 100,
 		logic,
 	},
-} satisfies BlockBuildersWithoutIdAndDefaults;
+};
 export const TNTBlocks = BlockCreation.arrayFromObject(list);
-
-export type TNTBlockIds = keyof typeof list;

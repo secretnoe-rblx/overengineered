@@ -1,15 +1,5 @@
 import type { BlockLogicFullBothDefinitions, GenericBlockLogicCtor } from "shared/blockLogic/BlockLogic";
 import type { BlockCreation, BlockMirrorBehaviour } from "shared/blocks/BlockCreation";
-import type { DisconnectBlock } from "shared/blocks/blocks/DisconnectBlock";
-import type { BasicOperationBlockIds } from "shared/blocks/blocks/grouped/BasicOperationBlocks";
-import type { BuildingBlockIds } from "shared/blocks/blocks/grouped/BuildingBlocks";
-import type { LampBlockIds } from "shared/blocks/blocks/grouped/LampBlocks";
-import type { MechanicalBlockIds } from "shared/blocks/blocks/grouped/MechanicalBlocks";
-import type { ServoMotorBlockIds } from "shared/blocks/blocks/grouped/ServoMotorBlocks";
-import type { TNTBlockIds } from "shared/blocks/blocks/grouped/TNTBlocks";
-import type { WheelBlockIds } from "shared/blocks/blocks/grouped/WheelBlocks";
-import type { WingBlockIds } from "shared/blocks/blocks/grouped/WingsBlocks";
-import type { RocketBlockIds } from "shared/blocks/blocks/RocketEngineBlocks";
 
 export type BlockCategoryPath = readonly string[];
 export type BlockLogicInfo = {
@@ -53,19 +43,7 @@ export type BlockBuilderWithoutIdAndDefaults = MakePartial<BlockBuilderWithoutId
 export type BlockBuildersWithoutIdAndDefaults = { readonly [k in string]: BlockBuilderWithoutIdAndDefaults };
 
 declare global {
-	type BlockId =
-		| string
-		| (string &
-				BuildingBlockIds &
-				MechanicalBlockIds &
-				BasicOperationBlockIds &
-				WheelBlockIds &
-				RocketBlockIds &
-				LampBlockIds &
-				WingBlockIds &
-				ServoMotorBlockIds &
-				TNTBlockIds &
-				(typeof DisconnectBlock)["id"]);
+	type BlockId = string;
 
 	type Block = Omit<BlockBuilder, "id" | (`${string}Source` & keyof BlockBuilder)> & {
 		readonly id: BlockId;

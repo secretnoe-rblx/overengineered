@@ -1376,7 +1376,7 @@ const test: {} = !RunService.IsStudio()
 
 //
 
-const list = {
+const list: BlockBuildersWithoutIdAndDefaults = {
 	...maths,
 	...constants,
 	...trigonometry,
@@ -1385,7 +1385,5 @@ const list = {
 	...byte,
 	...other,
 	...test,
-} satisfies BlockBuildersWithoutIdAndDefaults;
+};
 export const BasicOperationBlocks = BlockCreation.arrayFromObject(list);
-
-export type BasicOperationBlockIds = keyof typeof list;

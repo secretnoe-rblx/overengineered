@@ -156,7 +156,7 @@ class Logic extends InstanceBlockLogic<typeof servoDefinition, ServoMotorModel> 
 	}
 }
 
-const list = {
+const list: BlockBuildersWithoutIdAndDefaults = {
 	servomotorblock: {
 		displayName: "Servo",
 		description: "A configurable motor. Rotates to the desired angle",
@@ -183,7 +183,5 @@ const list = {
 			},
 		},
 	},
-} satisfies BlockBuildersWithoutIdAndDefaults;
+};
 export const ServoMotorBlocks = BlockCreation.arrayFromObject(list);
-
-export type ServoMotorBlockIds = keyof typeof list;
