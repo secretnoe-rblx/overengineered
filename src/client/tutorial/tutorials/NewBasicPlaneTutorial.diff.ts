@@ -145,41 +145,49 @@ export const NewBasicPlaneTutorialDiffs = {
 		controlWings: [
 			{
 				block: {
-					uuid: "81affaf4-5a6c-4949-a585-9e4771653334",
-					id: "wing1x3",
-					location: new CFrame(9, 15.5, 0, 0, 0, -1, -1, 0, 0, 0, 1, 0),
+					uuid: "3277b070-5d5e-44e1-b41d-8b63b11cbfdc",
+					id: "wing1x2",
+					location: new CFrame(7, 9.5, 5, 0, 0, 1, 0, -1, 0, 1, 0, 0),
 				},
 				type: "added",
 			},
 			{
 				block: {
-					uuid: "a78b9c23-c081-45f0-865d-826bd56cc3df",
-					id: "wing1x3",
-					location: new CFrame(7, 15.5, 0, 0, 0, -1, -1, 0, 0, 0, 1, 0),
+					uuid: "a87e50ea-ab5c-4237-bffa-6db1ec646934",
+					id: "wing1x2",
+					location: new CFrame(9, 14.5, 0, 0, 0, 1, 1, 0, 0, 0, 1, 0),
 				},
 				type: "added",
 			},
 			{
 				block: {
-					uuid: "1213590b-ab22-4117-9d6e-f2f1f8099a13",
-					id: "wing1x3",
-					location: new CFrame(9, 9.5, 6, 0, 0, -1, 0, 1, 0, 1, 0, 0),
+					uuid: "48c7b42d-3bbc-49ec-9546-8e9278842868",
+					id: "wing1x2",
+					location: new CFrame(7, 14.5, 0, 0, 0, 1, 1, 0, 0, 0, 1, 0),
 				},
 				type: "added",
 			},
 			{
 				block: {
-					uuid: "ca95f3a2-ea9b-4a42-a58c-f12dba1d11cb",
-					id: "wing1x3",
-					location: new CFrame(7, 9.5, -6, 0, 0, -1, 0, -1, -0, -1, 0, -0),
+					uuid: "e70da516-eb85-45ef-837e-1455208d44fc",
+					id: "wing1x2",
+					location: new CFrame(9, 9.5, -5, 0, 0, 1, 0, 1, 0, -1, 0, 0),
 				},
 				type: "added",
 			},
 			{
 				block: {
-					uuid: "c4ed1049-989b-4800-9bcb-087f252ccf66",
-					id: "wing1x3",
-					location: new CFrame(7, 9.5, 6, 0, 0, -1, 0, 1, 0, 1, 0, 0),
+					uuid: "982133c1-045d-495f-a360-a6ea73626fd0",
+					id: "wing1x2",
+					location: new CFrame(7, 9.5, -5, 0, 0, 1, 0, 1, 0, -1, 0, 0),
+				},
+				type: "added",
+			},
+			{
+				block: {
+					uuid: "713d4f01-c77d-4f2c-aa91-bb3afcbbc908",
+					id: "wing1x2",
+					location: new CFrame(9, 9.5, 5, 0, 0, 1, 0, -1, 0, 1, 0, 0),
 				},
 				type: "added",
 			},
@@ -196,14 +204,6 @@ export const NewBasicPlaneTutorialDiffs = {
 					uuid: "5e48fac3-6dae-4769-b5a2-7191aa08b831",
 					id: "wing1x3",
 					location: new CFrame(-1, 9.5, 6, 0, 0, -1, 0, 1, 0, 1, 0, 0),
-				},
-				type: "added",
-			},
-			{
-				block: {
-					uuid: "4c960203-659e-4116-88ed-d87bd69c5472",
-					id: "wing1x3",
-					location: new CFrame(9, 9.5, -6, 0, 0, -1, 0, -1, -0, -1, 0, -0),
 				},
 				type: "added",
 			},
