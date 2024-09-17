@@ -2,7 +2,6 @@ import { GamepadService, GuiService, Players, ReplicatedStorage, RunService, Wor
 import { ClientComponent } from "client/component/ClientComponent";
 import { ClientInstanceComponent } from "client/component/ClientInstanceComponent";
 import { InputController } from "client/controller/InputController";
-import { Colors } from "shared/Colors";
 import { Control } from "client/gui/Control";
 import { ButtonControl } from "client/gui/controls/Button";
 import { Gui } from "client/gui/Gui";
@@ -12,6 +11,7 @@ import { ActionController } from "client/modes/build/ActionController";
 import { ClientBuilding } from "client/modes/build/ClientBuilding";
 import { ToolBase } from "client/tools/ToolBase";
 import { BlockWireManager } from "shared/blockLogic/BlockWireManager";
+import { Colors } from "shared/Colors";
 import { Component } from "shared/component/Component";
 import { ComponentChild } from "shared/component/ComponentChild";
 import { ComponentChildren } from "shared/component/ComponentChildren";
@@ -106,6 +106,7 @@ namespace Markers {
 		protected pauseColors = false;
 
 		constructor(
+			readonly block: BlockModel,
 			instance: MarkerComponentDefinition,
 			marker: BlockWireManager.Markers.Marker,
 			readonly plot: SharedPlot,
@@ -116,7 +117,7 @@ namespace Markers {
 			this.onDisable(() => (this.instance.Enabled = false));
 
 			this.data = marker.data;
-			this.position = this.data.blockData.instance.GetPivot().PointToWorldSpace(instance.StudsOffsetWorldSpace);
+			this.position = this.block.GetPivot().PointToWorldSpace(instance.StudsOffsetWorldSpace);
 			this.availableTypes = marker.availableTypes;
 
 			this.initTooltips();
@@ -201,12 +202,13 @@ namespace Markers {
 		private connected = false;
 
 		constructor(
+			blockInstance: BlockModel,
 			gui: MarkerComponentDefinition,
 			readonly marker: BlockWireManager.Markers.Input,
 			plot: SharedPlot,
 			componentMap: ReadonlyMap<BlockWireManager.Markers.Marker, Marker>,
 		) {
-			super(gui, marker, plot);
+			super(blockInstance, gui, marker, plot);
 
 			this.instance.TextButton.White.Visible = true;
 
@@ -236,11 +238,12 @@ namespace Markers {
 	}
 	export class Output extends Marker {
 		constructor(
+			blockInstance: BlockModel,
 			gui: MarkerComponentDefinition,
 			readonly marker: BlockWireManager.Markers.Output,
 			plot: SharedPlot,
 		) {
-			super(gui, marker, plot);
+			super(blockInstance, gui, marker, plot);
 
 			this.instance.TextButton.White.Visible = false;
 			this.instance.TextButton.Filled.Visible = false;
@@ -473,9 +476,9 @@ namespace Controllers {
 		task.spawn(async () => {
 			const result = await ClientBuilding.logicConnectOperation.execute({
 				plot: from.plot,
-				inputBlock: to.data.blockData.instance,
+				inputBlock: to.block,
 				inputConnection: to.data.id,
-				outputBlock: from.data.blockData.instance,
+				outputBlock: from.block,
 				outputConnection: from.data.id,
 			});
 
@@ -490,7 +493,7 @@ namespace Controllers {
 		task.spawn(async () => {
 			const result = await ClientBuilding.logicDisconnectOperation.execute({
 				plot: marker.plot,
-				inputBlock: marker.data.blockData.instance,
+				inputBlock: marker.block,
 				inputConnection: marker.data.id,
 			});
 
@@ -717,12 +720,12 @@ export class WireTool extends ToolBase {
 		this.markers.clear();
 
 		const components = new Map<BlockWireManager.Markers.Marker, Markers.Marker>();
-		for (const [, markers] of BlockWireManager.fromPlot(plot, this.blockList)) {
+		for (const [uuid, markers] of BlockWireManager.fromPlot(plot, this.blockList)) {
 			let [ii, oi, ai] = [0, 0, 0];
 			const size = markers.size();
 
 			for (const marker of markers) {
-				const block = this.blockList.blocks[(marker.data.blockData as PlacedBlockData).id];
+				const block = this.blockList.blocks[marker.data.blockId];
 				if (!block) continue;
 
 				const configDef = block.logic?.definition;
@@ -732,7 +735,7 @@ export class WireTool extends ToolBase {
 					continue;
 				}
 
-				const blockid = (marker.data.blockData as PlacedBlockData).id;
+				const blockid = marker.data.blockId;
 				const positions = this.blockList.blocks[blockid]?.markerPositions;
 				let markerpos = positions?.[marker.data.id];
 				if (!markerpos) {
@@ -759,15 +762,16 @@ export class WireTool extends ToolBase {
 					}
 				}
 
+				const blockInstance = plot.getBlock(uuid);
 				const markerInstance = Markers.Marker.createInstance(
-					marker.data.blockData.instance.PrimaryPart!,
+					blockInstance.PrimaryPart!,
 					markerpos !== undefined ? markerpos : size === 1 ? "center" : ai++,
 				);
 
 				const component =
 					marker instanceof BlockWireManager.Markers.Input
-						? new Markers.Input(markerInstance, marker, plot, components)
-						: new Markers.Output(markerInstance, marker, plot);
+						? new Markers.Input(blockInstance, markerInstance, marker, plot, components)
+						: new Markers.Output(blockInstance, markerInstance, marker, plot);
 
 				component.instance.Parent = markerParent;
 				components.set(marker, component);

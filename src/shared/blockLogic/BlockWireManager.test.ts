@@ -18,14 +18,16 @@ namespace WireToolTests {
 		const in1 = new Input({
 			id: "a" as BlockConnectionName,
 			name: "u",
-			blockData: block1,
+			blockUuid: block1.uuid,
+			blockId: "block",
 			dataTypes: ["bool", "number"],
 			group: "0",
 		});
 		const in2 = new Input({
 			id: "a" as BlockConnectionName,
 			name: "u",
-			blockData: block1,
+			blockUuid: block1.uuid,
+			blockId: "block",
 			dataTypes: ["bool", "number"],
 			group: "0",
 		});
@@ -33,7 +35,8 @@ namespace WireToolTests {
 		const out1 = new Output({
 			id: "a" as BlockConnectionName,
 			name: "u",
-			blockData: block2,
+			blockUuid: block2.uuid,
+			blockId: "block",
 			dataTypes: ["bool"],
 			group: undefined,
 		});
@@ -71,28 +74,32 @@ namespace WireToolTests {
 		const in1 = new Input({
 			id: "a" as BlockConnectionName,
 			name: "u",
-			blockData: block1,
+			blockUuid: block1.uuid,
+			blockId: "block",
 			dataTypes: ["bool", "number"],
 			group: "0",
 		});
 		const in2 = new Input({
 			id: "a" as BlockConnectionName,
 			name: "u",
-			blockData: block1,
+			blockUuid: block1.uuid,
+			blockId: "block",
 			dataTypes: ["bool", "number"],
 			group: "0",
 		});
 		const in3 = new Input({
 			id: "a" as BlockConnectionName,
 			name: "u",
-			blockData: block3,
+			blockUuid: block3.uuid,
+			blockId: "block",
 			dataTypes: ["bool", "number"],
 			group: "1",
 		});
 		const in4 = new Input({
 			id: "a" as BlockConnectionName,
 			name: "u",
-			blockData: block3,
+			blockUuid: block3.uuid,
+			blockId: "block",
 			dataTypes: ["bool", "number"],
 			group: "1",
 		});
@@ -100,7 +107,8 @@ namespace WireToolTests {
 		const out1 = new Output({
 			id: "a" as BlockConnectionName,
 			name: "u",
-			blockData: block2,
+			blockUuid: block2.uuid,
+			blockId: "block",
 			dataTypes: ["bool"],
 			group: undefined,
 		});

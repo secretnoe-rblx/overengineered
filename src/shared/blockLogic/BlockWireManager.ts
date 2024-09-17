@@ -1,6 +1,7 @@
 import { BlockConfig } from "shared/blockLogic/BlockConfig";
 import { Colors } from "shared/Colors";
 import { ObservableValue } from "shared/event/ObservableValue";
+import type { PlacedBlockConfig } from "shared/blockLogic/BlockConfig";
 import type { BlockLogicFullInputDef, BlockLogicFullOutputDef } from "shared/blockLogic/BlockLogic";
 import type { BlockLogicTypes } from "shared/blockLogic/BlockLogicTypes";
 import type { SharedPlot } from "shared/building/SharedPlot";
@@ -10,10 +11,8 @@ export namespace BlockWireManager {
 	export type MarkerData = {
 		readonly id: BlockConnectionName;
 		readonly name: string;
-		readonly blockData: {
-			readonly uuid: BlockUuid;
-			readonly instance: BlockModel;
-		};
+		readonly blockId: BlockId;
+		readonly blockUuid: BlockUuid;
 		readonly dataTypes: readonly DataType[];
 		readonly group: string | undefined;
 	};
@@ -94,8 +93,14 @@ export namespace BlockWireManager {
 	export function fromPlot(plot: SharedPlot, blockList: BlockList, treatDisconnectedAsUnset: boolean = false) {
 		return from(plot.getBlockDatas(), blockList, treatDisconnectedAsUnset);
 	}
+
+	type BlockDataForWireManager = {
+		readonly id: BlockId;
+		readonly uuid: BlockUuid;
+		readonly config?: PlacedBlockConfig;
+	};
 	export function from(
-		blocks: readonly PlacedBlockData[],
+		blocks: readonly BlockDataForWireManager[],
 		blockList: BlockList,
 		treatDisconnectedAsUnset: boolean = false,
 	) {
@@ -133,7 +138,8 @@ export namespace BlockWireManager {
 				}
 
 				const data: MarkerData = {
-					blockData: block,
+					blockId: block.id,
+					blockUuid: block.uuid,
 					dataTypes,
 					group: def.group,
 					id: key as BlockConnectionName,
@@ -199,10 +205,10 @@ export namespace BlockWireManager {
 		return markersByBlock;
 	}
 	export function groupMarkers(markers: readonly Markers.Marker[]) {
-		const groupedMarkers = markers.groupBy((m) => m.data.group + " " + m.data.blockData.uuid);
+		const groupedMarkers = markers.groupBy((m) => m.data.group + " " + m.data.blockUuid);
 		for (const marker of markers) {
 			if (marker.data.group === undefined) continue;
-			marker.sameGroupMarkers = groupedMarkers.get(marker.data.group + " " + marker.data.blockData.uuid);
+			marker.sameGroupMarkers = groupedMarkers.get(marker.data.group + " " + marker.data.blockUuid);
 		}
 	}
 
