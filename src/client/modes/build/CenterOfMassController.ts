@@ -1,6 +1,6 @@
 import { ReplicatedStorage, Workspace } from "@rbxts/services";
 import { ClientComponent } from "client/component/ClientComponent";
-import { Colors } from "client/gui/Colors";
+import { Colors } from "shared/Colors";
 import { Gui } from "client/gui/Gui";
 import { BuildingManager } from "shared/building/BuildingManager";
 import { SharedPlot } from "shared/building/SharedPlot";

@@ -1,6 +1,6 @@
 import { ContextActionService } from "@rbxts/services";
 import { InputController } from "client/controller/InputController";
-import { Colors } from "client/gui/Colors";
+import { Colors } from "shared/Colors";
 import { Control } from "client/gui/Control";
 import { SelectButtonPopup } from "client/gui/popup/SelectButtonPopup";
 import { ObservableValue } from "shared/event/ObservableValue";

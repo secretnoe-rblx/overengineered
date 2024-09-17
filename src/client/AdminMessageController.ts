@@ -1,9 +1,9 @@
-import { Colors } from "client/gui/Colors";
 import { Control } from "client/gui/Control";
 import { TextButtonControl } from "client/gui/controls/Button";
 import { TextBoxControl } from "client/gui/controls/TextBoxControl";
 import { Gui } from "client/gui/Gui";
 import { GuiAnimator } from "client/gui/GuiAnimator";
+import { Colors } from "shared/Colors";
 import { Element } from "shared/Element";
 import { Remotes } from "shared/Remotes";
 

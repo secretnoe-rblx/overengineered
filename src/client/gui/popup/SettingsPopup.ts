@@ -1,4 +1,4 @@
-import { Colors } from "client/gui/Colors";
+import { Colors } from "shared/Colors";
 import { ButtonControl, TextButtonControl } from "client/gui/controls/Button";
 import { Gui } from "client/gui/Gui";
 import { MultiPlayerConfigControl } from "client/gui/PlayerConfigControls";

@@ -1,5 +1,5 @@
 import { Workspace } from "@rbxts/services";
-import { Colors } from "client/gui/Colors";
+import { Colors } from "shared/Colors";
 import { Element } from "shared/Element";
 import { PartUtils } from "shared/utils/PartUtils";
 

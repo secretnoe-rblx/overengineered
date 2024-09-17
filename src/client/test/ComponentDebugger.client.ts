@@ -1,6 +1,6 @@
 import { Players, RunService, UserInputService } from "@rbxts/services";
 import { InputController } from "client/controller/InputController";
-import { Colors } from "client/gui/Colors";
+import { Colors } from "shared/Colors";
 import { Control } from "client/gui/Control";
 import { ButtonControl } from "client/gui/controls/Button";
 import { Gui } from "client/gui/Gui";

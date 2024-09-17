@@ -3,7 +3,7 @@ import { ClientComponent } from "client/component/ClientComponent";
 import { InputController } from "client/controller/InputController";
 import { LoadingController } from "client/controller/LoadingController";
 import { MaterialColorEditControl } from "client/gui/buildmode/MaterialColorEditControl";
-import { Colors } from "client/gui/Colors";
+import { Colors } from "shared/Colors";
 import { Control } from "client/gui/Control";
 import { ButtonControl } from "client/gui/controls/Button";
 import { LogControl } from "client/gui/static/LogControl";

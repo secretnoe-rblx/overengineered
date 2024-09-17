@@ -1,5 +1,5 @@
 import { Players, UserInputService } from "@rbxts/services";
-import { Colors } from "client/gui/Colors";
+import { Colors } from "shared/Colors";
 import { ButtonControl } from "client/gui/controls/Button";
 import { HoveredPartHighlighter } from "client/tools/highlighters/HoveredPartHighlighter";
 import { BlockManager } from "shared/building/BlockManager";

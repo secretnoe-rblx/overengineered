@@ -1,6 +1,6 @@
 import { ContentProvider, GuiService, Players } from "@rbxts/services";
 import { BlockPreviewControl } from "client/gui/buildmode/BlockPreviewControl";
-import { Colors } from "client/gui/Colors";
+import { Colors } from "shared/Colors";
 import { Control } from "client/gui/Control";
 import { BlockPipetteButton } from "client/gui/controls/BlockPipetteButton";
 import { TextButtonControl } from "client/gui/controls/Button";

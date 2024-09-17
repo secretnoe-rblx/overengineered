@@ -2,7 +2,7 @@ import { ReplicatedStorage, Workspace } from "@rbxts/services";
 import { ClientComponentChild } from "client/component/ClientComponentChild";
 import { InputController } from "client/controller/InputController";
 import { Signals } from "client/event/Signals";
-import { Colors } from "client/gui/Colors";
+import { Colors } from "shared/Colors";
 import { Gui } from "client/gui/Gui";
 import { TooltipsHolder } from "client/gui/static/TooltipsControl";
 import { BlockEditorBase } from "client/tools/additional/BlockEditorBase";
