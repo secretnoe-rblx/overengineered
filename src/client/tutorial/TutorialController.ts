@@ -1,14 +1,15 @@
 import { Workspace, Players, RunService } from "@rbxts/services";
 import { LoadingController } from "client/controller/LoadingController";
-import { Colors } from "shared/Colors";
 import { Control } from "client/gui/Control";
 import { ButtonControl } from "client/gui/controls/Button";
 import { Gui } from "client/gui/Gui";
+import { ConfirmPopup } from "client/gui/popup/ConfirmPopup";
 import { ClientBuilding } from "client/modes/build/ClientBuilding";
 import { BlockConfig } from "shared/blockLogic/BlockConfig";
 import { BlockManager } from "shared/building/BlockManager";
 import { BlocksSerializer } from "shared/building/BlocksSerializer";
 import { BuildingPlot } from "shared/building/BuildingPlot";
+import { Colors } from "shared/Colors";
 import { Component } from "shared/component/Component";
 import { ComponentInstance } from "shared/component/ComponentInstance";
 import { ArgsSignal, Signal } from "shared/event/Signal";
@@ -109,15 +110,14 @@ export class TutorialControl extends Control<TutorialControlDefinition> {
 		this.add(new ButtonControl(this.gui.Header.Next, () => this._nextPressed.Fire()));
 		this.add(
 			new ButtonControl(this.gui.Header.Skip, () => {
-				this._skipPressed.Fire();
-				// ConfirmPopup.showPopup(
-				// 	"Are you sure you want to skip this step?",
-				// 	"This way you will learn this lesson worse!",
-				// 	() => {
-				// 		this._skipPressed.Fire();
-				// 	},
-				// 	() => {},
-				// );
+				ConfirmPopup.showPopup(
+					"Are you sure you want to skip this step?",
+					"This way you will learn this lesson worse!",
+					() => {
+						this._skipPressed.Fire();
+					},
+					() => {},
+				);
 			}),
 		);
 	}
