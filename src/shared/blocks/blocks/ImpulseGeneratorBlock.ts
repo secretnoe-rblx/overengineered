@@ -8,14 +8,24 @@ import type {
 import type { BlockBuilder } from "shared/blocks/Block";
 
 const definition = {
-	inputOrder: ["delay", "isInverted", "isSinglePulse"],
+	inputOrder: ["delay", "delay_low", "isInverted", "isSinglePulse"],
 	input: {
 		delay: {
-			displayName: "Interval",
+			//не переименовывал чтоб совметимость была
+			displayName: "High Level Length",
 			unit: "Tick",
 			types: {
 				number: {
-					config: 0,
+					config: 1,
+				},
+			},
+		},
+		delay_low: {
+			displayName: "Low Level Length",
+			unit: "Tick",
+			types: {
+				number: {
+					config: 1,
 				},
 			},
 		},
@@ -49,33 +59,28 @@ const definition = {
 
 export type { Logic as ImpulseGeneratorBlockLogic };
 class Logic extends BlockLogic<typeof definition> {
-	private impulseProgress = 0;
-	private didImpulse = false;
-	private impulseDelay?: number;
+	private impulseProgress = -1;
+	private impulseDelay = 0;
 
 	constructor(block: BlockLogicArgs) {
 		super(definition, block);
 
-		const get = () => this.output.value.justGet().value;
+		//const get = () => this.output.value.justGet().value;
 		const set = (value: boolean) => this.output.value.set("bool", value);
 
 		this.onk(["isInverted"], ({ isInverted }) => set(!isInverted));
 
-		this.onAlwaysInputs(({ delay, isSinglePulse }) => {
-			this.impulseDelay = delay;
+		this.onAlwaysInputs(({ delay, delay_low, isSinglePulse, isInverted }) => {
+			this.impulseDelay = delay; //for debugging or some sh$t
 
-			if (this.didImpulse) {
-				set(!get());
-				this.didImpulse = false;
-			}
-
-			this.impulseProgress++;
 			delay = math.max(delay, 1);
-			this.impulseProgress %= delay;
-			if (this.impulseProgress !== 0) return;
+			delay_low = math.max(delay_low, 1);
 
-			this.didImpulse = isSinglePulse;
-			set(!get());
+			const len = delay + delay_low;
+			this.impulseProgress = ++this.impulseProgress % len;
+
+			const res = this.impulseProgress < (isSinglePulse ? 1 : delay);
+			set(!res !== !isInverted); //xor (a.k.a. управляемая инверсия)
 		});
 	}
 
