@@ -65,13 +65,12 @@ class Logic extends BlockLogic<typeof definition> {
 	constructor(block: BlockLogicArgs) {
 		super(definition, block);
 
-		//const get = () => this.output.value.justGet().value;
 		const set = (value: boolean) => this.output.value.set("bool", value);
 
 		this.onk(["isInverted"], ({ isInverted }) => set(!isInverted));
 
 		this.onAlwaysInputs(({ delay, delay_low, isSinglePulse, isInverted }) => {
-			this.impulseDelay = delay; //for debugging or some sh$t
+			this.impulseDelay = delay; //for debugging or sum sh$t
 
 			delay = math.max(delay, 1);
 			delay_low = math.max(delay_low, 1);
