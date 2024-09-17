@@ -879,7 +879,7 @@ class ConfigAutoValueWrapper extends Control<ConfigValueWrapperDefinition> {
 			(k) =>
 				wireTypes
 					.get(k)
-					?.find((t) => t.data.id === key)
+					?.findValue((k, t) => t.data.id === key)
 					?.availableTypes.get() ?? [],
 		);
 		// only types that every block has
@@ -1063,7 +1063,10 @@ class ConfigAutoValueWrapper extends Control<ConfigValueWrapperDefinition> {
 	}
 }
 
-type WireTypes = ReadonlyMap<BlockUuid, readonly (BlockWireManager.Markers.Input | BlockWireManager.Markers.Output)[]>;
+type WireTypes = ReadonlyMap<
+	BlockUuid,
+	ReadonlyMap<string, BlockWireManager.Markers.Input | BlockWireManager.Markers.Output>
+>;
 @injectable
 export class MultiBlockConfigControl extends Control implements Controls.Args {
 	private readonly _travelledTo = new ArgsSignal<[uuid: BlockUuid]>();

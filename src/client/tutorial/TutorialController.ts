@@ -32,7 +32,10 @@ class TutorialPlot extends Component {
 	private readonly plot: BuildingPlot;
 	private readonly actualPlot: ReadonlyPlot;
 
-	constructor(plot: ReadonlyPlot, @inject blockList: BlockList) {
+	constructor(
+		plot: ReadonlyPlot,
+		@inject private readonly blockList: BlockList,
+	) {
 		super();
 
 		this.actualPlot = plot;
@@ -46,7 +49,7 @@ class TutorialPlot extends Component {
 	}
 
 	build(blocks: LatestSerializedBlocks) {
-		BlocksSerializer.deserializeFromObject(blocks, this.plot);
+		BlocksSerializer.deserializeFromObject(blocks, this.plot, this.blockList);
 
 		for (const block of this.plot.getBlocks()) {
 			PartUtils.ghostModel(block, Colors.white);

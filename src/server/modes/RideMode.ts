@@ -17,7 +17,7 @@ export class RideMode implements PlayModeBase {
 
 	constructor(
 		@inject private readonly serverPlots: ServerPlots,
-		@inject blockList: BlockList,
+		@inject private readonly blockList: BlockList,
 		@inject private readonly slots: SlotDatabase,
 	) {
 		this.required = blockList.sorted.filter((b) => b.required);
@@ -160,7 +160,7 @@ export class RideMode implements PlayModeBase {
 
 			const blocksToLoad = this.slots.getBlocks(player.UserId, SlotsMeta.autosaveSlotIndex);
 			if (blocksToLoad !== undefined) {
-				BlocksSerializer.deserialize(blocksToLoad, controller.blocks);
+				BlocksSerializer.deserialize(blocksToLoad, controller.blocks, this.blockList);
 			}
 		}
 

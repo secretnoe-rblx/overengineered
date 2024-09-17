@@ -1,3 +1,4 @@
+import { BlockWireManager } from "shared/blockLogic/BlockWireManager";
 import { _BlockConfigRegistrySave } from "shared/building/BlockConfigRegistrySave";
 import { BlockManager } from "shared/building/BlockManager";
 import { Config } from "shared/config/Config";
@@ -116,7 +117,7 @@ interface UpgradableBlocksSerializer<
 	TBlocks extends SerializedBlocks<SerializedBlockBase>,
 	TPrev extends BlockSerializer<SerializedBlocks<SerializedBlockBase>>,
 > extends BlockSerializer<TBlocks> {
-	upgradeFrom(prev: TPrev extends BlockSerializer<infer T> ? T : never): TBlocks;
+	upgradeFrom(prev: TPrev extends BlockSerializer<infer T> ? T : never, blockList: BlockList): TBlocks;
 }
 
 //
@@ -1007,7 +1008,7 @@ const v24: UpgradableBlocksSerializer<SerializedBlocks<SerializedBlockV3>, typeo
 const v25: UpgradableBlocksSerializer<SerializedBlocks<SerializedBlockV4>, typeof v24> = {
 	version: 25,
 
-	upgradeFrom(prev: SerializedBlocks<SerializedBlockV3>): SerializedBlocks<SerializedBlockV4> {
+	upgradeFrom(prev: SerializedBlocks<SerializedBlockV3>, blockList: BlockList): SerializedBlocks<SerializedBlockV4> {
 		const updateTypes = (block: SerializedBlockV3): SerializedBlockV4 => {
 			const config = {
 				...Objects.mapValues(block.config ?? {}, (k, v) => {
@@ -1184,7 +1185,33 @@ const v25: UpgradableBlocksSerializer<SerializedBlocks<SerializedBlockV4>, typeo
 			return ret;
 		};
 
+		const blocks = prev.blocks.map(updateTypes);
+		const wires = BlockWireManager.from(blocks, blockList);
+
 		const updateBlock = (block: SerializedBlockV4): SerializedBlockV4 => {
+			if (block.config) {
+				const def = blockList.blocks[block.id]?.logic?.definition;
+				if (def) {
+					for (const [k] of pairs(def.input)) {
+						if (block.config && (!block.config[k] || block.config[k].type === "unset")) {
+							const wireType = wires.get(block.uuid)!.get(k)!.availableTypes.get()[0];
+
+							$log(`Replaced type ${block.config[k]?.type ?? "nil"} with ${wireType}`);
+							block = {
+								...block,
+								config: {
+									...block.config,
+									[k]: {
+										type: wireType,
+										config: def.input[k].types[wireType]!.config,
+									} as PlacedBlockConfig[string],
+								},
+							};
+						}
+					}
+				}
+			}
+
 			if (block.id === "logicmemory") {
 				return {
 					...block,
@@ -1197,7 +1224,7 @@ const v25: UpgradableBlocksSerializer<SerializedBlocks<SerializedBlockV4>, typeo
 
 		return {
 			version: this.version,
-			blocks: prev.blocks.map((b) => updateBlock(updateTypes(b))),
+			blocks: blocks.map(updateBlock),
 		};
 	},
 };
@@ -1252,7 +1279,11 @@ export namespace BlocksSerializer {
 		return JSON.serialize({ ...serialized, blocks: serialized.blocks.map(fix) });
 	}
 
-	export function deserializeFromObject(data: SerializedBlocks<SerializedBlockBase>, plot: BuildingPlot): number {
+	export function deserializeFromObject(
+		data: SerializedBlocks<SerializedBlockBase>,
+		plot: BuildingPlot,
+		blockList: BlockList,
+	): number {
 		$log(`Loaded a slot using savev${data.version}`);
 
 		const version = data.version;
@@ -1261,14 +1292,14 @@ export namespace BlocksSerializer {
 			if (!version) continue;
 			if (!("upgradeFrom" in version)) continue;
 
-			data = version.upgradeFrom(data as never);
+			data = version.upgradeFrom(data as never, blockList);
 			$log(`Upgrading a slot to savev${version.version}`);
 		}
 
 		place.blocksOnPlot(plot, data.blocks as readonly LatestSerializedBlock[], place.blockOnPlotV3);
 		return data.blocks.size();
 	}
-	export function deserialize(data: string, plot: BuildingPlot): number {
+	export function deserialize(data: string, plot: BuildingPlot, blockList: BlockList): number {
 		const fix = (block: JsonBlock): LatestSerializedBlock => {
 			return {
 				id: block.id,
@@ -1283,7 +1314,7 @@ export namespace BlocksSerializer {
 		};
 
 		const deserialized = JSON.deserialize(data) as SerializedBlocks<JsonBlock>;
-		return deserializeFromObject({ ...deserialized, blocks: deserialized.blocks.map(fix) }, plot);
+		return deserializeFromObject({ ...deserialized, blocks: deserialized.blocks.map(fix) }, plot, blockList);
 	}
 
 	export function serializedBlockToPlaceRequest(

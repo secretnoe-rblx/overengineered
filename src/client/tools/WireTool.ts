@@ -724,7 +724,7 @@ export class WireTool extends ToolBase {
 			let [ii, oi, ai] = [0, 0, 0];
 			const size = markers.size();
 
-			for (const marker of markers) {
+			for (const [, marker] of pairs(markers)) {
 				const block = this.blockList.blocks[marker.data.blockId];
 				if (!block) continue;
 

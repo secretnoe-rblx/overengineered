@@ -94,7 +94,7 @@ export namespace BlockWireManager {
 		return from(plot.getBlockDatas(), blockList, treatDisconnectedAsUnset);
 	}
 
-	type BlockDataForWireManager = {
+	export type BlockDataForWireManager = {
 		readonly id: BlockId;
 		readonly uuid: BlockUuid;
 		readonly config?: PlacedBlockConfig;
@@ -105,7 +105,7 @@ export namespace BlockWireManager {
 		treatDisconnectedAsUnset: boolean = false,
 	) {
 		const toNarrow: Markers.Marker[] = [];
-		const markersByBlock = new Map<BlockUuid, (Markers.Input | Markers.Output)[]>();
+		const markersByBlock = new Map<BlockUuid, Map<string, Markers.Input | Markers.Output>>();
 		const markers = new Map<string, Markers.Marker>();
 
 		for (const block of blocks) {
@@ -151,9 +151,9 @@ export namespace BlockWireManager {
 
 				{
 					let bb = markersByBlock.get(block.uuid);
-					if (!bb) markersByBlock.set(block.uuid, (bb = []));
+					if (!bb) markersByBlock.set(block.uuid, (bb = new Map()));
 
-					bb.push(marker);
+					bb.set(key, marker);
 				}
 
 				if (narrow) {
