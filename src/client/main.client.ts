@@ -1,6 +1,5 @@
 import { ContentProvider, Players, ReplicatedStorage, RunService } from "@rbxts/services";
 import { AdminMessageController } from "client/AdminMessageController";
-import { Atmosphere } from "client/Atmosphere";
 import { LoadingController } from "client/controller/LoadingController";
 import { InputTypeChangeEvent } from "client/event/InputTypeChangeEvent";
 import { BSOD } from "client/gui/BSOD";
@@ -55,7 +54,7 @@ InputTypeChangeEvent.subscribe();
 RemoteEvents.initialize();
 AdminMessageController.initialize();
 ServerRestartController.initialize();
-Atmosphere.initialize();
+// Atmosphere.initialize();
 
 LoadingController.hide();
 CustomRemotes.player.loaded.send();

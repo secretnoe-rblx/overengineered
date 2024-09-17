@@ -20,8 +20,6 @@ export namespace Atmosphere {
 	const normalCloudsDensity = clouds.Density;
 
 	export function initialize() {
-		return;
-		
 		Workspace.Atmosphere.Surface.Size = new Vector3(32, 32, 32);
 
 		// Rotation animation
