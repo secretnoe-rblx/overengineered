@@ -120,11 +120,11 @@ function initRagdollKey(
 		ContextActionService.BindAction(
 			actionName,
 			(name, state, input) => {
-				if (actionName !== name) return;
-				if (state !== Enum.UserInputState.Begin) return;
-				if (input.KeyCode.Name !== key) return;
+				if (state === Enum.UserInputState.Begin) {
+					func();
+				}
 
-				func();
+				return Enum.ContextActionResult.Pass;
 			},
 			false,
 			Keys[key],
