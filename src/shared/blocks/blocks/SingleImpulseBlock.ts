@@ -16,14 +16,14 @@ const definition = {
 			configHidden: true, // Because why
 		},
 		type: {
-			displayName: "Detection type",
+			displayName: "Type",
 			types: {
 				enum: inferEnumLogicType({
 					config: "rtrig",
 					elementOrder: ["rtrig", "ftrig", "both"],
 					elements: {
-						rtrig: { displayName: "R_trig", tooltip: "Detects a rising edge of the input" },
-						ftrig: { displayName: "F_trig", tooltip: "Detects a falling edge of the input" },
+						rtrig: { displayName: "Rise", tooltip: "Detects a rising edge of the input" },
+						ftrig: { displayName: "Fall", tooltip: "Detects a falling edge of the input" },
 						both: { displayName: "Both", tooltip: "Detects both edges of the input" },
 					},
 				}),
