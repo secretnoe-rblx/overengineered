@@ -111,8 +111,8 @@ const map = <T, TOut extends defined>(
 
 //
 
-const template = Gui.getGameUI<{ Templates: { Config2: { Template: ConfigValueWrapperDefinition } } }>().Templates
-	.Config2.Template;
+const template = Gui.getGameUI<{ Templates: { Config: { Template: ConfigValueWrapperDefinition } } }>().Templates.Config
+	.Template;
 
 const setWrapperColor = (wrapper: ConfigValueWrapper, valueType: PrimitiveKeys) => {
 	wrapper.typeColor.set(BlockWireManager.types[valueType].color);
