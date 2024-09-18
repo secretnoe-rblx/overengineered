@@ -90,8 +90,14 @@ export type GenericBlockLogic<TDef extends BlockLogicBothDefinitions = BlockLogi
 
 //
 
+type ValueTypeByInputDef<TDef extends BlockLogicInputDef> = TDef extends {
+	readonly types: { readonly enum: { readonly elementOrder: readonly (infer E)[] } };
+}
+	? E & (Primitives[keyof TDef["types"] & PrimitiveKeys] & defined)["default"]
+	: (Primitives[keyof TDef["types"] & PrimitiveKeys] & defined)["default"];
+
 type AllInputKeysToArgsObject<TDef extends BlockLogicInputDefs, TKeys extends keyof TDef = keyof TDef> = {
-	readonly [k in TKeys]: (Primitives[keyof TDef[k]["types"] & PrimitiveKeys] & defined)["default"];
+	readonly [k in TKeys]: ValueTypeByInputDef<TDef[k]>;
 };
 type AllInputKeysToTypesObject<TDef extends BlockLogicInputDefs, TKeys extends keyof TDef = keyof TDef> = {
 	readonly [k in string & TKeys as `${k}Type`]: keyof TDef[k]["types"] & PrimitiveKeys;

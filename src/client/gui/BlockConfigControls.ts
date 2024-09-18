@@ -111,11 +111,11 @@ const map = <T, TOut extends defined>(
 
 //
 
-const template = Gui.getGameUI<{ Templates: { Config2: { Template: ConfigValueWrapperDefinition } } }>().Templates
-	.Config2.Template;
+const template = Gui.getGameUI<{ Templates: { Config: { Template: ConfigValueWrapperDefinition } } }>().Templates.Config
+	.Template;
 
 const setWrapperColor = (wrapper: ConfigValueWrapper, valueType: PrimitiveKeys) => {
-	wrapper.typeColor.set(BlockWireManager.typeGroups[BlockWireManager.groups[valueType]].color);
+	wrapper.typeColor.set(BlockWireManager.types[valueType].color);
 };
 const setWrapperName = (control: Control<GuiObject & { readonly HeadingLabel: TextLabel }>, name: string) => {
 	control.instance.HeadingLabel.Text = name;
@@ -161,7 +161,7 @@ namespace Controls {
 		readonly ByteArray: ConfigValueDefinition<GuiButton>;
 		readonly Key: ConfigValueDefinition<KeyOrStringChooserControlDefinition>;
 		readonly Color: ConfigValueDefinition<ColorChooserDefinition>;
-		readonly Dropdown: ConfigValueDefinition<undefined> & DropdownListDefinition;
+		readonly Dropdown: ConfigValueDefinition<DropdownListDefinition>;
 		readonly Multi: ConfigValueDefinition<GuiObject>;
 
 		readonly MultiKeys: MultiKeyNumberControlDefinition;
@@ -445,6 +445,25 @@ namespace Controls {
 				cx.submitted.Connect((n) => this.submitted.Fire((config = vec(n, "X"))));
 				cy.submitted.Connect((n) => this.submitted.Fire((config = vec(n, "Y"))));
 				cz.submitted.Connect((n) => this.submitted.Fire((config = vec(n, "Z"))));
+			}
+		}
+
+		export class _enum extends Base<DropdownListDefinition, "enum"> {
+			constructor(templates: templates, definition: MiniPrimitives["enum"], config: ConfigParts<"enum">) {
+				super(templates.Dropdown());
+
+				const control = this.add(new DropdownList<string>(this.control));
+				for (const value of definition.elementOrder) {
+					const { displayName, tooltip } = definition.elements[value];
+
+					const item = control.addItem(value, displayName);
+					if (tooltip) {
+						Tooltip.init(item, tooltip);
+					}
+				}
+
+				control.selectedItem.set(sameOrUndefined(config));
+				control.submitted.Connect((v) => this.submitted.Fire((config = map(config, (_) => v))));
 			}
 		}
 
@@ -787,6 +806,7 @@ namespace Controls {
 		bytearray: (templates, definition, config, parent) => new Controls.bytearray(templates, definition, config),
 		color: (templates, definition, config, parent) => new Controls.color(templates, definition, config),
 		vector3: (templates, definition, config, parent) => new Controls.vector3(templates, definition, config, parent),
+		enum: (templates, definition, config, parent) => new Controls._enum(templates, definition, config),
 	} satisfies Controls.controls as Controls.genericControls;
 
 	export const extendedControls = {

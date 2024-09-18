@@ -198,7 +198,7 @@ export class ConfigTool extends ToolBase {
 		super(mode);
 		this.parentGui(
 			new Scene.ConfigToolScene(
-				ToolBase.getToolGui<"Config2", Scene.ConfigToolSceneDefinition>().Config2,
+				ToolBase.getToolGui<"Config", Scene.ConfigToolSceneDefinition>().Config,
 				this,
 				blockList,
 				di,

@@ -7,8 +7,8 @@ import type { BlockLogicTypes } from "shared/blockLogic/BlockLogicTypes";
 import type { SharedPlot } from "shared/building/SharedPlot";
 
 export namespace BlockWireManager {
-	export type DataType = "bool" | "vector3" | "number" | "string" | "color" | "byte" | "bytearray" | "key" | "unset";
-	export type MarkerData = {
+	type DataType = keyof BlockLogicTypes.Primitives;
+	type MarkerData = {
 		readonly id: BlockConnectionName;
 		readonly name: string;
 		readonly blockId: BlockId;
@@ -17,7 +17,7 @@ export namespace BlockWireManager {
 		readonly group: string | undefined;
 	};
 
-	export const typeGroups: { readonly [k in BlockWireManager.DataType]: { readonly color: Color3 } } = {
+	export const types: { readonly [k in DataType]: { readonly color: Color3 } } = {
 		bool: { color: Colors.yellow },
 		vector3: { color: Colors.pink },
 		number: { color: Colors.green },
@@ -26,29 +26,12 @@ export namespace BlockWireManager {
 		color: { color: Colors.red },
 		byte: { color: Color3.fromRGB(97, 138, 255) },
 		bytearray: { color: Colors.black },
+		enum: { color: Color3.fromRGB(100, 100, 100) },
 		unset: { color: Colors.white },
+		wire: { color: Colors.white },
 	};
 
-	export const groups: { readonly [k in keyof BlockLogicTypes.Primitives]: DataType } = {
-		unset: "unset",
-		wire: "unset",
-		bool: "bool",
-		vector3: "vector3",
-		number: "number",
-		string: "string",
-		color: "color",
-		key: "key",
-		byte: "byte",
-		bytearray: "bytearray",
-
-		// keybool: "bool",
-		// thrust: "number",
-		// motorRotationSpeed: "number",
-		// servoMotorAngle: "number",
-		// controllableNumber: "number",
-	};
-
-	export function intersectTypes(types: readonly (readonly DataType[])[]): readonly DataType[] {
+	function intersectTypes(types: readonly (readonly DataType[])[]): readonly DataType[] {
 		if (types.size() === 1) {
 			return types[0];
 		}
@@ -131,9 +114,9 @@ export namespace BlockWireManager {
 						existingcfg.type === "unset" ||
 						existingcfg.type === "wire"
 					) {
-						dataTypes = types.map((v) => groups[v]);
+						dataTypes = types;
 					} else {
-						dataTypes = [groups[existingcfg.type]];
+						dataTypes = [existingcfg.type];
 						narrow = true;
 					}
 				}
