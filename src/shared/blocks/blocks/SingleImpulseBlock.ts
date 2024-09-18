@@ -1,4 +1,5 @@
 import { BlockLogic } from "shared/blockLogic/BlockLogic";
+import { inferEnumLogicType } from "shared/blockLogic/BlockLogicTypes";
 import { BlockCreation } from "shared/blocks/BlockCreation";
 import type { BlockLogicArgs, BlockLogicFullBothDefinitions } from "shared/blockLogic/BlockLogic";
 import type { BlockBuilder } from "shared/blocks/Block";
@@ -14,12 +15,18 @@ const definition = {
 			},
 			configHidden: true, // Because why
 		},
-		side: {
-			displayName: "R_trig / F_trig",
+		type: {
+			displayName: "Detection type",
 			types: {
-				bool: {
-					config: false,
-				},
+				enum: inferEnumLogicType({
+					config: "rtrig",
+					elementOrder: ["rtrig", "ftrig", "both"],
+					elements: {
+						rtrig: { displayName: "R_trig", tooltip: "Detects a rising edge of the input" },
+						ftrig: { displayName: "F_trig", tooltip: "Detects a falling edge of the input" },
+						both: { displayName: "Both", tooltip: "Detects both edges of the input" },
+					},
+				}),
 			},
 			connectorHidden: true,
 		},
@@ -48,20 +55,21 @@ class Logic extends BlockLogic<typeof definition> {
 			lastValue = impulse;
 		});
 
-		this.on(({ impulse, side: trig_side, impulseChanged }) => {
+		this.on(({ impulse, type: trig_side, impulseChanged }) => {
 			// Proceed with normal logic after initialization
 			if (!impulseChanged) return;
 
 			if (lastValue === impulse) return;
 			lastValue = impulse;
 
-			if (trig_side) {
+			if (trig_side === "both" || trig_side === "rtrig") {
 				// R_Trig: Rising edge detected
 				if (!impulse) return;
 
 				wasImpulsedLastTick = true;
 				this.output.value.set("bool", true);
-			} else {
+			}
+			if (trig_side === "both" || trig_side === "ftrig") {
 				// F_Trig: Falling edge detected
 				if (impulse) return;
 

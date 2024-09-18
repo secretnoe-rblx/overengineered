@@ -1,5 +1,13 @@
 import type { PlacedBlockConfig } from "shared/blockLogic/BlockConfig";
 
+type LEnum<T extends string> = {
+	readonly config: NoInfer<T>;
+	readonly elementOrder: NoInfer<readonly T[]>;
+	readonly elements: BlockLogicTypes.Enum<T>["elements"];
+};
+/** Infers the T of the `enum` type because without this it returns Enum<string> which is not helpful */
+export const inferEnumLogicType = <const T extends string>(value: LEnum<T>): LEnum<T> => value;
+
 export namespace BlockLogicTypes {
 	type BCType<TDefault, TConfig> = {
 		readonly config: TConfig;
@@ -77,6 +85,15 @@ export namespace BlockLogicTypes {
 		readonly lengthLimit: number;
 	};
 
+	type EnumElement = {
+		readonly displayName: string;
+		readonly tooltip?: string;
+	};
+	export type Enum<T extends string = string> = BCPrimitive<T> & {
+		readonly elementOrder: readonly T[];
+		readonly elements: { readonly [k in T]: EnumElement };
+	};
+
 	//
 
 	export type Primitives = {
@@ -91,6 +108,7 @@ export namespace BlockLogicTypes {
 		readonly color: Color;
 		readonly byte: Byte;
 		readonly bytearray: ByteArray;
+		readonly enum: Enum;
 	};
 
 	export type Controls = {

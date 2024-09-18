@@ -26,6 +26,7 @@ export namespace BlockWireManager {
 		color: { color: Colors.red },
 		byte: { color: Color3.fromRGB(97, 138, 255) },
 		bytearray: { color: Colors.black },
+		enum: { color: Color3.fromRGB(100, 100, 100) },
 		unset: { color: Colors.white },
 		wire: { color: Colors.white },
 	};
