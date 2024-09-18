@@ -17,6 +17,8 @@ export namespace BootFlagsController {
 			const launchData = HttpService.JSONDecode(Base64.Decode(rawData)) as BootFlag;
 
 			if (launchData.task === 0) {
+				if (launchData.jobId === game.JobId) return;
+
 				TeleportService.TeleportToPlaceInstance(game.PlaceId, launchData.jobId, player);
 			}
 		});
