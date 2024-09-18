@@ -12,6 +12,16 @@ const definition = {
 					config: false,
 				},
 			},
+			configHidden: true, // Because why
+		},
+		side: {
+			displayName: "R_trig / F_trig",
+			types: {
+				bool: {
+					config: false,
+				},
+			},
+			connectorHidden: true,
 		},
 	},
 	output: {
@@ -34,16 +44,30 @@ class Logic extends BlockLogic<typeof definition> {
 		});
 
 		let lastValue: boolean | undefined = undefined;
-		this.on(({ impulse, impulseChanged }) => {
+		this.onFirstInputs(({ impulse }) => {
+			lastValue = impulse;
+		});
+
+		this.on(({ impulse, side: trig_side, impulseChanged }) => {
+			// Proceed with normal logic after initialization
 			if (!impulseChanged) return;
 
 			if (lastValue === impulse) return;
 			lastValue = impulse;
 
-			if (!impulse) return;
+			if (trig_side) {
+				// R_Trig: Rising edge detected
+				if (!impulse) return;
 
-			wasImpulsedLastTick = true;
-			this.output.value.set("bool", true);
+				wasImpulsedLastTick = true;
+				this.output.value.set("bool", true);
+			} else {
+				// F_Trig: Falling edge detected
+				if (impulse) return;
+
+				wasImpulsedLastTick = true;
+				this.output.value.set("bool", true);
+			}
 		});
 	}
 }
@@ -51,12 +75,12 @@ class Logic extends BlockLogic<typeof definition> {
 export const SingleImpulseBlock = {
 	...BlockCreation.defaults,
 	id: "singleimpulse",
-	displayName: "Single Impulse",
+	displayName: "Edge Detector",
 	description: "Converts a bit into a pulse",
 
 	logic: { definition, ctor: Logic },
 	modelSource: {
-		model: BlockCreation.Model.fAutoCreated("GenericLogicBlockPrefab", "SINGLE IMPULSE"),
+		model: BlockCreation.Model.fAutoCreated("GenericLogicBlockPrefab", "Edge Detector"),
 		category: () => BlockCreation.Categories.other,
 	},
 } as const satisfies BlockBuilder;
