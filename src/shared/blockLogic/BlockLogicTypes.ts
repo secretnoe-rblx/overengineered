@@ -5,7 +5,7 @@ type LEnum<T extends string> = {
 	readonly elementOrder: NoInfer<readonly T[]>;
 	readonly elements: BlockLogicTypes.Enum<T>["elements"];
 };
-/** Infers the T of the `enum` type because without this it returns Enum<string> which is not helpful */
+/** Infers the T of the `enum` type because without this it returns Enum\<string\> which is not helpful */
 export const inferEnumLogicType = <const T extends string>(value: LEnum<T>): LEnum<T> => value;
 
 export namespace BlockLogicTypes {
