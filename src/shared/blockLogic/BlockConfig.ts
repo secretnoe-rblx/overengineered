@@ -36,7 +36,11 @@ export namespace BlockConfig {
 		readonly [k in string]: BlockLogicFullInputDef;
 	};
 
-	export function addDefaults(config: PartialPlacedBlockConfig | undefined, definition: Def): PlacedBlockConfig {
+	export function addDefaults(
+		config: PartialPlacedBlockConfig | undefined,
+		definition: Def,
+		treatUnsetAsUnset = false,
+	): PlacedBlockConfig {
 		const result: { [k in string]?: Partial<GenericConfig> } = { ...(config ?? {}) };
 
 		const getDefaultType = (def: BlockLogicFullInputDef): PrimitiveKeys => {
@@ -44,7 +48,7 @@ export namespace BlockConfig {
 				return firstKey(def.types)!;
 			}
 
-			if (def.connectorHidden) {
+			if (def.connectorHidden && !treatUnsetAsUnset) {
 				// without a connector we can only configure the value with the config tool; thus, "unset" makes zero sense
 				const t = firstKey(def.types);
 				if (!t) {

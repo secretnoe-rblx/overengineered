@@ -1186,37 +1186,34 @@ const v25: UpgradableBlocksSerializer<SerializedBlocks<SerializedBlockV4>, typeo
 		};
 
 		const blocks = prev.blocks.map(updateTypes);
-		const wires = BlockWireManager.from(blocks, blockList);
+		const wires = BlockWireManager.from(blocks, blockList, undefined, true);
 
 		const updateBlock = (block: SerializedBlockV4): SerializedBlockV4 => {
-			if (block.config) {
-				const def = blockList.blocks[block.id]?.logic?.definition;
-				if (def) {
-					for (const [k] of pairs(def.input)) {
-						if (block.config && (!block.config[k] || block.config[k].type === "unset")) {
-							const wireType = wires.get(block.uuid)!.get(k)!.availableTypes.get()[0];
-
-							$log(`Replaced type ${block.config[k]?.type ?? "nil"} with ${wireType}`);
-							block = {
-								...block,
-								config: {
-									...block.config,
-									[k]: {
-										type: wireType,
-										config: def.input[k].types[wireType]!.config,
-									} as PlacedBlockConfig[string],
-								},
-							};
-						}
-					}
-				}
+			if (!block.config) {
+				block = { ...block, config: {} };
 			}
 
-			if (block.id === "logicmemory") {
-				return {
-					...block,
-					id: "logicmemorylegacy",
-				};
+			const def = blockList.blocks[block.id]?.logic?.definition;
+			if (def) {
+				for (const [k] of pairs(def.input)) {
+					if (block.config && (!block.config[k] || block.config[k].type === "unset")) {
+						const wireType = wires.get(block.uuid)!.get(k)!.availableTypes.get()[0];
+
+						$log(`Replaced ${block.uuid} ${k} type ${block.config[k]?.type ?? "nil"} with ${wireType}`);
+						if (!wireType) continue;
+
+						block = {
+							...block,
+							config: {
+								...block.config,
+								[k]: {
+									type: wireType,
+									config: def.input[k].types[wireType]!.config,
+								} as PlacedBlockConfig[string],
+							},
+						};
+					}
+				}
 			}
 
 			return block;

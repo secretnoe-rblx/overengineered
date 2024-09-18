@@ -103,6 +103,7 @@ export namespace BlockWireManager {
 		blocks: readonly BlockDataForWireManager[],
 		blockList: BlockList,
 		treatDisconnectedAsUnset: boolean = false,
+		treatUnsetAsUnset: boolean = false,
 	) {
 		const toNarrow: Markers.Marker[] = [];
 		const markersByBlock = new Map<BlockUuid, Map<string, Markers.Input | Markers.Output>>();
@@ -111,7 +112,7 @@ export namespace BlockWireManager {
 		for (const block of blocks) {
 			const definition = blockList.blocks[block.id]?.logic?.definition;
 			if (!definition) continue;
-			const cfg = BlockConfig.addDefaults(block.config, definition.input);
+			const cfg = BlockConfig.addDefaults(block.config, definition.input, treatUnsetAsUnset);
 
 			const add = (
 				key: string,
