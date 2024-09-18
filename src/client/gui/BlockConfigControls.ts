@@ -115,7 +115,7 @@ const template = Gui.getGameUI<{ Templates: { Config2: { Template: ConfigValueWr
 	.Config2.Template;
 
 const setWrapperColor = (wrapper: ConfigValueWrapper, valueType: PrimitiveKeys) => {
-	wrapper.typeColor.set(BlockWireManager.typeGroups[BlockWireManager.groups[valueType]].color);
+	wrapper.typeColor.set(BlockWireManager.types[valueType].color);
 };
 const setWrapperName = (control: Control<GuiObject & { readonly HeadingLabel: TextLabel }>, name: string) => {
 	control.instance.HeadingLabel.Text = name;

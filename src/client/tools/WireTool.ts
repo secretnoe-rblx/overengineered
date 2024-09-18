@@ -23,7 +23,7 @@ import type { BuildingMode } from "client/modes/build/BuildingMode";
 import type { SharedPlot } from "shared/building/SharedPlot";
 import type { ReadonlyObservableValue } from "shared/event/ObservableValue";
 
-const typeGroups = BlockWireManager.typeGroups;
+const typeGroups = BlockWireManager.types;
 
 const markerParent = Element.create("ScreenGui", {
 	Name: "WireToolMarkers",
