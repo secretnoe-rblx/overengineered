@@ -31,7 +31,7 @@ export type MultiKeyPart = {
 
 type MultiKeyPartControlDefinition = GuiObject & {
 	readonly Number: NumberTextBoxControlDefinition;
-	readonly Button: KeyOrStringChooserControlDefinition;
+	readonly Button: Frame & { Button: KeyOrStringChooserControlDefinition };
 	readonly DeleteButton: GuiButton;
 };
 class MultiKeyPartControl extends Control<MultiKeyPartControlDefinition> {
@@ -52,7 +52,7 @@ class MultiKeyPartControl extends Control<MultiKeyPartControlDefinition> {
 		const value = new SubmittableValue(new ObservableValue<MultiKeyPart>({ key, value: num }));
 		this.value = value.asHalfReadonly();
 
-		const keyChooser = this.add(new KeyOrStringChooserControl(gui.Button));
+		const keyChooser = this.add(new KeyOrStringChooserControl(gui.Button.Button));
 		keyChooser.submitted.Connect((key) => value.submit({ ...value.get(), key }));
 
 		const numbertb = this.add(new NumberTextBoxControl(gui.Number, min, max));
@@ -75,7 +75,7 @@ class MultiKeyPartControl extends Control<MultiKeyPartControlDefinition> {
 export type MultiKeyNumberControlDefinition = GuiObject & {
 	readonly Template: GuiObject & {
 		readonly Number: NumberTextBoxControlDefinition;
-		readonly Button: KeyOrStringChooserControlDefinition;
+		readonly Button: Frame & { Button: KeyOrStringChooserControlDefinition };
 		readonly DeleteButton: GuiButton;
 	};
 	readonly Add: GuiObject & {
