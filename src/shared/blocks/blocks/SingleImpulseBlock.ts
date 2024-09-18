@@ -75,7 +75,7 @@ class Logic extends BlockLogic<typeof definition> {
 export const SingleImpulseBlock = {
 	...BlockCreation.defaults,
 	id: "singleimpulse",
-	displayName: "Edge Detector",
+	displayName: "Signal Edge Detector",
 	description: "Converts a bit into a pulse",
 
 	logic: { definition, ctor: Logic },
