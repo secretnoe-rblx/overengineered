@@ -42,7 +42,7 @@ export class PlayerDataController extends HostedService {
 
 		const slots: SlotMeta[] = [];
 
-		if (GameDefinitions.isTester(player)) {
+		if (GameDefinitions.isTester(player) || GameDefinitions.isTestPlace()) {
 			try {
 				const externalData = HttpService.JSONDecode(
 					Backend.Datastores.GetEntry(universeId, "players", tostring(player.UserId)) as string,
