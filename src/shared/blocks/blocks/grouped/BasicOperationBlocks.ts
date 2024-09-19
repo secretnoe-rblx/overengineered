@@ -650,7 +650,7 @@ const maths = {
 		modelSource: autoModel("DoubleGenericLogicBlockPrefab", "RAND", categories.math),
 		logic: logic(
 			{
-				inputOrder: ["value", "min", "max"],
+				inputOrder: ["min", "max"],
 				input: {
 					min: defpartsf.number("Min"),
 					max: defpartsf.number("Max"),
