@@ -1085,6 +1085,11 @@ const v25: UpgradableBlocksSerializer<SerializedBlocks<SerializedBlockV4>, typeo
 								readonly switchmode: boolean;
 							};
 
+							let max = 100;
+							if (block.id === "piston") {
+								max = (block.config?.distance as number | undefined) ?? max;
+							}
+
 							controlConfig = {
 								enabled: true,
 								keys: [
@@ -1227,6 +1232,15 @@ const v25: UpgradableBlocksSerializer<SerializedBlocks<SerializedBlockV4>, typeo
 						...block.config,
 						lightRange: block.config?.lightRrange as never,
 						lightRrange: undefined!,
+					},
+				};
+			}
+			if (block.id === "piston") {
+				block = {
+					...block,
+					config: {
+						...block.config,
+						distance: undefined!,
 					},
 				};
 			}

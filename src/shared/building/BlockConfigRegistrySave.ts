@@ -852,6 +852,18 @@ const lamp = {
 			default: false as boolean,
 			config: false as boolean,
 		},
+		brightness: {
+			displayName: "Brightness",
+			type: "number",
+			config: 20,
+			default: 20,
+		},
+		lightRrange: {
+			displayName: "Range",
+			type: "number",
+			config: 20,
+			default: 20,
+		},
 	},
 	output: {},
 } as const satisfies BlockConfigBothDefinitions;
