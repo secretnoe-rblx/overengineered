@@ -93,20 +93,19 @@ namespace ClientBlockControlsNamespace {
 		};
 		const smoothCancel = () => smoothMovingTask && task.cancel(smoothMovingTask);
 
-		const set = config.mode.smooth ? smoothSet : actualSet;
+		let switchSetTo = config.startValue;
+		const switchSet = (value: number) => {
+			if (value === switchSetTo) {
+				actualSet((switchSetTo = config.startValue));
+			} else {
+				actualSet((switchSetTo = value));
+			}
+		};
 
 		//
 
-		const keySet = (value: number) => {
-			set(value);
-		};
-		const keyReset = () => {
-			if (config.mode.resetOnStop) {
-				set(config.startValue);
-			} else {
-				smoothCancel();
-			}
-		};
+		const set = config.mode.smooth ? smoothSet : switchSet;
+		const reset = config.mode.resetOnStop ? () => set(config.startValue) : smoothCancel;
 
 		//
 
@@ -115,8 +114,8 @@ namespace ClientBlockControlsNamespace {
 		const mapKeyHold = (_: unknown, v: BlockLogicTypes.NumberControlKey): KeyDefinition<string> => ({
 			key: v.key,
 			conflicts: allKeys.except([v.key]),
-			keyDown: () => keySet(v.value),
-			keyUp: () => keyReset(),
+			keyDown: () => set(v.value),
+			keyUp: () => reset(),
 		});
 
 		let movingTo: string | undefined;
@@ -125,10 +124,10 @@ namespace ClientBlockControlsNamespace {
 			conflicts: allKeys.except([v.key]),
 			keyDown: () => {
 				if (movingTo === v.key) {
-					keyReset();
+					reset();
 					movingTo = undefined;
 				} else {
-					keySet(v.value);
+					set(v.value);
 					movingTo = v.key;
 				}
 			},
