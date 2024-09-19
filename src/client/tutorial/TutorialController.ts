@@ -474,19 +474,26 @@ namespace Steps {
 			autoComplete: () => {
 				ClientBuilding.updateConfigOperation.execute({
 					plot: plot,
-					configs: blocksToConfigure.map(
-						({ uuid, key, value }): ClientBuilding.UpdateConfigArgs["configs"][number] => ({
+					configs: blocksToConfigure
+						.groupBy((b) => b.uuid)
+						.map((uuid, blocks): ClientBuilding.UpdateConfigArgs["configs"][number] => ({
 							block: plot.getBlock(uuid),
 							cfg: {
 								...(BlockManager.manager.config.get(plot.getBlock(uuid)) ?? {}),
-								[key]: BlockConfig.addDefaults(
-									{ [key]: value },
-									blockList.blocks[BlockManager.manager.id.get(plot.getBlock(uuid))]!.logic!
-										.definition.input,
-								)[key],
+								...asObject(
+									blocks.mapToMap(({ key, value }) =>
+										$tuple(
+											key,
+											BlockConfig.addDefaults(
+												{ [key]: value },
+												blockList.blocks[BlockManager.manager.id.get(plot.getBlock(uuid))]!
+													.logic!.definition.input,
+											)[key],
+										),
+									),
+								),
 							},
-						}),
-					),
+						})),
 				});
 			},
 		};
