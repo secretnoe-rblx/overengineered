@@ -1339,6 +1339,29 @@ const other = {
 			}),
 		),
 	},
+	switch: {
+		displayName: "Switch",
+		description: "Allows signals to pass through only when enabled",
+		modelSource: autoModel("GenericLogicBlockPrefab", "SWITCH", categories.other),
+		logic: logic(
+			{
+				inputOrder: ["value", "enable"],
+				input: {
+					enable: defpartsf.bool("Enabled"),
+					value: defpartsf.any("Value", { group: "1" }),
+				},
+				output: {
+					result: {
+						displayName: "Result",
+						types: asMap(BlockConfigDefinitions.any).keys(),
+						group: "1",
+					},
+				},
+			},
+			({ value, valueType, enable }) =>
+				enable ? { result: { type: valueType, value: value } } : BlockLogicValueResults.availableLater,
+		),
+	},
 } as const satisfies BlockBuildersWithoutIdAndDefaults;
 
 const test: {} = !RunService.IsStudio()
