@@ -1186,7 +1186,18 @@ const v25: UpgradableBlocksSerializer<SerializedBlocks<SerializedBlockV4>, typeo
 		};
 
 		const blocks = prev.blocks.map(updateTypes);
+		const blockMap = blocks.mapToMap((b) => $tuple(b.uuid, b));
 		const wires = BlockWireManager.from(blocks, blockList, undefined, true);
+		const byteSplitterFixMap: { readonly [k in string]: string } = {
+			"1": "128",
+			"2": "64",
+			"4": "32",
+			"8": "16",
+			"16": "8",
+			"32": "4",
+			"64": "2",
+			"128": "1",
+		};
 
 		const updateBlock = (block: SerializedBlockV4): SerializedBlockV4 => {
 			if (!block.config) {
@@ -1214,6 +1225,31 @@ const v25: UpgradableBlocksSerializer<SerializedBlocks<SerializedBlockV4>, typeo
 						};
 					}
 				}
+			}
+
+			for (const [k, v] of pairs(block.config ?? {})) {
+				if (v.type !== "wire") continue;
+
+				const connectedBlock = blockMap.get(v.config.blockUuid);
+				if (!connectedBlock) continue;
+
+				if (connectedBlock.id !== "bytesplitter") continue;
+
+				block = {
+					...block,
+					config: {
+						...block.config,
+						[k]: {
+							type: "wire",
+							config: {
+								...v.config,
+								connectionName: byteSplitterFixMap[v.config.connectionName] as BlockConnectionName,
+							},
+						},
+					},
+				};
+
+				$log("Rerouting a byte splitter connection from number", v.config.connectionName);
 			}
 
 			return block;
