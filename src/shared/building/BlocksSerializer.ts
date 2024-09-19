@@ -1014,6 +1014,9 @@ const v25: UpgradableBlocksSerializer<SerializedBlocks<SerializedBlockV4>, typeo
 				...Objects.mapValues(block.config ?? {}, (k, v) => {
 					const def = (blockConfigRegistry as BlockConfigRegistry)[block.id as keyof BlockConfigRegistry]!
 						.input[k];
+					if (!def) {
+						$err(`Got nil trying to load key ${k} in block ${block.id}`);
+					}
 
 					assert(def.type !== "multikey");
 
