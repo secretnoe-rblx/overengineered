@@ -1,7 +1,7 @@
 import type { TutorialDiffList } from "client/tutorial/TutorialController";
 
 export const TestTutorialDiff = {
-	saveVersion: 23,
+	saveVersion: 25,
 	diffs: {
 		d0buildFrame: [
 			{ block: { uuid: "bdel", location: new CFrame(29, 1.5, 11), id: "block" }, type: "added" },

@@ -1,7 +1,7 @@
 import type { TutorialDiffList } from "client/tutorial/TutorialController";
 
 export const BasicCarTutorialDiffs = {
-	saveVersion: 24,
+	saveVersion: 25,
 	diffs: {
 		c1frame: [
 			{
