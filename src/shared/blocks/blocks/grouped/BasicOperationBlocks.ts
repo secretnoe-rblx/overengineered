@@ -92,6 +92,7 @@ const defpartsf = {
 };
 const defs = {
 	equality: {
+		inputOrder: ["value1", "value2"],
 		input: {
 			value1: {
 				displayName: "Value 1",
@@ -118,9 +119,10 @@ const defs = {
 		},
 	},
 	num2_bool: {
+		inputOrder: ["value1", "value2"],
 		input: {
-			value1: defpartsf.number("Value"),
-			value2: defpartsf.number("Value"),
+			value1: defpartsf.number("Value 1"),
+			value2: defpartsf.number("Value 2"),
 		},
 		output: {
 			result: {
