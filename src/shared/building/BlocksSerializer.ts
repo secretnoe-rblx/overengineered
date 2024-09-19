@@ -1216,7 +1216,7 @@ const v25: UpgradableBlocksSerializer<SerializedBlocks<SerializedBlockV4>, typeo
 			) {
 				return {
 					...block,
-					location: block.location.mul(CFrame.Angles(0, 0, -90)),
+					location: block.location.mul(CFrame.Angles(0, 0, math.rad(-90))),
 				};
 			}
 			if (block.id === "radioreciever") {
