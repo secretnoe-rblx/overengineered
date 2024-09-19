@@ -338,7 +338,7 @@ const maths = {
 	},
 	floor: {
 		displayName: "Floor",
-		description: "N/A", // TODO: <
+		description: "It's like rounding but it only rounds down",
 		modelSource: autoModel("GenericLogicBlockPrefab", "FLOOR", categories.math),
 		logic: logic(defs.num1_num, ({ value }) => ({
 			result: { type: "number", value: math.floor(value) },
@@ -346,7 +346,7 @@ const maths = {
 	},
 	ceil: {
 		displayName: "Ceil",
-		description: "N/A", // TODO: <
+		description: "It's like rounding but it only rounds up",
 		modelSource: autoModel("GenericLogicBlockPrefab", "CEIL", categories.math),
 		logic: logic(defs.num1_num, ({ value }) => ({
 			result: { type: "number", value: math.ceil(value) },
@@ -642,34 +642,6 @@ const maths = {
 			({ value, min, max }) => ({
 				result: { type: "number", value: math.clamp(value, min, max) },
 			}),
-		),
-	},
-	rand: {
-		displayName: "Random",
-		description: `Returns a "random" value between chosen minimum and maximum (excluding maximum)`,
-		modelSource: autoModel("DoubleGenericLogicBlockPrefab", "RAND", categories.math),
-		logic: logic(
-			{
-				inputOrder: ["min", "max"],
-				input: {
-					min: defpartsf.number("Min"),
-					max: defpartsf.number("Max"),
-				},
-				output: {
-					result: {
-						displayName: "Result",
-						types: ["number"],
-					},
-				},
-			},
-			({ min, max }, logic) => {
-				if (max <= min) {
-					logic.disableAndBurn();
-					return BlockLogicValueResults.garbage;
-				}
-
-				return { result: { type: "number", value: math.random() * (max - min) + min } };
-			},
 		),
 	},
 

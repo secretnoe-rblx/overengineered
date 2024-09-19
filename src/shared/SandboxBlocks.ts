@@ -38,6 +38,7 @@ import { RadarSectionBlock } from "shared/blocks/blocks/RadarSectionBlock";
 import { RadioReceiverBlock } from "shared/blocks/blocks/RadioReceiverBlock";
 import { RadioTransmitterBlock } from "shared/blocks/blocks/RadioTransmitterBlock";
 import { RandomAccessMemoryBlock } from "shared/blocks/blocks/RandomAccessMemoryBlock";
+import { RandomBlock } from "shared/blocks/blocks/RandomBlock";
 import { ReadonlyMemoryBlock } from "shared/blocks/blocks/ReadonlyMemoryBlock";
 import { RocketBlocks } from "shared/blocks/blocks/RocketEngineBlocks";
 import { RopeBlock } from "shared/blocks/blocks/RopeBlock";
@@ -92,6 +93,7 @@ export const CreateSandboxBlocks = (): BlockList => {
 		RandomAccessMemoryBlock,
 		StackMemoryBlock,
 		ReadonlyMemoryBlock,
+		RandomBlock,
 
 		AltimeterBlock,
 		KeySensorBlock,
