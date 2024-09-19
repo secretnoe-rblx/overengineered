@@ -41,6 +41,7 @@ class TooltipController extends HostedService {
 
 		const screen = new Instance("ScreenGui");
 		screen.Name = "TooltipScreen";
+		screen.ResetOnSpawn = false;
 		screen.IgnoreGuiInset = true;
 		screen.ClipToDeviceSafeArea = false;
 		screen.SafeAreaCompatibility = Enum.SafeAreaCompatibility.None;
