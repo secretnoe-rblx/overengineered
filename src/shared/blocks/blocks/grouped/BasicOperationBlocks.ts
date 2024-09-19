@@ -311,9 +311,31 @@ const maths = {
 		displayName: "Round",
 		description: "Returns rounded input value",
 		modelSource: autoModel("GenericLogicBlockPrefab", "ROUND", categories.math),
-		logic: logic(defs.num1_num, ({ value }) => ({
-			result: { type: "number", value: math.round(value) },
-		})),
+		logic: logic(
+			{
+				inputOrder: ["value", "precision"],
+				input: {
+					value: defpartsf.number("Value"),
+					precision: {
+						displayName: "Precision",
+						types: {
+							number: {
+								config: 1,
+							},
+						},
+					},
+				},
+				output: {
+					result: {
+						displayName: "Result",
+						types: ["number"],
+					},
+				},
+			},
+			({ value, precision }) => ({
+				result: { type: "number", value: MathUtils.round(value, precision) },
+			}),
+		),
 	},
 	floor: {
 		displayName: "Floor",
