@@ -12,7 +12,7 @@ export namespace BootFlagsController {
 			if (player.GetJoinData().SourcePlaceId) return;
 
 			const rawData = player.GetJoinData().LaunchData;
-			if (!rawData) return;
+			if (!rawData || rawData === "") return;
 
 			const launchData = HttpService.JSONDecode(Base64.Decode(rawData)) as BootFlag;
 
