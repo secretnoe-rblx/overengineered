@@ -255,7 +255,12 @@ namespace Markers {
 		}
 		unhighlight() {
 			this.pauseColors = false;
-			this.instance.TextButton.BackgroundColor3 = typeGroups[this.availableTypes.get()[0]].color;
+			this.instance.TextButton.BackgroundColor3 =
+				typeGroups[this.availableTypes.get()[0]]?.color ?? Colors.purple;
+			LogControl.instance.addLine(
+				"Some of your wires have incompatible types, fix before proceeding.",
+				Colors.red,
+			);
 		}
 
 		hideWires() {
