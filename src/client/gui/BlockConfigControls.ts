@@ -49,6 +49,7 @@ export type VisualBlockConfigDefinition = {
 	readonly unit?: string;
 	readonly types: Partial<BlockLogicWithConfigDefinitionTypes<PrimitiveKeys>>;
 	readonly connectorHidden?: boolean;
+	readonly configHidden?: boolean;
 	readonly group?: string;
 };
 export type VisualBlockConfigDefinitions = {
@@ -1125,6 +1126,7 @@ export class MultiBlockConfigControl extends Control implements Controls.Args {
 
 			for (const k of order ?? asMap(definitions).keys()) {
 				const definition = definitions[k];
+				if (definition.configHidden) continue;
 
 				const lconfigs = map(configs, (c) => c[k]);
 				const wrapper = this.add(
