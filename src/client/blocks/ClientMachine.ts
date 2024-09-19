@@ -57,6 +57,10 @@ export class ClientMachine extends SharedMachine {
 				const input = logic.input[k] as
 					| (typeof logic)["input"][typeof k]
 					| ILogicValueStorage<keyof BlockLogicTypes.Primitives>;
+				if (!input) {
+					$warn(`Found nil input key ${k} for logic ${block.id}`);
+				}
+
 				if (!("set" in input)) continue;
 
 				const def = logic.definition.input[k].types[cfg.type] as
