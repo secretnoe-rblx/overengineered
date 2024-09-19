@@ -1090,7 +1090,7 @@ const v25: UpgradableBlocksSerializer<SerializedBlocks<SerializedBlockV4>, typeo
 								],
 								startValue: 0,
 								mode: {
-									stopOnRelease: false,
+									stopOnRelease: !value.switchmode,
 									resetOnStop: false,
 									smooth: !value.switchmode,
 									smoothSpeed: 20,
