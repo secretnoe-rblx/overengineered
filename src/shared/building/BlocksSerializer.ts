@@ -1200,6 +1200,18 @@ const v25: UpgradableBlocksSerializer<SerializedBlocks<SerializedBlockV4>, typeo
 		};
 
 		const updateBlock = (block: SerializedBlockV4): SerializedBlockV4 => {
+			if (
+				block.id === "halfcylinder1x1" ||
+				block.id === "halfcylinder1x2" ||
+				block.id === "halfcylinder2x1" ||
+				block.id === "halfcylinder2x2"
+			) {
+				return {
+					...block,
+					location: block.location.mul(CFrame.Angles(0, 0, -90)),
+				};
+			}
+
 			if (!block.config) {
 				block = { ...block, config: {} };
 			}
