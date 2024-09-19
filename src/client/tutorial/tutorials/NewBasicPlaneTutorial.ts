@@ -192,7 +192,6 @@ export class NewBasicPlaneTutorial implements TutorialDescriber {
 			() => [
 				t.funcPart(() => toolController.enabledTools.enableOnly(toolController.allTools.configTool)),
 				t.processDiff(diffs.configureAllServos, saveVersion),
-				t.partNextButton(),
 				t.partText("Let's configure tese servos!"),
 				t.translatedHintsPart(
 					["Select the configuration tool"],
