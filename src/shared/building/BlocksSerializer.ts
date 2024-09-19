@@ -1217,6 +1217,16 @@ const v25: UpgradableBlocksSerializer<SerializedBlocks<SerializedBlockV4>, typeo
 					id: "radioreceiver",
 				};
 			}
+			if (block.id === "lamp") {
+				block = {
+					...block,
+					config: {
+						...block.config,
+						lightRange: block.config?.lightRrange as never,
+						lightRrange: undefined!,
+					},
+				};
+			}
 
 			if (!block.config) {
 				block = { ...block, config: {} };
