@@ -32,6 +32,7 @@ import { MotorBlock } from "shared/blocks/blocks/MotorBlock";
 import { MouseSensorBlock } from "shared/blocks/blocks/MouseSensorBlock";
 import { OwnerCameraLocatorBlock } from "shared/blocks/blocks/OwnerCameraLocatorBlock";
 import { OwnerLocatorBlock } from "shared/blocks/blocks/OwnerLocatorBlock";
+import { PassengerSeatBlock } from "shared/blocks/blocks/PassengerSeatBlock";
 import { PistonBlock } from "shared/blocks/blocks/PistonBlock";
 import { RadarSectionBlock } from "shared/blocks/blocks/RadarSectionBlock";
 import { RadioReceiverBlock } from "shared/blocks/blocks/RadioReceiverBlock";
@@ -79,6 +80,7 @@ export const CreateSandboxBlocks = (): BlockList => {
 		SevenSegmentDisplayBlock,
 
 		VehicleSeatBlock,
+		PassengerSeatBlock,
 
 		DelayBlock,
 		SingleImpulseBlock,
