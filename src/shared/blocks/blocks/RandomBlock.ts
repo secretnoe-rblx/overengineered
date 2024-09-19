@@ -9,7 +9,7 @@ const definition = {
 	inputOrder: ["min", "max"],
 	input: {
 		min: { displayName: "Min", types: BlockConfigDefinitions.number },
-		max: { displayName: "Max", types: BlockConfigDefinitions.number },
+		max: { displayName: "Max", types: { number: { config: 1 } } },
 	},
 	output: {
 		result: {
