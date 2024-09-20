@@ -53,17 +53,7 @@ class Logic extends BlockLogic<typeof definition> {
 		this.on(({ impulse, type: trig_side, impulseChanged }) => {
 			if (!impulseChanged) return;
 
-			if (trig_side === "both" || trig_side === "rtrig") {
-				// R_Trig: Rising edge detected
-				if (!impulse) return;
-
-				wasImpulsedLastTick = true;
-				this.output.value.set("bool", true);
-			}
-			if (trig_side === "both" || trig_side === "ftrig") {
-				// F_Trig: Falling edge detected
-				if (impulse) return;
-
+			if (trig_side === "both" || (impulse && trig_side === "rtrig") || (!impulse && trig_side === "ftrig")) {
 				wasImpulsedLastTick = true;
 				this.output.value.set("bool", true);
 			}
