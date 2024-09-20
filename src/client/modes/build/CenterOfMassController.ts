@@ -50,13 +50,19 @@ export class CenterOfMassController extends ClientComponent {
 			}
 		};
 
+		const clear = () => {
+			for (const b of this.renderedBalls) {
+				b.Destroy();
+			}
+
+			this.renderedBalls.clear();
+		};
+
+		this.event.subscribe(CustomRemotes.slots.load.sent, clear);
 		this.event.subscribe(CustomRemotes.slots.load.completed, (v) => (v.success ? update() : undefined));
 		this.event.subscribe(SharedPlot.anyChanged, update);
 		this.event.onEnable(update);
-		this.onDisable(() => {
-			for (const b of this.renderedBalls) b.Destroy();
-			this.renderedBalls.clear();
-		});
+		this.onDisable(clear);
 	}
 
 	private calculateCentersOfMass(blocks: readonly BlockModel[]) {
