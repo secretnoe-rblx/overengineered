@@ -12,6 +12,7 @@ export type TouchActionControllerGuiDefinition = GuiObject & {
 	readonly Undo: GuiButton;
 	readonly Redo: GuiButton;
 	readonly Grid: GuiButton;
+	readonly CenterOfMass: GuiButton;
 };
 export class TouchActionControllerGui extends Control<TouchActionControllerGuiDefinition> {
 	constructor(
@@ -19,6 +20,7 @@ export class TouchActionControllerGui extends Control<TouchActionControllerGuiDe
 		editMode: ObservableValue<EditMode>,
 		moveGridStep: ObservableValue<number>,
 		rotateGridStep: ObservableValue<number>,
+		centerOfMassEnabled: ObservableValue<boolean>,
 		editTool: EditTool,
 	) {
 		super(gui);
@@ -47,5 +49,14 @@ export class TouchActionControllerGui extends Control<TouchActionControllerGuiDe
 
 		this.add(new GridEditorControl(gridEditorGui.Content, moveGridStep, rotateGridStep, editMode));
 		this.add(new ButtonControl(gui.Grid, () => (gridEditorGui.Visible = !gridEditorGui.Visible)));
+
+		const com = this.add(
+			new ButtonControl(gui.CenterOfMass, () => centerOfMassEnabled.set(!centerOfMassEnabled.get())),
+		);
+		this.event.subscribeObservable(
+			centerOfMassEnabled,
+			(enabled) => (com.instance.Transparency = enabled ? 0.5 : 0),
+			true,
+		);
 	}
 }
