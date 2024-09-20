@@ -1,9 +1,9 @@
 import { ReplicatedStorage, Workspace } from "@rbxts/services";
 import { ClientComponent } from "client/component/ClientComponent";
-import { Colors } from "shared/Colors";
 import { Gui } from "client/gui/Gui";
 import { BuildingManager } from "shared/building/BuildingManager";
 import { SharedPlot } from "shared/building/SharedPlot";
+import { Colors } from "shared/Colors";
 import { CustomRemotes } from "shared/Remotes";
 
 @injectable
@@ -50,7 +50,7 @@ export class CenterOfMassController extends ClientComponent {
 			}
 		};
 
-		this.event.subscribe(CustomRemotes.slots.load.completed, (v) => (v.success ? update : ""));
+		this.event.subscribe(CustomRemotes.slots.load.completed, (v) => (v.success ? update() : undefined));
 		this.event.subscribe(SharedPlot.anyChanged, update);
 		this.event.onEnable(update);
 		this.onDisable(() => {
