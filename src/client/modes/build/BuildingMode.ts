@@ -40,7 +40,8 @@ export class BuildingMode extends PlayMode {
 
 		di = di.beginScope((di) => di.registerSingleton(this));
 		const com = new CenterOfMassController(plot);
-		this.event.subscribeObservable(this.centerOfMassEnabled, (enabled) => com.setEnabled(enabled));
+		this.event.subscribeObservable(this.centerOfMassEnabled, (enabled) => com.setEnabled(enabled), true);
+		this.onDisable(() => com.disable());
 		this.onDestroy(() => com.destroy());
 
 		this.event.subInput((ih) => {
