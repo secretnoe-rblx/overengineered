@@ -1,4 +1,5 @@
 import { MathUtils } from "shared/fixes/MathUtils";
+import { Strings } from "shared/fixes/String.propmacro";
 import type {
 	BlockLogic,
 	BlockLogicBothDefinitions,
@@ -34,7 +35,13 @@ type Filter<K extends PrimitiveKeys> = {
 type GenericFilter = Filter<PrimitiveKeys>;
 const Filters: { readonly [k in PrimitiveKeys]?: Filter<k> } = {
 	byte: {
-		filter: (value) => math.clamp(value, 0, 255),
+		filter: (value) => {
+			if (typeIs(value, "table")) {
+				$warn("clamping a table", Strings.pretty(value ?? "NIL"));
+			}
+
+			return math.clamp(value, 0, 255);
+		},
 	},
 	number: {
 		filter: (value, definition) => {
