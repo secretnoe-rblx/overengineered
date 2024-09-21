@@ -1225,7 +1225,7 @@ const v25: UpgradableBlocksSerializer<SerializedBlocks<SerializedBlockV4>, typeo
 					id: "radioreceiver",
 				};
 			}
-			if (block.id === "lamp") {
+			if (block.id === "lamp" || block.id === "smalllamp") {
 				block = {
 					...block,
 					config: {
