@@ -20,10 +20,9 @@ import { ObservableValue } from "shared/event/ObservableValue";
 import { ReplicatedAssets } from "shared/ReplicatedAssets";
 import type { InputTooltips } from "client/gui/static/TooltipsControl";
 import type { BuildingMode } from "client/modes/build/BuildingMode";
+import type { BlockLogicTypes } from "shared/blockLogic/BlockLogicTypes";
 import type { SharedPlot } from "shared/building/SharedPlot";
 import type { ReadonlyObservableValue } from "shared/event/ObservableValue";
-
-const typeGroups = BlockWireManager.types;
 
 const markerParent = Element.create("ScreenGui", {
 	Name: "WireToolMarkers",
@@ -56,6 +55,16 @@ task.spawn(() => {
 		}
 	}
 });
+
+const getTypeColor = (wireType: keyof BlockLogicTypes.Primitives) => {
+	const color = BlockWireManager.types[wireType]?.color;
+	if (!color) {
+		LogControl.instance.addLine("Some of your wires have incompatible types, fix before proceeding.", Colors.red);
+		return Colors.purple;
+	}
+
+	return color;
+};
 
 namespace Markers {
 	type MarkerComponentDefinition = BillboardGui & {
@@ -181,11 +190,11 @@ namespace Markers {
 					};
 
 					if (types.size() === 1) {
-						setcolor(typeGroups[types[0]].color);
+						setcolor(getTypeColor(types[0]));
 					} else {
 						const func = (index: number) => {
 							if (this.pauseColors) return;
-							setcolor(typeGroups[types[index % types.size()]].color);
+							setcolor(getTypeColor(types[index % types.size()]));
 						};
 
 						looped.set(this, func);
@@ -255,12 +264,7 @@ namespace Markers {
 		}
 		unhighlight() {
 			this.pauseColors = false;
-			this.instance.TextButton.BackgroundColor3 =
-				typeGroups[this.availableTypes.get()[0]]?.color ?? Colors.purple;
-			LogControl.instance.addLine(
-				"Some of your wires have incompatible types, fix before proceeding.",
-				Colors.red,
-			);
+			this.instance.TextButton.BackgroundColor3 = getTypeColor(this.availableTypes.get()[0]);
 		}
 
 		hideWires() {
@@ -388,12 +392,10 @@ class WireComponent extends ClientInstanceComponent<WireComponentDefinition> {
 				const setcolor = (color: Color3) => (this.instance.Color = color);
 
 				if (types.size() === 1) {
-					setcolor(typeGroups[types[0]].color);
+					setcolor(getTypeColor(types[0]));
 				} else {
 					const func = (index: number) =>
-						setcolor(
-							typeGroups[types[index % (types.size() === 0 ? 1 : types.size())]]?.color ?? Colors.red,
-						);
+						setcolor(getTypeColor(types[index % (types.size() === 0 ? 1 : types.size())]));
 
 					looped.set(this, func);
 					loop = () => looped.delete(this);
