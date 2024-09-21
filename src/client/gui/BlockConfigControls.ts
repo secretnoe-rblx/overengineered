@@ -896,13 +896,32 @@ class ConfigAutoValueWrapper extends Control<ConfigValueWrapperDefinition> {
 		control.dropdown.selectedItem.subscribe((t) => t && selectedType.set(t));
 
 		// all the possible types of every block
-		const availableBlockTypes = asMap(configs).map(
-			(k) =>
-				wireTypes
-					.get(k)
-					?.findValue((k, t) => t.data.id === key)
-					?.availableTypes.get() ?? [],
-		);
+		const availableBlockTypes = asMap(configs).map((k) => {
+			const marker = wireTypes.get(k)?.findValue((k, t) => t.data.id === key);
+			if (!marker) return [];
+
+			const intersectWithSameGroup = (types: readonly (keyof BlockLogicTypes.Primitives)[]) => {
+				return BlockWireManager.intersectTypes([
+					types,
+					...(marker.sameGroupMarkers?.map((m) => m.availableTypes.get()) ?? []),
+				]);
+			};
+
+			if (marker instanceof BlockWireManager.Markers.Input) {
+				const connected = marker.connected.get();
+				if (connected) {
+					return intersectWithSameGroup(
+						BlockWireManager.intersectTypes([marker.data.dataTypes, connected.availableTypes.get()]),
+					);
+				} else {
+					return intersectWithSameGroup(marker.data.dataTypes);
+				}
+			} else {
+				const connected = marker.getConnected();
+				const intersected = BlockWireManager.intersectTypes(connected.map((c) => c.availableTypes.get()));
+				return intersectWithSameGroup(intersected);
+			}
+		});
 		// only types that every block has
 		const availableTypes = new Set(availableBlockTypes.flatmap((t) => t)).filter((t) =>
 			availableBlockTypes.all((at) => at.includes(t)),

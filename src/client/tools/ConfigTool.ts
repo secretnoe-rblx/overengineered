@@ -141,7 +141,11 @@ namespace Scene {
 
 			this.gui.ParamsSelection.Content.ScrollingFrame.Visible = false;
 
-			const markered = BlockWireManager.fromPlot(this.tool.targetPlot.get(), this.tool.blockList, true);
+			const markered = BlockWireManager.fromPlot(
+				this.tool.targetPlot.get(),
+				this.tool.blockList,
+				selected.map(BlockManager.manager.uuid.get),
+			);
 
 			const gui = this.gui.ParamsSelection.Content.ScrollingFrame.Clone();
 			gui.Visible = true;
