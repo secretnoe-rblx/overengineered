@@ -509,7 +509,11 @@ export const BasicPlaneTutorialDiffs = {
 				value: {
 					controlConfig: {
 						enabled: true,
-						mode: { resetOnStop: true, stopOnRelease: true, smoothSpeed: 20, smooth: false },
+						mode: {
+							type: "instant",
+							instant: { mode: "onRelease" },
+							smooth_: { speed: 10, mode: "stopOnRelease" },
+						},
 						keys: [
 							{ key: "A", value: 45 },
 							{ key: "D", value: -45 },
@@ -525,7 +529,11 @@ export const BasicPlaneTutorialDiffs = {
 				value: {
 					controlConfig: {
 						enabled: true,
-						mode: { resetOnStop: true, stopOnRelease: true, smoothSpeed: 20, smooth: false },
+						mode: {
+							type: "instant",
+							instant: { mode: "onRelease" },
+							smooth_: { speed: 10, mode: "stopOnRelease" },
+						},
 						keys: [
 							{ key: "A", value: 45 },
 							{ key: "D", value: -45 },
@@ -543,7 +551,11 @@ export const BasicPlaneTutorialDiffs = {
 				value: {
 					controlConfig: {
 						enabled: true,
-						mode: { resetOnStop: true, stopOnRelease: true, smoothSpeed: 20, smooth: false },
+						mode: {
+							type: "instant",
+							instant: { mode: "onRelease" },
+							smooth_: { speed: 10, mode: "stopOnRelease" },
+						},
 						keys: [
 							{ key: "W", value: 45 },
 							{ key: "S", value: -45 },
@@ -561,7 +573,11 @@ export const BasicPlaneTutorialDiffs = {
 				value: {
 					controlConfig: {
 						enabled: true,
-						mode: { resetOnStop: true, stopOnRelease: true, smoothSpeed: 20, smooth: false },
+						mode: {
+							type: "instant",
+							instant: { mode: "onRelease" },
+							smooth_: { speed: 10, mode: "stopOnRelease" },
+						},
 						keys: [
 							{ key: "W", value: 45 },
 							{ key: "S", value: -45 },
@@ -579,7 +595,11 @@ export const BasicPlaneTutorialDiffs = {
 				value: {
 					controlConfig: {
 						enabled: true,
-						mode: { resetOnStop: true, stopOnRelease: false, smoothSpeed: 20, smooth: false },
+						mode: {
+							type: "instant",
+							instant: { mode: "onRelease" },
+							smooth_: { speed: 20, mode: "stopOnRelease" },
+						},
 						keys: [
 							{ key: "F", value: 100 },
 							{ key: "R", value: 0 },
@@ -595,7 +615,11 @@ export const BasicPlaneTutorialDiffs = {
 				value: {
 					controlConfig: {
 						enabled: true,
-						mode: { resetOnStop: true, stopOnRelease: false, smoothSpeed: 20, smooth: false },
+						mode: {
+							type: "instant",
+							instant: { mode: "onRelease" },
+							smooth_: { speed: 20, mode: "stopOnRelease" },
+						},
 						keys: [
 							{ key: "F", value: 100 },
 							{ key: "R", value: 0 },

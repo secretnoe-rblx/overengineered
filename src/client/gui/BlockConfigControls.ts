@@ -557,6 +557,155 @@ namespace Controls {
 					this.submittedControl.Fire((controlConfig = map(controlConfig, (c) => ({ ...c, keys: v })))),
 				);
 
+				const createSmoothStuff = (redrawMode: () => void) => {
+					const def = definition.control.config.mode.smooth_;
+
+					const [wMode, cMode] = addSingleTypeWrapperAuto(
+						this,
+						"Mode",
+						{
+							type: "enum",
+							config: def.mode,
+							elementOrder: [
+								"stopOnRelease",
+								"stopOnDoublePress",
+								"resetOnRelease",
+								"resetOnDoublePress",
+								"never",
+							],
+							elements: {
+								stopOnRelease: {
+									displayName: "Stop on release",
+									tooltip: "Stops upon releasing the key",
+								},
+								stopOnDoublePress: {
+									displayName: "Stop on double press",
+									tooltip: "Stops upon pressing the same key twice",
+								},
+								resetOnRelease: {
+									displayName: "Reset on release",
+									tooltip: "Resets upon releasing the key",
+								},
+								resetOnDoublePress: {
+									displayName: "Reset on double press",
+									tooltip: "Resets upon pressing the same key twice",
+								},
+								never: {
+									displayName: "Never",
+									tooltip: "Never stops or resets",
+								},
+							},
+							tooltip: "Mode of stopping",
+						} satisfies Omit<
+							BlockLogicTypes.Enum<BlockLogicTypes.NumberControlModesSmoothMode>,
+							"default"
+						> & {
+							readonly type: "enum";
+						} & Pick<VisualBlockConfigDefinition, "tooltip" | "unit">,
+						map(controlConfig, (c) => c.mode.smooth_.mode),
+						args,
+					);
+					dropdownContent.push(wMode);
+					cMode.submitted.Connect((v) => {
+						this.submittedControl.Fire(
+							(controlConfig = map(controlConfig, (c, uuid): BlockLogicTypes.NumberControl["config"] => ({
+								...c,
+								mode: {
+									...c.mode,
+									smooth_: {
+										...c.mode.smooth_,
+										mode: v[uuid] as BlockLogicTypes.NumberControlModesSmoothMode,
+									},
+								},
+							}))),
+						);
+
+						redrawMode();
+					});
+
+					const [wSpeed, cSpeed] = addSingleTypeWrapperAuto(
+						this,
+						"Speed",
+						{
+							type: "number",
+							config: def.speed,
+							clamp: !definition.clamp
+								? undefined
+								: {
+										showAsSlider: true,
+										min: 0,
+										max: definition.clamp.max - definition.clamp.min,
+									},
+						},
+						map(controlConfig, (c) => c.mode.smooth_.speed),
+						args,
+					);
+					dropdownContent.push(wSpeed);
+					cSpeed.submitted.Connect((v) =>
+						this.submittedControl.Fire(
+							(controlConfig = map(controlConfig, (c, uuid): BlockLogicTypes.NumberControl["config"] => ({
+								...c,
+								mode: {
+									...c.mode,
+									smooth_: { ...c.mode.smooth_, speed: v[uuid] },
+								},
+							}))),
+						),
+					);
+				};
+				const createInstantStuff = (redrawMode: () => void) => {
+					const def = definition.control.config.mode.instant;
+
+					const [wStopMode, cStopMode] = addSingleTypeWrapperAuto(
+						this,
+						"Reset mode",
+						{
+							type: "enum",
+							config: def.mode,
+							elementOrder: ["onRelease", "onDoublePress", "never"],
+							elements: {
+								onRelease: {
+									displayName: "On release",
+									tooltip: "Resets upon releasing the key",
+								},
+								onDoublePress: {
+									displayName: "On double press",
+									tooltip: "Resets upon pressing the same key twice",
+								},
+								never: {
+									displayName: "Never",
+									tooltip: "Does not reset",
+								},
+							},
+							tooltip: "Mode of stopping",
+						} satisfies Omit<
+							BlockLogicTypes.Enum<BlockLogicTypes.NumberControlModesResetMode>,
+							"default"
+						> & {
+							readonly type: "enum";
+						} & Pick<VisualBlockConfigDefinition, "tooltip" | "unit">,
+						map(controlConfig, (c) => c.mode.instant.mode),
+						args,
+					);
+					dropdownContent.push(wStopMode);
+					cStopMode.submitted.Connect((v) => {
+						this.submittedControl.Fire(
+							(controlConfig = map(controlConfig, (c, uuid): BlockLogicTypes.NumberControl["config"] => ({
+								...c,
+								mode: {
+									...c.mode,
+									instant: {
+										...c.mode.instant,
+										mode: v[uuid] as BlockLogicTypes.NumberControlModesResetMode,
+									},
+								},
+							}))),
+						);
+
+						redrawMode();
+					});
+				};
+
 				const dropdownContent: Control[] = [];
 				const createModeDropdown = () => {
 					const redrawMode = () => {
@@ -565,105 +714,30 @@ namespace Controls {
 						}
 						dropdownContent.clear();
 
-						if (sameOrUndefinedBy(controlConfig, (c) => c.mode.smooth)) {
-							const [wStopOnRelease, cStopOnRelease] = addSingleTypeWrapperAuto(
-								this,
-								"Stop on release",
-								{
-									type: "bool",
-									config: definition.control.config.mode.stopOnRelease,
-									tooltip: "Stops changing the value when all the keys are released",
-								},
-								map(controlConfig, (c) => c.mode.stopOnRelease),
-								args,
-							);
-							dropdownContent.push(wStopOnRelease);
-							cStopOnRelease.submitted.Connect((v) => {
-								this.submittedControl.Fire(
-									(controlConfig = map(
-										controlConfig,
-										(c, uuid): BlockLogicTypes.NumberControl["config"] => ({
-											...c,
-											mode: { ...c.mode, stopOnRelease: v[uuid] },
-										}),
-									)),
-								);
-
-								redrawMode();
-							});
-
-							const [wSpeed, cSpeed] = addSingleTypeWrapperAuto(
-								this,
-								"Speed",
-								{
-									type: "number",
-									config: definition.control.config.mode.smoothSpeed,
-									clamp: !definition.clamp
-										? undefined
-										: {
-												showAsSlider: true,
-												min: 0,
-												max: definition.clamp.max,
-											},
-								},
-								map(controlConfig, (c) => c.mode.smoothSpeed),
-								args,
-							);
-							dropdownContent.push(wSpeed);
-							cSpeed.submitted.Connect((v) =>
-								this.submittedControl.Fire(
-									(controlConfig = map(
-										controlConfig,
-										(c, uuid): BlockLogicTypes.NumberControl["config"] => ({
-											...c,
-											mode: { ...c.mode, smoothSpeed: v[uuid] },
-										}),
-									)),
-								),
-							);
+						const mode = sameOrUndefinedBy(controlConfig, (c) => c.mode.type);
+						if (mode === "smooth") {
+							createSmoothStuff(redrawMode);
+						} else if (mode === "instant") {
+							createInstantStuff(redrawMode);
 						}
 					};
 
-					const [wResetReleased, cResetReleased] = addSingleTypeWrapperAuto(
-						this,
-						"Reset on stop",
-						{
-							type: "bool",
-							config: definition.control.config.mode.resetOnStop,
-							tooltip: "Sets the value to the default upon stopping",
-						},
-						map(controlConfig, (c) => c.mode.resetOnStop),
-						args,
-					);
-					cResetReleased.submitted.Connect((v) => {
-						this.submittedControl.Fire(
-							(controlConfig = map(controlConfig, (c, uuid): BlockLogicTypes.NumberControl["config"] => ({
-								...c,
-								mode: { ...c.mode, resetOnStop: v[uuid] },
-							}))),
-						);
-
-						redrawMode();
-					});
-
-					let smoothSpeed = sameOrUndefinedBy(controlConfig, (c) => c.mode.smoothSpeed);
-					smoothSpeed ??= definition.control.config.mode.smoothSpeed;
 					const [wSmooth, cSmooth] = addSingleTypeWrapperAuto(
 						this,
 						"Smooth change",
 						{
 							type: "bool",
-							config: definition.control.config.mode.smooth,
+							config: definition.control.config.mode.type === "smooth",
 							tooltip: "Slowly changed the value to the target instead of an instantaneous change",
 						},
-						map(controlConfig, (c) => c.mode.smooth),
+						map(controlConfig, (c) => c.mode.type === "smooth"),
 						args,
 					);
 					cSmooth.submitted.Connect((v) => {
 						this.submittedControl.Fire(
 							(controlConfig = map(controlConfig, (c, uuid): BlockLogicTypes.NumberControl["config"] => ({
 								...c,
-								mode: { ...c.mode, smooth: v[uuid] },
+								mode: { ...c.mode, type: v[uuid] ? "smooth" : "instant" },
 							}))),
 						);
 

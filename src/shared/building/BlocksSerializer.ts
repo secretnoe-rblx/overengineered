@@ -1070,10 +1070,12 @@ const v25: UpgradableBlocksSerializer<SerializedBlocks<SerializedBlockV4>, typeo
 								],
 								startValue: 0,
 								mode: {
-									stopOnRelease: !value.switchmode,
-									resetOnStop: true,
-									smooth: false,
-									smoothSpeed: 20,
+									type: "instant",
+									instant: { mode: value.switchmode ? "onDoublePress" : "onRelease" },
+									smooth_: {
+										speed: 20,
+										mode: value.switchmode ? "stopOnDoublePress" : "stopOnRelease",
+									},
 								},
 							} satisfies BlockConfigPart<"number">["controlConfig"];
 						} else if (def.type === "thrust") {
@@ -1098,10 +1100,9 @@ const v25: UpgradableBlocksSerializer<SerializedBlocks<SerializedBlockV4>, typeo
 								],
 								startValue: 0,
 								mode: {
-									stopOnRelease: !value.switchmode,
-									resetOnStop: false,
-									smooth: !value.switchmode,
-									smoothSpeed: 20,
+									type: value.switchmode ? "instant" : "smooth",
+									instant: { mode: value.switchmode ? "onDoublePress" : "onRelease" },
+									smooth_: { speed: 20, mode: value.switchmode ? "resetOnRelease" : "stopOnRelease" },
 								},
 							} satisfies BlockConfigPart<"number">["controlConfig"];
 						} else if (def.type === "controllableNumber") {
@@ -1120,7 +1121,11 @@ const v25: UpgradableBlocksSerializer<SerializedBlocks<SerializedBlockV4>, typeo
 									{ key: value.control.sub, value: def.min },
 								],
 								startValue: 0,
-								mode: { stopOnRelease: false, resetOnStop: false, smooth: true, smoothSpeed: 20 },
+								mode: {
+									type: "smooth",
+									instant: { mode: "onRelease" },
+									smooth_: { speed: 20, mode: "stopOnRelease" },
+								},
 							} satisfies BlockConfigPart<"number">["controlConfig"];
 						} else if (def.type === "servoMotorAngle") {
 							const value = v as {
@@ -1140,10 +1145,12 @@ const v25: UpgradableBlocksSerializer<SerializedBlocks<SerializedBlockV4>, typeo
 								],
 								startValue: 0,
 								mode: {
-									stopOnRelease: !value.switchmode,
-									resetOnStop: true,
-									smooth: false,
-									smoothSpeed: 20,
+									type: "instant",
+									instant: { mode: value.switchmode ? "onDoublePress" : "onRelease" },
+									smooth_: {
+										speed: 20,
+										mode: value.switchmode ? "stopOnDoublePress" : "stopOnRelease",
+									},
 								},
 							} satisfies BlockConfigPart<"number">["controlConfig"];
 						}

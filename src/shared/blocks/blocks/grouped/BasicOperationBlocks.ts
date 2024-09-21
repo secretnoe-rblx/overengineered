@@ -1361,10 +1361,14 @@ const test: {} = !RunService.IsStudio()
 												enabled: true,
 												startValue: 0,
 												mode: {
-													stopOnRelease: true,
-													resetOnStop: false,
-													smooth: true,
-													smoothSpeed: 1,
+													type: "smooth",
+													instant: {
+														mode: "onRelease",
+													},
+													smooth_: {
+														speed: 1,
+														mode: "stopOnRelease",
+													},
 												},
 												keys: [
 													{ key: "R", value: 10 },

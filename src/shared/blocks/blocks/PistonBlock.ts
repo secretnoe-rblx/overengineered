@@ -31,10 +31,14 @@ const definition = {
 							enabled: true,
 							startValue: 0,
 							mode: {
-								stopOnRelease: false,
-								resetOnStop: false,
-								smooth: true,
-								smoothSpeed: 2,
+								type: "smooth",
+								instant: {
+									mode: "onRelease",
+								},
+								smooth_: {
+									speed: 2,
+									mode: "stopOnRelease",
+								},
 							},
 							keys: [
 								{ key: "R", value: 10 },
