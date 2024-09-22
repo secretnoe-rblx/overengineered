@@ -82,7 +82,9 @@ export class Logic extends InstanceBlockLogic<typeof definition, Piston> {
 		super(definition, block);
 
 		this.on((ctx) => {
-			this.instance.Bottom.PrismaticConstraint.Speed = 1000;
+			const speed = 1000;
+
+			this.instance.Bottom.PrismaticConstraint.Speed = speed;
 			this.instance.Bottom.PrismaticConstraint.TargetPosition = ctx.extend;
 			this.instance.Bottom.PrismaticConstraint.ServoMaxForce = ctx.maxforce;
 
@@ -90,7 +92,7 @@ export class Logic extends InstanceBlockLogic<typeof definition, Piston> {
 				block: this.instance,
 				force: ctx.maxforce,
 				position: ctx.extend,
-				speed: ctx.speed,
+				speed: speed,
 			});
 		});
 
