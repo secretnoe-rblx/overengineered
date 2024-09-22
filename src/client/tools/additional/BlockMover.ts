@@ -126,7 +126,11 @@ class DesktopMove extends MoveBase {
 			let startpos = Vector3.zero;
 			let startDifference: Vector3 = Vector3.zero;
 
-			const defaultCameraType = Workspace.CurrentCamera!.CameraType;
+			let defaultCameraType = Workspace.CurrentCamera!.CameraType;
+			if (defaultCameraType === Enum.CameraType.Scriptable) {
+				defaultCameraType = Enum.CameraType.Custom;
+			}
+
 			this.event.subscribe(instance.MouseButton1Down, () => {
 				startpos = moveHandles.GetPivot().Position;
 				startDifference = this.difference;
