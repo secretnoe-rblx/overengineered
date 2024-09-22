@@ -42,7 +42,7 @@ const servoDefinition = {
 								instant: {
 									mode: "onRelease",
 								},
-								smooth_: {
+								smooth: {
 									speed: 72,
 									mode: "stopOnRelease",
 								},

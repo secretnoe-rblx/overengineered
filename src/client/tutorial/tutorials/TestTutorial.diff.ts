@@ -62,7 +62,7 @@ export const TestTutorialDiff = {
 							instant: {
 								mode: "onRelease",
 							},
-							smooth_: {
+							smooth: {
 								speed: 20,
 								mode: "stopOnRelease",
 							},

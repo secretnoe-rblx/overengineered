@@ -1365,7 +1365,7 @@ const test: {} = !RunService.IsStudio()
 													instant: {
 														mode: "onRelease",
 													},
-													smooth_: {
+													smooth: {
 														speed: 1,
 														mode: "stopOnRelease",
 													},

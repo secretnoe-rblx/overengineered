@@ -54,7 +54,7 @@ export namespace BlockLogicTypes {
 		| "never";
 	export interface NumberControlModes {
 		readonly type: "smooth" | "instant";
-		readonly smooth_: {
+		readonly smooth: {
 			readonly speed: number;
 			readonly mode: NumberControlModesSmoothMode;
 		};

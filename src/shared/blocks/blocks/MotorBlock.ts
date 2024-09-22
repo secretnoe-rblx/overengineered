@@ -27,7 +27,7 @@ const definition = {
 								instant: {
 									mode: "onRelease",
 								},
-								smooth_: {
+								smooth: {
 									speed: 60,
 									mode: "stopOnRelease",
 								},

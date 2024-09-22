@@ -558,7 +558,7 @@ namespace Controls {
 				);
 
 				const createSmoothStuff = (redrawMode: () => void) => {
-					const def = definition.control.config.mode.smooth_;
+					const def = definition.control.config.mode.smooth;
 
 					const [wMode, cMode] = addSingleTypeWrapperAuto(
 						this,
@@ -602,7 +602,7 @@ namespace Controls {
 						> & {
 							readonly type: "enum";
 						} & Pick<VisualBlockConfigDefinition, "tooltip" | "unit">,
-						map(controlConfig, (c) => c.mode.smooth_.mode),
+						map(controlConfig, (c) => c.mode.smooth.mode),
 						args,
 					);
 					dropdownContent.push(wMode);
@@ -612,8 +612,8 @@ namespace Controls {
 								...c,
 								mode: {
 									...c.mode,
-									smooth_: {
-										...c.mode.smooth_,
+									smooth: {
+										...c.mode.smooth,
 										mode: v[uuid] as BlockLogicTypes.NumberControlModesSmoothMode,
 									},
 								},
@@ -637,7 +637,7 @@ namespace Controls {
 										max: definition.clamp.max - definition.clamp.min,
 									},
 						},
-						map(controlConfig, (c) => c.mode.smooth_.speed),
+						map(controlConfig, (c) => c.mode.smooth.speed),
 						args,
 					);
 					dropdownContent.push(wSpeed);
@@ -647,7 +647,7 @@ namespace Controls {
 								...c,
 								mode: {
 									...c.mode,
-									smooth_: { ...c.mode.smooth_, speed: v[uuid] },
+									smooth: { ...c.mode.smooth, speed: v[uuid] },
 								},
 							}))),
 						),

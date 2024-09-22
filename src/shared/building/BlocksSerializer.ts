@@ -1072,7 +1072,7 @@ const v25: UpgradableBlocksSerializer<SerializedBlocks<SerializedBlockV4>, typeo
 								mode: {
 									type: "instant",
 									instant: { mode: value.switchmode ? "onDoublePress" : "onRelease" },
-									smooth_: {
+									smooth: {
 										speed: 20,
 										mode: value.switchmode ? "stopOnDoublePress" : "stopOnRelease",
 									},
@@ -1102,7 +1102,7 @@ const v25: UpgradableBlocksSerializer<SerializedBlocks<SerializedBlockV4>, typeo
 								mode: {
 									type: value.switchmode ? "instant" : "smooth",
 									instant: { mode: value.switchmode ? "onDoublePress" : "onRelease" },
-									smooth_: { speed: 20, mode: value.switchmode ? "resetOnRelease" : "stopOnRelease" },
+									smooth: { speed: 20, mode: value.switchmode ? "resetOnRelease" : "stopOnRelease" },
 								},
 							} satisfies BlockConfigPart<"number">["controlConfig"];
 						} else if (def.type === "controllableNumber") {
@@ -1124,7 +1124,7 @@ const v25: UpgradableBlocksSerializer<SerializedBlocks<SerializedBlockV4>, typeo
 								mode: {
 									type: "smooth",
 									instant: { mode: "onRelease" },
-									smooth_: { speed: 20, mode: "stopOnRelease" },
+									smooth: { speed: 20, mode: "stopOnRelease" },
 								},
 							} satisfies BlockConfigPart<"number">["controlConfig"];
 						} else if (def.type === "servoMotorAngle") {
@@ -1147,7 +1147,7 @@ const v25: UpgradableBlocksSerializer<SerializedBlocks<SerializedBlockV4>, typeo
 								mode: {
 									type: "instant",
 									instant: { mode: value.switchmode ? "onDoublePress" : "onRelease" },
-									smooth_: {
+									smooth: {
 										speed: 20,
 										mode: value.switchmode ? "stopOnDoublePress" : "stopOnRelease",
 									},
@@ -1314,11 +1314,100 @@ const v25: UpgradableBlocksSerializer<SerializedBlocks<SerializedBlockV4>, typeo
 	},
 };
 
+// update controllable number mode
+const v26: UpgradableBlocksSerializer<SerializedBlocks<SerializedBlockV4>, typeof v25> = {
+	version: 26,
+
+	upgradeFrom(prev: SerializedBlocks<SerializedBlockV4>, blockList: BlockList): SerializedBlocks<SerializedBlockV4> {
+		const update = (block: SerializedBlockV4): SerializedBlockV4 => {
+			if (!block.config) return block;
+
+			const b = blockList.blocks[block.id]?.logic?.definition;
+			if (!b) return block;
+
+			for (const [k, v] of pairs(block.config)) {
+				if (!v.controlConfig) continue;
+				if (v.type !== "number") continue;
+				if ("instant" in v.controlConfig.mode) continue;
+				if (!b.input[k].types.number?.control) continue;
+
+				interface PrevNumberControlMode {
+					readonly smooth: boolean;
+					readonly smoothSpeed: number;
+					readonly resetOnStop: boolean;
+					readonly stopOnRelease: boolean;
+				}
+
+				const prevMode = v.controlConfig.mode as Partial<PrevNumberControlMode>;
+
+				const newMode = {
+					...b.input[k].types.number.control.config.mode,
+					smooth: { ...b.input[k].types.number.control.config.mode.smooth },
+					instant: { ...b.input[k].types.number.control.config.mode.instant },
+				};
+
+				if (prevMode.smooth !== undefined) {
+					newMode.type = prevMode.smooth ? "smooth" : "instant";
+				}
+
+				if (prevMode.smoothSpeed !== undefined) {
+					newMode.smooth.speed = prevMode.smoothSpeed;
+				}
+
+				if (prevMode.stopOnRelease !== undefined && prevMode.resetOnStop !== undefined) {
+					newMode.instant.mode =
+						prevMode.stopOnRelease && prevMode.resetOnStop
+							? "onRelease"
+							: !prevMode.stopOnRelease && prevMode.resetOnStop
+								? "onDoublePress"
+								: "never";
+
+					newMode.smooth.mode =
+						prevMode.stopOnRelease && prevMode.resetOnStop
+							? "resetOnRelease"
+							: !prevMode.stopOnRelease && prevMode.resetOnStop
+								? "resetOnDoublePress"
+								: prevMode.stopOnRelease && !prevMode.resetOnStop
+									? "stopOnRelease"
+									: !prevMode.stopOnRelease && !prevMode.resetOnStop
+										? "stopOnDoublePress"
+										: "never";
+				}
+
+				//
+
+				block = {
+					...block,
+					config: {
+						...block.config,
+						[k]: {
+							...v,
+							controlConfig: {
+								enabled: v.controlConfig.enabled,
+								keys: v.controlConfig.keys,
+								startValue: v.controlConfig.startValue,
+								mode: newMode,
+							} satisfies BlockLogicTypes.NumberControl["config"],
+						},
+					},
+				};
+			}
+
+			return block;
+		};
+
+		return {
+			version: this.version,
+			blocks: prev.blocks.map(update),
+		};
+	},
+};
+
 //
 
 const versions = [
 	...([v4, v5, v6, v7, v8, v9, v10, v11, v12, v13, v14, v15, v16, v17, v18, v19, v20, v21, v22] as const),
-	...([v23, v24, v25] as const),
+	...([v23, v24, v25, v26] as const),
 ] as const;
 const current = versions[versions.size() - 1] as typeof versions extends readonly [...unknown[], infer T] ? T : never;
 

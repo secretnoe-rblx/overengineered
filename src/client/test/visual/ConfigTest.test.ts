@@ -162,7 +162,7 @@ namespace ConfigTests {
 									instant: {
 										mode: "onRelease",
 									},
-									smooth_: {
+									smooth: {
 										speed: 20,
 										mode: "stopOnRelease",
 									},
@@ -244,7 +244,7 @@ namespace ConfigTests {
 						instant: {
 							mode: "onRelease",
 						},
-						smooth_: {
+						smooth: {
 							speed: 20,
 							mode: "stopOnRelease",
 						},

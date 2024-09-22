@@ -123,7 +123,7 @@ namespace ClientBlockControlsNamespace {
 
 		const mode = config.mode;
 		if (mode.type === "smooth") {
-			const mode = config.mode.smooth_;
+			const mode = config.mode.smooth;
 			const speed = mode.speed;
 			set = (value) => smoothSet(value, speed);
 

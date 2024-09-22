@@ -284,7 +284,7 @@ export const BasicCarTutorialDiffs = {
 						mode: {
 							type: "instant",
 							instant: { mode: "onRelease" },
-							smooth_: { speed: 5, mode: "stopOnRelease" },
+							smooth: { speed: 5, mode: "stopOnRelease" },
 						},
 						keys: [
 							{ key: "W", value: 15 },
@@ -304,7 +304,7 @@ export const BasicCarTutorialDiffs = {
 						mode: {
 							type: "instant",
 							instant: { mode: "onRelease" },
-							smooth_: { speed: 5, mode: "stopOnRelease" },
+							smooth: { speed: 5, mode: "stopOnRelease" },
 						},
 						keys: [
 							{ key: "W", value: 15 },
@@ -326,7 +326,7 @@ export const BasicCarTutorialDiffs = {
 						mode: {
 							type: "instant",
 							instant: { mode: "onRelease" },
-							smooth_: { speed: 5, mode: "stopOnRelease" },
+							smooth: { speed: 5, mode: "stopOnRelease" },
 						},
 						keys: [
 							{ key: "W", value: -15 },
@@ -346,7 +346,7 @@ export const BasicCarTutorialDiffs = {
 						mode: {
 							type: "instant",
 							instant: { mode: "onRelease" },
-							smooth_: { speed: 5, mode: "stopOnRelease" },
+							smooth: { speed: 5, mode: "stopOnRelease" },
 						},
 						keys: [
 							{ key: "W", value: -15 },
@@ -368,7 +368,7 @@ export const BasicCarTutorialDiffs = {
 						mode: {
 							type: "instant",
 							instant: { mode: "onRelease" },
-							smooth_: { speed: 5, mode: "stopOnRelease" },
+							smooth: { speed: 5, mode: "stopOnRelease" },
 						},
 						keys: [
 							{ key: "A", value: 45 },
@@ -388,7 +388,7 @@ export const BasicCarTutorialDiffs = {
 						mode: {
 							type: "instant",
 							instant: { mode: "onRelease" },
-							smooth_: { speed: 5, mode: "stopOnRelease" },
+							smooth: { speed: 5, mode: "stopOnRelease" },
 						},
 						keys: [
 							{ key: "A", value: 45 },
