@@ -95,13 +95,12 @@ namespace ClientBlockControlsNamespace {
 
 		//
 
+		let movingTo: string | undefined;
 		const createDoublePress = (
 			v: BlockLogicTypes.NumberControlKey,
 			onSet: (valuye: number) => void,
 			onReset: () => void,
 		) => {
-			let movingTo: string | undefined;
-
 			return () => {
 				if (movingTo !== v.key) {
 					onSet(v.value);
