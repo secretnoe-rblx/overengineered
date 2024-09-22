@@ -63,19 +63,6 @@ const definition = {
 				},
 			},
 		},
-		speed: {
-			displayName: "Speed",
-			types: {
-				number: {
-					config: 5,
-					clamp: {
-						min: 0,
-						max: 20,
-						showAsSlider: true,
-					},
-				},
-			},
-		},
 	},
 	output: {},
 } satisfies BlockLogicFullBothDefinitions;
@@ -95,7 +82,7 @@ export class Logic extends InstanceBlockLogic<typeof definition, Piston> {
 		super(definition, block);
 
 		this.on((ctx) => {
-			this.instance.Bottom.PrismaticConstraint.Speed = ctx.speed;
+			this.instance.Bottom.PrismaticConstraint.Speed = 1000;
 			this.instance.Bottom.PrismaticConstraint.TargetPosition = ctx.extend;
 			this.instance.Bottom.PrismaticConstraint.ServoMaxForce = ctx.maxforce;
 
