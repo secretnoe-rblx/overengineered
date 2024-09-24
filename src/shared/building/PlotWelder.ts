@@ -164,7 +164,9 @@ export class PlotWelder extends Component {
 	static getWeldsToOtherBlocks(model: BlockModel): Set<Constraint | JointInstance> {
 		const result = new Set<Constraint | JointInstance>();
 
-		const modelParts = model.GetChildren().filter((value) => value.IsA("BasePart") && value.CanCollide);
+		const modelParts = model
+			.GetChildren()
+			.filter((value) => value.IsA("BasePart") && value.Name.lower() !== "colbox");
 		for (let i = 0; i < modelParts.size(); i++) {
 			const modelPart = modelParts[i] as BasePart;
 			const welds = modelPart.GetJoints();
