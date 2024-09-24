@@ -78,6 +78,7 @@ class Logic extends BlockLogic<typeof definition> {
 			this.output.size.set("number", internalMemory.size());
 		};
 
+		this.output.size.set("number", 0);
 		this.onk(["pop"], ({ pop }) => {
 			if (!pop) return;
 			popValue();
