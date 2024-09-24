@@ -4,7 +4,7 @@ import { GameDefinitions } from "shared/data/GameDefinitions";
 import { HostedService } from "shared/GameHost";
 import { CustomRemotes } from "shared/Remotes";
 import type { PlayerDatabase } from "server/database/PlayerDatabase";
-import type { PlayerData } from "server/database/PlayerDatabase";
+import type { PlayerDatabaseData } from "server/database/PlayerDatabase";
 
 @injectable
 export class PlayerDataController extends HostedService {
@@ -12,6 +12,7 @@ export class PlayerDataController extends HostedService {
 		super();
 
 		this.event.subscribe(CustomRemotes.player.updateSettings.invoked, this.updateSetting.bind(this));
+		this.event.subscribe(CustomRemotes.player.updateData.invoked, this.updateData.bind(this));
 		CustomRemotes.player.fetchData.subscribe(this.fetchSettings.bind(this));
 
 		Workspace.AddTag("data_loadable");
@@ -20,10 +21,26 @@ export class PlayerDataController extends HostedService {
 	private updateSetting(player: Player, { key, value }: PlayerUpdateSettingsRequest): Response {
 		const playerData = this.players.get(player.UserId);
 
-		const newPlayerData: PlayerData = {
+		const newPlayerData: PlayerDatabaseData = {
 			...playerData,
 			settings: {
 				...(playerData.settings ?? {}),
+				[key]: value,
+			},
+		};
+
+		this.players.set(player.UserId, newPlayerData);
+		return {
+			success: true,
+		};
+	}
+	private updateData(player: Player, { key, value }: PlayerUpdateDataRequest): Response {
+		const playerData = this.players.get(player.UserId);
+
+		const newPlayerData: PlayerDatabaseData = {
+			...playerData,
+			data: {
+				...(playerData.data ?? {}),
 				[key]: value,
 			},
 		};
@@ -67,6 +84,7 @@ export class PlayerDataController extends HostedService {
 			settings: data.settings,
 			slots: data.slots,
 			imported_slots: slots,
+			data: data.data,
 		};
 	}
 }

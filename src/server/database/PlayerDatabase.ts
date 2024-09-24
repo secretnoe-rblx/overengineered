@@ -3,10 +3,11 @@ import { Db } from "server/database/Database";
 import { PlayerConfigUpdater } from "server/PlayerConfigVersioning";
 import { JSON } from "shared/fixes/Json";
 
-export type PlayerData = {
+export type PlayerDatabaseData = {
 	readonly purchasedSlots?: number;
 	readonly settings?: Partial<PlayerConfig>;
 	readonly slots?: readonly SlotMeta[];
+	readonly data?: Partial<PlayerData>;
 };
 
 export class PlayerDatabase {
@@ -21,12 +22,12 @@ export class PlayerDatabase {
 			warn("Place datastore is not available. All requests will be dropped.");
 		}
 
-		this.db = new Db<PlayerData>(
+		this.db = new Db<PlayerDatabaseData>(
 			this.datastore,
 			() => ({}),
 			(data) => JSON.serialize(data),
 			(data) => {
-				const pdata = JSON.deserialize<PlayerData>(data);
+				const pdata = JSON.deserialize<PlayerDatabaseData>(data);
 				return {
 					...pdata,
 					settings: pdata.settings === undefined ? undefined : PlayerConfigUpdater.update(pdata.settings),
@@ -51,7 +52,7 @@ export class PlayerDatabase {
 		return this.db.get(tostring(userId));
 	}
 
-	set(userId: number, data: PlayerData) {
+	set(userId: number, data: PlayerDatabaseData) {
 		this.db.set(tostring(userId), data);
 
 		if (!this.onlinePlayers.has(userId)) {

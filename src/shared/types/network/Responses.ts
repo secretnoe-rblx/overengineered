@@ -29,6 +29,7 @@ declare global {
 		readonly purchasedSlots: number | undefined;
 		readonly settings: Partial<PlayerConfig> | undefined;
 		readonly slots: readonly SlotMeta[] | undefined;
+		readonly data: PlayerData | undefined;
 		readonly imported_slots: readonly SlotMeta[] | undefined;
 	};
 

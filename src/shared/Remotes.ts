@@ -77,6 +77,10 @@ declare global {
 		readonly key: keyof PlayerConfig;
 		readonly value: PlayerConfig[keyof PlayerConfig];
 	};
+	type PlayerUpdateDataRequest = {
+		readonly key: keyof PlayerData;
+		readonly value: PlayerData[keyof PlayerData];
+	};
 	type PlayerSaveSlotRequest = {
 		readonly index: number;
 		readonly name?: string;
@@ -116,6 +120,7 @@ export const CustomRemotes = {
 	player: {
 		loaded: new C2SRemoteEvent<undefined>("client_initialized"),
 		updateSettings: new C2SRemoteEvent<PlayerUpdateSettingsRequest>("pl_updsettings"),
+		updateData: new C2SRemoteEvent<PlayerUpdateDataRequest>("pl_upddata"),
 		fetchData: new C2S2CRemoteFunction<undefined, Response<PlayerDataResponse>>("pl_fetchdata"),
 	},
 	gui: {

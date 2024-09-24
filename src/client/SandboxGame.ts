@@ -13,6 +13,7 @@ import { OtherPlayersController } from "client/controller/OtherPlayersController
 import { RagdollController } from "client/controller/RagdollController";
 import { MusicController } from "client/controller/sound/MusicController";
 import { SoundController } from "client/controller/SoundController";
+import { UpdatePopupController } from "client/controller/UpdatePopupController";
 import { ActionsGui } from "client/gui/ActionsGui";
 import { AdminGui } from "client/gui/AdminGui";
 import { GuiAutoScaleController } from "client/gui/GuiAutoScaleController";
@@ -88,6 +89,10 @@ export namespace SandboxGame {
 		builder.services.registerService(GuiAutoScaleController);
 		builder.services.registerService(HideInterfaceController);
 		ActionsGui.initialize(builder);
+
+		if (!RunService.IsStudio()) {
+			builder.services.registerService(UpdatePopupController);
+		}
 
 		ChatController.initializeAdminPrefix();
 		SettingsPopup.addAsService(builder);
