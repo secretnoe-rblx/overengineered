@@ -50,17 +50,20 @@ export namespace Strings {
 	export function prettyNumber(value: number, step: number | undefined) {
 		const maxdigits = math.min(4, step ? math.max(0, math.ceil(-math.log(step, 10))) : math.huge);
 
-		const floating = value % 1;
-		const integer = value - floating;
+		const absvalue = math.abs(value);
+
+		const floating = absvalue % 1;
+		const integer = absvalue - floating;
 
 		let floatingstr = string.format("%i", floating * math.pow(10, maxdigits));
 		const integerstr = string.format("%i", integer);
+		const negativestr = value < 0 ? "-" : "";
 
 		while (floatingstr.sub(-1) === "0") {
 			if (floatingstr.size() === 1) break;
 			floatingstr = floatingstr.sub(1, -2);
 		}
 
-		return `${integerstr}.${floatingstr}`;
+		return `${negativestr}${integerstr}.${floatingstr}`;
 	}
 }
