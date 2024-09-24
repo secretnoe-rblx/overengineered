@@ -1,4 +1,5 @@
 import { Component } from "shared/component/Component";
+import { ObservableValue } from "shared/event/ObservableValue";
 import { ArgsSignal } from "shared/event/Signal";
 import type { BlockLogic, BlockLogicFullBothDefinitions, BlockLogicTickContext } from "shared/blockLogic/BlockLogic";
 
@@ -11,6 +12,8 @@ export class BlockLogicRunner extends Component {
 	private tickingLoop?: SignalConnection;
 	private tickNumber = 0;
 	private lastTickTime?: number;
+	private readonly _isRunning = new ObservableValue(false);
+	readonly isRunning = this._isRunning.asReadonly();
 
 	onAfterTick(func: (ctx: BlockLogicTickContext) => void): SignalConnection {
 		return this.ticked.Connect(func);
@@ -35,9 +38,11 @@ export class BlockLogicRunner extends Component {
 
 	startTicking() {
 		this.stopTicking();
+		this._isRunning.set(true);
 		this.tickingLoop = this.event.loop(0, () => this.tick());
 	}
 	stopTicking() {
+		this._isRunning.set(false);
 		this.tickingLoop?.Disconnect();
 		this.tickingLoop = undefined;
 	}

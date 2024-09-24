@@ -31,8 +31,8 @@ export class ClientMachine extends SharedMachine {
 		);
 	}
 
-	protected initialize(blocks: readonly PlacedBlockData[]) {
-		super.initialize(blocks);
+	protected initialize(blocks: readonly PlacedBlockData[], startLogicImmediately: boolean) {
+		super.initialize(blocks, startLogicImmediately);
 		this.initializeControls();
 	}
 	protected createImpactControllerIfNeeded(blocks: readonly PlacedBlockData[]): ImpactController | undefined {

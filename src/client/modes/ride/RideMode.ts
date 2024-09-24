@@ -3,6 +3,7 @@ import { SoundController } from "client/controller/SoundController";
 import { Gui } from "client/gui/Gui";
 import { RideModeScene } from "client/gui/ridemode/RideModeScene";
 import { PlayMode } from "client/modes/PlayMode";
+import { ObservableValue } from "shared/event/ObservableValue";
 import { CustomRemotes } from "shared/Remotes";
 import type { RideModeSceneDefinition } from "client/gui/ridemode/RideModeScene";
 import type { PlayerDataStorage } from "client/PlayerDataStorage";
@@ -12,6 +13,7 @@ import type { SharedPlot } from "shared/building/SharedPlot";
 export class RideMode extends PlayMode {
 	private currentMachine?: ClientMachine;
 	private readonly rideModeScene;
+	readonly pauseOnStart = new ObservableValue(false);
 
 	constructor(
 		@inject private readonly plot: SharedPlot,
@@ -81,7 +83,7 @@ export class RideMode extends PlayMode {
 			//
 		} else if (prev === "build") {
 			this.currentMachine = this.di.resolveForeignClass(ClientMachine);
-			this.currentMachine.init(this.plot.getBlockDatas());
+			this.currentMachine.init(this.plot.getBlockDatas(), !this.pauseOnStart.get());
 
 			SoundController.getSounds().Start.Play();
 			this.rideModeScene.start(this.currentMachine);
