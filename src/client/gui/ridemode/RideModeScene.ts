@@ -506,8 +506,10 @@ export class RideModeScene extends Control<RideModeSceneDefinition> {
 			new ButtonControl(logicDebug.instance.Content.Buttons.Pause, () => {
 				if (machine.runner.isRunning.get()) {
 					machine.runner.stopTicking();
+					machine.logicInputs.setEnabled(false);
 				} else {
 					machine.runner.startTicking();
+					machine.logicInputs.setEnabled(true);
 				}
 			}),
 		);
