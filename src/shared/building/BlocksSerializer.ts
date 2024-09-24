@@ -1488,6 +1488,13 @@ export namespace BlocksSerializer {
 		};
 
 		const deserialized = JSON.deserialize(data) as SerializedBlocks<JsonBlock>;
+		if (deserialized.version === undefined) {
+			throw "Corrupted slot data";
+		}
+		if (deserialized.version > latestVersion) {
+			throw "Trying to load a slot with an unknown version (loaded from testing?)";
+		}
+
 		return deserializeFromObject({ ...deserialized, blocks: deserialized.blocks.map(fix) }, plot, blockList);
 	}
 
