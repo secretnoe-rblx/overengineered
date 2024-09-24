@@ -44,7 +44,8 @@ interface ReplicatedStorage {
 				};
 			};
 		};
-		CenterOfMass: Model;
+		CenterOfMassAssembly: Model;
+		CenterOfMassMachine: Model;
 		Placeable: Folder;
 		Axis: Model & {
 			X: BasePart;

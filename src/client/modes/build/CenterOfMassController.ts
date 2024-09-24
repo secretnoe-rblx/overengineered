@@ -1,15 +1,27 @@
 import { ReplicatedStorage, Workspace } from "@rbxts/services";
 import { ClientComponent } from "client/component/ClientComponent";
 import { Gui } from "client/gui/Gui";
+import { ActionController } from "client/modes/build/ActionController";
 import { BuildingManager } from "shared/building/BuildingManager";
 import { SharedPlot } from "shared/building/SharedPlot";
 import { Colors } from "shared/Colors";
+import { Strings } from "shared/fixes/String.propmacro";
 import { CustomRemotes } from "shared/Remotes";
+
+type CM = readonly [pos: Vector3, mass: number];
+const weightedAverage = (values: readonly CM[]) => {
+	const sum = values.reduce((acc, [pos, weight]) => acc.add(pos.mul(weight)), Vector3.zero);
+	const totalMass = values.reduce((acc, [, weight]) => acc + weight, 0);
+	print(Strings.pretty({ sum, totalMass, a: sum.div(totalMass) }));
+
+	return sum.div(totalMass);
+};
 
 @injectable
 export class CenterOfMassController extends ClientComponent {
 	private readonly viewportFrame;
 	private renderedBalls: Model[] = [];
+	private machineCOM: Model | undefined;
 
 	constructor(@inject plot: SharedPlot) {
 		super();
@@ -25,14 +37,17 @@ export class CenterOfMassController extends ClientComponent {
 		this.viewportFrame.ZIndex = -1000;
 
 		const update = () => {
+			if (!this.machineCOM) {
+				this.machineCOM = ReplicatedStorage.Assets.CenterOfMassMachine.Clone();
+				this.machineCOM.Parent = this.viewportFrame;
+			}
+
 			const blocks = plot.getBlocks();
 			const pos = this.calculateCentersOfMass(blocks);
 
-			print(pos.size(), this.renderedBalls.size());
-
 			if (pos.size() > this.renderedBalls.size()) {
 				for (let i = 0; i < pos.size() - this.renderedBalls.size(); i++)
-					this.renderedBalls.push(ReplicatedStorage.Assets.CenterOfMass.Clone());
+					this.renderedBalls.push(ReplicatedStorage.Assets.CenterOfMassAssembly.Clone());
 			}
 
 			if (pos.size() < this.renderedBalls.size()) {
@@ -43,21 +58,38 @@ export class CenterOfMassController extends ClientComponent {
 				}
 			}
 
+			//let machineCOMpost = new Vector3(0, 0, 0);
+
 			for (let i = 0; i < pos.size(); i++) {
 				const ball = this.renderedBalls[i];
 				ball.Parent = this.viewportFrame;
-				ball.PivotTo(new CFrame(pos[i]));
+				ball.PivotTo(new CFrame(pos[i][0]));
+				//machineCOMpost = machineCOMpost.add(pos[i]);
 			}
+
+			const weightedAverage = (values: readonly CM[]) => {
+				const sum = values.reduce((acc, [pos, weight]) => acc.add(pos.mul(weight)), Vector3.zero);
+				const totalMass = values.reduce((acc, [, weight]) => acc + weight, 0);
+				print(Strings.pretty({ sum, totalMass, a: sum.div(totalMass) }));
+
+				return sum.div(totalMass);
+			};
+
+			//average pos divided by amount of CoMs
+			//this.machineCOM?.PivotTo(new CFrame(machineCOMpost.div(pos.size()))); //<---- nesting hell :D
+			this.machineCOM?.PivotTo(new CFrame(weightedAverage(pos)));
 		};
 
 		const clear = () => {
-			for (const b of this.renderedBalls) {
-				b.Destroy();
-			}
+			for (const b of this.renderedBalls) b.Destroy();
+			this.machineCOM?.Destroy();
+			this.machineCOM = undefined;
 
 			this.renderedBalls.clear();
 		};
 
+		this.event.subscribe(ActionController.instance.onRedo, update);
+		this.event.subscribe(ActionController.instance.onUndo, update);
 		this.event.subscribe(CustomRemotes.slots.load.sent, clear);
 		this.event.subscribe(CustomRemotes.slots.load.completed, (v) => (v.success ? update() : undefined));
 		this.event.subscribe(SharedPlot.anyChanged, update);
@@ -65,22 +97,53 @@ export class CenterOfMassController extends ClientComponent {
 		this.onDisable(clear);
 	}
 
-	private calculateCentersOfMass(blocks: readonly BlockModel[]) {
+	private calculateCentersOfMass(blocks: readonly BlockModel[]): readonly CM[] {
 		const partsInUse: Set<BlockModel> = new Set();
-		const ass: Vector3[] = [];
+		const ass: CM[] = [];
+
+		// ACTUALLY WRONG; returns the center of every part inside but they're not weighted; but who cares
+		const getBlockMass = (block: BlockModel): LuaTuple<[pos: Vector3, mass: number]> => {
+			let mass = 0;
+			let center = Vector3.zero;
+			let amount = 0;
+
+			for (const part of block.GetDescendants()) {
+				if (part.IsA("BasePart") && !part.Massless) {
+					amount++;
+
+					mass += part.Mass;
+					center = center.add(part.Position);
+				}
+			}
+
+			return $tuple(center.div(amount), mass);
+		};
+		// ACTUALLY WRONG; returns the center of every part inside but they're not weighted; but who cares
+		const getAssemblyMass = (asm: readonly BlockModel[]): LuaTuple<[pos: Vector3, mass: number]> => {
+			let mass = 0;
+			let center = Vector3.zero;
+
+			for (const b of asm) {
+				const [c, m] = getBlockMass(b);
+				mass += m;
+				center = center.add(c);
+			}
+
+			return $tuple(center.div(asm.size()), mass);
+		};
+
 		for (const block of blocks) {
 			if (partsInUse.has(block)) continue;
 
-			let result = new Vector3(0, 0, 0);
 			const assembly = BuildingManager.getAssemblyBlocks(block);
 			for (const b of assembly) {
 				partsInUse.add(b);
-				if (!b.PrimaryPart) continue;
-				result = result.add(b.PrimaryPart.AssemblyCenterOfMass);
 			}
-			const length = assembly.size();
-			ass.push(result.div(new Vector3(length, length, length)));
+
+			const vectorSum = weightedAverage(assembly.map((b) => [...getBlockMass(b)] as unknown as CM));
+			ass.push([vectorSum, getAssemblyMass(assembly)[1]]);
 		}
+
 		return ass;
 	}
 }
