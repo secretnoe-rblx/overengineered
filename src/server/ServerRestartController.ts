@@ -62,9 +62,7 @@ export class ServerRestartController extends HostedService {
 
 			while (true as boolean) {
 				if (timeLeft <= 1) {
-					Players.GetPlayers().forEach((p) => p.Kick("Got boned!"));
-					task.wait(1);
-					continue;
+					return;
 				}
 
 				// if (timeLeft % 10 === 0 || timeLeft < 10) {
