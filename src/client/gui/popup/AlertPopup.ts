@@ -43,6 +43,8 @@ export class AlertPopup extends Popup<AlertPopupDefinition> {
 			okFunc?.();
 			this.hide();
 		});
+
+		this.add(new ButtonControl(this.gui.Heading.CloseButton, () => this.hide()));
 	}
 
 	protected prepareGamepad(): void {
