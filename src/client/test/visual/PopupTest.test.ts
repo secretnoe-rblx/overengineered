@@ -1,10 +1,12 @@
 import { Control } from "client/gui/Control";
 import { TextButtonControl } from "client/gui/controls/Button";
+import { AlertPopup } from "client/gui/popup/AlertPopup";
 import { ConfirmPopup } from "client/gui/popup/ConfirmPopup";
 import { SelectButtonPopup } from "client/gui/popup/SelectButtonPopup";
 import { Element } from "shared/Element";
 import type { ControlsPopup } from "client/gui/popup/ControlsPopup";
 import type { NewSettingsPopup } from "client/gui/popup/NewSettingsPopup";
+import type { ReportSubmitController } from "client/gui/popup/ReportSubmitPopup";
 import type { SavePopup } from "client/gui/popup/SavePopup";
 import type { SettingsPopup } from "client/gui/popup/SettingsPopup";
 import type { WikiPopup } from "client/gui/popup/WikiPopup";
@@ -106,6 +108,22 @@ namespace PopupTests {
 								popup.setScene("Permissions");
 								popup.show();
 							}),
+						)
+						.with((b) => b.enable()).instance,
+					b9: TextButtonControl.create({
+						Text: "Alert",
+						Size: new UDim2(0, 200, 0, 30),
+					})
+						.with((b) => b.activated.Connect(() => AlertPopup.showPopup("Important information")))
+						.with((b) => b.enable()).instance,
+					b10: TextButtonControl.create({
+						Text: "Report",
+						Size: new UDim2(0, 200, 0, 30),
+					})
+						.with((b) =>
+							b.activated.Connect(() =>
+								di.resolve<ReportSubmitController>().submit({ text: "test_data" }),
+							),
 						)
 						.with((b) => b.enable()).instance,
 				},

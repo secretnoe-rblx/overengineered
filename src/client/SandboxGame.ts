@@ -20,6 +20,7 @@ import { GuiAutoScaleController } from "client/gui/GuiAutoScaleController";
 import { HideInterfaceController } from "client/gui/HideInterfaceController";
 import { ControlsPopup } from "client/gui/popup/ControlsPopup";
 import { NewSettingsPopup } from "client/gui/popup/NewSettingsPopup";
+import { ReportSubmitController } from "client/gui/popup/ReportSubmitPopup";
 import { SavePopup } from "client/gui/popup/SavePopup";
 import { SettingsPopup } from "client/gui/popup/SettingsPopup";
 import { WikiPopup } from "client/gui/popup/WikiPopup";
@@ -100,6 +101,7 @@ export namespace SandboxGame {
 		SavePopup.addAsService(builder);
 		ControlsPopup.addAsService(builder);
 		WikiPopup.addAsService(builder);
+		builder.services.registerSingletonClass(ReportSubmitController);
 
 		{
 			const tutorials: (new (...args: any[]) => TutorialDescriber)[] = [
