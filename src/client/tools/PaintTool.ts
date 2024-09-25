@@ -111,23 +111,24 @@ class Controller extends ClientComponent {
 		stuff.submit.Connect(fireSelected);
 
 		this.event.subInput((ih) => {
-			ih.onMouse3Down(() => {
-				if (Gui.isCursorOnVisibleGui()) return;
+			const pick = () => {};
+			if (Gui.isCursorOnVisibleGui()) return;
 
-				// eslint-disable-next-line prefer-const
-				let [material, color] = this.pick();
-				if (!material || !color) return;
+			// eslint-disable-next-line prefer-const
+			let [material, color] = this.pick();
+			if (!material || !color) return;
 
-				if (
-					material === Enum.Material.Neon &&
-					!Marketplace.Gamepass.has(Players.LocalPlayer, GameDefinitions.GAMEPASSES.NeonMaterial)
-				) {
-					material = Enum.Material.Plastic;
-				}
-				tool.selectedMaterial.set(material);
+			if (
+				material === Enum.Material.Neon &&
+				!Marketplace.Gamepass.has(Players.LocalPlayer, GameDefinitions.GAMEPASSES.NeonMaterial)
+			) {
+				material = Enum.Material.Plastic;
+			}
+			tool.selectedMaterial.set(material);
 
-				tool.selectedColor.set(color);
-			}, false);
+			tool.selectedColor.set(color);
+			ih.onMouse3Down(pick, false);
+			ih.onKeyDown("P", pick);
 		});
 	}
 
@@ -163,8 +164,8 @@ export class PaintTool extends ToolBase {
 		return ClientBuilding.paintOperation.execute({
 			plot: this.targetPlot.get(),
 			blocks: "all",
-			material: enableMaterial ?? this.enableMaterial.get() ? this.selectedMaterial.get() : undefined,
-			color: enableColor ?? this.enableColor.get() ? this.selectedColor.get() : undefined,
+			material: (enableMaterial ?? this.enableMaterial.get()) ? this.selectedMaterial.get() : undefined,
+			color: (enableColor ?? this.enableColor.get()) ? this.selectedColor.get() : undefined,
 		});
 	}
 	paint(
