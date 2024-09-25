@@ -366,29 +366,30 @@ namespace Controls {
 			) {
 				super(templates.ByteArray());
 
-				const value = sameOrUndefined(config, (left, right) => {
-					if (left.size() !== right.size()) {
-						return false;
-					}
-
-					for (let i = 0; i < left.size(); i++) {
-						if (left[i] !== right[i]) {
+				const value = () =>
+					sameOrUndefined(config, (left, right) => {
+						if (left.size() !== right.size()) {
 							return false;
 						}
-					}
 
-					return true;
-				});
+						for (let i = 0; i < left.size(); i++) {
+							if (left[i] !== right[i]) {
+								return false;
+							}
+						}
+
+						return true;
+					});
 
 				const control = this.add(
 					new ButtonControl(this.control, () => {
-						MemoryEditorPopup.showPopup(definition.lengthLimit, [...(value ?? [])], (v) =>
+						MemoryEditorPopup.showPopup(definition.lengthLimit, [...(value() ?? [])], (v) =>
 							this.submitted.Fire((config = map(config, (_) => v))),
 						);
 					}),
 				);
 
-				if (!value) {
+				if (!value()) {
 					control.setInteractable(false);
 				}
 			}
