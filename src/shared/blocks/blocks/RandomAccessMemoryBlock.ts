@@ -90,7 +90,7 @@ class Logic extends BlockLogic<typeof definition> {
 				return;
 			}
 
-			this.output.result.set(value.type as never, value as never);
+			this.output.result.set(value.type as "string", value.value as string);
 			this.output.size.set("number", internalMemory.size());
 		};
 
