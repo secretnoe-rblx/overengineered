@@ -106,8 +106,8 @@ export namespace SandboxGame {
 		{
 			const tutorials: (new (...args: any[]) => TutorialDescriber)[] = [
 				BasicCarTutorial,
-				BasicPlaneTutorial,
 				NewBasicPlaneTutorial,
+				BasicPlaneTutorial,
 			];
 			if (GameDefinitions.isAdmin(Players.LocalPlayer)) {
 				tutorials.push(TestTutorial);
@@ -115,7 +115,7 @@ export namespace SandboxGame {
 
 			TutorialServiceInitializer.initialize(builder, {
 				tutorials,
-				tutorialToRunWhenNoSlots: BasicPlaneTutorial,
+				tutorialToRunWhenNoSlots: NewBasicPlaneTutorial,
 			});
 		}
 

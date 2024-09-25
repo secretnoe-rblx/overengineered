@@ -6,7 +6,7 @@ import type { TutorialController, TutorialDescriber, TutorialRunnerPartList } fr
 
 @injectable
 export class NewBasicPlaneTutorial implements TutorialDescriber {
-	readonly name = "Basics/simple plane";
+	readonly name = "Basics/plane";
 
 	constructor(@inject private readonly buildingMode: BuildingMode) {}
 
