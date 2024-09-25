@@ -39,12 +39,20 @@ export class AlertPopup extends Popup<AlertPopupDefinition> {
 		SoundController.getSounds().Warning.Play();
 
 		this.gui.Content.Text.Text = text;
+
 		this.event.subscribe(this.okButton.activated, () => {
 			okFunc?.();
 			this.hide();
 		});
 
-		this.add(new ButtonControl(this.gui.Heading.CloseButton, () => this.hide()));
+		const closeButton = this.add(new ButtonControl(this.gui.Heading.CloseButton, () => this.hide()));
+
+		this.okButton.setInteractable(false);
+		closeButton.setInteractable(false);
+		task.delay(3, () => {
+			this.okButton.setInteractable(true);
+			closeButton.setInteractable(true);
+		});
 	}
 
 	protected prepareGamepad(): void {
