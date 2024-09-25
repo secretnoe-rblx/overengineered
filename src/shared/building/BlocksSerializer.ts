@@ -1440,11 +1440,37 @@ const v27: UpgradableBlocksSerializer<SerializedBlocks<SerializedBlockV4>, typeo
 	},
 };
 
+// removed piston speed
+const v28: UpgradableBlocksSerializer<SerializedBlocks<SerializedBlockV4>, typeof v27> = {
+	version: 28,
+
+	upgradeFrom(prev: SerializedBlocks<SerializedBlockV4>, blockList: BlockList): SerializedBlocks<SerializedBlockV4> {
+		const update = (block: SerializedBlockV4): SerializedBlockV4 => {
+			if (block.id === "piston") {
+				return {
+					...block,
+					config: {
+						...(block.config ?? {}),
+						speed: undefined!,
+					},
+				};
+			}
+
+			return block;
+		};
+
+		return {
+			version: this.version,
+			blocks: prev.blocks.map(update),
+		};
+	},
+};
+
 //
 
 const versions = [
 	...([v4, v5, v6, v7, v8, v9, v10, v11, v12, v13, v14, v15, v16, v17, v18, v19, v20, v21, v22] as const),
-	...([v23, v24, v25, v26, v27] as const),
+	...([v23, v24, v25, v26, v27, v28] as const),
 ] as const;
 const current = versions[versions.size() - 1] as typeof versions extends readonly [...unknown[], infer T] ? T : never;
 
