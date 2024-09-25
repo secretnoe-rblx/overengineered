@@ -1201,31 +1201,6 @@ const other = {
 			}),
 		),
 	},
-	multiplexer: {
-		displayName: "Multiplexer",
-		description: "Outputs values depending on the incoming boolean",
-		modelSource: autoModel("TripleGenericLogicBlockPrefab", "MUX", categories.other),
-		logic: logic(
-			{
-				inputOrder: ["value", "truevalue", "falsevalue"],
-				input: {
-					value: defpartsf.bool("State"),
-					truevalue: defpartsf.any("True value", { group: "1" }),
-					falsevalue: defpartsf.any("False value", { group: "1" }),
-				},
-				output: {
-					result: {
-						displayName: "Result",
-						types: asMap(BlockConfigDefinitions.any).keys(),
-						group: "1",
-					},
-				},
-			},
-			({ value, truevalue, falsevalue, truevalueType, falsevalueType }) => ({
-				result: { type: value ? truevalueType : falsevalueType, value: value ? truevalue : falsevalue },
-			}),
-		),
-	},
 	switch: {
 		displayName: "Switch",
 		description: "Allows signals to pass through only when enabled",

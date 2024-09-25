@@ -293,7 +293,69 @@ namespace Not {
 		logic: { definition, ctor: Logic },
 	} as const satisfies BlockBuilder;
 }
+namespace Mux {
+	const definition = {
+		inputOrder: ["value", "truevalue", "falsevalue"],
+		input: {
+			value: {
+				displayName: "State",
+				types: BlockConfigDefinitions.bool,
+			},
+			truevalue: {
+				displayName: "True value",
+				types: BlockConfigDefinitions.any,
+				group: "1",
+			},
+			falsevalue: {
+				displayName: "False value",
+				types: BlockConfigDefinitions.any,
+				group: "1",
+			},
+		},
+		output: {
+			result: {
+				displayName: "Result",
+				types: asMap(BlockConfigDefinitions.any).keys(),
+				group: "1",
+			},
+		},
+	};
 
+	class Logic extends BlockLogic<typeof definition> {
+		constructor(block: BlockLogicArgs) {
+			super(definition, block);
+
+			const truevaluecache = this.initializeInputCache("truevalue");
+			const falsevaluecache = this.initializeInputCache("falsevalue");
+
+			this.onkRecalcInputs(["value"], ({ value }) => {
+				if (value) {
+					const ret = truevaluecache.tryGet();
+					const rettype = truevaluecache.tryGetType();
+					if (ret !== undefined && rettype !== undefined) {
+						this.output.result.set(rettype, ret);
+					}
+				} else {
+					const ret = falsevaluecache.tryGet();
+					const rettype = falsevaluecache.tryGetType();
+					if (ret !== undefined && rettype !== undefined) {
+						this.output.result.set(rettype, ret);
+					}
+				}
+			});
+		}
+	}
+
+	export const block = {
+		...BlockCreation.defaults,
+		id: "multiplexer",
+		displayName: "Multiplexer",
+		description: "Outputs values depending on the incoming boolean",
+		modelSource: autoModel("TripleGenericLogicBlockPrefab", "MUX", BlockCreation.Categories.other),
+
+		logic: { definition, ctor: Logic },
+	} as const satisfies BlockBuilder;
+}
 export const BasicLogicGateBlocks: readonly BlockBuilder[] = [
 	And.block,
 	Or.block,
@@ -302,4 +364,5 @@ export const BasicLogicGateBlocks: readonly BlockBuilder[] = [
 	Xor.block,
 	Xnor.block,
 	Not.block,
+	Mux.block,
 ];
