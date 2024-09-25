@@ -918,7 +918,7 @@ const vec3 = {
 		modelSource: autoModel("DoubleGenericLogicBlockPrefab", "VEC3 OBJ/WLD", categories.converterVector),
 		logic: logic(
 			{
-				inputOrder: ["toobject", "originpos", "originrot", "position"],
+				inputOrder: ["toobject", "originpos", "originrot", "inposition"],
 				input: {
 					toobject: {
 						displayName: "To object?",
@@ -932,7 +932,7 @@ const vec3 = {
 						displayName: "Origin rotation",
 						types: BlockConfigDefinitions.vector3,
 					},
-					position: {
+					inposition: {
 						displayName: "Position",
 						types: BlockConfigDefinitions.vector3,
 					},
@@ -944,9 +944,9 @@ const vec3 = {
 					},
 				},
 			},
-			({ toobject, originpos, originrot, position }) => {
+			({ toobject, originpos, originrot, inposition }) => {
 				const origin = new CFrame(originpos).mul(CFrame.fromOrientation(originrot.X, originrot.Y, originrot.Z));
-				const result = toobject ? origin.PointToObjectSpace(position) : origin.PointToWorldSpace(position);
+				const result = toobject ? origin.PointToObjectSpace(inposition) : origin.PointToWorldSpace(inposition);
 
 				return { position: { type: "vector3", value: result } };
 			},

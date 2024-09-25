@@ -4,9 +4,9 @@ import type { BlockLogicArgs, BlockLogicFullBothDefinitions } from "shared/block
 import type { BlockBuilder } from "shared/blocks/Block";
 
 const definition = {
-	inputOrder: ["value", "step", "triggerStep", "triggerValue"],
+	inputOrder: ["newvalue", "step", "triggerStep", "triggerValue"],
 	input: {
-		value: {
+		newvalue: {
 			displayName: "New value",
 			types: {
 				number: {
@@ -58,11 +58,14 @@ class Logic extends BlockLogic<typeof definition> {
 		const get = () => this.output.value.justGet().value;
 		const set = (value: number) => this.output.value.set("number", value);
 
-		this.onkFirstInputs(["value"], ({ value }) => set(value));
-		this.onk(["triggerValue", "value"], ({ triggerValue: rewrite, triggerValueChanged: rewriteChanged, value }) => {
-			if (!rewrite || !rewriteChanged) return;
-			set(value);
-		});
+		this.onkFirstInputs(["newvalue"], ({ newvalue }) => set(newvalue));
+		this.onk(
+			["triggerValue", "newvalue"],
+			({ triggerValue: rewrite, triggerValueChanged: rewriteChanged, newvalue }) => {
+				if (!rewrite || !rewriteChanged) return;
+				set(newvalue);
+			},
+		);
 		this.onk(["step", "triggerStep"], ({ triggerStep, triggerStepChanged, step }) => {
 			if (!triggerStep || !triggerStepChanged) return;
 			set(get() + step);
