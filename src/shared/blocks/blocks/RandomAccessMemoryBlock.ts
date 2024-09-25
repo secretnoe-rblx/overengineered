@@ -85,6 +85,11 @@ class Logic extends BlockLogic<typeof definition> {
 			if (!isReady(address)) return;
 
 			const value = internalMemory[address];
+			if (value === undefined) {
+				this.disableAndBurn();
+				return;
+			}
+
 			this.output.result.set(value.type as never, value as never);
 			this.output.size.set("number", internalMemory.size());
 		};
