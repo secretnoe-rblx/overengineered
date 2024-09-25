@@ -51,20 +51,6 @@ export namespace BlockListBuilder {
 					});
 				}),
 			);
-
-			const throwErrors = (blocks: typeof serverBuiltBlocks & defined) => {
-				const errors: { readonly id: string; readonly errors: readonly string[] }[] = [];
-				for (const [id, block] of asMap(blocks)) {
-					const blockErrors = BlockAssertions.getAllErrors(block.model);
-					if (blockErrors.size() !== 0) {
-						errors.push({ id, errors: [...new Set(blockErrors)] });
-					}
-				}
-				if (errors.size() !== 0) {
-					throw `Found block errors:\n${errors.map(({ id, errors }) => `${id}:\n${errors.map((e) => `    ${e}`).join("\n")}`).join("\n\n")}`;
-				}
-			};
-			throwErrors(serverBuiltBlocks);
 		}
 
 		let remoteBlocks: typeof serverBuiltBlocks;
@@ -93,6 +79,19 @@ export namespace BlockListBuilder {
 				} satisfies Block),
 			),
 		);
+
+		if (RunService.IsStudio() && RunService.IsServer()) {
+			const errors: { readonly id: string; readonly errors: readonly string[] }[] = [];
+			for (const [id, block] of asMap(blocks)) {
+				const blockErrors = BlockAssertions.getAllErrors(block);
+				if (blockErrors.size() !== 0) {
+					errors.push({ id, errors: [...new Set(blockErrors)] });
+				}
+			}
+			if (errors.size() !== 0) {
+				throw `Found block errors:\n${errors.map(({ id, errors }) => `${id}:\n${errors.map((e) => `    ${e}`).join("\n")}`).join("\n\n")}`;
+			}
+		}
 
 		const sorted = asMap(blocks)
 			.values()
