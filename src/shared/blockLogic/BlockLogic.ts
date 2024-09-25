@@ -448,12 +448,19 @@ export abstract class BlockLogic<TDef extends BlockLogicBothDefinitions> extends
 	protected onRecalcInputs(
 		func: (inputs: AllInputKeysToObject<TDef["input"]>, ctx: BlockLogicTickContext) => void,
 	): SignalConnection {
-		const empty = {} as AllInputKeysToObject<TDef["input"], keyof TDef["input"]>;
+		return this.onkRecalcInputs(Objects.keys(this.input), func);
+	}
+
+	/** Runs the provided function when another block requests a value from this one, but no more than once per tick, if all of the provided sinput values are available and only when any input value changes. */
+	protected onkRecalcInputs<const TKeys extends keyof TDef["input"]>(
+		keys: readonly TKeys[],
+		func: (inputs: AllInputKeysToObject<TDef["input"], TKeys>, ctx: BlockLogicTickContext) => void,
+	): SignalConnection {
+		const empty = {} as AllInputKeysToObject<TDef["input"], TKeys>;
 		if (!asMap(this.input).any()) {
 			return this.onRecalc((ctx) => func(empty, ctx));
 		}
 
-		const keys = Objects.keys(this.input);
 		return this.onRecalc((ctx) => this.executeFuncWithValues(ctx, keys, func, true));
 	}
 

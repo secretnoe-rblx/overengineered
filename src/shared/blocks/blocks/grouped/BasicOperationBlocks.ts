@@ -183,30 +183,6 @@ const defs = {
 			},
 		},
 	},
-	bool1_bool: {
-		input: {
-			value: defpartsf.bool("Value"),
-		},
-		output: {
-			result: {
-				displayName: "Result",
-				types: ["bool"],
-			},
-		},
-	},
-	bool2_bool: {
-		inputOrder: ["value1", "value2"],
-		input: {
-			value1: defpartsf.bool("Value 1"),
-			value2: defpartsf.bool("Value 2"),
-		},
-		output: {
-			result: {
-				displayName: "Result",
-				types: ["bool"],
-			},
-		},
-	},
 	byte1_byte: {
 		input: {
 			value: defpartsf.byte("Value"),
@@ -954,67 +930,6 @@ const vec3 = {
 	},
 } as const satisfies BlockBuildersWithoutIdAndDefaults;
 
-const bool = {
-	not: {
-		displayName: "NOT Gate",
-		description: "Returns true when false is given, and vice versa",
-		modelSource: autoModel("GenericLogicBlockPrefab", "NOT", categories.bool),
-		logic: logic(defs.bool1_bool, ({ value }) => ({
-			result: { type: "bool", value: !value },
-		})),
-	},
-
-	and: {
-		displayName: "AND Gate",
-		description: "Returns true when both inputs are true",
-		modelSource: autoModel("DoubleGenericLogicBlockPrefab", "AND", categories.bool),
-		logic: logic(defs.bool2_bool, ({ value1, value2 }) => ({
-			result: { type: "bool", value: value1 && value2 },
-		})),
-	},
-	or: {
-		displayName: "OR Gate",
-		description: "Returns true when any of the inputs are true",
-		modelSource: autoModel("DoubleGenericLogicBlockPrefab", "OR", categories.bool),
-		logic: logic(defs.bool2_bool, ({ value1, value2 }) => ({
-			result: { type: "bool", value: value1 || value2 },
-		})),
-	},
-	xor: {
-		displayName: "XOR Gate",
-		description: "Returns true when only one of the inputs is true",
-		modelSource: autoModel("DoubleGenericLogicBlockPrefab", "XOR", categories.bool),
-		logic: logic(defs.bool2_bool, ({ value1, value2 }) => ({
-			result: { type: "bool", value: value1 !== value2 },
-		})),
-	},
-
-	nand: {
-		displayName: "NAND Gate",
-		description: "Returns true when both inputs are not true",
-		modelSource: autoModel("DoubleGenericLogicBlockPrefab", "NAND", categories.bool),
-		logic: logic(defs.bool2_bool, ({ value1, value2 }) => ({
-			result: { type: "bool", value: !(value1 && value2) },
-		})),
-	},
-	nor: {
-		displayName: "NOR Gate",
-		description: "Returns true when none of the inputs are true",
-		modelSource: autoModel("DoubleGenericLogicBlockPrefab", "NOR", categories.bool),
-		logic: logic(defs.bool2_bool, ({ value1, value2 }) => ({
-			result: { type: "bool", value: !(value1 || value2) },
-		})),
-	},
-	xnor: {
-		displayName: "XNOR Gate",
-		description: "Returns true when both of the the inputs are the same",
-		modelSource: autoModel("DoubleGenericLogicBlockPrefab", "XNOR", categories.bool),
-		logic: logic(defs.bool2_bool, ({ value1, value2 }) => ({
-			result: { type: "bool", value: !(value1 !== value2) },
-		})),
-	},
-} as const satisfies BlockBuildersWithoutIdAndDefaults;
-
 const byte = {
 	numbertobyte: {
 		displayName: "Number to Byte",
@@ -1401,7 +1316,6 @@ const list: BlockBuildersWithoutIdAndDefaults = {
 	...constants,
 	...trigonometry,
 	...vec3,
-	...bool,
 	...byte,
 	...other,
 	...test,

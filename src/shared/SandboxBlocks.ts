@@ -10,6 +10,7 @@ import { DelayBlock } from "shared/blocks/blocks/DelayBlock";
 import { DisconnectBlock } from "shared/blocks/blocks/DisconnectBlock";
 import { FireSensorBlock } from "shared/blocks/blocks/FireSensorBlock";
 import { GravitySensorBlock } from "shared/blocks/blocks/GravitySensorBlock";
+import { BasicLogicGateBlocks } from "shared/blocks/blocks/grouped/BasicLogicGateBlocks";
 import { BasicOperationBlocks } from "shared/blocks/blocks/grouped/BasicOperationBlocks";
 import { BuildingBlocks } from "shared/blocks/blocks/grouped/BuildingBlocks";
 import { LampBlocks } from "shared/blocks/blocks/grouped/LampBlocks";
@@ -58,6 +59,7 @@ export const CreateSandboxBlocks = (): BlockList => {
 		...BuildingBlocks,
 		...MechanicalBlocks,
 		...BasicOperationBlocks,
+		...BasicLogicGateBlocks,
 		...WheelBlocks,
 		...WingBlocks,
 		...LampBlocks,
