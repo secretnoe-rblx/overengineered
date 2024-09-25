@@ -54,10 +54,10 @@ const definition = {
 			tooltip: "The piston's maximum force as the piston attempts to reach its desired Speed",
 			types: {
 				number: {
-					config: 500,
+					config: 5000,
 					clamp: {
 						min: 0,
-						max: 2000,
+						max: 20000,
 						showAsSlider: true,
 					},
 				},
