@@ -158,10 +158,14 @@ namespace ConfigTests {
 							config: {
 								startValue: 0,
 								mode: {
-									stopOnRelease: true,
-									resetOnStop: false,
-									smooth: false,
-									smoothSpeed: 25,
+									type: "instant",
+									instant: {
+										mode: "onRelease",
+									},
+									smooth: {
+										speed: 20,
+										mode: "stopOnRelease",
+									},
 								},
 								enabled: true,
 								keys: [
@@ -236,10 +240,14 @@ namespace ConfigTests {
 					enabled: true,
 					startValue: 0,
 					mode: {
-						stopOnRelease: false,
-						resetOnStop: false,
-						smooth: false,
-						smoothSpeed: 25,
+						type: "instant",
+						instant: {
+							mode: "onRelease",
+						},
+						smooth: {
+							speed: 20,
+							mode: "stopOnRelease",
+						},
 					},
 					keys: [
 						{ key: "R", value: 100 },

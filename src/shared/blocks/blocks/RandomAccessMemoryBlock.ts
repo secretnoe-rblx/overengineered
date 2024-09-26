@@ -7,7 +7,7 @@ import type { BlockLogicTypes } from "shared/blockLogic/BlockLogicTypes";
 import type { BlockBuilder } from "shared/blocks/Block";
 
 const definition = {
-	inputOrder: ["read", "write", "address", "value"],
+	inputOrder: ["read", "write", "address", "value", "clear"],
 	outputOrder: ["result", "size"],
 	input: {
 		read: {
@@ -41,6 +41,11 @@ const definition = {
 			types: BlockConfigDefinitions.any,
 			group: "1",
 		},
+		clear: {
+			displayName: "Clear",
+			types: BlockConfigDefinitions.bool,
+			configHidden: true,
+		},
 	},
 	output: {
 		size: {
@@ -63,7 +68,7 @@ class Logic extends BlockLogic<typeof definition> {
 		type PrimitiveKeys = keyof BlockLogicTypes.Primitives;
 
 		const size = 0xff;
-		const internalMemory: { readonly value: unknown; readonly type: PrimitiveKeys }[] = [];
+		const internalMemory: { [k in number]: { readonly value: unknown; readonly type: PrimitiveKeys } } = {};
 
 		const isReady = (address: number) => {
 			const isInRange = address <= size && address >= 0;
@@ -78,22 +83,35 @@ class Logic extends BlockLogic<typeof definition> {
 			if (!isReady(address)) return;
 
 			internalMemory[address] = { value, type: valueType };
-			this.output.size.set("number", internalMemory.size());
+			this.output.size.set("number", asMap(internalMemory).size());
 		};
 
 		const readValue = (address: number) => {
 			if (!isReady(address)) return;
 
 			const value = internalMemory[address];
-			this.output.result.set(value.type as never, value as never);
-			this.output.size.set("number", internalMemory.size());
+			if (value === undefined) {
+				this.disableAndBurn();
+				return;
+			}
+
+			this.output.result.set(value.type as "string", value.value as string);
+			this.output.size.set("number", asMap(internalMemory).size());
 		};
 
-		this.on(({ read, write, address, value, valueType }) => {
+		this.onk(["read", "write", "address", "value"], ({ read, write, address, value, valueType }) => {
 			if (read) {
 				readValue(address);
 			} else if (write) {
 				writeValue(address, value, valueType);
+			}
+		});
+		this.onk(["clear"], ({ clear, clearChanged }) => {
+			if (clearChanged && clear) {
+				asMap(internalMemory).clear();
+
+				this.output.result.unset();
+				this.output.size.set("number", asMap(internalMemory).size());
 			}
 		});
 	}

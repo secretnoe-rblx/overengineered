@@ -31,10 +31,14 @@ const definition = {
 							enabled: true,
 							startValue: 0,
 							mode: {
-								stopOnRelease: false,
-								resetOnStop: false,
-								smooth: true,
-								smoothSpeed: 2,
+								type: "smooth",
+								instant: {
+									mode: "onRelease",
+								},
+								smooth: {
+									speed: 2,
+									mode: "stopOnRelease",
+								},
 							},
 							keys: [
 								{ key: "R", value: 10 },
@@ -50,23 +54,10 @@ const definition = {
 			tooltip: "The piston's maximum force as the piston attempts to reach its desired Speed",
 			types: {
 				number: {
-					config: 500,
+					config: 5000,
 					clamp: {
 						min: 0,
-						max: 2000,
-						showAsSlider: true,
-					},
-				},
-			},
-		},
-		speed: {
-			displayName: "Speed",
-			types: {
-				number: {
-					config: 5,
-					clamp: {
-						min: 0,
-						max: 20,
+						max: 20000,
 						showAsSlider: true,
 					},
 				},
@@ -91,7 +82,9 @@ export class Logic extends InstanceBlockLogic<typeof definition, Piston> {
 		super(definition, block);
 
 		this.on((ctx) => {
-			this.instance.Bottom.PrismaticConstraint.Speed = ctx.speed;
+			const speed = 1000;
+
+			this.instance.Bottom.PrismaticConstraint.Speed = speed;
 			this.instance.Bottom.PrismaticConstraint.TargetPosition = ctx.extend;
 			this.instance.Bottom.PrismaticConstraint.ServoMaxForce = ctx.maxforce;
 
@@ -99,7 +92,7 @@ export class Logic extends InstanceBlockLogic<typeof definition, Piston> {
 				block: this.instance,
 				force: ctx.maxforce,
 				position: ctx.extend,
-				speed: ctx.speed,
+				speed: speed,
 			});
 		});
 

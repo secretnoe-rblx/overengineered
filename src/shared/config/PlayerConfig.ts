@@ -93,6 +93,9 @@ declare global {
 	}
 
 	type PlayerConfig = ConfigDefinitionsToConfig<keyof PlayerConfigDefinition, PlayerConfigDefinition>;
+	type PlayerData = {
+		readonly lastLaunchedVersion?: number;
+	};
 
 	type PlayerConfigDefinition = typeof PlayerConfigDefinition;
 }

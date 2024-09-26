@@ -92,6 +92,7 @@ const defpartsf = {
 };
 const defs = {
 	equality: {
+		inputOrder: ["value1", "value2"],
 		input: {
 			value1: {
 				displayName: "Value 1",
@@ -118,9 +119,10 @@ const defs = {
 		},
 	},
 	num2_bool: {
+		inputOrder: ["value1", "value2"],
 		input: {
-			value1: defpartsf.number("Value"),
-			value2: defpartsf.number("Value"),
+			value1: defpartsf.number("Value 1"),
+			value2: defpartsf.number("Value 2"),
 		},
 		output: {
 			result: {
@@ -178,30 +180,6 @@ const defs = {
 				displayName: "Result",
 				types: ["number", "vector3"],
 				group: "0",
-			},
-		},
-	},
-	bool1_bool: {
-		input: {
-			value: defpartsf.bool("Value"),
-		},
-		output: {
-			result: {
-				displayName: "Result",
-				types: ["bool"],
-			},
-		},
-	},
-	bool2_bool: {
-		inputOrder: ["value1", "value2"],
-		input: {
-			value1: defpartsf.bool("Value 1"),
-			value2: defpartsf.bool("Value 2"),
-		},
-		output: {
-			result: {
-				displayName: "Result",
-				types: ["bool"],
 			},
 		},
 	},
@@ -285,10 +263,7 @@ const constants = {
 		displayName: "Pi",
 		description: `So called "free thinkers" will make a thousand PIe jokes as soon as they'll see the PI constant..`,
 		modelSource: autoModel("ConstLogicBlockPrefab", "π", BlockCreation.Categories.other),
-		logic: logic(defs.constnum, (ctx) => {
-			print("pi", ctx);
-			return { value: { type: "number", value: math.pi } };
-		}),
+		logic: logic(defs.constnum, () => ({ value: { type: "number", value: math.pi } })),
 	},
 	e: {
 		displayName: "Euler's number (e)",
@@ -339,7 +314,7 @@ const maths = {
 	},
 	floor: {
 		displayName: "Floor",
-		description: "N/A", // TODO: <
+		description: "It's like rounding but it only rounds down",
 		modelSource: autoModel("GenericLogicBlockPrefab", "FLOOR", categories.math),
 		logic: logic(defs.num1_num, ({ value }) => ({
 			result: { type: "number", value: math.floor(value) },
@@ -347,7 +322,7 @@ const maths = {
 	},
 	ceil: {
 		displayName: "Ceil",
-		description: "N/A", // TODO: <
+		description: "It's like rounding but it only rounds up",
 		modelSource: autoModel("GenericLogicBlockPrefab", "CEIL", categories.math),
 		logic: logic(defs.num1_num, ({ value }) => ({
 			result: { type: "number", value: math.ceil(value) },
@@ -645,34 +620,6 @@ const maths = {
 			}),
 		),
 	},
-	rand: {
-		displayName: "Random",
-		description: `Returns a "random" value between chosen minimum and maximum (excluding maximum)`,
-		modelSource: autoModel("DoubleGenericLogicBlockPrefab", "RAND", categories.math),
-		logic: logic(
-			{
-				inputOrder: ["value", "min", "max"],
-				input: {
-					min: defpartsf.number("Min"),
-					max: defpartsf.number("Max"),
-				},
-				output: {
-					result: {
-						displayName: "Result",
-						types: ["number"],
-					},
-				},
-			},
-			({ min, max }, logic) => {
-				if (max <= min) {
-					logic.disableAndBurn();
-					return BlockLogicValueResults.garbage;
-				}
-
-				return { result: { type: "number", value: math.random() * (max - min) + min } };
-			},
-		),
-	},
 
 	equals: {
 		displayName: "Equals",
@@ -947,7 +894,7 @@ const vec3 = {
 		modelSource: autoModel("DoubleGenericLogicBlockPrefab", "VEC3 OBJ/WLD", categories.converterVector),
 		logic: logic(
 			{
-				inputOrder: ["toobject", "originpos", "originrot", "position"],
+				inputOrder: ["toobject", "originpos", "originrot", "inposition"],
 				input: {
 					toobject: {
 						displayName: "To object?",
@@ -961,7 +908,7 @@ const vec3 = {
 						displayName: "Origin rotation",
 						types: BlockConfigDefinitions.vector3,
 					},
-					position: {
+					inposition: {
 						displayName: "Position",
 						types: BlockConfigDefinitions.vector3,
 					},
@@ -973,74 +920,13 @@ const vec3 = {
 					},
 				},
 			},
-			({ toobject, originpos, originrot, position }) => {
+			({ toobject, originpos, originrot, inposition }) => {
 				const origin = new CFrame(originpos).mul(CFrame.fromOrientation(originrot.X, originrot.Y, originrot.Z));
-				const result = toobject ? origin.PointToObjectSpace(position) : origin.PointToWorldSpace(position);
+				const result = toobject ? origin.PointToObjectSpace(inposition) : origin.PointToWorldSpace(inposition);
 
 				return { position: { type: "vector3", value: result } };
 			},
 		),
-	},
-} as const satisfies BlockBuildersWithoutIdAndDefaults;
-
-const bool = {
-	not: {
-		displayName: "NOT Gate",
-		description: "Returns true when false is given, and vice versa",
-		modelSource: autoModel("GenericLogicBlockPrefab", "NOT", categories.bool),
-		logic: logic(defs.bool1_bool, ({ value }) => ({
-			result: { type: "bool", value: !value },
-		})),
-	},
-
-	and: {
-		displayName: "AND Gate",
-		description: "Returns true when both inputs are true",
-		modelSource: autoModel("DoubleGenericLogicBlockPrefab", "AND", categories.bool),
-		logic: logic(defs.bool2_bool, ({ value1, value2 }) => ({
-			result: { type: "bool", value: value1 && value2 },
-		})),
-	},
-	or: {
-		displayName: "OR Gate",
-		description: "Returns true when any of the inputs are true",
-		modelSource: autoModel("DoubleGenericLogicBlockPrefab", "OR", categories.bool),
-		logic: logic(defs.bool2_bool, ({ value1, value2 }) => ({
-			result: { type: "bool", value: value1 || value2 },
-		})),
-	},
-	xor: {
-		displayName: "XOR Gate",
-		description: "Returns true when only one of the inputs is true",
-		modelSource: autoModel("DoubleGenericLogicBlockPrefab", "XOR", categories.bool),
-		logic: logic(defs.bool2_bool, ({ value1, value2 }) => ({
-			result: { type: "bool", value: value1 !== value2 },
-		})),
-	},
-
-	nand: {
-		displayName: "NAND Gate",
-		description: "Returns true when both inputs are not true",
-		modelSource: autoModel("DoubleGenericLogicBlockPrefab", "NAND", categories.bool),
-		logic: logic(defs.bool2_bool, ({ value1, value2 }) => ({
-			result: { type: "bool", value: !(value1 && value2) },
-		})),
-	},
-	nor: {
-		displayName: "NOR Gate",
-		description: "Returns true when none of the inputs are true",
-		modelSource: autoModel("DoubleGenericLogicBlockPrefab", "NOR", categories.bool),
-		logic: logic(defs.bool2_bool, ({ value1, value2 }) => ({
-			result: { type: "bool", value: !(value1 || value2) },
-		})),
-	},
-	xnor: {
-		displayName: "XNOR Gate",
-		description: "Returns true when both of the the inputs are the same",
-		modelSource: autoModel("DoubleGenericLogicBlockPrefab", "XNOR", categories.bool),
-		logic: logic(defs.bool2_bool, ({ value1, value2 }) => ({
-			result: { type: "bool", value: !(value1 !== value2) },
-		})),
 	},
 } as const satisfies BlockBuildersWithoutIdAndDefaults;
 
@@ -1315,17 +1201,16 @@ const other = {
 			}),
 		),
 	},
-	multiplexer: {
-		displayName: "Multiplexer",
-		description: "Outputs values depending on the incoming boolean",
-		modelSource: autoModel("TripleGenericLogicBlockPrefab", "MUX", categories.other),
+	switch: {
+		displayName: "Switch",
+		description: "Allows signals to pass through only when enabled",
+		modelSource: autoModel("GenericLogicBlockPrefab", "SWITCH", categories.other),
 		logic: logic(
 			{
-				inputOrder: ["value", "truevalue", "falsevalue"],
+				inputOrder: ["value", "enable"],
 				input: {
-					value: defpartsf.bool("State"),
-					truevalue: defpartsf.any("True value", { group: "1" }),
-					falsevalue: defpartsf.any("False value", { group: "1" }),
+					enable: defpartsf.bool("Enabled"),
+					value: defpartsf.any("Value", { group: "1" }),
 				},
 				output: {
 					result: {
@@ -1335,9 +1220,8 @@ const other = {
 					},
 				},
 			},
-			({ value, truevalue, falsevalue, truevalueType, falsevalueType }) => ({
-				result: { type: value ? truevalueType : falsevalueType, value: value ? truevalue : falsevalue },
-			}),
+			({ value, valueType, enable }) =>
+				enable ? { result: { type: valueType, value: value } } : BlockLogicValueResults.availableLater,
 		),
 	},
 } as const satisfies BlockBuildersWithoutIdAndDefaults;
@@ -1367,10 +1251,14 @@ const test: {} = !RunService.IsStudio()
 												enabled: true,
 												startValue: 0,
 												mode: {
-													stopOnRelease: true,
-													resetOnStop: false,
-													smooth: true,
-													smoothSpeed: 1,
+													type: "smooth",
+													instant: {
+														mode: "onRelease",
+													},
+													smooth: {
+														speed: 1,
+														mode: "stopOnRelease",
+													},
 												},
 												keys: [
 													{ key: "R", value: 10 },
@@ -1403,7 +1291,6 @@ const list: BlockBuildersWithoutIdAndDefaults = {
 	...constants,
 	...trigonometry,
 	...vec3,
-	...bool,
 	...byte,
 	...other,
 	...test,

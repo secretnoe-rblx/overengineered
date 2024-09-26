@@ -73,7 +73,6 @@ namespace BlockTests {
 		};
 
 		testUnary("abs", -5, math.abs(-5));
-		testUnary("round", 4.7, math.round(4.7));
 		testUnary("floor", 4.7, math.floor(4.7));
 		testUnary("ceil", 4.1, math.ceil(4.1));
 		testUnary("sign", -7, math.sign(-7));
@@ -106,6 +105,8 @@ namespace BlockTests {
 		testBinary("mod", 10, 3, 10 % 3);
 		testBinary("pow", 2, 3, math.pow(2, 3), "value", "power");
 		testBinary("nsqrt", 16, 2, math.pow(16, 1 / 2), "value", "root");
+		testBinary("round", 5.3, 1, math.round(5.3), "value", "precision");
+		testBinary("round", 5.3, 2, MathUtils.round(5.3, 2), "value", "precision");
 	}
 	export function complexMathBlocks() {
 		const testTernary = (id: string, value: number, min: number, max: number, expectedResult: number) => {

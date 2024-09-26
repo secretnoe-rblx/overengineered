@@ -1014,6 +1014,9 @@ const v25: UpgradableBlocksSerializer<SerializedBlocks<SerializedBlockV4>, typeo
 				...Objects.mapValues(block.config ?? {}, (k, v) => {
 					const def = (blockConfigRegistry as BlockConfigRegistry)[block.id as keyof BlockConfigRegistry]!
 						.input[k];
+					if (!def) {
+						$err(`Got nil trying to load key ${k} in block ${block.id}`);
+					}
 
 					assert(def.type !== "multikey");
 
@@ -1067,10 +1070,12 @@ const v25: UpgradableBlocksSerializer<SerializedBlocks<SerializedBlockV4>, typeo
 								],
 								startValue: 0,
 								mode: {
-									stopOnRelease: !value.switchmode,
-									resetOnStop: true,
-									smooth: false,
-									smoothSpeed: 20,
+									type: "instant",
+									instant: { mode: value.switchmode ? "onDoublePress" : "onRelease" },
+									smooth: {
+										speed: 20,
+										mode: value.switchmode ? "stopOnDoublePress" : "stopOnRelease",
+									},
 								},
 							} satisfies BlockConfigPart<"number">["controlConfig"];
 						} else if (def.type === "thrust") {
@@ -1082,6 +1087,11 @@ const v25: UpgradableBlocksSerializer<SerializedBlocks<SerializedBlockV4>, typeo
 								readonly switchmode: boolean;
 							};
 
+							let max = 100;
+							if (block.id === "piston") {
+								max = (block.config?.distance as number | undefined) ?? max;
+							}
+
 							controlConfig = {
 								enabled: true,
 								keys: [
@@ -1090,10 +1100,9 @@ const v25: UpgradableBlocksSerializer<SerializedBlocks<SerializedBlockV4>, typeo
 								],
 								startValue: 0,
 								mode: {
-									stopOnRelease: false,
-									resetOnStop: false,
-									smooth: !value.switchmode,
-									smoothSpeed: 20,
+									type: value.switchmode ? "instant" : "smooth",
+									instant: { mode: value.switchmode ? "onDoublePress" : "onRelease" },
+									smooth: { speed: 20, mode: value.switchmode ? "resetOnRelease" : "stopOnRelease" },
 								},
 							} satisfies BlockConfigPart<"number">["controlConfig"];
 						} else if (def.type === "controllableNumber") {
@@ -1112,7 +1121,11 @@ const v25: UpgradableBlocksSerializer<SerializedBlocks<SerializedBlockV4>, typeo
 									{ key: value.control.sub, value: def.min },
 								],
 								startValue: 0,
-								mode: { stopOnRelease: false, resetOnStop: false, smooth: true, smoothSpeed: 20 },
+								mode: {
+									type: "smooth",
+									instant: { mode: "onRelease" },
+									smooth: { speed: 20, mode: "stopOnRelease" },
+								},
 							} satisfies BlockConfigPart<"number">["controlConfig"];
 						} else if (def.type === "servoMotorAngle") {
 							const value = v as {
@@ -1132,10 +1145,12 @@ const v25: UpgradableBlocksSerializer<SerializedBlocks<SerializedBlockV4>, typeo
 								],
 								startValue: 0,
 								mode: {
-									stopOnRelease: !value.switchmode,
-									resetOnStop: true,
-									smooth: false,
-									smoothSpeed: 20,
+									type: "instant",
+									instant: { mode: value.switchmode ? "onDoublePress" : "onRelease" },
+									smooth: {
+										speed: 20,
+										mode: value.switchmode ? "stopOnDoublePress" : "stopOnRelease",
+									},
 								},
 							} satisfies BlockConfigPart<"number">["controlConfig"];
 						}
@@ -1208,7 +1223,32 @@ const v25: UpgradableBlocksSerializer<SerializedBlocks<SerializedBlockV4>, typeo
 			) {
 				return {
 					...block,
-					location: block.location.mul(CFrame.Angles(0, 0, -90)),
+					location: block.location.mul(CFrame.Angles(0, 0, math.rad(-90))),
+				};
+			}
+			if (block.id === "radioreciever") {
+				block = {
+					...block,
+					id: "radioreceiver",
+				};
+			}
+			if (block.id === "lamp" || block.id === "smalllamp") {
+				block = {
+					...block,
+					config: {
+						...block.config,
+						lightRange: block.config?.lightRrange as never,
+						lightRrange: undefined!,
+					},
+				};
+			}
+			if (block.id === "piston") {
+				block = {
+					...block,
+					config: {
+						...block.config,
+						distance: undefined!,
+					},
 				};
 			}
 
@@ -1274,11 +1314,202 @@ const v25: UpgradableBlocksSerializer<SerializedBlocks<SerializedBlockV4>, typeo
 	},
 };
 
+// update controllable number mode
+const v26: UpgradableBlocksSerializer<SerializedBlocks<SerializedBlockV4>, typeof v25> = {
+	version: 26,
+
+	upgradeFrom(prev: SerializedBlocks<SerializedBlockV4>, blockList: BlockList): SerializedBlocks<SerializedBlockV4> {
+		const update = (block: SerializedBlockV4): SerializedBlockV4 => {
+			if (!block.config) return block;
+
+			const b = blockList.blocks[block.id]?.logic?.definition;
+			if (!b) return block;
+
+			for (const [k, v] of pairs(block.config)) {
+				if (!v.controlConfig) continue;
+				if (v.type !== "number") continue;
+				if ("instant" in v.controlConfig.mode) continue;
+				if (!b.input[k].types.number?.control) continue;
+
+				interface PrevNumberControlMode {
+					readonly smooth: boolean;
+					readonly smoothSpeed: number;
+					readonly resetOnStop: boolean;
+					readonly stopOnRelease: boolean;
+				}
+
+				const prevMode = v.controlConfig.mode as Partial<PrevNumberControlMode>;
+
+				const newMode = {
+					...b.input[k].types.number.control.config.mode,
+					smooth: { ...b.input[k].types.number.control.config.mode.smooth },
+					instant: { ...b.input[k].types.number.control.config.mode.instant },
+				};
+
+				if (prevMode.smooth !== undefined) {
+					newMode.type = prevMode.smooth ? "smooth" : "instant";
+				}
+
+				if (prevMode.smoothSpeed !== undefined) {
+					newMode.smooth.speed = prevMode.smoothSpeed;
+				}
+
+				if (prevMode.stopOnRelease !== undefined && prevMode.resetOnStop !== undefined) {
+					newMode.instant.mode =
+						prevMode.stopOnRelease && prevMode.resetOnStop
+							? "onRelease"
+							: !prevMode.stopOnRelease && prevMode.resetOnStop
+								? "onDoublePress"
+								: "never";
+
+					newMode.smooth.mode =
+						prevMode.stopOnRelease && prevMode.resetOnStop
+							? "resetOnRelease"
+							: !prevMode.stopOnRelease && prevMode.resetOnStop
+								? "resetOnDoublePress"
+								: prevMode.stopOnRelease && !prevMode.resetOnStop
+									? "stopOnRelease"
+									: !prevMode.stopOnRelease && !prevMode.resetOnStop
+										? "stopOnDoublePress"
+										: "never";
+				}
+
+				//
+
+				block = {
+					...block,
+					config: {
+						...block.config,
+						[k]: {
+							...v,
+							controlConfig: {
+								enabled: v.controlConfig.enabled,
+								keys: v.controlConfig.keys,
+								startValue: v.controlConfig.startValue,
+								mode: newMode,
+							} satisfies BlockLogicTypes.NumberControl["config"],
+						},
+					},
+				};
+			}
+
+			return block;
+		};
+
+		return {
+			version: this.version,
+			blocks: prev.blocks.map(update),
+		};
+	},
+};
+
+// remove duplicates in logic definition between input/output
+const v27: UpgradableBlocksSerializer<SerializedBlocks<SerializedBlockV4>, typeof v26> = {
+	version: 27,
+
+	upgradeFrom(prev: SerializedBlocks<SerializedBlockV4>, blockList: BlockList): SerializedBlocks<SerializedBlockV4> {
+		const update = (block: SerializedBlockV4): SerializedBlockV4 => {
+			if (block.id === "counter") {
+				return {
+					...block,
+					config: {
+						...(block.config ?? {}),
+						newvalue: block.config?.value as never,
+						value: undefined!,
+					},
+				};
+			}
+			if (block.id === "vec3objectworldtransformer") {
+				return {
+					...block,
+					config: {
+						...(block.config ?? {}),
+						inposition: block.config?.position as never,
+						position: undefined!,
+					},
+				};
+			}
+
+			return block;
+		};
+
+		return {
+			version: this.version,
+			blocks: prev.blocks.map(update),
+		};
+	},
+};
+
+// removed piston speed
+const v28: UpgradableBlocksSerializer<SerializedBlocks<SerializedBlockV4>, typeof v27> = {
+	version: 28,
+
+	upgradeFrom(prev: SerializedBlocks<SerializedBlockV4>, blockList: BlockList): SerializedBlocks<SerializedBlockV4> {
+		const update = (block: SerializedBlockV4): SerializedBlockV4 => {
+			if (block.id === "piston") {
+				return {
+					...block,
+					config: {
+						...(block.config ?? {}),
+						speed: undefined!,
+					},
+				};
+			}
+
+			return block;
+		};
+
+		return {
+			version: this.version,
+			blocks: prev.blocks.map(update),
+		};
+	},
+};
+
+// fix config duplicate {config:{config,type}}
+const v29: UpgradableBlocksSerializer<SerializedBlocks<SerializedBlockV4>, typeof v28> = {
+	version: 29,
+
+	upgradeFrom(prev: SerializedBlocks<SerializedBlockV4>, blockList: BlockList): SerializedBlocks<SerializedBlockV4> {
+		const update = (block: SerializedBlockV4): SerializedBlockV4 => {
+			if (!block.config) return block;
+
+			const fixConfigErrors = <T>(config: T): T => {
+				if (typeIs(config, "table") && "type" in config && "config" in config) {
+					return config.config as T;
+				}
+
+				return config;
+			};
+
+			for (const [k, v] of pairs(block.config)) {
+				block = {
+					...block,
+					config: {
+						...block.config,
+						[k]: {
+							...v,
+							config: fixConfigErrors(v.config),
+						} as BlockConfigPart<"string">,
+					},
+				};
+			}
+
+			return block;
+		};
+
+		return {
+			version: this.version,
+			blocks: prev.blocks.map(update),
+		};
+	},
+};
+
 //
 
 const versions = [
 	...([v4, v5, v6, v7, v8, v9, v10, v11, v12, v13, v14, v15, v16, v17, v18, v19, v20, v21, v22] as const),
-	...([v23, v24, v25] as const),
+	...([v23, v24, v25, v26, v27, v28, v29] as const),
 ] as const;
 const current = versions[versions.size() - 1] as typeof versions extends readonly [...unknown[], infer T] ? T : never;
 
@@ -1359,6 +1590,13 @@ export namespace BlocksSerializer {
 		};
 
 		const deserialized = JSON.deserialize(data) as SerializedBlocks<JsonBlock>;
+		if (deserialized.version === undefined) {
+			throw "Corrupted slot data";
+		}
+		if (deserialized.version > latestVersion) {
+			throw "Trying to load a slot with an unknown version (loaded from testing?)";
+		}
+
 		return deserializeFromObject({ ...deserialized, blocks: deserialized.blocks.map(fix) }, plot, blockList);
 	}
 

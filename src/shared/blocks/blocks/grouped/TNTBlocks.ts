@@ -95,7 +95,10 @@ class Logic extends InstanceBlockLogic<typeof definition> {
 			(ctx) => ([radius, pressure, flammable] = [ctx.radius, ctx.pressure, ctx.flammable]),
 		);
 
+		const impactCache = this.initializeInputCache("impact");
+
 		this.event.subscribe(this.instance.PrimaryPart!.Touched, (part) => {
+			if (!impactCache.tryGet()) return;
 			if (radius === undefined || pressure === undefined || flammable === undefined) {
 				return;
 			}

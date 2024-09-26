@@ -46,5 +46,6 @@ export class LogicVisualizer extends Component {
 			}
 		};
 		this.event.subscribeRegistration(() => runner.onAfterTick(tick));
+		this.onEnable(() => tick(runner.getContext(false)));
 	}
 }

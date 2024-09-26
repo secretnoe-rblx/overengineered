@@ -56,33 +56,35 @@ class MemoryEditorRow extends Control<MemoryEditorRecordDefinition, ByteTextBoxC
 	) {
 		super(gui);
 
-		// Address
-		this.gui.AddressLabel.Text = popup.numberToHex(row * 16);
+		this.onEnable(() => {
+			// Address
+			this.gui.AddressLabel.Text = popup.numberToHex(row * 16);
 
-		this.updateAsciiLabel();
+			this.updateAsciiLabel();
 
-		for (let i = 0; i < 16; i++) {
-			// Get [i] byte TextBox
-			const tb = this.gui.WaitForChild(`b${i}`) as TextBox;
+			for (let i = 0; i < 16; i++) {
+				// Get [i] byte TextBox
+				const tb = this.gui.WaitForChild(`b${i}`) as TextBox;
 
-			// Color gray if no data
-			tb.TextColor3 = popup.data[row * 16 + i] !== undefined ? Colors.white : Color3.fromRGB(180, 180, 180);
+				// Color gray if no data
+				tb.TextColor3 = popup.data[row * 16 + i] !== undefined ? Colors.white : Color3.fromRGB(180, 180, 180);
 
-			const idx = i;
-			const control = this.add(new ByteTextBoxControl(tb));
-			control.value.set(popup.data[row * 16 + i] ?? 0);
-			control.submitted.Connect((value) => {
-				tb.TextColor3 = Colors.white;
+				const idx = i;
+				const control = this.add(new ByteTextBoxControl(tb));
+				control.value.set(popup.data[row * 16 + i] ?? 0);
+				control.submitted.Connect((value) => {
+					tb.TextColor3 = Colors.white;
 
-				for (let j = 0; j < row * 16 + i; j++) {
-					popup.data[j] ??= 0;
-				}
+					for (let j = 0; j < row * 16 + i; j++) {
+						popup.data[j] ??= 0;
+					}
 
-				popup.data[row * 16 + i] = value;
-				recolorPreviousUntil(row * 16 + idx);
-				this.updateAsciiLabel();
-			});
-		}
+					popup.data[row * 16 + i] = value;
+					recolorPreviousUntil(row * 16 + idx);
+					this.updateAsciiLabel();
+				});
+			}
+		});
 	}
 
 	private updateAsciiLabel() {

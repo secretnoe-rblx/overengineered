@@ -2,6 +2,7 @@ import { ClientBlockControls } from "client/blocks/ClientBlockControls";
 import { LogicVisualizer } from "client/blocks/LogicVisuaizer";
 import { BlockConfig } from "shared/blockLogic/BlockConfig";
 import { SharedMachine } from "shared/blockLogic/SharedMachine";
+import { ContainerComponent } from "shared/component/ContainerComponent";
 import type { IClientBlockControl } from "client/blocks/ClientBlockControls";
 import type { PlayerDataStorage } from "client/PlayerDataStorage";
 import type { ImpactController } from "shared/block/impact/ImpactController";
@@ -10,7 +11,7 @@ import type { ILogicValueStorage } from "shared/blockLogic/BlockLogicValueStorag
 
 @injectable
 export class ClientMachine extends SharedMachine {
-	private readonly logicInputs = new Set<IClientBlockControl>();
+	readonly logicInputs = this.parent(new ContainerComponent<IClientBlockControl>());
 
 	constructor(
 		@inject private readonly playerData: PlayerDataStorage,
@@ -21,7 +22,7 @@ export class ClientMachine extends SharedMachine {
 	}
 
 	getLogicInputs() {
-		return this.logicInputs.asReadonly();
+		return this.logicInputs.getChildren();
 	}
 
 	createVisualizer() {
@@ -31,8 +32,8 @@ export class ClientMachine extends SharedMachine {
 		);
 	}
 
-	protected initialize(blocks: readonly PlacedBlockData[]) {
-		super.initialize(blocks);
+	protected initialize(blocks: readonly PlacedBlockData[], startLogicImmediately: boolean) {
+		super.initialize(blocks, startLogicImmediately);
 		this.initializeControls();
 	}
 	protected createImpactControllerIfNeeded(blocks: readonly PlacedBlockData[]): ImpactController | undefined {
@@ -57,6 +58,10 @@ export class ClientMachine extends SharedMachine {
 				const input = logic.input[k] as
 					| (typeof logic)["input"][typeof k]
 					| ILogicValueStorage<keyof BlockLogicTypes.Primitives>;
+				if (!input) {
+					$warn(`Found nil input key ${k} for logic ${block.id}`);
+				}
+
 				if (!("set" in input)) continue;
 
 				const def = logic.definition.input[k].types[cfg.type] as

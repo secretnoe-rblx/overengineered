@@ -2,6 +2,7 @@ import { InstanceBlockLogic as InstanceBlockLogic } from "shared/blockLogic/Bloc
 import { BlockConfigDefinitions } from "shared/blocks/BlockConfigDefinitions";
 import { BlockCreation } from "shared/blocks/BlockCreation";
 import { AutoC2SRemoteEvent } from "shared/event/C2SRemoteEvent";
+import { Strings } from "shared/fixes/String.propmacro";
 import type { BlockLogicFullBothDefinitions, InstanceBlockLogicArgs } from "shared/blockLogic/BlockLogic";
 import type { BlockBuilder } from "shared/blocks/Block";
 
@@ -36,14 +37,29 @@ class Logic extends InstanceBlockLogic<typeof definition, ScreenBlock> {
 	constructor(block: InstanceBlockLogicArgs) {
 		super(definition, block);
 
+		const dataToString = (data: unknown): string => {
+			if (typeIs(data, "Vector3")) {
+				return `${dataToString(data.X)}\n${dataToString(data.Y)}\n${dataToString(data.Z)}`;
+			}
+			if (typeIs(data, "number")) {
+				const isHighPresicion = data % 0.001 !== 0;
+				if (isHighPresicion) {
+					return `${Strings.prettyNumber(data, 0.001)}..`;
+				}
+			}
+
+			return tostring(data);
+		};
 		this.on(({ data }) => {
+			const datastr = dataToString(data);
+
 			if (this.instance.FindFirstChild("Part")) {
-				this.instance.Part.SurfaceGui.TextLabel.Text = tostring(data);
+				this.instance.Part.SurfaceGui.TextLabel.Text = datastr;
 			}
 
 			Logic.events.update.send({
 				block: this.instance,
-				text: tostring(data),
+				text: datastr,
 				translate: typeIs(data, "string"),
 			});
 		});

@@ -4,6 +4,7 @@ import { LoadingController } from "client/controller/LoadingController";
 import { LocalPlayer } from "client/controller/LocalPlayer";
 import { Control } from "client/gui/Control";
 import { ButtonControl } from "client/gui/controls/Button";
+import { CheckBoxControl } from "client/gui/controls/CheckBoxControl";
 import { DictionaryControl } from "client/gui/controls/DictionaryControl";
 import { FormattedLabelControl } from "client/gui/controls/FormattedLabelControl";
 import { ProgressBarControl } from "client/gui/controls/ProgressBarControl";
@@ -13,6 +14,7 @@ import { requestMode } from "client/modes/PlayModeRequest";
 import { RocketBlocks } from "shared/blocks/blocks/RocketEngineBlocks";
 import { VehicleSeatBlock } from "shared/blocks/blocks/VehicleSeatBlock";
 import { ComponentChild } from "shared/component/ComponentChild";
+import { ContainerComponent } from "shared/component/ContainerComponent";
 import { EventHandler } from "shared/event/EventHandler";
 import { Signal } from "shared/event/Signal";
 import { CustomRemotes } from "shared/Remotes";
@@ -20,6 +22,7 @@ import { RobloxUnit } from "shared/RobloxUnit";
 import { SlotsMeta } from "shared/SlotsMeta";
 import type { ClientMachine } from "client/blocks/ClientMachine";
 import type { TextButtonDefinition } from "client/gui/controls/Button";
+import type { CheckBoxControlDefinition } from "client/gui/controls/CheckBoxControl";
 import type { ProgressBarControlDefinition } from "client/gui/controls/ProgressBarControl";
 import type { RideMode } from "client/modes/ride/RideMode";
 import type { PlayerDataStorage } from "client/PlayerDataStorage";
@@ -34,6 +37,7 @@ export type ActionBarControlDefinition = GuiObject & {
 };
 export class ActionBarControl extends Control<ActionBarControlDefinition> {
 	readonly sitButton;
+	readonly logicButton;
 
 	constructor(gui: ActionBarControlDefinition, mode: RideMode, controls: RideModeControls) {
 		super(gui);
@@ -77,16 +81,7 @@ export class ActionBarControl extends Control<ActionBarControlDefinition> {
 			controlResetButton.hide();
 		});
 
-		const visualizer = new ComponentChild(this, true);
-		this.add(
-			new ButtonControl(this.gui.LogicVisualizer, () => {
-				if (visualizer.get()) {
-					visualizer.clear();
-				} else {
-					visualizer.set(mode.getCurrentMachine()?.createVisualizer());
-				}
-			}),
-		);
+		this.logicButton = this.add(new ButtonControl(this.gui.LogicVisualizer));
 	}
 }
 
@@ -321,6 +316,18 @@ export type RideModeSceneDefinition = GuiObject & {
 		readonly Template: RideModeInfoControlDefinition & { Title: TextLabel };
 		readonly TextTemplate: RideModeInfoControlDefinition & { Title: TextLabel };
 	};
+	readonly LogicDebug: GuiObject & {
+		readonly Content: GuiObject & {
+			readonly Buttons: GuiObject & {
+				readonly Visualizer: GuiButton;
+				readonly Pause: GuiButton & { readonly ImageLabel: ImageLabel };
+				readonly Step: GuiButton;
+			};
+			readonly PauseOnStart: GuiObject & {
+				readonly Control: CheckBoxControlDefinition;
+			};
+		};
+	};
 };
 
 export class RideModeScene extends Control<RideModeSceneDefinition> {
@@ -466,11 +473,65 @@ export class RideModeScene extends Control<RideModeSceneDefinition> {
 		}
 	}
 
+	private initLogicController(machine: ClientMachine) {
+		const component = this.current.set(new ContainerComponent());
+
+		this.gui.LogicDebug.Visible = false;
+
+		const logicDebug = component.add(new Control(this.gui.LogicDebug.Clone()));
+		logicDebug.instance.Parent = this.gui.LogicDebug.Parent;
+		component.event.subscribe(this.actionbar.logicButton.activated, () => {
+			logicDebug.setVisible(!logicDebug.isVisible());
+		});
+		logicDebug.setVisible(false);
+
+		const pauseOnStart = logicDebug.add(new CheckBoxControl(logicDebug.instance.Content.PauseOnStart.Control));
+		logicDebug.onEnable(() => pauseOnStart.value.set(this.mode.pauseOnStart.get()));
+		logicDebug.event.subscribe(pauseOnStart.submitted, (value) => this.mode.pauseOnStart.set(value));
+
+		const visualizer = new ComponentChild(component, true);
+		logicDebug.add(
+			new ButtonControl(logicDebug.instance.Content.Buttons.Visualizer, () => {
+				if (visualizer.get()) {
+					visualizer.clear();
+				} else {
+					visualizer.set(machine.createVisualizer());
+				}
+			}),
+		);
+
+		logicDebug.add(new ButtonControl(logicDebug.instance.Content.Buttons.Step, () => machine.runner.tick()));
+
+		const pauseButton = logicDebug.add(
+			new ButtonControl(logicDebug.instance.Content.Buttons.Pause, () => {
+				if (machine.runner.isRunning.get()) {
+					machine.runner.stopTicking();
+					machine.logicInputs.setEnabled(false);
+				} else {
+					machine.runner.startTicking();
+					machine.logicInputs.setEnabled(true);
+				}
+			}),
+		);
+		component.event.subscribeObservable(
+			machine.runner.isRunning,
+			(running) => {
+				pauseButton.instance.ImageLabel.Image = running
+					? "rbxassetid://18627572768"
+					: "rbxassetid://15266883073";
+			},
+			true,
+		);
+	}
+
+	private readonly current = new ComponentChild(this, true);
+
 	start(machine: ClientMachine) {
 		if (InputController.inputType.get() === "Touch") {
 			this.controls.start(machine);
 		}
 
 		this.addMeters(machine);
+		this.initLogicController(machine);
 	}
 }

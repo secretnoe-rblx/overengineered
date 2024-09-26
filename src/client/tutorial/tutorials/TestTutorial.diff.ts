@@ -57,7 +57,16 @@ export const TestTutorialDiff = {
 				value: {
 					controlConfig: {
 						enabled: true,
-						mode: { resetOnStop: true, stopOnRelease: true, smoothSpeed: 20, smooth: false },
+						mode: {
+							type: "instant",
+							instant: {
+								mode: "onRelease",
+							},
+							smooth: {
+								speed: 20,
+								mode: "stopOnRelease",
+							},
+						},
 						keys: [
 							{ key: "W", value: 45 },
 							{ key: "S", value: -45 },

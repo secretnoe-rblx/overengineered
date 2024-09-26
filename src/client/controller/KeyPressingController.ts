@@ -57,7 +57,7 @@ export class KeyPressingController<TKeys extends string> {
 */
 export class KeyPressingConflictingController<TKeys extends string> extends KeyPressingController<TKeys> {
 	private readonly definitions;
-	private readonly holding: TKeys[] = [];
+	private readonly holding = new Set<TKeys>();
 
 	constructor(definitions: Readonly<Partial<Record<TKeys, { readonly conflicts?: readonly TKeys[] }>>>) {
 		super();
@@ -70,10 +70,12 @@ export class KeyPressingConflictingController<TKeys extends string> extends KeyP
 		const def = this.definitions[key];
 		if (def?.conflicts && this.isAnyDown(def.conflicts)) {
 			for (const conflict of def.conflicts) {
+				if (!this.isDown(conflict)) continue;
+
 				this.keyUp(conflict);
-				this.holding.push(key);
-				this.holding.push(conflict);
+				this.holding.add(conflict);
 			}
+			this.holding.add(key);
 
 			return;
 		}
@@ -81,16 +83,15 @@ export class KeyPressingConflictingController<TKeys extends string> extends KeyP
 		super.keyDown(key);
 	}
 	keyUp(key: TKeys) {
-		if (!this.isDown(key) && !this.holding.includes(key)) return;
+		if (!this.isDown(key) && !this.holding.has(key)) return;
 
 		const def = this.definitions[key];
-		if (def?.conflicts && this.holding.any((h) => def.conflicts!.includes(h))) {
-			this.holding.remove(this.holding.indexOf(key));
-			for (const conflict of def.conflicts) {
-				this.holding.remove(this.holding.indexOf(conflict));
-			}
+		const conflict = def?.conflicts && this.holding.find((h) => def.conflicts!.includes(h));
+		if (conflict) {
+			this.holding.delete(key);
+			this.holding.delete(conflict);
 
-			this.keyDown(def.conflicts[0]);
+			this.keyDown(conflict);
 			return;
 		}
 

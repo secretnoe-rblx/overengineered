@@ -38,10 +38,14 @@ const servoDefinition = {
 							enabled: true,
 							startValue: 0,
 							mode: {
-								stopOnRelease: true,
-								resetOnStop: true,
-								smooth: false,
-								smoothSpeed: 20,
+								type: "instant",
+								instant: {
+									mode: "onRelease",
+								},
+								smooth: {
+									speed: 72,
+									mode: "stopOnRelease",
+								},
 							},
 							keys: [
 								{ key: "R", value: 45 },

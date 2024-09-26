@@ -3,7 +3,7 @@ import { KeyPressingDefinitionsController } from "client/controller/KeyPressingC
 import { Keys } from "shared/fixes/Keys";
 import { MathUtils } from "shared/fixes/MathUtils";
 import { Objects } from "shared/fixes/objects";
-import type { KeyDefinition, KeyDefinitions } from "client/controller/KeyPressingController";
+import type { KeyDefinitions } from "client/controller/KeyPressingController";
 import type { TouchModeButtonData } from "client/gui/ridemode/TouchModeButtonControl";
 import type { BlockLogicTypes } from "shared/blockLogic/BlockLogicTypes";
 import type { ILogicValueStorage } from "shared/blockLogic/BlockLogicValueStorage";
@@ -65,12 +65,12 @@ namespace ClientBlockControlsNamespace {
 
 		let smoothMovingTask: thread | undefined;
 		let smoothAmount = config.startValue;
-		const smoothSet = (target: number) => {
+		const smoothSet = (target: number, speed: number) => {
 			if (smoothMovingTask) {
 				smoothCancel();
 			}
 
-			const step = smoothAmount < target ? config.mode.smoothSpeed : -config.mode.smoothSpeed;
+			const step = smoothAmount < target ? speed : -speed;
 			if (step === 0) return;
 
 			const direction = math.sign(step) as -1 | 1;
@@ -93,52 +93,100 @@ namespace ClientBlockControlsNamespace {
 		};
 		const smoothCancel = () => smoothMovingTask && task.cancel(smoothMovingTask);
 
-		const set = config.mode.smooth ? smoothSet : actualSet;
-
 		//
 
-		const keySet = (value: number) => {
-			set(value);
+		let movingTo: string | undefined;
+		const createDoublePress = (
+			v: BlockLogicTypes.NumberControlKey,
+			onSet: (valuye: number) => void,
+			onReset: () => void,
+		) => {
+			return () => {
+				if (movingTo !== v.key) {
+					onSet(v.value);
+					movingTo = v.key;
+				} else {
+					onReset();
+					movingTo = undefined;
+				}
+			};
 		};
-		const keyReset = () => {
-			if (config.mode.resetOnStop) {
-				set(config.startValue);
-			} else {
-				smoothCancel();
+
+		let set: (value: number) => void;
+		const reset = () => set(config.startValue);
+
+		let mapper: (v: BlockLogicTypes.NumberControlKey) => {
+			readonly keyDown: (() => void) | undefined;
+			readonly keyUp: (() => void) | undefined;
+		};
+
+		const mode = config.mode;
+		if (mode.type === "smooth") {
+			const mode = config.mode.smooth;
+			const speed = mode.speed;
+			set = (value) => smoothSet(value, speed);
+
+			if (mode.mode === "never") {
+				mapper = (v) => ({
+					keyDown: () => set(v.value),
+					keyUp: undefined,
+				});
+			} else if (mode.mode === "stopOnRelease") {
+				mapper = (v) => ({
+					keyDown: () => set(v.value),
+					keyUp: smoothCancel,
+				});
+			} else if (mode.mode === "stopOnDoublePress") {
+				mapper = (v) => ({
+					keyDown: createDoublePress(v, set, smoothCancel),
+					keyUp: undefined,
+				});
+			} else if (mode.mode === "resetOnRelease") {
+				mapper = (v) => ({
+					keyDown: () => set(v.value),
+					keyUp: reset,
+				});
+			} else if (mode.mode === "resetOnDoublePress") {
+				mapper = (v) => ({
+					keyDown: createDoublePress(v, set, reset),
+					keyUp: undefined,
+				});
 			}
-		};
+		} else {
+			const mode = config.mode.instant;
+			set = actualSet;
+
+			if (mode.mode === "never") {
+				mapper = (v) => ({
+					keyDown: () => set(v.value),
+					keyUp: undefined,
+				});
+			} else if (mode.mode === "onRelease") {
+				mapper = (v) => ({
+					keyDown: () => set(v.value),
+					keyUp: reset,
+				});
+			} else if (mode.mode === "onDoublePress") {
+				mapper = (v) => ({
+					keyDown: createDoublePress(v, set, reset),
+					keyUp: undefined,
+				});
+			}
+		}
 
 		//
 
 		actualSet(config.startValue);
 
-		const mapKeyHold = (_: unknown, v: BlockLogicTypes.NumberControlKey): KeyDefinition<string> => ({
-			key: v.key,
-			conflicts: allKeys.except([v.key]),
-			keyDown: () => keySet(v.value),
-			keyUp: () => keyReset(),
-		});
-
-		let movingTo: string | undefined;
-		const mapKeySwitch = (_: unknown, v: BlockLogicTypes.NumberControlKey): KeyDefinition<string> => ({
-			key: v.key,
-			conflicts: allKeys.except([v.key]),
-			keyDown: () => {
-				if (movingTo === v.key) {
-					keyReset();
-					movingTo = undefined;
-				} else {
-					keySet(v.value);
-					movingTo = v.key;
-				}
-			},
-		});
-
 		const allKeys = config.keys.map((k) => k.key);
 		const def: KeyDefinitions<string> = Objects.map(
 			config.keys,
 			(i, v) => v.key,
-			config.mode.stopOnRelease ? mapKeyHold : mapKeySwitch,
+			(_, v) => ({
+				key: v.key,
+				conflicts: allKeys.except([v.key]),
+				...mapper(v),
+			}),
 		);
 
 		return new KeyPressingDefinitionsController(def);

@@ -2,6 +2,7 @@ import { Control } from "client/gui/Control";
 import { ObservableValue } from "shared/event/ObservableValue";
 import { Signal } from "shared/event/Signal";
 import { MathUtils } from "shared/fixes/MathUtils";
+import { Strings } from "shared/fixes/String.propmacro";
 
 /** ObservableValue that stores a number that can be clamped */
 class NumberObservableValue<T extends number | undefined = number> extends ObservableValue<T> {
@@ -53,24 +54,7 @@ export class NumberTextBoxControl<TAllowNull extends boolean = false> extends Co
 					return;
 				}
 
-				const prettyNumber = (value: number) => {
-					const maxdigits = math.min(4, step ? math.max(0, math.ceil(-math.log(step, 10))) : math.huge);
-
-					const floating = value % 1;
-					const integer = value - floating;
-
-					let floatingstr = string.format("%i", floating * math.pow(10, maxdigits));
-					const integerstr = string.format("%i", integer);
-
-					while (floatingstr.sub(-1) === "0") {
-						if (floatingstr.size() === 1) break;
-						floatingstr = floatingstr.sub(1, -2);
-					}
-
-					return `${integerstr}.${floatingstr}`;
-				};
-
-				this.gui.Text = prettyNumber(value ?? 0);
+				this.gui.Text = Strings.prettyNumber(value ?? 0, step);
 			},
 			true,
 		);

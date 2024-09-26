@@ -289,7 +289,11 @@ export const NewBasicPlaneTutorialDiffs = {
 					type: "number",
 					controlConfig: {
 						enabled: true,
-						mode: { resetOnStop: true, stopOnRelease: true, smoothSpeed: 20, smooth: false },
+						mode: {
+							type: "instant",
+							instant: { mode: "onRelease" },
+							smooth: { speed: 20, mode: "stopOnRelease" },
+						},
 						keys: [
 							{ key: "R", value: 15 },
 							{ key: "F", value: -15 },
@@ -325,7 +329,11 @@ export const NewBasicPlaneTutorialDiffs = {
 					type: "number",
 					controlConfig: {
 						enabled: true,
-						mode: { resetOnStop: true, stopOnRelease: true, smoothSpeed: 20, smooth: false },
+						mode: {
+							type: "instant",
+							instant: { mode: "onRelease" },
+							smooth: { speed: 20, mode: "stopOnRelease" },
+						},
 						keys: [
 							{ key: "R", value: 15 },
 							{ key: "F", value: -15 },
@@ -361,7 +369,11 @@ export const NewBasicPlaneTutorialDiffs = {
 					type: "number",
 					controlConfig: {
 						enabled: true,
-						mode: { resetOnStop: true, stopOnRelease: true, smoothSpeed: 20, smooth: false },
+						mode: {
+							type: "instant",
+							instant: { mode: "onRelease" },
+							smooth: { speed: 20, mode: "stopOnRelease" },
+						},
 						keys: [
 							{ key: "R", value: 15 },
 							{ key: "F", value: -15 },
@@ -397,7 +409,11 @@ export const NewBasicPlaneTutorialDiffs = {
 					type: "number",
 					controlConfig: {
 						enabled: true,
-						mode: { resetOnStop: true, stopOnRelease: true, smoothSpeed: 20, smooth: false },
+						mode: {
+							type: "instant",
+							instant: { mode: "onRelease" },
+							smooth: { speed: 20, mode: "stopOnRelease" },
+						},
 						keys: [
 							{ key: "R", value: 15 },
 							{ key: "F", value: -15 },
@@ -433,7 +449,11 @@ export const NewBasicPlaneTutorialDiffs = {
 					type: "number",
 					controlConfig: {
 						enabled: true,
-						mode: { resetOnStop: true, stopOnRelease: true, smoothSpeed: 20, smooth: false },
+						mode: {
+							type: "instant",
+							instant: { mode: "onRelease" },
+							smooth: { speed: 20, mode: "stopOnRelease" },
+						},
 						keys: [
 							{ key: "R", value: 15 },
 							{ key: "F", value: -15 },
@@ -469,7 +489,11 @@ export const NewBasicPlaneTutorialDiffs = {
 					type: "number",
 					controlConfig: {
 						enabled: true,
-						mode: { resetOnStop: true, stopOnRelease: true, smoothSpeed: 20, smooth: false },
+						mode: {
+							type: "instant",
+							instant: { mode: "onRelease" },
+							smooth: { speed: 20, mode: "stopOnRelease" },
+						},
 						keys: [
 							{ key: "R", value: 15 },
 							{ key: "F", value: -15 },
@@ -501,7 +525,11 @@ export const NewBasicPlaneTutorialDiffs = {
 					type: "number",
 					controlConfig: {
 						enabled: true,
-						mode: { resetOnStop: true, stopOnRelease: true, smoothSpeed: 20, smooth: false },
+						mode: {
+							type: "instant",
+							instant: { mode: "onRelease" },
+							smooth: { speed: 20, mode: "stopOnRelease" },
+						},
 						keys: [
 							{ key: "D", value: 15 },
 							{ key: "A", value: -15 },
@@ -519,7 +547,11 @@ export const NewBasicPlaneTutorialDiffs = {
 					type: "number",
 					controlConfig: {
 						enabled: true,
-						mode: { resetOnStop: true, stopOnRelease: true, smoothSpeed: 20, smooth: false },
+						mode: {
+							type: "instant",
+							instant: { mode: "onRelease" },
+							smooth: { speed: 20, mode: "stopOnRelease" },
+						},
 						keys: [
 							{ key: "D", value: 15 },
 							{ key: "A", value: -15 },
@@ -539,7 +571,11 @@ export const NewBasicPlaneTutorialDiffs = {
 					type: "number",
 					controlConfig: {
 						enabled: true,
-						mode: { resetOnStop: true, stopOnRelease: true, smoothSpeed: 20, smooth: false },
+						mode: {
+							type: "instant",
+							instant: { mode: "onRelease" },
+							smooth: { speed: 20, mode: "stopOnRelease" },
+						},
 						keys: [
 							{ key: "W", value: 15 },
 							{ key: "S", value: -15 },
@@ -557,7 +593,11 @@ export const NewBasicPlaneTutorialDiffs = {
 					type: "number",
 					controlConfig: {
 						enabled: true,
-						mode: { resetOnStop: true, stopOnRelease: true, smoothSpeed: 20, smooth: false },
+						mode: {
+							type: "instant",
+							instant: { mode: "onRelease" },
+							smooth: { speed: 20, mode: "stopOnRelease" },
+						},
 						keys: [
 							{ key: "S", value: 15 },
 							{ key: "W", value: -15 },
@@ -577,7 +617,11 @@ export const NewBasicPlaneTutorialDiffs = {
 					type: "number",
 					controlConfig: {
 						enabled: true,
-						mode: { resetOnStop: true, stopOnRelease: true, smoothSpeed: 20, smooth: false },
+						mode: {
+							type: "instant",
+							instant: { mode: "onRelease" },
+							smooth: { speed: 20, mode: "stopOnRelease" },
+						},
 						keys: [
 							{ key: "Q", value: 15 },
 							{ key: "E", value: -15 },
@@ -595,7 +639,11 @@ export const NewBasicPlaneTutorialDiffs = {
 					type: "number",
 					controlConfig: {
 						enabled: true,
-						mode: { resetOnStop: true, stopOnRelease: true, smoothSpeed: 20, smooth: false },
+						mode: {
+							type: "instant",
+							instant: { mode: "onRelease" },
+							smooth: { speed: 20, mode: "stopOnRelease" },
+						},
 						keys: [
 							{ key: "Q", value: 15 },
 							{ key: "E", value: -15 },
@@ -615,7 +663,11 @@ export const NewBasicPlaneTutorialDiffs = {
 					type: "number",
 					controlConfig: {
 						enabled: true,
-						mode: { resetOnStop: true, stopOnRelease: false, smoothSpeed: 20, smooth: true },
+						mode: {
+							type: "smooth",
+							instant: { mode: "onRelease" },
+							smooth: { speed: 20, mode: "stopOnRelease" },
+						},
 						keys: [
 							{ key: "Z", value: 100 },
 							{ key: "X", value: 0 },

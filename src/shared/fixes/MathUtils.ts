@@ -5,6 +5,9 @@ export namespace MathUtils {
 		if (step === undefined || step === 0) {
 			return value;
 		}
+		if (step === 1) {
+			return math.round(value);
+		}
 
 		const halfstep = step / 2;
 		return value - ((value + halfstep) % step) + halfstep;

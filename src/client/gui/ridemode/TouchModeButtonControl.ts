@@ -57,10 +57,7 @@ export class TouchModeButtonControl extends TextButtonControl {
 		return new TouchModeButtonControl(template.Clone());
 	}
 
-	static fromBlocks(
-		inputType: InputType,
-		logics: ReadonlySet<IClientBlockControl>,
-	): readonly TouchModeButtonControl[] {
+	static fromBlocks(inputType: InputType, logics: readonly IClientBlockControl[]): readonly TouchModeButtonControl[] {
 		if (inputType !== "Touch") return [];
 
 		const createButton = (key: string, group: readonly TouchModeButtonData[]) => {

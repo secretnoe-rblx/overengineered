@@ -103,6 +103,7 @@ export class BuildingModeScene extends Control<BuildingModeSceneDefinition> {
 				mode.editMode,
 				mode.moveGrid,
 				mode.rotateGrid,
+				mode.centerOfMassEnabled,
 				mode.toolController.allTools.editTool,
 			),
 		);

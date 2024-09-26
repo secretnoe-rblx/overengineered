@@ -45,11 +45,22 @@ export namespace BlockLogicTypes {
 		readonly control?: BoolControls;
 	};
 
+	export type NumberControlModesResetMode = "onRelease" | "onDoublePress" | "never";
+	export type NumberControlModesSmoothMode =
+		| "resetOnRelease"
+		| "stopOnRelease"
+		| "resetOnDoublePress"
+		| "stopOnDoublePress"
+		| "never";
 	export interface NumberControlModes {
-		readonly smooth: boolean;
-		readonly smoothSpeed: number;
-		readonly resetOnStop: boolean;
-		readonly stopOnRelease: boolean;
+		readonly type: "smooth" | "instant";
+		readonly smooth: {
+			readonly speed: number;
+			readonly mode: NumberControlModesSmoothMode;
+		};
+		readonly instant: {
+			readonly mode: NumberControlModesResetMode;
+		};
 	}
 	export interface NumberControlKey {
 		readonly key: string | KeyCode;

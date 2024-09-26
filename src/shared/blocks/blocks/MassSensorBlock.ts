@@ -41,7 +41,7 @@ class Logic extends InstanceBlockLogic<typeof definition> {
 			}
 
 			const assemblyOnly = assemblyOnlyCache.tryGet();
-			if (!assemblyOnly) return;
+			if (assemblyOnly === undefined) return;
 
 			this.output.result.set(
 				"number",

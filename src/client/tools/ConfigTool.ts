@@ -17,6 +17,7 @@ import { JSON } from "shared/fixes/Json";
 import { Objects } from "shared/fixes/objects";
 import { Localization } from "shared/Localization";
 import { VectorUtils } from "shared/utils/VectorUtils";
+import type { ReportSubmitController } from "client/gui/popup/ReportSubmitPopup";
 import type { BuildingMode } from "client/modes/build/BuildingMode";
 import type { MultiBlockSelectorConfiguration } from "client/tools/highlighters/MultiBlockSelector";
 //import type { TutorialConfigBlockHighlight } from "client/tutorial/TutorialConfigTool";
@@ -46,6 +47,7 @@ namespace Scene {
 			private readonly tool: ConfigTool,
 			private readonly blockList: BlockList,
 			@inject private readonly di: DIContainer,
+			@inject private readonly reportSubmitter: ReportSubmitController,
 		) {
 			super(gui);
 
@@ -141,45 +143,58 @@ namespace Scene {
 
 			this.gui.ParamsSelection.Content.ScrollingFrame.Visible = false;
 
-			const markered = BlockWireManager.fromPlot(this.tool.targetPlot.get(), this.tool.blockList, true);
+			const markered = BlockWireManager.fromPlot(
+				this.tool.targetPlot.get(),
+				this.tool.blockList,
+				selected.map(BlockManager.manager.uuid.get),
+			);
 
 			const gui = this.gui.ParamsSelection.Content.ScrollingFrame.Clone();
 			gui.Visible = true;
 			gui.Parent = this.gui.ParamsSelection.Content;
-			const configControl = this.add(
-				this.di.resolveForeignClass(MultiBlockConfigControl, [
-					gui,
-					onedef,
-					asObject(configs.mapToMap((c) => $tuple(c.uuid, c.config))),
-					deforder,
-					markered,
-				]),
-			);
-			this.currentConfigControl = configControl;
 
-			configControl.travelledTo.Connect((uuid) => {
-				this.tool.unselectAll();
-				this.tool.selectBlockByUuid(uuid);
-			});
-			configControl.submitted.Connect((config) => {
-				const selected = this.tool.selected.get();
-				$log(`Sending (${selected.size()}) block config values ${JSON.serialize(asMap(config).values())}`);
+			try {
+				const configControl = this.add(
+					this.di.resolveForeignClass(MultiBlockConfigControl, [
+						gui,
+						onedef,
+						asObject(configs.mapToMap((c) => $tuple(c.uuid, c.config))),
+						deforder,
+						markered,
+					]),
+				);
+				this.currentConfigControl = configControl;
 
-				const response = ClientBuilding.updateConfigOperation.execute({
-					plot: this.tool.targetPlot.get(),
-					configs: selected.map(
-						(b) =>
-							({
-								block: b,
-								cfg: config[BlockManager.manager.uuid.get(b)] as never,
-							}) satisfies ClientBuilding.UpdateConfigArgs["configs"][number],
-					),
+				configControl.travelledTo.Connect((uuid) => {
+					this.tool.unselectAll();
+					this.tool.selectBlockByUuid(uuid);
 				});
-				if (!response.success) {
-					LogControl.instance.addLine(response.message, Colors.red);
-					this.updateConfigs([...selected]);
-				}
-			});
+				configControl.submitted.Connect((config) => {
+					const selected = this.tool.selected.get();
+					$log(`Sending (${selected.size()}) block config values ${JSON.serialize(asMap(config).values())}`);
+
+					const response = ClientBuilding.updateConfigOperation.execute({
+						plot: this.tool.targetPlot.get(),
+						configs: selected.map(
+							(b) =>
+								({
+									block: b,
+									cfg: config[BlockManager.manager.uuid.get(b)] as never,
+								}) satisfies ClientBuilding.UpdateConfigArgs["configs"][number],
+						),
+					});
+					if (!response.success) {
+						LogControl.instance.addLine(response.message, Colors.red);
+						this.updateConfigs([...selected]);
+					}
+				});
+			} catch (err) {
+				this.reportSubmitter.submit({
+					err,
+					selected,
+					configs,
+				});
+			}
 		}
 	}
 }
@@ -202,6 +217,7 @@ export class ConfigTool extends ToolBase {
 				this,
 				blockList,
 				di,
+				di.resolve<ReportSubmitController>(),
 			),
 		);
 

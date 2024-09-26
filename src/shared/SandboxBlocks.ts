@@ -10,6 +10,7 @@ import { DelayBlock } from "shared/blocks/blocks/DelayBlock";
 import { DisconnectBlock } from "shared/blocks/blocks/DisconnectBlock";
 import { FireSensorBlock } from "shared/blocks/blocks/FireSensorBlock";
 import { GravitySensorBlock } from "shared/blocks/blocks/GravitySensorBlock";
+import { BasicLogicGateBlocks } from "shared/blocks/blocks/grouped/BasicLogicGateBlocks";
 import { BasicOperationBlocks } from "shared/blocks/blocks/grouped/BasicOperationBlocks";
 import { BuildingBlocks } from "shared/blocks/blocks/grouped/BuildingBlocks";
 import { LampBlocks } from "shared/blocks/blocks/grouped/LampBlocks";
@@ -32,11 +33,13 @@ import { MotorBlock } from "shared/blocks/blocks/MotorBlock";
 import { MouseSensorBlock } from "shared/blocks/blocks/MouseSensorBlock";
 import { OwnerCameraLocatorBlock } from "shared/blocks/blocks/OwnerCameraLocatorBlock";
 import { OwnerLocatorBlock } from "shared/blocks/blocks/OwnerLocatorBlock";
+import { PassengerSeatBlock } from "shared/blocks/blocks/PassengerSeatBlock";
 import { PistonBlock } from "shared/blocks/blocks/PistonBlock";
 import { RadarSectionBlock } from "shared/blocks/blocks/RadarSectionBlock";
 import { RadioReceiverBlock } from "shared/blocks/blocks/RadioReceiverBlock";
 import { RadioTransmitterBlock } from "shared/blocks/blocks/RadioTransmitterBlock";
 import { RandomAccessMemoryBlock } from "shared/blocks/blocks/RandomAccessMemoryBlock";
+import { RandomBlock } from "shared/blocks/blocks/RandomBlock";
 import { ReadonlyMemoryBlock } from "shared/blocks/blocks/ReadonlyMemoryBlock";
 import { RocketBlocks } from "shared/blocks/blocks/RocketEngineBlocks";
 import { RopeBlock } from "shared/blocks/blocks/RopeBlock";
@@ -56,6 +59,7 @@ export const CreateSandboxBlocks = (): BlockList => {
 		...BuildingBlocks,
 		...MechanicalBlocks,
 		...BasicOperationBlocks,
+		...BasicLogicGateBlocks,
 		...WheelBlocks,
 		...WingBlocks,
 		...LampBlocks,
@@ -79,6 +83,7 @@ export const CreateSandboxBlocks = (): BlockList => {
 		SevenSegmentDisplayBlock,
 
 		VehicleSeatBlock,
+		PassengerSeatBlock,
 
 		DelayBlock,
 		SingleImpulseBlock,
@@ -90,6 +95,7 @@ export const CreateSandboxBlocks = (): BlockList => {
 		RandomAccessMemoryBlock,
 		StackMemoryBlock,
 		ReadonlyMemoryBlock,
+		RandomBlock,
 
 		AltimeterBlock,
 		KeySensorBlock,

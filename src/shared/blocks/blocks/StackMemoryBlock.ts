@@ -7,7 +7,7 @@ import type { BlockLogicTypes } from "shared/blockLogic/BlockLogicTypes";
 import type { BlockBuilder } from "shared/blocks/Block";
 
 const definition = {
-	inputOrder: ["value", "push", "pop"],
+	inputOrder: ["value", "push", "pop", "clear"],
 	outputOrder: ["result", "size"],
 	input: {
 		push: {
@@ -32,6 +32,11 @@ const definition = {
 			displayName: "Input",
 			types: BlockConfigDefinitions.any,
 			group: "1",
+		},
+		clear: {
+			displayName: "Clear",
+			types: BlockConfigDefinitions.bool,
+			configHidden: true,
 		},
 	},
 	output: {
@@ -78,6 +83,7 @@ class Logic extends BlockLogic<typeof definition> {
 			this.output.size.set("number", internalMemory.size());
 		};
 
+		this.output.size.set("number", 0);
 		this.onk(["pop"], ({ pop }) => {
 			if (!pop) return;
 			popValue();
@@ -86,6 +92,15 @@ class Logic extends BlockLogic<typeof definition> {
 		this.onk(["push", "value"], ({ push, value, valueType }) => {
 			if (!push) return;
 			pushValue(value, valueType);
+		});
+
+		this.onk(["clear"], ({ clear, clearChanged }) => {
+			if (clearChanged && clear) {
+				internalMemory.clear();
+
+				this.output.result.unset();
+				this.output.size.set("number", internalMemory.size());
+			}
 		});
 	}
 }

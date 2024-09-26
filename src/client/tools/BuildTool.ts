@@ -8,7 +8,6 @@ import { BlockPreviewControl } from "client/gui/buildmode/BlockPreviewControl";
 import { BlockSelectionControl } from "client/gui/buildmode/BlockSelection";
 import { MaterialColorEditControl } from "client/gui/buildmode/MaterialColorEditControl";
 import { MirrorEditorControl } from "client/gui/buildmode/MirrorEditorControl";
-import { Colors } from "shared/Colors";
 import { Control } from "client/gui/Control";
 import { ButtonControl } from "client/gui/controls/Button";
 import { DebugLog } from "client/gui/DebugLog";
@@ -20,6 +19,7 @@ import { BlockMirrorer } from "client/tools/additional/BlockMirrorer";
 import { ToolBase } from "client/tools/ToolBase";
 import { BlockManager } from "shared/building/BlockManager";
 import { BuildingManager } from "shared/building/BuildingManager";
+import { Colors } from "shared/Colors";
 import { Component } from "shared/component/Component";
 import { ComponentChild } from "shared/component/ComponentChild";
 import { InstanceComponent } from "shared/component/InstanceComponent";
@@ -655,10 +655,12 @@ namespace SinglePlaceController {
 			this.event.subscribe(mouse.Move, () => this.updateBlockPosition());
 			this.event.subInput((ih) => {
 				ih.onMouse1Up(() => this.place(), false);
-				ih.onMouse3Down(() => {
+				const pick = () => {
 					state.pickBlock();
 					this.updateBlockPosition();
-				}, false);
+				};
+				ih.onMouse3Down(pick, false);
+				ih.onKeyDown("P", pick);
 
 				ih.onKeyDown("T", () => this.rotate("x"));
 				ih.onKeyDown("R", () => this.rotate("y"));
@@ -710,10 +712,12 @@ namespace SinglePlaceController {
 			super(state, di);
 
 			this.event.subInput((ih) => {
-				ih.onMouse3Down(() => {
+				const pick = () => {
 					state.pickBlock();
 					this.updateBlockPosition();
-				}, false);
+				};
+				ih.onMouse3Down(pick, false);
+				ih.onKeyDown("P", pick);
 
 				ih.onKeyDown("ButtonX", () => this.place());
 				ih.onKeyDown("DPadLeft", () => this.rotate("x"));

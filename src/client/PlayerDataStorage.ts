@@ -1,7 +1,7 @@
 import { HttpService, Players, Workspace } from "@rbxts/services";
 import { LoadingController } from "client/controller/LoadingController";
-import { Colors } from "shared/Colors";
 import { LogControl } from "client/gui/static/LogControl";
+import { Colors } from "shared/Colors";
 import { Config } from "shared/config/Config";
 import { PlayerConfigDefinition } from "shared/config/PlayerConfig";
 import { GameDefinitions } from "shared/data/GameDefinitions";
@@ -42,6 +42,7 @@ export namespace PlayerDataInitializer {
 				GameDefinitions.getMaxSlots(Players.LocalPlayer, d.purchasedSlots ?? 0),
 			),
 			imported_slots: d.imported_slots ?? [],
+			data: d.data ?? {},
 		};
 
 		$log("Configuration loaded: " + HttpService.JSONEncode(data.settings));
@@ -71,6 +72,18 @@ export class PlayerDataStorage {
 	async sendPlayerConfigValue<TKey extends keyof PlayerConfig>(key: TKey, value: PlayerConfig[TKey] & defined) {
 		$log(`Setting player config value ${key} to ${JSON.serialize(value)}`);
 		CustomRemotes.player.updateSettings.send({ key, value });
+
+		this._data.set({
+			...this.data.get(),
+			settings: {
+				...this.data.get().settings,
+				[key]: value,
+			},
+		});
+	}
+	async sendPlayerDataValue<TKey extends keyof PlayerData>(key: TKey, value: PlayerData[TKey] & defined) {
+		$log(`Setting player data value ${key} to ${JSON.serialize(value)}`);
+		CustomRemotes.player.updateData.send({ key, value });
 
 		this._data.set({
 			...this.data.get(),

@@ -13,12 +13,14 @@ import { OtherPlayersController } from "client/controller/OtherPlayersController
 import { RagdollController } from "client/controller/RagdollController";
 import { MusicController } from "client/controller/sound/MusicController";
 import { SoundController } from "client/controller/SoundController";
+import { UpdatePopupController } from "client/controller/UpdatePopupController";
 import { ActionsGui } from "client/gui/ActionsGui";
 import { AdminGui } from "client/gui/AdminGui";
 import { GuiAutoScaleController } from "client/gui/GuiAutoScaleController";
 import { HideInterfaceController } from "client/gui/HideInterfaceController";
 import { ControlsPopup } from "client/gui/popup/ControlsPopup";
 import { NewSettingsPopup } from "client/gui/popup/NewSettingsPopup";
+import { ReportSubmitController } from "client/gui/popup/ReportSubmitPopup";
 import { SavePopup } from "client/gui/popup/SavePopup";
 import { SettingsPopup } from "client/gui/popup/SettingsPopup";
 import { WikiPopup } from "client/gui/popup/WikiPopup";
@@ -89,18 +91,23 @@ export namespace SandboxGame {
 		builder.services.registerService(HideInterfaceController);
 		ActionsGui.initialize(builder);
 
+		if (!RunService.IsStudio()) {
+			builder.services.registerService(UpdatePopupController);
+		}
+
 		ChatController.initializeAdminPrefix();
 		SettingsPopup.addAsService(builder);
 		NewSettingsPopup.addAsService(builder);
 		SavePopup.addAsService(builder);
 		ControlsPopup.addAsService(builder);
 		WikiPopup.addAsService(builder);
+		builder.services.registerSingletonClass(ReportSubmitController);
 
 		{
 			const tutorials: (new (...args: any[]) => TutorialDescriber)[] = [
 				BasicCarTutorial,
-				BasicPlaneTutorial,
 				NewBasicPlaneTutorial,
+				BasicPlaneTutorial,
 			];
 			if (GameDefinitions.isAdmin(Players.LocalPlayer)) {
 				tutorials.push(TestTutorial);
@@ -108,7 +115,7 @@ export namespace SandboxGame {
 
 			TutorialServiceInitializer.initialize(builder, {
 				tutorials,
-				tutorialToRunWhenNoSlots: BasicPlaneTutorial,
+				tutorialToRunWhenNoSlots: NewBasicPlaneTutorial,
 			});
 		}
 

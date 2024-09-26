@@ -63,7 +63,10 @@ export class ByteEditor extends Control<ByteEditorDefinition> {
 		const tb = this.add(new NumberTextBoxControl(parts.TextBox, 0, 255, 1));
 		tb.value.set(this.value.get());
 		this.event.subscribeObservable(this.value, (value) => tb.value.set(value), true);
-		this.event.subscribe(tb.submitted, (value) => this.value.set(value));
+		this.event.subscribe(tb.submitted, (value) => {
+			this.value.set(value);
+			this.submitted.Fire(this.value.get());
+		});
 
 		// Button click
 		for (const button of this.buttons) {

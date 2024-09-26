@@ -31,7 +31,7 @@ export namespace BlockWireManager {
 		wire: { color: Colors.white },
 	};
 
-	function intersectTypes(types: readonly (readonly DataType[])[]): readonly DataType[] {
+	export function intersectTypes(types: readonly (readonly DataType[])[]): readonly DataType[] {
 		if (types.size() === 1) {
 			return types[0];
 		}
@@ -73,7 +73,7 @@ export namespace BlockWireManager {
 		return isNotConnected(input) && areSameType(output, input);
 	}
 
-	export function fromPlot(plot: SharedPlot, blockList: BlockList, treatDisconnectedAsUnset: boolean = false) {
+	export function fromPlot(plot: SharedPlot, blockList: BlockList, treatDisconnectedAsUnset?: readonly BlockUuid[]) {
 		return from(plot.getBlockDatas(), blockList, treatDisconnectedAsUnset);
 	}
 
@@ -85,7 +85,7 @@ export namespace BlockWireManager {
 	export function from(
 		blocks: readonly BlockDataForWireManager[],
 		blockList: BlockList,
-		treatDisconnectedAsUnset: boolean = false,
+		treatDisconnectedAsUnset?: readonly BlockUuid[],
 		treatUnsetAsUnset: boolean = false,
 	) {
 		const toNarrow: Markers.Marker[] = [];
@@ -109,7 +109,7 @@ export namespace BlockWireManager {
 				{
 					const existingcfg = cfg[key];
 					if (
-						treatDisconnectedAsUnset ||
+						treatDisconnectedAsUnset?.includes(block.uuid) ||
 						existingcfg === undefined ||
 						existingcfg.type === "unset" ||
 						existingcfg.type === "wire"

@@ -19,7 +19,7 @@ export class SharedMachine extends ContainerComponent<GenericBlockLogic> {
 	readonly occupiedByLocalPlayer = new ObservableValue(true);
 	private impactController?: ImpactController;
 	protected readonly blocksMap = new Map<BlockUuid, BlockData>();
-	protected readonly runner = this.parent(new BlockLogicRunner());
+	readonly runner = this.parent(new BlockLogicRunner());
 
 	constructor(
 		@inject private readonly blockList: BlockList,
@@ -29,7 +29,7 @@ export class SharedMachine extends ContainerComponent<GenericBlockLogic> {
 	}
 
 	/** Add blocks to the machine, initialize it and start */
-	init(blocks: readonly PlacedBlockData[]) {
+	init(blocks: readonly PlacedBlockData[], startLogicImmediately = true) {
 		const di = this.di.beginScope((di) => di.registerSingleton(this));
 
 		for (const block of blocks) {
@@ -48,12 +48,12 @@ export class SharedMachine extends ContainerComponent<GenericBlockLogic> {
 			this.blocksMap.set(block.uuid, { block, logic });
 		}
 
-		this.initialize(blocks);
+		this.initialize(blocks, startLogicImmediately);
 		this.enable();
 	}
-	protected initialize(blocks: readonly PlacedBlockData[]) {
+	protected initialize(blocks: readonly PlacedBlockData[], startLogicImmediately: boolean) {
 		this.initializeSpeedLimiter();
-		this.initializeBlockConnections();
+		this.initializeBlockConnections(startLogicImmediately);
 
 		const impact = this.createImpactControllerIfNeeded(blocks);
 		if (impact) {
@@ -117,7 +117,7 @@ export class SharedMachine extends ContainerComponent<GenericBlockLogic> {
 		});
 	}
 
-	protected initializeBlockConnections() {
+	protected initializeBlockConnections(startImmediately: boolean) {
 		const logicMap = this.blocksMap.mapToMap((k, v) => $tuple(k, v.logic));
 
 		for (const [, { block, logic }] of this.blocksMap) {
@@ -132,6 +132,8 @@ export class SharedMachine extends ContainerComponent<GenericBlockLogic> {
 			this.runner.add(logic);
 		}
 
-		this.runner.startTicking();
+		if (startImmediately) {
+			this.runner.startTicking();
+		}
 	}
 }

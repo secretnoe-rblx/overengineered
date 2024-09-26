@@ -1,4 +1,6 @@
 import { AABB } from "shared/fixes/AABB";
+import { Objects } from "shared/fixes/objects";
+import type { BlockLogicFullBothDefinitions } from "shared/blockLogic/BlockLogic";
 
 export namespace BlockAssertions {
 	type AssertedModel = Model & { PrimaryPart: BasePart };
@@ -86,7 +88,7 @@ export namespace BlockAssertions {
 			if (num % 1 === 0) return;
 
 			if (num % 1 < 0.01) {
-				$warn(`Potential floating point problem: ${block.Name}.Size.${axis} = ${num}`);
+				$log(`[WARN] Potential floating point problem: ${block.Name}.Size.${axis} = ${num}`);
 			}
 		};
 
@@ -105,7 +107,7 @@ export namespace BlockAssertions {
 		check(size.Z, "Z");
 	}
 
-	export function getAllErrors(block: Model): readonly string[] {
+	function getAllModelErrors(block: Model): readonly string[] {
 		if (!isPrimaryPartSet(block)) {
 			return [`PrimaryPart in Block '${block.Name}' is not set!`];
 		}
@@ -119,5 +121,24 @@ export namespace BlockAssertions {
 			...assertCollisionGroup(block),
 			// ...assertNoRepeatedPartNames(block), temporarily removed
 		];
+	}
+
+	function* checkNoSameNamesInLogicDefinition(block: Block, defs: BlockLogicFullBothDefinitions) {
+		const keys = [...Objects.keys(defs.input), ...Objects.keys(defs.output)];
+
+		if (keys.size() !== new Set(keys).size()) {
+			yield `Block ${block.id} has duplicate keys between logic input and output`;
+		}
+	}
+
+	function getAllLogicErrors(block: Block, logic: Block["logic"] & defined): readonly string[] {
+		return [
+			...checkNoSameNamesInLogicDefinition(block, logic.definition),
+			//
+		];
+	}
+
+	export function getAllErrors(block: Block): readonly string[] {
+		return [...getAllModelErrors(block.model), ...(block.logic ? getAllLogicErrors(block, block.logic) : [])];
 	}
 }

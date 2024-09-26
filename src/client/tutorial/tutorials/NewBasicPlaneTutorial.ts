@@ -6,7 +6,7 @@ import type { TutorialController, TutorialDescriber, TutorialRunnerPartList } fr
 
 @injectable
 export class NewBasicPlaneTutorial implements TutorialDescriber {
-	readonly name = "Basics/simple plane";
+	readonly name = "Basics/plane";
 
 	constructor(@inject private readonly buildingMode: BuildingMode) {}
 
@@ -78,9 +78,7 @@ export class NewBasicPlaneTutorial implements TutorialDescriber {
 			() => [
 				t.funcPart(() => toolController.enabledTools.enableOnly(toolController.allTools.buildTool)),
 				t.processDiff(diffs.basicWings, saveVersion),
-				t.partText(
-					"Well done! Let's use the mirror to speed up the constructruction!\rPlace some wings using it.",
-				),
+				t.partText("Well done! Let's use the mirror to speed up the construction!\nPlace some wings using it."),
 				t.translatedHintsPart(
 					["Select the build tool"],
 					["Press the mirror button (top of your screen)"],
@@ -112,7 +110,7 @@ export class NewBasicPlaneTutorial implements TutorialDescriber {
 				t.funcPart(() => toolController.enabledTools.enableOnly(toolController.allTools.buildTool)),
 				t.processDiff(diffs.servo, saveVersion),
 				t.partText(
-					"It's time to place servomotors.\rThese are used to precisely rotate to a target angle.\rWe're going to control many things using these.",
+					"It's time to place the servomotors.\nThese are used to precisely rotate something to an angle.\nWe're going to control many things using these.",
 				),
 				t.translatedHintsPart(
 					["Select the build tool"],
@@ -127,7 +125,7 @@ export class NewBasicPlaneTutorial implements TutorialDescriber {
 			() => [
 				t.funcPart(() => toolController.enabledTools.enableOnly(toolController.allTools.deleteTool)),
 				t.processDiff(diffs.removeExtraServo, saveVersion),
-				t.partText("Oh, what's that? Seems that we placed extra servo!\rLet's remove it."),
+				t.partText("Oh, what's that? Seems that we placed an extra servo!\nLet's remove it."),
 				t.translatedHintsPart(["Select the delete tool"], ["Remove the highlighted block"], [""]),
 			],
 
@@ -148,7 +146,7 @@ export class NewBasicPlaneTutorial implements TutorialDescriber {
 				t.funcPart(() => toolController.enabledTools.enableOnly(toolController.allTools.buildTool)),
 				t.processDiff(diffs.prepareForWheels, saveVersion),
 				t.partText(
-					"All your plane lacks now is wheels.\rBut how do we connect them?\rUsing bearings and hinges of course!",
+					"All your plane lacks now is wheels.\nBut how do we connect them?\nUsing bearings and hinges of course!",
 				),
 				t.translatedHintsPart(
 					["Select the build tool"],
@@ -192,7 +190,7 @@ export class NewBasicPlaneTutorial implements TutorialDescriber {
 			() => [
 				t.funcPart(() => toolController.enabledTools.enableOnly(toolController.allTools.configTool)),
 				t.processDiff(diffs.configureAllServos, saveVersion),
-				t.partText("Let's configure tese servos!"),
+				t.partText("Let's configure these servos!"),
 				t.translatedHintsPart(
 					["Select the configuration tool"],
 					[`Select all of the servos (preferably using multiselect)`],
@@ -214,14 +212,14 @@ export class NewBasicPlaneTutorial implements TutorialDescriber {
 				t.funcPart(() => toolController.enabledTools.disableAll()),
 				t.partNextButton(),
 				t.partText(
-					`Wery well! You just configured your first blocks.\rRemember: most of the blocks are configurable.`,
+					`Very well! You just configured your first blocks.\nRemember: a lot of the blocks are configurable.`,
 				),
 			],
 			() => [
 				t.funcPart(() => toolController.enabledTools.enableOnly(toolController.allTools.configTool)),
 				t.processDiff(diffs.configureRoll, saveVersion),
 				t.partText(
-					"Set up the servos that are used to control horisontal tilt (roll) of your plane.\r These are located just bihind your front main pair of wings.",
+					"Set up the servos that are used to control horisontal tilt (roll) of your plane.\n These are located just behind your front main pair of wings.",
 				),
 				t.hintsPart(
 					"Select the config tool",
@@ -235,7 +233,7 @@ export class NewBasicPlaneTutorial implements TutorialDescriber {
 				t.funcPart(() => toolController.enabledTools.enableOnly(toolController.allTools.configTool)),
 				t.processDiff(diffs.configurePitch, saveVersion),
 				t.partText(
-					`Great. Now we need to adjust the back wings.\rThey are responsible for the forward tilt (pitch)`,
+					`Great. Now we need to adjust the back wings.\nThey are responsible for the forward tilt (pitch)`,
 				),
 				t.hintsPart(
 					"Select the config tool",
@@ -261,7 +259,7 @@ export class NewBasicPlaneTutorial implements TutorialDescriber {
 				t.funcPart(() => toolController.enabledTools.enableOnly(toolController.allTools.configTool)),
 				t.processDiff(diffs.configureYaw, saveVersion),
 				t.partText(
-					"Time to configure last two servos. One is on the back (on top of your tail) and another right under the nose of your plane",
+					"Time to configure the last two servos. One is on the back (on top of your tail) and another right under the nose of your plane",
 				),
 				t.translatedHintsPart(
 					["Select the config tool"],
@@ -287,14 +285,14 @@ export class NewBasicPlaneTutorial implements TutorialDescriber {
 				t.funcPart(() => toolController.enabledTools.disableAll()),
 				t.partNextButton(),
 				t.partText(
-					`Your plane is ready! When you're ready, just press triangle ("PLAY") button on the top of your screen.`,
+					`Your plane is ready! When you're ready, just press the triangle button on the top of your screen.`,
 				),
 			],
 			() => [
 				t.funcPart(() => toolController.enabledTools.disableAll()),
 				t.partNextButton(),
 				t.partText(
-					`This is the last message. You can replay tutorial any moment, just go to the settings (near "PLAY" button).\rGood luck!`,
+					`This is the last message. You can replay tutorial any moment, just go to the settings (near the play button).\nGood luck!`,
 				),
 			],
 		];
