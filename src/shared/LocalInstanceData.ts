@@ -9,7 +9,7 @@ export namespace LocalInstanceData {
 	 * @param tag Tag
 	 */
 	export function AddLocalTag(instance: Instance, tag: string) {
-		const currentTags = instanceTags.has(instance) ? instanceTags.get(instance)! : new Set<string>()
+		const currentTags = instanceTags.has(instance) ? instanceTags.get(instance)! : new Set<string>();
 		currentTags.add(tag);
 		instanceTags.set(instance, currentTags);
 

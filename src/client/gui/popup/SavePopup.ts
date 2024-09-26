@@ -12,6 +12,7 @@ import { Signal } from "shared/event/Signal";
 import { Serializer } from "shared/Serializer";
 import type { TextButtonDefinition } from "client/gui/controls/Button";
 import type { PlayerDataStorage } from "client/PlayerDataStorage";
+import type { GameHostBuilder } from "shared/GameHostBuilder";
 
 const NOT_EDITABLE_IMAGE = "rbxassetid://15428855911";
 const EDITABLE_IMAGE = "rbxassetid://17320900740";

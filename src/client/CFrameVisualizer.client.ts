@@ -27,9 +27,9 @@ const copyScripts = (parent: Instance, parentTo: Instance) => {
 copyScripts(game.GetService("StarterPlayer").WaitForChild("StarterPlayerScripts").WaitForChild("TS"), script.Parent!);
 copyScripts(game.GetService("ReplicatedStorage"), script.Parent!);
 
-import { Colors } from "shared/Colors";
 import { Control } from "client/gui/Control";
 import { TextButtonControl } from "client/gui/controls/Button";
+import { Colors } from "shared/Colors";
 import { ContainerComponent } from "shared/component/ContainerComponent";
 import { Element } from "shared/Element";
 

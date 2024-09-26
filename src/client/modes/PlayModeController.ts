@@ -5,9 +5,10 @@ import { Popup } from "client/gui/Popup";
 import { BuildingMode } from "client/modes/build/BuildingMode";
 import { requestMode } from "client/modes/PlayModeRequest";
 import { RideMode } from "client/modes/ride/RideMode";
+import { HostedService } from "shared/di/HostedService";
 import { ObservableValue } from "shared/event/ObservableValue";
-import { HostedService } from "shared/GameHost";
 import { CustomRemotes } from "shared/Remotes";
+import type { GameHostBuilder } from "shared/GameHostBuilder";
 
 @injectable
 export class PlayModeController extends HostedService {

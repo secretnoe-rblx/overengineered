@@ -1,6 +1,6 @@
 import { ServerBuildingRequestHandler } from "server/building/ServerBuildingRequestHandler";
 import { BlocksSerializer } from "shared/building/BlocksSerializer";
-import { HostedService } from "shared/GameHost";
+import { HostedService } from "shared/di/HostedService";
 import { PlayerWatcher } from "shared/PlayerWatcher";
 import { CustomRemotes } from "shared/Remotes";
 import { SlotsMeta } from "shared/SlotsMeta";
@@ -28,7 +28,7 @@ export class ServerBuildingRequestController extends HostedService {
 				if (update.kind !== "add") return;
 
 				for (const controller of update.added) {
-					container = container.beginScope((di) => di.registerSingleton(controller));
+					container = container.beginScope((di) => di.registerSingletonValue(controller));
 					const handler = container.resolveForeignClass(ServerBuildingRequestHandler);
 
 					children.set(controller.player, handler);

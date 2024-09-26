@@ -30,7 +30,7 @@ export class SharedMachine extends ContainerComponent<GenericBlockLogic> {
 
 	/** Add blocks to the machine, initialize it and start */
 	init(blocks: readonly PlacedBlockData[], startLogicImmediately = true) {
-		const di = this.di.beginScope((di) => di.registerSingleton(this));
+		const di = this.di.beginScope((di) => di.registerSingletonValue(this));
 
 		for (const block of blocks) {
 			const id = block.id;

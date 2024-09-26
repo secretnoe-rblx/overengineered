@@ -3,7 +3,7 @@ import { LocalPlayer } from "client/controller/LocalPlayer";
 import { Beacon } from "client/gui/Beacon";
 import { Component } from "shared/component/Component";
 import { ComponentKeyedChildren } from "shared/component/ComponentKeyedChildren";
-import { HostedService } from "shared/GameHost";
+import { HostedService } from "shared/di/HostedService";
 import { PlayerWatcher } from "shared/PlayerWatcher";
 import type { PlayerDataStorage } from "client/PlayerDataStorage";
 import type { ReadonlyPlot } from "shared/building/ReadonlyPlot";

@@ -6,6 +6,7 @@ import { ParticleEffect } from "shared/effects/ParticleEffect";
 import { SoundEffect } from "shared/effects/SoundEffect";
 import { SparksEffect } from "shared/effects/SparksEffect";
 import { AutoC2SRemoteEvent } from "shared/event/C2SRemoteEvent";
+import type { GameHostBuilder } from "shared/GameHostBuilder";
 
 export type ExplodeArgs = {
 	readonly part: BasePart;

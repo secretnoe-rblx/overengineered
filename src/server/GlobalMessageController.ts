@@ -1,7 +1,7 @@
 import { MessagingService, RunService } from "@rbxts/services";
 import { isNotAdmin_AutoBanned } from "server/BanAdminExploiter";
 import { registerOnRemoteEvent } from "server/network/event/RemoteHandler";
-import { HostedService } from "shared/GameHost";
+import { HostedService } from "shared/di/HostedService";
 import { Remotes } from "shared/Remotes";
 
 export class GlobalMessageController extends HostedService {

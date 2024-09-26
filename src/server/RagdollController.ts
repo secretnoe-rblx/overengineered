@@ -1,6 +1,6 @@
 import { Debris } from "@rbxts/services";
+import { HostedService } from "shared/di/HostedService";
 import { Instances } from "shared/fixes/Instances";
-import { HostedService } from "shared/GameHost";
 import { PlayerWatcher } from "shared/PlayerWatcher";
 import { SharedRagdoll } from "shared/SharedRagdoll";
 

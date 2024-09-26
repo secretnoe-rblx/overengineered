@@ -1,9 +1,10 @@
 import { BSOD } from "client/gui/BSOD";
 import { NotificationPopup } from "client/gui/popup/NotificationPopup";
 import { TutorialController } from "client/tutorial/TutorialController";
-import { HostedService } from "shared/GameHost";
+import { HostedService } from "shared/di/HostedService";
 import type { PlayerDataStorage } from "client/PlayerDataStorage";
 import type { TutorialDescriber } from "client/tutorial/TutorialController";
+import type { GameHostBuilder } from "shared/GameHostBuilder";
 
 /** Service for running the tutorials */
 @injectable

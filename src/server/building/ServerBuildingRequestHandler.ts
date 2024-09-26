@@ -3,7 +3,7 @@ import { BlockManager } from "shared/building/BlockManager";
 import { BlocksSerializer } from "shared/building/BlocksSerializer";
 import { BuildingManager } from "shared/building/BuildingManager";
 import { GameDefinitions } from "shared/data/GameDefinitions";
-import { HostedService } from "shared/GameHost";
+import { HostedService } from "shared/di/HostedService";
 import { Operation } from "shared/Operation";
 import { PlayerWatcher } from "shared/PlayerWatcher";
 import { SlotsMeta } from "shared/SlotsMeta";

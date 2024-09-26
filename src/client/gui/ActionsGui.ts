@@ -3,6 +3,7 @@ import { TextButtonControl } from "client/gui/controls/Button";
 import { Gui } from "client/gui/Gui";
 import { Component } from "shared/component/Component";
 import type { HideInterfaceController } from "client/gui/HideInterfaceController";
+import type { GameHostBuilder } from "shared/GameHostBuilder";
 
 @injectable
 class Starter extends Component {

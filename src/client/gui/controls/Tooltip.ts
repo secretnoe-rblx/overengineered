@@ -4,8 +4,8 @@ import { Control } from "client/gui/Control";
 import { Gui } from "client/gui/Gui";
 import { InstanceComponent } from "shared/component/InstanceComponent";
 import { TransformService } from "shared/component/TransformService";
+import { HostedService } from "shared/di/HostedService";
 import { EventHandler } from "shared/event/EventHandler";
-import { HostedService } from "shared/GameHost";
 
 type TooltipDefinition = GuiObject & {
 	readonly TextLabel: TextLabel;

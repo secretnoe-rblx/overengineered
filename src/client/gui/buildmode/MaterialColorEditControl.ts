@@ -1,10 +1,10 @@
 import { Players } from "@rbxts/services";
 import { ColorChooser } from "client/gui/ColorChooser";
-import { Colors } from "shared/Colors";
 import { Control } from "client/gui/Control";
 import { BlockPipetteButton } from "client/gui/controls/BlockPipetteButton";
 import { TextButtonControl } from "client/gui/controls/Button";
 import { MaterialChooser } from "client/gui/MaterialChooser";
+import { Colors } from "shared/Colors";
 import { ObjectOverlayStorage } from "shared/component/ObjectOverlayStorage";
 import { TransformService } from "shared/component/TransformService";
 import { GameDefinitions } from "shared/data/GameDefinitions";

@@ -10,6 +10,7 @@ import { JSON } from "shared/fixes/Json";
 import { Objects } from "shared/fixes/objects";
 import { CustomRemotes } from "shared/Remotes";
 import { SlotsMeta } from "shared/SlotsMeta";
+import type { GameHostBuilder } from "shared/GameHostBuilder";
 
 type NonNullableFields<T> = {
 	[P in keyof T]-?: NonNullable<T[P]>;

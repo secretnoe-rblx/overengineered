@@ -1,12 +1,13 @@
 import { Players } from "@rbxts/services";
 import { BuildMode } from "server/modes/BuildMode";
 import { RideMode } from "server/modes/RideMode";
-import { HostedService } from "shared/GameHost";
+import { HostedService } from "shared/di/HostedService";
 import { PlayerWatcher } from "shared/PlayerWatcher";
 import { CustomRemotes } from "shared/Remotes";
 import { Throttler } from "shared/Throttler";
 import { PlayerUtils } from "shared/utils/PlayerUtils";
 import type { PlayModeBase } from "server/modes/PlayModeBase";
+import type { GameHostBuilder } from "shared/GameHostBuilder";
 
 @injectable
 export class PlayModeController extends HostedService {
