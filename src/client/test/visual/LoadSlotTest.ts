@@ -42,9 +42,14 @@ export const LoadSlotTest = {
 		);
 
 		userid.value.set(1745850275); // BlackWater
-		loadbtn.activated.Connect(() =>
-			CustomRemotes.slots.loadAsAdmin.send({ userid: userid.value.get(), index: slotid.value.get(), imported }),
-		);
+		loadbtn.activated.Connect(() => {
+			const result = CustomRemotes.slots.loadAsAdmin.send({
+				userid: userid.value.get(),
+				index: slotid.value.get(),
+				imported,
+			});
+			$log(result);
+		});
 
 		return loadControl;
 	},
