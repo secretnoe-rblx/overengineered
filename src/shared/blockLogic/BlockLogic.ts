@@ -536,6 +536,10 @@ export abstract class CalculatableBlockLogic<TDef extends BlockLogicBothDefiniti
 					this.disableAndBurn();
 				}
 
+				for (const [, v] of pairs(this.output)) {
+					v.unset();
+				}
+
 				return;
 			}
 

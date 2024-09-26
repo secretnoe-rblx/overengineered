@@ -136,6 +136,12 @@ export class LogicValueStorageContainer<TType extends PrimitiveKeys>
 			changedSinceLastTick: ctx.tick === this.lastChangeTick,
 		};
 	}
+	unset(): void {
+		this.changedThisTick = true;
+		this.wasChanged = true;
+
+		this.value = undefined;
+	}
 	set<TType2 extends TType>(valueType: TType2, value: Primitives[TType2]["default"]): void {
 		this.changedThisTick = true;
 		this.wasChanged = true;
