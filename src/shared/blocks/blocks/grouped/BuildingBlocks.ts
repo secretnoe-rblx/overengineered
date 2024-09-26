@@ -101,8 +101,26 @@ const cornerWedges = {
 		mirror: { behaviour: "offset270" },
 	},
 	innertetra: {
-		displayName: "Inner Tetra",
+		displayName: "Inner Tetra 1x1",
 		description: "This name was chosen just to make the searching more inconvenient",
+
+		mirror: { behaviour: "offset270" },
+	},
+	innertetra2x1: {
+		displayName: "Inner Tetra 2x1",
+		description: "This name was chosen just to make the searching 2 times inconvenient",
+
+		mirror: { behaviour: "offset270" },
+	},
+	innertetra3x1: {
+		displayName: "Inner Tetra 3x1",
+		description: "This name was chosen just to make the searching 3 times inconvenient",
+
+		mirror: { behaviour: "offset270" },
+	},
+	innertetra4x1: {
+		displayName: "Inner Tetra 4x1",
+		description: "This name was chosen just to make the searching 4 times inconvenient",
 
 		mirror: { behaviour: "offset270" },
 	},
