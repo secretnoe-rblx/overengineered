@@ -6,6 +6,7 @@ import type { BlockLogicArgs, BlockLogicFullBothDefinitions } from "shared/block
 import type { BlockBuilder } from "shared/blocks/Block";
 
 const definition = {
+	inputOrder: ["set", "value", "defaultValue", "reset"],
 	input: {
 		set: {
 			displayName: "Set",
@@ -26,6 +27,13 @@ const definition = {
 			types: BlockConfigDefinitions.any,
 			group: "1",
 			connectorHidden: true,
+		},
+		reset: {
+			displayName: "Reset",
+			tooltip: "Reset the value to the default one",
+			types: BlockConfigDefinitions.any,
+			group: "1",
+			configHidden: true,
 		},
 	},
 	output: {
@@ -49,6 +57,12 @@ class Logic extends BlockLogic<typeof definition> {
 		this.onk(["value", "set"], ({ value, valueType, set }) => {
 			if (!set) return;
 			this.output.result.set(valueType, value);
+		});
+
+		this.onk(["reset", "defaultValue"], ({ reset, resetChanged, defaultValue, defaultValueType }) => {
+			if (resetChanged && reset) {
+				this.output.result.set(defaultValueType, defaultValue);
+			}
 		});
 	}
 }
