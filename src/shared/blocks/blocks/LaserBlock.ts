@@ -65,6 +65,11 @@ const definition = {
 			displayName: "Distance",
 			types: ["number"],
 		},
+		targetColor: {
+			displayName: "Target Color",
+			types: ["vector3"],
+			tooltip: "Black (0,0,0) by default",
+		},
 	},
 } satisfies BlockLogicFullBothDefinitions;
 
@@ -96,6 +101,17 @@ class Logic extends InstanceBlockLogic<typeof definition> {
 			const raycastResult = Workspace.Raycast(raycastOrigin, raycastDirection, raycastParams);
 			const distance = raycastResult?.Distance ?? maxDistance;
 			const endpos = raycastOrigin.add(this.instance.GetPivot().UpVector.mul(distance));
+
+			this.output.targetColor.set(
+				"vector3",
+				raycastResult?.Instance?.Color
+					? new Vector3(
+							raycastResult?.Instance?.Color.R * 255,
+							raycastResult?.Instance?.Color.G * 255,
+							raycastResult?.Instance?.Color.B * 255,
+						)
+					: Vector3.zero,
+			);
 
 			this.output.distance.set(
 				"number",
