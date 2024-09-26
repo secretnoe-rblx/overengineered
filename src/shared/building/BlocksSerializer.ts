@@ -1466,11 +1466,50 @@ const v28: UpgradableBlocksSerializer<SerializedBlocks<SerializedBlockV4>, typeo
 	},
 };
 
+// fix config duplicate {config:{config,type}}
+const v29: UpgradableBlocksSerializer<SerializedBlocks<SerializedBlockV4>, typeof v28> = {
+	version: 29,
+
+	upgradeFrom(prev: SerializedBlocks<SerializedBlockV4>, blockList: BlockList): SerializedBlocks<SerializedBlockV4> {
+		const update = (block: SerializedBlockV4): SerializedBlockV4 => {
+			if (!block.config) return block;
+
+			const fixConfigErrors = <T>(config: T): T => {
+				if (typeIs(config, "table") && "type" in config && "config" in config) {
+					return config.config as T;
+				}
+
+				return config;
+			};
+
+			for (const [k, v] of pairs(block.config)) {
+				block = {
+					...block,
+					config: {
+						...block.config,
+						[k]: {
+							...v,
+							config: fixConfigErrors(v.config),
+						} as BlockConfigPart<"string">,
+					},
+				};
+			}
+
+			return block;
+		};
+
+		return {
+			version: this.version,
+			blocks: prev.blocks.map(update),
+		};
+	},
+};
+
 //
 
 const versions = [
 	...([v4, v5, v6, v7, v8, v9, v10, v11, v12, v13, v14, v15, v16, v17, v18, v19, v20, v21, v22] as const),
-	...([v23, v24, v25, v26, v27, v28] as const),
+	...([v23, v24, v25, v26, v27, v28, v29] as const),
 ] as const;
 const current = versions[versions.size() - 1] as typeof versions extends readonly [...unknown[], infer T] ? T : never;
 
