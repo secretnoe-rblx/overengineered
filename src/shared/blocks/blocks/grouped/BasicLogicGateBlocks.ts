@@ -325,10 +325,14 @@ namespace Mux {
 		constructor(block: BlockLogicArgs) {
 			super(definition, block);
 
+			const valuecache = this.initializeInputCache("value");
 			const truevaluecache = this.initializeInputCache("truevalue");
 			const falsevaluecache = this.initializeInputCache("falsevalue");
 
-			this.onkRecalcInputs(["value"], ({ value }) => {
+			const update = () => {
+				const value = valuecache.tryGet();
+				if (value === undefined) return;
+
 				if (value) {
 					const ret = truevaluecache.tryGet();
 					const rettype = truevaluecache.tryGetType();
@@ -342,7 +346,11 @@ namespace Mux {
 						this.output.result.set(rettype, ret);
 					}
 				}
-			});
+			};
+
+			this.onkRecalcInputs(["value"], update);
+			this.onkRecalcInputs(["truevalue"], update);
+			this.onkRecalcInputs(["falsevalue"], update);
 		}
 	}
 
