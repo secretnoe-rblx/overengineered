@@ -1199,8 +1199,18 @@ const v25: UpgradableBlocksSerializer<SerializedBlocks<SerializedBlockV4>, typeo
 
 			return ret;
 		};
+		const updateIds = (block: SerializedBlockV4): SerializedBlockV4 => {
+			if (block.id === "radioreciever") {
+				block = {
+					...block,
+					id: "radioreceiver",
+				};
+			}
 
-		const blocks = prev.blocks.map(updateTypes);
+			return block;
+		};
+
+		const blocks = prev.blocks.map((b) => updateIds(updateTypes(b)));
 		const blockMap = blocks.mapToMap((b) => $tuple(b.uuid, b));
 		const wires = BlockWireManager.from(blocks, blockList, undefined, true);
 		const byteSplitterFixMap: { readonly [k in string]: string } = {
@@ -1224,12 +1234,6 @@ const v25: UpgradableBlocksSerializer<SerializedBlocks<SerializedBlockV4>, typeo
 				return {
 					...block,
 					location: block.location.mul(CFrame.Angles(0, 0, math.rad(-90))),
-				};
-			}
-			if (block.id === "radioreciever") {
-				block = {
-					...block,
-					id: "radioreceiver",
 				};
 			}
 			if (block.id === "lamp" || block.id === "smalllamp") {
