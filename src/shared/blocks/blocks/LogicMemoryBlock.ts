@@ -31,8 +31,7 @@ const definition = {
 		reset: {
 			displayName: "Reset",
 			tooltip: "Reset the value to the default one",
-			types: BlockConfigDefinitions.any,
-			group: "1",
+			types: BlockConfigDefinitions.bool,
 			configHidden: true,
 		},
 	},
