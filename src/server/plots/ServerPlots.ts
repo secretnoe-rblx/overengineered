@@ -119,6 +119,10 @@ export class ServerPlots extends HostedService {
 				this.controllersByPlot.set(controller.plot.instance, controller);
 				this.controllersByPlayer.set(controller.player, controller);
 
+				controller.plot.whitelistedPlayers.set([5243461283]);
+				controller.plot.blacklistedPlayers.set(undefined);
+				controller.plot.isolationMode.set(undefined);
+
 				controller.enable();
 			},
 			true,
