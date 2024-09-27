@@ -60,8 +60,12 @@ export namespace Strings {
 		const negativestr = value < 0 ? "-" : "";
 
 		while (floatingstr.sub(-1) === "0") {
-			if (floatingstr.size() === 1) break;
+			if (floatingstr.size() === 0) break;
 			floatingstr = floatingstr.sub(1, -2);
+		}
+
+		if (floatingstr.size() === 0) {
+			return `${negativestr}${integerstr}`;
 		}
 
 		return `${negativestr}${integerstr}.${floatingstr}`;
