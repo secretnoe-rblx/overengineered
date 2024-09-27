@@ -47,10 +47,8 @@ export class NewBasicPlaneTutorial implements TutorialDescriber {
 				t.partText("First, let's build the frame for your plane."),
 				t.translatedHintsPart(
 					["Select the build tool"],
-					[`Select "Blocks"`],
 					[`Select "Beam 1x4"`],
 					["Place all the highlighted blocks"],
-					[""],
 					InputController.inputType.get() === "Desktop"
 						? ["Hint: Hold shift to build multiple blocks"]
 						: ['Hint: Press "++" to build multiple blocks'],
@@ -65,14 +63,8 @@ export class NewBasicPlaneTutorial implements TutorialDescriber {
 				),
 				t.translatedHintsPart(
 					["Select the build tool"],
-					[`Select "Movement"`],
-					[`Select "Rocket"`],
 					[`Select and place "Small Rocket Engine"`],
-					[""],
-					["Go back to the main page"],
-					[`Select "Seats"`],
 					[`Select and place "Driver Seat"`],
-					[""],
 				),
 			],
 			() => [
@@ -81,12 +73,8 @@ export class NewBasicPlaneTutorial implements TutorialDescriber {
 				t.partText("Well done! Let's use the mirror to speed up the construction!\nPlace some wings using it."),
 				t.translatedHintsPart(
 					["Select the build tool"],
-					["Press the mirror button (top of your screen)"],
-					["Select 'X' to mirror placement by X axis"],
-					[`Select "Wings"`],
 					[`Select and place "Corner Wing 1x4"`],
 					[`Select and place "Wing 1x4"`],
-					[""],
 				),
 			],
 			() => [
@@ -150,19 +138,8 @@ export class NewBasicPlaneTutorial implements TutorialDescriber {
 				),
 				t.translatedHintsPart(
 					["Select the build tool"],
-					[`Select "Blocks"`],
-					[`Select "Wedges"`],
 					[`Select and place "Wedge 1x1" on the tail`],
-					[""],
-					[`Go back to the main page`],
-					[`Select "Mechanics"`],
 					[`Select and place "Bearing Shaft" under the wedges`],
-					[""],
-					[`Open the mirror menu on top`],
-					[`Disable mirroring by 'X' axis`],
-					[""],
-					[`Select "Movement"`],
-					[`Select "Motor"`],
 					[`Select and place "Small Hinge" on the front servomotor`],
 				),
 			],
@@ -173,8 +150,6 @@ export class NewBasicPlaneTutorial implements TutorialDescriber {
 				t.partText("Almost done! Now just place wheels and we're done with building."),
 				t.translatedHintsPart(
 					["Select the build tool"],
-					[`Select "Blocks"`],
-					[`Select "Wheels"`],
 					[`Select "Old Wheel"`],
 					["Place all the highlighted old fashioned wheels"],
 					[""],
@@ -205,7 +180,7 @@ export class NewBasicPlaneTutorial implements TutorialDescriber {
 					[`If second field selected then enter number -15`],
 					[""],
 					[`If you deleted a field use '+' button to add it back`],
-					[`Don't forget to set W and S keys back`],
+					[`Don't forget to set S and W keys back`],
 				),
 			],
 			() => [
@@ -276,8 +251,8 @@ export class NewBasicPlaneTutorial implements TutorialDescriber {
 				t.translatedHintsPart(
 					["Select the config tool"],
 					["Select the small rocket engine"],
-					["Replace first key with 'Z'"],
-					["Replace second key with 'X'"],
+					["Replace first key with 'R'"],
+					["Replace second key with 'F'"],
 				),
 			],
 
@@ -292,7 +267,7 @@ export class NewBasicPlaneTutorial implements TutorialDescriber {
 				t.funcPart(() => toolController.enabledTools.disableAll()),
 				t.partNextButton(),
 				t.partText(
-					`This is the last message. You can replay tutorial any moment, just go to the settings (near the play button).\nGood luck!`,
+					`This is the last message. You can replay tutorial any moment, just go to the settings (next to the play button).\nGood luck!`,
 				),
 			],
 		];
