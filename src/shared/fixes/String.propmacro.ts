@@ -48,26 +48,28 @@ export namespace Strings {
 	}
 
 	export function prettyNumber(value: number, step: number | undefined) {
+		if (value !== value) return "NaN";
+
 		const maxdigits = math.min(4, step ? math.max(0, math.ceil(-math.log(step, 10))) : math.huge);
+		const multiplied = value * math.pow(10, maxdigits);
 
-		const absvalue = math.abs(value);
+		let valuestr = string.format("%i", multiplied);
+		while (valuestr.size() < maxdigits + 1) {
+			valuestr = "0" + valuestr;
+		}
 
-		const floating = absvalue % 1;
-		const integer = absvalue - floating;
+		const integerstr = valuestr.sub(1, -maxdigits - 1);
 
-		let floatingstr = string.format("%i", floating * math.pow(10, maxdigits));
-		const integerstr = string.format("%i", integer);
-		const negativestr = value < 0 ? "-" : "";
-
+		let floatingstr = valuestr.sub(-maxdigits);
 		while (floatingstr.sub(-1) === "0") {
 			if (floatingstr.size() === 0) break;
 			floatingstr = floatingstr.sub(1, -2);
 		}
 
 		if (floatingstr.size() === 0) {
-			return `${negativestr}${integerstr}`;
+			return integerstr;
 		}
 
-		return `${negativestr}${integerstr}.${floatingstr}`;
+		return `${integerstr}.${floatingstr}`;
 	}
 }

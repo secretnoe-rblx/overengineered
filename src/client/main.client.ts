@@ -92,3 +92,11 @@ if (RunService.IsStudio() && Players.LocalPlayer.Name === "i3ymm") {
 
 	TestFramework.runMultiple("BlockLogic", tests!, host.services);
 }
+
+// TODO: make into actual tests or something
+// print(0.05 + " = " + Strings.prettyNumber(0.05, 0.01));
+// print(0.000005 + " = " + Strings.prettyNumber(0.000005, 0.01));
+// print(0.012345 + " = " + Strings.prettyNumber(0.012345, 0.01));
+// print(4545463550.012345 + " = " + Strings.prettyNumber(4545463550.012345, 0.01));
+// print(1.05 + " = " + Strings.prettyNumber(1.05, 0.01));
+// print(1 + " = " + Strings.prettyNumber(1, 0.01));
