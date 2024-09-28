@@ -60,7 +60,7 @@ export namespace Strings {
 
 		const integerstr = valuestr.sub(1, -maxdigits - 1);
 
-		let floatingstr = valuestr.sub(-maxdigits);
+		let floatingstr = maxdigits === 0 ? "" : valuestr.sub(-maxdigits);
 		while (floatingstr.sub(-1) === "0") {
 			if (floatingstr.size() === 0) break;
 			floatingstr = floatingstr.sub(1, -2);
