@@ -1,9 +1,9 @@
-import { Control } from "client/gui/Control";
 import { ButtonControl } from "client/gui/controls/Button";
 import { NumberTextBoxControl } from "client/gui/controls/NumberTextBoxControl";
 import { ToggleControl } from "client/gui/controls/ToggleControl";
-import { ObservableValue } from "shared/event/ObservableValue";
-import { ArgsSignal } from "shared/event/Signal";
+import { Control } from "engine/client/gui/Control";
+import { ObservableValue } from "engine/shared/event/ObservableValue";
+import { ArgsSignal } from "engine/shared/event/Signal";
 import type { NumberTextBoxControlDefinition } from "client/gui/controls/NumberTextBoxControl";
 import type { ToggleControlDefinition } from "client/gui/controls/ToggleControl";
 import type { SharedPlot } from "shared/building/SharedPlot";

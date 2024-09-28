@@ -2,8 +2,8 @@ import { ReplicatedStorage, StarterGui, UserInputService, Workspace } from "@rbx
 import { ButtonControl } from "client/gui/controls/Button";
 import { Gui } from "client/gui/Gui";
 import { ScaledScreenGui } from "client/gui/ScaledScreenGui";
-import { HostedService } from "shared/di/HostedService";
-import { ObservableValue } from "shared/event/ObservableValue";
+import { HostedService } from "engine/shared/di/HostedService";
+import { ObservableValue } from "engine/shared/event/ObservableValue";
 
 export class HideInterfaceController extends HostedService {
 	readonly visible = new ObservableValue(true);

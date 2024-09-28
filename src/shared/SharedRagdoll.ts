@@ -1,4 +1,4 @@
-import { C2SRemoteEvent } from "shared/event/PERemoteEvent";
+import { C2SRemoteEvent } from "engine/shared/event/PERemoteEvent";
 
 export namespace SharedRagdoll {
 	export const event = new C2SRemoteEvent<boolean>("ragdoll_trigger");

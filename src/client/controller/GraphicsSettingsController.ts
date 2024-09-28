@@ -1,5 +1,5 @@
 import { Players } from "@rbxts/services";
-import { HostedService } from "shared/di/HostedService";
+import { HostedService } from "engine/shared/di/HostedService";
 import { PartUtils } from "shared/utils/PartUtils";
 import type { PlayerDataStorage } from "client/PlayerDataStorage";
 import type { SharedPlots } from "shared/building/SharedPlots";

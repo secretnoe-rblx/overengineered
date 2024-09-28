@@ -1,4 +1,4 @@
-import { JSON } from "shared/fixes/Json";
+import { JSON } from "engine/shared/fixes/Json";
 import { Serializer } from "shared/Serializer";
 import type { PlacedBlockConfig } from "shared/blockLogic/BlockConfig";
 

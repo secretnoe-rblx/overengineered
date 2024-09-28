@@ -1,6 +1,6 @@
 import { PhysicsService } from "@rbxts/services";
-import { HostedService } from "shared/di/HostedService";
-import { PlayerWatcher } from "shared/PlayerWatcher";
+import { HostedService } from "engine/shared/di/HostedService";
+import { PlayerWatcher } from "engine/shared/PlayerWatcher";
 
 export class PlayersCollision extends HostedService {
 	constructor() {

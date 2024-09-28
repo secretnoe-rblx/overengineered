@@ -1,8 +1,8 @@
-import { Control } from "client/gui/Control";
 import { ButtonControl } from "client/gui/controls/Button";
+import { Control } from "engine/client/gui/Control";
+import { Element } from "engine/shared/Element";
 import { Colors } from "shared/Colors";
-import { Element } from "shared/Element";
-import type { UnitTests } from "shared/test/TestFramework";
+import type { UnitTests } from "engine/shared/TestFramework";
 
 namespace TransformTests {
 	export function show() {

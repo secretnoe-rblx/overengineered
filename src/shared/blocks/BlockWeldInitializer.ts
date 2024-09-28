@@ -1,6 +1,6 @@
 import { Workspace, RunService } from "@rbxts/services";
-import { Element } from "shared/Element";
-import { Instances } from "shared/fixes/Instances";
+import { Element } from "engine/shared/Element";
+import { Instances } from "engine/shared/fixes/Instances";
 import type { BlockWeldRegions } from "shared/blocks/Block";
 import type { AutoWeldColliderBlockShape } from "shared/blocks/BlockCreation";
 

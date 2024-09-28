@@ -1,10 +1,10 @@
-import { Assert } from "shared/Assert";
+import { Assert } from "engine/shared/Assert";
+import { MathUtils } from "engine/shared/fixes/MathUtils";
 import { BlockLogicValueResults } from "shared/blockLogic/BlockLogicValueStorage";
 import { BlockAssert } from "shared/blocks/testing/BlockAssert";
 import { BlockTesting } from "shared/blocks/testing/BlockTesting";
-import { MathUtils } from "shared/fixes/MathUtils";
+import type { UnitTests } from "engine/shared/TestFramework";
 import type { GenericBlockLogic } from "shared/blockLogic/BlockLogic";
-import type { UnitTests } from "shared/test/TestFramework";
 
 namespace BlockTests {
 	function createBlock1(id: string, value: number, valuename?: string) {

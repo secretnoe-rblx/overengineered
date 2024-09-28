@@ -195,7 +195,7 @@ const create = (program: ts.Program, context: ts.TransformationContext) => {
 								),
 							]),
 						),
-						factory.createStringLiteral("shared/Logger"),
+						factory.createStringLiteral("engine/shared/Logger"),
 					),
 					...file.statements,
 				],

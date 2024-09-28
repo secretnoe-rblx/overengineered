@@ -1,17 +1,17 @@
 import { ContentProvider, Players, ReplicatedStorage, RunService } from "@rbxts/services";
 import { AdminMessageController } from "client/AdminMessageController";
 import { LoadingController } from "client/controller/LoadingController";
-import { InputTypeChangeEvent } from "client/event/InputTypeChangeEvent";
 import { BSOD } from "client/gui/BSOD";
 import { Gui } from "client/gui/Gui";
 import { LogControl } from "client/gui/static/LogControl";
 import { SandboxGame } from "client/SandboxGame";
 import { ServerRestartController } from "client/ServerRestartController";
-import { Objects } from "shared/fixes/objects";
-import { GameHostBuilder } from "shared/GameHostBuilder";
+import { InputTypeChangeEvent } from "engine/client/event/InputTypeChangeEvent";
+import { Objects } from "engine/shared/fixes/objects";
+import { GameHostBuilder } from "engine/shared/GameHostBuilder";
+import { TestFramework } from "engine/shared/TestFramework";
 import { RemoteEvents } from "shared/RemoteEvents";
 import { CustomRemotes } from "shared/Remotes";
-import { TestFramework } from "shared/test/TestFramework";
 import { BulletProjectile } from "shared/weapons/BulletProjectileLogic";
 
 LoadingController.show("Initializing");

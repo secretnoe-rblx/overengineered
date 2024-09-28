@@ -1,10 +1,10 @@
 import { Players, UserInputService } from "@rbxts/services";
-import { Control } from "client/gui/Control";
 import { NumberTextBoxControl } from "client/gui/controls/NumberTextBoxControl";
 import { ProgressBarControl } from "client/gui/controls/ProgressBarControl";
-import { EventHandler } from "shared/event/EventHandler";
-import { NumberObservableValue } from "shared/event/NumberObservableValue";
-import { Signal } from "shared/event/Signal";
+import { Control } from "engine/client/gui/Control";
+import { EventHandler } from "engine/shared/event/EventHandler";
+import { NumberObservableValue } from "engine/shared/event/NumberObservableValue";
+import { Signal } from "engine/shared/event/Signal";
 import type {
 	ProgressBarControlDefinition,
 	ProgressBarControlDefinitionParts,

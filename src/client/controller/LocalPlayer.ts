@@ -1,7 +1,7 @@
 import { Players } from "@rbxts/services";
-import { Signals } from "client/event/Signals";
+import { Signals } from "engine/client/event/Signals";
+import { ObservableValue } from "engine/shared/event/ObservableValue";
 import { GameDefinitions } from "shared/data/GameDefinitions";
-import { ObservableValue } from "shared/event/ObservableValue";
 import { Physics } from "shared/Physics";
 import type { PlayerModule } from "client/types/PlayerModule";
 import type { LocalHeight } from "shared/Physics";

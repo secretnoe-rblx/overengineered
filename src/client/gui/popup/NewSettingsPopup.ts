@@ -3,11 +3,11 @@ import { PlayerSelectorColumnControl } from "client/gui/controls/PlayerSelectorL
 import { ToggleControl } from "client/gui/controls/ToggleControl";
 import { Gui } from "client/gui/Gui";
 import { Popup } from "client/gui/Popup";
-import { InstanceComponent } from "shared/component/InstanceComponent";
+import { InstanceComponent } from "engine/shared/component/InstanceComponent";
 import { CustomRemotes } from "shared/Remotes";
 import type { PlayerSelectorColumnControlDefinition } from "client/gui/controls/PlayerSelectorListControl";
+import type { GameHostBuilder } from "engine/shared/GameHostBuilder";
 import type { SharedPlot } from "shared/building/SharedPlot";
-import type { GameHostBuilder } from "shared/GameHostBuilder";
 
 export type NewSettingsPopupDefinition = GuiObject & {
 	readonly Content: ScrollingFrame & NewSettingsScenes;

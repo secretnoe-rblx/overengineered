@@ -1,9 +1,9 @@
 import { LoadingController } from "client/controller/LoadingController";
 import { ActionController } from "client/modes/build/ActionController";
+import { JSON } from "engine/shared/fixes/Json";
+import { Operation } from "engine/shared/Operation";
 import { BlockManager } from "shared/building/BlockManager";
 import { SharedBuilding } from "shared/building/SharedBuilding";
-import { JSON } from "shared/fixes/Json";
-import { Operation } from "shared/Operation";
 import { CustomRemotes } from "shared/Remotes";
 import type { PlacedBlockConfig } from "shared/blockLogic/BlockConfig";
 import type { BlockLogicTypes } from "shared/blockLogic/BlockLogicTypes";

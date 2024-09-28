@@ -1,13 +1,13 @@
 import { ContentProvider, GuiService, Players } from "@rbxts/services";
 import { BlockPreviewControl } from "client/gui/buildmode/BlockPreviewControl";
-import { Control } from "client/gui/Control";
 import { BlockPipetteButton } from "client/gui/controls/BlockPipetteButton";
 import { TextButtonControl } from "client/gui/controls/Button";
 import { Gui } from "client/gui/Gui";
 import { GuiAnimator } from "client/gui/GuiAnimator";
+import { Control } from "engine/client/gui/Control";
+import { ObservableValue } from "engine/shared/event/ObservableValue";
+import { Localization } from "engine/shared/Localization";
 import { Colors } from "shared/Colors";
-import { ObservableValue } from "shared/event/ObservableValue";
-import { Localization } from "shared/Localization";
 import type { BlockCategoryPath } from "shared/blocks/Block";
 
 type Category = {

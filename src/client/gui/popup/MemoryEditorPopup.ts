@@ -1,4 +1,3 @@
-import { Control } from "client/gui/Control";
 import { ButtonControl } from "client/gui/controls/Button";
 import { ByteTextBoxControl } from "client/gui/controls/ByteTextBoxControl";
 import { TextBoxControl } from "client/gui/controls/TextBoxControl";
@@ -7,8 +6,9 @@ import { Popup } from "client/gui/Popup";
 import { ConfirmPopup } from "client/gui/popup/ConfirmPopup";
 import { TextPopup } from "client/gui/popup/TextPopup";
 import { LogControl } from "client/gui/static/LogControl";
+import { Control } from "engine/client/gui/Control";
+import { TransformService } from "engine/shared/component/TransformService";
 import { Colors } from "shared/Colors";
-import { TransformService } from "shared/component/TransformService";
 import { VectorUtils } from "shared/utils/VectorUtils";
 
 export type MemoryEditorPopupDefinition = GuiObject & {

@@ -1,6 +1,6 @@
 import { RunService, Workspace } from "@rbxts/services";
 import { LocalPlayer } from "client/controller/LocalPlayer";
-import { HostedService } from "shared/di/HostedService";
+import { HostedService } from "engine/shared/di/HostedService";
 import { Physics } from "shared/Physics";
 
 export class GameEnvironmentController extends HostedService {

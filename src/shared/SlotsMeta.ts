@@ -1,4 +1,4 @@
-import { Objects } from "shared/fixes/objects";
+import { Objects } from "engine/shared/fixes/objects";
 
 /** Slots storage for a single user */
 export namespace SlotsMeta {

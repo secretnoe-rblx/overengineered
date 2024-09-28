@@ -1,11 +1,11 @@
 import { MessagingService, Players, RunService, Workspace } from "@rbxts/services";
+import { HostedService } from "engine/shared/di/HostedService";
+import { Instances } from "engine/shared/fixes/Instances";
 import { isNotAdmin_AutoBanned } from "server/BanAdminExploiter";
 import { registerOnRemoteEvent } from "server/network/event/RemoteHandler";
 import { ServerPartUtils } from "server/plots/ServerPartUtils";
 import { BlockManager } from "shared/building/BlockManager";
-import { HostedService } from "shared/di/HostedService";
 import { Remotes } from "shared/Remotes";
-import { ReplicatedAssets } from "shared/ReplicatedAssets";
 import { PartUtils } from "shared/utils/PartUtils";
 import type { SpreadingFireController } from "server/SpreadingFireController";
 import type { ExplosionEffect } from "shared/effects/ExplosionEffect";
@@ -98,7 +98,7 @@ export class ServerRestartController extends HostedService {
 					);
 					clone.Parent = Workspace;
 					clone.AssemblyLinearVelocity = meteorSpeed;
-					for (const child of ReplicatedAssets.get<{
+					for (const child of Instances.getAssets<{
 						Effects: { Fire: Folder };
 					}>().Effects.Fire.GetChildren()) {
 						child.Clone().Parent = clone;

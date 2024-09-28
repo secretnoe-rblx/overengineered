@@ -1,5 +1,5 @@
 import { GuiService, UserInputService } from "@rbxts/services";
-import { ObservableValue } from "shared/event/ObservableValue";
+import { ObservableValue } from "engine/shared/event/ObservableValue";
 
 /** Basic class of input data type control */
 export namespace InputController {

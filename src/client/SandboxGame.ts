@@ -40,8 +40,8 @@ import { GameDefinitions } from "shared/data/GameDefinitions";
 import { RemoteEvents } from "shared/RemoteEvents";
 import { CreateSandboxBlocks } from "shared/SandboxBlocks";
 import type { TutorialDescriber } from "client/tutorial/TutorialController";
+import type { GameHostBuilder } from "engine/shared/GameHostBuilder";
 import type { SharedPlot } from "shared/building/SharedPlot";
-import type { GameHostBuilder } from "shared/GameHostBuilder";
 
 export namespace SandboxGame {
 	export function initialize(builder: GameHostBuilder) {

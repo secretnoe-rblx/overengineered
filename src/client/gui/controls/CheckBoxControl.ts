@@ -1,6 +1,6 @@
-import { Control } from "client/gui/Control";
-import { ObservableValue } from "shared/event/ObservableValue";
-import { Signal } from "shared/event/Signal";
+import { Control } from "engine/client/gui/Control";
+import { ObservableValue } from "engine/shared/event/ObservableValue";
+import { Signal } from "engine/shared/event/Signal";
 
 export type CheckBoxControlDefinition = TextButton & {
 	readonly Enabled: GuiObject;

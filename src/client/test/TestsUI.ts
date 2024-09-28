@@ -1,9 +1,9 @@
-import { Control } from "client/gui/Control";
 import { TextButtonControl } from "client/gui/controls/Button";
-import { InstanceComponent } from "shared/component/InstanceComponent";
-import { TestFramework } from "shared/test/TestFramework";
+import { Control } from "engine/client/gui/Control";
+import { InstanceComponent } from "engine/shared/component/InstanceComponent";
+import { TestFramework } from "engine/shared/TestFramework";
 import type { TextButtonDefinition } from "client/gui/controls/Button";
-import type { UnitTest } from "shared/test/TestFramework";
+import type { UnitTest } from "engine/shared/TestFramework";
 
 export type TestsUIDefinition = ScreenGui & {
 	readonly TestList: GuiObject & {

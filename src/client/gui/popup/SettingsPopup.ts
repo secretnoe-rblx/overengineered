@@ -7,7 +7,7 @@ import { PlayerConfigDefinition } from "shared/config/PlayerConfig";
 import type { TextButtonDefinition } from "client/gui/controls/Button";
 import type { NewSettingsPopup } from "client/gui/popup/NewSettingsPopup";
 import type { PlayerDataStorage } from "client/PlayerDataStorage";
-import type { GameHostBuilder } from "shared/GameHostBuilder";
+import type { GameHostBuilder } from "engine/shared/GameHostBuilder";
 
 export type ConfigPartDefinition<T extends GuiObject> = GuiObject & {
 	readonly HeadingLabel: TextLabel;

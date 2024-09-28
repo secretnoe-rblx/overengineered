@@ -1,8 +1,8 @@
-import { Control } from "client/gui/Control";
 import { TextButtonControl } from "client/gui/controls/Button";
-import { TransformService } from "shared/component/TransformService";
-import { ObservableValue } from "shared/event/ObservableValue";
-import { ArgsSignal } from "shared/event/Signal";
+import { Control } from "engine/client/gui/Control";
+import { TransformService } from "engine/shared/component/TransformService";
+import { ObservableValue } from "engine/shared/event/ObservableValue";
+import { ArgsSignal } from "engine/shared/event/Signal";
 import type { ButtonControl, TextButtonDefinition } from "client/gui/controls/Button";
 import type { DropdownDefinition } from "client/gui/controls/Dropdown";
 

@@ -1,6 +1,6 @@
 import { Players, RunService } from "@rbxts/services";
+import { ObservableValue } from "engine/shared/event/ObservableValue";
 import { GameDefinitions } from "shared/data/GameDefinitions";
-import { ObservableValue } from "shared/event/ObservableValue";
 import { CustomRemotes } from "shared/Remotes";
 
 export namespace Switches {

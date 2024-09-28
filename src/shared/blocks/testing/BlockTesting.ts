@@ -1,5 +1,5 @@
+import { Objects } from "engine/shared/fixes/objects";
 import { BlockTestRunner } from "shared/blocks/testing/BlockTestRunner";
-import { Objects } from "shared/fixes/objects";
 import { CreateSandboxBlocks } from "shared/SandboxBlocks";
 import type { PlacedBlockConfig } from "shared/blockLogic/BlockConfig";
 import type { GenericBlockLogic } from "shared/blockLogic/BlockLogic";

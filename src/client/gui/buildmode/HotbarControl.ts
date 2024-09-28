@@ -1,10 +1,10 @@
 import { StarterGui, UserInputService } from "@rbxts/services";
 import { LoadingController } from "client/controller/LoadingController";
 import { SoundController } from "client/controller/SoundController";
-import { Control } from "client/gui/Control";
 import { DictionaryControl } from "client/gui/controls/DictionaryControl";
+import { Control } from "engine/client/gui/Control";
+import { TransformService } from "engine/shared/component/TransformService";
 import { Colors } from "shared/Colors";
-import { TransformService } from "shared/component/TransformService";
 import type { ToolBase } from "client/tools/ToolBase";
 import type { ToolController } from "client/tools/ToolController";
 

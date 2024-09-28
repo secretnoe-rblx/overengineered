@@ -4,8 +4,8 @@ import { FlatTerrainRenderer } from "client/terrain/FlatTerrainRenderer";
 import { TerrainChunkRenderer } from "client/terrain/TerrainChunkRenderer";
 import { TriangleChunkRenderer } from "client/terrain/TriangleChunkRenderer";
 import { WaterTerrainChunkRenderer } from "client/terrain/WaterTerrainChunkRenderer";
-import { ComponentChildren } from "shared/component/ComponentChildren";
-import { HostedService } from "shared/di/HostedService";
+import { ComponentChildren } from "engine/shared/component/ComponentChildren";
+import { HostedService } from "engine/shared/di/HostedService";
 import type { PlayerDataStorage } from "client/PlayerDataStorage";
 
 @injectable

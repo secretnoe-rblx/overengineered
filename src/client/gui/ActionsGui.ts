@@ -1,9 +1,9 @@
-import { Control } from "client/gui/Control";
 import { TextButtonControl } from "client/gui/controls/Button";
 import { Gui } from "client/gui/Gui";
-import { Component } from "shared/component/Component";
+import { Control } from "engine/client/gui/Control";
+import { Component } from "engine/shared/component/Component";
 import type { HideInterfaceController } from "client/gui/HideInterfaceController";
-import type { GameHostBuilder } from "shared/GameHostBuilder";
+import type { GameHostBuilder } from "engine/shared/GameHostBuilder";
 
 @injectable
 class Starter extends Component {

@@ -1,13 +1,13 @@
 import { ReplicatedStorage, Workspace } from "@rbxts/services";
-import { ClientComponentChild } from "client/component/ClientComponentChild";
 import { InputController } from "client/controller/InputController";
-import { Signals } from "client/event/Signals";
 import { Gui } from "client/gui/Gui";
 import { TooltipsHolder } from "client/gui/static/TooltipsControl";
 import { BlockEditorBase } from "client/tools/additional/BlockEditorBase";
+import { ClientComponentChild } from "engine/client/component/ClientComponentChild";
+import { Signals } from "engine/client/event/Signals";
+import { NumberObservableValue } from "engine/shared/event/NumberObservableValue";
+import { BB } from "engine/shared/fixes/BB";
 import { Colors } from "shared/Colors";
-import { NumberObservableValue } from "shared/event/NumberObservableValue";
-import { BB } from "shared/fixes/BB";
 import type { InputTooltips } from "client/gui/static/TooltipsControl";
 import type { BuildingMode } from "client/modes/build/BuildingMode";
 import type { PlayerDataStorage } from "client/PlayerDataStorage";

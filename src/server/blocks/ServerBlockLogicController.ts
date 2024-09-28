@@ -1,3 +1,4 @@
+import { HostedService } from "engine/shared/di/HostedService";
 import { BracedShaftServerLogic } from "server/blocks/logic/BracedShaftServerLogic";
 import { DisconnectBlockServerLogic } from "server/blocks/logic/DisconnectBlockServerLogic";
 import { LampServerLogic } from "server/blocks/logic/LampServerLogic";
@@ -5,7 +6,6 @@ import { LEDDisplayServerLogic } from "server/blocks/logic/LEDDisplayServerLogic
 import { PistonBlockServerLogic } from "server/blocks/logic/PistonBlockServerLogic";
 import { ScreenServerLogic } from "server/blocks/logic/ScreenServerLogic";
 import { SevenSegmentDisplayServerLogic } from "server/blocks/logic/SevenSegmentDisplayServerLogic";
-import { HostedService } from "shared/di/HostedService";
 import type { ServerBlockLogic } from "server/blocks/ServerBlockLogic";
 import type { GenericBlockLogicCtor } from "shared/blockLogic/BlockLogic";
 

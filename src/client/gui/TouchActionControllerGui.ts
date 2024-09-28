@@ -1,12 +1,12 @@
-import { Control } from "client/gui/Control";
 import { ButtonControl } from "client/gui/controls/Button";
 import { GridEditorControl } from "client/gui/GridEditor";
 import { Gui } from "client/gui/Gui";
 import { ActionController } from "client/modes/build/ActionController";
+import { Control } from "engine/client/gui/Control";
 import type { GridEditorControlDefinition } from "client/gui/GridEditor";
 import type { EditMode } from "client/modes/build/BuildingMode";
 import type { EditTool } from "client/tools/EditTool";
-import type { ObservableValue } from "shared/event/ObservableValue";
+import type { ObservableValue } from "engine/shared/event/ObservableValue";
 
 export type TouchActionControllerGuiDefinition = GuiObject & {
 	readonly Undo: GuiButton;

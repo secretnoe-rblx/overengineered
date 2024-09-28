@@ -1,9 +1,9 @@
 import { RunService, Workspace } from "@rbxts/services";
+import { ObservableValue } from "engine/shared/event/ObservableValue";
 import { InstanceBlockLogic } from "shared/blockLogic/BlockLogic";
 import { BlockCreation } from "shared/blocks/BlockCreation";
 import { GameDefinitions } from "shared/data/GameDefinitions";
 import { GameEnvironment } from "shared/data/GameEnvironment";
-import { ObservableValue } from "shared/event/ObservableValue";
 import { Switches } from "shared/Switches";
 import type { PlacedBlockConfig } from "shared/blockLogic/BlockConfig";
 import type {

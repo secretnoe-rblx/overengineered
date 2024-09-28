@@ -1,7 +1,7 @@
-import { Control } from "client/gui/Control";
 import { ButtonControl } from "client/gui/controls/Button";
-import { TransformService } from "shared/component/TransformService";
-import { ObservableValue } from "shared/event/ObservableValue";
+import { Control } from "engine/client/gui/Control";
+import { TransformService } from "engine/shared/component/TransformService";
+import { ObservableValue } from "engine/shared/event/ObservableValue";
 
 export type DropdownDefinition = GuiObject & {
 	readonly Header: GuiButton & {

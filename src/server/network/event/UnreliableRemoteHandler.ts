@@ -1,8 +1,8 @@
 import { Players, RunService, Workspace } from "@rbxts/services";
+import { HostedService } from "engine/shared/di/HostedService";
 import { ServerPartUtils } from "server/plots/ServerPartUtils";
 import { ServerPlayers } from "server/ServerPlayers";
 import { BlockManager } from "shared/building/BlockManager";
-import { HostedService } from "shared/di/HostedService";
 import { RemoteEvents } from "shared/RemoteEvents";
 import { CustomRemotes } from "shared/Remotes";
 import { PartUtils } from "shared/utils/PartUtils";

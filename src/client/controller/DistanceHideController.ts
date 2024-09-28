@@ -1,7 +1,7 @@
 import { Players, Workspace } from "@rbxts/services";
-import { Component } from "shared/component/Component";
+import { Component } from "engine/shared/component/Component";
+import { RobloxUnit } from "engine/shared/RobloxUnit";
 import { GameDefinitions } from "shared/data/GameDefinitions";
-import { RobloxUnit } from "shared/RobloxUnit";
 
 export class DistanceHideController extends Component {
 	constructor() {

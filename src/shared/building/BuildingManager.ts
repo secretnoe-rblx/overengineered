@@ -1,6 +1,6 @@
 import { Players } from "@rbxts/services";
+import { BB } from "engine/shared/fixes/BB";
 import { BlockManager } from "shared/building/BlockManager";
-import { BB } from "shared/fixes/BB";
 import { VectorUtils } from "shared/utils/VectorUtils";
 import type { SharedPlot } from "shared/building/SharedPlot";
 

@@ -1,9 +1,9 @@
-import { Assert } from "shared/Assert";
-import { Objects } from "shared/fixes/objects";
+import { Assert } from "engine/shared/Assert";
+import { Objects } from "engine/shared/fixes/objects";
 import { CreateSandboxBlocks } from "shared/SandboxBlocks";
+import type { UnitTests } from "engine/shared/TestFramework";
 import type { PlacedBlockConfig } from "shared/blockLogic/BlockConfig";
 import type { BlockLogicTypes } from "shared/blockLogic/BlockLogicTypes";
-import type { UnitTests } from "shared/test/TestFramework";
 
 namespace BlockLogicTests {
 	export function test2() {

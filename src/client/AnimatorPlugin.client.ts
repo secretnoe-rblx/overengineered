@@ -28,20 +28,20 @@ copyScripts(game.GetService("StarterPlayer").WaitForChild("StarterPlayerScripts"
 copyScripts(game.GetService("ReplicatedStorage"), script.Parent!);
 
 import { StarterGui } from "@rbxts/services";
-import { Control } from "client/gui/Control";
 import { ButtonControl, TextButtonControl } from "client/gui/controls/Button";
 import { LabelControl } from "client/gui/controls/LabelControl";
 import { NumberTextBoxControl } from "client/gui/controls/NumberTextBoxControl";
 import { TextBoxControl } from "client/gui/controls/TextBoxControl";
-import { ContainerComponent } from "shared/component/ContainerComponent";
-import { Easing } from "shared/component/Easing";
-import { EventHandler } from "shared/event/EventHandler";
-import { ObservableValue } from "shared/event/ObservableValue";
-import { ArgsSignal } from "shared/event/Signal";
+import { Control } from "engine/client/gui/Control";
+import { ContainerComponent } from "engine/shared/component/ContainerComponent";
+import { Easing } from "engine/shared/component/Easing";
+import { EventHandler } from "engine/shared/event/EventHandler";
+import { ObservableValue } from "engine/shared/event/ObservableValue";
+import { ArgsSignal } from "engine/shared/event/Signal";
 import type { TextButtonDefinition } from "client/gui/controls/Button";
-import type { ComponentEvents } from "shared/component/ComponentEvents";
-import type { Easable } from "shared/component/Easing";
-import type { ReadonlyObservableValue } from "shared/event/ObservableValue";
+import type { ComponentEvents } from "engine/shared/component/ComponentEvents";
+import type { Easable } from "engine/shared/component/Easing";
+import type { ReadonlyObservableValue } from "engine/shared/event/ObservableValue";
 
 TS.import = previmport;
 

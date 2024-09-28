@@ -1,5 +1,5 @@
-import { AABB } from "shared/fixes/AABB";
-import { Objects } from "shared/fixes/objects";
+import { AABB } from "engine/shared/fixes/AABB";
+import { Objects } from "engine/shared/fixes/objects";
 import type { BlockLogicFullBothDefinitions } from "shared/blockLogic/BlockLogic";
 
 export namespace BlockAssertions {

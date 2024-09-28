@@ -1,7 +1,7 @@
-import { Control } from "client/gui/Control";
 import { TextButtonControl } from "client/gui/controls/Button";
 import { NumberTextBoxControl } from "client/gui/controls/NumberTextBoxControl";
-import { Element } from "shared/Element";
+import { Control } from "engine/client/gui/Control";
+import { Element } from "engine/shared/Element";
 import { CustomRemotes } from "shared/Remotes";
 
 export const LoadSlotTest = {

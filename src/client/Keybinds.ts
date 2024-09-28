@@ -1,6 +1,6 @@
 import { ContextActionService } from "@rbxts/services";
-import { ObservableMap } from "shared/event/ObservableMap";
-import { Keys } from "shared/fixes/Keys";
+import { ObservableMap } from "engine/shared/event/ObservableMap";
+import { Keys } from "engine/shared/fixes/Keys";
 
 type KeybindSubscription = {
 	readonly func: (input: InputObject) => void | Enum.ContextActionResult;

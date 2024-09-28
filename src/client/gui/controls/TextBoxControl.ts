@@ -1,5 +1,5 @@
-import { Control } from "client/gui/Control";
-import { Signal } from "shared/event/Signal";
+import { Control } from "engine/client/gui/Control";
+import { Signal } from "engine/shared/event/Signal";
 
 export type TextBoxControlDefinition = TextBox;
 

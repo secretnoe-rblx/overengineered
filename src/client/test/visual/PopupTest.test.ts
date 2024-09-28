@@ -1,16 +1,16 @@
-import { Control } from "client/gui/Control";
 import { TextButtonControl } from "client/gui/controls/Button";
 import { AlertPopup } from "client/gui/popup/AlertPopup";
 import { ConfirmPopup } from "client/gui/popup/ConfirmPopup";
 import { SelectButtonPopup } from "client/gui/popup/SelectButtonPopup";
-import { Element } from "shared/Element";
+import { Control } from "engine/client/gui/Control";
+import { Element } from "engine/shared/Element";
 import type { ControlsPopup } from "client/gui/popup/ControlsPopup";
 import type { NewSettingsPopup } from "client/gui/popup/NewSettingsPopup";
 import type { ReportSubmitController } from "client/gui/popup/ReportSubmitPopup";
 import type { SavePopup } from "client/gui/popup/SavePopup";
 import type { SettingsPopup } from "client/gui/popup/SettingsPopup";
 import type { WikiPopup } from "client/gui/popup/WikiPopup";
-import type { UnitTests } from "shared/test/TestFramework";
+import type { UnitTests } from "engine/shared/TestFramework";
 
 namespace PopupTests {
 	export function show(di: DIContainer) {

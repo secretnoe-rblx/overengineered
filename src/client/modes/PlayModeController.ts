@@ -1,14 +1,14 @@
 import { GuiService, StarterGui } from "@rbxts/services";
 import { LocalPlayer } from "client/controller/LocalPlayer";
-import { Signals } from "client/event/Signals";
 import { Popup } from "client/gui/Popup";
 import { BuildingMode } from "client/modes/build/BuildingMode";
 import { requestMode } from "client/modes/PlayModeRequest";
 import { RideMode } from "client/modes/ride/RideMode";
-import { HostedService } from "shared/di/HostedService";
-import { ObservableValue } from "shared/event/ObservableValue";
+import { Signals } from "engine/client/event/Signals";
+import { HostedService } from "engine/shared/di/HostedService";
+import { ObservableValue } from "engine/shared/event/ObservableValue";
 import { CustomRemotes } from "shared/Remotes";
-import type { GameHostBuilder } from "shared/GameHostBuilder";
+import type { GameHostBuilder } from "engine/shared/GameHostBuilder";
 
 @injectable
 export class PlayModeController extends HostedService {

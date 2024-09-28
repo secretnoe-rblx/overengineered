@@ -1,10 +1,10 @@
 import { MultiBlockConfigControl } from "client/gui/BlockConfigControls";
-import { Control } from "client/gui/Control";
-import { Element } from "shared/Element";
+import { Control } from "engine/client/gui/Control";
+import { Element } from "engine/shared/Element";
 import type { VisualBlockConfigDefinitions } from "client/gui/BlockConfigControls";
+import type { UnitTests } from "engine/shared/TestFramework";
 import type { BlockConfigPart } from "shared/blockLogic/BlockConfig";
 import type { BlockLogicTypes } from "shared/blockLogic/BlockLogicTypes";
-import type { UnitTests } from "shared/test/TestFramework";
 
 namespace ConfigTests {
 	export function show(di: DIContainer) {

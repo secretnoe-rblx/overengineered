@@ -2,9 +2,9 @@ import { GuiService, Players, Workspace } from "@rbxts/services";
 import { InputController } from "client/controller/InputController";
 import { LocalPlayer } from "client/controller/LocalPlayer";
 import { Gui } from "client/gui/Gui";
+import { PlayerUtils } from "engine/shared/utils/PlayerUtils";
 import { BlockManager } from "shared/building/BlockManager";
-import { PlayerUtils } from "shared/utils/PlayerUtils";
-import type { ObservableCollectionSet } from "shared/event/ObservableCollection";
+import type { ObservableCollectionSet } from "engine/shared/event/ObservableCollection";
 
 export namespace BlockSelect {
 	export const blockRaycastParams = new RaycastParams();

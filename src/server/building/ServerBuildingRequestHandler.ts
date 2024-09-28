@@ -1,11 +1,11 @@
+import { HostedService } from "engine/shared/di/HostedService";
+import { Operation } from "engine/shared/Operation";
+import { PlayerWatcher } from "engine/shared/PlayerWatcher";
 import { Backend } from "server/Backend";
 import { BlockManager } from "shared/building/BlockManager";
 import { BlocksSerializer } from "shared/building/BlocksSerializer";
 import { BuildingManager } from "shared/building/BuildingManager";
 import { GameDefinitions } from "shared/data/GameDefinitions";
-import { HostedService } from "shared/di/HostedService";
-import { Operation } from "shared/Operation";
-import { PlayerWatcher } from "shared/PlayerWatcher";
 import { SlotsMeta } from "shared/SlotsMeta";
 import type { SlotDatabase } from "server/database/SlotDatabase";
 import type { ServerPlotController, ServerPlots } from "server/plots/ServerPlots";
@@ -203,7 +203,7 @@ export class ServerBuildingRequestHandler extends HostedService {
 		const player = this.player;
 		$log(`Saving ${player.Name}'s slot ${request.index}`);
 
-		let output: ResponseExtract<SaveSlotResponse> | undefined;
+		let output: ResponseResult<SaveSlotResponse> | undefined;
 		if (request.save) {
 			const controller = this.serverPlots.tryGetControllerByPlayer(player);
 			if (!controller) throw "what";

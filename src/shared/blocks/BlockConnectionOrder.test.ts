@@ -1,10 +1,10 @@
-import { Assert } from "shared/Assert";
+import { Assert } from "engine/shared/Assert";
+import { Logger } from "engine/shared/Logger";
 import { BlockLogicValueResults } from "shared/blockLogic/BlockLogicValueStorage";
 import { BlockAssert } from "shared/blocks/testing/BlockAssert";
 import { BlockTesting } from "shared/blocks/testing/BlockTesting";
-import { Logger } from "shared/Logger";
+import type { UnitTests } from "engine/shared/TestFramework";
 import type { DelayBlockLogic } from "shared/blocks/blocks/DelayBlock";
-import type { UnitTests } from "shared/test/TestFramework";
 
 namespace BlockTests {
 	function init() {

@@ -1,6 +1,6 @@
-import { BidirectionalRemoteEvent } from "shared/event/PERemoteEvent";
+import { BidirectionalRemoteEvent } from "engine/shared/event/PERemoteEvent";
 import { SharedImpl } from "shared/SharedImpl";
-import type { CreatableRemoteEvents } from "shared/event/RemoteEventBase";
+import type { CreatableRemoteEvents } from "engine/shared/event/RemoteEventBase";
 
 abstract class _EffectBase<T> {
 	readonly event;

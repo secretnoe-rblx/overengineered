@@ -1,6 +1,6 @@
-import { Control } from "client/gui/Control";
 import { Gui } from "client/gui/Gui";
 import { GuiAnimator } from "client/gui/GuiAnimator";
+import { Control } from "engine/client/gui/Control";
 import { Colors } from "shared/Colors";
 
 export type LogControlDefinition = GuiObject & {

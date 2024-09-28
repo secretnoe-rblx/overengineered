@@ -1,6 +1,6 @@
-import { ClientComponent } from "client/component/ClientComponent";
+import { ClientComponent } from "engine/client/component/ClientComponent";
 import type { PlayerDataStorage } from "client/PlayerDataStorage";
-import type { ReadonlyObservableCollectionSet } from "shared/event/ObservableCollection";
+import type { ReadonlyObservableCollectionSet } from "engine/shared/event/ObservableCollection";
 
 @injectable
 export class SelectedBlocksHighlighter extends ClientComponent {

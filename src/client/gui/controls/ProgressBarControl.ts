@@ -1,6 +1,6 @@
-import { Control } from "client/gui/Control";
 import { GuiAnimator } from "client/gui/GuiAnimator";
-import { NumberObservableValue } from "shared/event/NumberObservableValue";
+import { Control } from "engine/client/gui/Control";
+import { NumberObservableValue } from "engine/shared/event/NumberObservableValue";
 
 export type ProgressBarControlDefinition = GuiObject & ProgressBarControlDefinitionParts;
 export type ProgressBarControlDefinitionParts = {

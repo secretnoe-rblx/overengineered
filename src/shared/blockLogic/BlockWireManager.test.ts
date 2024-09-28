@@ -1,6 +1,6 @@
-import { Assert } from "shared/Assert";
+import { Assert } from "engine/shared/Assert";
 import { BlockWireManager } from "shared/blockLogic/BlockWireManager";
-import type { UnitTests } from "shared/test/TestFramework";
+import type { UnitTests } from "engine/shared/TestFramework";
 
 namespace WireToolTests {
 	const Input = BlockWireManager.Markers.Input;

@@ -1,4 +1,4 @@
-import { Objects } from "shared/fixes/objects";
+import { Objects } from "engine/shared/fixes/objects";
 import type { BlockLogicFullInputDef } from "shared/blockLogic/BlockLogic";
 import type { BlockLogicTypes } from "shared/blockLogic/BlockLogicTypes";
 

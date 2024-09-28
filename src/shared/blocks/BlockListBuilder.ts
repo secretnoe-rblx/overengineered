@@ -1,6 +1,6 @@
 import { RunService } from "@rbxts/services";
+import { C2S2CRemoteFunction } from "engine/shared/event/PERemoteEvent";
 import { BlockAssertions } from "shared/blocks/BlockAssertions";
-import { C2S2CRemoteFunction } from "shared/event/PERemoteEvent";
 import type { BlockBuilder } from "shared/blocks/Block";
 
 export namespace BlockListBuilder {

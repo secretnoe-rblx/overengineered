@@ -1,12 +1,12 @@
 import { BlockPreviewControl } from "client/gui/buildmode/BlockPreviewControl";
-import { Control } from "client/gui/Control";
 import { TextButtonControl } from "client/gui/controls/Button";
 import { DictionaryControl } from "client/gui/controls/DictionaryControl";
 import { Dropdown } from "client/gui/controls/Dropdown";
+import { Control } from "engine/client/gui/Control";
+import { TransformService } from "engine/shared/component/TransformService";
+import { Element } from "engine/shared/Element";
+import { ArgsSignal } from "engine/shared/event/Signal";
 import { Colors } from "shared/Colors";
-import { TransformService } from "shared/component/TransformService";
-import { Element } from "shared/Element";
-import { ArgsSignal } from "shared/event/Signal";
 import type { TextButtonDefinition } from "client/gui/controls/Button";
 import type { DropdownDefinition } from "client/gui/controls/Dropdown";
 

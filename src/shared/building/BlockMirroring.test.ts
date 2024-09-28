@@ -1,7 +1,7 @@
 import { RunService, Workspace } from "@rbxts/services";
+import { EventHandler } from "engine/shared/event/EventHandler";
 import { BuildingManager } from "shared/building/BuildingManager";
-import { EventHandler } from "shared/event/EventHandler";
-import type { UnitTests } from "shared/test/TestFramework";
+import type { UnitTests } from "engine/shared/TestFramework";
 
 const parent = new Instance("Folder", Workspace);
 parent.Name = "BlockMirroringTest";

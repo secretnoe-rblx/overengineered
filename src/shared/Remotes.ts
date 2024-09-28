@@ -5,7 +5,7 @@ import {
 	PERemoteEventMiddlewares,
 	S2C2SRemoteFunction,
 	S2CRemoteEvent,
-} from "shared/event/PERemoteEvent";
+} from "engine/shared/event/PERemoteEvent";
 
 declare global {
 	type BuildResponse = Response<{ readonly model: BlockModel }>;

@@ -1,6 +1,6 @@
-import { Control } from "client/gui/Control";
-import { NumberObservableValue } from "shared/event/NumberObservableValue";
-import { Signal } from "shared/event/Signal";
+import { Control } from "engine/client/gui/Control";
+import { NumberObservableValue } from "engine/shared/event/NumberObservableValue";
+import { Signal } from "engine/shared/event/Signal";
 
 export type ByteTextBoxControlDefinition = TextBox;
 /** Control that represents a byte via a text input */

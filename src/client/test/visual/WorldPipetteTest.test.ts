@@ -1,8 +1,8 @@
-import { Control } from "client/gui/Control";
 import { BlockPipetteButton } from "client/gui/controls/BlockPipetteButton";
+import { Control } from "engine/client/gui/Control";
+import { Element } from "engine/shared/Element";
 import { BlockManager } from "shared/building/BlockManager";
-import { Element } from "shared/Element";
-import type { UnitTests } from "shared/test/TestFramework";
+import type { UnitTests } from "engine/shared/TestFramework";
 
 namespace WorldPipetteTests {
 	export function show() {

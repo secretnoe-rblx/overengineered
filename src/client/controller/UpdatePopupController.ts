@@ -1,5 +1,5 @@
 import { AlertPopup } from "client/gui/popup/AlertPopup";
-import { HostedService } from "shared/di/HostedService";
+import { HostedService } from "engine/shared/di/HostedService";
 import type { PlayerDataStorage } from "client/PlayerDataStorage";
 
 @injectable

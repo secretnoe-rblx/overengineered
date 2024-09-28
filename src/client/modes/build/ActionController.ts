@@ -1,9 +1,9 @@
-import { ClientComponent } from "client/component/ClientComponent";
 import { InputController } from "client/controller/InputController";
 import { LoadingController } from "client/controller/LoadingController";
 import { LogControl } from "client/gui/static/LogControl";
-import { ObservableCollectionArr } from "shared/event/ObservableCollection";
-import { Signal } from "shared/event/Signal";
+import { ClientComponent } from "engine/client/component/ClientComponent";
+import { ObservableCollectionArr } from "engine/shared/event/ObservableCollection";
+import { Signal } from "engine/shared/event/Signal";
 
 type Operation = {
 	readonly description: string;

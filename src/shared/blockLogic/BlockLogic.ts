@@ -1,3 +1,8 @@
+import { Component } from "engine/shared/component/Component";
+import { ComponentInstance } from "engine/shared/component/ComponentInstance";
+import { ArgsSignal } from "engine/shared/event/Signal";
+import { Objects } from "engine/shared/fixes/objects";
+import { BlockLogicValueResults } from "shared/blockLogic/BlockLogicValueStorage";
 import {
 	BlockBackedInputLogicValueStorage,
 	isCustomBlockLogicValueResult,
@@ -5,11 +10,6 @@ import {
 	UnsetBlockLogicValueStorage,
 	LogicValueStorageContainer,
 } from "shared/blockLogic/BlockLogicValueStorage";
-import { BlockLogicValueResults } from "shared/blockLogic/BlockLogicValueStorage";
-import { Component } from "shared/component/Component";
-import { ComponentInstance } from "shared/component/ComponentInstance";
-import { ArgsSignal } from "shared/event/Signal";
-import { Objects } from "shared/fixes/objects";
 import { RemoteEvents } from "shared/RemoteEvents";
 import { PartUtils } from "shared/utils/PartUtils";
 import type { PlacedBlockConfig } from "shared/blockLogic/BlockConfig";

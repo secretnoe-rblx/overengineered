@@ -1,9 +1,9 @@
+import { JSON } from "engine/shared/fixes/Json";
+import { Objects } from "engine/shared/fixes/objects";
 import { BlockWireManager } from "shared/blockLogic/BlockWireManager";
 import { _BlockConfigRegistrySave } from "shared/building/BlockConfigRegistrySave";
 import { BlockManager } from "shared/building/BlockManager";
 import { Config } from "shared/config/Config";
-import { JSON } from "shared/fixes/Json";
-import { Objects } from "shared/fixes/objects";
 import { Serializer } from "shared/Serializer";
 import type { BlockConfigPart, PlacedBlockConfig } from "shared/blockLogic/BlockConfig";
 import type { BlockLogicTypes } from "shared/blockLogic/BlockLogicTypes";
