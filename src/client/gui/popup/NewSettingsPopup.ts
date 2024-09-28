@@ -7,6 +7,7 @@ import { InstanceComponent } from "shared/component/InstanceComponent";
 import { CustomRemotes } from "shared/Remotes";
 import type { PlayerSelectorColumnControlDefinition } from "client/gui/controls/PlayerSelectorListControl";
 import type { SharedPlot } from "shared/building/SharedPlot";
+import type { GameHostBuilder } from "shared/GameHostBuilder";
 
 export type NewSettingsPopupDefinition = GuiObject & {
 	readonly Content: ScrollingFrame & NewSettingsScenes;

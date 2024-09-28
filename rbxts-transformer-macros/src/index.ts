@@ -5,6 +5,20 @@ const create = (program: ts.Program, context: ts.TransformationContext) => {
 	const factory = ts.factory;
 	const typeChecker = program.getTypeChecker();
 
+	const identifierByTypeNode = (typeNode: ts.TypeNode) =>
+		identifierByType(typeChecker.getTypeFromTypeNode(typeNode));
+	const identifierByType = (type: ts.Type) => {
+		const declaration=
+			type.symbol?.valueDeclaration
+			?? type.aliasSymbol?.declarations?.[0]
+			?? type.symbol?.declarations?.[0]
+			?? type.aliasSymbol?.valueDeclaration
+		if (!declaration) return;
+
+		const pth = path.relative("src", declaration.getSourceFile().fileName).replaceAll("\\", "/");
+		return pth + "$" + (type.aliasSymbol?.name ?? type.symbol.name);
+	};
+
 	/** Fix namespace function hoisting by moving any variable and inside namespace declarations to the bottom */
 	const transformNamespaces = (file: ts.SourceFile): ts.SourceFile => {
 		const fixNamespace = (node: ts.ModuleDeclaration): ts.ModuleDeclaration => {
@@ -196,22 +210,10 @@ const create = (program: ts.Program, context: ts.TransformationContext) => {
 		return file;
 	}
 	const transformDI = (file: ts.SourceFile): ts.SourceFile => {
-		const identifierByTypeNode = (typeNode: ts.TypeNode) =>
-			identifierByType(typeChecker.getTypeFromTypeNode(typeNode));
-		const identifierByType = (type: ts.Type) => {
-			const declaration =
-				type.symbol?.valueDeclaration
-				?? type.aliasSymbol?.declarations?.[0];
-			if (!declaration) return;
-
-			const pth = path.relative("src", declaration.getSourceFile().fileName).replaceAll("\\", "/");
-			return pth + "$" + (type.aliasSymbol?.name ?? type.symbol.name);
-		};
-
 		const modifyParameters = (clazz: ts.ClassDeclaration): ts.ClassDeclaration => {
 			if (!clazz.name) return clazz;
 
-			const classParentOf = (clazz: ts.ClassDeclaration): ts.ClassDeclaration | undefined => {	
+			const classParentOf = (clazz: ts.ClassDeclaration): ts.ClassDeclaration | undefined => {
 				const extend = clazz.heritageClauses?.find(c => c.token === ts.SyntaxKind.ExtendsKeyword)?.types[0].expression;
 				if (!extend) return;
 
@@ -224,7 +226,7 @@ const create = (program: ts.Program, context: ts.TransformationContext) => {
 				if (clazz.modifiers?.find(m => ts.isDecorator(m) && ts.isIdentifier(m.expression) && m.expression.text === 'injectable')) {
 					return true;
 				}
-				
+
 				const parent = classParentOf(clazz);
 				if (!parent) return false;
 
@@ -237,8 +239,9 @@ const create = (program: ts.Program, context: ts.TransformationContext) => {
 
 			type decl = {
 				readonly name: ts.Identifier;
-				readonly type: ts.TypeReferenceNode;
+				readonly type: ts.TypeNode;
 				readonly nullable: boolean;
+				readonly isFunc: boolean;
 			}
 			let ctorAdded: decl[] = [];
 			let propAdded: decl[] = [];
@@ -270,23 +273,38 @@ const create = (program: ts.Program, context: ts.TransformationContext) => {
 						for (const decorator of parameter.modifiers) {
 							if (!ts.isDecorator(decorator)) continue;
 							if (!ts.isIdentifier(decorator.expression)) continue;
-							if (decorator.expression.text !== 'inject' && decorator.expression.text !== 'tryInject') continue;
+							if (decorator.expression.text !== 'inject' && decorator.expression.text !== 'tryInject' && decorator.expression.text !== 'injectFunc')
+								continue;
 							if (!ts.isIdentifier(parameter.name)) continue;
-							if (!parameter.type || !ts.isTypeReferenceNode(parameter.type)) continue;
-							if (!ts.isIdentifier(parameter.type.typeName)) continue;
 
 							classsymb ??= program.getTypeChecker().getSymbolAtLocation(clazz.name);
 							if (!classsymb) {
 								throw `Could not find symbol for class ${clazz.name.text}`;
 							}
 
-							ctorAdded ??= [];
-							identifierByTypeNode(parameter.type);
-							ctorAdded.push({
-								name: parameter.name,
-								type: parameter.type,
-								nullable: decorator.expression.text === 'tryInject',
-							});
+							if (decorator.expression.text === 'inject' || decorator.expression.text === 'tryInject') {
+								if (!parameter.type || !ts.isTypeReferenceNode(parameter.type)) continue;
+								if (!ts.isIdentifier(parameter.type.typeName)) continue;
+
+								ctorAdded ??= [];
+								ctorAdded.push({
+									name: parameter.name,
+									type: parameter.type,
+									nullable: decorator.expression.text === 'tryInject',
+									isFunc: false,
+								});
+							}
+							else {
+								if (!parameter.type || !ts.isFunctionTypeNode(parameter.type)) continue;
+
+								ctorAdded ??= [];
+								ctorAdded.push({
+									name: parameter.name,
+									type: parameter.type.type,
+									nullable: false, // decorator.expression.text === 'tryInject',
+									isFunc: true,
+								});
+							}
 						}
 					}
 				}
@@ -299,7 +317,8 @@ const create = (program: ts.Program, context: ts.TransformationContext) => {
 					for (const decorator of parameter.modifiers) {
 						if (!ts.isDecorator(decorator)) continue;
 						if (!ts.isIdentifier(decorator.expression)) continue;
-						if (decorator.expression.text !== 'inject' && decorator.expression.text !== 'tryInject') continue;
+						if (decorator.expression.text !== 'inject' && decorator.expression.text !== 'tryInject' && decorator.expression.text !== 'injectFunc')
+							continue;
 						if (!ts.isIdentifier(parameter.name)) continue;
 						if (!parameter.type || !ts.isTypeReferenceNode(parameter.type)) continue;
 						if (!ts.isIdentifier(parameter.type.typeName)) continue;
@@ -315,6 +334,7 @@ const create = (program: ts.Program, context: ts.TransformationContext) => {
 							name: parameter.name,
 							type: parameter.type,
 							nullable: decorator.expression.text === 'tryInject',
+							isFunc: decorator.expression.text === 'injectFunc',
 						});
 					}
 				}
@@ -341,7 +361,7 @@ const create = (program: ts.Program, context: ts.TransformationContext) => {
 						factory.createParameterDeclaration(
 							undefined,
 							undefined,
-							factory.createIdentifier("deps"),
+							factory.createIdentifier("di"),
 							undefined,
 							factory.createTypeReferenceNode(
 								factory.createIdentifier("DIContainer"),
@@ -359,16 +379,29 @@ const create = (program: ts.Program, context: ts.TransformationContext) => {
 									undefined,
 									[
 										...(constr?.parameters.filter(p => !ctorAdded.find(a => a.name.text === (p.name as ts.Identifier).text)).map(p => p.name as ts.Identifier) ?? []),
-										...ctorAdded.map(a =>
-											factory.createCallExpression(
+										...ctorAdded.map(a => {
+											let resolve: ts.Expression = factory.createCallExpression(
 												factory.createPropertyAccessExpression(
-													factory.createIdentifier("deps"),
+													factory.createIdentifier("di"),
 													factory.createIdentifier(a.nullable ? "tryResolve" : "resolve"),
 												),
 												[a.type],
 												[factory.createStringLiteral(identifierByTypeNode(a.type)!)],
-											),
-										),
+											);
+
+											if (a.isFunc) {
+												resolve = factory.createArrowFunction(
+													undefined,
+													undefined,
+													[],
+													undefined,
+													undefined,
+													resolve
+												);
+											}
+
+											return resolve;
+										}),
 									],
 								),
 							),
@@ -389,7 +422,7 @@ const create = (program: ts.Program, context: ts.TransformationContext) => {
 						factory.createParameterDeclaration(
 							undefined,
 							undefined,
-							factory.createIdentifier("deps"),
+							factory.createIdentifier("di"),
 							undefined,
 							factory.createTypeReferenceNode(
 								factory.createIdentifier("DIContainer"),
@@ -408,13 +441,13 @@ const create = (program: ts.Program, context: ts.TransformationContext) => {
 											factory.createAsExpression(
 												factory.createThis(),
 												factory.createKeywordTypeNode(ts.SyntaxKind.AnyKeyword)
-											),											  
+											),
 											p.name,
 										),
 										factory.createToken(ts.SyntaxKind.EqualsToken),
 										factory.createCallExpression(
 											factory.createPropertyAccessExpression(
-												factory.createIdentifier("deps"),
+												factory.createIdentifier("di"),
 												factory.createIdentifier(p.nullable ? "tryResolve" : "resolve"),
 											),
 											[p.type],
@@ -442,7 +475,7 @@ const create = (program: ts.Program, context: ts.TransformationContext) => {
 							return ts.factory.createConstructorDeclaration(
 								m.modifiers,
 								m.parameters.map(p => ts.factory.createParameterDeclaration(
-									p.modifiers?.filter(m => !(ts.isDecorator(m) && ts.isIdentifier(m.expression) && (m.expression.text === 'inject' || m.expression.text === 'tryInject'))),
+									p.modifiers?.filter(m => !(ts.isDecorator(m) && ts.isIdentifier(m.expression) && (m.expression.text === 'inject' || m.expression.text === 'injectFunc' || m.expression.text === 'tryInject'))),
 									p.dotDotDotToken,
 									p.name,
 									p.questionToken,
@@ -454,7 +487,7 @@ const create = (program: ts.Program, context: ts.TransformationContext) => {
 						}
 						if (ts.isPropertyDeclaration(m)) {
 							return ts.factory.createPropertyDeclaration(
-								m.modifiers?.filter(m => !(ts.isDecorator(m) && ts.isIdentifier(m.expression) && (m.expression.text === 'inject' || m.expression.text === 'tryInject'))),
+								m.modifiers?.filter(m => !(ts.isDecorator(m) && ts.isIdentifier(m.expression) && (m.expression.text === 'inject' || m.expression.text === 'injectFunc' || m.expression.text === 'tryInject'))),
 								m.name,
 								m.questionToken ?? m.exclamationToken,
 								m.type,
@@ -467,71 +500,78 @@ const create = (program: ts.Program, context: ts.TransformationContext) => {
 				],
 			);
 		};
-		const modifyRegistration = (node: ts.Node): ts.Node | undefined => {
-			if (!ts.isCallExpression(node)) return;
-			if (!ts.isPropertyAccessExpression(node.expression)) return;
-			if (!ts.isIdentifier(node.expression.name)) return;
-
-			const tp = typeChecker.getTypeAtLocation(node.expression.expression);
-			if (!(tp.aliasSymbol ?? tp.symbol)?.name.includes('DIContainer'))
-				return;
-
-			if (node.expression.name.text.startsWith('register')) {
-				const signature = typeChecker.getResolvedSignature(node);
-				if (!signature) return;
-
-				if (node.arguments.length >= (signature.declaration?.parameters.length ?? 99999)) {
-					return;
-				}
-
-				const type =
-					node.expression.name.text.includes('Func')
-					? typeChecker.getReturnTypeOfSignature(typeChecker.getSignaturesOfType(typeChecker.getTypeOfSymbolAtLocation(signature.getParameters()[0], node), ts.SignatureKind.Call)[0])
-					: typeChecker.getTypeOfSymbolAtLocation(signature.getParameters()[0], node);
-
-				const identifier = identifierByType(type);
-				if (!identifier) return;
-
-				return ts.factory.createCallExpression(
-					node.expression,
-					node.typeArguments,
-					[
-						...node.arguments,
-						ts.factory.createStringLiteral(identifier),
-					],
-				);
-			}
-			if (node.expression.name.text.startsWith('resolve')) {
-				if (!node.typeArguments || node.typeArguments.length === 0) return;
-
-				const signature = typeChecker.getResolvedSignature(node);
-				if (!signature) return;
-
-				if (node.arguments.length >= (signature.declaration?.parameters.length ?? 99999)) {
-					return;
-				}
-				
-				const type = typeChecker.getTypeFromTypeNode(node.typeArguments[0]);
-				const identifier = identifierByType(type);
-				if (!identifier) return;
-
-				return ts.factory.createCallExpression(
-					node.expression,
-					node.typeArguments,
-					[
-						...node.arguments,
-						ts.factory.createStringLiteral(identifier),
-					],
-				)
-			};
-		};
 
 		const visit = (node: ts.Node): ts.Node => {
 			if (ts.isClassDeclaration(node) && node.name) {
 				node = modifyParameters(node);
 			}
 
-			node = modifyRegistration(node) ?? node;
+			return ts.visitEachChild(node, visit, context);
+		};
+
+		return ts.visitEachChild(file, visit, context);
+	}
+	const transformDIDecoratorPathOf = (file: ts.SourceFile): ts.SourceFile => {
+		const modifyParameters = (call: ts.CallExpression): ts.CallExpression | undefined => {
+			const methodType = typeChecker.getResolvedSignature(call);
+			if (!methodType) return;
+			const declaration = methodType.getDeclaration();
+			if (!declaration) return;
+
+			let paramIdx = -1;
+			for (const parameter of declaration.parameters) {
+				if (ts.isIdentifier(parameter.name) && parameter.name.text === 'this') continue;
+				paramIdx++;
+
+				const decorators = ts.getDecorators(parameter);
+				if (!decorators) continue;
+
+				for (const decorator of decorators) {
+					if (!ts.isCallExpression(decorator.expression)) continue;
+					if (!ts.isIdentifier(decorator.expression.expression)) continue;
+
+					if (decorator.expression.expression.text === 'pathOf') {
+						if (!declaration.typeParameters) continue;
+						if (call.arguments.length > paramIdx) continue;
+
+						const typeName = (decorator.expression.arguments[0] as ts.StringLiteral).text;
+						const typeArgumentIndex = declaration.typeParameters.findIndex(p => p.name.text === typeName);
+						if (typeArgumentIndex < 0) continue;
+
+						let type: ts.Type;
+						if (call.typeArguments) {
+							const typeNode = call.typeArguments[typeArgumentIndex];
+							if (!typeNode) continue;
+
+							type = typeChecker.getTypeFromTypeNode(typeNode);
+						}
+						else {
+							const typeParameter = methodType.getTypeParameterAtPosition(typeArgumentIndex);
+							type = (typeParameter as any)?.mapper?.target ?? typeParameter;
+						}
+
+						const path = identifierByType(type);
+						if (!path) continue;
+
+						const args = [...call.arguments ?? []];
+						args[paramIdx] = ts.factory.createStringLiteral(path);
+
+						call = ts.factory.createCallExpression(
+							call.expression,
+							call.typeArguments,
+							args,
+						);
+					}
+				}
+			}
+
+			return call;
+		};
+
+		const visit = (node: ts.Node): ts.Node => {
+			if (ts.isCallExpression(node)) {
+				node = modifyParameters(node) ?? node;
+			}
 
 			return ts.visitEachChild(node, visit, context);
 		};
@@ -543,6 +583,7 @@ const create = (program: ts.Program, context: ts.TransformationContext) => {
 		file = transformNamespaces(file);
 		file = transformLogs(file);
 		file = transformDI(file);
+		file = transformDIDecoratorPathOf(file);
 
 		return file;
 	}

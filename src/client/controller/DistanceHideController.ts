@@ -31,7 +31,7 @@ export class DistanceHideController extends Component {
 			visible = newVisible;
 
 			for (const [part, transparency] of transparencies) {
-				part.Transparency = visible ? transparency ?? 0 : 1;
+				part.Transparency = visible ? (transparency ?? 0) : 1;
 			}
 		});
 	}

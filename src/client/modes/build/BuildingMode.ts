@@ -38,7 +38,7 @@ export class BuildingMode extends PlayMode {
 	constructor(@inject di: DIContainer, @inject plot: SharedPlot) {
 		super();
 
-		di = di.beginScope((di) => di.registerSingleton(this));
+		di = di.beginScope((di) => di.registerSingletonValue(this));
 		const com = new CenterOfMassController(plot);
 		this.event.subscribeObservable(this.centerOfMassEnabled, (enabled) => com.setEnabled(enabled), true);
 		this.onDisable(() => com.disable());

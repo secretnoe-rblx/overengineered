@@ -608,7 +608,10 @@ export class MultiPlayerConfigControl<
 		for (const [id, def] of Objects.entriesArray(definition).sort(
 			(left, right) => tostring(left[0]) < tostring(right[0]),
 		)) {
-			const control = this.di.resolveForeignClass(Controls[def.type], [config[id], def] as never);
+			const control = this.di.resolveForeignClass(
+				Controls[def.type] as typeof Controls.bool,
+				[config[id], def] as never,
+			);
 			this.add(control);
 			this.settedElements.set(id, control);
 

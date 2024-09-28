@@ -1,6 +1,6 @@
-import { Colors } from "shared/Colors";
 import { Control } from "client/gui/Control";
 import { GuiAnimator } from "client/gui/GuiAnimator";
+import { Colors } from "shared/Colors";
 import { ObservableValue } from "shared/event/ObservableValue";
 import { Signal } from "shared/event/Signal";
 

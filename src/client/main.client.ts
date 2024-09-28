@@ -8,7 +8,7 @@ import { LogControl } from "client/gui/static/LogControl";
 import { SandboxGame } from "client/SandboxGame";
 import { ServerRestartController } from "client/ServerRestartController";
 import { Objects } from "shared/fixes/objects";
-import { Game } from "shared/GameHost";
+import { GameHostBuilder } from "shared/GameHostBuilder";
 import { RemoteEvents } from "shared/RemoteEvents";
 import { CustomRemotes } from "shared/Remotes";
 import { TestFramework } from "shared/test/TestFramework";
@@ -17,7 +17,7 @@ import { BulletProjectile } from "shared/weapons/BulletProjectileLogic";
 LoadingController.show("Initializing");
 Gui.getGameUI<{ VERSION: TextLabel }>().VERSION.Text = `v${RunService.IsStudio() ? "studio" : game.PlaceVersion}`;
 
-const builder = Game.createHost();
+const builder = new GameHostBuilder();
 try {
 	SandboxGame.initialize(builder);
 } catch (err) {

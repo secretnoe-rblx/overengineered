@@ -1,9 +1,10 @@
 import { Players } from "@rbxts/services";
 import { ClientBuilding } from "client/modes/build/ClientBuilding";
 import { BuildingManager } from "shared/building/BuildingManager";
-import { HostedService } from "shared/GameHost";
+import { HostedService } from "shared/di/HostedService";
 import { errorResponse, successResponse } from "shared/types/network/Responses";
 import { PlayerUtils } from "shared/utils/PlayerUtils";
+import type { GameHostBuilder } from "shared/GameHostBuilder";
 
 @injectable
 export class ClientBuildingValidationController extends HostedService {

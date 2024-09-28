@@ -6,6 +6,7 @@ import { Gui } from "client/gui/Gui";
 import { Popup } from "client/gui/Popup";
 import type { KeyChooserControlDefinition } from "client/gui/controls/KeyChooserControl";
 import type { Keybinds } from "client/Keybinds";
+import type { GameHostBuilder } from "shared/GameHostBuilder";
 
 export type ControlsPopupDefinition = GuiObject & {
 	readonly Heading: Frame & {

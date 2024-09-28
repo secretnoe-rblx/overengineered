@@ -1,9 +1,10 @@
 import { ContextActionService, Players } from "@rbxts/services";
 import { InputController } from "client/controller/InputController";
 import { LocalPlayer } from "client/controller/LocalPlayer";
+import { HostedService } from "shared/di/HostedService";
 import { ObservableValue } from "shared/event/ObservableValue";
-import { HostedService } from "shared/GameHost";
 import { PartUtils } from "shared/utils/PartUtils";
+import type { GameHostBuilder } from "shared/GameHostBuilder";
 
 class SprintLogic extends HostedService {
 	constructor(sprintSpeed: number) {

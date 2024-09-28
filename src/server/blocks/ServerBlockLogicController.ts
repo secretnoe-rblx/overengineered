@@ -5,7 +5,7 @@ import { LEDDisplayServerLogic } from "server/blocks/logic/LEDDisplayServerLogic
 import { PistonBlockServerLogic } from "server/blocks/logic/PistonBlockServerLogic";
 import { ScreenServerLogic } from "server/blocks/logic/ScreenServerLogic";
 import { SevenSegmentDisplayServerLogic } from "server/blocks/logic/SevenSegmentDisplayServerLogic";
-import { HostedService } from "shared/GameHost";
+import { HostedService } from "shared/di/HostedService";
 import type { ServerBlockLogic } from "server/blocks/ServerBlockLogic";
 import type { GenericBlockLogicCtor } from "shared/blockLogic/BlockLogic";
 

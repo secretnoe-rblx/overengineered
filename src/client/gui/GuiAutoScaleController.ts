@@ -1,6 +1,6 @@
 import { Gui } from "client/gui/Gui";
 import { ScaledScreenGui } from "client/gui/ScaledScreenGui";
-import { HostedService } from "shared/GameHost";
+import { HostedService } from "shared/di/HostedService";
 import type { PlayerDataStorage } from "client/PlayerDataStorage";
 
 @injectable

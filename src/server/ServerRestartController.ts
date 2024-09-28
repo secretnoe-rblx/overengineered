@@ -3,7 +3,7 @@ import { isNotAdmin_AutoBanned } from "server/BanAdminExploiter";
 import { registerOnRemoteEvent } from "server/network/event/RemoteHandler";
 import { ServerPartUtils } from "server/plots/ServerPartUtils";
 import { BlockManager } from "shared/building/BlockManager";
-import { HostedService } from "shared/GameHost";
+import { HostedService } from "shared/di/HostedService";
 import { Remotes } from "shared/Remotes";
 import { ReplicatedAssets } from "shared/ReplicatedAssets";
 import { PartUtils } from "shared/utils/PartUtils";

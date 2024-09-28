@@ -1,7 +1,7 @@
-import { Colors } from "shared/Colors";
 import { Control } from "client/gui/Control";
 import { Gui } from "client/gui/Gui";
 import { GuiAnimator } from "client/gui/GuiAnimator";
+import { Colors } from "shared/Colors";
 
 export type LogControlDefinition = GuiObject & {
 	Template: Frame & {

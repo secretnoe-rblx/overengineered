@@ -9,12 +9,12 @@ if (!game.GetService("RunService").IsStudio()) {
 import { Players, RunService, Workspace } from "@rbxts/services";
 import { RemoteEvents } from "shared/RemoteEvents";
 import { SandboxGame } from "server/SandboxGame";
-import { Game } from "shared/GameHost";
 import { PlasmaProjectile } from "shared/weapons/PlasmaProjectileLogic";
 import { BulletProjectile } from "shared/weapons/BulletProjectileLogic";
 import { BootFlagsController } from "server/BootFlagsController";
+import { GameHostBuilder } from "shared/GameHostBuilder";
 
-const builder = Game.createHost();
+const builder = new GameHostBuilder();
 SandboxGame.initialize(builder);
 
 const host = builder.build();

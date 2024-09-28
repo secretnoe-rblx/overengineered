@@ -1,9 +1,9 @@
 import { Players, UserInputService } from "@rbxts/services";
-import { Colors } from "shared/Colors";
 import { ButtonControl } from "client/gui/controls/Button";
 import { HoveredPartHighlighter } from "client/tools/highlighters/HoveredPartHighlighter";
 import { BlockManager } from "shared/building/BlockManager";
 import { BuildingManager } from "shared/building/BuildingManager";
+import { Colors } from "shared/Colors";
 import { GameDefinitions } from "shared/data/GameDefinitions";
 import { EventHandler } from "shared/event/EventHandler";
 import { SlimFilter } from "shared/event/SlimFilter";

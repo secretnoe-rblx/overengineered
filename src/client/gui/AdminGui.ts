@@ -11,11 +11,12 @@ import { LoadSlotTest } from "client/test/visual/LoadSlotTest";
 import { TutorialCreator } from "client/tutorial/TutorialCreator";
 import { InstanceComponent } from "shared/component/InstanceComponent";
 import { GameDefinitions } from "shared/data/GameDefinitions";
+import { HostedService } from "shared/di/HostedService";
 import { Element } from "shared/Element";
-import { HostedService } from "shared/GameHost";
 import { Switches } from "shared/Switches";
 import type { TutorialsService } from "client/tutorial/TutorialService";
 import type { ReadonlyPlot } from "shared/building/ReadonlyPlot";
+import type { GameHostBuilder } from "shared/GameHostBuilder";
 
 @injectable
 export class AdminGui extends HostedService {

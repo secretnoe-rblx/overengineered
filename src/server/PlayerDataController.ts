@@ -1,7 +1,7 @@
 import { HttpService, Workspace } from "@rbxts/services";
 import { Backend } from "server/Backend";
 import { GameDefinitions } from "shared/data/GameDefinitions";
-import { HostedService } from "shared/GameHost";
+import { HostedService } from "shared/di/HostedService";
 import { CustomRemotes } from "shared/Remotes";
 import type { PlayerDatabase } from "server/database/PlayerDatabase";
 import type { PlayerDatabaseData } from "server/database/PlayerDatabase";

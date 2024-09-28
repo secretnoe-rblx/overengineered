@@ -41,6 +41,7 @@ import { RemoteEvents } from "shared/RemoteEvents";
 import { CreateSandboxBlocks } from "shared/SandboxBlocks";
 import type { TutorialDescriber } from "client/tutorial/TutorialController";
 import type { SharedPlot } from "shared/building/SharedPlot";
+import type { GameHostBuilder } from "shared/GameHostBuilder";
 
 export namespace SandboxGame {
 	export function initialize(builder: GameHostBuilder) {
@@ -71,7 +72,7 @@ export namespace SandboxGame {
 			return new ReadonlyPlot(plot.instance.Blocks, plot.getCenter(), plot.bounds);
 		});
 
-		builder.services.registerSingleton(CreateSandboxBlocks());
+		builder.services.registerSingletonValue(CreateSandboxBlocks());
 		PlayModeController.initialize(builder);
 		ClientBuildingValidationController.initialize(builder);
 

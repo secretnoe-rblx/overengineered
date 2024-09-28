@@ -1,5 +1,5 @@
 import { Lighting } from "@rbxts/services";
-import { HostedService } from "shared/GameHost";
+import { HostedService } from "shared/di/HostedService";
 import type { PlayerDataStorage } from "client/PlayerDataStorage";
 
 @injectable

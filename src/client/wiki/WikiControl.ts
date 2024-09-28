@@ -1,9 +1,9 @@
 import { BlockPreviewControl } from "client/gui/buildmode/BlockPreviewControl";
-import { Colors } from "shared/Colors";
 import { Control } from "client/gui/Control";
 import { TextButtonControl } from "client/gui/controls/Button";
 import { DictionaryControl } from "client/gui/controls/DictionaryControl";
 import { Dropdown } from "client/gui/controls/Dropdown";
+import { Colors } from "shared/Colors";
 import { TransformService } from "shared/component/TransformService";
 import { Element } from "shared/Element";
 import { ArgsSignal } from "shared/event/Signal";

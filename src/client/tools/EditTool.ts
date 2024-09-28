@@ -3,7 +3,6 @@ import { ClientComponent } from "client/component/ClientComponent";
 import { InputController } from "client/controller/InputController";
 import { LoadingController } from "client/controller/LoadingController";
 import { MaterialColorEditControl } from "client/gui/buildmode/MaterialColorEditControl";
-import { Colors } from "shared/Colors";
 import { Control } from "client/gui/Control";
 import { ButtonControl } from "client/gui/controls/Button";
 import { LogControl } from "client/gui/static/LogControl";
@@ -17,6 +16,7 @@ import { ToolBase } from "client/tools/ToolBase";
 import { BlockManager } from "shared/building/BlockManager";
 import { BuildingManager } from "shared/building/BuildingManager";
 import { SharedBuilding } from "shared/building/SharedBuilding";
+import { Colors } from "shared/Colors";
 import { ComponentChild } from "shared/component/ComponentChild";
 import { ComponentDisabler } from "shared/component/ComponentDisabler";
 import { TransformService } from "shared/component/TransformService";
@@ -658,7 +658,11 @@ export class EditTool extends ToolBase {
 			}
 
 			this.controller.set(
-				di.resolveForeignClass(Controllers[mode], [this, this.targetPlot.get(), [...selected]]),
+				di.resolveForeignClass(Controllers[mode] as typeof Controllers.Move, [
+					this,
+					this.targetPlot.get(),
+					[...selected],
+				]),
 			);
 		});
 

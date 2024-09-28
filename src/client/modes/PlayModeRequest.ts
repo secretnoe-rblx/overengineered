@@ -1,7 +1,7 @@
 import { LoadingController } from "client/controller/LoadingController";
 import { SoundController } from "client/controller/SoundController";
-import { Colors } from "shared/Colors";
 import { LogControl } from "client/gui/static/LogControl";
+import { Colors } from "shared/Colors";
 import { CustomRemotes } from "shared/Remotes";
 
 let changing = false;
