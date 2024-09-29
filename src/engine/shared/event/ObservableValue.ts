@@ -14,9 +14,6 @@ export interface ReadonlyObservableValue<T> {
 	subscribe(func: (value: T, prev: T) => void): SignalConnection;
 	subscribe(func: (value: T, prev: T) => void, executeImmediately: boolean | undefined): SignalConnection;
 
-	/** Automatically sets the provided ObservableValue value to the current one. */
-	autoSet(observable: ObservableValue<T>, funcProvider?: (value: T) => T): void;
-
 	createBased<TNew>(func: (value: T) => TNew): ReadonlyObservableValue<TNew>;
 }
 
