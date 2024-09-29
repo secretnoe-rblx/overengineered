@@ -128,4 +128,24 @@ export namespace Objects {
 
 		return true;
 	}
+
+	/** Executes the function and throws if it ever yields */
+	export function requireNoYield<TArgs extends unknown[], TRet>(
+		func: (...args: TArgs) => TRet,
+		...args: TArgs
+	): TRet {
+		const co = coroutine.create(func);
+
+		const [ok, result] = coroutine.resume(co, ...args);
+		if (!ok) {
+			const message = result;
+			error(debug.traceback(co, tostring(message)), 2);
+		}
+
+		if (coroutine.status(co) !== "dead") {
+			error(debug.traceback(co, "Attempted to yield inside the no-yield zone!"), 1);
+		}
+
+		return result as TRet;
+	}
 }
