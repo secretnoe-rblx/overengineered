@@ -70,7 +70,7 @@ export class NewBasicPlaneTutorial implements TutorialDescriber {
 			() => [
 				t.funcPart(() => toolController.enabledTools.enableOnly(toolController.allTools.buildTool)),
 				t.processDiff(diffs.basicWings, saveVersion),
-				t.partText("Well done! Let's use the mirror to speed up the construction!\nPlace some wings using it."),
+				t.partText("Well done! Place some wings using it."),
 				t.translatedHintsPart(
 					["Select the build tool"],
 					[`Select and place "Corner Wing 1x4"`],
@@ -98,7 +98,7 @@ export class NewBasicPlaneTutorial implements TutorialDescriber {
 				t.funcPart(() => toolController.enabledTools.enableOnly(toolController.allTools.buildTool)),
 				t.processDiff(diffs.servo, saveVersion),
 				t.partText(
-					"It's time to place the servomotors.\nThese are used to precisely rotate something to an angle.\nWe're going to control many things using these.",
+					"It's time to place the servos.\nThese are used to precisely rotate something to an angle.\nWe're going to control many things using these.",
 				),
 				t.translatedHintsPart(
 					["Select the build tool"],
@@ -124,7 +124,7 @@ export class NewBasicPlaneTutorial implements TutorialDescriber {
 				t.translatedHintsPart(
 					["Select the build tool"],
 					[`Select "Wings"`],
-					[`Select "Wing 1x3"`],
+					[`Select "Wing 1x2"`],
 					["Place all the highlighted blocks"],
 					[""],
 				),
@@ -140,7 +140,7 @@ export class NewBasicPlaneTutorial implements TutorialDescriber {
 					["Select the build tool"],
 					[`Select and place "Wedge 1x1" on the tail`],
 					[`Select and place "Bearing Shaft" under the wedges`],
-					[`Select and place "Small Hinge" on the front servomotor`],
+					[`Select and place "Small Hinge" on the front servo`],
 				),
 			],
 
@@ -168,7 +168,7 @@ export class NewBasicPlaneTutorial implements TutorialDescriber {
 				t.partText("Let's configure these servos!"),
 				t.translatedHintsPart(
 					["Select the configuration tool"],
-					[`Select all of the servos (preferably using multiselect)`],
+					[`Select every servo`],
 					[""],
 					[`Take a close look at the menu`],
 					["Don't change anything yet"],
@@ -176,8 +176,8 @@ export class NewBasicPlaneTutorial implements TutorialDescriber {
 					[`In this menu you can configure things to your liking`],
 					[""],
 					[`Select number field (left of red trashbin button)`],
-					[`If first field selected then enter number 15.`],
-					[`If second field selected then enter number -15`],
+					[`Select the first field and enter "15"`],
+					[`Select the second field and enter "-15"`],
 					[""],
 					[`If you deleted a field use '+' button to add it back`],
 					[`Don't forget to set S and W keys back`],
@@ -187,20 +187,20 @@ export class NewBasicPlaneTutorial implements TutorialDescriber {
 				t.funcPart(() => toolController.enabledTools.disableAll()),
 				t.partNextButton(),
 				t.partText(
-					`Very well! You just configured your first blocks.\nRemember: a lot of the blocks are configurable.`,
+					`Very good! You just configured your first blocks.\nRemember: a lot of the blocks are configurable.`,
 				),
 			],
 			() => [
 				t.funcPart(() => toolController.enabledTools.enableOnly(toolController.allTools.configTool)),
 				t.processDiff(diffs.configureRoll, saveVersion),
 				t.partText(
-					"Set up the servos that are used to control horisontal tilt (roll) of your plane.\n These are located just behind your front main pair of wings.",
+					"Set up the servos that are used to control horizontal tilt (roll) of your plane.\n These are located just behind your front main pair of wings.",
 				),
 				t.hintsPart(
 					"Select the config tool",
 					"Select two servo motors behind your front wings",
-					"Press on 'R' on the left side to replace it with key 'D'",
-					"Replace key 'F' with key 'A'",
+					"Press 'R' and replace it with 'D'",
+					"Press 'F' and replace it with 'A'",
 				),
 			],
 
@@ -238,9 +238,9 @@ export class NewBasicPlaneTutorial implements TutorialDescriber {
 				),
 				t.translatedHintsPart(
 					["Select the config tool"],
-					[`Select both servos (preferably using multiselect)`],
-					["Replace first key with 'Q'"],
-					["Replace second key with 'E'"],
+					[`Select servomotors`],
+					["Replace first key with 'A'"],
+					["Replace second key with 'D'"],
 				),
 			],
 
@@ -267,7 +267,7 @@ export class NewBasicPlaneTutorial implements TutorialDescriber {
 				t.funcPart(() => toolController.enabledTools.disableAll()),
 				t.partNextButton(),
 				t.partText(
-					`This is the last message. You can replay tutorial any moment, just go to the settings (next to the play button).\nGood luck!`,
+					`This is the last message. You can replay this tutorial any moment, just go to the settings (next to the play button)\nGood luck!`,
 				),
 			],
 		];

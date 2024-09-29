@@ -577,8 +577,8 @@ export const NewBasicPlaneTutorialDiffs = {
 							smooth: { speed: 20, mode: "stopOnRelease" },
 						},
 						keys: [
-							{ key: "S", value: 15 },
-							{ key: "W", value: -15 },
+							{ key: "W", value: 15 },
+							{ key: "S", value: -15 },
 						],
 						startValue: 0,
 					},
@@ -599,8 +599,8 @@ export const NewBasicPlaneTutorialDiffs = {
 							smooth: { speed: 20, mode: "stopOnRelease" },
 						},
 						keys: [
-							{ key: "W", value: 15 },
-							{ key: "S", value: -15 },
+							{ key: "S", value: 15 },
+							{ key: "W", value: -15 },
 						],
 						startValue: 0,
 					},
