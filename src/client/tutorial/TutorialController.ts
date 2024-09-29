@@ -113,6 +113,11 @@ export class TutorialControl extends Control<TutorialControlDefinition> {
 		this.add(new ButtonControl(this.gui.Header.Next, () => this._nextPressed.Fire()));
 		this.add(
 			new ButtonControl(this.gui.Header.Skip, () => {
+				if (RunService.IsStudio()) {
+					this._skipPressed.Fire();
+					return;
+				}
+
 				ConfirmPopup.showPopup(
 					"Are you sure you want to skip this step?",
 					"This way you will learn this lesson worse!",
