@@ -1,11 +1,11 @@
-import { HttpService, Players, RunService } from "@rbxts/services";
+import { Players, RunService } from "@rbxts/services";
 import { ObservableValue } from "engine/shared/event/ObservableValue";
 import { C2S2CRemoteFunction } from "engine/shared/event/PERemoteEvent";
 import { PlayerRank } from "engine/shared/PlayerRank";
 
 export class Switches {
 	private readonly setSwitch = new C2S2CRemoteFunction<{ readonly name: string; readonly value: boolean }>(
-		"adm_setsw_" + HttpService.GenerateGUID(false),
+		"adm_setsw",
 	);
 
 	private readonly _registered: { [k in string]: ObservableValue<boolean> } = {};
