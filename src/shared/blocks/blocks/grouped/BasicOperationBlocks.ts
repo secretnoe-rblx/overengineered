@@ -101,6 +101,7 @@ const defs = {
 					bool: { config: false as boolean },
 					byte: { config: 0 as number },
 				},
+				group: "0",
 			},
 			value2: {
 				displayName: "Value 2",
@@ -109,6 +110,7 @@ const defs = {
 					bool: { config: false as boolean },
 					byte: { config: 0 as number },
 				},
+				group: "0",
 			},
 		},
 		output: {
