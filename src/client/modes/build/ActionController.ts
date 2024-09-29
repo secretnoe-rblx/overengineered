@@ -1,4 +1,4 @@
-import { InputController } from "client/controller/InputController";
+import { InputController } from "engine/client/InputController";
 import { LoadingController } from "client/controller/LoadingController";
 import { LogControl } from "client/gui/static/LogControl";
 import { ClientComponent } from "engine/client/component/ClientComponent";

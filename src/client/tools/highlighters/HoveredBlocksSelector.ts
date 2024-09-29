@@ -1,7 +1,7 @@
 import { BlockSelect } from "client/tools/highlighters/BlockSelect";
 import { MultiModelHighlighter } from "client/tools/highlighters/MultiModelHighlighter";
 import { ClientComponent } from "engine/client/component/ClientComponent";
-import { Signals } from "engine/client/event/Signals";
+import { Signals } from "client/Signals";
 import { ObservableValue } from "engine/shared/event/ObservableValue";
 import { ArgsSignal } from "engine/shared/event/Signal";
 import { BuildingManager } from "shared/building/BuildingManager";

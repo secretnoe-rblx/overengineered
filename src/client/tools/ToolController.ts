@@ -6,7 +6,7 @@ import { EditTool } from "client/tools/EditTool";
 import { PaintTool } from "client/tools/PaintTool";
 import { WireTool } from "client/tools/WireTool";
 import { ClientComponent } from "engine/client/component/ClientComponent";
-import { Signals } from "engine/client/event/Signals";
+import { Signals } from "client/Signals";
 import { ComponentChild } from "engine/shared/component/ComponentChild";
 import { ComponentDisabler } from "engine/shared/component/ComponentDisabler";
 import { MiddlewaredObservableValue } from "engine/shared/event/MiddlewaredObservableValue";

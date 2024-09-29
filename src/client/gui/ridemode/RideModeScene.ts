@@ -1,5 +1,4 @@
 import { RunService, UserInputService, Workspace } from "@rbxts/services";
-import { InputController } from "client/controller/InputController";
 import { LoadingController } from "client/controller/LoadingController";
 import { LocalPlayer } from "client/controller/LocalPlayer";
 import { ButtonControl } from "client/gui/controls/Button";
@@ -11,6 +10,7 @@ import { ConfirmPopup } from "client/gui/popup/ConfirmPopup";
 import { TouchModeButtonControl } from "client/gui/ridemode/TouchModeButtonControl";
 import { requestMode } from "client/modes/PlayModeRequest";
 import { Control } from "engine/client/gui/Control";
+import { InputController } from "engine/client/InputController";
 import { ComponentChild } from "engine/shared/component/ComponentChild";
 import { ContainerComponent } from "engine/shared/component/ContainerComponent";
 import { EventHandler } from "engine/shared/event/EventHandler";

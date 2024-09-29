@@ -21,7 +21,7 @@ export namespace BlockListBuilder {
 		});
 	}
 
-	export function buildBlockList(builders: readonly BlockBuilder[]): BlockList {
+	export function buildBlockList(builders: readonly BlockBuilder[], di: DIContainer): BlockList {
 		const endings = [".", "!", "?", " "];
 		const process = (block: BlockBuilder): BlockBuilder => {
 			if (!endings.includes(block.description.sub(block.description.size()))) {

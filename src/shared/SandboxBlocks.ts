@@ -54,7 +54,7 @@ import { TpsCounterBlock } from "shared/blocks/blocks/TpsCounterBlock";
 import { VehicleSeatBlock } from "shared/blocks/blocks/VehicleSeatBlock";
 import type { BlockBuilder } from "shared/blocks/Block";
 
-export const CreateSandboxBlocks = (): BlockList => {
+export const CreateSandboxBlocks = (di: DIContainer): BlockList => {
 	const blocksArr: BlockBuilder[] = [
 		...BuildingBlocks,
 		...MechanicalBlocks,
@@ -120,5 +120,5 @@ export const CreateSandboxBlocks = (): BlockList => {
 		}
 	}
 
-	return BlockListBuilder.buildBlockList(blocksArr);
+	return BlockListBuilder.buildBlockList(blocksArr, di);
 };

@@ -1,4 +1,21 @@
-import { VectorUtils } from "shared/utils/VectorUtils";
+namespace vec3u {
+	/** @returns Are all of the points of `left` less than those of `right` */
+	export function lessThan(left: Vector3, right: Vector3): boolean {
+		return left.X < right.X && left.Y < right.Y && left.Z < right.Z;
+	}
+	/** @returns Are all of the points of `left` less than those of `right` */
+	export function lessThanOrEquals(left: Vector3, right: Vector3): boolean {
+		return left.X <= right.X && left.Y <= right.Y && left.Z <= right.Z;
+	}
+	/** @returns Are all of the points of `left` greater than those of `right` */
+	export function greaterThan(left: Vector3, right: Vector3): boolean {
+		return left.X > right.X && left.Y > right.Y && left.Z > right.Z;
+	}
+	/** @returns Are all of the points of `left` greater than those of `right` */
+	export function greaterThanOrEquals(left: Vector3, right: Vector3): boolean {
+		return left.X >= right.X && left.Y >= right.Y && left.Z >= right.Z;
+	}
+}
 
 interface CenterSizeData {
 	readonly center: Vector3;
@@ -181,15 +198,12 @@ export class AABB {
 	/** @returns Is the provided value fully inside of this {@link AABB} */
 	contains(other: Vector3 | AABB): boolean {
 		if (typeIs(other, "Vector3")) {
-			return (
-				VectorUtils.ofVec3.lessThanOrEquals(this.getMin(), other) &&
-				VectorUtils.ofVec3.greaterThanOrEquals(this.getMax(), other)
-			);
+			return vec3u.lessThanOrEquals(this.getMin(), other) && vec3u.greaterThanOrEquals(this.getMax(), other);
 		}
 
 		return (
-			VectorUtils.ofVec3.lessThanOrEquals(this.getMin(), other.getMin()) &&
-			VectorUtils.ofVec3.greaterThanOrEquals(this.getMax(), other.getMax())
+			vec3u.lessThanOrEquals(this.getMin(), other.getMin()) &&
+			vec3u.greaterThanOrEquals(this.getMax(), other.getMax())
 		);
 	}
 }

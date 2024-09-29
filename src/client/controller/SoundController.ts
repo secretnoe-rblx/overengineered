@@ -1,6 +1,6 @@
 import { Players, ReplicatedStorage, Workspace } from "@rbxts/services";
 import { LocalPlayer } from "client/controller/LocalPlayer";
-import { Signals } from "engine/client/event/Signals";
+import { Signals } from "client/Signals";
 import { HostedService } from "engine/shared/di/HostedService";
 import { Sound } from "shared/Sound";
 import { TerrainDataInfo } from "shared/TerrainDataInfo";

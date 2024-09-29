@@ -1,5 +1,5 @@
 import { Players } from "@rbxts/services";
-import { InputController } from "client/controller/InputController";
+import { InputController } from "engine/client/InputController";
 import { MultiBlockConfigControl } from "client/gui/BlockConfigControls";
 import { GuiAnimator } from "client/gui/GuiAnimator";
 import { LogControl } from "client/gui/static/LogControl";

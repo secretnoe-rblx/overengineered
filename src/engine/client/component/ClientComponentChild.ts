@@ -1,4 +1,4 @@
-import { InputController } from "client/controller/InputController";
+import { InputController } from "engine/client/InputController";
 import { ComponentChild } from "engine/shared/component/ComponentChild";
 import type { ClientComponentEvents } from "engine/client/component/ClientComponentEvents";
 import type { ReadonlyComponentChild } from "engine/shared/component/ComponentChild";

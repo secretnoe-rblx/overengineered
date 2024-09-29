@@ -1,10 +1,9 @@
 import { RunService, Workspace } from "@rbxts/services";
-import { ObservableValue } from "engine/shared/event/ObservableValue";
 import { InstanceBlockLogic } from "shared/blockLogic/BlockLogic";
 import { BlockCreation } from "shared/blocks/BlockCreation";
 import { GameDefinitions } from "shared/data/GameDefinitions";
 import { GameEnvironment } from "shared/data/GameEnvironment";
-import { Switches } from "shared/Switches";
+import type { Switches } from "engine/shared/Switches";
 import type { PlacedBlockConfig } from "shared/blockLogic/BlockConfig";
 import type {
 	BlockLogicFullBothDefinitions,
@@ -37,16 +36,16 @@ type WingBlock = BlockModel & {
 		  });
 };
 
-const fluidForcesEnabled = new ObservableValue(RunService.IsStudio());
-Switches.register("Fluid forces enabled", fluidForcesEnabled);
-
 export type { Logic as WingsBlockLogic };
+@injectable
 class Logic extends InstanceBlockLogic<typeof definition, WingBlock> {
-	constructor(block: InstanceBlockLogicArgs) {
+	constructor(block: InstanceBlockLogicArgs, @tryInject switches?: Switches) {
 		super(definition, block);
 
+		const fluidForcesEnabled = switches?.registerOrGet("Fluid forces enabled", RunService.IsStudio());
+
 		// Enable fluidforces for roblox engineers
-		if (fluidForcesEnabled.get()) {
+		if (fluidForcesEnabled?.get()) {
 			this.instance.WingSurface.EnableFluidForces = true;
 			return;
 		}

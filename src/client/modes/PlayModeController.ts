@@ -4,7 +4,7 @@ import { Popup } from "client/gui/Popup";
 import { BuildingMode } from "client/modes/build/BuildingMode";
 import { requestMode } from "client/modes/PlayModeRequest";
 import { RideMode } from "client/modes/ride/RideMode";
-import { Signals } from "engine/client/event/Signals";
+import { Signals } from "client/Signals";
 import { HostedService } from "engine/shared/di/HostedService";
 import { ObservableValue } from "engine/shared/event/ObservableValue";
 import { CustomRemotes } from "shared/Remotes";

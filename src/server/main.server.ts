@@ -13,8 +13,9 @@ import { PlasmaProjectile } from "shared/weapons/PlasmaProjectileLogic";
 import { BulletProjectile } from "shared/weapons/BulletProjectileLogic";
 import { BootFlagsController } from "server/BootFlagsController";
 import { GameHostBuilder } from "engine/shared/GameHostBuilder";
+import { gameInfo } from "shared/GameInfo";
 
-const builder = new GameHostBuilder();
+const builder = new GameHostBuilder(gameInfo);
 SandboxGame.initialize(builder);
 
 const host = builder.build();

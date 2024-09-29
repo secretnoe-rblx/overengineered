@@ -1,5 +1,5 @@
 import { Players } from "@rbxts/services";
-import { Signals } from "engine/client/event/Signals";
+import { Signals } from "client/Signals";
 import { ObservableValue } from "engine/shared/event/ObservableValue";
 import { GameDefinitions } from "shared/data/GameDefinitions";
 import { Physics } from "shared/Physics";

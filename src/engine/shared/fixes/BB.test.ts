@@ -1,8 +1,8 @@
 import { Players, Workspace } from "@rbxts/services";
 import { Assert } from "engine/shared/Assert";
+import { Colors } from "engine/shared/Colors";
 import { Element } from "engine/shared/Element";
 import { BB } from "engine/shared/fixes/BB";
-import { Colors } from "shared/Colors";
 import type { UnitTests } from "engine/shared/TestFramework";
 
 const parent = Element.create("Folder", { Name: "BBtests", Parent: Workspace });

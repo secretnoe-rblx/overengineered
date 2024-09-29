@@ -2,6 +2,7 @@ import { DIContainerBuilder } from "engine/shared/di/DIContainer";
 import { pathOf } from "engine/shared/di/DIPathFunctions";
 import { GameHost } from "engine/shared/GameHost";
 import { Logger } from "engine/shared/Logger";
+import { Switches } from "engine/shared/Switches";
 
 class GameHostDIContainerBuilder extends DIContainerBuilder {
 	/** @deprecated Internal use only */
@@ -21,6 +22,13 @@ class GameHostDIContainerBuilder extends DIContainerBuilder {
 
 export class GameHostBuilder {
 	readonly services = new GameHostDIContainerBuilder();
+
+	constructor(gameInfo: GameInfo) {
+		Logger.printInfo(gameInfo);
+
+		this.services.registerSingletonValue(gameInfo);
+		this.services.registerSingletonClass(Switches).autoInit().onInit(Logger.initSwitches);
+	}
 
 	build(): GameHost {
 		Logger.beginScope("GameHostBuilder");

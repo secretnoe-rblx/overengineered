@@ -1,5 +1,5 @@
 import { Players, ReplicatedStorage, RunService, UserInputService, Workspace } from "@rbxts/services";
-import { InputController } from "client/controller/InputController";
+import { InputController } from "engine/client/InputController";
 import { SoundController } from "client/controller/SoundController";
 import { BlockPreviewControl } from "client/gui/buildmode/BlockPreviewControl";
 import { BlockSelectionControl } from "client/gui/buildmode/BlockSelection";
@@ -15,7 +15,7 @@ import { BlockMirrorer } from "client/tools/additional/BlockMirrorer";
 import { ToolBase } from "client/tools/ToolBase";
 import { ClientComponent } from "engine/client/component/ClientComponent";
 import { ClientComponentChild } from "engine/client/component/ClientComponentChild";
-import { Signals } from "engine/client/event/Signals";
+import { Signals } from "client/Signals";
 import { Control } from "engine/client/gui/Control";
 import { Component } from "engine/shared/component/Component";
 import { ComponentChild } from "engine/shared/component/ComponentChild";

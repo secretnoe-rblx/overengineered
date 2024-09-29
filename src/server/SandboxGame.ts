@@ -33,7 +33,7 @@ export namespace SandboxGame {
 		RemoteEvents.initializeVisualEffects(builder);
 
 		builder.services.registerSingletonFunc(() => SharedPlots.initialize());
-		builder.services.registerSingletonValue(CreateSandboxBlocks());
+		builder.services.registerSingletonFunc(CreateSandboxBlocks);
 
 		builder.services.registerService(ServerPlots);
 		PlayModeController.initialize(builder);

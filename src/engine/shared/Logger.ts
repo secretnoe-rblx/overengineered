@@ -1,9 +1,8 @@
-import { RunService } from "@rbxts/services";
+import { Players, RunService } from "@rbxts/services";
 import { ComponentDisabler } from "engine/shared/component/ComponentDisabler";
 import { ObservableValue } from "engine/shared/event/ObservableValue";
 import { Objects } from "engine/shared/fixes/objects";
-import { GameDefinitions } from "shared/data/GameDefinitions";
-import { Switches } from "shared/Switches";
+import type { Switches } from "engine/shared/Switches";
 
 declare global {
 	function $trace(...args: unknown[]): void;
@@ -61,29 +60,30 @@ export namespace Logger {
 	export const levels = lvls;
 	export const enabledLevels = new ComponentDisabler(Objects.values(levels));
 
-	{
+	const scopeStack: string[] = [];
+
+	export function printInfo(gameInfo: GameInfo) {
+		if (!RunService.IsClient()) return;
+
+		print(gameInfo.gameName);
+		print();
+
+		print(`ℹ Environment: ${gameInfo.environment} in ${RunService.IsStudio() ? "studio" : "player"}`);
+		print(`ℹ User: ${Players.LocalPlayer.UserId} @${Players.LocalPlayer.Name} ${Players.LocalPlayer.DisplayName}`);
+		print(`ℹ Build: ${RunService.IsStudio() ? "🔒 Studio" : game.PlaceVersion}`);
+		print(`ℹ Server: ${RunService.IsStudio() ? "🔒 Studio" : game.JobId}`);
+
+		print();
+	}
+	export function initSwitches(switches: Switches) {
 		const logDebug = new ObservableValue(false);
 		logDebug.subscribe((enabled) => enabledLevels.set(enabled, levels.debug), true);
-		Switches.register("logDebug", logDebug);
+		switches.register("logDebug", logDebug);
 
 		const logTrace = new ObservableValue(false);
 		logTrace.subscribe((enabled) => enabledLevels.set(enabled, levels.trace), true);
-		Switches.register("logTrace", logTrace);
+		switches.register("logTrace", logTrace);
 	}
-
-	const scopeStack: string[] = [];
-
-	function init() {
-		if (!RunService.IsClient()) return;
-
-		print(`🛠️ Plane Engineers 🛠️`);
-		print();
-		for (const env of GameDefinitions.getEnvironmentInfo()) {
-			print(`ℹ ${env}`);
-		}
-		print();
-	}
-	init();
 
 	export function beginScope(scope: string) {
 		scopeStack.push(scope);

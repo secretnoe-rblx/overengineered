@@ -8,16 +8,9 @@ export namespace Signals {
 	}
 
 	export namespace PLAYER {
-		export const SPAWN = registerSignal(new Signal<() => void>());
-		export const DIED = registerSignal(new Signal<() => void>());
+		export const SPAWN = new Signal();
+		export const DIED = new Signal();
 	}
 
 	export const LOCAL_PLAY_MODE_CHANGED = new Signal<(mode: PlayModes) => void>();
-
-	export function registerSignal<T extends Signal>(signal: T): T {
-		return signal;
-	}
-	export function r() {
-		registerSignal(new Signal());
-	}
 }

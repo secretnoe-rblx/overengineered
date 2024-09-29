@@ -1,10 +1,10 @@
 import { ReplicatedStorage, Workspace } from "@rbxts/services";
-import { InputController } from "client/controller/InputController";
+import { InputController } from "engine/client/InputController";
 import { Gui } from "client/gui/Gui";
 import { TooltipsHolder } from "client/gui/static/TooltipsControl";
 import { BlockEditorBase } from "client/tools/additional/BlockEditorBase";
 import { ClientComponentChild } from "engine/client/component/ClientComponentChild";
-import { Signals } from "engine/client/event/Signals";
+import { Signals } from "client/Signals";
 import { NumberObservableValue } from "engine/shared/event/NumberObservableValue";
 import { BB } from "engine/shared/fixes/BB";
 import { PlotWelder } from "shared/building/PlotWelder";

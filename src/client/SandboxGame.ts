@@ -72,7 +72,7 @@ export namespace SandboxGame {
 			return new ReadonlyPlot(plot.instance.Blocks, plot.getCenter(), plot.bounds);
 		});
 
-		builder.services.registerSingletonValue(CreateSandboxBlocks());
+		builder.services.registerSingletonFunc(CreateSandboxBlocks);
 		PlayModeController.initialize(builder);
 		ClientBuildingValidationController.initialize(builder);
 

@@ -6,8 +6,8 @@ import type { PlacedBlockConfig } from "shared/blockLogic/BlockConfig";
 import type { BlockLogicTypes } from "shared/blockLogic/BlockLogicTypes";
 
 namespace BlockLogicTests {
-	export function test2() {
-		const blockList = CreateSandboxBlocks();
+	export function test2(di: DIContainer) {
+		const blockList = CreateSandboxBlocks(di);
 
 		const newBlock = (id: string) => new blockList.blocks[id]!.logic!.ctor({ instance: undefined! });
 		const create = (blocks: { readonly id: string; readonly config: PlacedBlockConfig }[]) => {

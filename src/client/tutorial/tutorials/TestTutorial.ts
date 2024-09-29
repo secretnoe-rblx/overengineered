@@ -1,4 +1,4 @@
-import { InputController } from "client/controller/InputController";
+import { InputController } from "engine/client/InputController";
 import { ActionController } from "client/modes/build/ActionController";
 import { TestTutorialDiff } from "client/tutorial/tutorials/TestTutorial.diff";
 import type { BuildingMode } from "client/modes/build/BuildingMode";

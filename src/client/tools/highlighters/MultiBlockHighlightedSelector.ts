@@ -1,4 +1,4 @@
-import { InputController } from "client/controller/InputController";
+import { InputController } from "engine/client/InputController";
 import { BlockSelect } from "client/tools/highlighters/BlockSelect";
 import { BlockSelectorModeGui } from "client/tools/highlighters/BlockSelectorModeGui";
 import { MultiBlockSelector as MBS } from "client/tools/highlighters/MultiBlockSelector";

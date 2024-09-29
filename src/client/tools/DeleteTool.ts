@@ -1,4 +1,4 @@
-import { InputController } from "client/controller/InputController";
+import { InputController } from "engine/client/InputController";
 import { SoundController } from "client/controller/SoundController";
 import { MirrorEditorControl } from "client/gui/buildmode/MirrorEditorControl";
 import { ButtonControl } from "client/gui/controls/Button";
