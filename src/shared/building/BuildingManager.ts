@@ -7,6 +7,11 @@ import type { SharedPlot } from "shared/building/SharedPlot";
 /** Methods for for getting information about blocks in a building */
 export namespace BuildingManager {
 	export const AllowedMaterials: readonly Enum.Material[] = [
+		Enum.Material.Asphalt,
+		Enum.Material.Basalt,
+		Enum.Material.Cardboard,
+		Enum.Material.RoofShingles,
+		Enum.Material.Rubber,
 		Enum.Material.Brick,
 		Enum.Material.Cobblestone,
 		Enum.Material.Concrete,
