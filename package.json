@@ -7,11 +7,11 @@
     "build": "rbxtsc",
     "watch": "rbxtsc -w"
   },
-  "keywords": [],
-  "author": "",
+  "keywords": [ ],
+  "author": "anywaymachines",
   "license": "ISC",
   "workspaces": [
-    "rbxts-transformer-macros"
+    "src/engine/transformer"
   ],
   "devDependencies": {
     "@rbxts/compiler-types": "github:i3ym/roblox-ts-compiler-types-pe",
