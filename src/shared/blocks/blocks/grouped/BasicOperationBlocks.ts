@@ -530,9 +530,9 @@ const maths = {
 				if (typeIs(value1, "Vector3")) {
 					return { result: { type: "vector3", value: value1.div(value2) } };
 				}
-				if (typeIs(value2, "Vector3")) {
-					return { result: { type: "vector3", value: value2.div(value1) } };
-				}
+
+				// while we can't mix types easily
+				assert(!typeIs(value2, "Vector3"));
 
 				return { result: { type: "number", value: value1 / value2 } };
 			},
