@@ -2,7 +2,7 @@ import { HttpService } from "@rbxts/services";
 import { ArgsSignal } from "engine/shared/event/Signal";
 import { BB } from "engine/shared/fixes/BB";
 import { JSON } from "engine/shared/fixes/Json";
-import { Objects } from "engine/shared/fixes/objects";
+import { Objects } from "engine/shared/fixes/Objects";
 import { Operation } from "engine/shared/Operation";
 import { BlockManager } from "shared/building/BlockManager";
 import { ReadonlyPlot } from "shared/building/ReadonlyPlot";

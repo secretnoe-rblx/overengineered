@@ -7,7 +7,7 @@ import { LogControl } from "client/gui/static/LogControl";
 import { SandboxGame } from "client/SandboxGame";
 import { ServerRestartController } from "client/ServerRestartController";
 import { InputController } from "engine/client/InputController";
-import { Objects } from "engine/shared/fixes/objects";
+import { Objects } from "engine/shared/fixes/Objects";
 import { GameHostBuilder } from "engine/shared/GameHostBuilder";
 import { TestFramework } from "engine/shared/TestFramework";
 import { Colors } from "shared/Colors";

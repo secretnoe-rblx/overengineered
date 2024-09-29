@@ -1,9 +1,9 @@
 import { Players, RunService, UserInputService } from "@rbxts/services";
-import { InputController } from "engine/client/InputController";
 import { ButtonControl } from "client/gui/controls/Button";
 import { Gui } from "client/gui/Gui";
 import { rootComponents } from "client/test/RootComponents";
 import { Control } from "engine/client/gui/Control";
+import { InputController } from "engine/client/InputController";
 import { Element } from "engine/shared/Element";
 import { Colors } from "shared/Colors";
 import { GameDefinitions } from "shared/data/GameDefinitions";

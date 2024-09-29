@@ -1,7 +1,7 @@
 import { GuiService, Players, Workspace } from "@rbxts/services";
-import { InputController } from "engine/client/InputController";
 import { LocalPlayer } from "client/controller/LocalPlayer";
 import { Gui } from "client/gui/Gui";
+import { InputController } from "engine/client/InputController";
 import { PlayerUtils } from "engine/shared/utils/PlayerUtils";
 import { BlockManager } from "shared/building/BlockManager";
 import type { ObservableCollectionSet } from "engine/shared/event/ObservableCollection";

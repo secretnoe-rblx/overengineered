@@ -1,6 +1,6 @@
 import { ContextActionService, Players } from "@rbxts/services";
-import { InputController } from "engine/client/InputController";
 import { LocalPlayer } from "client/controller/LocalPlayer";
+import { InputController } from "engine/client/InputController";
 import { HostedService } from "engine/shared/di/HostedService";
 import { ObservableValue } from "engine/shared/event/ObservableValue";
 import { PartUtils } from "shared/utils/PartUtils";

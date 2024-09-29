@@ -1,4 +1,4 @@
-import { Objects } from "engine/shared/fixes/objects";
+import { Objects } from "engine/shared/fixes/Objects";
 import { utf8_lc_uc, utf8_uc_lc } from "engine/shared/fixes/utf8data";
 
 // function to force hoisting of the macros, because it does not but still tries to use them

@@ -1,5 +1,5 @@
 import { Assert } from "engine/shared/Assert";
-import { Objects } from "engine/shared/fixes/objects";
+import { Objects } from "engine/shared/fixes/Objects";
 import { CreateSandboxBlocks } from "shared/SandboxBlocks";
 import type { UnitTests } from "engine/shared/TestFramework";
 import type { PlacedBlockConfig } from "shared/blockLogic/BlockConfig";

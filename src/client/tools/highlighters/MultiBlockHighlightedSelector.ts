@@ -1,8 +1,8 @@
-import { InputController } from "engine/client/InputController";
 import { BlockSelect } from "client/tools/highlighters/BlockSelect";
 import { BlockSelectorModeGui } from "client/tools/highlighters/BlockSelectorModeGui";
 import { MultiBlockSelector as MBS } from "client/tools/highlighters/MultiBlockSelector";
 import { ClientComponent } from "engine/client/component/ClientComponent";
+import { InputController } from "engine/client/InputController";
 import type { BlockSelectorModeGuiDefinition } from "client/tools/highlighters/BlockSelectorModeGui";
 import type { MultiBlockSelectorConfiguration } from "client/tools/highlighters/MultiBlockSelector";
 import type { ObservableCollectionSet } from "engine/shared/event/ObservableCollection";

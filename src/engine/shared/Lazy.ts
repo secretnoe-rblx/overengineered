@@ -1,4 +1,4 @@
-import { Objects } from "engine/shared/fixes/objects";
+import { Objects } from "engine/shared/fixes/Objects";
 
 /** A lazily evaluated value. */
 export class Lazy<T> {

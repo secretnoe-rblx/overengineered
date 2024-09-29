@@ -1,5 +1,5 @@
-import { InputController } from "engine/client/InputController";
 import { InputHandler } from "engine/client/event/InputHandler";
+import { InputController } from "engine/client/InputController";
 import { ComponentEvents } from "engine/shared/component/ComponentEvents";
 import type { EventHandler } from "engine/shared/event/EventHandler";
 

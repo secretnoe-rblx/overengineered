@@ -3,7 +3,7 @@ import { Component } from "engine/shared/component/Component";
 import { ContainerComponent } from "engine/shared/component/ContainerComponent";
 import { Easing } from "engine/shared/component/Easing";
 import { SlimSignal } from "engine/shared/event/SlimSignal";
-import { Objects } from "engine/shared/fixes/objects";
+import { Objects } from "engine/shared/fixes/Objects";
 import type { Easable, EasingDirection, EasingStyle } from "engine/shared/component/Easing";
 
 interface Transform {

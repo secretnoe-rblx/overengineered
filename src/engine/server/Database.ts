@@ -1,5 +1,5 @@
 import { Element } from "engine/shared/Element";
-import { Objects } from "engine/shared/fixes/objects";
+import { Objects } from "engine/shared/fixes/Objects";
 import { Throttler } from "engine/shared/Throttler";
 
 interface DbStoredValue<T> {

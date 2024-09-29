@@ -3,7 +3,7 @@ import { LoadingController } from "client/controller/LoadingController";
 import { LogControl } from "client/gui/static/LogControl";
 import { ObservableValue } from "engine/shared/event/ObservableValue";
 import { JSON } from "engine/shared/fixes/Json";
-import { Objects } from "engine/shared/fixes/objects";
+import { Objects } from "engine/shared/fixes/Objects";
 import { Colors } from "shared/Colors";
 import { Config } from "shared/config/Config";
 import { PlayerConfigDefinition } from "shared/config/PlayerConfig";

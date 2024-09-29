@@ -1,5 +1,4 @@
 import { HttpService, Workspace } from "@rbxts/services";
-import { InputController } from "engine/client/InputController";
 import { LoadingController } from "client/controller/LoadingController";
 import { MaterialColorEditControl } from "client/gui/buildmode/MaterialColorEditControl";
 import { ButtonControl } from "client/gui/controls/Button";
@@ -13,6 +12,7 @@ import { SelectedBlocksHighlighter } from "client/tools/highlighters/SelectedBlo
 import { ToolBase } from "client/tools/ToolBase";
 import { ClientComponent } from "engine/client/component/ClientComponent";
 import { Control } from "engine/client/gui/Control";
+import { InputController } from "engine/client/InputController";
 import { ComponentChild } from "engine/shared/component/ComponentChild";
 import { ComponentDisabler } from "engine/shared/component/ComponentDisabler";
 import { TransformService } from "engine/shared/component/TransformService";

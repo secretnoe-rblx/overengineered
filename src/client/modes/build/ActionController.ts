@@ -1,7 +1,7 @@
-import { InputController } from "engine/client/InputController";
 import { LoadingController } from "client/controller/LoadingController";
 import { LogControl } from "client/gui/static/LogControl";
 import { ClientComponent } from "engine/client/component/ClientComponent";
+import { InputController } from "engine/client/InputController";
 import { ObservableCollectionArr } from "engine/shared/event/ObservableCollection";
 import { Signal } from "engine/shared/event/Signal";
 

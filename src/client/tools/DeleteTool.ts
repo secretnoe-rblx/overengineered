@@ -1,4 +1,3 @@
-import { InputController } from "engine/client/InputController";
 import { SoundController } from "client/controller/SoundController";
 import { MirrorEditorControl } from "client/gui/buildmode/MirrorEditorControl";
 import { ButtonControl } from "client/gui/controls/Button";
@@ -9,6 +8,7 @@ import { MultiBlockSelector } from "client/tools/highlighters/MultiBlockSelector
 import { SelectedBlocksHighlighter } from "client/tools/highlighters/SelectedBlocksHighlighter";
 import { ToolBase } from "client/tools/ToolBase";
 import { Control } from "engine/client/gui/Control";
+import { InputController } from "engine/client/InputController";
 import { ObservableCollectionSet } from "engine/shared/event/ObservableCollection";
 import { Signal } from "engine/shared/event/Signal";
 import type { MirrorEditorControlDefinition } from "client/gui/buildmode/MirrorEditorControl";

@@ -1,8 +1,8 @@
 import { UserInputService } from "@rbxts/services";
-import { InputController } from "engine/client/InputController";
 import { Gui } from "client/gui/Gui";
 import { ClientInstanceComponent } from "engine/client/component/ClientInstanceComponent";
 import { Control } from "engine/client/gui/Control";
+import { InputController } from "engine/client/InputController";
 import { TransformService } from "engine/shared/component/TransformService";
 import { Element } from "engine/shared/Element";
 import type { InstanceComponent } from "engine/shared/component/InstanceComponent";

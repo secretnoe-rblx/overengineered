@@ -8,7 +8,7 @@ import { ToggleControl } from "client/gui/controls/ToggleControl";
 import { Gui } from "client/gui/Gui";
 import { Control } from "engine/client/gui/Control";
 import { Signal } from "engine/shared/event/Signal";
-import { Objects } from "engine/shared/fixes/objects";
+import { Objects } from "engine/shared/fixes/Objects";
 import type { ColorChooserDefinition } from "client/gui/ColorChooser";
 import type { TextButtonDefinition } from "client/gui/controls/Button";
 import type { DropdownListDefinition } from "client/gui/controls/DropdownList";

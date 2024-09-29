@@ -1,5 +1,5 @@
 import { DIContainer } from "engine/shared/di/DIContainer";
-import { Objects } from "engine/shared/fixes/objects";
+import { Objects } from "engine/shared/fixes/Objects";
 import { BlockTestRunner } from "shared/blocks/testing/BlockTestRunner";
 import { CreateSandboxBlocks } from "shared/SandboxBlocks";
 import type { PlacedBlockConfig } from "shared/blockLogic/BlockConfig";

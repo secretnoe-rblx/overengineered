@@ -1,8 +1,8 @@
 import { GuiService, Players } from "@rbxts/services";
-import { InputController } from "engine/client/InputController";
 import { Gui } from "client/gui/Gui";
-import { ClientComponent } from "engine/client/component/ClientComponent";
 import { Signals } from "client/Signals";
+import { ClientComponent } from "engine/client/component/ClientComponent";
+import { InputController } from "engine/client/InputController";
 import { ObservableValue } from "engine/shared/event/ObservableValue";
 import { PlayerUtils } from "engine/shared/utils/PlayerUtils";
 import { SharedPlot } from "shared/building/SharedPlot";

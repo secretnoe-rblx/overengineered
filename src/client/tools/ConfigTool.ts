@@ -1,5 +1,4 @@
 import { Players } from "@rbxts/services";
-import { InputController } from "engine/client/InputController";
 import { MultiBlockConfigControl } from "client/gui/BlockConfigControls";
 import { GuiAnimator } from "client/gui/GuiAnimator";
 import { LogControl } from "client/gui/static/LogControl";
@@ -8,9 +7,10 @@ import { MultiBlockHighlightedSelector } from "client/tools/highlighters/MultiBl
 import { SelectedBlocksHighlighter } from "client/tools/highlighters/SelectedBlocksHighlighter";
 import { ToolBase } from "client/tools/ToolBase";
 import { Control } from "engine/client/gui/Control";
+import { InputController } from "engine/client/InputController";
 import { ObservableCollectionSet } from "engine/shared/event/ObservableCollection";
 import { JSON } from "engine/shared/fixes/Json";
-import { Objects } from "engine/shared/fixes/objects";
+import { Objects } from "engine/shared/fixes/Objects";
 import { Localization } from "engine/shared/Localization";
 import { BlockConfig } from "shared/blockLogic/BlockConfig";
 import { BlockWireManager } from "shared/blockLogic/BlockWireManager";

@@ -8,7 +8,7 @@ import { Control } from "engine/client/gui/Control";
 import { Component } from "engine/shared/component/Component";
 import { ComponentInstance } from "engine/shared/component/ComponentInstance";
 import { ArgsSignal, Signal } from "engine/shared/event/Signal";
-import { Objects } from "engine/shared/fixes/objects";
+import { Objects } from "engine/shared/fixes/Objects";
 import { Localization } from "engine/shared/Localization";
 import { BlockConfig } from "shared/blockLogic/BlockConfig";
 import { BlockManager } from "shared/building/BlockManager";

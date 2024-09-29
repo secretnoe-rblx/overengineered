@@ -1,6 +1,6 @@
 import { RunService, Workspace } from "@rbxts/services";
 import { Component } from "engine/shared/component/Component";
-import { Objects } from "engine/shared/fixes/objects";
+import { Objects } from "engine/shared/fixes/Objects";
 import { PlayerUtils } from "engine/shared/utils/PlayerUtils";
 import { BlockManager } from "shared/building/BlockManager";
 import { RemoteEvents } from "shared/RemoteEvents";

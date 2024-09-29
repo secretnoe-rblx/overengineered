@@ -1,5 +1,5 @@
 import { JSON } from "engine/shared/fixes/Json";
-import { Objects } from "engine/shared/fixes/objects";
+import { Objects } from "engine/shared/fixes/Objects";
 import { BlockWireManager } from "shared/blockLogic/BlockWireManager";
 import { _BlockConfigRegistrySave } from "shared/building/BlockConfigRegistrySave";
 import { BlockManager } from "shared/building/BlockManager";

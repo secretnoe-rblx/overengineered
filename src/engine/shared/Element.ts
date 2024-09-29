@@ -1,4 +1,4 @@
-import { Objects } from "engine/shared/fixes/objects";
+import { Objects } from "engine/shared/fixes/Objects";
 
 export type ElementProperties<T extends Instance> = Partial<ExcludeMembers<T, "Name">>;
 

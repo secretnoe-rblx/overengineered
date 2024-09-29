@@ -1,5 +1,5 @@
 import { TransformContainer } from "engine/shared/component/Transform";
-import { Objects } from "engine/shared/fixes/objects";
+import { Objects } from "engine/shared/fixes/Objects";
 import type {
 	RunningTransform,
 	TransformBuilder,

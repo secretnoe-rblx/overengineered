@@ -1,7 +1,7 @@
 import { Component } from "engine/shared/component/Component";
 import { ComponentInstance } from "engine/shared/component/ComponentInstance";
 import { ArgsSignal } from "engine/shared/event/Signal";
-import { Objects } from "engine/shared/fixes/objects";
+import { Objects } from "engine/shared/fixes/Objects";
 import { BlockLogicValueResults } from "shared/blockLogic/BlockLogicValueStorage";
 import {
 	BlockBackedInputLogicValueStorage,

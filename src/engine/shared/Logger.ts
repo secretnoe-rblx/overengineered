@@ -1,7 +1,7 @@
 import { Players, RunService } from "@rbxts/services";
 import { ComponentDisabler } from "engine/shared/component/ComponentDisabler";
 import { ObservableValue } from "engine/shared/event/ObservableValue";
-import { Objects } from "engine/shared/fixes/objects";
+import { Objects } from "engine/shared/fixes/Objects";
 import type { Switches } from "engine/shared/Switches";
 
 declare global {

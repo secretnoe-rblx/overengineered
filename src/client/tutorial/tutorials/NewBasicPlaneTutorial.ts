@@ -1,6 +1,6 @@
-import { InputController } from "engine/client/InputController";
 import { ActionController } from "client/modes/build/ActionController";
 import { NewBasicPlaneTutorialDiffs } from "client/tutorial/tutorials/NewBasicPlaneTutorial.diff";
+import { InputController } from "engine/client/InputController";
 import type { BuildingMode } from "client/modes/build/BuildingMode";
 import type { TutorialController, TutorialDescriber, TutorialRunnerPartList } from "client/tutorial/TutorialController";
 

@@ -1,4 +1,5 @@
 import { LoadingController } from "client/controller/LoadingController";
+import { Signals } from "client/Signals";
 import { BuildTool } from "client/tools/BuildTool";
 import { ConfigTool } from "client/tools/ConfigTool";
 import { DeleteTool } from "client/tools/DeleteTool";
@@ -6,11 +7,10 @@ import { EditTool } from "client/tools/EditTool";
 import { PaintTool } from "client/tools/PaintTool";
 import { WireTool } from "client/tools/WireTool";
 import { ClientComponent } from "engine/client/component/ClientComponent";
-import { Signals } from "client/Signals";
 import { ComponentChild } from "engine/shared/component/ComponentChild";
 import { ComponentDisabler } from "engine/shared/component/ComponentDisabler";
 import { MiddlewaredObservableValue } from "engine/shared/event/MiddlewaredObservableValue";
-import { Objects } from "engine/shared/fixes/objects";
+import { Objects } from "engine/shared/fixes/Objects";
 import type { BuildingMode } from "client/modes/build/BuildingMode";
 import type { ToolBase } from "client/tools/ToolBase";
 
