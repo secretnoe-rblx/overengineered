@@ -96,7 +96,7 @@ RunService.PostSimulation.Connect((dt) => {
 
 			const appliedForce = calculatedForce.mul(strength1).add(calculatedForce.mul(strength2));
 			forcesApplied.set(magneti, (forcesApplied.get(magneti) ?? Vector3.zero).add(appliedForce));
-			forcesApplied.set(magnetj, (forcesApplied.get(magnetj) ?? Vector3.zero).add(appliedForce.unm()));
+			forcesApplied.set(magnetj, (forcesApplied.get(magnetj) ?? Vector3.zero).add(appliedForce.mul(-1)));
 		}
 
 		const finalForce = forcesApplied.get(magneti);
