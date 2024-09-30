@@ -69,6 +69,7 @@ class Logic extends BlockLogic<typeof definition> {
 
 		const size = 0xff;
 		const internalMemory: { [k in number]: { readonly value: unknown; readonly type: PrimitiveKeys } } = {};
+		this.output.size.set("number", 0);
 
 		const isReady = (address: number) => {
 			const isInRange = address <= size && address >= 0;
