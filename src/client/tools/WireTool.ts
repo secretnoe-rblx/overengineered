@@ -1,8 +1,4 @@
 import { GamepadService, GuiService, Players, ReplicatedStorage, RunService, Workspace } from "@rbxts/services";
-import { ClientComponent } from "client/component/ClientComponent";
-import { ClientInstanceComponent } from "client/component/ClientInstanceComponent";
-import { InputController } from "client/controller/InputController";
-import { Control } from "client/gui/Control";
 import { ButtonControl } from "client/gui/controls/Button";
 import { Gui } from "client/gui/Gui";
 import { GuiAnimator } from "client/gui/GuiAnimator";
@@ -10,19 +6,23 @@ import { LogControl } from "client/gui/static/LogControl";
 import { ActionController } from "client/modes/build/ActionController";
 import { ClientBuilding } from "client/modes/build/ClientBuilding";
 import { ToolBase } from "client/tools/ToolBase";
+import { ClientComponent } from "engine/client/component/ClientComponent";
+import { ClientInstanceComponent } from "engine/client/component/ClientInstanceComponent";
+import { Control } from "engine/client/gui/Control";
+import { InputController } from "engine/client/InputController";
+import { Component } from "engine/shared/component/Component";
+import { ComponentChild } from "engine/shared/component/ComponentChild";
+import { ComponentChildren } from "engine/shared/component/ComponentChildren";
+import { Element } from "engine/shared/Element";
+import { ObservableValue } from "engine/shared/event/ObservableValue";
+import { Instances } from "engine/shared/fixes/Instances";
 import { BlockWireManager } from "shared/blockLogic/BlockWireManager";
 import { Colors } from "shared/Colors";
-import { Component } from "shared/component/Component";
-import { ComponentChild } from "shared/component/ComponentChild";
-import { ComponentChildren } from "shared/component/ComponentChildren";
-import { Element } from "shared/Element";
-import { ObservableValue } from "shared/event/ObservableValue";
-import { ReplicatedAssets } from "shared/ReplicatedAssets";
 import type { InputTooltips } from "client/gui/static/TooltipsControl";
 import type { BuildingMode } from "client/modes/build/BuildingMode";
+import type { ReadonlyObservableValue } from "engine/shared/event/ObservableValue";
 import type { BlockLogicTypes } from "shared/blockLogic/BlockLogicTypes";
 import type { SharedPlot } from "shared/building/SharedPlot";
-import type { ReadonlyObservableValue } from "shared/event/ObservableValue";
 
 const markerParent = Element.create("ScreenGui", {
 	Name: "WireToolMarkers",
@@ -138,7 +138,7 @@ namespace Markers {
 				Control<GuiObject & { WireInfoLabel: TextLabel; TypeTextLabel: TextLabel }>
 			>(this, true);
 			const createTooltip = () => {
-				const wireInfoSource = ReplicatedAssets.get<{
+				const wireInfoSource = Instances.getAssets<{
 					Wires: { WireInfo: GuiObject & { WireInfoLabel: TextLabel; TypeTextLabel: TextLabel } };
 				}>().Wires.WireInfo;
 				const control = new Control(wireInfoSource.Clone());

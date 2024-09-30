@@ -1,6 +1,6 @@
+import { ObservableValue } from "engine/shared/event/ObservableValue";
 import { BlockConfig } from "shared/blockLogic/BlockConfig";
 import { Colors } from "shared/Colors";
-import { ObservableValue } from "shared/event/ObservableValue";
 import type { PlacedBlockConfig } from "shared/blockLogic/BlockConfig";
 import type { BlockLogicFullInputDef, BlockLogicFullOutputDef } from "shared/blockLogic/BlockLogic";
 import type { BlockLogicTypes } from "shared/blockLogic/BlockLogicTypes";

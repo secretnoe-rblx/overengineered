@@ -1,6 +1,6 @@
-import { Component } from "shared/component/Component";
-import { ObservableValue } from "shared/event/ObservableValue";
-import { ArgsSignal } from "shared/event/Signal";
+import { Component } from "engine/shared/component/Component";
+import { ObservableValue } from "engine/shared/event/ObservableValue";
+import { ArgsSignal } from "engine/shared/event/Signal";
 import type { BlockLogic, BlockLogicFullBothDefinitions, BlockLogicTickContext } from "shared/blockLogic/BlockLogic";
 
 type Logic = BlockLogic<BlockLogicFullBothDefinitions>;

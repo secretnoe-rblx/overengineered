@@ -1,8 +1,8 @@
 import { ClientBlockControls } from "client/blocks/ClientBlockControls";
 import { LogicVisualizer } from "client/blocks/LogicVisuaizer";
+import { ContainerComponent } from "engine/shared/component/ContainerComponent";
 import { BlockConfig } from "shared/blockLogic/BlockConfig";
 import { SharedMachine } from "shared/blockLogic/SharedMachine";
-import { ContainerComponent } from "shared/component/ContainerComponent";
 import type { IClientBlockControl } from "client/blocks/ClientBlockControls";
 import type { PlayerDataStorage } from "client/PlayerDataStorage";
 import type { ImpactController } from "shared/block/impact/ImpactController";

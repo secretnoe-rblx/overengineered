@@ -1,18 +1,18 @@
 import { LoadingController } from "client/controller/LoadingController";
 import { HotbarControl } from "client/gui/buildmode/HotbarControl";
-import { Control } from "client/gui/Control";
 import { ButtonControl } from "client/gui/controls/Button";
 import { TouchActionControllerGui } from "client/gui/TouchActionControllerGui";
 import { ActionController } from "client/modes/build/ActionController";
 import { requestMode } from "client/modes/PlayModeRequest";
-import { ComponentDisabler } from "shared/component/ComponentDisabler";
+import { Control } from "engine/client/gui/Control";
+import { ComponentDisabler } from "engine/shared/component/ComponentDisabler";
 import type { HotbarControlDefinition } from "client/gui/buildmode/HotbarControl";
 import type { SavePopup } from "client/gui/popup/SavePopup";
 import type { SettingsPopup } from "client/gui/popup/SettingsPopup";
 import type { TouchActionControllerGuiDefinition } from "client/gui/TouchActionControllerGui";
 import type { BuildingMode } from "client/modes/build/BuildingMode";
 import type { ToolController } from "client/tools/ToolController";
-import type { TransformProps } from "shared/component/Transform";
+import type { TransformProps } from "engine/shared/component/Transform";
 
 type ActionBarControlDefinition = GuiObject & {
 	Buttons: {

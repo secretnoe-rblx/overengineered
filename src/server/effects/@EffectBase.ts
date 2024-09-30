@@ -1,9 +1,9 @@
+import { BidirectionalRemoteEvent } from "engine/shared/event/PERemoteEvent";
 import { ServerPlayers } from "server/ServerPlayers";
 import { PlayerConfigDefinition } from "shared/config/PlayerConfig";
-import { BidirectionalRemoteEvent } from "shared/event/PERemoteEvent";
+import type { CreatableRemoteEvents } from "engine/shared/event/RemoteEventBase";
 import type { PlayerDatabase } from "server/database/PlayerDatabase";
 import type { SharedPlots } from "shared/building/SharedPlots";
-import type { CreatableRemoteEvents } from "shared/event/RemoteEventBase";
 
 @injectable
 abstract class ServerEffectBase<T> {

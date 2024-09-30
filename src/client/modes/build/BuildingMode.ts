@@ -6,8 +6,8 @@ import { CenterOfMassController } from "client/modes/build/CenterOfMassControlle
 import { PlayMode } from "client/modes/PlayMode";
 import { BlockSelect } from "client/tools/highlighters/BlockSelect";
 import { ToolController } from "client/tools/ToolController";
-import { NumberObservableValue } from "shared/event/NumberObservableValue";
-import { ObservableValue } from "shared/event/ObservableValue";
+import { NumberObservableValue } from "engine/shared/event/NumberObservableValue";
+import { ObservableValue } from "engine/shared/event/ObservableValue";
 import { SharedRagdoll } from "shared/SharedRagdoll";
 import type { BuildingModeSceneDefinition } from "client/gui/buildmode/BuildingModeScene";
 import type { SharedPlot } from "shared/building/SharedPlot";
@@ -38,7 +38,7 @@ export class BuildingMode extends PlayMode {
 	constructor(@inject di: DIContainer, @inject plot: SharedPlot) {
 		super();
 
-		di = di.beginScope((di) => di.registerSingleton(this));
+		di = di.beginScope((di) => di.registerSingletonValue(this));
 		const com = new CenterOfMassController(plot);
 		this.event.subscribeObservable(this.centerOfMassEnabled, (enabled) => com.setEnabled(enabled), true);
 		this.onDisable(() => com.disable());

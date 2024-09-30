@@ -15,6 +15,7 @@ import { SpreadingFireController } from "server/SpreadingFireController";
 import { SharedPlots } from "shared/building/SharedPlots";
 import { RemoteEvents } from "shared/RemoteEvents";
 import { CreateSandboxBlocks } from "shared/SandboxBlocks";
+import type { GameHostBuilder } from "engine/shared/GameHostBuilder";
 
 export namespace SandboxGame {
 	export function initialize(builder: GameHostBuilder) {
@@ -32,7 +33,7 @@ export namespace SandboxGame {
 		RemoteEvents.initializeVisualEffects(builder);
 
 		builder.services.registerSingletonFunc(() => SharedPlots.initialize());
-		builder.services.registerSingleton(CreateSandboxBlocks());
+		builder.services.registerSingletonFunc(CreateSandboxBlocks);
 
 		builder.services.registerService(ServerPlots);
 		PlayModeController.initialize(builder);

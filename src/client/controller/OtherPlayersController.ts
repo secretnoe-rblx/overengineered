@@ -1,7 +1,8 @@
 import { Players } from "@rbxts/services";
-import { HostedService } from "shared/GameHost";
-import { PlayerWatcher } from "shared/PlayerWatcher";
+import { HostedService } from "engine/shared/di/HostedService";
+import { PlayerWatcher } from "engine/shared/PlayerWatcher";
 import { PartUtils } from "shared/utils/PartUtils";
+import type { GameHostBuilder } from "engine/shared/GameHostBuilder";
 
 class MakeMassless extends HostedService {
 	constructor() {

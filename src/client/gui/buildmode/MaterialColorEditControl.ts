@@ -1,19 +1,19 @@
 import { Players } from "@rbxts/services";
 import { ColorChooser } from "client/gui/ColorChooser";
-import { Colors } from "shared/Colors";
-import { Control } from "client/gui/Control";
 import { BlockPipetteButton } from "client/gui/controls/BlockPipetteButton";
 import { TextButtonControl } from "client/gui/controls/Button";
 import { MaterialChooser } from "client/gui/MaterialChooser";
-import { ObjectOverlayStorage } from "shared/component/ObjectOverlayStorage";
-import { TransformService } from "shared/component/TransformService";
+import { Control } from "engine/client/gui/Control";
+import { ObjectOverlayStorage } from "engine/shared/component/ObjectOverlayStorage";
+import { TransformService } from "engine/shared/component/TransformService";
+import { SubmittableValue } from "engine/shared/event/SubmittableValue";
+import { Marketplace } from "engine/shared/Marketplace";
+import { Colors } from "shared/Colors";
 import { GameDefinitions } from "shared/data/GameDefinitions";
-import { SubmittableValue } from "shared/event/SubmittableValue";
-import { Marketplace } from "shared/Marketplace";
 import type { ColorChooserDefinition } from "client/gui/ColorChooser";
 import type { ButtonControl, TextButtonDefinition } from "client/gui/controls/Button";
 import type { MaterialChooserDefinition } from "client/gui/MaterialChooser";
-import type { ObservableValue } from "shared/event/ObservableValue";
+import type { ObservableValue } from "engine/shared/event/ObservableValue";
 
 export type MaterialColorEditControlDefinition = GuiObject & {
 	readonly Color: GuiObject & {

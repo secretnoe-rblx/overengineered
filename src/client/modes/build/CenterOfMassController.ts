@@ -1,11 +1,11 @@
 import { ReplicatedStorage, Workspace } from "@rbxts/services";
-import { ClientComponent } from "client/component/ClientComponent";
 import { Gui } from "client/gui/Gui";
 import { ActionController } from "client/modes/build/ActionController";
+import { ClientComponent } from "engine/client/component/ClientComponent";
+import { Strings } from "engine/shared/fixes/String.propmacro";
 import { BuildingManager } from "shared/building/BuildingManager";
 import { SharedPlot } from "shared/building/SharedPlot";
 import { Colors } from "shared/Colors";
-import { Strings } from "shared/fixes/String.propmacro";
 import { CustomRemotes } from "shared/Remotes";
 
 type CM = readonly [pos: Vector3, mass: number];

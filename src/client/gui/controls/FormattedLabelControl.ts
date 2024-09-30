@@ -1,5 +1,5 @@
-import { Control } from "client/gui/Control";
-import { ObservableValue } from "shared/event/ObservableValue";
+import { Control } from "engine/client/gui/Control";
+import { ObservableValue } from "engine/shared/event/ObservableValue";
 
 export type LabelControlDefinition = TextLabel;
 

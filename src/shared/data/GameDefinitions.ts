@@ -1,6 +1,6 @@
 import { Players, RunService } from "@rbxts/services";
-import { RobloxUnit } from "shared/RobloxUnit";
-import { Throttler } from "shared/Throttler";
+import { RobloxUnit } from "engine/shared/RobloxUnit";
+import { Throttler } from "engine/shared/Throttler";
 
 export namespace GameDefinitions {
 	export const APRIL_FOOLS = false;

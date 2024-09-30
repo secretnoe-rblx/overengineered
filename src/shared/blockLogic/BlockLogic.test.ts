@@ -1,13 +1,13 @@
-import { Assert } from "shared/Assert";
-import { Objects } from "shared/fixes/objects";
+import { Assert } from "engine/shared/Assert";
+import { Objects } from "engine/shared/fixes/Objects";
 import { CreateSandboxBlocks } from "shared/SandboxBlocks";
+import type { UnitTests } from "engine/shared/TestFramework";
 import type { PlacedBlockConfig } from "shared/blockLogic/BlockConfig";
 import type { BlockLogicTypes } from "shared/blockLogic/BlockLogicTypes";
-import type { UnitTests } from "shared/test/TestFramework";
 
 namespace BlockLogicTests {
-	export function test2() {
-		const blockList = CreateSandboxBlocks();
+	export function test2(di: DIContainer) {
+		const blockList = CreateSandboxBlocks(di);
 
 		const newBlock = (id: string) => new blockList.blocks[id]!.logic!.ctor({ instance: undefined! });
 		const create = (blocks: { readonly id: string; readonly config: PlacedBlockConfig }[]) => {

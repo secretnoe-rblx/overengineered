@@ -1,8 +1,8 @@
 import { Players, RunService } from "@rbxts/services";
-import { Control } from "client/gui/Control";
 import { Gui } from "client/gui/Gui";
 import { GuiAnimator } from "client/gui/GuiAnimator";
-import { Localization } from "shared/Localization";
+import { Control } from "engine/client/gui/Control";
+import { Localization } from "engine/shared/Localization";
 
 export type TutorialControlDefinition = Frame & {
 	Header: TextLabel & {

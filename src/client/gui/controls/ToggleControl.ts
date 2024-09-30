@@ -1,8 +1,8 @@
-import { Colors } from "shared/Colors";
-import { Control } from "client/gui/Control";
 import { GuiAnimator } from "client/gui/GuiAnimator";
-import { ObservableValue } from "shared/event/ObservableValue";
-import { Signal } from "shared/event/Signal";
+import { Control } from "engine/client/gui/Control";
+import { ObservableValue } from "engine/shared/event/ObservableValue";
+import { Signal } from "engine/shared/event/Signal";
+import { Colors } from "shared/Colors";
 
 export type ToggleControlDefinition = TextButton & {
 	readonly Circle: TextButton;

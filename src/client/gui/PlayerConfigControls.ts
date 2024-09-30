@@ -1,5 +1,4 @@
 import { ColorChooser } from "client/gui/ColorChooser";
-import { Control } from "client/gui/Control";
 import { TextButtonControl } from "client/gui/controls/Button";
 import { DropdownList } from "client/gui/controls/DropdownList";
 import { KeyChooserControl } from "client/gui/controls/KeyChooserControl";
@@ -7,8 +6,9 @@ import { NumberTextBoxControl } from "client/gui/controls/NumberTextBoxControl";
 import { SliderControl } from "client/gui/controls/SliderControl";
 import { ToggleControl } from "client/gui/controls/ToggleControl";
 import { Gui } from "client/gui/Gui";
-import { Signal } from "shared/event/Signal";
-import { Objects } from "shared/fixes/objects";
+import { Control } from "engine/client/gui/Control";
+import { Signal } from "engine/shared/event/Signal";
+import { Objects } from "engine/shared/fixes/Objects";
 import type { ColorChooserDefinition } from "client/gui/ColorChooser";
 import type { TextButtonDefinition } from "client/gui/controls/Button";
 import type { DropdownListDefinition } from "client/gui/controls/DropdownList";
@@ -17,7 +17,7 @@ import type { NumberTextBoxControlDefinition } from "client/gui/controls/NumberT
 import type { SliderControlDefinition } from "client/gui/controls/SliderControl";
 import type { ToggleControlDefinition } from "client/gui/controls/ToggleControl";
 import type { TutorialsService } from "client/tutorial/TutorialService";
-import type { ReadonlyArgsSignal } from "shared/event/Signal";
+import type { ReadonlyArgsSignal } from "engine/shared/event/Signal";
 
 type ConfigPartDefinition<T extends GuiObject> = GuiObject & {
 	readonly HeadingLabel: TextLabel;
@@ -608,7 +608,10 @@ export class MultiPlayerConfigControl<
 		for (const [id, def] of Objects.entriesArray(definition).sort(
 			(left, right) => tostring(left[0]) < tostring(right[0]),
 		)) {
-			const control = this.di.resolveForeignClass(Controls[def.type], [config[id], def] as never);
+			const control = this.di.resolveForeignClass(
+				Controls[def.type] as typeof Controls.bool,
+				[config[id], def] as never,
+			);
 			this.add(control);
 			this.settedElements.set(id, control);
 

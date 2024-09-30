@@ -40,25 +40,6 @@ export namespace VectorUtils {
 		return vector.Unit as T;
 	}
 
-	export namespace ofVec3 {
-		/** @returns Are all of the points of `left` less than those of `right` */
-		export function lessThan(left: Vector3, right: Vector3): boolean {
-			return left.X < right.X && left.Y < right.Y && left.Z < right.Z;
-		}
-		/** @returns Are all of the points of `left` less than those of `right` */
-		export function lessThanOrEquals(left: Vector3, right: Vector3): boolean {
-			return left.X <= right.X && left.Y <= right.Y && left.Z <= right.Z;
-		}
-		/** @returns Are all of the points of `left` greater than those of `right` */
-		export function greaterThan(left: Vector3, right: Vector3): boolean {
-			return left.X > right.X && left.Y > right.Y && left.Z > right.Z;
-		}
-		/** @returns Are all of the points of `left` greater than those of `right` */
-		export function greaterThanOrEquals(left: Vector3, right: Vector3): boolean {
-			return left.X >= right.X && left.Y >= right.Y && left.Z >= right.Z;
-		}
-	}
-
 	export function roundVectorToBase(vector: Vector3, base: number): Vector3 {
 		const x = math.floor(vector.X / base + 0.5) * base;
 		const y = math.floor(vector.Y / base + 0.5) * base;

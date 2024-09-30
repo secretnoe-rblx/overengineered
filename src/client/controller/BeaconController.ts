@@ -1,10 +1,10 @@
 import { Workspace } from "@rbxts/services";
 import { LocalPlayer } from "client/controller/LocalPlayer";
 import { Beacon } from "client/gui/Beacon";
-import { Component } from "shared/component/Component";
-import { ComponentKeyedChildren } from "shared/component/ComponentKeyedChildren";
-import { HostedService } from "shared/GameHost";
-import { PlayerWatcher } from "shared/PlayerWatcher";
+import { Component } from "engine/shared/component/Component";
+import { ComponentKeyedChildren } from "engine/shared/component/ComponentKeyedChildren";
+import { HostedService } from "engine/shared/di/HostedService";
+import { PlayerWatcher } from "engine/shared/PlayerWatcher";
 import type { PlayerDataStorage } from "client/PlayerDataStorage";
 import type { ReadonlyPlot } from "shared/building/ReadonlyPlot";
 

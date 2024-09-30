@@ -1,7 +1,5 @@
 import { Players, RunService, UserInputService } from "@rbxts/services";
 import { AdminMessageController } from "client/AdminMessageController";
-import { InputController } from "client/controller/InputController";
-import { Control } from "client/gui/Control";
 import { TextButtonControl } from "client/gui/controls/Button";
 import { TabControl } from "client/gui/controls/TabControl";
 import { Gui } from "client/gui/Gui";
@@ -9,12 +7,15 @@ import { ServerRestartController } from "client/ServerRestartController";
 import { TestRunner } from "client/test/TestRunner";
 import { LoadSlotTest } from "client/test/visual/LoadSlotTest";
 import { TutorialCreator } from "client/tutorial/TutorialCreator";
-import { InstanceComponent } from "shared/component/InstanceComponent";
+import { Control } from "engine/client/gui/Control";
+import { InputController } from "engine/client/InputController";
+import { InstanceComponent } from "engine/shared/component/InstanceComponent";
+import { HostedService } from "engine/shared/di/HostedService";
+import { Element } from "engine/shared/Element";
 import { GameDefinitions } from "shared/data/GameDefinitions";
-import { Element } from "shared/Element";
-import { HostedService } from "shared/GameHost";
-import { Switches } from "shared/Switches";
 import type { TutorialsService } from "client/tutorial/TutorialService";
+import type { GameHostBuilder } from "engine/shared/GameHostBuilder";
+import type { Switches } from "engine/shared/Switches";
 import type { ReadonlyPlot } from "shared/building/ReadonlyPlot";
 
 @injectable
@@ -99,7 +100,7 @@ export class AdminGui extends HostedService {
 				wrapNonVisual(
 					"Switches",
 					asObject(
-						Switches.registered.mapToMap((k, v) =>
+						asMap(di.resolve<Switches>().registered).mapToMap((k, v) =>
 							$tuple(k + " " + (v.get() ? "+" : "-"), (di: DIContainer, btn: TextButtonControl) => {
 								v.set(!v.get());
 								btn.text.set(k + " " + (v.get() ? "+" : "-"));

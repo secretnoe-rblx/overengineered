@@ -1,8 +1,8 @@
 import { ColorChooser } from "client/gui/ColorChooser";
-import { Control } from "client/gui/Control";
 import { Gui } from "client/gui/Gui";
+import { Control } from "engine/client/gui/Control";
 import type { ColorChooserDefinition } from "client/gui/ColorChooser";
-import type { UnitTests } from "shared/test/TestFramework";
+import type { UnitTests } from "engine/shared/TestFramework";
 
 namespace ColorChooserTests {
 	export function show() {

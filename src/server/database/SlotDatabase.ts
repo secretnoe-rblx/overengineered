@@ -1,5 +1,5 @@
 import { DataStoreService, Players } from "@rbxts/services";
-import { Db } from "server/database/Database";
+import { Db } from "engine/server/Database";
 import { BlocksSerializer } from "shared/building/BlocksSerializer";
 import { GameDefinitions } from "shared/data/GameDefinitions";
 import { SlotsMeta } from "shared/SlotsMeta";
@@ -114,7 +114,7 @@ export class SlotDatabase {
 		const meta = metaUpdate(this.getMeta(userId));
 		this.setMeta(userId, meta);
 	}
-	save(userId: number, index: number, plot: BuildingPlot): ResponseExtract<SaveSlotResponse> {
+	save(userId: number, index: number, plot: BuildingPlot): ResponseResult<SaveSlotResponse> {
 		this.ensureValidSlotIndex(userId, index);
 
 		const blocks = BlocksSerializer.serialize(plot);

@@ -1,6 +1,6 @@
-import { ClientComponent } from "client/component/ClientComponent";
-import { Signal } from "shared/event/Signal";
-import { isKey } from "shared/fixes/Keys";
+import { ClientComponent } from "engine/client/component/ClientComponent";
+import { Signal } from "engine/shared/event/Signal";
+import { isKey } from "engine/shared/fixes/Keys";
 
 /*
 	When a key is pressed, invoke keyDown()

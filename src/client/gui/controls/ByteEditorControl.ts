@@ -1,9 +1,9 @@
-import { Control } from "client/gui/Control";
 import { ButtonControl } from "client/gui/controls/Button";
 import { NumberTextBoxControl } from "client/gui/controls/NumberTextBoxControl";
+import { Control } from "engine/client/gui/Control";
+import { ObservableValue } from "engine/shared/event/ObservableValue";
+import { Signal } from "engine/shared/event/Signal";
 import { Colors } from "shared/Colors";
-import { ObservableValue } from "shared/event/ObservableValue";
-import { Signal } from "shared/event/Signal";
 
 export type ByteEditorDefinition = GuiObject & Partial<ByteEditorDefinitionParts>;
 export type ByteEditorDefinitionParts = {

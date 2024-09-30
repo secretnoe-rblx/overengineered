@@ -1,10 +1,10 @@
 import { ContextActionService } from "@rbxts/services";
-import { InputController } from "client/controller/InputController";
-import { Colors } from "shared/Colors";
-import { Control } from "client/gui/Control";
 import { SelectButtonPopup } from "client/gui/popup/SelectButtonPopup";
-import { ObservableValue } from "shared/event/ObservableValue";
-import { Signal } from "shared/event/Signal";
+import { Control } from "engine/client/gui/Control";
+import { InputController } from "engine/client/InputController";
+import { ObservableValue } from "engine/shared/event/ObservableValue";
+import { Signal } from "engine/shared/event/Signal";
+import { Colors } from "shared/Colors";
 
 export type KeyChooserControlDefinition = TextButton;
 

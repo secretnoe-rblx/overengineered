@@ -1,11 +1,11 @@
 import { Players } from "@rbxts/services";
+import { Throttler } from "engine/shared/Throttler";
 import { ServerPartUtils } from "server/plots/ServerPartUtils";
 import { ServerPlayers } from "server/ServerPlayers";
 import { BlockManager } from "shared/building/BlockManager";
 import { BlocksSerializer } from "shared/building/BlocksSerializer";
 import { CustomRemotes } from "shared/Remotes";
 import { SlotsMeta } from "shared/SlotsMeta";
-import { Throttler } from "shared/Throttler";
 import type { SlotDatabase } from "server/database/SlotDatabase";
 import type { PlayModeBase } from "server/modes/PlayModeBase";
 import type { ServerPlots } from "server/plots/ServerPlots";

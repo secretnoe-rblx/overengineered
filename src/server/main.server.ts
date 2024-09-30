@@ -1,5 +1,5 @@
 /* eslint-disable import/order */
-import { TestFramework } from "shared/test/TestFramework";
+import { TestFramework } from "engine/shared/TestFramework";
 if (!game.GetService("RunService").IsStudio()) {
 	for (const testscript of TestFramework.findAllTestScripts()) {
 		testscript.Destroy();
@@ -9,12 +9,13 @@ if (!game.GetService("RunService").IsStudio()) {
 import { Players, RunService, Workspace } from "@rbxts/services";
 import { RemoteEvents } from "shared/RemoteEvents";
 import { SandboxGame } from "server/SandboxGame";
-import { Game } from "shared/GameHost";
 import { PlasmaProjectile } from "shared/weapons/PlasmaProjectileLogic";
 import { BulletProjectile } from "shared/weapons/BulletProjectileLogic";
 import { BootFlagsController } from "server/BootFlagsController";
+import { GameHostBuilder } from "engine/shared/GameHostBuilder";
+import { gameInfo } from "shared/GameInfo";
 
-const builder = Game.createHost();
+const builder = new GameHostBuilder(gameInfo);
 SandboxGame.initialize(builder);
 
 const host = builder.build();

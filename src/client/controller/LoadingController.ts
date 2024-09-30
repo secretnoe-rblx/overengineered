@@ -1,9 +1,9 @@
 import { Workspace } from "@rbxts/services";
-import { Control } from "client/gui/Control";
 import { Gui } from "client/gui/Gui";
-import { TransformService } from "shared/component/TransformService";
-import { ObservableValue } from "shared/event/ObservableValue";
-import type { TransformProps } from "shared/component/Transform";
+import { Control } from "engine/client/gui/Control";
+import { TransformService } from "engine/shared/component/TransformService";
+import { ObservableValue } from "engine/shared/event/ObservableValue";
+import type { TransformProps } from "engine/shared/component/Transform";
 
 class LoadingImage extends Control {
 	runShowAnimation() {

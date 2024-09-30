@@ -1,8 +1,8 @@
 import { RunService } from "@rbxts/services";
+import { Element } from "engine/shared/Element";
+import { Instances } from "engine/shared/fixes/Instances";
+import { Lazy } from "engine/shared/Lazy";
 import { BlockWeldInitializer } from "shared/blocks/BlockWeldInitializer";
-import { Element } from "shared/Element";
-import { Instances } from "shared/fixes/Instances";
-import { Lazy } from "shared/Lazy";
 import type {
 	BlockBuilder,
 	BlockBuilderWithoutIdAndDefaults,

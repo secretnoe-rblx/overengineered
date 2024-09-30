@@ -1,7 +1,7 @@
 import { Players, ReplicatedStorage, RunService, Workspace } from "@rbxts/services";
 import { Gui } from "client/gui/Gui";
-import { InstanceComponent } from "shared/component/InstanceComponent";
-import { RobloxUnit } from "shared/RobloxUnit";
+import { InstanceComponent } from "engine/shared/component/InstanceComponent";
+import { RobloxUnit } from "engine/shared/RobloxUnit";
 import { PartUtils } from "shared/utils/PartUtils";
 import { VectorUtils } from "shared/utils/VectorUtils";
 

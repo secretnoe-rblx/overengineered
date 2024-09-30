@@ -1,11 +1,11 @@
 import { GuiService, Players } from "@rbxts/services";
-import { ClientComponent } from "client/component/ClientComponent";
-import { InputController } from "client/controller/InputController";
-import { Signals } from "client/event/Signals";
 import { Gui } from "client/gui/Gui";
+import { Signals } from "client/Signals";
+import { ClientComponent } from "engine/client/component/ClientComponent";
+import { InputController } from "engine/client/InputController";
+import { ObservableValue } from "engine/shared/event/ObservableValue";
+import { PlayerUtils } from "engine/shared/utils/PlayerUtils";
 import { SharedPlot } from "shared/building/SharedPlot";
-import { ObservableValue } from "shared/event/ObservableValue";
-import { PlayerUtils } from "shared/utils/PlayerUtils";
 
 export class HoveredPartHighlighter<T extends Instance> extends ClientComponent {
 	readonly highlightedPart = new ObservableValue<T | undefined>(undefined);

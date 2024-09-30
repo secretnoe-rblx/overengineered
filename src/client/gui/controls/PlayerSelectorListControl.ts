@@ -1,10 +1,10 @@
 import { Players, RunService } from "@rbxts/services";
-import { Control } from "client/gui/Control";
 import { ButtonControl } from "client/gui/controls/Button";
 import { DictionaryControl } from "client/gui/controls/DictionaryControl";
-import { TransformService } from "shared/component/TransformService";
+import { Control } from "engine/client/gui/Control";
+import { TransformService } from "engine/shared/component/TransformService";
+import { ArgsSignal } from "engine/shared/event/Signal";
 import { GameDefinitions } from "shared/data/GameDefinitions";
-import { ArgsSignal } from "shared/event/Signal";
 
 type FakePlayer = {
 	readonly UserId: number;

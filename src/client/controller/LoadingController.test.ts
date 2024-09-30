@@ -1,5 +1,5 @@
 import { LoadingController } from "client/controller/LoadingController";
-import type { UnitTests } from "shared/test/TestFramework";
+import type { UnitTests } from "engine/shared/TestFramework";
 
 namespace LoadingControllerTests {
 	export function loading() {

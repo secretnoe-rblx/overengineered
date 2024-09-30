@@ -1,5 +1,5 @@
 import { HttpService, Workspace } from "@rbxts/services";
-import { HostedService } from "shared/GameHost";
+import { HostedService } from "engine/shared/di/HostedService";
 import type { PlayerDataStorage } from "client/PlayerDataStorage";
 
 @injectable

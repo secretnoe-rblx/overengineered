@@ -1,6 +1,6 @@
 import { Players, StarterGui, UserInputService } from "@rbxts/services";
 import { Gui } from "client/gui/Gui";
-import { InstanceComponent } from "shared/component/InstanceComponent";
+import { InstanceComponent } from "engine/shared/component/InstanceComponent";
 import { GameDefinitions } from "shared/data/GameDefinitions";
 
 export namespace BSOD {

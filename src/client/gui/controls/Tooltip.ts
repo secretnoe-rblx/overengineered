@@ -1,11 +1,11 @@
 import { RunService, UserInputService } from "@rbxts/services";
 import { AutoUIScaledControl } from "client/gui/AutoUIScaledControl";
-import { Control } from "client/gui/Control";
 import { Gui } from "client/gui/Gui";
-import { InstanceComponent } from "shared/component/InstanceComponent";
-import { TransformService } from "shared/component/TransformService";
-import { EventHandler } from "shared/event/EventHandler";
-import { HostedService } from "shared/GameHost";
+import { Control } from "engine/client/gui/Control";
+import { InstanceComponent } from "engine/shared/component/InstanceComponent";
+import { TransformService } from "engine/shared/component/TransformService";
+import { HostedService } from "engine/shared/di/HostedService";
+import { EventHandler } from "engine/shared/event/EventHandler";
 
 type TooltipDefinition = GuiObject & {
 	readonly TextLabel: TextLabel;

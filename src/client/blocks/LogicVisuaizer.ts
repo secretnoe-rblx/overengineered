@@ -1,7 +1,7 @@
 import { Workspace } from "@rbxts/services";
-import { Component } from "shared/component/Component";
-import { ComponentInstance } from "shared/component/ComponentInstance";
-import { Instances } from "shared/fixes/Instances";
+import { Component } from "engine/shared/component/Component";
+import { ComponentInstance } from "engine/shared/component/ComponentInstance";
+import { Instances } from "engine/shared/fixes/Instances";
 import type { BlockLogicTickContext, GenericBlockLogic } from "shared/blockLogic/BlockLogic";
 import type { BlockLogicRunner } from "shared/blockLogic/BlockLogicRunner";
 

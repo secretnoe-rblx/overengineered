@@ -1,7 +1,7 @@
 import { Players, ReplicatedStorage } from "@rbxts/services";
-import { Component } from "shared/component/Component";
-import { ComponentChild } from "shared/component/ComponentChild";
-import { InstanceComponent } from "shared/component/InstanceComponent";
+import { Component } from "engine/shared/component/Component";
+import { ComponentChild } from "engine/shared/component/ComponentChild";
+import { InstanceComponent } from "engine/shared/component/InstanceComponent";
 import { GameDefinitions } from "shared/data/GameDefinitions";
 import type { SharedPlot } from "shared/building/SharedPlot";
 import type { SharedPlots } from "shared/building/SharedPlots";

@@ -1,6 +1,6 @@
 import { Workspace } from "@rbxts/services";
-import { Easing } from "shared/component/Easing";
-import { AutoC2SRemoteEvent } from "shared/event/C2SRemoteEvent";
+import { Easing } from "engine/shared/component/Easing";
+import { AutoC2SRemoteEvent } from "engine/shared/event/C2SRemoteEvent";
 import { WeaponProjectile } from "shared/weapons/BaseProjectileLogic";
 import type { modifierValue } from "shared/weapons/BaseProjectileLogic";
 

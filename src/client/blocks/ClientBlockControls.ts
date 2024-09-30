@@ -1,8 +1,8 @@
-import { ClientComponent } from "client/component/ClientComponent";
 import { KeyPressingDefinitionsController } from "client/controller/KeyPressingController";
-import { Keys } from "shared/fixes/Keys";
-import { MathUtils } from "shared/fixes/MathUtils";
-import { Objects } from "shared/fixes/objects";
+import { ClientComponent } from "engine/client/component/ClientComponent";
+import { Keys } from "engine/shared/fixes/Keys";
+import { MathUtils } from "engine/shared/fixes/MathUtils";
+import { Objects } from "engine/shared/fixes/Objects";
 import type { KeyDefinitions } from "client/controller/KeyPressingController";
 import type { TouchModeButtonData } from "client/gui/ridemode/TouchModeButtonControl";
 import type { BlockLogicTypes } from "shared/blockLogic/BlockLogicTypes";

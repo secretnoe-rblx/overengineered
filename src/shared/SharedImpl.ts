@@ -1,5 +1,5 @@
 import { ReplicatedStorage, RunService, ServerScriptService, StarterPlayer } from "@rbxts/services";
-import { Instances } from "shared/fixes/Instances";
+import { Instances } from "engine/shared/fixes/Instances";
 
 export namespace SharedImpl {
 	export function getSharedImpl(scriptobj: LuaSourceContainer): ModuleScript {

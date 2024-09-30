@@ -1,6 +1,6 @@
 import { TextButtonControl } from "client/gui/controls/Button";
 import { Gui } from "client/gui/Gui";
-import { Signal } from "shared/event/Signal";
+import { Signal } from "engine/shared/event/Signal";
 import type { IClientBlockControl } from "client/blocks/ClientBlockControls";
 import type { TextButtonDefinition } from "client/gui/controls/Button";
 
