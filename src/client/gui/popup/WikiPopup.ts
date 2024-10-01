@@ -1,5 +1,5 @@
 import { ReplicatedStorage } from "@rbxts/services";
-import { LocalPlayer } from "client/controller/LocalPlayer";
+import { LocalPlayer } from "engine/client/LocalPlayer";
 import { ButtonControl } from "client/gui/controls/Button";
 import { Gui } from "client/gui/Gui";
 import { Popup } from "client/gui/Popup";

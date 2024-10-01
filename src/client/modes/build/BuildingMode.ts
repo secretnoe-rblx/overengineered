@@ -1,4 +1,4 @@
-import { LocalPlayer } from "client/controller/LocalPlayer";
+import { LocalPlayer } from "engine/client/LocalPlayer";
 import { MirrorVisualizer } from "client/controller/MirrorVisualizer";
 import { BuildingModeScene } from "client/gui/buildmode/BuildingModeScene";
 import { Gui } from "client/gui/Gui";

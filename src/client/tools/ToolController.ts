@@ -1,5 +1,4 @@
 import { LoadingController } from "client/controller/LoadingController";
-import { Signals } from "client/Signals";
 import { BuildTool } from "client/tools/BuildTool";
 import { ConfigTool } from "client/tools/ConfigTool";
 import { DeleteTool } from "client/tools/DeleteTool";
@@ -7,6 +6,7 @@ import { EditTool } from "client/tools/EditTool";
 import { PaintTool } from "client/tools/PaintTool";
 import { WireTool } from "client/tools/WireTool";
 import { ClientComponent } from "engine/client/component/ClientComponent";
+import { LocalPlayer } from "engine/client/LocalPlayer";
 import { ComponentChild } from "engine/shared/component/ComponentChild";
 import { ComponentDisabler } from "engine/shared/component/ComponentDisabler";
 import { MiddlewaredObservableValue } from "engine/shared/event/MiddlewaredObservableValue";
@@ -77,7 +77,7 @@ export class ToolController extends ClientComponent {
 		super();
 		di = di.beginScope((di) => di.registerSingletonValue(this));
 
-		Signals.PLAYER.DIED.Connect(() => {
+		LocalPlayer.diedEvent.Connect(() => {
 			this.selectedTool.set(undefined);
 		});
 

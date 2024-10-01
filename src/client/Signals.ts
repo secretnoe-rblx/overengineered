@@ -7,10 +7,5 @@ export namespace Signals {
 		export const MOVED = (Workspace.CurrentCamera as Camera).GetPropertyChangedSignal("CFrame");
 	}
 
-	export namespace PLAYER {
-		export const SPAWN = new Signal();
-		export const DIED = new Signal();
-	}
-
 	export const LOCAL_PLAY_MODE_CHANGED = new Signal<(mode: PlayModes) => void>();
 }

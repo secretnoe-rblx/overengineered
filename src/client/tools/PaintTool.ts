@@ -1,5 +1,5 @@
 import { Players } from "@rbxts/services";
-import { LocalPlayer } from "client/controller/LocalPlayer";
+import { LocalPlayer } from "engine/client/LocalPlayer";
 import { MaterialColorEditControl } from "client/gui/buildmode/MaterialColorEditControl";
 import { ButtonControl } from "client/gui/controls/Button";
 import { ToggleControl } from "client/gui/controls/ToggleControl";

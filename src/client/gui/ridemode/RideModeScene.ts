@@ -1,6 +1,6 @@
 import { RunService, UserInputService, Workspace } from "@rbxts/services";
 import { LoadingController } from "client/controller/LoadingController";
-import { LocalPlayer } from "client/controller/LocalPlayer";
+import { LocalPlayerController } from "client/controller/LocalPlayerController";
 import { ButtonControl } from "client/gui/controls/Button";
 import { CheckBoxControl } from "client/gui/controls/CheckBoxControl";
 import { DictionaryControl } from "client/gui/controls/DictionaryControl";
@@ -11,6 +11,7 @@ import { TouchModeButtonControl } from "client/gui/ridemode/TouchModeButtonContr
 import { requestMode } from "client/modes/PlayModeRequest";
 import { Control } from "engine/client/gui/Control";
 import { InputController } from "engine/client/InputController";
+import { LocalPlayer } from "engine/client/LocalPlayer";
 import { ComponentChild } from "engine/shared/component/ComponentChild";
 import { ContainerComponent } from "engine/shared/component/ContainerComponent";
 import { EventHandler } from "engine/shared/event/EventHandler";
@@ -428,7 +429,7 @@ export class RideModeScene extends Control<RideModeSceneDefinition> {
 				const rootPart = LocalPlayer.rootPart.get();
 				if (!rootPart) return;
 
-				const alt = RobloxUnit.Studs_To_Meters(LocalPlayer.getPlayerRelativeHeight());
+				const alt = RobloxUnit.Studs_To_Meters(LocalPlayerController.getPlayerRelativeHeight());
 				control.slider.value.set(alt);
 				control.text.value.set(alt);
 			});

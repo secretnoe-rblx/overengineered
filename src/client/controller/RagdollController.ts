@@ -1,5 +1,5 @@
 import { ContextActionService } from "@rbxts/services";
-import { LocalPlayer } from "client/controller/LocalPlayer";
+import { LocalPlayer } from "engine/client/LocalPlayer";
 import { Component } from "engine/shared/component/Component";
 import { ComponentEvents } from "engine/shared/component/ComponentEvents";
 import { HostedService } from "engine/shared/di/HostedService";

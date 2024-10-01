@@ -1,5 +1,5 @@
 import { RunService, Workspace } from "@rbxts/services";
-import { LocalPlayer } from "client/controller/LocalPlayer";
+import { LocalPlayerController } from "client/controller/LocalPlayerController";
 import { HostedService } from "engine/shared/di/HostedService";
 import { Physics } from "shared/Physics";
 
@@ -8,7 +8,7 @@ export class GameEnvironmentController extends HostedService {
 		super();
 
 		this.event.subscribe(RunService.Heartbeat, () => {
-			const playerHeight = LocalPlayer.getPlayerRelativeHeight();
+			const playerHeight = LocalPlayerController.getPlayerRelativeHeight();
 
 			Workspace.AirDensity = Physics.GetAirDensityOnHeight(playerHeight);
 			Workspace.Gravity = Physics.GetGravityOnHeight(playerHeight);

@@ -1,5 +1,5 @@
 import { GuiService, Players, Workspace } from "@rbxts/services";
-import { LocalPlayer } from "client/controller/LocalPlayer";
+import { LocalPlayer } from "engine/client/LocalPlayer";
 import { Gui } from "client/gui/Gui";
 import { InputController } from "engine/client/InputController";
 import { PlayerUtils } from "engine/shared/utils/PlayerUtils";

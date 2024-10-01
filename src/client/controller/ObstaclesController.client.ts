@@ -1,5 +1,5 @@
 import { CollectionService, Workspace } from "@rbxts/services";
-import { LocalPlayer } from "client/controller/LocalPlayer";
+import { LocalPlayer } from "engine/client/LocalPlayer";
 import { RemoteEvents } from "shared/RemoteEvents";
 import { CustomDebrisService } from "shared/service/CustomDebrisService";
 
