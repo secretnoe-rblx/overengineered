@@ -9,7 +9,7 @@
 	},
 	"ignorePatterns": [
 		"/out",
-		"/engine/transformer/out"
+		"/src/engine/transformer"
 	],
 	"plugins": [
 		"@typescript-eslint",
