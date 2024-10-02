@@ -9,7 +9,7 @@
 	},
 	"ignorePatterns": [
 		"/out",
-		"/rbxts-transformer-macros"
+		"/src/engine/transformer"
 	],
 	"plugins": [
 		"@typescript-eslint",

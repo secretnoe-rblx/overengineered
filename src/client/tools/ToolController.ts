@@ -1,16 +1,16 @@
-import { ClientComponent } from "client/component/ClientComponent";
 import { LoadingController } from "client/controller/LoadingController";
-import { Signals } from "client/event/Signals";
 import { BuildTool } from "client/tools/BuildTool";
 import { ConfigTool } from "client/tools/ConfigTool";
 import { DeleteTool } from "client/tools/DeleteTool";
 import { EditTool } from "client/tools/EditTool";
 import { PaintTool } from "client/tools/PaintTool";
 import { WireTool } from "client/tools/WireTool";
-import { ComponentChild } from "shared/component/ComponentChild";
-import { ComponentDisabler } from "shared/component/ComponentDisabler";
-import { MiddlewaredObservableValue } from "shared/event/MiddlewaredObservableValue";
-import { Objects } from "shared/fixes/objects";
+import { ClientComponent } from "engine/client/component/ClientComponent";
+import { LocalPlayer } from "engine/client/LocalPlayer";
+import { ComponentChild } from "engine/shared/component/ComponentChild";
+import { ComponentDisabler } from "engine/shared/component/ComponentDisabler";
+import { MiddlewaredObservableValue } from "engine/shared/event/MiddlewaredObservableValue";
+import { Objects } from "engine/shared/fixes/Objects";
 import type { BuildingMode } from "client/modes/build/BuildingMode";
 import type { ToolBase } from "client/tools/ToolBase";
 
@@ -75,9 +75,9 @@ export class ToolController extends ClientComponent {
 
 	constructor(@inject mode: BuildingMode, @inject di: DIContainer) {
 		super();
-		di = di.beginScope((di) => di.registerSingleton(this));
+		di = di.beginScope((di) => di.registerSingletonValue(this));
 
-		Signals.PLAYER.DIED.Connect(() => {
+		LocalPlayer.diedEvent.Connect(() => {
 			this.selectedTool.set(undefined);
 		});
 

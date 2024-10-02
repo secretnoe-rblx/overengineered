@@ -1,5 +1,5 @@
 import { AutoUIScaledControl } from "client/gui/AutoUIScaledControl";
-import type { ReadonlyObservableValue } from "shared/event/ObservableValue";
+import type { ReadonlyObservableValue } from "engine/shared/event/ObservableValue";
 
 export class ScaledScreenGui<T extends ScreenGui> extends AutoUIScaledControl {
 	static initializeGlobalScale(scale: ReadonlyObservableValue<number>) {

@@ -1,11 +1,12 @@
-import { Control } from "client/gui/Control";
 import { ButtonControl } from "client/gui/controls/Button";
 import { DictionaryControl } from "client/gui/controls/DictionaryControl";
 import { KeyChooserControl } from "client/gui/controls/KeyChooserControl";
 import { Gui } from "client/gui/Gui";
 import { Popup } from "client/gui/Popup";
+import { Control } from "engine/client/gui/Control";
 import type { KeyChooserControlDefinition } from "client/gui/controls/KeyChooserControl";
 import type { Keybinds } from "client/Keybinds";
+import type { GameHostBuilder } from "engine/shared/GameHostBuilder";
 
 export type ControlsPopupDefinition = GuiObject & {
 	readonly Heading: Frame & {

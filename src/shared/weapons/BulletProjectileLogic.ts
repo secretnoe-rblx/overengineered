@@ -1,4 +1,4 @@
-import { AutoC2SRemoteEvent } from "shared/event/C2SRemoteEvent";
+import { AutoC2SRemoteEvent } from "engine/shared/event/C2SRemoteEvent";
 import { WeaponProjectile } from "shared/weapons/BaseProjectileLogic";
 
 export class BulletProjectile extends WeaponProjectile {

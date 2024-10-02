@@ -1,7 +1,7 @@
 import { Workspace } from "@rbxts/services";
-import { Component } from "shared/component/Component";
+import { Component } from "engine/shared/component/Component";
+import { Objects } from "engine/shared/fixes/Objects";
 import { GameDefinitions } from "shared/data/GameDefinitions";
-import { Objects } from "shared/fixes/objects";
 
 /** Generates terrain height */
 export interface ChunkGenerator {

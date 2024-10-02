@@ -10,6 +10,9 @@
 			"$className": "ServerScriptService",
 			"TS": {
 				"$path": "out/server"
+			},
+			"engine": {
+				"$path": "out/engine/server"
 			}
 		},
 		"ReplicatedStorage": {
@@ -25,6 +28,9 @@
 			},
 			"TS": {
 				"$path": "out/shared"
+			},
+			"engine": {
+				"$path": "out/engine/shared"
 			}
 		},
 		"StarterPlayer": {
@@ -33,6 +39,9 @@
 				"$className": "StarterPlayerScripts",
 				"TS": {
 					"$path": "out/client"
+				},
+				"engine": {
+					"$path": "out/engine/client"
 				}
 			}
 		},

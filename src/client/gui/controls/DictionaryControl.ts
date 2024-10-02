@@ -1,7 +1,7 @@
-import { Control } from "client/gui/Control";
-import { ComponentInstance } from "shared/component/ComponentInstance";
-import { ComponentKeyedChildren } from "shared/component/ComponentKeyedChildren";
-import { InstanceComponent } from "shared/component/InstanceComponent";
+import { Control } from "engine/client/gui/Control";
+import { ComponentInstance } from "engine/shared/component/ComponentInstance";
+import { ComponentKeyedChildren } from "engine/shared/component/ComponentKeyedChildren";
+import { InstanceComponent } from "engine/shared/component/InstanceComponent";
 
 /** Control that has its children keyed by some value */
 export class DictionaryControl<

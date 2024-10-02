@@ -1,5 +1,5 @@
 import { BlockManager } from "shared/building/BlockManager";
-import type { BB } from "shared/fixes/BB";
+import type { BB } from "engine/shared/fixes/BB";
 
 /** Reading a plot. */
 @injectable

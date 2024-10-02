@@ -1,5 +1,5 @@
-import { AABB } from "shared/fixes/AABB";
-import { Objects } from "shared/fixes/objects";
+import { AABB } from "engine/shared/fixes/AABB";
+import { Objects } from "engine/shared/fixes/Objects";
 import type { BlockLogicFullBothDefinitions } from "shared/blockLogic/BlockLogic";
 
 export namespace BlockAssertions {
@@ -17,6 +17,15 @@ export namespace BlockAssertions {
 			}
 		}
 	}
+
+	function* assertFluidForcesIsDisabled(block: AssertedModel) {
+		for (const child of block.GetDescendants()) {
+			if (child.IsA("BasePart") && child.EnableFluidForces === true) {
+				yield `Fluid forces in part "${child.Name}" of block '${block.Name}' is enabled!`;
+			}
+		}
+	}
+
 	function* assertColboxWeldedIfExists(block: AssertedModel) {
 		if (block.PrimaryPart.Name.lower() !== "colbox") return;
 
@@ -117,6 +126,7 @@ export namespace BlockAssertions {
 			...assertColboxIsPrimaryPartIfExists(block),
 			...assertColboxWeldedIfExists(block),
 			...assertValidVelds(block),
+			...assertFluidForcesIsDisabled(block),
 			...assertSomethingAnchored(block),
 			...assertCollisionGroup(block),
 			// ...assertNoRepeatedPartNames(block), temporarily removed

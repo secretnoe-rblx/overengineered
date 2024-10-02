@@ -1,12 +1,12 @@
 import { ContextActionService } from "@rbxts/services";
-import { LocalPlayer } from "client/controller/LocalPlayer";
-import { Component } from "shared/component/Component";
-import { ComponentEvents } from "shared/component/ComponentEvents";
-import { Keys } from "shared/fixes/Keys";
-import { HostedService } from "shared/GameHost";
+import { LocalPlayer } from "engine/client/LocalPlayer";
+import { Component } from "engine/shared/component/Component";
+import { ComponentEvents } from "engine/shared/component/ComponentEvents";
+import { HostedService } from "engine/shared/di/HostedService";
+import { Keys } from "engine/shared/fixes/Keys";
 import { SharedRagdoll } from "shared/SharedRagdoll";
 import type { PlayerDataStorage } from "client/PlayerDataStorage";
-import type { ReadonlyObservableValue } from "shared/event/ObservableValue";
+import type { ReadonlyObservableValue } from "engine/shared/event/ObservableValue";
 
 const { isPlayerRagdolling } = SharedRagdoll;
 function initAutoRagdoll(event: ComponentEvents, humanoid: Humanoid, enabled: ReadonlyObservableValue<boolean>) {

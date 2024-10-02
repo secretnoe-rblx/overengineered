@@ -49,6 +49,10 @@ declare global {
 		readonly triggerKey: KeyCode;
 		readonly autoRecovery: boolean;
 	};
+	type PhysicsConfiguration = {
+		readonly legacyWings: boolean;
+		readonly fluidForcesEverything: boolean;
+	};
 
 	namespace PlayerConfigTypes {
 		export type Bool = ConfigType<"bool", boolean>;
@@ -71,6 +75,7 @@ declare global {
 		export type Terrain = ConfigType<"terrain", TerrainConfiguration>;
 		export type Tutorial = ConfigType<"tutorial", TutorialConfiguration>;
 		export type Ragdoll = ConfigType<"ragdoll", RagdollConfiguration>;
+		export type Physics = ConfigType<"physics", PhysicsConfiguration>;
 
 		export interface Types {
 			readonly bool: Bool;
@@ -87,6 +92,7 @@ declare global {
 			readonly terrain: Terrain;
 			readonly tutorial: Tutorial;
 			readonly ragdoll: Ragdoll;
+			readonly physics: Physics;
 		}
 
 		export type Definitions = ConfigTypesToDefinition<keyof Types, Types>;
@@ -203,6 +209,14 @@ export const PlayerConfigDefinition = {
 				surfaceColor: Color3.fromRGB(0, 127, 255),
 				surfaceTransparency: 1,
 			},
+		},
+	},
+	physics: {
+		displayName: "Physics",
+		type: "physics",
+		config: {
+			fluidForcesEverything: false,
+			legacyWings: true,
 		},
 	},
 } as const satisfies ConfigTypesToDefinition<keyof PlayerConfigTypes.Types, PlayerConfigTypes.Types>;

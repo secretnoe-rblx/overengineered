@@ -1,7 +1,7 @@
+import { Strings } from "engine/shared/fixes/String.propmacro";
 import { BlockLogic } from "shared/blockLogic/BlockLogic";
 import { BlockConfigDefinitions } from "shared/blocks/BlockConfigDefinitions";
 import { BlockCreation } from "shared/blocks/BlockCreation";
-import { Strings } from "shared/fixes/String.propmacro";
 import type {
 	BlockLogicArgs,
 	BlockLogicFullBothDefinitions,

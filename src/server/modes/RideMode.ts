@@ -1,11 +1,12 @@
 import { Players } from "@rbxts/services";
+import { Throttler } from "engine/shared/Throttler";
 import { ServerPartUtils } from "server/plots/ServerPartUtils";
 import { ServerPlayers } from "server/ServerPlayers";
 import { BlockManager } from "shared/building/BlockManager";
 import { BlocksSerializer } from "shared/building/BlocksSerializer";
 import { CustomRemotes } from "shared/Remotes";
 import { SlotsMeta } from "shared/SlotsMeta";
-import { Throttler } from "shared/Throttler";
+import type { PlayerDatabase } from "server/database/PlayerDatabase";
 import type { SlotDatabase } from "server/database/SlotDatabase";
 import type { PlayModeBase } from "server/modes/PlayModeBase";
 import type { ServerPlots } from "server/plots/ServerPlots";
@@ -19,6 +20,7 @@ export class RideMode implements PlayModeBase {
 		@inject private readonly serverPlots: ServerPlots,
 		@inject private readonly blockList: BlockList,
 		@inject private readonly slots: SlotDatabase,
+		@inject private readonly playerData: PlayerDatabase,
 	) {
 		this.required = blockList.sorted.filter((b) => b.required);
 
@@ -123,6 +125,9 @@ export class RideMode implements PlayModeBase {
 
 		for (const block of blocksChildren) {
 			ServerPartUtils.switchDescendantsAnchor(block, false);
+			if (this.playerData.get(player.UserId).settings?.physics?.fluidForcesEverything) {
+				ServerPartUtils.switchDescendantsAero(block, true);
+			}
 		}
 
 		for (const block of blocksChildren) {

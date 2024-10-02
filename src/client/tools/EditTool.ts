@@ -1,10 +1,6 @@
 import { HttpService, Workspace } from "@rbxts/services";
-import { ClientComponent } from "client/component/ClientComponent";
-import { InputController } from "client/controller/InputController";
 import { LoadingController } from "client/controller/LoadingController";
 import { MaterialColorEditControl } from "client/gui/buildmode/MaterialColorEditControl";
-import { Colors } from "shared/Colors";
-import { Control } from "client/gui/Control";
 import { ButtonControl } from "client/gui/controls/Button";
 import { LogControl } from "client/gui/static/LogControl";
 import { ClientBuilding } from "client/modes/build/ClientBuilding";
@@ -14,17 +10,21 @@ import { BlockRotater } from "client/tools/additional/BlockRotater";
 import { MultiBlockHighlightedSelector } from "client/tools/highlighters/MultiBlockHighlightedSelector";
 import { SelectedBlocksHighlighter } from "client/tools/highlighters/SelectedBlocksHighlighter";
 import { ToolBase } from "client/tools/ToolBase";
+import { ClientComponent } from "engine/client/component/ClientComponent";
+import { Control } from "engine/client/gui/Control";
+import { InputController } from "engine/client/InputController";
+import { ComponentChild } from "engine/shared/component/ComponentChild";
+import { ComponentDisabler } from "engine/shared/component/ComponentDisabler";
+import { TransformService } from "engine/shared/component/TransformService";
+import { Element } from "engine/shared/Element";
+import { NumberObservableValue } from "engine/shared/event/NumberObservableValue";
+import { ObservableCollectionSet } from "engine/shared/event/ObservableCollection";
+import { ObservableValue } from "engine/shared/event/ObservableValue";
+import { BB } from "engine/shared/fixes/BB";
 import { BlockManager } from "shared/building/BlockManager";
 import { BuildingManager } from "shared/building/BuildingManager";
 import { SharedBuilding } from "shared/building/SharedBuilding";
-import { ComponentChild } from "shared/component/ComponentChild";
-import { ComponentDisabler } from "shared/component/ComponentDisabler";
-import { TransformService } from "shared/component/TransformService";
-import { Element } from "shared/Element";
-import { NumberObservableValue } from "shared/event/NumberObservableValue";
-import { ObservableCollectionSet } from "shared/event/ObservableCollection";
-import { ObservableValue } from "shared/event/ObservableValue";
-import { BB } from "shared/fixes/BB";
+import { Colors } from "shared/Colors";
 import { PartUtils } from "shared/utils/PartUtils";
 import type { MaterialColorEditControlDefinition } from "client/gui/buildmode/MaterialColorEditControl";
 import type { TextButtonDefinition } from "client/gui/controls/Button";
@@ -658,7 +658,11 @@ export class EditTool extends ToolBase {
 			}
 
 			this.controller.set(
-				di.resolveForeignClass(Controllers[mode], [this, this.targetPlot.get(), [...selected]]),
+				di.resolveForeignClass(Controllers[mode] as typeof Controllers.Move, [
+					this,
+					this.targetPlot.get(),
+					[...selected],
+				]),
 			);
 		});
 

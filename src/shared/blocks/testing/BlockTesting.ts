@@ -1,12 +1,13 @@
+import { DIContainer } from "engine/shared/di/DIContainer";
+import { Objects } from "engine/shared/fixes/Objects";
 import { BlockTestRunner } from "shared/blocks/testing/BlockTestRunner";
-import { Objects } from "shared/fixes/objects";
 import { CreateSandboxBlocks } from "shared/SandboxBlocks";
 import type { PlacedBlockConfig } from "shared/blockLogic/BlockConfig";
 import type { GenericBlockLogic } from "shared/blockLogic/BlockLogic";
 import type { BlockLogicTypes } from "shared/blockLogic/BlockLogicTypes";
 
 export namespace BlockTesting {
-	export const blockList = CreateSandboxBlocks();
+	export const blockList = CreateSandboxBlocks(new DIContainer({}));
 
 	export function newBlock(id: string) {
 		return new blockList.blocks[id]!.logic!.ctor({ instance: undefined! });

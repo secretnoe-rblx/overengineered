@@ -1,10 +1,10 @@
 import { SoundController } from "client/controller/SoundController";
-import { Control } from "client/gui/Control";
-import { ObjectOverlayStorage } from "shared/component/ObjectOverlayStorage";
-import { TransformService } from "shared/component/TransformService";
-import { Element } from "shared/Element";
-import { Signal } from "shared/event/Signal";
-import type { ElementProperties } from "shared/Element";
+import { Control } from "engine/client/gui/Control";
+import { ObjectOverlayStorage } from "engine/shared/component/ObjectOverlayStorage";
+import { TransformService } from "engine/shared/component/TransformService";
+import { Element } from "engine/shared/Element";
+import { Signal } from "engine/shared/event/Signal";
+import type { ElementProperties } from "engine/shared/Element";
 
 export type ButtonDefinition = GuiButton;
 export class ButtonControl<T extends ButtonDefinition = ButtonDefinition> extends Control<T> {

@@ -1,12 +1,12 @@
-import { Control } from "client/gui/Control";
 import { NumberTextBoxControl } from "client/gui/controls/NumberTextBoxControl";
 import { SliderControl } from "client/gui/controls/SliderControl";
 import { TextBoxControl } from "client/gui/controls/TextBoxControl";
+import { Control } from "engine/client/gui/Control";
+import { ArgsSignal } from "engine/shared/event/Signal";
+import { SubmittableValue } from "engine/shared/event/SubmittableValue";
 import { Colors } from "shared/Colors";
-import { ArgsSignal } from "shared/event/Signal";
-import { SubmittableValue } from "shared/event/SubmittableValue";
 import type { SliderControlDefinition } from "client/gui/controls/SliderControl";
-import type { ReadonlyArgsSignal } from "shared/event/Signal";
+import type { ReadonlyArgsSignal } from "engine/shared/event/Signal";
 
 export type ColorChooserDefinition = GuiObject & {
 	readonly Preview: GuiObject;

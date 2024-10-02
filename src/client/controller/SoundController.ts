@@ -1,11 +1,12 @@
 import { Players, ReplicatedStorage, Workspace } from "@rbxts/services";
-import { LocalPlayer } from "client/controller/LocalPlayer";
-import { Signals } from "client/event/Signals";
-import { HostedService } from "shared/GameHost";
+import { LocalPlayerController } from "client/controller/LocalPlayerController";
+import { Signals } from "client/Signals";
+import { HostedService } from "engine/shared/di/HostedService";
 import { Sound } from "shared/Sound";
 import { TerrainDataInfo } from "shared/TerrainDataInfo";
 import { PartUtils } from "shared/utils/PartUtils";
 import type { PlayerDataStorage } from "client/PlayerDataStorage";
+import type { GameHostBuilder } from "engine/shared/GameHostBuilder";
 
 type Sounds = {
 	readonly Build: {
@@ -113,7 +114,7 @@ export namespace SoundController {
 	}
 
 	export function getWorldVolume(volume: number) {
-		return Sound.getWorldVolume(LocalPlayer.getPlayerRelativeHeight()) * volume;
+		return Sound.getWorldVolume(LocalPlayerController.getPlayerRelativeHeight()) * volume;
 	}
 
 	export function randomSoundSpeed(): number {

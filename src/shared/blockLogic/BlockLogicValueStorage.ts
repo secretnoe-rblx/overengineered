@@ -1,5 +1,5 @@
-import { MathUtils } from "shared/fixes/MathUtils";
-import { Strings } from "shared/fixes/String.propmacro";
+import { MathUtils } from "engine/shared/fixes/MathUtils";
+import { Strings } from "engine/shared/fixes/String.propmacro";
 import type {
 	BlockLogic,
 	BlockLogicBothDefinitions,

@@ -1,7 +1,7 @@
 import { RunService, Workspace } from "@rbxts/services";
-import { InstanceComponent } from "shared/component/InstanceComponent";
-import { AutoC2SRemoteEvent } from "shared/event/C2SRemoteEvent";
-import { Instances } from "shared/fixes/Instances";
+import { InstanceComponent } from "engine/shared/component/InstanceComponent";
+import { AutoC2SRemoteEvent } from "engine/shared/event/C2SRemoteEvent";
+import { Instances } from "engine/shared/fixes/Instances";
 import { RemoteEvents } from "shared/RemoteEvents";
 
 export type modifierValue = {

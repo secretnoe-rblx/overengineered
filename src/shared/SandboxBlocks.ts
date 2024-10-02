@@ -40,10 +40,10 @@ import { RadioReceiverBlock } from "shared/blocks/blocks/RadioReceiverBlock";
 import { RadioTransmitterBlock } from "shared/blocks/blocks/RadioTransmitterBlock";
 import { RandomAccessMemoryBlock } from "shared/blocks/blocks/RandomAccessMemoryBlock";
 import { RandomBlock } from "shared/blocks/blocks/RandomBlock";
+import { RCSEngineBlock } from "shared/blocks/blocks/RCSEngineBlock";
 import { ReadonlyMemoryBlock } from "shared/blocks/blocks/ReadonlyMemoryBlock";
 import { RocketBlocks } from "shared/blocks/blocks/RocketEngineBlocks";
 import { RopeBlock } from "shared/blocks/blocks/RopeBlock";
-import { RCSEngineBlock } from "shared/blocks/blocks/RSCEngineBlock";
 import { ScreenBlock } from "shared/blocks/blocks/ScreenBlock";
 import { SevenSegmentDisplayBlock } from "shared/blocks/blocks/SevenSegmentDisplayBlock";
 import { SingleImpulseBlock } from "shared/blocks/blocks/SingleImpulseBlock";
@@ -54,7 +54,7 @@ import { TpsCounterBlock } from "shared/blocks/blocks/TpsCounterBlock";
 import { VehicleSeatBlock } from "shared/blocks/blocks/VehicleSeatBlock";
 import type { BlockBuilder } from "shared/blocks/Block";
 
-export const CreateSandboxBlocks = (): BlockList => {
+export const CreateSandboxBlocks = (di: DIContainer): BlockList => {
 	const blocksArr: BlockBuilder[] = [
 		...BuildingBlocks,
 		...MechanicalBlocks,
@@ -120,5 +120,5 @@ export const CreateSandboxBlocks = (): BlockList => {
 		}
 	}
 
-	return BlockListBuilder.buildBlockList(blocksArr);
+	return BlockListBuilder.buildBlockList(blocksArr, di);
 };

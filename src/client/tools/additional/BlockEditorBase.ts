@@ -1,9 +1,9 @@
-import { ClientComponent } from "client/component/ClientComponent";
+import { ClientComponent } from "engine/client/component/ClientComponent";
 import type { InputTooltips } from "client/gui/static/TooltipsControl";
 import type { BuildingMode } from "client/modes/build/BuildingMode";
 import type { ClientBuilding } from "client/modes/build/ClientBuilding";
+import type { BB } from "engine/shared/fixes/BB";
 import type { SharedPlot } from "shared/building/SharedPlot";
-import type { BB } from "shared/fixes/BB";
 
 type BlockEditInfo = {
 	readonly instance: BlockModel;

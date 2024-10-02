@@ -1,14 +1,14 @@
 import { UserInputService } from "@rbxts/services";
-import { ClientComponent } from "client/component/ClientComponent";
 import { BoxSelector } from "client/tools/highlighters/BoxSelector";
 import { HoveredBlocksSelector } from "client/tools/highlighters/HoveredBlocksSelector";
-import { ComponentChild } from "shared/component/ComponentChild";
-import { ObservableValue } from "shared/event/ObservableValue";
-import { ArgsSignal } from "shared/event/Signal";
+import { ClientComponent } from "engine/client/component/ClientComponent";
+import { ComponentChild } from "engine/shared/component/ComponentChild";
+import { ObservableValue } from "engine/shared/event/ObservableValue";
+import { ArgsSignal } from "engine/shared/event/Signal";
 import type { HoveredBlocksSelectorMode } from "client/tools/highlighters/HoveredBlocksSelector";
+import type { ReadonlyObservableValue } from "engine/shared/event/ObservableValue";
+import type { ReadonlyArgsSignal } from "engine/shared/event/Signal";
 import type { SharedPlot } from "shared/building/SharedPlot";
-import type { ReadonlyObservableValue } from "shared/event/ObservableValue";
-import type { ReadonlyArgsSignal } from "shared/event/Signal";
 
 export interface BlockSelector extends IComponent {
 	readonly submit: ReadonlyArgsSignal<[blocks: readonly BlockModel[]]>;

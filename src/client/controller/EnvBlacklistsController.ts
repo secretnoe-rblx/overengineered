@@ -1,6 +1,6 @@
 import { Players, Workspace } from "@rbxts/services";
-import { Component } from "shared/component/Component";
-import { BB } from "shared/fixes/BB";
+import { Component } from "engine/shared/component/Component";
+import { BB } from "engine/shared/fixes/BB";
 import type { SharedPlot } from "shared/building/SharedPlot";
 import type { SharedPlots } from "shared/building/SharedPlots";
 

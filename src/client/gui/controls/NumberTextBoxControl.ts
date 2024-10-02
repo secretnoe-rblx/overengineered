@@ -1,8 +1,8 @@
-import { Control } from "client/gui/Control";
-import { ObservableValue } from "shared/event/ObservableValue";
-import { Signal } from "shared/event/Signal";
-import { MathUtils } from "shared/fixes/MathUtils";
-import { Strings } from "shared/fixes/String.propmacro";
+import { Control } from "engine/client/gui/Control";
+import { ObservableValue } from "engine/shared/event/ObservableValue";
+import { Signal } from "engine/shared/event/Signal";
+import { MathUtils } from "engine/shared/fixes/MathUtils";
+import { Strings } from "engine/shared/fixes/String.propmacro";
 
 /** ObservableValue that stores a number that can be clamped */
 class NumberObservableValue<T extends number | undefined = number> extends ObservableValue<T> {

@@ -1,9 +1,9 @@
 import { RunService } from "@rbxts/services";
+import { MathUtils } from "engine/shared/fixes/MathUtils";
 import { CalculatableBlockLogic } from "shared/blockLogic/BlockLogic";
 import { BlockLogicValueResults } from "shared/blockLogic/BlockLogicValueStorage";
 import { BlockConfigDefinitions } from "shared/blocks/BlockConfigDefinitions";
 import { BlockCreation } from "shared/blocks/BlockCreation";
-import { MathUtils } from "shared/fixes/MathUtils";
 import type {
 	BlockLogicBothDefinitions,
 	BlockLogicArgs,

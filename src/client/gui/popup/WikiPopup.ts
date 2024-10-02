@@ -1,10 +1,11 @@
 import { ReplicatedStorage } from "@rbxts/services";
-import { LocalPlayer } from "client/controller/LocalPlayer";
+import { LocalPlayer } from "engine/client/LocalPlayer";
 import { ButtonControl } from "client/gui/controls/Button";
 import { Gui } from "client/gui/Gui";
 import { Popup } from "client/gui/Popup";
 import { WikiCategoriesControl, WikiContentControl } from "client/wiki/WikiControl";
 import type { WikiCategoriesControlDefinition, WikiContentControlDefinition } from "client/wiki/WikiControl";
+import type { GameHostBuilder } from "engine/shared/GameHostBuilder";
 
 namespace WikiStorage {
 	let cache: readonly WikiEntry[] | undefined = undefined;

@@ -1,7 +1,7 @@
 import { BlockLogicValueResults } from "shared/blockLogic/BlockLogicValueStorage";
 import { BlockAssert } from "shared/blocks/testing/BlockAssert";
 import { BlockTesting } from "shared/blocks/testing/BlockTesting";
-import type { UnitTests } from "shared/test/TestFramework";
+import type { UnitTests } from "engine/shared/TestFramework";
 
 namespace BlockTests {
 	function init() {

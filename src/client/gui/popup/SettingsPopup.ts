@@ -1,12 +1,13 @@
-import { Colors } from "shared/Colors";
 import { ButtonControl, TextButtonControl } from "client/gui/controls/Button";
 import { Gui } from "client/gui/Gui";
 import { MultiPlayerConfigControl } from "client/gui/PlayerConfigControls";
 import { Popup } from "client/gui/Popup";
+import { Colors } from "shared/Colors";
 import { PlayerConfigDefinition } from "shared/config/PlayerConfig";
 import type { TextButtonDefinition } from "client/gui/controls/Button";
 import type { NewSettingsPopup } from "client/gui/popup/NewSettingsPopup";
 import type { PlayerDataStorage } from "client/PlayerDataStorage";
+import type { GameHostBuilder } from "engine/shared/GameHostBuilder";
 
 export type ConfigPartDefinition<T extends GuiObject> = GuiObject & {
 	readonly HeadingLabel: TextLabel;

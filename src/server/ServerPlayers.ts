@@ -1,5 +1,5 @@
 import { Players } from "@rbxts/services";
-import { Signal } from "shared/event/Signal";
+import { Signal } from "engine/shared/event/Signal";
 import { CustomRemotes } from "shared/Remotes";
 
 export namespace ServerPlayers {

@@ -1,18 +1,16 @@
 import { ReplicatedStorage, Workspace } from "@rbxts/services";
-import { ClientComponent } from "client/component/ClientComponent";
 import { Gui } from "client/gui/Gui";
 import { ActionController } from "client/modes/build/ActionController";
+import { ClientComponent } from "engine/client/component/ClientComponent";
 import { BuildingManager } from "shared/building/BuildingManager";
 import { SharedPlot } from "shared/building/SharedPlot";
 import { Colors } from "shared/Colors";
-import { Strings } from "shared/fixes/String.propmacro";
 import { CustomRemotes } from "shared/Remotes";
 
 type CM = readonly [pos: Vector3, mass: number];
 const weightedAverage = (values: readonly CM[]) => {
 	const sum = values.reduce((acc, [pos, weight]) => acc.add(pos.mul(weight)), Vector3.zero);
 	const totalMass = values.reduce((acc, [, weight]) => acc + weight, 0);
-	print(Strings.pretty({ sum, totalMass, a: sum.div(totalMass) }));
 
 	return sum.div(totalMass);
 };
@@ -70,7 +68,6 @@ export class CenterOfMassController extends ClientComponent {
 			const weightedAverage = (values: readonly CM[]) => {
 				const sum = values.reduce((acc, [pos, weight]) => acc.add(pos.mul(weight)), Vector3.zero);
 				const totalMass = values.reduce((acc, [, weight]) => acc + weight, 0);
-				print(Strings.pretty({ sum, totalMass, a: sum.div(totalMass) }));
 
 				return sum.div(totalMass);
 			};

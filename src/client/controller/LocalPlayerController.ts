@@ -1,9 +1,13 @@
 import { ContextActionService, Players } from "@rbxts/services";
-import { InputController } from "client/controller/InputController";
-import { LocalPlayer } from "client/controller/LocalPlayer";
-import { ObservableValue } from "shared/event/ObservableValue";
-import { HostedService } from "shared/GameHost";
+import { InputController } from "engine/client/InputController";
+import { LocalPlayer } from "engine/client/LocalPlayer";
+import { HostedService } from "engine/shared/di/HostedService";
+import { ObservableValue } from "engine/shared/event/ObservableValue";
+import { GameDefinitions } from "shared/data/GameDefinitions";
+import { Physics } from "shared/Physics";
 import { PartUtils } from "shared/utils/PartUtils";
+import type { GameHostBuilder } from "engine/shared/GameHostBuilder";
+import type { LocalHeight } from "shared/Physics";
 
 class SprintLogic extends HostedService {
 	constructor(sprintSpeed: number) {
@@ -88,5 +92,10 @@ export namespace LocalPlayerController {
 	}
 	export function initializeCameraMaxZoomDistance(host: GameHostBuilder, distance: number): void {
 		host.services.registerService(SetCameraMaxZoomDistance).withArgs([distance]);
+	}
+
+	/** Current player height in studs */
+	export function getPlayerRelativeHeight(): LocalHeight {
+		return Physics.LocalHeight.fromGlobal(LocalPlayer.rootPart.get()?.Position?.Y ?? GameDefinitions.HEIGHT_OFFSET);
 	}
 }

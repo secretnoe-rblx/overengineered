@@ -9,6 +9,12 @@ export namespace ServerPartUtils {
 		});
 	}
 
+	export function switchDescendantsAero(model: Instance, enabled: boolean) {
+		PartUtils.applyToAllDescendantsOfType("BasePart", model, (part) => {
+			part.EnableFluidForces = enabled;
+		});
+	}
+
 	export function switchDescendantsNetworkOwner(model: Instance, owner: Player | undefined) {
 		PartUtils.applyToAllDescendantsOfType("BasePart", model, (part) => {
 			if (!part.CanSetNetworkOwnership()[0]) return;

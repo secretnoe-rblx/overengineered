@@ -1,13 +1,14 @@
 import { GuiService, StarterGui } from "@rbxts/services";
-import { LocalPlayer } from "client/controller/LocalPlayer";
-import { Signals } from "client/event/Signals";
 import { Popup } from "client/gui/Popup";
 import { BuildingMode } from "client/modes/build/BuildingMode";
 import { requestMode } from "client/modes/PlayModeRequest";
 import { RideMode } from "client/modes/ride/RideMode";
-import { ObservableValue } from "shared/event/ObservableValue";
-import { HostedService } from "shared/GameHost";
+import { Signals } from "client/Signals";
+import { LocalPlayer } from "engine/client/LocalPlayer";
+import { HostedService } from "engine/shared/di/HostedService";
+import { ObservableValue } from "engine/shared/event/ObservableValue";
 import { CustomRemotes } from "shared/Remotes";
+import type { GameHostBuilder } from "engine/shared/GameHostBuilder";
 
 @injectable
 export class PlayModeController extends HostedService {
@@ -58,7 +59,7 @@ export class PlayModeController extends HostedService {
 		});
 
 		this.event.subscribeObservable(this.playmode, (mode, prev) => this.setMode(mode, prev));
-		this.event.subscribe(Signals.PLAYER.DIED, () => this.setMode(undefined, this.playmode.get()));
+		this.event.subscribe(LocalPlayer.diedEvent, () => this.setMode(undefined, this.playmode.get()));
 
 		this.setMode(this.playmode.get(), undefined);
 
@@ -66,7 +67,7 @@ export class PlayModeController extends HostedService {
 
 		this.onEnable(() => {
 			spawn(() => requestMode("build"));
-			Signals.PLAYER.SPAWN.Connect(() => spawn(() => requestMode("build")));
+			LocalPlayer.spawnEvent.Connect(() => spawn(() => requestMode("build")));
 		});
 	}
 

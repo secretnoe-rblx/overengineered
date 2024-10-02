@@ -1,7 +1,7 @@
 import { RunService, ServerStorage, Workspace } from "@rbxts/services";
+import { Component } from "engine/shared/component/Component";
+import { ComponentInstance } from "engine/shared/component/ComponentInstance";
 import { BlockManager } from "shared/building/BlockManager";
-import { Component } from "shared/component/Component";
-import { ComponentInstance } from "shared/component/ComponentInstance";
 import type { BuildingPlot } from "shared/building/BuildingPlot";
 
 /** {@link PlotWelder} that automatically subscribes to {@link BuildingPlot} block changing */

@@ -1,4 +1,4 @@
-import { Assert } from "shared/Assert";
+import { Assert } from "engine/shared/Assert";
 import { BlockTestRunner } from "shared/blocks/testing/BlockTestRunner";
 import type { GenericBlockLogic, BlockLogicTickContext } from "shared/blockLogic/BlockLogic";
 import type { BlockLogicValueResults } from "shared/blockLogic/BlockLogicValueStorage";

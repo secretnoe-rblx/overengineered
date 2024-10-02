@@ -1,6 +1,6 @@
 import { RunService } from "@rbxts/services";
+import { C2S2CRemoteFunction } from "engine/shared/event/PERemoteEvent";
 import { BlockAssertions } from "shared/blocks/BlockAssertions";
-import { C2S2CRemoteFunction } from "shared/event/PERemoteEvent";
 import type { BlockBuilder } from "shared/blocks/Block";
 
 export namespace BlockListBuilder {
@@ -21,7 +21,7 @@ export namespace BlockListBuilder {
 		});
 	}
 
-	export function buildBlockList(builders: readonly BlockBuilder[]): BlockList {
+	export function buildBlockList(builders: readonly BlockBuilder[], di: DIContainer): BlockList {
 		const endings = [".", "!", "?", " "];
 		const process = (block: BlockBuilder): BlockBuilder => {
 			if (!endings.includes(block.description.sub(block.description.size()))) {

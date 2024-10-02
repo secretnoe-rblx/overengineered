@@ -1,4 +1,4 @@
-import { ClientComponent } from "client/component/ClientComponent";
+import { ClientComponent } from "engine/client/component/ClientComponent";
 
 export abstract class PlayMode extends ClientComponent {
 	abstract getName(): PlayModes;

@@ -1,6 +1,6 @@
 import { Workspace } from "@rbxts/services";
+import { Element } from "engine/shared/Element";
 import { GameDefinitions } from "shared/data/GameDefinitions";
-import { Element } from "shared/Element";
 import type { ChunkRenderer } from "client/terrain/ChunkLoader";
 
 const parent = Element.create("Folder", { Name: "Flaterra", Parent: Workspace.WaitForChild("Obstacles") });

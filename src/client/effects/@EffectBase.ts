@@ -1,5 +1,5 @@
-import { BidirectionalRemoteEvent } from "shared/event/PERemoteEvent";
-import type { CreatableRemoteEvents } from "shared/event/RemoteEventBase";
+import { BidirectionalRemoteEvent } from "engine/shared/event/PERemoteEvent";
+import type { CreatableRemoteEvents } from "engine/shared/event/RemoteEventBase";
 
 abstract class ClientEffectBase<T> {
 	protected readonly event;

@@ -1,6 +1,6 @@
+import { AutoC2SRemoteEvent } from "engine/shared/event/C2SRemoteEvent";
 import { InstanceBlockLogic } from "shared/blockLogic/BlockLogic";
 import { BlockCreation } from "shared/blocks/BlockCreation";
-import { AutoC2SRemoteEvent } from "shared/event/C2SRemoteEvent";
 import type { BlockLogicFullBothDefinitions, InstanceBlockLogicArgs } from "shared/blockLogic/BlockLogic";
 import type { BlockBuilder } from "shared/blocks/Block";
 

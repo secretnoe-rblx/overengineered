@@ -1,17 +1,18 @@
 import { LocalizationService } from "@rbxts/services";
-import { Control } from "client/gui/Control";
 import { ButtonControl } from "client/gui/controls/Button";
 import { TextBoxControl } from "client/gui/controls/TextBoxControl";
 import { Gui } from "client/gui/Gui";
 import { Popup } from "client/gui/Popup";
 import { ConfirmPopup } from "client/gui/popup/ConfirmPopup";
-import { TransformService } from "shared/component/TransformService";
+import { Control } from "engine/client/gui/Control";
+import { TransformService } from "engine/shared/component/TransformService";
+import { ObservableValue } from "engine/shared/event/ObservableValue";
+import { Signal } from "engine/shared/event/Signal";
 import { GameDefinitions } from "shared/data/GameDefinitions";
-import { ObservableValue } from "shared/event/ObservableValue";
-import { Signal } from "shared/event/Signal";
 import { Serializer } from "shared/Serializer";
 import type { TextButtonDefinition } from "client/gui/controls/Button";
 import type { PlayerDataStorage } from "client/PlayerDataStorage";
+import type { GameHostBuilder } from "engine/shared/GameHostBuilder";
 
 const NOT_EDITABLE_IMAGE = "rbxassetid://15428855911";
 const EDITABLE_IMAGE = "rbxassetid://17320900740";

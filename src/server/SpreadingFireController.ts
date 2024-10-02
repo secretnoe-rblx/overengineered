@@ -1,9 +1,9 @@
 import { Workspace } from "@rbxts/services";
+import { LocalInstanceData } from "engine/shared/LocalInstanceData";
 import { ServerPartUtils } from "server/plots/ServerPartUtils";
 import { ServerPlayers } from "server/ServerPlayers";
 import { BlockManager } from "shared/building/BlockManager";
 import { GameDefinitions } from "shared/data/GameDefinitions";
-import { LocalInstanceData } from "shared/LocalInstanceData";
 import { CustomRemotes } from "shared/Remotes";
 import { CustomDebrisService } from "shared/service/CustomDebrisService";
 import type { FireEffect } from "shared/effects/FireEffect";

@@ -5,7 +5,7 @@ import {
 	PERemoteEventMiddlewares,
 	S2C2SRemoteFunction,
 	S2CRemoteEvent,
-} from "shared/event/PERemoteEvent";
+} from "engine/shared/event/PERemoteEvent";
 
 declare global {
 	type BuildResponse = Response<{ readonly model: BlockModel }>;
@@ -137,9 +137,6 @@ export const CustomRemotes = {
 		ride: {
 			teleportOnSeat: new C2SRemoteEvent("mdr_seat"),
 		},
-	},
-	admin: {
-		setSwitch: new C2S2CRemoteFunction<{ readonly name: string; readonly value: boolean }>("adm_setsw"),
 	},
 } as const;
 export const Remotes = Definitions.Create({

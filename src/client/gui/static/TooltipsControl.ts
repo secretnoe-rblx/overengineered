@@ -1,11 +1,11 @@
 import { UserInputService } from "@rbxts/services";
-import { ClientInstanceComponent } from "client/component/ClientInstanceComponent";
-import { InputController } from "client/controller/InputController";
-import { Control } from "client/gui/Control";
 import { Gui } from "client/gui/Gui";
-import { TransformService } from "shared/component/TransformService";
-import { Element } from "shared/Element";
-import type { InstanceComponent } from "shared/component/InstanceComponent";
+import { ClientInstanceComponent } from "engine/client/component/ClientInstanceComponent";
+import { Control } from "engine/client/gui/Control";
+import { InputController } from "engine/client/InputController";
+import { TransformService } from "engine/shared/component/TransformService";
+import { Element } from "engine/shared/Element";
+import type { InstanceComponent } from "engine/shared/component/InstanceComponent";
 
 const tooltipsGui = Gui.getGameUI<{ Help: { Controls: TooltipsControlDefinition } }>().Help.Controls;
 tooltipsGui.Visible = true;

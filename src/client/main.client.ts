@@ -1,23 +1,25 @@
 import { ContentProvider, Players, ReplicatedStorage, RunService } from "@rbxts/services";
 import { AdminMessageController } from "client/AdminMessageController";
 import { LoadingController } from "client/controller/LoadingController";
-import { InputTypeChangeEvent } from "client/event/InputTypeChangeEvent";
 import { BSOD } from "client/gui/BSOD";
 import { Gui } from "client/gui/Gui";
 import { LogControl } from "client/gui/static/LogControl";
 import { SandboxGame } from "client/SandboxGame";
 import { ServerRestartController } from "client/ServerRestartController";
-import { Objects } from "shared/fixes/objects";
-import { Game } from "shared/GameHost";
+import { InputController } from "engine/client/InputController";
+import { Objects } from "engine/shared/fixes/Objects";
+import { GameHostBuilder } from "engine/shared/GameHostBuilder";
+import { TestFramework } from "engine/shared/TestFramework";
+import { Colors } from "shared/Colors";
+import { gameInfo } from "shared/GameInfo";
 import { RemoteEvents } from "shared/RemoteEvents";
 import { CustomRemotes } from "shared/Remotes";
-import { TestFramework } from "shared/test/TestFramework";
 import { BulletProjectile } from "shared/weapons/BulletProjectileLogic";
 
 LoadingController.show("Initializing");
 Gui.getGameUI<{ VERSION: TextLabel }>().VERSION.Text = `v${RunService.IsStudio() ? "studio" : game.PlaceVersion}`;
 
-const builder = Game.createHost();
+const builder = new GameHostBuilder(gameInfo);
 try {
 	SandboxGame.initialize(builder);
 } catch (err) {
@@ -50,7 +52,9 @@ LoadingController.show("Loading the rest");
 
 LogControl.instance.show();
 
-InputTypeChangeEvent.subscribe();
+InputController.inputType.subscribe((newInputType) =>
+	LogControl.instance.addLine("New input type set to " + newInputType, Colors.yellow),
+);
 RemoteEvents.initialize();
 AdminMessageController.initialize();
 ServerRestartController.initialize();

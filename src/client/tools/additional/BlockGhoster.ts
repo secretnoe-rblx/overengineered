@@ -1,6 +1,6 @@
 import { Workspace } from "@rbxts/services";
+import { Element } from "engine/shared/Element";
 import { Colors } from "shared/Colors";
-import { Element } from "shared/Element";
 import { PartUtils } from "shared/utils/PartUtils";
 
 export namespace BlockGhoster {
