@@ -101,6 +101,11 @@ declare global {
 }
 
 export const PlayerConfigDefinition = {
+	legacy_wings: {
+		displayName: "Legacy wings",
+		type: "bool",
+		config: false as boolean,
+	},
 	betterCamera: {
 		displayName: "Camera",
 		type: "camera",
