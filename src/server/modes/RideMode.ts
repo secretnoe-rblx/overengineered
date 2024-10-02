@@ -125,7 +125,7 @@ export class RideMode implements PlayModeBase {
 
 		for (const block of blocksChildren) {
 			ServerPartUtils.switchDescendantsAnchor(block, false);
-			if (this.playerData.get(player.UserId).settings?.full_aerodynamics) {
+			if (this.playerData.get(player.UserId).settings?.physics?.fluidForcesEverything) {
 				ServerPartUtils.switchDescendantsAero(block, true);
 			}
 		}

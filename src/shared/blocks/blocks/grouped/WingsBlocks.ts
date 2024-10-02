@@ -43,7 +43,7 @@ class Logic extends InstanceBlockLogic<typeof definition, WingBlock> {
 	constructor(block: InstanceBlockLogicArgs, @inject playerData: PlayerDataStorage, @tryInject switches?: Switches) {
 		super(definition, block);
 
-		const fluidForcesEnabled = !playerData.config.get().legacy_wings;
+		const fluidForcesEnabled = !playerData.config.get().physics.legacyWings;
 
 		// Enable fluidforces for roblox engineers
 		if (fluidForcesEnabled) {

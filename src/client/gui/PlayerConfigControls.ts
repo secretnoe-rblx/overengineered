@@ -564,6 +564,49 @@ namespace ControlsSource {
 			setImprovedControlsEnabled(config.triggerByKey);
 		}
 	}
+
+	@injectable
+	export class physics extends ConfigValueControl<GuiObject> {
+		readonly submitted = new Signal<(config: PlayerConfigTypes.Physics["config"]) => void>();
+
+		constructor(
+			config: PlayerConfigTypes.Physics["config"],
+			definition: ConfigTypeToDefinition<PlayerConfigTypes.Physics>,
+			@inject di: DIContainer,
+		) {
+			super(templates.multi(), definition.displayName);
+
+			const def = {
+				legacyWings: {
+					displayName: "Legacy wings aerodynamics",
+					type: "bool",
+					config: definition.config.legacyWings,
+				},
+				fluidForcesEverything: {
+					displayName: "Aerodynamics for every block",
+					type: "bool",
+					config: definition.config.fluidForcesEverything,
+				},
+			} as const satisfies PlayerConfigTypes.Definitions;
+			const _compilecheck: ConfigDefinitionsToConfig<keyof typeof def, typeof def> = config;
+
+			const control = this.add(new MultiPlayerConfigControl<typeof def>(this.gui.Control, di));
+			control.set(config, def);
+			this.event.subscribe(control.configUpdated, (key, value) => {
+				this.submitted.Fire((config = { ...config, [key]: value }));
+				updateVisibility();
+			});
+
+			const legacyWings = control.get("legacyWings");
+			const fluidForcesEverything = control.get("fluidForcesEverything");
+
+			const updateVisibility = () => {
+				fluidForcesEverything.setVisible(!config.legacyWings);
+				legacyWings.setVisible(!config.fluidForcesEverything);
+			};
+			updateVisibility();
+		}
+	}
 }
 const Controls = {
 	...ControlsSource,
