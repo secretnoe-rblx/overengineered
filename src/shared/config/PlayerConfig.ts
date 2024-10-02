@@ -104,6 +104,11 @@ export const PlayerConfigDefinition = {
 	legacy_wings: {
 		displayName: "Legacy wings",
 		type: "bool",
+		config: true as boolean,
+	},
+	full_aerodynamics: {
+		displayName: "Extreme aerodynamics",
+		type: "bool",
 		config: false as boolean,
 	},
 	betterCamera: {
