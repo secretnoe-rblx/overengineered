@@ -50,8 +50,8 @@ declare global {
 		readonly autoRecovery: boolean;
 	};
 	type PhysicsConfiguration = {
-		readonly legacyWings: boolean;
-		readonly fluidForcesEverything: boolean;
+		readonly simplified_aerodynamics: boolean;
+		readonly advanced_aerodynamics: boolean;
 	};
 
 	namespace PlayerConfigTypes {
@@ -215,8 +215,8 @@ export const PlayerConfigDefinition = {
 		displayName: "Physics",
 		type: "physics",
 		config: {
-			fluidForcesEverything: false,
-			legacyWings: true,
+			advanced_aerodynamics: false,
+			simplified_aerodynamics: true,
 		},
 	},
 } as const satisfies ConfigTypesToDefinition<keyof PlayerConfigTypes.Types, PlayerConfigTypes.Types>;

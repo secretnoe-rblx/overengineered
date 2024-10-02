@@ -577,15 +577,15 @@ namespace ControlsSource {
 			super(templates.multi(), definition.displayName);
 
 			const def = {
-				legacyWings: {
-					displayName: "Legacy wings aerodynamics",
+				simplified_aerodynamics: {
+					displayName: "Simplified aerodynamics (wings only)",
 					type: "bool",
-					config: definition.config.legacyWings,
+					config: definition.config.simplified_aerodynamics,
 				},
-				fluidForcesEverything: {
-					displayName: "Aerodynamics for every block",
+				advanced_aerodynamics: {
+					displayName: "Advanced aerodynamics",
 					type: "bool",
-					config: definition.config.fluidForcesEverything,
+					config: definition.config.advanced_aerodynamics,
 				},
 			} as const satisfies PlayerConfigTypes.Definitions;
 			const _compilecheck: ConfigDefinitionsToConfig<keyof typeof def, typeof def> = config;
@@ -597,12 +597,12 @@ namespace ControlsSource {
 				updateVisibility();
 			});
 
-			const legacyWings = control.get("legacyWings");
-			const fluidForcesEverything = control.get("fluidForcesEverything");
+			const legacyWings = control.get("simplified_aerodynamics");
+			const fluidForcesEverything = control.get("advanced_aerodynamics");
 
 			const updateVisibility = () => {
-				fluidForcesEverything.setVisible(!config.legacyWings);
-				legacyWings.setVisible(!config.fluidForcesEverything);
+				fluidForcesEverything.setVisible(!config.simplified_aerodynamics);
+				legacyWings.setVisible(!config.advanced_aerodynamics);
 			};
 			updateVisibility();
 		}
