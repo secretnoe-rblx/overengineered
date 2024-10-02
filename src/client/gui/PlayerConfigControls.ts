@@ -578,7 +578,7 @@ namespace ControlsSource {
 
 			const def = {
 				simplified_aerodynamics: {
-					displayName: "Simplified aerodynamics (wings only)",
+					displayName: "Simplified aerodynamics",
 					type: "bool",
 					config: definition.config.simplified_aerodynamics,
 				},
