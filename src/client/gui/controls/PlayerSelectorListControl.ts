@@ -8,6 +8,7 @@ import { GameDefinitions } from "shared/data/GameDefinitions";
 
 type FakePlayer = {
 	readonly UserId: number;
+	readonly DisplayName: string;
 	readonly Name: string;
 };
 
@@ -15,6 +16,7 @@ type PlayerContainerDefinition = Frame & {
 	readonly TextButton: TextButton & {
 		readonly ImageLabel: ImageLabel;
 		readonly TitleLabel: TextLabel;
+		readonly UsernameLabel: TextLabel;
 	};
 };
 class PlayerContainer extends Control<PlayerContainerDefinition> {
@@ -26,7 +28,8 @@ class PlayerContainer extends Control<PlayerContainerDefinition> {
 	) {
 		super(gui);
 
-		gui.TextButton.TitleLabel.Text = `@${player.Name}`;
+		gui.TextButton.TitleLabel.Text = player.DisplayName;
+		gui.TextButton.UsernameLabel.Text = `@${player.Name}`;
 		task.spawn(() => {
 			gui.TextButton.ImageLabel.Image = Players.GetUserThumbnailAsync(
 				player.UserId,
@@ -146,6 +149,9 @@ export class PlayerSelectorColumnControl extends Control<PlayerSelectorColumnCon
 			TransformService.run(control.instance.TextButton.TitleLabel, (tr) =>
 				tr.transform("TextTransparency", 1, TransformService.commonProps.quadOut02),
 			);
+			TransformService.run(control.instance.TextButton.UsernameLabel, (tr) =>
+				tr.transform("TextTransparency", 1, TransformService.commonProps.quadOut02),
+			);
 			TransformService.run(control.instance.TextButton.ImageLabel, (tr) =>
 				tr.transform("ImageTransparency", 1, TransformService.commonProps.quadOut02),
 			);
@@ -158,6 +164,9 @@ export class PlayerSelectorColumnControl extends Control<PlayerSelectorColumnCon
 			);
 		} else {
 			TransformService.run(control.instance.TextButton.TitleLabel, (tr) =>
+				tr.transform("TextTransparency", 1, TransformService.commonProps.quadOut02),
+			);
+			TransformService.run(control.instance.TextButton.UsernameLabel, (tr) =>
 				tr.transform("TextTransparency", 1, TransformService.commonProps.quadOut02),
 			);
 			TransformService.run(control.instance.TextButton.ImageLabel, (tr) =>
