@@ -136,12 +136,11 @@ class Logic extends InstanceBlockLogic<typeof definition> {
 			}
 		});
 
-		this.onDescendantDestroyed(() => {
+		this.onDisable(() => {
 			const view = this.instance.FindFirstChild("RadarView") as BasePart | undefined;
 			if (view) view.Transparency = 1;
 
 			this.allTouchedBlocks.clear();
-			this.disable();
 		});
 	}
 

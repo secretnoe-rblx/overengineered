@@ -135,10 +135,7 @@ class Logic extends InstanceBlockLogic<typeof definition, RocketModel> {
 			this.update(thrust, strength);
 		});
 
-		this.onDescendantDestroyed(() => {
-			this.update(0, 0);
-			this.disable();
-		});
+		this.onDisable(() => this.update(0, 0));
 	}
 
 	private update(thrust: number, strength: number) {

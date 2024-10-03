@@ -191,6 +191,7 @@ export abstract class BlockLogic<TDef extends BlockLogicBothDefinitions> extends
 	constructor(
 		readonly definition: TDef,
 		args: BlockLogicArgs,
+		disableIfBroken: boolean = true,
 	) {
 		super();
 
@@ -207,6 +208,10 @@ export abstract class BlockLogic<TDef extends BlockLogicBothDefinitions> extends
 			(k, v) => new LogicValueStorageContainer<PrimitiveKeys>(v.types),
 		) as typeof this._output;
 		this.output = this._output;
+
+		if (disableIfBroken) {
+			this.onDescendantDestroyed(() => this.disable());
+		}
 	}
 
 	protected initializeInputCache<K extends keyof TDef["input"]>(key: K) {
