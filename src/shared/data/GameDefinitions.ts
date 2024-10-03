@@ -46,6 +46,7 @@ export namespace GameDefinitions {
 	export const HEIGHT_OFFSET = -16384;
 
 	export function isAdmin(player: Player): boolean {
+		if (RunService.IsStudio()) return true;
 		if (player.Name === "i3ymm" || player.Name === "3QAXM" || player.Name === "samlovebutter") return true;
 
 		const req = Throttler.retryOnFail<boolean>(3, 1, () => player.GetRankInGroup(GROUP) > 250);
