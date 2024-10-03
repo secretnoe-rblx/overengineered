@@ -11,6 +11,10 @@ export class UpdatePopupController extends HostedService {
 			const lastVersion = playerDataStorage.data.get().data.lastLaunchedVersion ?? 0;
 			playerDataStorage.sendPlayerDataValue("lastLaunchedVersion", game.PlaceVersion);
 
+			if (lastVersion === 0) {
+				return;
+			}
+
 			if (lastVersion < 100) {
 				AlertPopup.showPopup(
 					`
