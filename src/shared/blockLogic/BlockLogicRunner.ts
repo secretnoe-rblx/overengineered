@@ -52,7 +52,13 @@ export class BlockLogicRunner extends Component {
 
 		for (const block of this.blocks) {
 			if (!block.isEnabled()) continue;
-			block.ticc(ctx);
+
+			try {
+				block.ticc(ctx);
+			} catch (err) {
+				$warn(err);
+				block.disableAndBurn();
+			}
 		}
 		this.ticked.Fire(ctx);
 	}
