@@ -21,7 +21,10 @@ import type { ReadonlyPlot } from "shared/building/ReadonlyPlot";
 @injectable
 export class AdminGui extends HostedService {
 	static initializeIfAdminOrStudio(host: GameHostBuilder) {
-		const enabled = RunService.IsStudio() || GameDefinitions.isAdmin(Players.LocalPlayer);
+		const enabled =
+			RunService.IsStudio() ||
+			GameDefinitions.isAdmin(Players.LocalPlayer) ||
+			GameDefinitions.isRobloxEngineer(Players.LocalPlayer);
 		if (!enabled) return;
 
 		host.services.registerService(this);
