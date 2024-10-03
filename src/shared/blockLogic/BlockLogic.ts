@@ -479,6 +479,9 @@ export abstract class BlockLogic<TDef extends BlockLogicBothDefinitions> extends
 
 	getDebugInfo(ctx: BlockLogicTickContext): readonly string[] {
 		const result: string[] = [];
+		if (!this.isEnabled()) {
+			result.push("!DISABLED!");
+		}
 
 		for (const [k, input] of pairs(this.input)) {
 			const value = input.get(ctx);
