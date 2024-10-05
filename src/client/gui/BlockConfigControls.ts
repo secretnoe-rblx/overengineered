@@ -569,8 +569,10 @@ namespace Controls {
 							config: def.mode,
 							elementOrder: [
 								"stopOnRelease",
+								"instantResetOnDoublePress",
 								"stopOnDoublePress",
 								"resetOnRelease",
+								"instantResetOnRelease",
 								"resetOnDoublePress",
 								"never",
 							],
@@ -585,10 +587,18 @@ namespace Controls {
 								},
 								resetOnRelease: {
 									displayName: "Reset on release",
+									tooltip: "Smoothly resets upon releasing the key",
+								},
+								instantResetOnRelease: {
+									displayName: "Instant reset on release",
 									tooltip: "Resets upon releasing the key",
 								},
 								resetOnDoublePress: {
 									displayName: "Reset on double press",
+									tooltip: "Smoothly resets upon pressing the same key twice",
+								},
+								instantResetOnDoublePress: {
+									displayName: "Instant reset on double press",
 									tooltip: "Resets upon pressing the same key twice",
 								},
 								never: {
