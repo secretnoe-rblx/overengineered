@@ -14,7 +14,7 @@ namespace LoggingMetrics {
 		Players.PlayerAdded.Connect((plr) => {
 			addLine(`[**@${plr.Name}**](https://www.roblox.com/users/${plr.UserId}/profile) joined the game`);
 
-			if (plr.IsVerified()) {
+			if (plr.HasVerifiedBadge) {
 				DiscordWebhook.sendMessage({
 					content: `Verified player [**@${plr.Name}**](https://www.roblox.com/users/${plr.UserId}/profile) joined <@1049428656285548564>`,
 				});
