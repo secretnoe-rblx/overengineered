@@ -1255,6 +1255,25 @@ const other = {
 				enable ? { result: { type: valueType, value: value } } : BlockLogicValueResults.availableLater,
 		),
 	},
+	unixtime: {
+		displayName: "UNIX Time",
+		description: "Returns the amount of seconds since January 1st, 1970 at 00:00 UTC",
+		modelSource: autoModel("ConstLogicBlockPrefab", "UNIX", BlockCreation.Categories.other),
+		logic: logic(
+			{
+				input: {},
+				output: {
+					result: {
+						displayName: "Time",
+						types: ["number"],
+					},
+				},
+			},
+			() => ({
+				result: { type: "number", value: DateTime.now().UnixTimestampMillis * 1000 },
+			}),
+		),
+	},
 } as const satisfies BlockBuildersWithoutIdAndDefaults;
 
 const test: {} = !RunService.IsStudio()
