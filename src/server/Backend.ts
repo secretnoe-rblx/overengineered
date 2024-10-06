@@ -25,6 +25,7 @@ export namespace Backend {
 			address: endpoint,
 		};
 
+		// TODO: Remove (AccessToken as Secret)
 		return HttpService.JSONDecode(
 			HttpService.PostAsync(
 				`${DIST}/open-cloud/get`,
