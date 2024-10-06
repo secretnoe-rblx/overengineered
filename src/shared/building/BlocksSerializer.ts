@@ -751,6 +751,7 @@ const v20: UpgradableBlocksSerializer<SerializedBlocks<SerializedBlockV3>, typeo
 			"ownerlocator",
 			"laser",
 			"anglesensor",
+			"gpssensor",
 			"leddisplay",
 			"screen",
 			"speedometer",

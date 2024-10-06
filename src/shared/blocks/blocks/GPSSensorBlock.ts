@@ -20,7 +20,7 @@ class Logic extends InstanceBlockLogic<typeof definition> {
 	constructor(block: InstanceBlockLogicArgs) {
 		super(definition, block);
 
-		const offset = new Vector3(0, GameDefinitions.HEIGHT_OFFSET, 0);
+		const offset = new Vector3(0, -GameDefinitions.HEIGHT_OFFSET, 0);
 
 		this.onRecalcInputs(() => {
 			this.output.result.set("vector3", offset.add(block.instance.GetPivot().Position));
@@ -36,7 +36,7 @@ export const GPSSensorBlock = {
 
 	logic: { definition, ctor: Logic },
 	modelSource: {
-		model: BlockCreation.Model.fAutoCreated("GenericLogicBlockPrefab", "GPS"),
-		category: () => BlockCreation.Categories.other,
+		model: BlockCreation.Model.fAutoCreated("DoubleGenericLogicBlockPrefab", "GPS"),
+		category: () => BlockCreation.Categories.sensor,
 	},
 } as const satisfies BlockBuilder;
