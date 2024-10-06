@@ -4,7 +4,7 @@
 	"description": "",
 	"main": "index.js",
 	"scripts": {
-		"prepare": "git submodule update --init",
+		"preinstall": "git submodule update --init",
 		"build": "rbxtsc",
 		"watch": "rbxtsc -w"
 	},
