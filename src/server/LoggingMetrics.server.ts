@@ -14,6 +14,17 @@ namespace LoggingMetrics {
 		Players.PlayerAdded.Connect((plr) => {
 			addLine(`[**@${plr.Name}**](https://www.roblox.com/users/${plr.UserId}/profile) joined the game`);
 
+			if (plr.IsVerified()) {
+				DiscordWebhook.sendMessage({
+					content: `Verified player [**@${plr.Name}**](https://www.roblox.com/users/${plr.UserId}/profile) joined <@1049428656285548564>`,
+				});
+			}
+			if (GameDefinitions.isRobloxEngineer(plr)) {
+				DiscordWebhook.sendMessage({
+					content: `Roblox staff [**@${plr.Name}**](https://www.roblox.com/users/${plr.UserId}/profile) joined <@1049428656285548564>`,
+				});
+			}
+
 			plr.Chatted.Connect((message, recipient) => {
 				addLine(
 					`[**@${plr.Name}**](https://www.roblox.com/users/${plr.UserId}/profile) chatted \`${message}\`` +
