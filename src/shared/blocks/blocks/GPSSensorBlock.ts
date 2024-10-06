@@ -15,7 +15,7 @@ const definition = {
 	},
 } satisfies BlockLogicFullBothDefinitions;
 
-export type { Logic as GPSSensorBlock };
+export type { Logic as GPSSensorBlockLogic };
 class Logic extends InstanceBlockLogic<typeof definition> {
 	constructor(block: InstanceBlockLogicArgs) {
 		super(definition, block);
@@ -28,7 +28,7 @@ class Logic extends InstanceBlockLogic<typeof definition> {
 	}
 }
 
-export const AngleSensorBlock = {
+export const GPSSensorBlock = {
 	...BlockCreation.defaults,
 	id: "gpssensor",
 	displayName: "GPS",
