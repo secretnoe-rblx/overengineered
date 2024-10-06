@@ -32,7 +32,9 @@ export namespace Backend {
 				Enum.HttpContentType.ApplicationJson,
 				undefined,
 				{
-					Authorization: `Bearer ${AccessToken}`,
+					Authorization: typeIs(AccessToken, "string")
+						? `Bearer ${AccessToken}`
+						: ((AccessToken as Secret).AddPrefix("Bearer ") as unknown as string),
 				},
 			),
 		);
