@@ -276,6 +276,35 @@ const constants = {
 } as const satisfies BlockBuildersWithoutIdAndDefaults;
 
 const maths = {
+	negate: {
+		displayName: "Negate",
+		description: "Negates the input",
+		modelSource: autoModel("GenericLogicBlockPrefab", "NEG", categories.math),
+		logic: logic(
+			{
+				input: {
+					value: {
+						displayName: "Value",
+						types: {
+							number: { config: 0 },
+							vector3: { config: Vector3.zero },
+						},
+						group: "0",
+					},
+				},
+				output: {
+					result: {
+						displayName: "Result",
+						types: ["number", "vector3"],
+						group: "0",
+					},
+				},
+			},
+			({ value, valueType }) => ({
+				result: { type: valueType, value: typeIs(value, "number") ? -value : value.mul(-1) },
+			}),
+		),
+	},
 	abs: {
 		displayName: "Absolute",
 		description: "Returns the modulus of incoming number",
