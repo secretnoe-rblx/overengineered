@@ -1270,7 +1270,7 @@ const other = {
 				},
 			},
 			() => ({
-				result: { type: "number", value: DateTime.now().UnixTimestampMillis * 1000 },
+				result: { type: "number", value: DateTime.now().UnixTimestampMillis / 1000 },
 			}),
 		),
 	},
