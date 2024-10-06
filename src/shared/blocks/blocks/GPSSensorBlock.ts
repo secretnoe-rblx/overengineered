@@ -35,4 +35,8 @@ export const GPSSensorBlock = {
 	description: "Returns its global position",
 
 	logic: { definition, ctor: Logic },
+	modelSource: {
+		model: BlockCreation.Model.fAutoCreated("GenericLogicBlockPrefab", "GPS"),
+		category: () => BlockCreation.Categories.other,
+	},
 } as const satisfies BlockBuilder;
