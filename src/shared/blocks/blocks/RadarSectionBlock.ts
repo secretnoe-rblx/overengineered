@@ -85,9 +85,12 @@ class Logic extends InstanceBlockLogic<typeof definition> {
 		if (!view?.IsA("BasePart")) return;
 		if (!metalPlate?.IsA("BasePart")) return;
 
+		view.Anchored = true;
+
 		const updateDistance = (detectionSize: number, maxDistance: number) => {
 			const ds = detectionSize * (detectionSize - math.sqrt(halvedMaxDist / (maxDistance + halvedMaxDist))) * 10;
 			view.Size = new Vector3(ds, view.Size.Y, ds);
+			view.PivotOffset = new CFrame(0, -view.Size.Y / 2 - 0.4, 0);
 			this.triggerDistanceListUpdate = true;
 		};
 
@@ -103,6 +106,8 @@ class Logic extends InstanceBlockLogic<typeof definition> {
 		});
 
 		this.onAlwaysInputs(({ minimalDistance }) => {
+			view.PivotTo(this.instance.PrimaryPart!.CFrame);
+
 			if (this.closestDetectedPart?.Parent === undefined || this.triggerDistanceListUpdate) {
 				this.triggerDistanceListUpdate = false;
 				this.closestDetectedPart = this.findClosestPart(minimalDistance);
