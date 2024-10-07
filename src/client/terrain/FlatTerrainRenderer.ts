@@ -1,4 +1,5 @@
 import { Workspace } from "@rbxts/services";
+import { initLavaKillPlane } from "client/controller/KillPlane";
 import { Element } from "engine/shared/Element";
 import { GameDefinitions } from "shared/data/GameDefinitions";
 import type { ChunkRenderer } from "client/terrain/ChunkLoader";
@@ -7,6 +8,7 @@ const parent = Element.create("Folder", { Name: "Flaterra", Parent: Workspace.Wa
 
 type config = {
 	readonly snowOnly: boolean;
+	readonly isLava: boolean;
 };
 export const FlatTerrainRenderer = (
 	height: number,
@@ -32,7 +34,12 @@ export const FlatTerrainRenderer = (
 		);
 		part.Size = new Vector3(this.chunkSize, 2, this.chunkSize);
 
-		if (config?.snowOnly) {
+		if (config?.isLava) {
+			part.Material = Enum.Material.CrackedLava;
+			part.Color = Color3.fromRGB(255, 42, 0);
+
+			initLavaKillPlane(part);
+		} else if (config?.snowOnly) {
 			part.Material = Enum.Material.Snow;
 			part.Color = math.random() > 0.9999 ? new Color3(0.8, 0.8, 0.4) : new Color3(0.8, 0.8, 0.8);
 		} else {

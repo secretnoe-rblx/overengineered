@@ -420,6 +420,7 @@ namespace ControlsSource {
 				Classic: true,
 				Triangle: true,
 				Water: true,
+				Lava: true,
 			};
 			const def = {
 				kind: {
@@ -485,7 +486,7 @@ namespace ControlsSource {
 				triangleAddSandBelowSeaLevel.setVisible(kind === "Triangle");
 				waterControl.setVisible(kind === "Triangle");
 				foliageControl.setVisible(kind === "Classic");
-				snowOnly.setVisible(kind !== "Water");
+				snowOnly.setVisible(kind !== "Water" && kind !== "Lava");
 			};
 			this.event.subscribe(kindControl.submitted, setImprovedControlsEnabled);
 			setImprovedControlsEnabled(config.kind);
