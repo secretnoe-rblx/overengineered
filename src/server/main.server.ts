@@ -22,13 +22,10 @@ import { PlasmaProjectile } from "shared/weapons/PlasmaProjectileLogic";
 import { BulletProjectile } from "shared/weapons/BulletProjectileLogic";
 import { GameHostBuilder } from "engine/shared/GameHostBuilder";
 import { gameInfo } from "shared/GameInfo";
-import { DiscordLogging } from "engine/server/network/DiscordLogging";
 import { LaunchDataController } from "engine/server/network/LaunchDataController";
 
 const builder = new GameHostBuilder(gameInfo);
 SandboxGame.initialize(builder);
-
-DiscordLogging.initialize();
 
 const host = builder.build();
 host.run();
