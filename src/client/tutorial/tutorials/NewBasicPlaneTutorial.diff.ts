@@ -528,7 +528,7 @@ export const NewBasicPlaneTutorialDiffs = {
 						mode: {
 							type: "instant",
 							instant: { mode: "onRelease" },
-							smooth: { speed: 20, mode: "stopOnRelease" },
+							smooth: { speed: 72, mode: "stopOnRelease" },
 						},
 						keys: [
 							{ key: "D", value: 15 },
@@ -550,7 +550,7 @@ export const NewBasicPlaneTutorialDiffs = {
 						mode: {
 							type: "instant",
 							instant: { mode: "onRelease" },
-							smooth: { speed: 20, mode: "stopOnRelease" },
+							smooth: { speed: 72, mode: "stopOnRelease" },
 						},
 						keys: [
 							{ key: "D", value: 15 },
@@ -574,7 +574,7 @@ export const NewBasicPlaneTutorialDiffs = {
 						mode: {
 							type: "instant",
 							instant: { mode: "onRelease" },
-							smooth: { speed: 20, mode: "stopOnRelease" },
+							smooth: { speed: 72, mode: "stopOnRelease" },
 						},
 						keys: [
 							{ key: "W", value: 15 },
@@ -596,7 +596,7 @@ export const NewBasicPlaneTutorialDiffs = {
 						mode: {
 							type: "instant",
 							instant: { mode: "onRelease" },
-							smooth: { speed: 20, mode: "stopOnRelease" },
+							smooth: { speed: 72, mode: "stopOnRelease" },
 						},
 						keys: [
 							{ key: "S", value: 15 },
@@ -620,7 +620,7 @@ export const NewBasicPlaneTutorialDiffs = {
 						mode: {
 							type: "instant",
 							instant: { mode: "onRelease" },
-							smooth: { speed: 20, mode: "stopOnRelease" },
+							smooth: { speed: 72, mode: "stopOnRelease" },
 						},
 						keys: [
 							{ key: "A", value: 15 },
@@ -642,7 +642,7 @@ export const NewBasicPlaneTutorialDiffs = {
 						mode: {
 							type: "instant",
 							instant: { mode: "onRelease" },
-							smooth: { speed: 20, mode: "stopOnRelease" },
+							smooth: { speed: 72, mode: "stopOnRelease" },
 						},
 						keys: [
 							{ key: "A", value: 15 },
