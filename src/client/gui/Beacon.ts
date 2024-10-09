@@ -89,8 +89,12 @@ export class Beacon extends InstanceComponent<PVInstance> {
 				this.billboard.Title.TextTransparency = newTransparency;
 				this.billboard.Distance.TextTransparency = newTransparency;
 
-				pos_x = math.clamp(pos_x, adjustableOffset, screenSize.X - adjustableOffset);
-				pos_y = math.clamp(pos_y, adjustableOffset, screenSize.Y - adjustableOffset);
+				const p1 = adjustableOffset;
+				const px1 = screenSize.X - adjustableOffset;
+				const py1 = screenSize.Y - adjustableOffset;
+
+				pos_x = math.clamp(pos_x, math.min(p1, px1), math.max(p1, px1));
+				pos_y = math.clamp(pos_y, math.min(p1, py1), math.max(p1, py1));
 			}
 
 			this.billboard.Position = new UDim2(0, pos_x, 0, pos_y);
