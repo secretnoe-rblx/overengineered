@@ -1,6 +1,7 @@
-import { Players, ReplicatedStorage, Workspace } from "@rbxts/services";
+import { Players, ReplicatedStorage, RunService, Workspace } from "@rbxts/services";
 import { LocalPlayerController } from "client/controller/LocalPlayerController";
 import { Signals } from "client/Signals";
+import { LocalPlayer } from "engine/client/LocalPlayer";
 import { HostedService } from "engine/shared/di/HostedService";
 import { Sound } from "shared/Sound";
 import { TerrainDataInfo } from "shared/TerrainDataInfo";
@@ -18,6 +19,7 @@ type Sounds = {
 	readonly Start: Sound;
 	readonly Click: Sound;
 	readonly Warning: Sound;
+	readonly Wind: Sound;
 	readonly Music: {
 		readonly Space: Folder & { [key: string]: Sound };
 	};
@@ -82,6 +84,32 @@ class UnderwaterSoundEffect extends HostedService {
 	}
 }
 
+class WindSoundEffect extends HostedService {
+	constructor() {
+		super();
+
+		const sound = SoundController.getSounds().Wind;
+		const maxVolume = 6;
+		const maxSoundSpeed = 2;
+		const maxSpeed = 900;
+
+		this.event.subscribe(RunService.Heartbeat, () => {
+			const speed = LocalPlayer.rootPart.get()?.Velocity.Magnitude ?? 0;
+
+			let ratio = (speed / maxSpeed) * 100;
+			if (ratio > 100) {
+				ratio = 100;
+			}
+
+			const volume = (maxVolume / 100) * ratio;
+			const soundSpeed = (maxSoundSpeed / 100) * ratio;
+
+			sound.Volume = SoundController.getWorldVolume(volume);
+			sound.PlaybackSpeed = soundSpeed;
+		});
+	}
+}
+
 /** A class for controlling sounds and their effects */
 export namespace SoundController {
 	export function initializeAll(host: GameHostBuilder) {
@@ -89,6 +117,7 @@ export namespace SoundController {
 	}
 	export function initializeUnderwaterEffect(host: GameHostBuilder) {
 		host.services.registerService(UnderwaterSoundEffect);
+		host.services.registerService(WindSoundEffect);
 	}
 
 	export function subscribeSoundAdded(func: (sound: Sound) => void): SignalConnection {

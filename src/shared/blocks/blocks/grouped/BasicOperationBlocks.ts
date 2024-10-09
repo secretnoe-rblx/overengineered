@@ -276,6 +276,35 @@ const constants = {
 } as const satisfies BlockBuildersWithoutIdAndDefaults;
 
 const maths = {
+	negate: {
+		displayName: "Negate",
+		description: "Negates the input",
+		modelSource: autoModel("GenericLogicBlockPrefab", "NEG", categories.math),
+		logic: logic(
+			{
+				input: {
+					value: {
+						displayName: "Value",
+						types: {
+							number: { config: 0 },
+							vector3: { config: Vector3.zero },
+						},
+						group: "0",
+					},
+				},
+				output: {
+					result: {
+						displayName: "Result",
+						types: ["number", "vector3"],
+						group: "0",
+					},
+				},
+			},
+			({ value, valueType }) => ({
+				result: { type: valueType, value: typeIs(value, "number") ? -value : value.mul(-1) },
+			}),
+		),
+	},
 	abs: {
 		displayName: "Absolute",
 		description: "Returns the modulus of incoming number",
@@ -1224,6 +1253,25 @@ const other = {
 			},
 			({ value, valueType, enable }) =>
 				enable ? { result: { type: valueType, value: value } } : BlockLogicValueResults.availableLater,
+		),
+	},
+	unixtime: {
+		displayName: "UNIX Time",
+		description: "Returns the amount of seconds since January 1st, 1970 at 00:00 UTC",
+		modelSource: autoModel("ConstLogicBlockPrefab", "UNIX", BlockCreation.Categories.other),
+		logic: logic(
+			{
+				input: {},
+				output: {
+					result: {
+						displayName: "Time",
+						types: ["number"],
+					},
+				},
+			},
+			() => ({
+				result: { type: "number", value: DateTime.now().UnixTimestampMillis / 1000 },
+			}),
 		),
 	},
 } as const satisfies BlockBuildersWithoutIdAndDefaults;

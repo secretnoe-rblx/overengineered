@@ -55,7 +55,6 @@ class Logic extends InstanceBlockLogic<typeof definition> {
 			if (this.fireDuration > 0) this.fireDuration -= dt;
 			this.output.detected.set("bool", this.fireDuration > 0);
 		});
-		this.onDescendantDestroyed(() => this.disable());
 	}
 }
 

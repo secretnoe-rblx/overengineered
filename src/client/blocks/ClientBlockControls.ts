@@ -65,9 +65,15 @@ namespace ClientBlockControlsNamespace {
 
 		let smoothMovingTask: thread | undefined;
 		let smoothAmount = config.startValue;
-		const smoothSet = (target: number, speed: number) => {
+		const smoothSet = (target: number, speed: number | undefined) => {
 			if (smoothMovingTask) {
 				smoothCancel();
+			}
+
+			if (!speed) {
+				smoothAmount = MathUtils.round(target, clamp?.step);
+				actualSet(smoothAmount);
+				return;
 			}
 
 			const step = smoothAmount < target ? speed : -speed;
@@ -114,6 +120,7 @@ namespace ClientBlockControlsNamespace {
 
 		let set: (value: number) => void;
 		const reset = () => set(config.startValue);
+		const instantReset = () => smoothSet(config.startValue, undefined);
 
 		let mapper: (v: BlockLogicTypes.NumberControlKey) => {
 			readonly keyDown: (() => void) | undefined;
@@ -146,9 +153,19 @@ namespace ClientBlockControlsNamespace {
 					keyDown: () => set(v.value),
 					keyUp: reset,
 				});
+			} else if (mode.mode === "instantResetOnRelease") {
+				mapper = (v) => ({
+					keyDown: () => set(v.value),
+					keyUp: instantReset,
+				});
 			} else if (mode.mode === "resetOnDoublePress") {
 				mapper = (v) => ({
 					keyDown: createDoublePress(v, set, reset),
+					keyUp: undefined,
+				});
+			} else if (mode.mode === "instantResetOnDoublePress") {
+				mapper = (v) => ({
+					keyDown: createDoublePress(v, set, instantReset),
 					keyUp: undefined,
 				});
 			}

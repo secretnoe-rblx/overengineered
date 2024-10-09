@@ -155,8 +155,6 @@ class Logic extends InstanceBlockLogic<typeof servoDefinition, ServoMotorModel> 
 				this.disable();
 			}
 		});
-
-		this.onDescendantDestroyed(() => this.disable());
 	}
 }
 

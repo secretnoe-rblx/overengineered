@@ -6,14 +6,23 @@ if (!game.GetService("RunService").IsStudio()) {
 	}
 }
 
+import { Secrets } from "engine/server/Secrets";
+
+// API Secrets
+Secrets.addDevelopmentSecret(
+	"discord_webhook",
+	"https://webhook.lewisakura.moe/api/webhooks/1197990614671822999/kTKPwZN1p9sJQYLw7L4-jO3Au2LH6ffXxtJjNoLTZljuScGTpaVr9-hgVmGoq08IcfAV/queue",
+);
+Secrets.addDevelopmentSecret("backend_token", "d81b0f61-7f62-4016-b5fe-8c5904c9be7d");
+
 import { Players, RunService, Workspace } from "@rbxts/services";
 import { RemoteEvents } from "shared/RemoteEvents";
 import { SandboxGame } from "server/SandboxGame";
 import { PlasmaProjectile } from "shared/weapons/PlasmaProjectileLogic";
 import { BulletProjectile } from "shared/weapons/BulletProjectileLogic";
-import { BootFlagsController } from "server/BootFlagsController";
 import { GameHostBuilder } from "engine/shared/GameHostBuilder";
 import { gameInfo } from "shared/GameInfo";
+import { LaunchDataController } from "engine/server/network/LaunchDataController";
 
 const builder = new GameHostBuilder(gameInfo);
 SandboxGame.initialize(builder);
@@ -25,7 +34,7 @@ host.run();
 RemoteEvents.initialize();
 
 // Game boot flags
-BootFlagsController.initialize();
+LaunchDataController.initialize();
 
 $log("Server loaded.");
 Workspace.AddTag("GameLoaded");

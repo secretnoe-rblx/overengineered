@@ -24,6 +24,7 @@ export class TerrainController extends HostedService {
 				const config = {
 					snowOnly: terrain.snowOnly,
 					addSandBelowSeaLevel: terrain.triangleAddSandBelowSeaLevel,
+					isLava: terrain.kind === "Lava",
 				};
 
 				switch (terrain.kind) {
@@ -49,8 +50,12 @@ export class TerrainController extends HostedService {
 						);
 						break;
 					case "Flat":
+					case "Lava":
 						loaders.add(
-							new ChunkLoader(FlatTerrainRenderer(0.5 - 0.01, 1024, config), terrain.loadDistance),
+							new ChunkLoader(
+								FlatTerrainRenderer(0.5 - 0.01 + (terrain.kind === "Lava" ? -1.5 : 0), 1024, config),
+								terrain.loadDistance,
+							),
 						);
 						break;
 					case "Water":

@@ -48,8 +48,10 @@ export namespace BlockLogicTypes {
 	export type NumberControlModesResetMode = "onRelease" | "onDoublePress" | "never";
 	export type NumberControlModesSmoothMode =
 		| "resetOnRelease"
+		| "instantResetOnRelease"
 		| "stopOnRelease"
 		| "resetOnDoublePress"
+		| "instantResetOnDoublePress"
 		| "stopOnDoublePress"
 		| "never";
 	export interface NumberControlModes {

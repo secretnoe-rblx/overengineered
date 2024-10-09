@@ -3,7 +3,6 @@ import { Popup } from "client/gui/Popup";
 import { BuildingMode } from "client/modes/build/BuildingMode";
 import { requestMode } from "client/modes/PlayModeRequest";
 import { RideMode } from "client/modes/ride/RideMode";
-import { Signals } from "client/Signals";
 import { LocalPlayer } from "engine/client/LocalPlayer";
 import { HostedService } from "engine/shared/di/HostedService";
 import { ObservableValue } from "engine/shared/event/ObservableValue";
@@ -27,10 +26,6 @@ export class PlayModeController extends HostedService {
 		StarterGui.SetCoreGuiEnabled(Enum.CoreGuiType.Backpack, false);
 
 		CustomRemotes.modes.setOnClient.subscribe((mode) => {
-			if (mode) {
-				Signals.LOCAL_PLAY_MODE_CHANGED.Fire(mode);
-			}
-
 			this.playmode.set(mode);
 			return { success: true };
 		});
@@ -58,12 +53,13 @@ export class PlayModeController extends HostedService {
 			if (active) this.modes[active].enable();
 		});
 
-		this.event.subscribeObservable(this.playmode, (mode, prev) => this.setMode(mode, prev));
+		this.event.subscribeObservable(this.playmode, (mode, prev) => {
+			this.callImmediateSetMode(mode, prev);
+			this.setMode(mode, prev);
+		});
 		this.event.subscribe(LocalPlayer.diedEvent, () => this.setMode(undefined, this.playmode.get()));
 
 		this.setMode(this.playmode.get(), undefined);
-
-		this.event.subscribe(Signals.LOCAL_PLAY_MODE_CHANGED, (mode) => this.callImmediateSetMode(mode));
 
 		this.onEnable(() => {
 			spawn(() => requestMode("build"));
@@ -71,14 +67,14 @@ export class PlayModeController extends HostedService {
 		});
 	}
 
-	private callImmediateSetMode(mode: PlayModes) {
-		const prev = this.playmode.get();
-
+	private callImmediateSetMode(mode: PlayModes | undefined, prev: PlayModes | undefined) {
 		if (prev) {
 			this.modes[prev].onImmediateSwitchToNext(mode);
 		}
 
-		this.modes[mode].onImmediateSwitchFromPrev(prev);
+		if (mode) {
+			this.modes[mode].onImmediateSwitchFromPrev(prev);
+		}
 	}
 	private setMode(mode: PlayModes | undefined, prev: PlayModes | undefined) {
 		if (mode === prev) return;

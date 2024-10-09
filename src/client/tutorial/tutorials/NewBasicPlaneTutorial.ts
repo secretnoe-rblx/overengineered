@@ -39,6 +39,7 @@ export class NewBasicPlaneTutorial implements TutorialDescriber {
 					"This tutorial will teach you how to build a basic plane.",
 				),
 				t.translatedHintsPart([`Hint: Press "next" to advance`]),
+				t.translatedHintsPart([`Hint: You can play this tutorial again.\nLook for it in the settings.`]),
 			],
 
 			() => [
@@ -70,7 +71,7 @@ export class NewBasicPlaneTutorial implements TutorialDescriber {
 			() => [
 				t.funcPart(() => toolController.enabledTools.enableOnly(toolController.allTools.buildTool)),
 				t.processDiff(diffs.basicWings, saveVersion),
-				t.partText("Well done! Place some wings using it."),
+				t.partText("Well done! Now place some wings."),
 				t.translatedHintsPart(
 					["Select the build tool"],
 					[`Select and place "Corner Wing 1x4"`],
@@ -120,7 +121,7 @@ export class NewBasicPlaneTutorial implements TutorialDescriber {
 			() => [
 				t.funcPart(() => toolController.enabledTools.enableOnly(toolController.allTools.buildTool)),
 				t.processDiff(diffs.controlWings, saveVersion),
-				t.partText("Alright, let's place the rest of the wings"),
+				t.partText("Alright, let's place the rest of the wings."),
 				t.translatedHintsPart(
 					["Select the build tool"],
 					[`Select "Wings"`],

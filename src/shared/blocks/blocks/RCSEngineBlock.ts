@@ -232,10 +232,7 @@ class Logic extends InstanceBlockLogic<typeof definition, RCSEngineModel> {
 			}
 		});
 
-		this.onDescendantDestroyed(() => {
-			update();
-			this.disable();
-		});
+		this.onDisable(() => update());
 	}
 }
 

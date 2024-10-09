@@ -1,4 +1,5 @@
 import { HttpService } from "@rbxts/services";
+import { Secrets } from "engine/server/Secrets";
 
 type Datastore = {
 	name: string;
@@ -17,7 +18,7 @@ type ListEntriesResponse = {
 
 export namespace Backend {
 	const DIST = "https://api.mgcode.ru/roblox";
-	const AccessToken = "d81b0f61-7f62-4016-b5fe-8c5904c9be7d";
+	const AccessToken = Secrets.getSecret("backend_token");
 
 	function getRequest(endpoint: string) {
 		const _data = {
@@ -31,7 +32,9 @@ export namespace Backend {
 				Enum.HttpContentType.ApplicationJson,
 				undefined,
 				{
-					Authorization: `Bearer ${AccessToken}`,
+					Authorization: typeIs(AccessToken, "string")
+						? `Bearer ${AccessToken}`
+						: ((AccessToken as Secret).AddPrefix("Bearer ") as unknown as string),
 				},
 			),
 		);

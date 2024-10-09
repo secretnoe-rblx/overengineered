@@ -6,10 +6,10 @@ import type { BlockLogicFullBothDefinitions, InstanceBlockLogicArgs } from "shar
 import type { BlockBuilder } from "shared/blocks/Block";
 
 const definition = {
-	inputOrder: ["maxDistance", "detectionSize", "visibility", "minimalDistance"],
+	inputOrder: ["maxDistance", "detectionSize", "visibility", "relativePositioning", "minimalDistance"],
 	input: {
 		maxDistance: {
-			displayName: "Max distance",
+			displayName: "Max Distance",
 			types: {
 				number: {
 					config: 100,
@@ -22,7 +22,7 @@ const definition = {
 			},
 		},
 		detectionSize: {
-			displayName: "Detection Size",
+			displayName: "Detection Area Size",
 			types: {
 				number: {
 					config: 1,
@@ -35,19 +35,21 @@ const definition = {
 			},
 		},
 		visibility: {
-			displayName: "Area Visibility",
+			displayName: "Detection Area Visibility",
 			types: {
 				bool: {
 					config: false,
 				},
 			},
 		},
-		//angleOffset: {
-		//	displayName: "Angle Offset",
-		//	type: "vector3",
-		//	default: Vector3.zero,
-		//	config: Vector3.zero,
-		//},
+		relativePositioning: {
+			displayName: "Object-Relative Output",
+			types: {
+				bool: {
+					config: true,
+				},
+			},
+		},
 		minimalDistance: {
 			displayName: "Minimal Detection Distance",
 			types: {
@@ -83,15 +85,17 @@ class Logic extends InstanceBlockLogic<typeof definition> {
 		if (!view?.IsA("BasePart")) return;
 		if (!metalPlate?.IsA("BasePart")) return;
 
+		view.Anchored = true;
+
 		const updateDistance = (detectionSize: number, maxDistance: number) => {
 			const ds = detectionSize * (detectionSize - math.sqrt(halvedMaxDist / (maxDistance + halvedMaxDist))) * 10;
 			view.Size = new Vector3(ds, view.Size.Y, ds);
+			view.PivotOffset = new CFrame(0, -view.Size.Y / 2 - 0.4, 0);
 			this.triggerDistanceListUpdate = true;
 		};
 
-		this.onk(["visibility"], ({ visibility }) => {
-			view.Transparency = visibility ? 0.8 : 1;
-		});
+		this.onk(["visibility"], ({ visibility }) => (view.Transparency = visibility ? 0.8 : 1));
+		this.onk(["relativePositioning"], ({ relativePositioning }) => (this.isRelativePosition = relativePositioning));
 		this.onk(["detectionSize", "maxDistance"], ({ detectionSize, maxDistance }) => {
 			const sizeStuds = RobloxUnit.Meters_To_Studs(maxDistance);
 			const pivo = metalPlate.GetPivot();
@@ -102,6 +106,8 @@ class Logic extends InstanceBlockLogic<typeof definition> {
 		});
 
 		this.onAlwaysInputs(({ minimalDistance }) => {
+			view.PivotTo(this.instance.PrimaryPart!.CFrame);
+
 			if (this.closestDetectedPart?.Parent === undefined || this.triggerDistanceListUpdate) {
 				this.triggerDistanceListUpdate = false;
 				this.closestDetectedPart = this.findClosestPart(minimalDistance);
@@ -136,15 +142,15 @@ class Logic extends InstanceBlockLogic<typeof definition> {
 			}
 		});
 
-		this.onDescendantDestroyed(() => {
+		this.onDisable(() => {
 			const view = this.instance.FindFirstChild("RadarView") as BasePart | undefined;
 			if (view) view.Transparency = 1;
 
 			this.allTouchedBlocks.clear();
-			this.disable();
 		});
 	}
 
+	private isRelativePosition = false;
 	private triggerDistanceListUpdate: boolean = false;
 	private closestDetectedPart: BasePart | undefined = undefined;
 	private readonly allTouchedBlocks: Set<BasePart> = new Set<BasePart>();
@@ -152,14 +158,14 @@ class Logic extends InstanceBlockLogic<typeof definition> {
 	private getDistanceTo = (part: BasePart) => {
 		if (this.instance === undefined) return Vector3.zero;
 		if (part === undefined) return Vector3.zero;
-		return VectorUtils.apply(part.GetPivot().Position.sub(this.instance.GetPivot().Position), (v) =>
-			RobloxUnit.Studs_To_Meters(v),
-		);
-		//bring back relative positioning if needed vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
-		/* 
-		return VectorUtils.apply(this.instance.GetPivot().ToObjectSpace(part.GetPivot()).Position, (v) =>
-			RobloxUnit.Studs_To_Meters(v),
-		);*/
+		if (this.isRelativePosition)
+			return VectorUtils.apply(this.instance.GetPivot().ToObjectSpace(part.GetPivot()).Position, (v) =>
+				RobloxUnit.Studs_To_Meters(v),
+			);
+		else
+			return VectorUtils.apply(part.GetPivot().Position.sub(this.instance.GetPivot().Position), (v) =>
+				RobloxUnit.Studs_To_Meters(v),
+			);
 	};
 
 	private findClosestPart(minDist: number) {

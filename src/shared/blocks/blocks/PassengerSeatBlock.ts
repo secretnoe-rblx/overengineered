@@ -1,6 +1,11 @@
+import { Players } from "@rbxts/services";
 import { InstanceBlockLogic } from "shared/blockLogic/BlockLogic";
 import { BlockCreation } from "shared/blocks/BlockCreation";
-import type { BlockLogicFullBothDefinitions, InstanceBlockLogicArgs } from "shared/blockLogic/BlockLogic";
+import type {
+	BlockLogicFullBothDefinitions,
+	BlockLogicTickContext,
+	InstanceBlockLogicArgs,
+} from "shared/blockLogic/BlockLogic";
 import type { BlockBuilder } from "shared/blocks/Block";
 
 const definition = {
@@ -33,6 +38,13 @@ class Logic extends InstanceBlockLogic<typeof definition, PassengerSeatModel> {
 
 		this.event.subscribe(this.vehicleSeat.GetPropertyChangedSignal("Occupant"), update);
 		this.onEnable(update);
+	}
+
+	getDebugInfo(ctx: BlockLogicTickContext): readonly string[] {
+		const char = this.vehicleSeat.Occupant?.Parent;
+		const player = char && Players.GetPlayerFromCharacter(char);
+
+		return [...super.getDebugInfo(ctx), `Occiuped by ${player?.Name}`];
 	}
 }
 

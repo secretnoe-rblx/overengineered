@@ -2,6 +2,7 @@ import { HostedService } from "engine/shared/di/HostedService";
 import { Operation } from "engine/shared/Operation";
 import { PlayerWatcher } from "engine/shared/PlayerWatcher";
 import { Backend } from "server/Backend";
+import { isNotAdmin_AutoBanned } from "server/BanAdminExploiter";
 import { BlockManager } from "shared/building/BlockManager";
 import { BlocksSerializer } from "shared/building/BlocksSerializer";
 import { BuildingManager } from "shared/building/BuildingManager";
@@ -234,7 +235,7 @@ export class ServerBuildingRequestHandler extends HostedService {
 		return this.forceLoadSlot(this.player.UserId, index, true);
 	}
 	private loadSlotAsAdmin({ userid, index, imported }: PlayerLoadAdminSlotRequest): LoadSlotResponse {
-		if (!GameDefinitions.isAdmin(this.player)) {
+		if (isNotAdmin_AutoBanned(this.player, "loadSlotAsAdmin")) {
 			return err("Permission denied");
 		}
 

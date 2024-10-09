@@ -96,10 +96,7 @@ export class Logic extends InstanceBlockLogic<typeof definition, Piston> {
 			});
 		});
 
-		this.onDescendantDestroyed(() => {
-			block.instance.FindFirstChild("Top")?.FindFirstChild("Beam")?.Destroy();
-			this.disable();
-		});
+		this.onDisable(() => block.instance.FindFirstChild("Top")?.FindFirstChild("Beam")?.Destroy());
 	}
 }
 

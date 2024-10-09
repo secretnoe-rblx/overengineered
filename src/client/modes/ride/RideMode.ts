@@ -34,6 +34,8 @@ export class RideMode extends PlayMode {
 			if (!this.currentMachine) return;
 
 			this.currentMachine.getImpactController()?.disable();
+			this.currentMachine?.destroy();
+			this.currentMachine = undefined;
 		});
 
 		const alignPositionInstance = new Instance("AlignPosition");
@@ -72,13 +74,11 @@ export class RideMode extends PlayMode {
 		return this.currentMachine;
 	}
 
-	onImmediateSwitchToNext(mode: PlayModes | undefined): void {
-		this.currentMachine?.destroy();
-		this.currentMachine = undefined;
-	}
-
 	onSwitchToNext(mode: PlayModes | undefined) {}
 	onSwitchFromPrev(prev: PlayModes | undefined) {
+		this.currentMachine?.destroy();
+		this.currentMachine = undefined;
+
 		if (prev === undefined) {
 			//
 		} else if (prev === "build") {
