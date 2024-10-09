@@ -150,9 +150,8 @@ export namespace BuildingManager {
 						return normalRotation(cframe.mul(CFrame.fromEulerAnglesYXZ(0, math.pi, 0)));
 					case "offset270":
 						return normalRotation(cframe.mul(CFrame.fromEulerAnglesYXZ(0, math.pi * 1.5, 0)));
-					case "normal": {
+					case "normal":
 						return normalRotation(cframe);
-					}
 					case "wedgeWing": {
 						const [x, y, z, x0, x1, x2, y0, y1, y2, z0, z1, z2] = cframe.GetComponents();
 						if (mode === "x") {
@@ -165,9 +164,10 @@ export namespace BuildingManager {
 
 						throw "Unknown mode";
 					}
-					case "tetra": {
+					case "tetra":
 						return normalRotation(cframe.mul(CFrame.fromEulerAnglesYXZ(0, 0, math.pi * 1.5)));
-					}
+					case "innertetra":
+						return normalRotation(cframe.mul(CFrame.fromEulerAnglesYXZ(0, 0, math.pi * 0.5)));
 				}
 			}
 
