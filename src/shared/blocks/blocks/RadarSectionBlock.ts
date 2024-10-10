@@ -85,7 +85,7 @@ class Logic extends InstanceBlockLogic<typeof definition> {
 		if (!view?.IsA("BasePart")) return;
 		if (!metalPlate?.IsA("BasePart")) return;
 
-		view.Anchored = true;
+		// view.Anchored = true;
 
 		const updateDistance = (detectionSize: number, maxDistance: number) => {
 			const ds = detectionSize * (detectionSize - math.sqrt(halvedMaxDist / (maxDistance + halvedMaxDist))) * 10;
