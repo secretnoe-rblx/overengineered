@@ -55,7 +55,7 @@ export class TouchActionControllerGui extends Control<TouchActionControllerGuiDe
 		);
 		this.event.subscribeObservable(
 			centerOfMassEnabled,
-			(enabled) => (com.instance.Transparency = enabled ? 0 : 0.5),
+			(enabled) => (com.instance.Transparency = enabled ? 0 : 0.6),
 			true,
 		);
 	}

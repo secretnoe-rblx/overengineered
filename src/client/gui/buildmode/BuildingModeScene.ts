@@ -147,7 +147,9 @@ export class BuildingModeScene extends Control<BuildingModeSceneDefinition> {
 		this.event.subscribeObservable(tools.selectedTool, updateActionBarVisibility);
 		this.onEnable(updateActionBarVisibility);
 
-		const toolbar = this.add(new HotbarControl(tools, gui.HotbarNew));
+		gui.HotbarNew.Destroy();
+		const hotbarGui = Interface.getInterface<{ Hotbar: HotbarControlDefinition }>().Hotbar;
+		const toolbar = this.add(new HotbarControl(tools, hotbarGui));
 		const updateToolbarVisibility = () => toolbar.setVisible(!LoadingController.isLoading.get());
 		this.event.subscribeObservable(LoadingController.isLoading, updateToolbarVisibility);
 		this.onEnable(updateToolbarVisibility);
