@@ -1,5 +1,5 @@
 import { GuiService, Players } from "@rbxts/services";
-import { Gui } from "client/gui/Gui";
+import { Interface } from "client/gui/Interface";
 import { Signals } from "client/Signals";
 import { ClientComponent } from "engine/client/component/ClientComponent";
 import { InputController } from "engine/client/InputController";
@@ -35,7 +35,7 @@ export class HoveredPartHighlighter<T extends Instance> extends ClientComponent 
 			}
 
 			// ignore if over a GUI element
-			if (Gui.isCursorOnVisibleGui()) {
+			if (Interface.isCursorOnVisibleGui()) {
 				destroyHighlight();
 				return;
 			}

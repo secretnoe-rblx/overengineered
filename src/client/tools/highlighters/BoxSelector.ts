@@ -1,5 +1,5 @@
 import { Players, Workspace } from "@rbxts/services";
-import { Gui } from "client/gui/Gui";
+import { Interface } from "client/gui/Interface";
 import { ClientComponent } from "engine/client/component/ClientComponent";
 import { InputController } from "engine/client/InputController";
 import { ArgsSignal } from "engine/shared/event/Signal";
@@ -16,7 +16,7 @@ export class BoxSelector extends ClientComponent implements BlockSelector {
 		const camera = Workspace.CurrentCamera!;
 		const mouse = Players.LocalPlayer.GetMouse();
 		const template = this.asTemplate(
-			Gui.getGameUI<{ Templates: { Selection: GuiObject } }>().Templates.Selection,
+			Interface.getGameUI<{ Templates: { Selection: GuiObject } }>().Templates.Selection,
 			false,
 		);
 
@@ -71,7 +71,7 @@ export class BoxSelector extends ClientComponent implements BlockSelector {
 
 			selection = template();
 			selection.Position = startpos;
-			selection.Parent = Gui.getUnscaledGameUI();
+			selection.Parent = Interface.getUnscaledGameUI();
 			selection.Visible = true;
 			selection.Size = new UDim2(0, 0, 0, 0);
 

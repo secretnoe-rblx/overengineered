@@ -1,7 +1,7 @@
 import { GuiService } from "@rbxts/services";
 import { SoundController } from "client/controller/SoundController";
 import { ButtonControl } from "client/gui/controls/Button";
-import { Gui } from "client/gui/Gui";
+import { Interface } from "client/gui/Interface";
 import { Popup } from "client/gui/Popup";
 import type { ButtonDefinition } from "client/gui/controls/Button";
 
@@ -22,7 +22,7 @@ export class AlertPopup extends Popup<AlertPopupDefinition> {
 
 	static showPopup(text: string, okFunc?: () => void) {
 		const popup = new AlertPopup(
-			Gui.getGameUI<{
+			Interface.getGameUI<{
 				Popup: { Crossplatform: { Alert: AlertPopupDefinition } };
 			}>().Popup.Crossplatform.Alert.Clone(),
 			text,

@@ -1,5 +1,5 @@
 import { TextButtonControl } from "client/gui/controls/Button";
-import { Gui } from "client/gui/Gui";
+import { Interface } from "client/gui/Interface";
 import { Control } from "engine/client/gui/Control";
 import { Component } from "engine/shared/component/Component";
 import type { HideInterfaceController } from "client/gui/HideInterfaceController";
@@ -10,7 +10,7 @@ class Starter extends Component {
 	constructor(@inject di: DIContainer) {
 		super();
 
-		const gui = Gui.getGameUI<{ Action: ActionsGuiDefinition }>().Action;
+		const gui = Interface.getGameUI<{ Action: ActionsGuiDefinition }>().Action;
 		this.parentGui(di.resolveForeignClass(ActionsGui, [gui]));
 	}
 }

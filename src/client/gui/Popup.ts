@@ -1,5 +1,5 @@
 import { Lighting, TweenService } from "@rbxts/services";
-import { Gui } from "client/gui/Gui";
+import { Interface } from "client/gui/Interface";
 import { ScaledScreenGui } from "client/gui/ScaledScreenGui";
 import { Control } from "engine/client/gui/Control";
 import { Element } from "engine/shared/Element";
@@ -10,7 +10,7 @@ export class Popup<T extends GuiObject = GuiObject> extends Control<T> {
 	static readonly onAnyShow = new Signal<() => void>();
 	static readonly onAnyHide = new Signal<() => void>();
 	static readonly onAllHide = new Signal<() => void>();
-	private static readonly popupsScreenGui = Gui.getPopupUI();
+	private static readonly popupsScreenGui = Interface.getPopupUI();
 	private static readonly blur = Lighting.WaitForChild("Blur") as BlurEffect;
 
 	static {

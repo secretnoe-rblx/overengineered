@@ -1,7 +1,7 @@
 import { ButtonControl } from "client/gui/controls/Button";
 import { DictionaryControl } from "client/gui/controls/DictionaryControl";
 import { KeyChooserControl } from "client/gui/controls/KeyChooserControl";
-import { Gui } from "client/gui/Gui";
+import { Interface } from "client/gui/Interface";
 import { Popup } from "client/gui/Popup";
 import { Control } from "engine/client/gui/Control";
 import type { KeyChooserControlDefinition } from "client/gui/controls/KeyChooserControl";
@@ -24,7 +24,7 @@ export type ControlsPopupDefinition = GuiObject & {
 @injectable
 export class ControlsPopup extends Popup<ControlsPopupDefinition> {
 	static addAsService(host: GameHostBuilder) {
-		const gui = Gui.getGameUI<{ Popup: { Controls: ControlsPopupDefinition } }>().Popup.Controls;
+		const gui = Interface.getGameUI<{ Popup: { Controls: ControlsPopupDefinition } }>().Popup.Controls;
 		host.services.registerTransientFunc((ctx) => ctx.resolveForeignClass(this, [gui.Clone()]));
 	}
 

@@ -1,5 +1,5 @@
 import { UserInputService } from "@rbxts/services";
-import { Gui } from "client/gui/Gui";
+import { Interface } from "client/gui/Interface";
 import { ClientInstanceComponent } from "engine/client/component/ClientInstanceComponent";
 import { Control } from "engine/client/gui/Control";
 import { InputController } from "engine/client/InputController";
@@ -7,7 +7,7 @@ import { TransformService } from "engine/shared/component/TransformService";
 import { Element } from "engine/shared/Element";
 import type { InstanceComponent } from "engine/shared/component/InstanceComponent";
 
-const tooltipsGui = Gui.getGameUI<{ Help: { Controls: TooltipsControlDefinition } }>().Help.Controls;
+const tooltipsGui = Interface.getGameUI<{ Help: { Controls: TooltipsControlDefinition } }>().Help.Controls;
 tooltipsGui.Visible = true;
 
 const keyboardTooltipTemplate = Control.asTemplateWithMemoryLeak(tooltipsGui.KeyboardTemplate);

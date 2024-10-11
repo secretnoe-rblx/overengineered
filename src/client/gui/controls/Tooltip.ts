@@ -1,6 +1,6 @@
 import { RunService, UserInputService } from "@rbxts/services";
 import { AutoUIScaledControl } from "client/gui/AutoUIScaledControl";
-import { Gui } from "client/gui/Gui";
+import { Interface } from "client/gui/Interface";
 import { Control } from "engine/client/gui/Control";
 import { InstanceComponent } from "engine/shared/component/InstanceComponent";
 import { TransformService } from "engine/shared/component/TransformService";
@@ -46,13 +46,13 @@ class TooltipController extends HostedService {
 		screen.ClipToDeviceSafeArea = false;
 		screen.SafeAreaCompatibility = Enum.SafeAreaCompatibility.None;
 		screen.ScreenInsets = Enum.ScreenInsets.None;
-		screen.Parent = Gui.getPlayerGui();
+		screen.Parent = Interface.getPlayerGui();
 
 		const screenInstance = this.parent(new InstanceComponent(screen));
 		screenInstance.onEnable(() => (screen.Enabled = true));
 		screenInstance.onDisable(() => (screen.Enabled = false));
 
-		this.tooltip = new TooltipControl(Gui.getTemplates<{ Tooltip: TooltipDefinition }>().Tooltip.Clone());
+		this.tooltip = new TooltipControl(Interface.getTemplates<{ Tooltip: TooltipDefinition }>().Tooltip.Clone());
 		this.tooltip.instance.Parent = screen;
 		this.tooltip.hide();
 		this.onDestroy(() => this.tooltip.destroy());

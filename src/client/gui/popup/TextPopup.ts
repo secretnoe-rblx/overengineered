@@ -1,6 +1,6 @@
 import { GuiService } from "@rbxts/services";
 import { ButtonControl } from "client/gui/controls/Button";
-import { Gui } from "client/gui/Gui";
+import { Interface } from "client/gui/Interface";
 import { Popup } from "client/gui/Popup";
 
 export type TextPopupDefinition = GuiObject & {
@@ -20,7 +20,7 @@ export class TextPopup extends Popup<TextPopupDefinition> {
 
 	static showPopup(text: string, ps: string = "", okFunc: (text: string) => void, noFunc: () => void) {
 		const popup = new TextPopup(
-			Gui.getGameUI<{ Popup: { Text: TextPopupDefinition } }>().Popup.Text.Clone(),
+			Interface.getGameUI<{ Popup: { Text: TextPopupDefinition } }>().Popup.Text.Clone(),
 			text,
 			ps,
 			okFunc,

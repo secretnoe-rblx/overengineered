@@ -1,7 +1,7 @@
 import { Workspace, Players, RunService } from "@rbxts/services";
 import { LoadingController } from "client/controller/LoadingController";
 import { ButtonControl } from "client/gui/controls/Button";
-import { Gui } from "client/gui/Gui";
+import { Interface } from "client/gui/Interface";
 import { ConfirmPopup } from "client/gui/popup/ConfirmPopup";
 import { ClientBuilding } from "client/modes/build/ClientBuilding";
 import { Control } from "engine/client/gui/Control";
@@ -104,8 +104,8 @@ export class TutorialControl extends Control<TutorialControlDefinition> {
 	readonly skipPressed = this._skipPressed.asReadonly();
 
 	constructor(title: string) {
-		super(Gui.getGameUI<{ Tutorial: TutorialControlDefinition }>().Tutorial.Clone());
-		this.gui.Parent = Gui.getGameUI();
+		super(Interface.getGameUI<{ Tutorial: TutorialControlDefinition }>().Tutorial.Clone());
+		this.gui.Parent = Interface.getGameUI();
 
 		this.gui.Header.Text = title;
 
@@ -154,8 +154,8 @@ export class TutorialTasksControl extends Control<TutorialTasksDefinition> {
 	private readonly hintList;
 
 	constructor() {
-		super(Gui.getGameUI<{ Tasks: TutorialTasksDefinition }>().Tasks.Clone());
-		this.gui.Parent = Gui.getGameUI();
+		super(Interface.getGameUI<{ Tasks: TutorialTasksDefinition }>().Tasks.Clone());
+		this.gui.Parent = Interface.getGameUI();
 
 		this.taskTemplate = this.asTemplate(this.gui.Content.TaskList.Task);
 		this.taskList = this.add(new Control(this.gui.Content.TaskList));

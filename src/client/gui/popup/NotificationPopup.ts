@@ -1,7 +1,7 @@
 import { GuiService } from "@rbxts/services";
 import { SoundController } from "client/controller/SoundController";
 import { ButtonControl } from "client/gui/controls/Button";
-import { Gui } from "client/gui/Gui";
+import { Interface } from "client/gui/Interface";
 import { Popup } from "client/gui/Popup";
 import type { ButtonDefinition } from "client/gui/controls/Button";
 
@@ -24,7 +24,7 @@ export class NotificationPopup extends Popup<NotificationPopupDefinition> {
 
 	static showPopup(text: string, ps: string = "") {
 		const popup = new NotificationPopup(
-			Gui.getGameUI<{ Popup: { Notification: NotificationPopupDefinition } }>().Popup.Notification.Clone(),
+			Interface.getGameUI<{ Popup: { Notification: NotificationPopupDefinition } }>().Popup.Notification.Clone(),
 			text,
 			ps,
 		);

@@ -1,7 +1,7 @@
 import { GuiService } from "@rbxts/services";
 import { ButtonControl, TextButtonControl } from "client/gui/controls/Button";
 import { TextBoxControl } from "client/gui/controls/TextBoxControl";
-import { Gui } from "client/gui/Gui";
+import { Interface } from "client/gui/Interface";
 import { Popup } from "client/gui/Popup";
 import { Control } from "engine/client/gui/Control";
 import { Signal } from "engine/shared/event/Signal";
@@ -34,7 +34,7 @@ export class SelectButtonPopup<const TAllowCustomString extends boolean> extends
 		cancelFunc: () => void,
 	) {
 		const popup = new SelectButtonPopup(
-			Gui.getGameUI<{
+			Interface.getGameUI<{
 				Popup: { MobileSelectButton: SelectButtonPopupDefinition };
 			}>().Popup.MobileSelectButton.Clone(),
 			allowCustomString,

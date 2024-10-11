@@ -1,7 +1,7 @@
 import { GamepadService, GuiService, Players, ReplicatedStorage, RunService, Workspace } from "@rbxts/services";
 import { ButtonControl } from "client/gui/controls/Button";
-import { Gui } from "client/gui/Gui";
 import { GuiAnimator } from "client/gui/GuiAnimator";
+import { Interface } from "client/gui/Interface";
 import { LogControl } from "client/gui/static/LogControl";
 import { ActionController } from "client/modes/build/ActionController";
 import { ClientBuilding } from "client/modes/build/ClientBuilding";
@@ -28,7 +28,7 @@ const markerParent = Element.create("ScreenGui", {
 	ScreenInsets: Enum.ScreenInsets.None,
 	IgnoreGuiInset: true,
 	DisplayOrder: -1, // to draw behind the wires
-	Parent: Gui.getPlayerGui(),
+	Parent: Interface.getPlayerGui(),
 	ResetOnSpawn: false,
 });
 const wireParent = Element.create("ViewportFrame", {

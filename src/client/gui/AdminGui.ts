@@ -2,7 +2,7 @@ import { Players, RunService, UserInputService } from "@rbxts/services";
 import { AdminMessageController } from "client/AdminMessageController";
 import { TextButtonControl } from "client/gui/controls/Button";
 import { TabControl } from "client/gui/controls/TabControl";
-import { Gui } from "client/gui/Gui";
+import { Interface } from "client/gui/Interface";
 import { ServerRestartController } from "client/ServerRestartController";
 import { TestRunner } from "client/test/TestRunner";
 import { LoadSlotTest } from "client/test/visual/LoadSlotTest";
@@ -36,7 +36,7 @@ export class AdminGui extends HostedService {
 		let destroy: (() => void) | undefined;
 		const create = () => {
 			const parent = new InstanceComponent(
-				Element.create("ScreenGui", { AutoLocalize: false, Name: "TestScreenGui", Parent: Gui.getPlayerGui() }),
+				Element.create("ScreenGui", { AutoLocalize: false, Name: "TestScreenGui", Parent: Interface.getPlayerGui() }),
 			);
 
 			const tabs = TabControl.create();

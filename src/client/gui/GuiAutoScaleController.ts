@@ -1,4 +1,4 @@
-import { Gui } from "client/gui/Gui";
+import { Interface } from "client/gui/Interface";
 import { ScaledScreenGui } from "client/gui/ScaledScreenGui";
 import { HostedService } from "engine/shared/di/HostedService";
 import type { PlayerDataStorage } from "client/PlayerDataStorage";
@@ -11,7 +11,7 @@ export class GuiAutoScaleController extends HostedService {
 		const scale = playerData.config.createBased((c) => c.uiScale);
 		ScaledScreenGui.initializeGlobalScale(scale);
 
-		this.parent(new ScaledScreenGui(Gui.getGameUI()));
-		this.parent(new ScaledScreenGui(Gui.getPopupUI()));
+		this.parent(new ScaledScreenGui(Interface.getGameUI()));
+		this.parent(new ScaledScreenGui(Interface.getPopupUI()));
 	}
 }

@@ -1,6 +1,6 @@
 import { TextButtonControl } from "client/gui/controls/Button";
 import { TextBoxControl } from "client/gui/controls/TextBoxControl";
-import { Gui } from "client/gui/Gui";
+import { Interface } from "client/gui/Interface";
 import { GuiAnimator } from "client/gui/GuiAnimator";
 import { Control } from "engine/client/gui/Control";
 import { Element } from "engine/shared/Element";
@@ -16,7 +16,7 @@ Remotes.Client.GetNamespace("Admin")
 			Size: new UDim2(1, 0, 1, 0),
 			TextScaled: true,
 			TextColor3: color ?? Colors.red,
-			Parent: Gui.getGameUI(),
+			Parent: Interface.getGameUI(),
 		});
 
 		GuiAnimator.transition(label, 0.33, "down");

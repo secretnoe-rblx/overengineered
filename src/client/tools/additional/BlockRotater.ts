@@ -1,5 +1,5 @@
 import { ReplicatedStorage, Workspace } from "@rbxts/services";
-import { Gui } from "client/gui/Gui";
+import { Interface } from "client/gui/Interface";
 import { TooltipsHolder } from "client/gui/static/TooltipsControl";
 import { Signals } from "client/Signals";
 import { BlockEditorBase } from "client/tools/additional/BlockEditorBase";
@@ -54,7 +54,7 @@ abstract class RotaterBase extends BlockEditorBase {
 		const moveHandles = ReplicatedStorage.Assets.RotateHandles.Clone();
 		moveHandles.PivotTo(boundingBox.center);
 		moveHandles.Center.Size = moveHandles.Size = boundingBox.originalSize.add(new Vector3(0.001, 0.001, 0.001)); // + 0.001 to avoid z-fighting
-		moveHandles.Parent = Gui.getPlayerGui();
+		moveHandles.Parent = Interface.getPlayerGui();
 
 		this.event.subscribeObservable(
 			this.playerDataStorage.config.createBased((c) => c.visuals.multiSelection),

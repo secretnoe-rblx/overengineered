@@ -1,5 +1,5 @@
 import { Players, StarterGui, UserInputService } from "@rbxts/services";
-import { Gui } from "client/gui/Gui";
+import { Interface } from "client/gui/Interface";
 import { InstanceComponent } from "engine/shared/component/InstanceComponent";
 import { GameDefinitions } from "shared/data/GameDefinitions";
 
@@ -55,7 +55,7 @@ Error: ${errobj ?? "[unknown error]"}
 		show(str);
 	}
 	function show(text: string) {
-		const instance = Gui.getPlayerGui<{ BSOD: BsodControlDefinition }>().BSOD;
+		const instance = Interface.getPlayerGui<{ BSOD: BsodControlDefinition }>().BSOD;
 
 		for (const ui of Enum.CoreGuiType.GetEnumItems()) {
 			StarterGui.SetCoreGuiEnabled(ui, false);
@@ -64,7 +64,7 @@ Error: ${errobj ?? "[unknown error]"}
 
 		new BsodControl(instance).show(text);
 
-		for (const screen of Gui.getPlayerGui().GetChildren()) {
+		for (const screen of Interface.getPlayerGui().GetChildren()) {
 			if (screen === instance) {
 				continue;
 			}

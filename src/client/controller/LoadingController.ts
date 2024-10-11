@@ -1,5 +1,5 @@
 import { Workspace } from "@rbxts/services";
-import { Gui } from "client/gui/Gui";
+import { Interface } from "client/gui/Interface";
 import { Control } from "engine/client/gui/Control";
 import { TransformService } from "engine/shared/component/TransformService";
 import { ObservableValue } from "engine/shared/event/ObservableValue";
@@ -115,7 +115,7 @@ spawn(() => {
 	task.delay(10_000, () => loading.disable());
 });
 
-const control = new LoadingPopup(Gui.getGameUI<{ Loading: LoadingPopupDefinition }>().Loading);
+const control = new LoadingPopup(Interface.getGameUI<{ Loading: LoadingPopupDefinition }>().Loading);
 control.hide();
 
 const state = new ObservableValue<boolean>(false);

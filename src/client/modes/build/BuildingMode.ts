@@ -1,7 +1,7 @@
 import { LocalPlayer } from "engine/client/LocalPlayer";
 import { MirrorVisualizer } from "client/controller/MirrorVisualizer";
 import { BuildingModeScene } from "client/gui/buildmode/BuildingModeScene";
-import { Gui } from "client/gui/Gui";
+import { Interface } from "client/gui/Interface";
 import { CenterOfMassController } from "client/modes/build/CenterOfMassController";
 import { PlayMode } from "client/modes/PlayMode";
 import { BlockSelect } from "client/tools/highlighters/BlockSelect";
@@ -64,7 +64,7 @@ export class BuildingMode extends PlayMode {
 		this.toolController = this.parent(di.resolveForeignClass(ToolController));
 		this.gui = this.parentGui(
 			new BuildingModeScene(
-				Gui.getGameUI<{ BuildingMode: BuildingModeSceneDefinition }>().BuildingMode,
+				Interface.getGameUI<{ BuildingMode: BuildingModeSceneDefinition }>().BuildingMode,
 				this,
 				this.toolController,
 				di,

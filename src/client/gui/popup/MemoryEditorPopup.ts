@@ -1,7 +1,7 @@
 import { ButtonControl } from "client/gui/controls/Button";
 import { ByteTextBoxControl } from "client/gui/controls/ByteTextBoxControl";
 import { TextBoxControl } from "client/gui/controls/TextBoxControl";
-import { Gui } from "client/gui/Gui";
+import { Interface } from "client/gui/Interface";
 import { Popup } from "client/gui/Popup";
 import { ConfirmPopup } from "client/gui/popup/ConfirmPopup";
 import { TextPopup } from "client/gui/popup/TextPopup";
@@ -193,7 +193,7 @@ class MemoryEditorRows extends Control<MemoryEditorRecordsDefinition> {
 export class MemoryEditorPopup extends Popup<MemoryEditorPopupDefinition> {
 	static showPopup(bytesLimit: number, data: number[], callback: (data: number[]) => void) {
 		const popup = new MemoryEditorPopup(
-			Gui.getGameUI<{
+			Interface.getGameUI<{
 				Popup: {
 					MemoryEditor: MemoryEditorPopupDefinition;
 				};

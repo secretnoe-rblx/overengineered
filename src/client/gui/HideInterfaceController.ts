@@ -1,13 +1,13 @@
 import { ReplicatedStorage, StarterGui, UserInputService, Workspace } from "@rbxts/services";
 import { ButtonControl } from "client/gui/controls/Button";
-import { Gui } from "client/gui/Gui";
+import { Interface } from "client/gui/Interface";
 import { ScaledScreenGui } from "client/gui/ScaledScreenGui";
 import { HostedService } from "engine/shared/di/HostedService";
 import { ObservableValue } from "engine/shared/event/ObservableValue";
 
 export class HideInterfaceController extends HostedService {
 	readonly visible = new ObservableValue(true);
-	private readonly guis = [Gui.getGameUI(), Gui.getUnscaledGameUI()] as const;
+	private readonly guis = [Interface.getGameUI(), Interface.getUnscaledGameUI()] as const;
 
 	constructor() {
 		super();
@@ -18,7 +18,7 @@ export class HideInterfaceController extends HostedService {
 					readonly Hide: GuiButton;
 				};
 			};
-			const hiddenUiOriginal = Gui.getPlayerGui<{ GameUIHidden: HiddenUi }>().GameUIHidden;
+			const hiddenUiOriginal = Interface.getPlayerGui<{ GameUIHidden: HiddenUi }>().GameUIHidden;
 			hiddenUiOriginal.Enabled = false;
 
 			const hiddenUi = new ScaledScreenGui(hiddenUiOriginal.Clone());

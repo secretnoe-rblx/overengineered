@@ -1,9 +1,14 @@
 import { Players } from "@rbxts/services";
 
-export namespace Gui {
+export namespace Interface {
 	/** Receives GameUI from the PlayerGui */
 	export function getGameUI<T = ScreenGui>() {
 		return getPlayerGui().WaitForChild("GameUI") as T;
+	}
+
+	/** Receives Interface from the PlayerGui */
+	export function getInterface<T = ScreenGui>() {
+		return getPlayerGui().WaitForChild("Interface") as T;
 	}
 
 	/** Receives Unscaled from the PlayerGui */

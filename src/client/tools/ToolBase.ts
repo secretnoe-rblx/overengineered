@@ -1,5 +1,5 @@
 import { Players } from "@rbxts/services";
-import { Gui } from "client/gui/Gui";
+import { Interface } from "client/gui/Interface";
 import { TooltipsHolder } from "client/gui/static/TooltipsControl";
 import { ClientComponent } from "engine/client/component/ClientComponent";
 import type { InputTooltips } from "client/gui/static/TooltipsControl";
@@ -26,7 +26,7 @@ export abstract class ToolBase extends ClientComponent {
 		this.tooltipHolder = this.parent(TooltipsHolder.createComponent(this.getDisplayName()));
 		this.tooltipHolder.set(this.getTooltips());
 
-		this.gameUI = Gui.getGameUI<ScreenGui>();
+		this.gameUI = Interface.getGameUI<ScreenGui>();
 		this.mouse = Players.LocalPlayer.GetMouse();
 	}
 
@@ -48,7 +48,7 @@ export abstract class ToolBase extends ClientComponent {
 	}
 
 	static getToolGui<TName extends string, TType>(): { readonly [k in TName]: TType } {
-		return Gui.getGameUI<{ BuildingMode: { Tools: { [k in TName]: TType } } }>().BuildingMode.Tools;
+		return Interface.getGameUI<{ BuildingMode: { Tools: { [k in TName]: TType } } }>().BuildingMode.Tools;
 	}
 
 	supportsMirror() {

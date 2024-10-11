@@ -1,12 +1,12 @@
 import { ColorChooser } from "client/gui/ColorChooser";
-import { Gui } from "client/gui/Gui";
+import { Interface } from "client/gui/Interface";
 import { Control } from "engine/client/gui/Control";
 import type { ColorChooserDefinition } from "client/gui/ColorChooser";
 import type { UnitTests } from "engine/shared/TestFramework";
 
 namespace ColorChooserTests {
 	export function show() {
-		const colorparent = Gui.getGameUI<{
+		const colorparent = Interface.getGameUI<{
 			Templates: { Color: GuiObject & { Content: ColorChooserDefinition } };
 		}>().Templates.Color.Clone();
 

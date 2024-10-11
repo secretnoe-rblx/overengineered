@@ -2,7 +2,7 @@ import { Base64 } from "@rbxts/crypto";
 import { GuiService, Players } from "@rbxts/services";
 import { SoundController } from "client/controller/SoundController";
 import { ButtonControl } from "client/gui/controls/Button";
-import { Gui } from "client/gui/Gui";
+import { Interface } from "client/gui/Interface";
 import { Popup } from "client/gui/Popup";
 import { JSON } from "engine/shared/fixes/Json";
 import { GameDefinitions } from "shared/data/GameDefinitions";
@@ -47,7 +47,7 @@ export class ReportSubmitController {
 
 	submit(data: object, text?: string) {
 		const popup = new ReportSubmitPopup(
-			Gui.getGameUI<{
+			Interface.getGameUI<{
 				Popup: { Crossplatform: { ReportSubmit: ReportSubmitPopupDefinition } };
 			}>().Popup.Crossplatform.ReportSubmit.Clone(),
 			{
@@ -80,7 +80,7 @@ class ReportSubmitPopup extends Popup<ReportSubmitPopupDefinition> {
 
 	static showPopup(data: unknown, text?: string, okFunc?: () => void) {
 		const popup = new ReportSubmitPopup(
-			Gui.getGameUI<{
+			Interface.getGameUI<{
 				Popup: { Crossplatform: { ReportSubmit: ReportSubmitPopupDefinition } };
 			}>().Popup.Crossplatform.ReportSubmit.Clone(),
 			data,

@@ -1,6 +1,6 @@
 import { Players, RunService, UserInputService } from "@rbxts/services";
 import { ButtonControl } from "client/gui/controls/Button";
-import { Gui } from "client/gui/Gui";
+import { Interface } from "client/gui/Interface";
 import { rootComponents } from "client/test/RootComponents";
 import { Control } from "engine/client/gui/Control";
 import { InputController } from "engine/client/InputController";
@@ -81,7 +81,7 @@ const create = (): TreeControl => {
 			AutomaticCanvasSize: Enum.AutomaticSize.Y,
 			Parent: createElement("ScreenGui", {
 				Name: "DebugSCREEN",
-				Parent: Gui.getPlayerGui(),
+				Parent: Interface.getPlayerGui(),
 			}),
 		},
 		{

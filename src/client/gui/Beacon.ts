@@ -1,5 +1,5 @@
 import { Players, ReplicatedStorage, RunService, Workspace } from "@rbxts/services";
-import { Gui } from "client/gui/Gui";
+import { Interface } from "client/gui/Interface";
 import { InstanceComponent } from "engine/shared/component/InstanceComponent";
 import { RobloxUnit } from "engine/shared/RobloxUnit";
 import { PartUtils } from "shared/utils/PartUtils";
@@ -27,7 +27,7 @@ export class Beacon extends InstanceComponent<PVInstance> {
 
 		this.billboard.Visible = false;
 		this.billboard.Position = new UDim2(0, 1, 0, 1);
-		this.billboard.Parent = Gui.getUnscaledGameUI();
+		this.billboard.Parent = Interface.getUnscaledGameUI();
 		this.billboard.Title.Text = name;
 
 		this.event.subscribe(RunService.RenderStepped, () => {

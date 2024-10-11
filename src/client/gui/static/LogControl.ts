@@ -1,4 +1,4 @@
-import { Gui } from "client/gui/Gui";
+import { Interface } from "client/gui/Interface";
 import { GuiAnimator } from "client/gui/GuiAnimator";
 import { Control } from "engine/client/gui/Control";
 import { Colors } from "shared/Colors";
@@ -11,7 +11,7 @@ export type LogControlDefinition = GuiObject & {
 
 export class LogControl extends Control<LogControlDefinition> {
 	static readonly instance = new LogControl(
-		Gui.getGameUI<{
+		Interface.getGameUI<{
 			Log: LogControlDefinition;
 		}>().Log,
 	);

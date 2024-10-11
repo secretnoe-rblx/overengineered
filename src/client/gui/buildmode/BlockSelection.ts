@@ -2,7 +2,7 @@ import { ContentProvider, GuiService, Players } from "@rbxts/services";
 import { BlockPreviewControl } from "client/gui/buildmode/BlockPreviewControl";
 import { BlockPipetteButton } from "client/gui/controls/BlockPipetteButton";
 import { TextButtonControl } from "client/gui/controls/Button";
-import { Gui } from "client/gui/Gui";
+import { Interface } from "client/gui/Interface";
 import { GuiAnimator } from "client/gui/GuiAnimator";
 import { Control } from "engine/client/gui/Control";
 import { ObservableValue } from "engine/shared/event/ObservableValue";
@@ -231,7 +231,7 @@ export class BlockSelectionControl extends Control<BlockSelectionControlDefiniti
 
 	private create(selectedCategory: BlockCategoryPath, animated: boolean) {
 		const highlightButton = (control: Control) =>
-			(Gui.getTemplates<{ Highlight: GuiObject }>().Highlight.Clone().Parent = control.instance);
+			(Interface.getTemplates<{ Highlight: GuiObject }>().Highlight.Clone().Parent = control.instance);
 
 		let idx = 0;
 

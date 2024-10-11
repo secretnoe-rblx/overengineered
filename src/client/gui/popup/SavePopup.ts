@@ -1,7 +1,7 @@
 import { LocalizationService } from "@rbxts/services";
 import { ButtonControl } from "client/gui/controls/Button";
 import { TextBoxControl } from "client/gui/controls/TextBoxControl";
-import { Gui } from "client/gui/Gui";
+import { Interface } from "client/gui/Interface";
 import { Popup } from "client/gui/Popup";
 import { ConfirmPopup } from "client/gui/popup/ConfirmPopup";
 import { Control } from "engine/client/gui/Control";
@@ -265,7 +265,7 @@ export type SlotsPopupDefinition = GuiObject & {
 @injectable
 export class SavePopup extends Popup<SlotsPopupDefinition> {
 	static addAsService(host: GameHostBuilder) {
-		const gui = Gui.getGameUI<{ Popup: { Slots: SlotsPopupDefinition } }>().Popup.Slots;
+		const gui = Interface.getGameUI<{ Popup: { Slots: SlotsPopupDefinition } }>().Popup.Slots;
 		host.services.registerTransientFunc((ctx) => ctx.resolveForeignClass(this, [gui.Clone()]));
 	}
 

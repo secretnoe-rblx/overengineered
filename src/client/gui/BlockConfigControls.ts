@@ -8,7 +8,7 @@ import { NumberTextBoxControl } from "client/gui/controls/NumberTextBoxControl";
 import { SliderControl } from "client/gui/controls/SliderControl";
 import { TextBoxControl } from "client/gui/controls/TextBoxControl";
 import { Tooltip } from "client/gui/controls/Tooltip";
-import { Gui } from "client/gui/Gui";
+import { Interface } from "client/gui/Interface";
 import { MultiKeyNumberControl } from "client/gui/MultiKeyNumberControl";
 import { MemoryEditorPopup } from "client/gui/popup/MemoryEditorPopup";
 import { Control } from "engine/client/gui/Control";
@@ -112,7 +112,7 @@ const map = <T, TOut extends defined>(
 
 //
 
-const template = Gui.getGameUI<{ Templates: { Config: { Template: ConfigValueWrapperDefinition } } }>().Templates.Config
+const template = Interface.getGameUI<{ Templates: { Config: { Template: ConfigValueWrapperDefinition } } }>().Templates.Config
 	.Template;
 
 const setWrapperColor = (wrapper: ConfigValueWrapper, valueType: PrimitiveKeys) => {

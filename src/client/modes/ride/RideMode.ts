@@ -1,6 +1,6 @@
 import { ClientMachine } from "client/blocks/ClientMachine";
 import { SoundController } from "client/controller/SoundController";
-import { Gui } from "client/gui/Gui";
+import { Interface } from "client/gui/Interface";
 import { RideModeScene } from "client/gui/ridemode/RideModeScene";
 import { PlayMode } from "client/modes/PlayMode";
 import { ObservableValue } from "engine/shared/event/ObservableValue";
@@ -24,7 +24,7 @@ export class RideMode extends PlayMode {
 
 		this.rideModeScene = new RideModeScene(
 			this,
-			Gui.getGameUI<{ RideMode: RideModeSceneDefinition }>().RideMode,
+			Interface.getGameUI<{ RideMode: RideModeSceneDefinition }>().RideMode,
 			playerData,
 		);
 		this.parentGui(this.rideModeScene);

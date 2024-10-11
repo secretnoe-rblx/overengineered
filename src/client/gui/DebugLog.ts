@@ -1,6 +1,6 @@
 import { RunService } from "@rbxts/services";
 import { LabelControl } from "client/gui/controls/LabelControl";
-import { Gui } from "client/gui/Gui";
+import { Interface } from "client/gui/Interface";
 import { Control } from "engine/client/gui/Control";
 import { ComponentChildren } from "engine/shared/component/ComponentChildren";
 import { ComponentKeyedChildren } from "engine/shared/component/ComponentKeyedChildren";
@@ -22,7 +22,7 @@ class CategoryControl extends Control {
 	}
 }
 
-const mainControl = new CategoryControl(Gui.getGameUI<{ DebugLog: GuiObject }>().DebugLog);
+const mainControl = new CategoryControl(Interface.getGameUI<{ DebugLog: GuiObject }>().DebugLog);
 if (RunService.IsStudio()) {
 	mainControl.show();
 } else {

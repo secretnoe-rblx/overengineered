@@ -5,7 +5,7 @@ import { KeyChooserControl } from "client/gui/controls/KeyChooserControl";
 import { NumberTextBoxControl } from "client/gui/controls/NumberTextBoxControl";
 import { SliderControl } from "client/gui/controls/SliderControl";
 import { ToggleControl } from "client/gui/controls/ToggleControl";
-import { Gui } from "client/gui/Gui";
+import { Interface } from "client/gui/Interface";
 import { Control } from "engine/client/gui/Control";
 import { Signal } from "engine/shared/event/Signal";
 import { Objects } from "engine/shared/fixes/Objects";
@@ -30,7 +30,7 @@ class ConfigValueControl<TGui extends GuiObject> extends Control<ConfigPartDefin
 	}
 }
 
-const templatesFolder = Gui.getGameUI<{
+const templatesFolder = Interface.getGameUI<{
 	readonly Templates: {
 		readonly PlayerConfig: {
 			readonly ToggleTemplate: ConfigPartDefinition<ToggleControlDefinition>;
@@ -508,7 +508,7 @@ namespace ControlsSource {
 			for (const tutorial of tutorials.allTutorials) {
 				list.add(
 					new TextButtonControl(
-						Gui.getGameUI<{ Templates: { Button: TextButtonDefinition } }>().Templates.Button.Clone(),
+						Interface.getGameUI<{ Templates: { Button: TextButtonDefinition } }>().Templates.Button.Clone(),
 						() => tutorials.run(tutorial),
 					).with((b) => b.text.set(`Tutorial: ${tutorial.name}`)),
 				);

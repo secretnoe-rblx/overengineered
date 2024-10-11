@@ -6,7 +6,7 @@ import { MaterialColorEditControl } from "client/gui/buildmode/MaterialColorEdit
 import { MirrorEditorControl } from "client/gui/buildmode/MirrorEditorControl";
 import { ButtonControl } from "client/gui/controls/Button";
 import { DebugLog } from "client/gui/DebugLog";
-import { Gui } from "client/gui/Gui";
+import { Interface } from "client/gui/Interface";
 import { LogControl } from "client/gui/static/LogControl";
 import { ClientBuilding } from "client/modes/build/ClientBuilding";
 import { Signals } from "client/Signals";
@@ -525,7 +525,7 @@ namespace SinglePlaceController {
 			if (!selectedBlock) return;
 
 			if (!mainPosition) {
-				if (Gui.isCursorOnVisibleGui()) {
+				if (Interface.isCursorOnVisibleGui()) {
 					return;
 				}
 
@@ -679,7 +679,7 @@ namespace SinglePlaceController {
 
 			this.event.subInput((ih) => {
 				ih.onTouchTap(() => {
-					if (!Gui.isCursorOnVisibleGui()) {
+					if (!Interface.isCursorOnVisibleGui()) {
 						const target = mouse.Target;
 						if (target) {
 							this.prevTarget = [target, mouse.Hit, mouse.TargetSurface];

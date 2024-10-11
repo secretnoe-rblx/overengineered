@@ -3,7 +3,7 @@ import { LocalPlayer } from "engine/client/LocalPlayer";
 import { MaterialColorEditControl } from "client/gui/buildmode/MaterialColorEditControl";
 import { ButtonControl } from "client/gui/controls/Button";
 import { ToggleControl } from "client/gui/controls/ToggleControl";
-import { Gui } from "client/gui/Gui";
+import { Interface } from "client/gui/Interface";
 import { ClientBuilding } from "client/modes/build/ClientBuilding";
 import { MultiBlockSelector } from "client/tools/highlighters/MultiBlockSelector";
 import { ToolBase } from "client/tools/ToolBase";
@@ -112,7 +112,7 @@ class Controller extends ClientComponent {
 
 		this.event.subInput((ih) => {
 			const pick = () => {};
-			if (Gui.isCursorOnVisibleGui()) return;
+			if (Interface.isCursorOnVisibleGui()) return;
 
 			// eslint-disable-next-line prefer-const
 			let [material, color] = this.pick();

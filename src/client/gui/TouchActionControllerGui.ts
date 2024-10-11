@@ -1,6 +1,6 @@
 import { ButtonControl } from "client/gui/controls/Button";
 import { GridEditorControl } from "client/gui/GridEditor";
-import { Gui } from "client/gui/Gui";
+import { Interface } from "client/gui/Interface";
 import { ActionController } from "client/modes/build/ActionController";
 import { Control } from "engine/client/gui/Control";
 import type { GridEditorControlDefinition } from "client/gui/GridEditor";
@@ -42,7 +42,7 @@ export class TouchActionControllerGui extends Control<TouchActionControllerGuiDe
 			redo.setInteractable(hasRedo);
 		});
 
-		const gridEditorGui = Gui.getGameUI<{
+		const gridEditorGui = Interface.getGameUI<{
 			BuildingMode: { Grid: GuiObject & { Content: GridEditorControlDefinition } };
 		}>().BuildingMode.Grid;
 		gridEditorGui.Visible = false;

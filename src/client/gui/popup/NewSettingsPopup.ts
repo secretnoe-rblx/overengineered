@@ -1,7 +1,7 @@
 import { ButtonControl } from "client/gui/controls/Button";
 import { PlayerSelectorColumnControl } from "client/gui/controls/PlayerSelectorListControl";
 import { ToggleControl } from "client/gui/controls/ToggleControl";
-import { Gui } from "client/gui/Gui";
+import { Interface } from "client/gui/Interface";
 import { Popup } from "client/gui/Popup";
 import { InstanceComponent } from "engine/shared/component/InstanceComponent";
 import { CustomRemotes } from "shared/Remotes";
@@ -57,7 +57,7 @@ type Scenes = keyof NewSettingsScenes;
 @injectable
 export class NewSettingsPopup extends Popup<NewSettingsPopupDefinition> {
 	static addAsService(host: GameHostBuilder) {
-		const gui = Gui.getGameUI<{ Popup: { Crossplatform: { Settings: NewSettingsPopupDefinition } } }>().Popup
+		const gui = Interface.getGameUI<{ Popup: { Crossplatform: { Settings: NewSettingsPopupDefinition } } }>().Popup
 			.Crossplatform.Settings;
 		host.services.registerTransientFunc((ctx) => ctx.resolveForeignClass(this, [gui.Clone()]));
 	}

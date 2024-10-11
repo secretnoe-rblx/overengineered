@@ -2,7 +2,7 @@ import { ContentProvider, Players, ReplicatedStorage, RunService } from "@rbxts/
 import { AdminMessageController } from "client/AdminMessageController";
 import { LoadingController } from "client/controller/LoadingController";
 import { BSOD } from "client/gui/BSOD";
-import { Gui } from "client/gui/Gui";
+import { Interface } from "client/gui/Interface";
 import { LogControl } from "client/gui/static/LogControl";
 import { SandboxGame } from "client/SandboxGame";
 import { ServerRestartController } from "client/ServerRestartController";
@@ -17,7 +17,7 @@ import { CustomRemotes } from "shared/Remotes";
 import { BulletProjectile } from "shared/weapons/BulletProjectileLogic";
 
 LoadingController.show("Initializing");
-Gui.getGameUI<{ VERSION: TextLabel }>().VERSION.Text = `v${RunService.IsStudio() ? "studio" : game.PlaceVersion}`;
+Interface.getGameUI<{ VERSION: TextLabel }>().VERSION.Text = `v${RunService.IsStudio() ? "studio" : game.PlaceVersion}`;
 
 const builder = new GameHostBuilder(gameInfo);
 try {

@@ -1,5 +1,5 @@
 import { ReplicatedStorage, Workspace } from "@rbxts/services";
-import { Gui } from "client/gui/Gui";
+import { Interface } from "client/gui/Interface";
 import { ActionController } from "client/modes/build/ActionController";
 import { ClientComponent } from "engine/client/component/ClientComponent";
 import { BuildingManager } from "shared/building/BuildingManager";
@@ -29,7 +29,7 @@ export class CenterOfMassController extends ClientComponent {
 		this.viewportFrame.Size = UDim2.fromScale(1, 1);
 		this.viewportFrame.CurrentCamera = Workspace.CurrentCamera;
 		this.viewportFrame.Transparency = 1;
-		this.viewportFrame.Parent = Gui.getGameUI();
+		this.viewportFrame.Parent = Interface.getGameUI();
 		this.viewportFrame.Ambient = Colors.white;
 		this.viewportFrame.LightColor = Colors.white;
 		this.viewportFrame.ZIndex = -1000;

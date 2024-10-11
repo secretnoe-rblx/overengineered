@@ -1,5 +1,5 @@
 import { ButtonControl, TextButtonControl } from "client/gui/controls/Button";
-import { Gui } from "client/gui/Gui";
+import { Interface } from "client/gui/Interface";
 import { MultiPlayerConfigControl } from "client/gui/PlayerConfigControls";
 import { Popup } from "client/gui/Popup";
 import { Colors } from "shared/Colors";
@@ -29,7 +29,7 @@ export type SettingsPopupDefinition = GuiObject & {
 @injectable
 export class SettingsPopup extends Popup<SettingsPopupDefinition> {
 	static addAsService(host: GameHostBuilder) {
-		const gui = Gui.getGameUI<{ Popup: { Settings: SettingsPopupDefinition } }>().Popup.Settings;
+		const gui = Interface.getGameUI<{ Popup: { Settings: SettingsPopupDefinition } }>().Popup.Settings;
 		host.services.registerTransientFunc((ctx) => ctx.resolveForeignClass(this, [gui.Clone()]));
 	}
 
@@ -56,7 +56,7 @@ export class SettingsPopup extends Popup<SettingsPopupDefinition> {
 
 				const btn = this.config.add(
 					new TextButtonControl(
-						Gui.getGameUI<{ Templates: { Button: TextButtonDefinition } }>().Templates.Button.Clone(),
+						Interface.getGameUI<{ Templates: { Button: TextButtonDefinition } }>().Templates.Button.Clone(),
 						() => {
 							const popup = di.resolve<NewSettingsPopup>();
 							popup.setScene("Permissions");

@@ -1,7 +1,7 @@
 import { ReplicatedStorage } from "@rbxts/services";
 import { LocalPlayer } from "engine/client/LocalPlayer";
 import { ButtonControl } from "client/gui/controls/Button";
-import { Gui } from "client/gui/Gui";
+import { Interface } from "client/gui/Interface";
 import { Popup } from "client/gui/Popup";
 import { WikiCategoriesControl, WikiContentControl } from "client/wiki/WikiControl";
 import type { WikiCategoriesControlDefinition, WikiContentControlDefinition } from "client/wiki/WikiControl";
@@ -66,7 +66,7 @@ export type WikiPopupDefinition = GuiObject & {
 @injectable
 export class WikiPopup extends Popup<WikiPopupDefinition> {
 	static addAsService(host: GameHostBuilder) {
-		const gui = Gui.getGameUI<{ Popup: { Wiki: WikiPopupDefinition } }>().Popup.Wiki;
+		const gui = Interface.getGameUI<{ Popup: { Wiki: WikiPopupDefinition } }>().Popup.Wiki;
 		host.services.registerTransientFunc((ctx) => ctx.resolveForeignClass(this, [gui.Clone()]));
 	}
 

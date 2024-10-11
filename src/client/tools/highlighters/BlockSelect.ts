@@ -1,6 +1,6 @@
 import { GuiService, Players, Workspace } from "@rbxts/services";
 import { LocalPlayer } from "engine/client/LocalPlayer";
-import { Gui } from "client/gui/Gui";
+import { Interface } from "client/gui/Interface";
 import { InputController } from "engine/client/InputController";
 import { PlayerUtils } from "engine/shared/utils/PlayerUtils";
 import { BlockManager } from "shared/building/BlockManager";
@@ -11,7 +11,7 @@ export namespace BlockSelect {
 	blockRaycastParams.FilterType = Enum.RaycastFilterType.Include;
 
 	export function getTargetedPart(): BasePart | undefined {
-		if (GuiService.MenuIsOpen || !PlayerUtils.isAlive(Players.LocalPlayer) || Gui.isCursorOnVisibleGui()) {
+		if (GuiService.MenuIsOpen || !PlayerUtils.isAlive(Players.LocalPlayer) || Interface.isCursorOnVisibleGui()) {
 			return;
 		}
 
