@@ -45,9 +45,9 @@ export class ButtonControl<T extends ButtonDefinition = ButtonDefinition> extend
 		this.gui.Interactable = interactable;
 		this.visibilityOverlay.get(0).transparency = interactable ? undefined : 0.6;
 	}
-	protected setInstanceVisibilityFunction(visible: boolean): void {
-		this.visibilityOverlay.get(-1).transparency = visible ? undefined : 1;
-	}
+	// protected setInstanceVisibilityFunction(visible: boolean): void {
+	// 	this.visibilityOverlay.get(-1).transparency = visible ? undefined : 1;
+	// }
 }
 
 export type TextButtonDefinition = (GuiButton & { readonly TextLabel: TextLabel }) | TextButton;

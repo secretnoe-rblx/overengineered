@@ -12,7 +12,6 @@ import type { GridEditorControlDefinition } from "client/gui/GridEditor";
 import type { SavePopup } from "client/gui/popup/SavePopup";
 import type { SettingsPopup } from "client/gui/popup/SettingsPopup";
 import type { Topbar } from "client/gui/Topbar";
-import type { TouchActionControllerGuiDefinition } from "client/gui/TouchActionControllerGui";
 import type { BuildingMode } from "client/modes/build/BuildingMode";
 import type { EditTool } from "client/tools/EditTool";
 import type { ToolController } from "client/tools/ToolController";
@@ -80,11 +79,11 @@ class TopbarRightButtonsControl extends Control<TopbarRightButtonsControlDefinit
 
 		this.event.subscribeImmediately(actionController.history.changed, () => {
 			const hasUndo = actionController.history.size() !== 0;
-			undo.setInteractable(hasUndo);
+			undo.setVisible(hasUndo);
 		});
 		this.event.subscribeImmediately(actionController.redoHistory.changed, () => {
 			const hasRedo = actionController.redoHistory.size() !== 0;
-			redo.setInteractable(hasRedo);
+			redo.setVisible(hasRedo);
 		});
 
 		const gridEditorGui = Interface.getGameUI<{
@@ -107,7 +106,7 @@ class TopbarRightButtonsControl extends Control<TopbarRightButtonsControlDefinit
 }
 
 export type BuildingModeSceneDefinition = GuiObject & {
-	readonly Action: TouchActionControllerGuiDefinition;
+	readonly Action: GuiObject;
 	readonly HotbarNew: HotbarControlDefinition;
 };
 @injectable
