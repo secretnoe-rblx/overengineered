@@ -1,4 +1,3 @@
-import { LocalPlayer } from "engine/client/LocalPlayer";
 import { MirrorVisualizer } from "client/controller/MirrorVisualizer";
 import { BuildingModeScene } from "client/gui/buildmode/BuildingModeScene";
 import { Interface } from "client/gui/Interface";
@@ -6,6 +5,7 @@ import { CenterOfMassController } from "client/modes/build/CenterOfMassControlle
 import { PlayMode } from "client/modes/PlayMode";
 import { BlockSelect } from "client/tools/highlighters/BlockSelect";
 import { ToolController } from "client/tools/ToolController";
+import { LocalPlayer } from "engine/client/LocalPlayer";
 import { NumberObservableValue } from "engine/shared/event/NumberObservableValue";
 import { ObservableValue } from "engine/shared/event/ObservableValue";
 import { SharedRagdoll } from "shared/SharedRagdoll";
@@ -38,7 +38,17 @@ export class BuildingMode extends PlayMode {
 	constructor(@inject di: DIContainer, @inject plot: SharedPlot) {
 		super();
 
-		di = di.beginScope((di) => di.registerSingletonValue(this));
+		di = di.beginScope((di) => {
+			di.registerSingletonValue(this);
+			di.registerSingletonClass(ToolController);
+
+			di.registerSingletonFunc((di) => di.resolve<ToolController>().allTools.buildTool);
+			di.registerSingletonFunc((di) => di.resolve<ToolController>().allTools.configTool);
+			di.registerSingletonFunc((di) => di.resolve<ToolController>().allTools.editTool);
+			di.registerSingletonFunc((di) => di.resolve<ToolController>().allTools.deleteTool);
+			di.registerSingletonFunc((di) => di.resolve<ToolController>().allTools.paintTool);
+			di.registerSingletonFunc((di) => di.resolve<ToolController>().allTools.wireTool);
+		});
 		const com = new CenterOfMassController(plot);
 		this.event.subscribeObservable(this.centerOfMassEnabled, (enabled) => com.setEnabled(enabled), true);
 		this.onDisable(() => com.disable());
@@ -61,14 +71,11 @@ export class BuildingMode extends PlayMode {
 
 		this.mirrorVisualizer = this.parent(new MirrorVisualizer(this.targetPlot, this.mirrorMode));
 
-		this.toolController = this.parent(di.resolveForeignClass(ToolController));
+		this.toolController = this.parent(di.resolve<ToolController>());
 		this.gui = this.parentGui(
-			new BuildingModeScene(
+			di.resolveForeignClass(BuildingModeScene, [
 				Interface.getGameUI<{ BuildingMode: BuildingModeSceneDefinition }>().BuildingMode,
-				this,
-				this.toolController,
-				di,
-			),
+			]),
 		);
 	}
 

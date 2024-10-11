@@ -14,17 +14,19 @@ import { RagdollController } from "client/controller/RagdollController";
 import { MusicController } from "client/controller/sound/MusicController";
 import { SoundController } from "client/controller/SoundController";
 import { UpdatePopupController } from "client/controller/UpdatePopupController";
-import { ActionsGui } from "client/gui/ActionsGui";
 import { AdminGui } from "client/gui/AdminGui";
 import { GuiAutoScaleController } from "client/gui/GuiAutoScaleController";
 import { HideInterfaceController } from "client/gui/HideInterfaceController";
+import { Interface } from "client/gui/Interface";
 import { ControlsPopup } from "client/gui/popup/ControlsPopup";
 import { NewSettingsPopup } from "client/gui/popup/NewSettingsPopup";
 import { ReportSubmitController } from "client/gui/popup/ReportSubmitPopup";
 import { SavePopup } from "client/gui/popup/SavePopup";
 import { SettingsPopup } from "client/gui/popup/SettingsPopup";
 import { WikiPopup } from "client/gui/popup/WikiPopup";
+import { Topbar } from "client/gui/Topbar";
 import { Keybinds } from "client/Keybinds";
+import { ActionController } from "client/modes/build/ActionController";
 import { ClientBuildingValidationController } from "client/modes/build/ClientBuildingValidationController";
 import { PlayModeController } from "client/modes/PlayModeController";
 import { PlayerDataInitializer } from "client/PlayerDataStorage";
@@ -39,6 +41,7 @@ import { SharedPlots } from "shared/building/SharedPlots";
 import { GameDefinitions } from "shared/data/GameDefinitions";
 import { RemoteEvents } from "shared/RemoteEvents";
 import { CreateSandboxBlocks } from "shared/SandboxBlocks";
+import type { TopbarDefinition } from "client/gui/Topbar";
 import type { TutorialDescriber } from "client/tutorial/TutorialController";
 import type { GameHostBuilder } from "engine/shared/GameHostBuilder";
 import type { SharedPlot } from "shared/building/SharedPlot";
@@ -90,7 +93,12 @@ export namespace SandboxGame {
 		builder.services.registerService(MusicController);
 		builder.services.registerService(GuiAutoScaleController);
 		builder.services.registerService(HideInterfaceController);
-		ActionsGui.initialize(builder);
+		builder.services.registerSingletonValue(ActionController.instance);
+		builder.services
+			.registerSingletonClass(Topbar)
+			.withArgs([Interface.getInterface<{ Topbar: TopbarDefinition }>().Topbar])
+			.autoInit()
+			.onInit((control) => control.show());
 
 		if (!RunService.IsStudio()) {
 			builder.services.registerService(UpdatePopupController);

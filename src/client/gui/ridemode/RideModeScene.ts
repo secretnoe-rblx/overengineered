@@ -25,29 +25,54 @@ import type { ClientMachine } from "client/blocks/ClientMachine";
 import type { TextButtonDefinition } from "client/gui/controls/Button";
 import type { CheckBoxControlDefinition } from "client/gui/controls/CheckBoxControl";
 import type { ProgressBarControlDefinition } from "client/gui/controls/ProgressBarControl";
+import type { Topbar } from "client/gui/Topbar";
 import type { RideMode } from "client/modes/ride/RideMode";
 import type { PlayerDataStorage } from "client/PlayerDataStorage";
 import type { RocketBlockLogic } from "shared/blocks/blocks/RocketEngineBlocks";
 
-export type ActionBarControlDefinition = GuiObject & {
+type TopbarButtonsControlDefinition = GuiObject & {
 	readonly Stop: GuiButton;
 	readonly Sit: GuiButton;
-	readonly ControlSettings: GuiButton;
-	readonly ControlReset: GuiButton;
-	readonly LogicVisualizer: GuiButton;
 };
-export class ActionBarControl extends Control<ActionBarControlDefinition> {
+@injectable
+class TopbarButtonsControl extends Control<TopbarButtonsControlDefinition> {
 	readonly sitButton;
-	readonly logicButton;
 
-	constructor(gui: ActionBarControlDefinition, mode: RideMode, controls: RideModeControls) {
+	constructor(gui: TopbarButtonsControlDefinition, controls: RideModeControls) {
 		super(gui);
 
 		const stopButton = this.add(new ButtonControl(this.gui.Stop));
 		const sitButton = this.add(new ButtonControl(this.gui.Sit));
 		this.sitButton = sitButton;
-		const controlSettingsButton = this.add(new ButtonControl(this.gui.ControlSettings));
-		const controlResetButton = this.add(new ButtonControl(this.gui.ControlReset));
+
+		this.event.subscribe(stopButton.activated, () => requestMode("build"));
+		this.event.subscribe(sitButton.activated, () => CustomRemotes.modes.ride.teleportOnSeat.send());
+
+		this.event.subscribe(controls.onEnterSettingsMode, () => {
+			stopButton.hide();
+			sitButton.hide();
+		});
+		this.event.subscribe(controls.onQuitSettingsMode, () => {
+			stopButton.show();
+			sitButton.show();
+		});
+	}
+}
+
+type TopbarRightButtonsControlDefinition = GuiObject & {
+	readonly EditControls: GuiButton;
+	readonly ResetControls: GuiButton;
+	readonly Logic: GuiButton;
+};
+@injectable
+class TopbarRightButtonsControl extends Control<TopbarRightButtonsControlDefinition> {
+	readonly logicButton;
+
+	constructor(gui: TopbarRightButtonsControlDefinition, controls: RideModeControls) {
+		super(gui);
+
+		const controlSettingsButton = this.add(new ButtonControl(this.gui.EditControls));
+		const controlResetButton = this.add(new ButtonControl(this.gui.ResetControls));
 		controlResetButton.hide();
 
 		this.onPrepare((input) => {
@@ -57,9 +82,6 @@ export class ActionBarControl extends Control<ActionBarControlDefinition> {
 				controlSettingsButton.hide();
 			}
 		});
-
-		this.event.subscribe(stopButton.activated, () => requestMode("build"));
-		this.event.subscribe(sitButton.activated, () => CustomRemotes.modes.ride.teleportOnSeat.send());
 		this.event.subscribe(controlSettingsButton.activated, () => controls.toggleSettingsMode());
 
 		this.event.subscribe(controlResetButton.activated, async () => {
@@ -72,20 +94,15 @@ export class ActionBarControl extends Control<ActionBarControlDefinition> {
 		});
 
 		this.event.subscribe(controls.onEnterSettingsMode, () => {
-			stopButton.hide();
-			sitButton.hide();
 			controlResetButton.show();
 		});
 		this.event.subscribe(controls.onQuitSettingsMode, () => {
-			stopButton.show();
-			sitButton.show();
 			controlResetButton.hide();
 		});
 
-		this.logicButton = this.add(new ButtonControl(this.gui.LogicVisualizer));
+		this.logicButton = this.add(new ButtonControl(this.gui.Logic));
 	}
 }
-
 type RideModeControlsDefinition = GuiObject & {
 	readonly Overlay: GuiObject;
 	readonly Button: TextButtonDefinition;
@@ -311,7 +328,6 @@ export class RideModeInfoControl extends Control<RideModeInfoControlDefinition> 
 }
 
 export type RideModeSceneDefinition = GuiObject & {
-	readonly ActionBar: ActionBarControlDefinition;
 	readonly Controls: RideModeControlsDefinition;
 	readonly Info: GuiObject & {
 		readonly Template: RideModeInfoControlDefinition & { Title: TextLabel };
@@ -331,8 +347,10 @@ export type RideModeSceneDefinition = GuiObject & {
 	};
 };
 
+@injectable
 export class RideModeScene extends Control<RideModeSceneDefinition> {
-	private readonly actionbar;
+	private readonly topbarButtons;
+	private readonly topbarRightButtons;
 	private readonly controls;
 	private readonly info;
 
@@ -340,20 +358,31 @@ export class RideModeScene extends Control<RideModeSceneDefinition> {
 	private readonly infoTextTemplate;
 
 	constructor(
-		readonly mode: RideMode,
 		gui: RideModeSceneDefinition,
-		playerData: PlayerDataStorage,
+		@inject readonly mode: RideMode,
+		@inject playerData: PlayerDataStorage,
+		@inject topbar: Topbar,
 	) {
 		super(gui);
 
 		this.controls = new RideModeControls(this.gui.Controls, playerData);
 		this.add(this.controls);
 
-		this.actionbar = new ActionBarControl(gui.ActionBar, mode, this.controls);
-		this.add(this.actionbar);
-		const updateActionBarVisibility = () => this.actionbar.setVisible(!LoadingController.isLoading.get());
-		this.event.subscribeObservable(LoadingController.isLoading, updateActionBarVisibility);
-		this.onEnable(updateActionBarVisibility);
+		gui.FindFirstChild("ActionBar")!.Destroy();
+
+		this.topbarButtons = this.add(new TopbarButtonsControl(topbar.getButtonsGui("Ride"), this.controls));
+		this.topbarRightButtons = this.add(
+			new TopbarRightButtonsControl(topbar.getRightButtonsGui("Ride"), this.controls),
+		);
+
+		this.event.subscribeObservable(
+			LoadingController.isLoading,
+			(isLoading) => {
+				this.topbarButtons.setVisible(!isLoading);
+				this.topbarRightButtons.setVisible(!isLoading);
+			},
+			true,
+		);
 
 		this.info = new Control(this.gui.Info);
 		this.add(this.info);
@@ -364,7 +393,9 @@ export class RideModeScene extends Control<RideModeSceneDefinition> {
 
 	private addMeters(machine: IReadonlyContainerComponent) {
 		this.info.clear();
-		this.actionbar.sitButton.setVisible(machine.getChildren().any((b) => b instanceof VehicleSeatBlock.logic.ctor));
+		this.topbarButtons.sitButton.setVisible(
+			machine.getChildren().any((b) => b instanceof VehicleSeatBlock.logic.ctor),
+		);
 
 		const init = (
 			title: string,
@@ -481,7 +512,7 @@ export class RideModeScene extends Control<RideModeSceneDefinition> {
 
 		const logicDebug = component.add(new Control(this.gui.LogicDebug.Clone()));
 		logicDebug.instance.Parent = this.gui.LogicDebug.Parent;
-		component.event.subscribe(this.actionbar.logicButton.activated, () => {
+		component.event.subscribe(this.topbarRightButtons.logicButton.activated, () => {
 			logicDebug.setVisible(!logicDebug.isVisible());
 		});
 		logicDebug.setVisible(false);

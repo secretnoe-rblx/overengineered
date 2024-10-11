@@ -6,7 +6,6 @@ import { PlayMode } from "client/modes/PlayMode";
 import { ObservableValue } from "engine/shared/event/ObservableValue";
 import { CustomRemotes } from "shared/Remotes";
 import type { RideModeSceneDefinition } from "client/gui/ridemode/RideModeScene";
-import type { PlayerDataStorage } from "client/PlayerDataStorage";
 import type { SharedPlot } from "shared/building/SharedPlot";
 
 @injectable
@@ -17,16 +16,17 @@ export class RideMode extends PlayMode {
 
 	constructor(
 		@inject private readonly plot: SharedPlot,
-		@inject playerData: PlayerDataStorage,
 		@inject private readonly di: DIContainer,
 	) {
 		super();
 
-		this.rideModeScene = new RideModeScene(
-			this,
+		this.di = di = di.beginScope((builder) => {
+			builder.registerSingletonValue(this);
+		});
+
+		this.rideModeScene = di.resolveForeignClass(RideModeScene, [
 			Interface.getGameUI<{ RideMode: RideModeSceneDefinition }>().RideMode,
-			playerData,
-		);
+		]);
 		this.parentGui(this.rideModeScene);
 
 		CustomRemotes.modes.set.sent.Connect((mode) => {

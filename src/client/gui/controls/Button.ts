@@ -9,11 +9,12 @@ import type { ElementProperties } from "engine/shared/Element";
 export type ButtonDefinition = GuiButton;
 export class ButtonControl<T extends ButtonDefinition = ButtonDefinition> extends Control<T> {
 	readonly activated = new Signal();
-	private readonly visibilityOverlay = new ObjectOverlayStorage({ transparency: 0 });
+	private readonly visibilityOverlay;
 
 	constructor(gui: T, activated?: () => void) {
 		super(gui);
 
+		this.visibilityOverlay = new ObjectOverlayStorage({ transparency: gui.Transparency });
 		const silent = this.getAttribute<boolean>("silent") === true;
 
 		this.event.subscribe(this.gui.Activated, () => {
