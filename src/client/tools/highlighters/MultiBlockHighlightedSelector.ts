@@ -6,7 +6,6 @@ import { InputController } from "engine/client/InputController";
 import type { BlockSelectorModeGuiDefinition } from "client/tools/highlighters/BlockSelectorModeGui";
 import type { MultiBlockSelectorConfiguration } from "client/tools/highlighters/MultiBlockSelector";
 import type { ObservableCollectionSet } from "engine/shared/event/ObservableCollection";
-import type { ReadonlyObservableValue } from "engine/shared/event/ObservableValue";
 import type { SharedPlot } from "shared/building/SharedPlot";
 
 export class MultiBlockHighlightedSelector extends ClientComponent {

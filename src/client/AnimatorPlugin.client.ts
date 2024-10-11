@@ -41,7 +41,6 @@ import { ArgsSignal } from "engine/shared/event/Signal";
 import type { TextButtonDefinition } from "client/gui/controls/Button";
 import type { ComponentEvents } from "engine/shared/component/ComponentEvents";
 import type { Easable } from "engine/shared/component/Easing";
-import type { ReadonlyObservableValue } from "engine/shared/event/ObservableValue";
 
 TS.import = previmport;
 
