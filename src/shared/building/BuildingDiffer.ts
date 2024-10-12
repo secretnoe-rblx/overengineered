@@ -15,11 +15,13 @@ type AddedChange = {
 		readonly location: CFrame;
 	};
 };
+
+export type PartialThrough<T> = T extends object ? { [k in keyof T]?: PartialThrough<T[k]> } : T;
 type ConfigChangedChange = {
 	readonly type: "configChanged";
 	readonly uuid: DiffBlock["uuid"];
 	readonly key: string;
-	readonly value: Partial<PlacedBlockConfig[string]> | undefined;
+	readonly value: PartialThrough<PlacedBlockConfig[string]> | undefined;
 };
 type MovedChange = {
 	readonly type: "moved";
