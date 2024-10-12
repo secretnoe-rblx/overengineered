@@ -119,19 +119,23 @@ export class WeaponProjectile extends InstanceComponent<BasePart> {
 		const impactDamage = (this.totalEffect?.impactDamage?.value ?? 0) + this.baseDamage;
 		const inflictedDamage = (WeaponProjectile.damagedParts.get(part) ?? 0) + impactDamage;
 		const explosiveDamage = this.totalEffect?.explosiveDamage?.value ?? 0;
-		const ignitionChance = //basically density == chance, because density can't be bigger than 100, right? right..?
+		const ignitionChance = //
+			//basically density == chance, because density can't be bigger than 100, right? right..?
+			// (1 - (density[0.01...100] / 100)) * fireChance
 			(1 - properties.Density / 100) * math.clamp(this.totalEffect?.heatDamage?.value ?? 0, 0, 1);
 
-		WeaponProjectile.damagedParts.set(part, impactDamage);
+		const partWasDamagedBefore = WeaponProjectile.damagedParts.has(part);
+		WeaponProjectile.damagedParts.set(
+			part,
+			(partWasDamagedBefore ? WeaponProjectile.damagedParts.get(part)! : 0) + impactDamage,
+		);
+		//print(WeaponProjectile.damagedParts.get(part), 1024 * part.CurrentPhysicalProperties.Density);
 
-		if (!WeaponProjectile.damagedParts.has(part))
-			//damage here
-			part.Destroying.Connect(() => WeaponProjectile.damagedParts.delete(part));
+		if (!partWasDamagedBefore) part.Destroying.Connect(() => WeaponProjectile.damagedParts.delete(part)); //damage here
 		if (checkIfCanBeUnwelded(part)) unweld(part); //unweld here
 		if (checkIfCanBeDestroyed(part)) part.Destroy(); //destroy here
 		if ((this.totalEffect.explosiveDamage?.value ?? 0) > 0)
-			//explode here
-			explode(this.projectilePart, this.totalEffect.explosiveDamage?.value ?? 0);
+			explode(this.projectilePart, this.totalEffect.explosiveDamage?.value ?? 0); //explode here
 		if (tryYourLuck(ignitionChance)) putOnFire(part); //put on fire here
 	}
 
@@ -157,6 +161,7 @@ export class WeaponProjectile extends InstanceComponent<BasePart> {
 	}
 
 	onHit(part: BasePart, point: Vector3): void {
+		this.applyDamageToPart(part);
 		this.destroy();
 	}
 

@@ -67,7 +67,8 @@ $log("Client loaded.");
 //host.services.resolveForeignClass(CenterOfMassController).enable();
 
 //testing
-if (RunService.IsStudio() && Players.LocalPlayer.Name === "samlovebutter" && (false as boolean)) {
+if (RunService.IsStudio() && Players.LocalPlayer.Name === "samlovebutter") {
+	//&& (false as boolean)
 	while (true as boolean) {
 		BulletProjectile.spawn.send({
 			startPosition: new Vector3(359, -16360, 330),
@@ -76,7 +77,7 @@ if (RunService.IsStudio() && Players.LocalPlayer.Name === "samlovebutter" && (fa
 				20 + (math.random() - 0.5) * 10,
 				-(500 + (math.random() - 0.5) * 10),
 			),
-			baseDamage: 0,
+			baseDamage: 100,
 		});
 		task.wait(0.1);
 	}
