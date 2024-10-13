@@ -91,10 +91,14 @@ export class WeaponProjectile extends InstanceComponent<BasePart> {
 	applyDamageToPart(part: BasePart) {
 		this.recalculateEffects();
 
+		const magicNumber = 18;
+		const partHealth =
+			(part.Mass * part.CurrentPhysicalProperties.Elasticity * part.CurrentPhysicalProperties.ElasticityWeight) /
+			magicNumber;
+
 		const checkIfCanBeUnwelded = (part: BasePart) =>
-			(WeaponProjectile.damagedParts.get(part) ?? 0) > 256 * part.CurrentPhysicalProperties.Density;
-		const checkIfCanBeDestroyed = (part: BasePart) =>
-			(WeaponProjectile.damagedParts.get(part) ?? 0) > 1024 * part.CurrentPhysicalProperties.Density;
+			(WeaponProjectile.damagedParts.get(part) ?? 0) > partHealth / 4;
+		const checkIfCanBeDestroyed = (part: BasePart) => (WeaponProjectile.damagedParts.get(part) ?? 0) > partHealth;
 		const tryYourLuck = (num: number): boolean => math.random() < num;
 		function createExplosion(part: BasePart, diameter: number, force: number, enableEffect?: boolean) {
 			//affect blocks in radius/diameter somehow
@@ -124,14 +128,10 @@ export class WeaponProjectile extends InstanceComponent<BasePart> {
 			// (1 - (density[0.01...100] / 100)) * fireChance
 			(1 - properties.Density / 100) * math.clamp(this.totalEffect?.heatDamage?.value ?? 0, 0, 1);
 
-		const partWasDamagedBefore = WeaponProjectile.damagedParts.has(part);
-		WeaponProjectile.damagedParts.set(
-			part,
-			(partWasDamagedBefore ? WeaponProjectile.damagedParts.get(part)! : 0) + impactDamage,
-		);
-		//print(WeaponProjectile.damagedParts.get(part), 1024 * part.CurrentPhysicalProperties.Density);
+		WeaponProjectile.damagedParts.set(part, inflictedDamage + explosiveDamage);
 
-		if (!partWasDamagedBefore) part.Destroying.Connect(() => WeaponProjectile.damagedParts.delete(part)); //damage here
+		if (!WeaponProjectile.damagedParts.has(part))
+			part.Destroying.Connect(() => WeaponProjectile.damagedParts.delete(part)); //damage here
 		if (checkIfCanBeUnwelded(part)) unweld(part); //unweld here
 		if (checkIfCanBeDestroyed(part)) part.Destroy(); //destroy here
 		if ((this.totalEffect.explosiveDamage?.value ?? 0) > 0)
