@@ -155,8 +155,11 @@ const inputValuesToFullObject = <TDef extends BlockLogicBothDefinitions, K exten
 		input[`${tostring(k)}Type`] = value.type;
 		input[`${tostring(k)}Changed`] = changed;
 
-		inputCacheNext[k] = value.value;
-		inputCacheNext[`${tostring(k)}Type`] = value.type;
+		if (inputCacheNext[`${tostring(k)}Tick`] !== ctx.tick) {
+			inputCacheNext[k] = value.value;
+			inputCacheNext[`${tostring(k)}Tick`] = ctx.tick;
+			inputCacheNext[`${tostring(k)}Type`] = value.type;
+		}
 	}
 
 	if (returnUndefinedIfUnchanged && !anyChanged) {
@@ -343,6 +346,11 @@ export abstract class BlockLogic<TDef extends BlockLogicBothDefinitions> extends
 
 		this.calculatingRightNow = false;
 		return value;
+	}
+
+	/** @deprecated Internal use only */
+	setOutputValue(key: string, valueType: PrimitiveKeys, value: BlockLogicTypes.Primitives[PrimitiveKeys]["default"]) {
+		this.output[key].set(valueType, value);
 	}
 
 	protected onTicc(func: (ctx: BlockLogicTickContext) => void): SignalConnection {

@@ -104,5 +104,70 @@ namespace BlockTests {
 			Logger.endScope();
 		}
 	}
+
+	export function testCaching() {
+		/* the situation of (KEY->AND->NOT->AND...)
+		если NOT запускается раньше AND то 
+		1. not берет у and значение
+			1.1. чтобы взять значение, and должен пересчитаться.
+			1.2. оба инпута у and сейчас возвращают true, and устанавливает свой результат на true
+		2. not получает true и выдаёт false
+		and в этом тике уже обновился и не понял что один инпут изменился на false 
+		*/
+
+		{
+			const blocks = BlockTesting.create([
+				{ id: "not", config: { value: BlockTesting.wire(1, "result") } },
+				{
+					id: "and",
+					config: { value1: BlockTesting.wire(2, "result"), value2: BlockTesting.wire(0, "result") },
+				},
+				{ id: "constant", config: { value: BlockTesting.bool(false) } },
+			]);
+
+			const ticker = BlockTesting.runner(...blocks);
+			const [_not, _and, _constant] = blocks;
+
+			BlockAssert.resultSuccessAndEquals(_not, ticker, "result", { value: true }, "NOT1");
+			BlockAssert.resultSuccessAndEquals(_and, ticker, "result", { value: false }, "AND1");
+
+			_constant.setOutputValue("result", "bool", true);
+			ticker.tick();
+			BlockAssert.resultSuccessAndEquals(_not, ticker, "result", { value: false }, "NOT2");
+			BlockAssert.resultSuccessAndEquals(_and, ticker, "result", { value: true }, "AND2");
+
+			ticker.tick();
+			BlockAssert.resultSuccessAndEquals(_not, ticker, "result", { value: true }, "NOT3");
+			BlockAssert.resultSuccessAndEquals(_and, ticker, "result", { value: false }, "AND3");
+		}
+
+		//
+
+		{
+			const blocks = BlockTesting.create([
+				{ id: "not", config: { value: BlockTesting.wire(1, "result") } },
+				{
+					id: "and",
+					config: { value1: BlockTesting.wire(2, "result"), value2: BlockTesting.wire(0, "result") },
+				},
+				{ id: "constant", config: { value: BlockTesting.bool(false) } },
+			]);
+
+			const ticker = BlockTesting.runner(...blocks);
+			const [_not, _and, _constant] = blocks;
+
+			BlockAssert.resultSuccessAndEquals(_and, ticker, "result", { value: false }, "AND11");
+			BlockAssert.resultError(_not, ticker, "result", BlockLogicValueResults.availableLater, "NOT11");
+
+			_constant.setOutputValue("result", "bool", true);
+			ticker.tick();
+			BlockAssert.resultSuccessAndEquals(_and, ticker, "result", { value: false }, "AND12");
+			BlockAssert.resultSuccessAndEquals(_not, ticker, "result", { value: true }, "NOT12");
+
+			ticker.tick();
+			BlockAssert.resultSuccessAndEquals(_and, ticker, "result", { value: false }, "AND13");
+			BlockAssert.resultSuccessAndEquals(_not, ticker, "result", { value: true }, "NOT13");
+		}
+	}
 }
 export const _Tests: UnitTests = { BlockTests };

@@ -83,9 +83,8 @@ if (RunService.IsStudio() && Players.LocalPlayer.Name === "samlovebutter" && (fa
 	}
 }
 if (RunService.IsStudio() && Players.LocalPlayer.Name === "i3ymm") {
-	const testsName = "StringTests";
-	const testName: string | undefined = undefined;
-	("delayBlockZeroImmediateTickBased");
+	const testsName = "BlockTests";
+	const testName: string | undefined = "testCaching";
 
 	const testss = TestFramework.findAllTestScripts().map(TestFramework.loadTestsFromScript);
 	const tests = Objects.fromEntries(
