@@ -44,16 +44,18 @@ const definition = {
 	output: {},
 } satisfies BlockLogicFullBothDefinitions;
 
+interface UpdateData {
+	readonly block: BlockModel;
+	readonly state: boolean;
+	readonly color: Color3 | undefined;
+	readonly brightness: number;
+	readonly range: number;
+}
+
 export type { Logic as LampBlockLogic };
-export class Logic extends InstanceBlockLogic<typeof definition> {
+class Logic extends InstanceBlockLogic<typeof definition> {
 	static readonly events = {
-		update: new AutoC2SRemoteEvent<{
-			readonly block: BlockModel;
-			readonly state: boolean;
-			readonly color: Color3 | undefined;
-			readonly brightness: number;
-			readonly range: number;
-		}>("lamp_update"),
+		update: new AutoC2SRemoteEvent<UpdateData>("lamp_update"),
 	} as const;
 
 	constructor(args: InstanceBlockLogicArgs) {
@@ -65,14 +67,37 @@ export class Logic extends InstanceBlockLogic<typeof definition> {
 			// Send the request only if enabled or enabling
 			if (!enabled && !enabledChanged) return;
 
-			Logic.events.update.send({
+			const data: UpdateData = {
 				block: this.instance,
 				state: enabled,
 				color: color,
 				brightness: brightness * 0.2, // a.k.a. / 100 * 40 and 30% off
 				range: lightRange * 0.6, // a.k.a. / 100 * 60
-			});
+			};
+
+			Logic.update(data);
+			Logic.events.update.send(data);
 		});
+	}
+
+	static update({ block, state, color, brightness, range }: UpdateData) {
+		const part = block.PrimaryPart;
+		const light = part?.WaitForChild("PointLight") as PointLight;
+		if (!part) return;
+		if (!light) return;
+
+		if (state) {
+			const commonColor = color ?? Color3.fromRGB(255, 255, 255);
+			light.Range = range;
+			part.Color = commonColor;
+			light.Color = commonColor;
+			part.Material = Enum.Material.Neon;
+			light.Brightness = brightness;
+			return;
+		}
+		part.Color = Color3.fromRGB(0, 0, 0);
+		part.Material = Enum.Material.SmoothPlastic;
+		light.Brightness = 0;
 	}
 }
 
