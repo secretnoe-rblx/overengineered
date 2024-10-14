@@ -1,7 +1,8 @@
 import { Workspace } from "@rbxts/services";
 import { Interface } from "client/gui/Interface";
 import { Control } from "engine/client/gui/Control";
-import { TransformService } from "engine/shared/component/TransformService";
+import { Transforms } from "engine/shared/component/Transforms";
+import { TransformService2 } from "engine/shared/component/TransformService2";
 import { ObservableValue } from "engine/shared/event/ObservableValue";
 import type { TransformProps } from "engine/shared/component/Transform";
 
@@ -10,42 +11,40 @@ class LoadingImage extends Control {
 		const startanim = () => {
 			if (!this.isEnabled()) return;
 
-			this.transform((transform, instance) =>
-				transform
-					.transform("Rotation", instance.Rotation + 90, {
-						duration: 0.8,
-						style: "Quad",
-						direction: "InOut",
-					})
-					.then()
-					.func(startanim),
-			);
-		};
-
-		this.cancelTransforms();
-		this.transform((transform, instance) =>
-			transform
-				.then()
-				.transform("Rotation", () => instance.Rotation + 270, {
-					duration: 0.3,
+			Transforms.create()
+				.transform(this.instance, "Rotation", this.instance.Rotation + 90, {
+					duration: 0.8,
 					style: "Quad",
-					direction: "Out",
+					direction: "InOut",
 				})
 				.then()
-				.func(startanim),
-		);
+				.func(startanim)
+				.run(this.instance);
+		};
+
+		TransformService2.cancel(this.instance);
+		Transforms.create()
+			.then()
+			.transform(this.instance, "Rotation", () => this.instance.Rotation + 270, {
+				duration: 0.3,
+				style: "Quad",
+				direction: "Out",
+			})
+			.then()
+			.func(startanim)
+			.run(this.instance);
 	}
 	runHideAnimation() {
 		this.disable();
 
-		TransformService.cancel(this.instance);
-		this.transform((transform, instance) =>
-			transform.then().transform("Rotation", () => instance.Rotation - 270, {
+		TransformService2.cancel(this.instance);
+		Transforms.create()
+			.transform(this.instance, "Rotation", () => this.instance.Rotation - 270, {
 				duration: 0.3,
 				style: "Quad",
 				direction: "In",
-			}),
-		);
+			})
+			.run(this.instance);
 	}
 }
 
@@ -67,7 +66,7 @@ class LoadingPopup extends Control<LoadingPopupDefinition> {
 		}
 
 		super.show();
-		this.cancelTransforms();
+		TransformService2.cancel(this.instance);
 
 		this.loadingImage.runShowAnimation();
 		const params: TransformProps = {
@@ -75,7 +74,9 @@ class LoadingPopup extends Control<LoadingPopupDefinition> {
 			style: "Quad",
 			direction: "Out",
 		};
-		this.transform((tr) => tr.moveY(new UDim(0, 80), params));
+		Transforms.create() //
+			.moveY(this.instance, new UDim(0, 80), params)
+			.run(this.instance);
 	}
 	hide(): void {
 		const params: TransformProps = {
@@ -87,13 +88,12 @@ class LoadingPopup extends Control<LoadingPopupDefinition> {
 		task.wait(0.5);
 
 		this.loadingImage.runHideAnimation();
-		this.cancelTransforms();
-		this.transform((tr) =>
-			tr
-				.moveY(new UDim(0, -200), params)
-				.then()
-				.func(() => super.hide()),
-		);
+		TransformService2.cancel(this.instance);
+		Transforms.create()
+			.moveY(this.instance, new UDim(0, -200), params)
+			.then()
+			.func(() => super.hide())
+			.run(this.instance);
 	}
 
 	setText(text: string) {

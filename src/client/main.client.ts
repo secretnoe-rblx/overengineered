@@ -8,7 +8,7 @@ import { LogControl } from "client/gui/static/LogControl";
 import { SandboxGame } from "client/SandboxGame";
 import { ServerRestartController } from "client/ServerRestartController";
 import { InputController } from "engine/client/InputController";
-import { TransformService } from "engine/shared/component/TransformService";
+import { Transforms } from "engine/shared/component/Transforms";
 import { Objects } from "engine/shared/fixes/Objects";
 import { GameHostBuilder } from "engine/shared/GameHostBuilder";
 import { TestFramework } from "engine/shared/TestFramework";
@@ -102,44 +102,44 @@ if (RunService.IsStudio() && Players.LocalPlayer.Name === "i3ymm") {
 //
 
 task.spawn(() => {
-	const d = 0.1;
+	const d = 0.2;
 	const gui = Interface.getPlayerGui<{ test_delete_later: ScreenGui & { Build: GuiObject } }>().test_delete_later
 		.Build;
 	const child = gui.WaitForChild("Redo") as GuiObject;
 	const props: TransformProps = { duration: 0.2 };
 
 	while (true as boolean) {
-		{
-			const [asc, childcopy] = Anim.createScreenForAnimating(child);
-			Anim.UIListLayout.animateRemove(gui, child, props, "hide");
-
-			TransformService.run(childcopy, (tr) =>
-				tr
-					.moveRelative(new UDim2(0, 0, 0, -50), props)
-					.transform("Transparency", 1, props)
+		Transforms.parallel(
+			Transforms.func(() => {
+				const [asc, childcopy] = Anim.createScreenForAnimating(child);
+				return Transforms.create()
+					.moveRelative(childcopy, new UDim2(0, 0, 0, -50), props)
+					.transform(childcopy, "Transparency", 1, props)
 					.then()
-					.func(() => asc.Destroy()),
-			);
-		}
+					.destroy(asc);
+			}),
+			Anim.UIListLayout.animRemove(gui, child, props, "hide"),
+		).run(child);
 
 		task.wait(d);
 
-		{
-			const [asc, childcopy] = Anim.createScreenForAnimating(child);
-			Anim.UIListLayout.animateAdd(gui, child, props, undefined, (tr) => tr.func(() => (child.Visible = true)));
-
-			TransformService.run(childcopy, (tr) =>
-				tr
-					.moveRelative(new UDim2(0, 0, 0, -50))
-					.transform("Transparency", 1)
-					.func(() => (childcopy.Visible = true))
+		Transforms.parallel(
+			Transforms.func(() => {
+				const [asc, childcopy] = Anim.createScreenForAnimating(child);
+				return Transforms.create()
+					.moveRelative(childcopy, new UDim2(0, 0, 0, -50))
+					.transform(childcopy, "Transparency", 1)
+					.setVisible(childcopy, true)
 					.then()
-					.moveRelative(new UDim2(0, 0, 0, 50), props)
-					.transform("Transparency", 0, props)
+					.moveRelative(childcopy, new UDim2(0, 0, 0, 50), props)
+					.transform(childcopy, "Transparency", 0, props)
 					.then()
-					.func(() => asc.Destroy()),
-			);
-		}
+					.destroy(asc);
+			}),
+			Anim.UIListLayout.animAdd(gui, child, props) //
+				.then()
+				.setVisible(child, true),
+		).run(child);
 
 		task.wait(d);
 	}

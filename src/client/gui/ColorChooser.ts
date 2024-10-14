@@ -2,6 +2,7 @@ import { NumberTextBoxControl } from "client/gui/controls/NumberTextBoxControl";
 import { SliderControl } from "client/gui/controls/SliderControl";
 import { TextBoxControl } from "client/gui/controls/TextBoxControl";
 import { Control } from "engine/client/gui/Control";
+import { Transforms } from "engine/shared/component/Transforms";
 import { ArgsSignal } from "engine/shared/event/Signal";
 import { SubmittableValue } from "engine/shared/event/SubmittableValue";
 import { Colors } from "shared/Colors";
@@ -115,7 +116,9 @@ class ColorChooserInputs extends Control<ColorChooserDefinition["Inputs"]> {
 				this._value.submit(Color3.fromHex(hex));
 			} catch {
 				hextext.text.set("#" + getColorFromRgbTextBoxes().ToHex().upper());
-				hextext.transform((tr) => tr.flashColor(Colors.red, "BackgroundColor3"));
+				Transforms.create() //
+					.flashColor(hextext.instance, Colors.red)
+					.run(hextext.instance);
 			}
 		});
 

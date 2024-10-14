@@ -1,9 +1,8 @@
 import { Interface } from "client/gui/Interface";
-import { TransformBuilder2 } from "engine/shared/component/Transform2";
+import { Transforms } from "engine/shared/component/Transforms";
 import { TransformService } from "engine/shared/component/TransformService";
 import { Element } from "engine/shared/Element";
 import type { RunningTransform, TransformProps } from "engine/shared/component/Transform";
-import type { TransformSetup2 } from "engine/shared/component/Transform2";
 import type { TransformSetup } from "engine/shared/component/TransformService";
 
 export namespace Anim {
@@ -115,8 +114,7 @@ export namespace Anim {
 			child: GuiObject,
 			props: TransformProps,
 			childAction: "none" | "hide" | "destroy" | "unparent" = "none",
-			setup?: TransformSetup2,
-		): TransformBuilder2 {
+		): ITransformBuilder {
 			if (child.Parent !== parent) {
 				throw `${child} is not a child of ${parent}`;
 			}
@@ -129,7 +127,7 @@ export namespace Anim {
 				throw `${listLayout}.SortOrder is not ListLayout`;
 			}
 
-			return new TransformBuilder2() //
+			return Transforms.create() //
 				.func(() => {
 					const container = Element.create("Frame", {
 						BackgroundTransparency: 1,
@@ -151,15 +149,46 @@ export namespace Anim {
 							? new UDim2(new UDim().sub(listLayout.Padding), child.Size.Y)
 							: new UDim2(child.Size.X, new UDim().sub(listLayout.Padding));
 
-					return new TransformBuilder2()
+					return Transforms.create() //
 						.transform(container, "Size", target, props)
 						.then()
-						.func(() => {
-							container.Destroy();
-							transforms.delete(child);
-						}, [])
-						.setup(setup);
-				}, []);
+						.destroy(container);
+				});
+		}
+
+		/** Creates an animation of adding the child to an UIListLayout */
+		export function animAdd(
+			parent: GuiObject,
+			child: GuiObject,
+			props: TransformProps,
+			layoutIndex?: number,
+		): ITransformBuilder {
+			const listLayout = parent.FindFirstChildWhichIsA("UIListLayout");
+			if (!listLayout) {
+				throw `${parent} does not have a UIListLayout`;
+			}
+			if (listLayout.SortOrder !== Enum.SortOrder.LayoutOrder) {
+				throw `${listLayout}.SortOrder is not ListLayout`;
+			}
+
+			return Transforms.create().func(() => {
+				const source =
+					listLayout.FillDirection === Enum.FillDirection.Horizontal
+						? new UDim2(new UDim().sub(listLayout.Padding), child.Size.Y)
+						: new UDim2(child.Size.X, new UDim().sub(listLayout.Padding));
+
+				const container = Element.create("Frame", {
+					BackgroundTransparency: 1,
+					LayoutOrder: layoutIndex ?? child.LayoutOrder,
+					Size: source,
+					Parent: parent,
+				});
+
+				return Transforms.create() //
+					.resize(container, child.Size, props)
+					.then()
+					.destroy(container);
+			});
 		}
 	}
 

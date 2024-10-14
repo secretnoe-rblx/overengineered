@@ -3,6 +3,7 @@ import { LoadingController } from "client/controller/LoadingController";
 import { SoundController } from "client/controller/SoundController";
 import { DictionaryControl } from "client/gui/controls/DictionaryControl";
 import { Control } from "engine/client/gui/Control";
+import { Transforms } from "engine/shared/component/Transforms";
 import { TransformService } from "engine/shared/component/TransformService";
 import { Colors } from "shared/Colors";
 import type { ToolBase } from "client/tools/ToolBase";
@@ -133,25 +134,27 @@ export class HotbarControl extends Control<HotbarControlDefinition> {
 	private toolChanged(tool: ToolBase | undefined, prev: ToolBase | undefined) {
 		const duration = tool && prev ? 0.07 : 0.15;
 
-		this.nameLabel.transform((transform) => {
-			if (prev) {
-				transform
-					.moveY(new UDim(0, 0), { duration })
-					.transform("TextTransparency", 1, { duration: duration * 0.8 });
-			}
+		const transform = Transforms.create();
+		if (prev) {
+			transform
+				.moveY(this.nameLabel.instance, new UDim(0, 0), { duration })
+				.transform(this.nameLabel.instance, "TextTransparency", 1, { duration: duration * 0.8 });
+		}
 
-			transform.then().func(() => (this.instance.NameLabel.Text = tool?.getDisplayName() ?? ""));
+		transform //
+			.then()
+			.func(() => (this.instance.NameLabel.Text = tool?.getDisplayName() ?? ""));
 
-			if (tool) {
-				transform
-					.then()
-					.moveY(new UDim(1, 0))
-					.transform("TextTransparency", 1)
-					.moveY(new UDim(0.05, 0), { duration })
-					.transform("TextTransparency", 0, { duration: duration * 0.8 })
-					.then();
-			}
-		});
+		if (tool) {
+			transform
+				.then()
+				.moveY(this.nameLabel.instance, new UDim(1, 0))
+				.transform(this.nameLabel.instance, "TextTransparency", 1)
+				.moveY(this.nameLabel.instance, new UDim(0.05, 0), { duration })
+				.transform(this.nameLabel.instance, "TextTransparency", 0, { duration: duration * 0.8 })
+				.then();
+		}
+		transform.run(this.nameLabel.instance);
 
 		// Play sound
 		SoundController.getSounds().Click.Play();

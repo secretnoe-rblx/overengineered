@@ -3,6 +3,7 @@ import { TextButtonControl } from "client/gui/controls/Button";
 import { DictionaryControl } from "client/gui/controls/DictionaryControl";
 import { Dropdown } from "client/gui/controls/Dropdown";
 import { Control } from "engine/client/gui/Control";
+import { Transforms } from "engine/shared/component/Transforms";
 import { TransformService } from "engine/shared/component/TransformService";
 import { Element } from "engine/shared/Element";
 import { ArgsSignal } from "engine/shared/event/Signal";
@@ -49,13 +50,15 @@ export class WikiCategoriesControl extends Control<WikiCategoriesControlDefiniti
 		);
 		this.list.instance.CanvasPosition = pos;
 
-		child.transform((tr) =>
-			tr.flash(
-				tr.instance.BackgroundColor3.Lerp(Colors.white, 0.2),
+		Transforms.create()
+			.flash(
+				child.instance,
+				child.instance.BackgroundColor3.Lerp(Colors.white, 0.2),
 				"BackgroundColor3",
 				TransformService.commonProps.quadOut02,
-			),
-		);
+			)
+			.run(child.instance);
+
 		this._clicked.Fire(id);
 	}
 }
