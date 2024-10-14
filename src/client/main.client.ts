@@ -102,7 +102,7 @@ if (RunService.IsStudio() && Players.LocalPlayer.Name === "i3ymm") {
 //
 
 task.spawn(() => {
-	const d = 0.2;
+	const d = 0.1;
 	const gui = Interface.getPlayerGui<{ test_delete_later: ScreenGui & { Build: GuiObject } }>().test_delete_later
 		.Build;
 	const child = gui.WaitForChild("Redo") as GuiObject;

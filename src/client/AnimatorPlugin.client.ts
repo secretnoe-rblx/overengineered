@@ -401,9 +401,10 @@ namespace ScriptIO {
 		*/
 	}
 
-	type Saveable = undefined | number | string | UDim2 | UDim | Vector2 | Vector3 | Color3;
+	type Saveable = undefined | number | boolean | string | UDim2 | UDim | Vector2 | Vector3 | Color3;
 	function objectToLuaString(object: Saveable): string {
 		if (object === undefined) return "nil";
+		if (typeIs(object, "boolean")) return tostring(object);
 		if (typeIs(object, "number")) return tostring(object);
 		if (typeIs(object, "string")) return `"${tostring(object)}"`;
 		if (typeIs(object, "UDim")) return `UDim.new(${object.Scale}, ${object.Offset})`;

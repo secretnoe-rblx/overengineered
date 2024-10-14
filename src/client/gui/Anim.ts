@@ -1,7 +1,9 @@
 import { Interface } from "client/gui/Interface";
+import { TransformBuilder2 } from "engine/shared/component/Transform2";
 import { TransformService } from "engine/shared/component/TransformService";
 import { Element } from "engine/shared/Element";
 import type { RunningTransform, TransformProps } from "engine/shared/component/Transform";
+import type { TransformSetup2 } from "engine/shared/component/Transform2";
 import type { TransformSetup } from "engine/shared/component/TransformService";
 
 export namespace Anim {
@@ -47,19 +49,19 @@ export namespace Anim {
 					? new UDim2(new UDim().sub(listLayout.Padding), child.Size.Y)
 					: new UDim2(child.Size.X, new UDim().sub(listLayout.Padding));
 
-			transforms.get(parent)?.finish();
-			transforms.delete(parent);
+			transforms.get(child)?.finish();
+			transforms.delete(child);
 			const transform = TransformService.run(container, (tr, instance) => {
 				tr.resize(target, props)
 					.then()
 					.func(() => {
 						container.Destroy();
-						transforms.delete(parent);
+						transforms.delete(child);
 					});
 				setup?.(tr, instance);
 			});
 
-			transforms.set(parent, transform);
+			transforms.set(child, transform);
 			return transform;
 		}
 
@@ -91,20 +93,73 @@ export namespace Anim {
 				Parent: parent,
 			});
 
-			transforms.get(parent)?.finish();
-			transforms.delete(parent);
+			transforms.get(child)?.finish();
+			transforms.delete(child);
 			const transform = TransformService.run(container, (tr, instance) => {
 				tr.resize(child.Size, props)
 					.then()
 					.func(() => {
 						container.Destroy();
-						transforms.delete(parent);
+						transforms.delete(child);
 					});
 				setup?.(tr, instance);
 			});
 
-			transforms.set(parent, transform);
+			transforms.set(child, transform);
 			return transform;
+		}
+
+		/** Creates an animation of removing the child from an UIListLayout */
+		export function animRemove(
+			parent: GuiObject,
+			child: GuiObject,
+			props: TransformProps,
+			childAction: "none" | "hide" | "destroy" | "unparent" = "none",
+			setup?: TransformSetup2,
+		): TransformBuilder2 {
+			if (child.Parent !== parent) {
+				throw `${child} is not a child of ${parent}`;
+			}
+
+			const listLayout = parent.FindFirstChildWhichIsA("UIListLayout");
+			if (!listLayout) {
+				throw `${parent} does not have a UIListLayout`;
+			}
+			if (listLayout.SortOrder !== Enum.SortOrder.LayoutOrder) {
+				throw `${listLayout}.SortOrder is not ListLayout`;
+			}
+
+			return new TransformBuilder2() //
+				.func(() => {
+					const container = Element.create("Frame", {
+						BackgroundTransparency: 1,
+						LayoutOrder: child.LayoutOrder,
+						Size: child.Size,
+						Parent: parent,
+					});
+
+					if (childAction === "hide") {
+						child.Visible = false;
+					} else if (childAction === "destroy") {
+						child.Destroy();
+					} else if (childAction === "unparent") {
+						child.Parent = undefined;
+					}
+
+					const target =
+						listLayout.FillDirection === Enum.FillDirection.Horizontal
+							? new UDim2(new UDim().sub(listLayout.Padding), child.Size.Y)
+							: new UDim2(child.Size.X, new UDim().sub(listLayout.Padding));
+
+					return new TransformBuilder2()
+						.transform(container, "Size", target, props)
+						.then()
+						.func(() => {
+							container.Destroy();
+							transforms.delete(child);
+						}, [])
+						.setup(setup);
+				}, []);
 		}
 	}
 
