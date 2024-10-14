@@ -279,49 +279,15 @@ export const NewBasicPlaneTutorialDiffs = {
 		configureAllServos: [
 			{
 				uuid: "b11c87ba-291b-44f0-8ce7-8cf0678c0ffc",
-				value: { type: "number", config: 15 },
-				type: "configChanged",
-				key: "speed",
-			},
-			{
-				uuid: "b11c87ba-291b-44f0-8ce7-8cf0678c0ffc",
 				value: {
 					type: "number",
 					controlConfig: {
 						enabled: true,
-						mode: {
-							type: "instant",
-							instant: { mode: "onRelease" },
-							smooth: { speed: 72, mode: "stopOnRelease" },
-						},
-						keys: [
-							{ key: "R", value: 15 },
-							{ key: "F", value: -15 },
-						],
-						startValue: 0,
+						keys: [{ value: 15 }, { value: -15 }],
 					},
-					config: 0,
 				},
 				type: "configChanged",
 				key: "angle",
-			},
-			{
-				uuid: "b11c87ba-291b-44f0-8ce7-8cf0678c0ffc",
-				value: { type: "number", config: 200 },
-				type: "configChanged",
-				key: "max_torque",
-			},
-			{
-				uuid: "b11c87ba-291b-44f0-8ce7-8cf0678c0ffc",
-				value: { type: "number", config: 45 },
-				type: "configChanged",
-				key: "stiffness",
-			},
-			{
-				uuid: "5271ad05-e960-4c45-bf62-52b2a0d5873d",
-				value: { type: "number", config: 15 },
-				type: "configChanged",
-				key: "speed",
 			},
 			{
 				uuid: "5271ad05-e960-4c45-bf62-52b2a0d5873d",
@@ -329,39 +295,11 @@ export const NewBasicPlaneTutorialDiffs = {
 					type: "number",
 					controlConfig: {
 						enabled: true,
-						mode: {
-							type: "instant",
-							instant: { mode: "onRelease" },
-							smooth: { speed: 72, mode: "stopOnRelease" },
-						},
-						keys: [
-							{ key: "R", value: 15 },
-							{ key: "F", value: -15 },
-						],
-						startValue: 0,
+						keys: [{ value: 15 }, { value: -15 }],
 					},
-					config: 0,
 				},
 				type: "configChanged",
 				key: "angle",
-			},
-			{
-				uuid: "5271ad05-e960-4c45-bf62-52b2a0d5873d",
-				value: { type: "number", config: 200 },
-				type: "configChanged",
-				key: "max_torque",
-			},
-			{
-				uuid: "5271ad05-e960-4c45-bf62-52b2a0d5873d",
-				value: { type: "number", config: 45 },
-				type: "configChanged",
-				key: "stiffness",
-			},
-			{
-				uuid: "9a9c54c8-601c-41ec-b755-c5d14db1db37",
-				value: { type: "number", config: 15 },
-				type: "configChanged",
-				key: "speed",
 			},
 			{
 				uuid: "9a9c54c8-601c-41ec-b755-c5d14db1db37",
@@ -369,39 +307,11 @@ export const NewBasicPlaneTutorialDiffs = {
 					type: "number",
 					controlConfig: {
 						enabled: true,
-						mode: {
-							type: "instant",
-							instant: { mode: "onRelease" },
-							smooth: { speed: 72, mode: "stopOnRelease" },
-						},
-						keys: [
-							{ key: "R", value: 15 },
-							{ key: "F", value: -15 },
-						],
-						startValue: 0,
+						keys: [{ value: 15 }, { value: -15 }],
 					},
-					config: 0,
 				},
 				type: "configChanged",
 				key: "angle",
-			},
-			{
-				uuid: "9a9c54c8-601c-41ec-b755-c5d14db1db37",
-				value: { type: "number", config: 200 },
-				type: "configChanged",
-				key: "max_torque",
-			},
-			{
-				uuid: "9a9c54c8-601c-41ec-b755-c5d14db1db37",
-				value: { type: "number", config: 45 },
-				type: "configChanged",
-				key: "stiffness",
-			},
-			{
-				uuid: "826fc8a9-4fb6-4401-8c76-21610e67c637",
-				value: { type: "number", config: 15 },
-				type: "configChanged",
-				key: "speed",
 			},
 			{
 				uuid: "826fc8a9-4fb6-4401-8c76-21610e67c637",
@@ -409,39 +319,11 @@ export const NewBasicPlaneTutorialDiffs = {
 					type: "number",
 					controlConfig: {
 						enabled: true,
-						mode: {
-							type: "instant",
-							instant: { mode: "onRelease" },
-							smooth: { speed: 72, mode: "stopOnRelease" },
-						},
-						keys: [
-							{ key: "R", value: 15 },
-							{ key: "F", value: -15 },
-						],
-						startValue: 0,
+						keys: [{ value: 15 }, { value: -15 }],
 					},
-					config: 0,
 				},
 				type: "configChanged",
 				key: "angle",
-			},
-			{
-				uuid: "826fc8a9-4fb6-4401-8c76-21610e67c637",
-				value: { type: "number", config: 200 },
-				type: "configChanged",
-				key: "max_torque",
-			},
-			{
-				uuid: "826fc8a9-4fb6-4401-8c76-21610e67c637",
-				value: { type: "number", config: 45 },
-				type: "configChanged",
-				key: "stiffness",
-			},
-			{
-				uuid: "f957d4b6-6a1c-407d-a6d1-9dfff2abda1e",
-				value: { type: "number", config: 15 },
-				type: "configChanged",
-				key: "speed",
 			},
 			{
 				uuid: "f957d4b6-6a1c-407d-a6d1-9dfff2abda1e",
@@ -449,39 +331,11 @@ export const NewBasicPlaneTutorialDiffs = {
 					type: "number",
 					controlConfig: {
 						enabled: true,
-						mode: {
-							type: "instant",
-							instant: { mode: "onRelease" },
-							smooth: { speed: 72, mode: "stopOnRelease" },
-						},
-						keys: [
-							{ key: "R", value: 15 },
-							{ key: "F", value: -15 },
-						],
-						startValue: 0,
+						keys: [{ value: 15 }, { value: -15 }],
 					},
-					config: 0,
 				},
 				type: "configChanged",
 				key: "angle",
-			},
-			{
-				uuid: "f957d4b6-6a1c-407d-a6d1-9dfff2abda1e",
-				value: { type: "number", config: 200 },
-				type: "configChanged",
-				key: "max_torque",
-			},
-			{
-				uuid: "f957d4b6-6a1c-407d-a6d1-9dfff2abda1e",
-				value: { type: "number", config: 45 },
-				type: "configChanged",
-				key: "stiffness",
-			},
-			{
-				uuid: "18db45c8-7f7a-4610-97f3-c1af6c8625d6",
-				value: { type: "number", config: 15 },
-				type: "configChanged",
-				key: "speed",
 			},
 			{
 				uuid: "18db45c8-7f7a-4610-97f3-c1af6c8625d6",
@@ -489,33 +343,11 @@ export const NewBasicPlaneTutorialDiffs = {
 					type: "number",
 					controlConfig: {
 						enabled: true,
-						mode: {
-							type: "instant",
-							instant: { mode: "onRelease" },
-							smooth: { speed: 72, mode: "stopOnRelease" },
-						},
-						keys: [
-							{ key: "R", value: 15 },
-							{ key: "F", value: -15 },
-						],
-						startValue: 0,
+						keys: [{ value: 15 }, { value: -15 }],
 					},
-					config: 0,
 				},
 				type: "configChanged",
 				key: "angle",
-			},
-			{
-				uuid: "18db45c8-7f7a-4610-97f3-c1af6c8625d6",
-				value: { type: "number", config: 200 },
-				type: "configChanged",
-				key: "max_torque",
-			},
-			{
-				uuid: "18db45c8-7f7a-4610-97f3-c1af6c8625d6",
-				value: { type: "number", config: 45 },
-				type: "configChanged",
-				key: "stiffness",
 			},
 		],
 		configureRoll: [
@@ -525,18 +357,8 @@ export const NewBasicPlaneTutorialDiffs = {
 					type: "number",
 					controlConfig: {
 						enabled: true,
-						mode: {
-							type: "instant",
-							instant: { mode: "onRelease" },
-							smooth: { speed: 72, mode: "stopOnRelease" },
-						},
-						keys: [
-							{ key: "D", value: 15 },
-							{ key: "A", value: -15 },
-						],
-						startValue: 0,
+						keys: [{ key: "D" }, { key: "A" }],
 					},
-					config: 0,
 				},
 				type: "configChanged",
 				key: "angle",
@@ -547,18 +369,8 @@ export const NewBasicPlaneTutorialDiffs = {
 					type: "number",
 					controlConfig: {
 						enabled: true,
-						mode: {
-							type: "instant",
-							instant: { mode: "onRelease" },
-							smooth: { speed: 72, mode: "stopOnRelease" },
-						},
-						keys: [
-							{ key: "D", value: 15 },
-							{ key: "A", value: -15 },
-						],
-						startValue: 0,
+						keys: [{ key: "D" }, { key: "A" }],
 					},
-					config: 0,
 				},
 				type: "configChanged",
 				key: "angle",
@@ -571,18 +383,8 @@ export const NewBasicPlaneTutorialDiffs = {
 					type: "number",
 					controlConfig: {
 						enabled: true,
-						mode: {
-							type: "instant",
-							instant: { mode: "onRelease" },
-							smooth: { speed: 72, mode: "stopOnRelease" },
-						},
-						keys: [
-							{ key: "W", value: 15 },
-							{ key: "S", value: -15 },
-						],
-						startValue: 0,
+						keys: [{ key: "W" }, { key: "S" }],
 					},
-					config: 0,
 				},
 				type: "configChanged",
 				key: "angle",
@@ -593,18 +395,8 @@ export const NewBasicPlaneTutorialDiffs = {
 					type: "number",
 					controlConfig: {
 						enabled: true,
-						mode: {
-							type: "instant",
-							instant: { mode: "onRelease" },
-							smooth: { speed: 72, mode: "stopOnRelease" },
-						},
-						keys: [
-							{ key: "S", value: 15 },
-							{ key: "W", value: -15 },
-						],
-						startValue: 0,
+						keys: [{ key: "S" }, { key: "W", value: -15 }],
 					},
-					config: 0,
 				},
 				type: "configChanged",
 				key: "angle",
@@ -617,18 +409,8 @@ export const NewBasicPlaneTutorialDiffs = {
 					type: "number",
 					controlConfig: {
 						enabled: true,
-						mode: {
-							type: "instant",
-							instant: { mode: "onRelease" },
-							smooth: { speed: 72, mode: "stopOnRelease" },
-						},
-						keys: [
-							{ key: "A", value: 15 },
-							{ key: "D", value: -15 },
-						],
-						startValue: 0,
+						keys: [{ key: "A" }, { key: "D" }],
 					},
-					config: 0,
 				},
 				type: "configChanged",
 				key: "angle",
@@ -639,18 +421,8 @@ export const NewBasicPlaneTutorialDiffs = {
 					type: "number",
 					controlConfig: {
 						enabled: true,
-						mode: {
-							type: "instant",
-							instant: { mode: "onRelease" },
-							smooth: { speed: 72, mode: "stopOnRelease" },
-						},
-						keys: [
-							{ key: "A", value: 15 },
-							{ key: "D", value: -15 },
-						],
-						startValue: 0,
+						keys: [{ key: "A" }, { key: "D" }],
 					},
-					config: 0,
 				},
 				type: "configChanged",
 				key: "angle",
@@ -663,27 +435,11 @@ export const NewBasicPlaneTutorialDiffs = {
 					type: "number",
 					controlConfig: {
 						enabled: true,
-						mode: {
-							type: "smooth",
-							instant: { mode: "onRelease" },
-							smooth: { speed: 20, mode: "stopOnRelease" },
-						},
-						keys: [
-							{ key: "R", value: 100 },
-							{ key: "F", value: 0 },
-						],
-						startValue: 0,
+						keys: [{ key: "R" }, { key: "F" }],
 					},
-					config: 0,
 				},
 				type: "configChanged",
 				key: "thrust",
-			},
-			{
-				uuid: "b36b920d-6d56-43c5-b63e-12af744b400d",
-				value: { type: "number", config: 100 },
-				type: "configChanged",
-				key: "strength",
 			},
 		],
 	},

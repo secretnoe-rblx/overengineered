@@ -286,6 +286,9 @@ const maths = {
 		displayName: "Negate",
 		description: "Negates the input",
 		modelSource: autoModel("GenericLogicBlockPrefab", "NEG", categories.math),
+		search: {
+			aliases: ["neg"],
+		},
 		logic: logic(
 			{
 				input: {
@@ -754,6 +757,9 @@ const trigonometry = {
 		displayName: "Arctangent",
 		description: "The opposite of the Tangent",
 		modelSource: autoModel("GenericLogicBlockPrefab", "ATAN", categories.trigonometry),
+		search: {
+			aliases: ["ata"],
+		},
 		logic: logic(defs.num1_num, ({ value }) => ({
 			result: { type: "number", value: math.atan(value) },
 		})),
@@ -803,6 +809,10 @@ const trigonometry = {
 		displayName: "Arctangent 2",
 		description: "No way they made a sequel",
 		modelSource: autoModel("DoubleGenericLogicBlockPrefab", "ATAN2", categories.trigonometry),
+		search: {
+			aliases: ["atan 2"],
+			partialAliases: ["atan"],
+		},
 		logic: logic(
 			{
 				inputOrder: ["y", "x"],
@@ -907,6 +917,9 @@ const vec3 = {
 		displayName: "Vector3 Normalize",
 		description: "Returns normalized vector from the given vector",
 		modelSource: autoModel("TripleGenericLogicBlockPrefab", "VEC3 NORM", categories.converterVector),
+		search: {
+			aliases: ["unit"],
+		},
 		logic: logic(
 			{
 				input: {

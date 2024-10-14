@@ -54,10 +54,6 @@ class ServerPlotController extends HostedService {
 
 		this.parent(di.resolveForeignClass(AutoPlotWelder, [this.blocks]));
 
-		this.event.subscribe(Players.PlayerRemoving, (player) => {
-			if (player !== this.player) return;
-			this.destroy();
-		});
 		this.onDestroy(() => {
 			this.plot.ownerId.set(undefined);
 			this.plot.whitelistedPlayers.set([5243461283]);
@@ -127,6 +123,8 @@ export class ServerPlots extends HostedService {
 			},
 			true,
 		);
+
+		this.event.subscribe(Players.PlayerRemoving, (player) => this.tryGetControllerByPlayer(player)?.destroy());
 
 		this.event.subscribe(CustomRemotes.gui.settings.permissions.updateBlacklist.invoked, (player, newBlacklist) => {
 			const plot = this.tryGetControllerByPlayer(player);

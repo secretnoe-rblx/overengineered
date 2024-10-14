@@ -71,6 +71,7 @@ $log("Client loaded.");
 
 //testing
 if (RunService.IsStudio() && Players.LocalPlayer.Name === "samlovebutter" && (false as boolean)) {
+	//&& (false as boolean)
 	while (true as boolean) {
 		BulletProjectile.spawn.send({
 			startPosition: new Vector3(359, -16360, 330),
@@ -79,15 +80,14 @@ if (RunService.IsStudio() && Players.LocalPlayer.Name === "samlovebutter" && (fa
 				20 + (math.random() - 0.5) * 10,
 				-(500 + (math.random() - 0.5) * 10),
 			),
-			baseDamage: 0,
+			baseDamage: 1,
 		});
 		task.wait(0.1);
 	}
 }
 if (RunService.IsStudio() && Players.LocalPlayer.Name === "i3ymm") {
-	const testsName = "StringTests";
-	const testName: string | undefined = undefined;
-	("delayBlockZeroImmediateTickBased");
+	const testsName = "BlockTests";
+	const testName: string | undefined = "testCaching";
 
 	const testss = TestFramework.findAllTestScripts().map(TestFramework.loadTestsFromScript);
 	const tests = Objects.fromEntries(

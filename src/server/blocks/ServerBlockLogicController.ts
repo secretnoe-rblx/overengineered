@@ -1,5 +1,6 @@
 import { HostedService } from "engine/shared/di/HostedService";
 import { BracedShaftServerLogic } from "server/blocks/logic/BracedShaftServerLogic";
+import { CameraBlockServerLogic } from "server/blocks/logic/CameraBlockServerLogic";
 import { DisconnectBlockServerLogic } from "server/blocks/logic/DisconnectBlockServerLogic";
 import { LampServerLogic } from "server/blocks/logic/LampServerLogic";
 import { LEDDisplayServerLogic } from "server/blocks/logic/LEDDisplayServerLogic";
@@ -20,6 +21,7 @@ export class ServerBlockLogicController extends HostedService {
 		container = container.beginScope();
 
 		const serverBlockLogicRegistry: ServerBlockLogicRegistry = {
+			camera: CameraBlockServerLogic,
 			disconnectblock: DisconnectBlockServerLogic,
 			lamp: LampServerLogic,
 			smalllamp: LampServerLogic,

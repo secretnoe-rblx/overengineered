@@ -53,8 +53,8 @@ namespace And {
 		constructor(block: BlockLogicArgs) {
 			super(definition, block);
 
-			const value1cache = this.initializeInputCache("value1");
-			const value2cache = this.initializeInputCache("value2");
+			const value1cache = this.initializeRecalcInputCache("value1");
+			const value2cache = this.initializeRecalcInputCache("value2");
 
 			this.onkRecalcInputs(["value1"], ({ value1 }) => {
 				if (!value1) {
@@ -97,8 +97,8 @@ namespace Or {
 		constructor(block: BlockLogicArgs) {
 			super(definition, block);
 
-			const value1cache = this.initializeInputCache("value1");
-			const value2cache = this.initializeInputCache("value2");
+			const value1cache = this.initializeRecalcInputCache("value1");
+			const value2cache = this.initializeRecalcInputCache("value2");
 
 			this.onkRecalcInputs(["value1"], ({ value1 }) => {
 				if (value1) {
@@ -141,8 +141,8 @@ namespace Nand {
 		constructor(block: BlockLogicArgs) {
 			super(definition, block);
 
-			const value1cache = this.initializeInputCache("value1");
-			const value2cache = this.initializeInputCache("value2");
+			const value1cache = this.initializeRecalcInputCache("value1");
+			const value2cache = this.initializeRecalcInputCache("value2");
 
 			this.onkRecalcInputs(["value1"], ({ value1 }) => {
 				if (!value1) {
@@ -185,8 +185,8 @@ namespace Nor {
 		constructor(block: BlockLogicArgs) {
 			super(definition, block);
 
-			const value1cache = this.initializeInputCache("value1");
-			const value2cache = this.initializeInputCache("value2");
+			const value1cache = this.initializeRecalcInputCache("value1");
+			const value2cache = this.initializeRecalcInputCache("value2");
 
 			this.onkRecalcInputs(["value1"], ({ value1 }) => {
 				if (value1) {
@@ -325,12 +325,13 @@ namespace Mux {
 		constructor(block: BlockLogicArgs) {
 			super(definition, block);
 
-			const valuecache = this.initializeInputCache("value");
-			const truevaluecache = this.initializeInputCache("truevalue");
-			const falsevaluecache = this.initializeInputCache("falsevalue");
+			const valuecache = this.initializeRecalcInputCache("value");
+			const truevaluecache = this.initializeRecalcInputCache("truevalue");
+			const falsevaluecache = this.initializeRecalcInputCache("falsevalue");
 
-			const update = () => {
+			const update = (_: unknown, ctx: { readonly tick: number }) => {
 				const value = valuecache.tryGet();
+				print(ctx.tick, "updating SUS", value, truevaluecache.tryGet(), falsevaluecache.tryGet());
 				if (value === undefined) return;
 
 				if (value) {
@@ -360,6 +361,9 @@ namespace Mux {
 		displayName: "Multiplexer",
 		description: "Outputs values depending on the incoming boolean",
 		modelSource: autoModel("TripleGenericLogicBlockPrefab", "MUX", BlockCreation.Categories.other),
+		search: {
+			aliases: ["mux"],
+		},
 
 		logic: { definition, ctor: Logic },
 	} as const satisfies BlockBuilder;

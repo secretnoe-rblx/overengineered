@@ -188,11 +188,31 @@ export class BlockSelectionControl extends Control<BlockSelectionControlDefiniti
 	readonly pipette;
 	private readonly breadcrumbs;
 
+	private readonly searchCache;
+
 	constructor(
 		template: BlockSelectionControlDefinition,
 		@inject readonly blockList: BlockList,
 	) {
 		super(template);
+
+		const buildSearchCache = () => {
+			const generate = (block: Block) => {
+				const displayNameLower = block.displayName.fullLower();
+				const translatedLower = Localization.translateForPlayer(
+					Players.LocalPlayer,
+					block.displayName,
+				).fullLower();
+
+				return {
+					exact: [block.id, ...(block.search?.aliases ?? []), displayNameLower, translatedLower],
+					fuzzy: [...(block.search?.partialAliases ?? []), displayNameLower, translatedLower],
+				};
+			};
+
+			return asObject(asMap(blockList.blocks).mapToMap((k, v) => $tuple(k, generate(v))));
+		};
+		this.searchCache = buildSearchCache();
 
 		this.categories = Categories.createCategoryTreeFromBlocks(blockList.sorted);
 
@@ -332,19 +352,9 @@ export class BlockSelectionControl extends Control<BlockSelectionControlDefiniti
 		let prev: BlockControl | CategoryControl | undefined;
 
 		const lowerSearch = this.gui.SearchTextBox.Text.fullLower();
-		const blocks =
-			this.gui.SearchTextBox.Text === ""
-				? Categories.getBlocksByCategory(this.blockList.sorted, this.selectedCategory.get())
-				: this.blockList.sorted.filter(
-						(block) =>
-							block.displayName.fullLower().find(lowerSearch)[0] !== undefined ||
-							Localization.translateForPlayer(Players.LocalPlayer, block.displayName)
-								.fullLower()
-								.find(lowerSearch, undefined, true)[0] !== undefined,
-					);
 
-		for (const block of blocks) {
-			if (block.hidden) continue;
+		const processBlock = (block: Block) => {
+			if (block.hidden) return;
 
 			const button = createBlockButton(block, () => {
 				if (this.gui.SearchTextBox.Text !== "") {
@@ -383,6 +393,28 @@ export class BlockSelectionControl extends Control<BlockSelectionControlDefiniti
 			);
 
 			prev = button;
+		};
+
+		if (this.gui.SearchTextBox.Text === "") {
+			for (const block of Categories.getBlocksByCategory(this.blockList.sorted, this.selectedCategory.get())) {
+				processBlock(block);
+			}
+		} else {
+			const similar: Block[] = [];
+
+			for (const block of this.blockList.sorted) {
+				const cache = this.searchCache[block.id];
+
+				if (cache.exact.find((e) => e === lowerSearch) !== undefined) {
+					processBlock(block);
+				} else if (cache.fuzzy.any((f) => f.find(lowerSearch)[0] !== undefined)) {
+					similar.push(block);
+				}
+			}
+
+			for (const block of similar) {
+				processBlock(block);
+			}
 		}
 
 		if (this.gui.SearchTextBox.Text === "") {
