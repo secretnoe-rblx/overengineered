@@ -338,6 +338,7 @@ export class BlockSelectionControl extends Control<BlockSelectionControlDefiniti
 				: this.blockList.sorted.filter(
 						(block) =>
 							block.displayName.fullLower().find(lowerSearch)[0] !== undefined ||
+							block.aliases?.find((alias) => alias.find(lowerSearch)[0] !== undefined) !== undefined ||
 							Localization.translateForPlayer(Players.LocalPlayer, block.displayName)
 								.fullLower()
 								.find(lowerSearch, undefined, true)[0] !== undefined,

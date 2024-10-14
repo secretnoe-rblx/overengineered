@@ -20,6 +20,7 @@ export type BlockBuilder = {
 	readonly id: string;
 	readonly displayName: string;
 	readonly description: string;
+	readonly aliases?: readonly string[];
 	/** Is the block hidden from the block list */
 	readonly hidden?: boolean;
 	readonly logic?: BlockLogicInfo;
