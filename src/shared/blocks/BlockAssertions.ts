@@ -142,8 +142,14 @@ export namespace BlockAssertions {
 	}
 
 	function* checkLowercaseAlias(block: Block) {
-		if (block.aliases?.any((a) => a.fullLower() !== a)) {
-			yield `Block ${block.id} has non-lowercase aliases ${block.aliases.filter((a) => a.fullLower() !== a).join()}`;
+		if (
+			block.search?.aliases?.any((a) => a.fullLower() !== a) ||
+			block.search?.partialAliases?.any((a) => a.fullLower() !== a)
+		) {
+			yield `Block ${block.id} has non-lowercase aliases ${[
+				...(block.search?.aliases?.filter((a) => a.fullLower() !== a) ?? []),
+				...(block.search?.partialAliases?.filter((a) => a.fullLower() !== a) ?? []),
+			].join()}`;
 		}
 	}
 
