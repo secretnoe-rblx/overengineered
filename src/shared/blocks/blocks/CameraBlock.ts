@@ -1,9 +1,11 @@
 import { RunService, Workspace } from "@rbxts/services";
 import { Component } from "engine/shared/component/Component";
 import { Element } from "engine/shared/Element";
+import { AutoC2SRemoteEvent } from "engine/shared/event/C2SRemoteEvent";
 import { Objects } from "engine/shared/fixes/Objects";
 import { InstanceBlockLogic } from "shared/blockLogic/BlockLogic";
 import { BlockCreation } from "shared/blocks/BlockCreation";
+import { Colors } from "shared/Colors";
 import type { BlockLogicFullBothDefinitions, InstanceBlockLogicArgs } from "shared/blockLogic/BlockLogic";
 import type { BlockBuilder } from "shared/blocks/Block";
 
@@ -41,6 +43,10 @@ const enabledCameras = new Set<Logic>();
 
 export type { Logic as CameraBlockLogic };
 class Logic extends InstanceBlockLogic<typeof definition> {
+	static readonly events = {
+		update: new AutoC2SRemoteEvent<{ readonly block: BlockModel; readonly enabled: boolean }>("b_camera_update"),
+	} as const;
+
 	constructor(block: InstanceBlockLogicArgs) {
 		super(definition, block);
 
@@ -75,12 +81,22 @@ class Logic extends InstanceBlockLogic<typeof definition> {
 					(Objects.firstKey(enabledCameras)?.instance.FindFirstChild("Camera") as Camera | undefined) ??
 					defaultCamera;
 			}
+
+			Logic.events.update.send({ block: this.instance, enabled });
+			Logic.update(this.instance, enabled);
 		});
 
 		this.onDisable(() => {
 			enabledCameras.delete(this);
 			Workspace.CurrentCamera = defaultCamera;
 		});
+	}
+
+	static update(block: BlockModel, enabled: boolean) {
+		const led = block.FindFirstChild("LED") as BasePart | undefined;
+		if (!led) return;
+
+		led.Color = enabled ? Colors.green : Colors.red;
 	}
 }
 
