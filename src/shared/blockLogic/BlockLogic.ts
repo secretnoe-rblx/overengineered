@@ -217,14 +217,20 @@ export abstract class BlockLogic<TDef extends BlockLogicBothDefinitions> extends
 		}
 	}
 
-	protected initializeInputCache<K extends keyof TDef["input"]>(key: K) {
+	private _initializeInputCache<K extends keyof TDef["input"]>(
+		key: K,
+		initFunc: (
+			keys: readonly K[],
+			func: (inputs: AllInputKeysToObject<TDef["input"], K>, ctx: BlockLogicTickContext) => void,
+		) => SignalConnection,
+	) {
 		type ttypes = keyof TDef["input"][K]["types"] & PrimitiveKeys;
 		type tvalue = Primitives[ttypes]["default"];
 
 		let value: unknown;
 		let valueType: unknown;
 
-		this.onk([key], (ctx) => {
+		initFunc([key], (ctx) => {
 			value = ctx[key];
 			valueType = ctx[`${tostring(key)}Type` as never];
 		});
@@ -235,6 +241,14 @@ export abstract class BlockLogic<TDef extends BlockLogicBothDefinitions> extends
 			getType: () => valueType as ttypes,
 			tryGetType: () => valueType as ttypes | undefined,
 		};
+	}
+	/** Initializes an object that stores and auto-updates a single input. **Might be processed before recalc, do not use in blocks where this.on\*Recalc\*() is used.** */
+	protected initializeInputCache<K extends keyof TDef["input"]>(key: K) {
+		return this._initializeInputCache(key, this.onk.bind(this));
+	}
+	/** Initializes an object that stores and auto-updates a single input. **Processed only on recalc, do not use in blocks without any outputs.** */
+	protected initializeRecalcInputCache<K extends keyof TDef["input"]>(key: K) {
+		return this._initializeInputCache(key, this.onkRecalcInputs.bind(this));
 	}
 
 	protected subscribeOnDestroyed(instance: Instance, func: () => void) {
