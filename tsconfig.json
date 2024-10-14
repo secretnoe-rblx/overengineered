@@ -28,6 +28,7 @@
 		]
 	},
 	"exclude": [
-		"src/engine/transformer"
+		"src/engine/transformer",
+		"dev"
 	]
 }
