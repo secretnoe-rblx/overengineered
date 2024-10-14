@@ -10,6 +10,12 @@ export type BlockModelSource = {
 	readonly model: (self: BlockBuilder) => BlockModel;
 	readonly category: (self: BlockBuilder, model: BlockModel) => BlockCategoryPath;
 };
+export type BlockSearchInfo = {
+	/** Aliases that are not checked for sub-string */
+	readonly aliases?: readonly string[];
+	/** Aliases that are checked for sub-string */
+	readonly partialAliases?: readonly string[];
+};
 
 export type BlockMarkerPositions = {
 	readonly [name in string]?: Vector3;
@@ -20,7 +26,6 @@ export type BlockBuilder = {
 	readonly id: string;
 	readonly displayName: string;
 	readonly description: string;
-	readonly aliases?: readonly string[];
 	/** Is the block hidden from the block list */
 	readonly hidden?: boolean;
 	readonly logic?: BlockLogicInfo;
@@ -30,6 +35,8 @@ export type BlockBuilder = {
 		readonly behaviour: BlockMirrorBehaviour;
 		readonly replacementId?: string;
 	};
+
+	readonly search?: BlockSearchInfo;
 
 	/** @server */
 	readonly modelSource: BlockModelSource;

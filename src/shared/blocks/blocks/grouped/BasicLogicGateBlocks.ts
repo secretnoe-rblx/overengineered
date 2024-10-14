@@ -361,7 +361,9 @@ namespace Mux {
 		displayName: "Multiplexer",
 		description: "Outputs values depending on the incoming boolean",
 		modelSource: autoModel("TripleGenericLogicBlockPrefab", "MUX", BlockCreation.Categories.other),
-		aliases: ["mux"],
+		search: {
+			aliases: ["mux"],
+		},
 
 		logic: { definition, ctor: Logic },
 	} as const satisfies BlockBuilder;
