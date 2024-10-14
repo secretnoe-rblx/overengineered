@@ -757,6 +757,9 @@ const trigonometry = {
 		displayName: "Arctangent",
 		description: "The opposite of the Tangent",
 		modelSource: autoModel("GenericLogicBlockPrefab", "ATAN", categories.trigonometry),
+		search: {
+			aliases: ["ata"],
+		},
 		logic: logic(defs.num1_num, ({ value }) => ({
 			result: { type: "number", value: math.atan(value) },
 		})),
