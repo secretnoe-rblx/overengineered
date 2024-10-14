@@ -245,6 +245,9 @@ export const RCSEngineBlock = {
 	mirror: {
 		behaviour: "offset180",
 	},
+	search: {
+		aliases: ["rcs"],
+	},
 
 	logic: { definition, ctor: Logic },
 } as const satisfies BlockBuilder;
