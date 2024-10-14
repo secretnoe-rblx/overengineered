@@ -107,4 +107,7 @@ export const CameraBlock = {
 	description: "Does camera things",
 
 	logic: { definition, ctor: Logic },
+	mirror: {
+		behaviour: "offset180",
+	},
 } as const satisfies BlockBuilder;
