@@ -78,6 +78,7 @@ class Logic extends InstanceBlockLogic<typeof definition> {
 	constructor(block: InstanceBlockLogicArgs) {
 		super(definition, block);
 
+		const cachedResult: Vector3 = Vector3.zero;
 		let minDistance = 0;
 		const originalView = this.instance.FindFirstChild("RadarView");
 		const view = originalView?.Clone();
@@ -111,22 +112,10 @@ class Logic extends InstanceBlockLogic<typeof definition> {
 
 		this.onAlwaysInputs(({ minimalDistance }) => (minDistance = minimalDistance));
 
-		this.onTicc(() => {
-			if (this.closestDetectedPart?.Parent === undefined || this.triggerDistanceListUpdate) {
-				this.triggerDistanceListUpdate = false;
-				this.closestDetectedPart = this.findClosestPart(minDistance);
-			}
-
-			this.output.distance.set(
-				"vector3",
-				this.closestDetectedPart ? this.getDistanceTo(this.closestDetectedPart) : Vector3.zero,
-			);
-		});
-
 		this.event.subscribe(view.Touched, (part) => {
 			if (part.HasTag("RADARVIEW")) return;
 			if (!minDistance) return;
-			if (this.getDistanceTo(part).Magnitude < minDistance) return;
+			//if (this.getDistanceTo(part).Magnitude < minDistance) return;
 
 			this.allTouchedBlocks.add(part);
 			if (this.closestDetectedPart === undefined) {
@@ -143,6 +132,24 @@ class Logic extends InstanceBlockLogic<typeof definition> {
 		});
 
 		this.event.subscribe(RunService.Heartbeat, () => {
+			/*
+			if (this.closestDetectedPart?.Parent === undefined || this.triggerDistanceListUpdate) {
+				this.triggerDistanceListUpdate = false;
+				this.closestDetectedPart = this.findClosestPart(minDistance);
+			}
+				this.output.distance.set(
+				"vector3",
+				this.closestDetectedPart ? this.getDistanceTo(this.closestDetectedPart) : Vector3.zero,
+			);
+			*/
+
+			this.closestDetectedPart = this.findClosestPart(minDistance);
+
+			if (this.closestDetectedPart) {
+				const d = this.getDistanceTo(this.closestDetectedPart);
+				this.output.distance.set("vector3", d);
+			} else this.output.distance.set("vector3", Vector3.zero);
+
 			view.AssemblyLinearVelocity = Vector3.zero;
 			view.AssemblyAngularVelocity = Vector3.zero;
 			view.PivotTo(this.instance.PrimaryPart!.CFrame);
@@ -179,12 +186,13 @@ class Logic extends InstanceBlockLogic<typeof definition> {
 		for (const bp of this.allTouchedBlocks) {
 			const d = this.getDistanceTo(bp).Magnitude;
 
+			if (d < minDist) continue;
 			if (smallestDistance === undefined) {
 				[smallestDistance, closestPart] = [d, bp];
 				continue;
 			}
 
-			if (d > smallestDistance || d < minDist) continue;
+			if (d > smallestDistance) continue;
 			[smallestDistance, closestPart] = [d, bp];
 		}
 		return closestPart;
