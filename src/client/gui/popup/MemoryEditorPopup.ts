@@ -7,7 +7,7 @@ import { ConfirmPopup } from "client/gui/popup/ConfirmPopup";
 import { TextPopup } from "client/gui/popup/TextPopup";
 import { LogControl } from "client/gui/static/LogControl";
 import { Control } from "engine/client/gui/Control";
-import { TransformService } from "engine/shared/component/TransformService";
+import { OldTransformService } from "engine/shared/component/OldTransformService";
 import { Colors } from "shared/Colors";
 import { VectorUtils } from "shared/utils/VectorUtils";
 
@@ -330,7 +330,7 @@ export class MemoryEditorPopup extends Popup<MemoryEditorPopupDefinition> {
 
 	show() {
 		super.show();
-		TransformService.run(this.instance, (transform) => transform.slideIn("top", 50, { duration: 0.2 }));
+		OldTransformService.run(this.instance, (transform) => transform.slideIn("top", 50, { duration: 0.2 }));
 	}
 
 	getScale() {

@@ -2,7 +2,7 @@ import { Players, RunService } from "@rbxts/services";
 import { ButtonControl } from "client/gui/controls/Button";
 import { DictionaryControl } from "client/gui/controls/DictionaryControl";
 import { Control } from "engine/client/gui/Control";
-import { TransformService } from "engine/shared/component/TransformService";
+import { OldTransformService } from "engine/shared/component/OldTransformService";
 import { ArgsSignal } from "engine/shared/event/Signal";
 import { GameDefinitions } from "shared/data/GameDefinitions";
 
@@ -94,7 +94,7 @@ export class PlayerSelectorColumnControl extends Control<PlayerSelectorColumnCon
 
 		if (!this.addedPlayers.has(player.UserId)) {
 			this.leftControl.keyedChildren.add(player, control);
-			TransformService.run(control.instance.TextButton, (tr, instance) =>
+			OldTransformService.run(control.instance.TextButton, (tr, instance) =>
 				tr
 					.func(() => (instance.Visible = false))
 					.transform("BackgroundTransparency", 1)
@@ -102,8 +102,8 @@ export class PlayerSelectorColumnControl extends Control<PlayerSelectorColumnCon
 					.wait(this.leftControl.keyedChildren.getAll().size() * 0.05)
 					.then()
 					.func(() => (instance.Visible = true))
-					.transform("BackgroundTransparency", 0, TransformService.commonProps.quadOut02)
-					.moveRelative(new UDim2(0, 50, 0, 0), TransformService.commonProps.quadOut02)
+					.transform("BackgroundTransparency", 0, OldTransformService.commonProps.quadOut02)
+					.moveRelative(new UDim2(0, 50, 0, 0), OldTransformService.commonProps.quadOut02)
 					.then()
 					.func(() => {
 						control.clicked.Connect(() => {
@@ -116,7 +116,7 @@ export class PlayerSelectorColumnControl extends Control<PlayerSelectorColumnCon
 			);
 		} else {
 			this.rightControl.keyedChildren.add(player, control);
-			TransformService.run(control.instance.TextButton, (tr, instance) =>
+			OldTransformService.run(control.instance.TextButton, (tr, instance) =>
 				tr
 					.func(() => (instance.Visible = false))
 					.transform("BackgroundTransparency", 1)
@@ -124,8 +124,8 @@ export class PlayerSelectorColumnControl extends Control<PlayerSelectorColumnCon
 					.wait(this.rightControl.keyedChildren.getAll().size() * 0.05)
 					.then()
 					.func(() => (instance.Visible = true))
-					.transform("BackgroundTransparency", 0, TransformService.commonProps.quadOut02)
-					.moveRelative(new UDim2(0, -50, 0, 0), TransformService.commonProps.quadOut02)
+					.transform("BackgroundTransparency", 0, OldTransformService.commonProps.quadOut02)
+					.moveRelative(new UDim2(0, -50, 0, 0), OldTransformService.commonProps.quadOut02)
 					.then()
 					.func(() => {
 						control.clicked.Connect(() => {
@@ -146,36 +146,36 @@ export class PlayerSelectorColumnControl extends Control<PlayerSelectorColumnCon
 		control.instance.Interactable = false;
 
 		if (this.leftControl.keyedChildren.get(player)) {
-			TransformService.run(control.instance.TextButton.TitleLabel, (tr) =>
-				tr.transform("TextTransparency", 1, TransformService.commonProps.quadOut02),
+			OldTransformService.run(control.instance.TextButton.TitleLabel, (tr) =>
+				tr.transform("TextTransparency", 1, OldTransformService.commonProps.quadOut02),
 			);
-			TransformService.run(control.instance.TextButton.UsernameLabel, (tr) =>
-				tr.transform("TextTransparency", 1, TransformService.commonProps.quadOut02),
+			OldTransformService.run(control.instance.TextButton.UsernameLabel, (tr) =>
+				tr.transform("TextTransparency", 1, OldTransformService.commonProps.quadOut02),
 			);
-			TransformService.run(control.instance.TextButton.ImageLabel, (tr) =>
-				tr.transform("ImageTransparency", 1, TransformService.commonProps.quadOut02),
+			OldTransformService.run(control.instance.TextButton.ImageLabel, (tr) =>
+				tr.transform("ImageTransparency", 1, OldTransformService.commonProps.quadOut02),
 			);
-			TransformService.run(control.instance.TextButton, (tr) =>
+			OldTransformService.run(control.instance.TextButton, (tr) =>
 				tr
-					.moveRelative(new UDim2(0, -50, 0, 0), TransformService.commonProps.quadOut02)
-					.transform("BackgroundTransparency", 1, TransformService.commonProps.quadOut02)
+					.moveRelative(new UDim2(0, -50, 0, 0), OldTransformService.commonProps.quadOut02)
+					.transform("BackgroundTransparency", 1, OldTransformService.commonProps.quadOut02)
 					.then()
 					.func(() => control.destroy()),
 			);
 		} else {
-			TransformService.run(control.instance.TextButton.TitleLabel, (tr) =>
-				tr.transform("TextTransparency", 1, TransformService.commonProps.quadOut02),
+			OldTransformService.run(control.instance.TextButton.TitleLabel, (tr) =>
+				tr.transform("TextTransparency", 1, OldTransformService.commonProps.quadOut02),
 			);
-			TransformService.run(control.instance.TextButton.UsernameLabel, (tr) =>
-				tr.transform("TextTransparency", 1, TransformService.commonProps.quadOut02),
+			OldTransformService.run(control.instance.TextButton.UsernameLabel, (tr) =>
+				tr.transform("TextTransparency", 1, OldTransformService.commonProps.quadOut02),
 			);
-			TransformService.run(control.instance.TextButton.ImageLabel, (tr) =>
-				tr.transform("ImageTransparency", 1, TransformService.commonProps.quadOut02),
+			OldTransformService.run(control.instance.TextButton.ImageLabel, (tr) =>
+				tr.transform("ImageTransparency", 1, OldTransformService.commonProps.quadOut02),
 			);
-			TransformService.run(control.instance.TextButton, (tr) =>
+			OldTransformService.run(control.instance.TextButton, (tr) =>
 				tr
-					.moveRelative(new UDim2(0, 50, 0, 0), TransformService.commonProps.quadOut02)
-					.transform("BackgroundTransparency", 1, TransformService.commonProps.quadOut02)
+					.moveRelative(new UDim2(0, 50, 0, 0), OldTransformService.commonProps.quadOut02)
+					.transform("BackgroundTransparency", 1, OldTransformService.commonProps.quadOut02)
 					.then()
 					.func(() => control.destroy()),
 			);

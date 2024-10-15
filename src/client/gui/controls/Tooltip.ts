@@ -3,7 +3,7 @@ import { AutoUIScaledControl } from "client/gui/AutoUIScaledControl";
 import { Interface } from "client/gui/Interface";
 import { Control } from "engine/client/gui/Control";
 import { InstanceComponent } from "engine/shared/component/InstanceComponent";
-import { TransformService } from "engine/shared/component/TransformService";
+import { OldTransformService } from "engine/shared/component/OldTransformService";
 import { HostedService } from "engine/shared/di/HostedService";
 import { EventHandler } from "engine/shared/event/EventHandler";
 
@@ -15,17 +15,17 @@ class TooltipControl extends Control<TooltipDefinition> {
 		this.show();
 
 		this.instance.TextLabel.Text = "";
-		TransformService.cancel(this.instance.TextLabel);
-		TransformService.run(this.instance.TextLabel, (tr) =>
-			tr.setText(text, "Text", TransformService.commonProps.quadOut02),
+		OldTransformService.cancel(this.instance.TextLabel);
+		OldTransformService.run(this.instance.TextLabel, (tr) =>
+			tr.setText(text, "Text", OldTransformService.commonProps.quadOut02),
 		);
 	}
 
 	hideTooltip() {
-		TransformService.cancel(this.instance.TextLabel);
-		TransformService.run(this.instance.TextLabel, (tr) =>
+		OldTransformService.cancel(this.instance.TextLabel);
+		OldTransformService.run(this.instance.TextLabel, (tr) =>
 			tr
-				.setText("", "Text", TransformService.commonProps.quadOut02)
+				.setText("", "Text", OldTransformService.commonProps.quadOut02)
 				.then()
 				.func(() => this.hide()),
 		);
@@ -68,10 +68,10 @@ class TooltipController extends HostedService {
 		this.event.subscribe(RunService.Heartbeat, () => {
 			if (!this.tooltip.isVisible()) return;
 
-			TransformService.cancel(this.tooltip.instance);
-			TransformService.run(this.tooltip.instance, (tr) =>
+			OldTransformService.cancel(this.tooltip.instance);
+			OldTransformService.run(this.tooltip.instance, (tr) =>
 				tr.move(getMousePosition(), {
-					...TransformService.commonProps.quadOut02,
+					...OldTransformService.commonProps.quadOut02,
 					duration: 0.1,
 				}),
 			);

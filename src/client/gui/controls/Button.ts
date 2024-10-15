@@ -27,12 +27,12 @@ export class ButtonControl<T extends ButtonDefinition = ButtonDefinition> extend
 		}
 
 		this.visibilityOverlay.value.subscribe(({ transparency }) => {
-			TransformService.run(gui as GuiObject, (tr) => {
+			TransformService.run(gui, (tr) => {
 				if (gui.Transparency === 1 && transparency !== 1) {
 					tr.func(() => (this.gui.Visible = true)).then();
 				}
 
-				tr.transform("Transparency", transparency, TransformService.commonProps.quadOut02);
+				tr.transform(gui as GuiObject, "Transparency", transparency, TransformService.commonProps.quadOut02);
 
 				if (transparency === 1) {
 					tr.then().func(() => (this.gui.Visible = false));

@@ -3,7 +3,7 @@ import { Interface } from "client/gui/Interface";
 import { ClientInstanceComponent } from "engine/client/component/ClientInstanceComponent";
 import { Control } from "engine/client/gui/Control";
 import { InputController } from "engine/client/InputController";
-import { TransformService } from "engine/shared/component/TransformService";
+import { OldTransformService } from "engine/shared/component/OldTransformService";
 import { Element } from "engine/shared/Element";
 import type { InstanceComponent } from "engine/shared/component/InstanceComponent";
 
@@ -127,11 +127,11 @@ export class TooltipsHolder extends ClientInstanceComponent<
 		}
 
 		if (this.isEnabled()) {
-			TransformService.run(button, (tr) =>
+			OldTransformService.run(button, (tr) =>
 				tr
 					.transform("Size", new UDim2(1, 0, 0, 0))
 					.then()
-					.transform("Size", new UDim2(1, 0, 0, 50), TransformService.commonProps.quadOut02),
+					.transform("Size", new UDim2(1, 0, 0, 50), OldTransformService.commonProps.quadOut02),
 			);
 		} else {
 			button.Visible = false;
@@ -141,8 +141,8 @@ export class TooltipsHolder extends ClientInstanceComponent<
 	}
 
 	private destroyTooltip(tooltip: GuiObject) {
-		TransformService.run(tooltip, (tr) => {
-			tr.transform("Size", new UDim2(1, 0, 0, 0), TransformService.commonProps.quadOut02)
+		OldTransformService.run(tooltip, (tr) => {
+			tr.transform("Size", new UDim2(1, 0, 0, 0), OldTransformService.commonProps.quadOut02)
 				.then()
 				.func(() => tooltip.Destroy());
 		});

@@ -5,7 +5,7 @@ import { Interface } from "client/gui/Interface";
 import { Popup } from "client/gui/Popup";
 import { ConfirmPopup } from "client/gui/popup/ConfirmPopup";
 import { Control } from "engine/client/gui/Control";
-import { TransformService } from "engine/shared/component/TransformService";
+import { OldTransformService } from "engine/shared/component/OldTransformService";
 import { ObservableValue } from "engine/shared/event/ObservableValue";
 import { Signal } from "engine/shared/event/Signal";
 import { GameDefinitions } from "shared/data/GameDefinitions";
@@ -137,7 +137,7 @@ class SaveItem extends Control<SlotRecordDefinition> {
 		this.gui.Content.BadgeTextLabel.Text = wasSelected ? "CURRENT" : from.upper();
 
 		this.setOpened(false);
-		TransformService.finish(this.instance);
+		OldTransformService.finish(this.instance);
 
 		this.add(
 			new ButtonControl(this.gui.Content.SlotButton, () => {
@@ -147,9 +147,9 @@ class SaveItem extends Control<SlotRecordDefinition> {
 		);
 	}
 
-	private readonly heightStateMachine = TransformService.boolStateMachine(
+	private readonly heightStateMachine = OldTransformService.boolStateMachine(
 		this.instance,
-		TransformService.commonProps.quadOut02,
+		OldTransformService.commonProps.quadOut02,
 		{ Size: this.instance.Size },
 		{ Size: this.instance.Size.sub(new UDim2(new UDim(), this.instance.Deep.Size.Y)) },
 	);
@@ -282,6 +282,6 @@ export class SavePopup extends Popup<SlotsPopupDefinition> {
 
 	show() {
 		super.show();
-		TransformService.run(this.instance, (transform) => transform.slideIn("top", 50, { duration: 0.2 }));
+		OldTransformService.run(this.instance, (transform) => transform.slideIn("top", 50, { duration: 0.2 }));
 	}
 }

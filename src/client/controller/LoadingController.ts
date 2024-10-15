@@ -2,7 +2,7 @@ import { Workspace } from "@rbxts/services";
 import { Interface } from "client/gui/Interface";
 import { Control } from "engine/client/gui/Control";
 import { Transforms } from "engine/shared/component/Transforms";
-import { TransformService2 } from "engine/shared/component/TransformService2";
+import { TransformService } from "engine/shared/component/TransformService";
 import { ObservableValue } from "engine/shared/event/ObservableValue";
 import type { TransformProps } from "engine/shared/component/Transform";
 
@@ -22,7 +22,7 @@ class LoadingImage extends Control {
 				.run(this.instance);
 		};
 
-		TransformService2.cancel(this.instance);
+		TransformService.cancel(this.instance);
 		Transforms.create()
 			.then()
 			.transform(this.instance, "Rotation", () => this.instance.Rotation + 270, {
@@ -37,7 +37,7 @@ class LoadingImage extends Control {
 	runHideAnimation() {
 		this.disable();
 
-		TransformService2.cancel(this.instance);
+		TransformService.cancel(this.instance);
 		Transforms.create()
 			.transform(this.instance, "Rotation", () => this.instance.Rotation - 270, {
 				duration: 0.3,
@@ -66,7 +66,7 @@ class LoadingPopup extends Control<LoadingPopupDefinition> {
 		}
 
 		super.show();
-		TransformService2.cancel(this.instance);
+		TransformService.cancel(this.instance);
 
 		this.loadingImage.runShowAnimation();
 		const params: TransformProps = {
@@ -88,7 +88,7 @@ class LoadingPopup extends Control<LoadingPopupDefinition> {
 		task.wait(0.5);
 
 		this.loadingImage.runHideAnimation();
-		TransformService2.cancel(this.instance);
+		TransformService.cancel(this.instance);
 		Transforms.create()
 			.moveY(this.instance, new UDim(0, -200), params)
 			.then()

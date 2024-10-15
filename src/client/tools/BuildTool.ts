@@ -21,7 +21,7 @@ import { Component } from "engine/shared/component/Component";
 import { ComponentChild } from "engine/shared/component/ComponentChild";
 import { InstanceComponent } from "engine/shared/component/InstanceComponent";
 import { ObjectOverlayStorage } from "engine/shared/component/ObjectOverlayStorage";
-import { TransformService } from "engine/shared/component/TransformService";
+import { OldTransformService } from "engine/shared/component/OldTransformService";
 import { Element } from "engine/shared/Element";
 import { ObservableValue } from "engine/shared/event/ObservableValue";
 import { AABB } from "engine/shared/fixes/AABB";
@@ -175,15 +175,15 @@ namespace Scene {
 						this.gui.DescriptionLabel.Text = "";
 					}
 
-					TransformService.run(this.gui, (tr) =>
+					OldTransformService.run(this.gui, (tr) =>
 						tr
 							.moveRelative(new UDim2(0, 0, 0, -10), {
-								...TransformService.commonProps.quadOut02,
+								...OldTransformService.commonProps.quadOut02,
 								duration: 0.1,
 							})
 							.then()
 							.moveRelative(new UDim2(0, 0, 0, 10), {
-								...TransformService.commonProps.quadOut02,
+								...OldTransformService.commonProps.quadOut02,
 								duration: 0.1,
 							}),
 					);
@@ -192,19 +192,19 @@ namespace Scene {
 			);
 		}
 
-		private readonly visibilityStateMachine = TransformService.multi(
-			TransformService.boolStateMachine(
+		private readonly visibilityStateMachine = OldTransformService.multi(
+			OldTransformService.boolStateMachine(
 				this.gui.NameLabel,
-				TransformService.commonProps.quadOut02,
+				OldTransformService.commonProps.quadOut02,
 				{ AnchorPoint: this.gui.NameLabel.AnchorPoint, Position: this.gui.NameLabel.Position },
 				{
 					AnchorPoint: new Vector2(1, this.gui.NameLabel.AnchorPoint.Y),
 					Position: new UDim2(new UDim(), this.gui.NameLabel.Position.Y),
 				},
 			),
-			TransformService.boolStateMachine(
+			OldTransformService.boolStateMachine(
 				this.gui.DescriptionLabel,
-				TransformService.commonProps.quadOut02,
+				OldTransformService.commonProps.quadOut02,
 				{
 					AnchorPoint: this.gui.DescriptionLabel.AnchorPoint,
 					Position: this.gui.DescriptionLabel.Position,
@@ -215,9 +215,9 @@ namespace Scene {
 				},
 				(tr) => tr.wait(0.05).then(),
 			),
-			TransformService.boolStateMachine(
+			OldTransformService.boolStateMachine(
 				this.gui.ViewportFrame,
-				TransformService.commonProps.quadOut02,
+				OldTransformService.commonProps.quadOut02,
 				{
 					AnchorPoint: this.gui.ViewportFrame.AnchorPoint,
 					Position: this.gui.ViewportFrame.Position,
@@ -247,9 +247,9 @@ namespace Scene {
 		constructor(gui: TouchButtonsDefinition, selectedBlock: ReadonlyObservableValue<Block | undefined>) {
 			super(gui);
 
-			const visibilityState = TransformService.boolStateMachine(
+			const visibilityState = OldTransformService.boolStateMachine(
 				this.gui,
-				TransformService.commonProps.quadOut02,
+				OldTransformService.commonProps.quadOut02,
 				{ AnchorPoint: this.gui.AnchorPoint, Position: this.gui.Position },
 				{
 					AnchorPoint: new Vector2(0, this.gui.AnchorPoint.Y),
@@ -267,7 +267,7 @@ namespace Scene {
 
 			this.event.onPrepare(() => {
 				this.visibilityOverlay.get(-1).visible = false;
-				TransformService.finish(this.gui);
+				OldTransformService.finish(this.gui);
 
 				updateTouchControls();
 			});
@@ -418,19 +418,19 @@ namespace Scene {
 			);
 		}
 
-		private readonly visibilityStateMachine = TransformService.multi(
-			TransformService.boolStateMachine(
+		private readonly visibilityStateMachine = OldTransformService.multi(
+			OldTransformService.boolStateMachine(
 				this.gui.Inventory,
-				TransformService.commonProps.quadOut02,
+				OldTransformService.commonProps.quadOut02,
 				{ AnchorPoint: this.gui.Inventory.AnchorPoint, Position: this.gui.Inventory.Position },
 				{
 					AnchorPoint: new Vector2(1, this.gui.Inventory.AnchorPoint.Y),
 					Position: new UDim2(new UDim(), this.gui.Inventory.Position.Y),
 				},
 			),
-			TransformService.boolStateMachine(
+			OldTransformService.boolStateMachine(
 				this.gui.ActionBar,
-				TransformService.commonProps.quadOut02,
+				OldTransformService.commonProps.quadOut02,
 				{ AnchorPoint: this.gui.ActionBar.AnchorPoint },
 				{ AnchorPoint: new Vector2(0.5, 1) },
 				(tr, enabled) => (enabled ? tr.func(() => super.setInstanceVisibilityFunction(true)) : 0),

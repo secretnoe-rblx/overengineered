@@ -3,6 +3,7 @@ import { LoadingController } from "client/controller/LoadingController";
 import { SoundController } from "client/controller/SoundController";
 import { DictionaryControl } from "client/gui/controls/DictionaryControl";
 import { Control } from "engine/client/gui/Control";
+import { OldTransformService } from "engine/shared/component/OldTransformService";
 import { Transforms } from "engine/shared/component/Transforms";
 import { TransformService } from "engine/shared/component/TransformService";
 import { Colors } from "shared/Colors";
@@ -27,13 +28,11 @@ export class HotbarButtonControl extends Control<HotbarToolButtonControlDefiniti
 			tools.selectedTool.set(tool === tools.selectedTool.get() ? undefined : tool);
 		});
 
-		const selectedToolStateMachine = TransformService.multi(
-			TransformService.boolStateMachine(
-				this.gui,
-				TransformService.commonProps.quadOut02,
-				{ BackgroundColor3: Colors.newGui.blue },
-				{ BackgroundColor3: Colors.newGui.staticBackground },
-			),
+		const selectedToolStateMachine = OldTransformService.boolStateMachine(
+			this.gui,
+			TransformService.commonProps.quadOut02,
+			{ BackgroundColor3: Colors.newGui.blue },
+			{ BackgroundColor3: Colors.newGui.staticBackground },
 		);
 		this.event.subscribeObservable(
 			tools.selectedTool,
@@ -119,9 +118,9 @@ export class HotbarControl extends Control<HotbarControlDefinition> {
 		this.resetLabels();
 	}
 
-	private readonly visibilityFunction = TransformService.boolStateMachine(
+	private readonly visibilityFunction = OldTransformService.boolStateMachine(
 		this.gui,
-		TransformService.commonProps.quadOut02,
+		OldTransformService.commonProps.quadOut02,
 		{ AnchorPoint: new Vector2(0.5, 1) },
 		{ AnchorPoint: new Vector2(0.5, 0) },
 		(tr, enabled) => (enabled ? tr.func(() => super.setInstanceVisibilityFunction(true)) : 0),

@@ -9,7 +9,7 @@ import { MultiBlockSelector } from "client/tools/highlighters/MultiBlockSelector
 import { ToolBase } from "client/tools/ToolBase";
 import { ClientComponent } from "engine/client/component/ClientComponent";
 import { Control } from "engine/client/gui/Control";
-import { TransformService } from "engine/shared/component/TransformService";
+import { OldTransformService } from "engine/shared/component/OldTransformService";
 import { ObservableValue } from "engine/shared/event/ObservableValue";
 import { Marketplace } from "engine/shared/Marketplace";
 import { BlockManager } from "shared/building/BlockManager";
@@ -81,10 +81,10 @@ namespace Scene {
 			this.tool.paintEverything(enableColor, enableMaterial);
 		}
 
-		private readonly visibilityStateMachine = TransformService.multi(
-			TransformService.boolStateMachine(
+		private readonly visibilityStateMachine = OldTransformService.multi(
+			OldTransformService.boolStateMachine(
 				this.gui.Top,
-				TransformService.commonProps.quadOut02,
+				OldTransformService.commonProps.quadOut02,
 				{ AnchorPoint: this.gui.Top.AnchorPoint },
 				{ AnchorPoint: new Vector2(0.5, 1) },
 				(tr, enabled) => (enabled ? tr.func(() => super.setInstanceVisibilityFunction(true)) : 0),
