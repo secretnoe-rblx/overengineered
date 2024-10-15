@@ -29,6 +29,19 @@ const definition = {
 				},
 			},
 		},
+		fov: {
+			displayName: "Field Of View",
+			types: {
+				number: {
+					config: 70,
+					clamp: {
+						showAsSlider: true,
+						min: 1,
+						max: 170,
+					},
+				},
+			},
+		},
 	},
 	output: {},
 } satisfies BlockLogicFullBothDefinitions;
@@ -60,6 +73,8 @@ class Logic extends InstanceBlockLogic<typeof definition> {
 			Parent: this.instance,
 		});
 
+		this.onk(["fov"], ({ fov }) => (camera.FieldOfView = fov));
+
 		const ticker = new Component();
 		ticker.event.subscribe(RunService.RenderStepped, () => {
 			camera.CFrame = target.CFrame;
@@ -71,10 +86,13 @@ class Logic extends InstanceBlockLogic<typeof definition> {
 			.observableFromInstanceParam(Workspace, "CurrentCamera")
 			.subscribe((wcamera) => ticker.setEnabled(wcamera === camera));
 
-		this.on(({ enabled }) => {
+		const fovCache = this.initializeInputCache("fov");
+
+		this.onk(["enabled"], ({ enabled }) => {
 			if (enabled) {
 				enabledCameras.add(this);
 				Workspace.CurrentCamera = camera;
+				camera.FieldOfView = fovCache.tryGet() ?? definition.input.fov.types.number.config;
 			} else {
 				enabledCameras.delete(this);
 				Workspace.CurrentCamera =
