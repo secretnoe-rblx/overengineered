@@ -141,6 +141,18 @@ export namespace BlockAssertions {
 		}
 	}
 
+	function* checkLowercaseAlias(block: Block) {
+		if (
+			block.search?.aliases?.any((a) => a.fullLower() !== a) ||
+			block.search?.partialAliases?.any((a) => a.fullLower() !== a)
+		) {
+			yield `Block ${block.id} has non-lowercase aliases ${[
+				...(block.search?.aliases?.filter((a) => a.fullLower() !== a) ?? []),
+				...(block.search?.partialAliases?.filter((a) => a.fullLower() !== a) ?? []),
+			].join()}`;
+		}
+	}
+
 	function getAllLogicErrors(block: Block, logic: Block["logic"] & defined): readonly string[] {
 		return [
 			...checkNoSameNamesInLogicDefinition(block, logic.definition),
@@ -149,6 +161,10 @@ export namespace BlockAssertions {
 	}
 
 	export function getAllErrors(block: Block): readonly string[] {
-		return [...getAllModelErrors(block.model), ...(block.logic ? getAllLogicErrors(block, block.logic) : [])];
+		return [
+			...getAllModelErrors(block.model),
+			...(block.logic ? getAllLogicErrors(block, block.logic) : []),
+			...checkLowercaseAlias(block),
+		];
 	}
 }

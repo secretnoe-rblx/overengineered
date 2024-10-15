@@ -97,18 +97,24 @@ const defs = {
 			value1: {
 				displayName: "Value 1",
 				types: {
-					number: { config: 0 as number },
-					bool: { config: false as boolean },
-					byte: { config: 0 as number },
+					number: { config: 0 },
+					bool: { config: false },
+					byte: { config: 0 },
+					string: { config: "" },
+					vector3: { config: Vector3.zero },
+					color: { config: new Color3() },
 				},
 				group: "0",
 			},
 			value2: {
 				displayName: "Value 2",
 				types: {
-					number: { config: 0 as number },
-					bool: { config: false as boolean },
-					byte: { config: 0 as number },
+					number: { config: 0 },
+					bool: { config: false },
+					byte: { config: 0 },
+					string: { config: "" },
+					vector3: { config: Vector3.zero },
+					color: { config: new Color3() },
 				},
 				group: "0",
 			},
@@ -280,6 +286,9 @@ const maths = {
 		displayName: "Negate",
 		description: "Negates the input",
 		modelSource: autoModel("GenericLogicBlockPrefab", "NEG", categories.math),
+		search: {
+			aliases: ["neg"],
+		},
 		logic: logic(
 			{
 				input: {
@@ -748,6 +757,9 @@ const trigonometry = {
 		displayName: "Arctangent",
 		description: "The opposite of the Tangent",
 		modelSource: autoModel("GenericLogicBlockPrefab", "ATAN", categories.trigonometry),
+		search: {
+			aliases: ["ata"],
+		},
 		logic: logic(defs.num1_num, ({ value }) => ({
 			result: { type: "number", value: math.atan(value) },
 		})),
@@ -797,6 +809,10 @@ const trigonometry = {
 		displayName: "Arctangent 2",
 		description: "No way they made a sequel",
 		modelSource: autoModel("DoubleGenericLogicBlockPrefab", "ATAN2", categories.trigonometry),
+		search: {
+			aliases: ["atan 2"],
+			partialAliases: ["atan"],
+		},
 		logic: logic(
 			{
 				inputOrder: ["y", "x"],
@@ -901,6 +917,9 @@ const vec3 = {
 		displayName: "Vector3 Normalize",
 		description: "Returns normalized vector from the given vector",
 		modelSource: autoModel("TripleGenericLogicBlockPrefab", "VEC3 NORM", categories.converterVector),
+		search: {
+			aliases: ["unit"],
+		},
 		logic: logic(
 			{
 				input: {

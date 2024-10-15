@@ -38,7 +38,6 @@ import type { MaterialColorEditControlDefinition } from "client/gui/buildmode/Ma
 import type { MirrorEditorControlDefinition } from "client/gui/buildmode/MirrorEditorControl";
 import type { InputTooltips } from "client/gui/static/TooltipsControl";
 import type { BuildingMode } from "client/modes/build/BuildingMode";
-import type { ReadonlyObservableValue } from "engine/shared/event/ObservableValue";
 import type { SharedPlot } from "shared/building/SharedPlot";
 
 const allowedColor = Colors.blue;
