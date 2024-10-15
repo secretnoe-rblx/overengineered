@@ -77,7 +77,9 @@ class Logic extends InstanceBlockLogic<typeof definition> {
 	constructor(block: InstanceBlockLogicArgs) {
 		super(definition, block);
 
-		const view = this.instance.FindFirstChild("RadarView");
+		const originalView = this.instance.FindFirstChild("RadarView");
+		const view = originalView?.Clone();
+		originalView?.Destroy();
 		const metalPlate = this.instance.FindFirstChild("MetalPlate");
 		const maxDist = definition.input.maxDistance.types.number.clamp.max;
 		const halvedMaxDist = maxDist / 2;
@@ -85,7 +87,7 @@ class Logic extends InstanceBlockLogic<typeof definition> {
 		if (!view?.IsA("BasePart")) return;
 		if (!metalPlate?.IsA("BasePart")) return;
 
-		// view.Anchored = true;
+		view.Parent = this.instance;
 
 		const updateDistance = (detectionSize: number, maxDistance: number) => {
 			const ds = detectionSize * (detectionSize - math.sqrt(halvedMaxDist / (maxDistance + halvedMaxDist))) * 10;
@@ -143,7 +145,6 @@ class Logic extends InstanceBlockLogic<typeof definition> {
 		});
 
 		this.onDisable(() => {
-			const view = this.instance.FindFirstChild("RadarView") as BasePart | undefined;
 			if (view) view.Transparency = 1;
 
 			this.allTouchedBlocks.clear();
