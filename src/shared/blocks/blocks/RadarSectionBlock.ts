@@ -77,6 +77,7 @@ class Logic extends InstanceBlockLogic<typeof definition> {
 	constructor(block: InstanceBlockLogicArgs) {
 		super(definition, block);
 
+		let minDistance = 0;
 		const originalView = this.instance.FindFirstChild("RadarView");
 		const view = originalView?.Clone();
 		originalView?.Destroy();
@@ -107,27 +108,26 @@ class Logic extends InstanceBlockLogic<typeof definition> {
 			updateDistance(detectionSize, maxDistance);
 		});
 
-		this.onAlwaysInputs(({ minimalDistance }) => {
-			view.PivotTo(this.instance.PrimaryPart!.CFrame);
+		this.onAlwaysInputs(({ minimalDistance }) => (minDistance = minimalDistance));
 
+		this.onTicc(() => {
 			if (this.closestDetectedPart?.Parent === undefined || this.triggerDistanceListUpdate) {
 				this.triggerDistanceListUpdate = false;
-				this.closestDetectedPart = this.findClosestPart(minimalDistance);
+				this.closestDetectedPart = this.findClosestPart(minDistance);
 			}
 
 			this.output.distance.set(
 				"vector3",
 				this.closestDetectedPart ? this.getDistanceTo(this.closestDetectedPart) : Vector3.zero,
 			);
+
+			view.PivotTo(this.instance.PrimaryPart!.CFrame);
 		});
 
-		const minimalDistanceCache = this.initializeInputCache("minimalDistance");
 		this.event.subscribe(view.Touched, (part) => {
 			if (part.HasTag("RADARVIEW")) return;
-			const minimalDistance = minimalDistanceCache.tryGet();
-			if (!minimalDistance) return;
-
-			if (this.getDistanceTo(part).Magnitude < minimalDistance) return;
+			if (!minDistance) return;
+			if (this.getDistanceTo(part).Magnitude < minDistance) return;
 
 			this.allTouchedBlocks.add(part);
 			if (this.closestDetectedPart === undefined) {
@@ -139,14 +139,12 @@ class Logic extends InstanceBlockLogic<typeof definition> {
 
 		this.event.subscribe(view.TouchEnded, (part) => {
 			this.allTouchedBlocks.delete(part);
-			if (!this.triggerDistanceListUpdate) {
-				this.triggerDistanceListUpdate = part === this.closestDetectedPart;
-			}
+			if (this.triggerDistanceListUpdate) return;
+			this.triggerDistanceListUpdate = part === this.closestDetectedPart;
 		});
 
 		this.onDisable(() => {
 			if (view) view.Transparency = 1;
-
 			this.allTouchedBlocks.clear();
 		});
 	}
