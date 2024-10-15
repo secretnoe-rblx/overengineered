@@ -1,3 +1,4 @@
+import { RunService } from "@rbxts/services";
 import { RobloxUnit } from "engine/shared/RobloxUnit";
 import { InstanceBlockLogic as InstanceBlockLogic } from "shared/blockLogic/BlockLogic";
 import { BlockCreation } from "shared/blocks/BlockCreation";
@@ -120,8 +121,6 @@ class Logic extends InstanceBlockLogic<typeof definition> {
 				"vector3",
 				this.closestDetectedPart ? this.getDistanceTo(this.closestDetectedPart) : Vector3.zero,
 			);
-
-			view.PivotTo(this.instance.PrimaryPart!.CFrame);
 		});
 
 		this.event.subscribe(view.Touched, (part) => {
@@ -141,6 +140,12 @@ class Logic extends InstanceBlockLogic<typeof definition> {
 			this.allTouchedBlocks.delete(part);
 			if (this.triggerDistanceListUpdate) return;
 			this.triggerDistanceListUpdate = part === this.closestDetectedPart;
+		});
+
+		this.event.subscribe(RunService.Heartbeat, () => {
+			view.AssemblyLinearVelocity = Vector3.zero;
+			view.AssemblyAngularVelocity = Vector3.zero;
+			view.PivotTo(this.instance.PrimaryPart!.CFrame);
 		});
 
 		this.onDisable(() => {
