@@ -78,7 +78,7 @@ class Logic extends InstanceBlockLogic<typeof definition> {
 	constructor(block: InstanceBlockLogicArgs) {
 		super(definition, block);
 
-		const cachedResult: Vector3 = Vector3.zero;
+		let updateTask: thread;
 		let minDistance = 0;
 		const originalView = this.instance.FindFirstChild("RadarView");
 		const view = originalView?.Clone();
@@ -132,24 +132,26 @@ class Logic extends InstanceBlockLogic<typeof definition> {
 		});
 
 		this.event.subscribe(RunService.Heartbeat, () => {
-			/*
 			if (this.closestDetectedPart?.Parent === undefined || this.triggerDistanceListUpdate) {
 				this.triggerDistanceListUpdate = false;
 				this.closestDetectedPart = this.findClosestPart(minDistance);
+
+				if (updateTask) task.cancel(updateTask);
+				updateTask = task.delay(5000, () => (this.triggerDistanceListUpdate = true));
 			}
-				this.output.distance.set(
+			this.output.distance.set(
 				"vector3",
 				this.closestDetectedPart ? this.getDistanceTo(this.closestDetectedPart) : Vector3.zero,
 			);
+
+			/*
+				this.closestDetectedPart = this.findClosestPart(minDistance);
+
+				if (this.closestDetectedPart) {
+					const d = this.getDistanceTo(this.closestDetectedPart);
+					this.output.distance.set("vector3", d);
+				} else this.output.distance.set("vector3", Vector3.zero);
 			*/
-
-			this.closestDetectedPart = this.findClosestPart(minDistance);
-
-			if (this.closestDetectedPart) {
-				const d = this.getDistanceTo(this.closestDetectedPart);
-				this.output.distance.set("vector3", d);
-			} else this.output.distance.set("vector3", Vector3.zero);
-
 			view.AssemblyLinearVelocity = Vector3.zero;
 			view.AssemblyAngularVelocity = Vector3.zero;
 			view.PivotTo(this.instance.PrimaryPart!.CFrame);
