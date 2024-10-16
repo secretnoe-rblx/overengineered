@@ -682,6 +682,9 @@ const maths = {
 		displayName: "Greater Than",
 		description: "Returns true if first value greater than second one",
 		modelSource: autoModel("DoubleGenericLogicBlockPrefab", ">", categories.math),
+		search: {
+			aliases: ["mor", "more", "gre", "grea", "greater"],
+		},
 		logic: logic(defs.num2_bool, ({ value1, value2 }) => ({
 			result: { type: "bool", value: value1 > value2 },
 		})),
@@ -690,6 +693,9 @@ const maths = {
 		displayName: "Less Than",
 		description: "Returns true if the first value or lesser than second one",
 		modelSource: autoModel("DoubleGenericLogicBlockPrefab", "<", categories.math),
+		search: {
+			aliases: ["les", "less"],
+		},
 		logic: logic(defs.num2_bool, ({ value1, value2 }) => ({
 			result: { type: "bool", value: value1 < value2 },
 		})),
@@ -697,6 +703,9 @@ const maths = {
 	greaterthanorequals: {
 		displayName: "Greater Than or Equals",
 		description: "Returns true if the first value greater than second one",
+		search: {
+			partialAliases: ["more"],
+		},
 		modelSource: autoModel("DoubleGenericLogicBlockPrefab", "≥", categories.math),
 		logic: logic(defs.num2_bool, ({ value1, value2 }) => ({
 			result: { type: "bool", value: value1 >= value2 },
