@@ -118,9 +118,9 @@ class Logic extends InstanceBlockLogic<typeof definition> {
 			//if (this.getDistanceTo(part).Magnitude < minDistance) return;
 
 			this.allTouchedBlocks.add(part);
-			if (this.closestDetectedPart === undefined) {
-				return (this.closestDetectedPart = part);
-			}
+			//if (this.closestDetectedPart === undefined) {
+			//	return (this.closestDetectedPart = part);
+			//}
 
 			this.triggerDistanceListUpdate = true;
 		});
@@ -134,10 +134,11 @@ class Logic extends InstanceBlockLogic<typeof definition> {
 		this.event.subscribe(RunService.Heartbeat, () => {
 			if (this.closestDetectedPart?.Parent === undefined || this.triggerDistanceListUpdate) {
 				this.triggerDistanceListUpdate = false;
+
 				this.closestDetectedPart = this.findClosestPart(minDistance);
 
 				if (updateTask) task.cancel(updateTask);
-				updateTask = task.delay(5000, () => (this.triggerDistanceListUpdate = true));
+				updateTask = task.delay(5, () => (this.triggerDistanceListUpdate = true));
 			}
 			this.output.distance.set(
 				"vector3",
@@ -152,6 +153,7 @@ class Logic extends InstanceBlockLogic<typeof definition> {
 					this.output.distance.set("vector3", d);
 				} else this.output.distance.set("vector3", Vector3.zero);
 			*/
+
 			view.AssemblyLinearVelocity = Vector3.zero;
 			view.AssemblyAngularVelocity = Vector3.zero;
 			view.PivotTo(this.instance.PrimaryPart!.CFrame);
@@ -175,26 +177,25 @@ class Logic extends InstanceBlockLogic<typeof definition> {
 			return VectorUtils.apply(this.instance.GetPivot().ToObjectSpace(part.GetPivot()).Position, (v) =>
 				RobloxUnit.Studs_To_Meters(v),
 			);
-		else
-			return VectorUtils.apply(part.GetPivot().Position.sub(this.instance.GetPivot().Position), (v) =>
-				RobloxUnit.Studs_To_Meters(v),
-			);
+		return VectorUtils.apply(part.GetPivot().Position.sub(this.instance.GetPivot().Position), (v) =>
+			RobloxUnit.Studs_To_Meters(v),
+		);
 	};
 
 	private findClosestPart(minDist: number) {
-		let smallestDistance: number | undefined;
+		let smallestDistance: Vector3 | undefined;
 		let closestPart: BasePart | undefined;
 
 		for (const bp of this.allTouchedBlocks) {
-			const d = this.getDistanceTo(bp).Magnitude;
+			const d = this.getDistanceTo(bp);
 
-			if (d < minDist) continue;
+			if (d.Magnitude < minDist) continue;
 			if (smallestDistance === undefined) {
 				[smallestDistance, closestPart] = [d, bp];
 				continue;
 			}
 
-			if (d > smallestDistance) continue;
+			if (d.Magnitude > smallestDistance.Magnitude) continue;
 			[smallestDistance, closestPart] = [d, bp];
 		}
 		return closestPart;
