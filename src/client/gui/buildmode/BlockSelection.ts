@@ -400,19 +400,25 @@ export class BlockSelectionControl extends Control<BlockSelectionControlDefiniti
 				processBlock(block);
 			}
 		} else {
-			const similar: Block[] = [];
+			const similar1: Block[] = [];
+			const similar2: Block[] = [];
 
 			for (const block of this.blockList.sorted) {
 				const cache = this.searchCache[block.id];
 
 				if (cache.exact.find((e) => e === lowerSearch) !== undefined) {
 					processBlock(block);
-				} else if (cache.fuzzy.any((f) => f.find(lowerSearch)[0] !== undefined)) {
-					similar.push(block);
+				} else if (cache.fuzzy.any((f) => f.startsWith(lowerSearch))) {
+					similar1.push(block);
+				} else if (cache.fuzzy.any((f) => f.contains(lowerSearch))) {
+					similar2.push(block);
 				}
 			}
 
-			for (const block of similar) {
+			for (const block of similar1) {
+				processBlock(block);
+			}
+			for (const block of similar2) {
 				processBlock(block);
 			}
 		}
