@@ -20,4 +20,7 @@ export const BlockConfigDefinitions = {
 	vector3: {
 		vector3: { config: new Vector3(0, 0, 0) },
 	},
+	color: {
+		color: { config: new Color3(0, 0, 0) },
+	},
 } as const satisfies { readonly [k in string]: BlockLogicFullInputDef["types"] };

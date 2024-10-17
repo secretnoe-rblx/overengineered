@@ -87,6 +87,11 @@ const defpartsf = {
 		types: BlockConfigDefinitions.vector3,
 		...(rest ?? {}),
 	}),
+	color: (name: string, rest?: BLFID) => ({
+		displayName: name,
+		types: BlockConfigDefinitions.color,
+		...(rest ?? {}),
+	}),
 } as const satisfies {
 	readonly [k in string]: (name: string, rest?: BLFID) => BlockLogicFullInputDef;
 };
@@ -870,7 +875,7 @@ const vec3 = {
 	},
 	vec3splitter: {
 		displayName: "Vector3 Splitter",
-		description: "Returns vector values",
+		description: "Splits a vector into three numbers",
 		modelSource: autoModel("TripleGenericLogicBlockPrefab", "VEC3 SPLIT", categories.converterVector),
 		logic: logic(
 			{
@@ -985,6 +990,111 @@ const vec3 = {
 
 				return { position: { type: "vector3", value: result } };
 			},
+		),
+	},
+} as const satisfies BlockBuildersWithoutIdAndDefaults;
+
+const color = {
+	colorcombiner: {
+		displayName: "Color Combiner",
+		description: "Returns a color combined from three numbers (0-255)",
+		modelSource: autoModel("TripleGenericLogicBlockPrefab", "CLR COMB", categories.converterColor),
+		logic: logic(
+			{
+				inputOrder: ["value_r", "value_g", "value_b"],
+				input: {
+					value_r: defpartsf.number("R"),
+					value_g: defpartsf.number("G"),
+					value_b: defpartsf.number("B"),
+				},
+				output: {
+					result: {
+						displayName: "Result",
+						types: ["color"],
+					},
+				},
+			},
+			({ value_r, value_g, value_b }) => ({
+				result: { type: "color", value: Color3.fromRGB(value_r, value_g, value_b) },
+			}),
+		),
+	},
+	colorfromvec: {
+		displayName: "Color From Vector",
+		description: "Converts a vector (0-255) to color",
+		modelSource: autoModel("TripleGenericLogicBlockPrefab", "VEC3->CLR", categories.converterColor),
+		logic: logic(
+			{
+				input: {
+					input: defpartsf.vector3("Input"),
+				},
+				output: {
+					result: {
+						displayName: "Result",
+						types: ["color"],
+					},
+				},
+			},
+			({ input }) => ({
+				result: { type: "color", value: Color3.fromRGB(input.X, input.Y, input.Z) },
+			}),
+		),
+	},
+	colorsplitter: {
+		displayName: "Color Splitter",
+		description: "Splits a color into three numbers (0-255)",
+		modelSource: autoModel("TripleGenericLogicBlockPrefab", "CLR SPLIT", categories.converterColor),
+		logic: logic(
+			{
+				outputOrder: ["result_r", "result_g", "result_b"],
+				input: {
+					value: defpartsf.color("Value"),
+				},
+				output: {
+					result_r: {
+						displayName: "R",
+						types: ["number"],
+					},
+					result_g: {
+						displayName: "G",
+						types: ["number"],
+					},
+					result_b: {
+						displayName: "B",
+						types: ["number"],
+					},
+				},
+			},
+			({ value }) => ({
+				result_r: { type: "number", value: math.floor(value.R * 255) },
+				result_g: { type: "number", value: math.floor(value.G * 255) },
+				result_b: { type: "number", value: math.floor(value.B * 255) },
+			}),
+		),
+	},
+	colortovec: {
+		displayName: "Color To Vector",
+		description: "Convert a color to vector (0-255)",
+		modelSource: autoModel("TripleGenericLogicBlockPrefab", "CLR->VEC3", categories.converterColor),
+		logic: logic(
+			{
+				outputOrder: ["result_r", "result_g", "result_b"],
+				input: {
+					value: defpartsf.color("Value"),
+				},
+				output: {
+					result: {
+						displayName: "Result",
+						types: ["vector3"],
+					},
+				},
+			},
+			({ value }) => ({
+				result: {
+					type: "vector3",
+					value: new Vector3(math.floor(value.R * 255), math.floor(value.G * 255), math.floor(value.B * 255)),
+				},
+			}),
 		),
 	},
 } as const satisfies BlockBuildersWithoutIdAndDefaults;
@@ -1369,6 +1479,7 @@ const list: BlockBuildersWithoutIdAndDefaults = {
 	...constants,
 	...trigonometry,
 	...vec3,
+	...color,
 	...byte,
 	...other,
 	...test,
