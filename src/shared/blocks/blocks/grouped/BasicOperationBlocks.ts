@@ -72,6 +72,11 @@ const defpartsf = {
 		types: BlockConfigDefinitions.number,
 		...(rest ?? {}),
 	}),
+	string: (name: string, rest?: BLFID) => ({
+		displayName: name,
+		types: BlockConfigDefinitions.string,
+		...(rest ?? {}),
+	}),
 	bool: (name: string, rest?: BLFID) => ({
 		displayName: name,
 		types: BlockConfigDefinitions.bool,
@@ -1040,6 +1045,7 @@ const color = {
 			}),
 		),
 	},
+
 	colorsplitter: {
 		displayName: "Color Splitter",
 		description: "Splits a color into three numbers (0-255)",
@@ -1095,6 +1101,95 @@ const color = {
 					value: new Vector3(math.floor(value.R * 255), math.floor(value.G * 255), math.floor(value.B * 255)),
 				},
 			}),
+		),
+	},
+
+	colorfromhex: {
+		displayName: "Color From HEX String",
+		description: "Converts a HEX string (#FA1298) to color",
+		modelSource: autoModel("TripleGenericLogicBlockPrefab", "HEX->CLR", categories.converterColor),
+		logic: logic(
+			{
+				input: {
+					input: defpartsf.string("HEX"),
+				},
+				output: {
+					result: {
+						displayName: "Result",
+						types: ["color"],
+					},
+				},
+			},
+			({ input }) => ({
+				result: { type: "color", value: Color3.fromHex(input) },
+			}),
+		),
+	},
+	colortohex: {
+		displayName: "Color To HEX String",
+		description: "Converts a color to a HEX string (#FA1298)",
+		modelSource: autoModel("TripleGenericLogicBlockPrefab", "CLR->HEX", categories.converterColor),
+		logic: logic(
+			{
+				input: {
+					input: defpartsf.color("HEX"),
+				},
+				output: {
+					result: {
+						displayName: "Result",
+						types: ["string"],
+					},
+				},
+			},
+			({ input }) => ({
+				result: { type: "string", value: input.ToHex() },
+			}),
+		),
+	},
+
+	colorfromhsvvec: {
+		displayName: "Color From HSV Vector",
+		description: "Converts an HSV vector (0-1) to color",
+		modelSource: autoModel("TripleGenericLogicBlockPrefab", "HSV->CLR", categories.converterColor),
+		logic: logic(
+			{
+				input: {
+					input: defpartsf.vector3("Input"),
+				},
+				output: {
+					result: {
+						displayName: "Result",
+						types: ["color"],
+					},
+				},
+			},
+			({ input }) => ({
+				result: { type: "color", value: Color3.fromHSV(input.X, input.Y, input.Z) },
+			}),
+		),
+	},
+	colortohsvvec: {
+		displayName: "Color To HSV Vector",
+		description: "Converts a color to an HSV vector (0-1)",
+		modelSource: autoModel("TripleGenericLogicBlockPrefab", "CLR->HSV", categories.converterColor),
+		logic: logic(
+			{
+				input: {
+					input: defpartsf.color("Input"),
+				},
+				output: {
+					result: {
+						displayName: "Result",
+						types: ["vector3"],
+					},
+				},
+			},
+			({ input }) => {
+				const [h, s, v] = input.ToHSV();
+				return {
+					result: { type: "vector3", value: new Vector3(h, s, v) },
+				};
+			},
 		),
 	},
 } as const satisfies BlockBuildersWithoutIdAndDefaults;
