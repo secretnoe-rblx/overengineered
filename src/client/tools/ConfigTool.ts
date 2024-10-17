@@ -18,6 +18,7 @@ import { BlockManager } from "shared/building/BlockManager";
 import { Colors } from "shared/Colors";
 import { VectorUtils } from "shared/utils/VectorUtils";
 import type { ReportSubmitController } from "client/gui/popup/ReportSubmitPopup";
+import type { ActionController } from "client/modes/build/ActionController";
 import type { BuildingMode } from "client/modes/build/BuildingMode";
 import type { MultiBlockSelectorConfiguration } from "client/tools/highlighters/MultiBlockSelector";
 //import type { TutorialConfigBlockHighlight } from "client/tutorial/TutorialConfigTool";
@@ -44,15 +45,22 @@ namespace Scene {
 	export class ConfigToolScene extends Control<ConfigToolSceneDefinition> {
 		constructor(
 			gui: ConfigToolSceneDefinition,
-			private readonly tool: ConfigTool,
-			private readonly blockList: BlockList,
+			@inject private readonly tool: ConfigTool,
+			@inject private readonly blockList: BlockList,
 			@inject private readonly di: DIContainer,
 			@inject private readonly reportSubmitter: ReportSubmitController,
+			@inject actionController: ActionController,
 		) {
 			super(gui);
 
 			const selected = tool.selected;
 			this.event.subscribeCollection(selected, () => {
+				this.updateConfigs(selected.getArr());
+			});
+			this.event.subscribe(actionController.onRedo, () => {
+				this.updateConfigs(selected.getArr());
+			});
+			this.event.subscribe(actionController.onUndo, () => {
 				this.updateConfigs(selected.getArr());
 			});
 
@@ -212,13 +220,9 @@ export class ConfigTool extends ToolBase {
 	) {
 		super(mode);
 		this.parentGui(
-			new Scene.ConfigToolScene(
+			di.resolveForeignClass(Scene.ConfigToolScene, [
 				ToolBase.getToolGui<"Config", Scene.ConfigToolSceneDefinition>().Config,
-				this,
-				blockList,
-				di,
-				di.resolve<ReportSubmitController>(),
-			),
+			]),
 		);
 
 		this.parent(di.resolveForeignClass(SelectedBlocksHighlighter, [this.selected]));

@@ -317,11 +317,33 @@ export namespace ClientBuilding {
 			readonly cfg: PlacedBlockConfig;
 		}[];
 	};
-	function updateConfig({ plot, configs }: UpdateConfigArgs) {
-		return building.updateConfig.send({
-			plot: plot.instance,
-			configs: configs.map(({ block, cfg }) => ({ block: block, scfg: JSON.serialize(cfg) })),
-		});
+	function updateConfig({ plot, configs: _configs }: UpdateConfigArgs) {
+		const newConfigs = asObject(_configs.mapToMap((c) => $tuple(BlockManager.manager.uuid.get(c.block), c.cfg)));
+		const origConfigs = asObject(
+			_configs.mapToMap((c) =>
+				$tuple(BlockManager.manager.uuid.get(c.block), BlockManager.manager.config.get(c.block)),
+			),
+		);
+
+		const getBlocks = (
+			data: Record<BlockUuid, PlacedBlockConfig>,
+		): { readonly block: BlockModel; readonly scfg: string }[] => {
+			return asMap(data).map((k, v) => ({ block: plot.getBlock(k), scfg: JSON.serialize(v) }));
+		};
+
+		return ActionController.instance.execute(
+			"Update config",
+			() =>
+				building.updateConfig.send({
+					plot: plot.instance,
+					configs: getBlocks(origConfigs),
+				}),
+			() =>
+				building.updateConfig.send({
+					plot: plot.instance,
+					configs: getBlocks(newConfigs),
+				}),
+		);
 	}
 
 	type ResetConfigArgs = {
@@ -329,7 +351,25 @@ export namespace ClientBuilding {
 		readonly blocks: readonly BlockModel[];
 	};
 	function resetConfig({ plot, blocks: _blocks }: ResetConfigArgs) {
-		return building.resetConfig.send({ plot: plot.instance, blocks: _blocks });
+		const origConfigs = asObject(
+			_blocks.mapToMap((b) => $tuple(BlockManager.manager.uuid.get(b), BlockManager.manager.config.get(b))),
+		);
+
+		const getBlocks = (
+			data: Record<BlockUuid, PlacedBlockConfig>,
+		): { readonly block: BlockModel; readonly scfg: string }[] => {
+			return asMap(data).map((k, v) => ({ block: plot.getBlock(k), scfg: JSON.serialize(v) }));
+		};
+
+		return ActionController.instance.execute(
+			"Reset config",
+			() =>
+				building.updateConfig.send({
+					plot: plot.instance,
+					configs: getBlocks(origConfigs),
+				}),
+			() => building.resetConfig.send({ plot: plot.instance, blocks: _blocks }),
+		);
 	}
 
 	type LogicConnectArgs = {
