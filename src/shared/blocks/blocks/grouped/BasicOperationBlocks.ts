@@ -72,6 +72,11 @@ const defpartsf = {
 		types: BlockConfigDefinitions.number,
 		...(rest ?? {}),
 	}),
+	string: (name: string, rest?: BLFID) => ({
+		displayName: name,
+		types: BlockConfigDefinitions.string,
+		...(rest ?? {}),
+	}),
 	bool: (name: string, rest?: BLFID) => ({
 		displayName: name,
 		types: BlockConfigDefinitions.bool,
@@ -85,6 +90,11 @@ const defpartsf = {
 	vector3: (name: string, rest?: BLFID) => ({
 		displayName: name,
 		types: BlockConfigDefinitions.vector3,
+		...(rest ?? {}),
+	}),
+	color: (name: string, rest?: BLFID) => ({
+		displayName: name,
+		types: BlockConfigDefinitions.color,
 		...(rest ?? {}),
 	}),
 } as const satisfies {
@@ -682,6 +692,9 @@ const maths = {
 		displayName: "Greater Than",
 		description: "Returns true if first value greater than second one",
 		modelSource: autoModel("DoubleGenericLogicBlockPrefab", ">", categories.math),
+		search: {
+			aliases: ["mor", "more", "gre", "grea", "greater"],
+		},
 		logic: logic(defs.num2_bool, ({ value1, value2 }) => ({
 			result: { type: "bool", value: value1 > value2 },
 		})),
@@ -690,6 +703,9 @@ const maths = {
 		displayName: "Less Than",
 		description: "Returns true if the first value or lesser than second one",
 		modelSource: autoModel("DoubleGenericLogicBlockPrefab", "<", categories.math),
+		search: {
+			aliases: ["les", "less"],
+		},
 		logic: logic(defs.num2_bool, ({ value1, value2 }) => ({
 			result: { type: "bool", value: value1 < value2 },
 		})),
@@ -697,6 +713,9 @@ const maths = {
 	greaterthanorequals: {
 		displayName: "Greater Than or Equals",
 		description: "Returns true if the first value greater than second one",
+		search: {
+			partialAliases: ["more"],
+		},
 		modelSource: autoModel("DoubleGenericLogicBlockPrefab", "≥", categories.math),
 		logic: logic(defs.num2_bool, ({ value1, value2 }) => ({
 			result: { type: "bool", value: value1 >= value2 },
@@ -861,7 +880,7 @@ const vec3 = {
 	},
 	vec3splitter: {
 		displayName: "Vector3 Splitter",
-		description: "Returns vector values",
+		description: "Splits a vector into three numbers",
 		modelSource: autoModel("TripleGenericLogicBlockPrefab", "VEC3 SPLIT", categories.converterVector),
 		logic: logic(
 			{
@@ -975,6 +994,201 @@ const vec3 = {
 				const result = toobject ? origin.PointToObjectSpace(inposition) : origin.PointToWorldSpace(inposition);
 
 				return { position: { type: "vector3", value: result } };
+			},
+		),
+	},
+} as const satisfies BlockBuildersWithoutIdAndDefaults;
+
+const color = {
+	colorcombiner: {
+		displayName: "Color Combiner",
+		description: "Returns a color combined from three numbers (0-255)",
+		modelSource: autoModel("TripleGenericLogicBlockPrefab", "CLR COMB", categories.converterColor),
+		logic: logic(
+			{
+				inputOrder: ["value_r", "value_g", "value_b"],
+				input: {
+					value_r: defpartsf.number("R"),
+					value_g: defpartsf.number("G"),
+					value_b: defpartsf.number("B"),
+				},
+				output: {
+					result: {
+						displayName: "Result",
+						types: ["color"],
+					},
+				},
+			},
+			({ value_r, value_g, value_b }) => ({
+				result: { type: "color", value: Color3.fromRGB(value_r, value_g, value_b) },
+			}),
+		),
+	},
+	colorfromvec: {
+		displayName: "Color From Vector",
+		description: "Converts a vector (0-255) to color",
+		modelSource: autoModel("TripleGenericLogicBlockPrefab", "VEC3->CLR", categories.converterColor),
+		logic: logic(
+			{
+				input: {
+					input: defpartsf.vector3("Input"),
+				},
+				output: {
+					result: {
+						displayName: "Result",
+						types: ["color"],
+					},
+				},
+			},
+			({ input }) => ({
+				result: { type: "color", value: Color3.fromRGB(input.X, input.Y, input.Z) },
+			}),
+		),
+	},
+
+	colorsplitter: {
+		displayName: "Color Splitter",
+		description: "Splits a color into three numbers (0-255)",
+		modelSource: autoModel("TripleGenericLogicBlockPrefab", "CLR SPLIT", categories.converterColor),
+		logic: logic(
+			{
+				outputOrder: ["result_r", "result_g", "result_b"],
+				input: {
+					value: defpartsf.color("Value"),
+				},
+				output: {
+					result_r: {
+						displayName: "R",
+						types: ["number"],
+					},
+					result_g: {
+						displayName: "G",
+						types: ["number"],
+					},
+					result_b: {
+						displayName: "B",
+						types: ["number"],
+					},
+				},
+			},
+			({ value }) => ({
+				result_r: { type: "number", value: math.floor(value.R * 255) },
+				result_g: { type: "number", value: math.floor(value.G * 255) },
+				result_b: { type: "number", value: math.floor(value.B * 255) },
+			}),
+		),
+	},
+	colortovec: {
+		displayName: "Color To Vector",
+		description: "Convert a color to vector (0-255)",
+		modelSource: autoModel("TripleGenericLogicBlockPrefab", "CLR->VEC3", categories.converterColor),
+		logic: logic(
+			{
+				outputOrder: ["result_r", "result_g", "result_b"],
+				input: {
+					value: defpartsf.color("Value"),
+				},
+				output: {
+					result: {
+						displayName: "Result",
+						types: ["vector3"],
+					},
+				},
+			},
+			({ value }) => ({
+				result: {
+					type: "vector3",
+					value: new Vector3(math.floor(value.R * 255), math.floor(value.G * 255), math.floor(value.B * 255)),
+				},
+			}),
+		),
+	},
+
+	colorfromhex: {
+		displayName: "Color From HEX String",
+		description: "Converts a HEX string (#FA1298) to color",
+		modelSource: autoModel("TripleGenericLogicBlockPrefab", "HEX->CLR", categories.converterColor),
+		logic: logic(
+			{
+				input: {
+					input: defpartsf.string("HEX"),
+				},
+				output: {
+					result: {
+						displayName: "Result",
+						types: ["color"],
+					},
+				},
+			},
+			({ input }) => ({
+				result: { type: "color", value: Color3.fromHex(input) },
+			}),
+		),
+	},
+	colortohex: {
+		displayName: "Color To HEX String",
+		description: "Converts a color to a HEX string (#FA1298)",
+		modelSource: autoModel("TripleGenericLogicBlockPrefab", "CLR->HEX", categories.converterColor),
+		logic: logic(
+			{
+				input: {
+					input: defpartsf.color("HEX"),
+				},
+				output: {
+					result: {
+						displayName: "Result",
+						types: ["string"],
+					},
+				},
+			},
+			({ input }) => ({
+				result: { type: "string", value: input.ToHex() },
+			}),
+		),
+	},
+
+	colorfromhsvvec: {
+		displayName: "Color From HSV Vector",
+		description: "Converts an HSV vector (0-1) to color",
+		modelSource: autoModel("TripleGenericLogicBlockPrefab", "HSV->CLR", categories.converterColor),
+		logic: logic(
+			{
+				input: {
+					input: defpartsf.vector3("Input"),
+				},
+				output: {
+					result: {
+						displayName: "Result",
+						types: ["color"],
+					},
+				},
+			},
+			({ input }) => ({
+				result: { type: "color", value: Color3.fromHSV(input.X, input.Y, input.Z) },
+			}),
+		),
+	},
+	colortohsvvec: {
+		displayName: "Color To HSV Vector",
+		description: "Converts a color to an HSV vector (0-1)",
+		modelSource: autoModel("TripleGenericLogicBlockPrefab", "CLR->HSV", categories.converterColor),
+		logic: logic(
+			{
+				input: {
+					input: defpartsf.color("Input"),
+				},
+				output: {
+					result: {
+						displayName: "Result",
+						types: ["vector3"],
+					},
+				},
+			},
+			({ input }) => {
+				const [h, s, v] = input.ToHSV();
+				return {
+					result: { type: "vector3", value: new Vector3(h, s, v) },
+				};
 			},
 		),
 	},
@@ -1360,6 +1574,7 @@ const list: BlockBuildersWithoutIdAndDefaults = {
 	...constants,
 	...trigonometry,
 	...vec3,
+	...color,
 	...byte,
 	...other,
 	...test,
