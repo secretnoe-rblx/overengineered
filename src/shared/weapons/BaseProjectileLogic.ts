@@ -20,6 +20,7 @@ export type projectileModifier = {
 
 const PLASMA_BALL = Instances.assets.WaitForChild("WeaponProjectiles").WaitForChild("PlasmaProjectile") as BasePart;
 const BULLET = Instances.assets.WaitForChild("WeaponProjectiles").WaitForChild("BulletProjectile") as BasePart;
+const LASER = Instances.assets.WaitForChild("WeaponProjectiles").WaitForChild("LaserProjectile") as BasePart;
 
 const projectileFolder = new Instance("Folder", Workspace);
 projectileFolder.Name = "Projectiles";
@@ -45,18 +46,18 @@ export class WeaponProjectile extends InstanceComponent<BasePart> {
 	static readonly damagedParts: Map<BasePart, number> = new Map();
 	readonly projectilePart: BasePart;
 	static readonly PLASMA_PROJECTILE: BasePart = PLASMA_BALL;
-	static readonly LASER_PROJECTILE: BasePart;
+	static readonly LASER_PROJECTILE: BasePart = LASER;
 	static readonly BULLET_PROJECTILE: BasePart = BULLET;
 
 	constructor(
 		readonly startPosition: Vector3,
 		readonly projectileType: ProjectileType,
-		projectilePart: BasePart,
+		originalProjectilePart: BasePart,
 		readonly baseVelocity: Vector3,
 		readonly baseDamage: number,
 		lifetime?: number, //<--- seconds
 	) {
-		const newModel = projectilePart.Clone();
+		const newModel = originalProjectilePart.Clone();
 		newModel.Position = startPosition;
 		newModel.CanCollide = false;
 		newModel.CanTouch = true;
@@ -160,9 +161,9 @@ export class WeaponProjectile extends InstanceComponent<BasePart> {
 		for (const mod of modifiers) this.rawModifiers.push(mod);
 	}
 
-	onHit(part: BasePart, point: Vector3): void {
+	onHit(part: BasePart, point: Vector3, destroyOnHit = false): void {
 		this.applyDamageToPart(part);
-		this.destroy();
+		if (destroyOnHit) this.destroy();
 	}
 
 	onTick(dt: number, percentage: number, reversePercentage: number): void {

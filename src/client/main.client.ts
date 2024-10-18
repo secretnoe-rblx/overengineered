@@ -14,7 +14,7 @@ import { Colors } from "shared/Colors";
 import { gameInfo } from "shared/GameInfo";
 import { RemoteEvents } from "shared/RemoteEvents";
 import { CustomRemotes } from "shared/Remotes";
-import { BulletProjectile } from "shared/weapons/BulletProjectileLogic";
+import { LaserProjectile } from "shared/weapons/LaserProjectileLogic";
 
 LoadingController.show("Initializing");
 Gui.getGameUI<{ VERSION: TextLabel }>().VERSION.Text = `v${RunService.IsStudio() ? "studio" : game.PlaceVersion}`;
@@ -67,8 +67,9 @@ $log("Client loaded.");
 //host.services.resolveForeignClass(CenterOfMassController).enable();
 
 //testing
-if (RunService.IsStudio() && Players.LocalPlayer.Name === "samlovebutter" && (false as boolean)) {
+if (RunService.IsStudio() && Players.LocalPlayer.Name === "samlovebutter") {
 	//&& (false as boolean)
+	/*
 	while (true as boolean) {
 		BulletProjectile.spawn.send({
 			startPosition: new Vector3(359, -16360, 330),
@@ -81,6 +82,16 @@ if (RunService.IsStudio() && Players.LocalPlayer.Name === "samlovebutter" && (fa
 		});
 		task.wait(0.1);
 	}
+	*/
+	LaserProjectile.spawn.send({
+		startPosition: new Vector3(359, -16360, 330),
+		baseVelocity: new Vector3(
+			0 + (math.random() - 0.5) * 10,
+			20 + (math.random() - 0.5) * 10,
+			-(500 + (math.random() - 0.5) * 10),
+		),
+		baseDamage: 1,
+	});
 }
 if (RunService.IsStudio() && Players.LocalPlayer.Name === "i3ymm") {
 	const testsName = "BlockTests";

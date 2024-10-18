@@ -7,6 +7,7 @@ export class BulletProjectile extends WeaponProjectile {
 		readonly baseVelocity: Vector3;
 		readonly baseDamage: number;
 	}>("bullet_spawn", "RemoteEvent");
+
 	constructor(startPosition: Vector3, baseVelocity: Vector3, baseDamage: number) {
 		super(startPosition, "KINETIC", WeaponProjectile.BULLET_PROJECTILE, baseVelocity, baseDamage);
 	}
@@ -30,6 +31,6 @@ export class BulletProjectile extends WeaponProjectile {
 	}
 }
 BulletProjectile.spawn.invoked.Connect((player, { startPosition, baseVelocity, baseDamage }) => {
-	// print("Bullet spawned");
+	print("Bullet spawned");
 	new BulletProjectile(startPosition, baseVelocity, baseDamage);
 });
