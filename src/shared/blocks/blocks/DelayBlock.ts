@@ -124,6 +124,9 @@ export const DelayBlock = {
 	id: "delayblock",
 	displayName: "Delay Block",
 	description: "Returns your value, but later",
+	search: {
+		partialAliases: ["wait"],
+	},
 
 	logic: { definition, ctor: Logic },
 	modelSource: {
