@@ -44,8 +44,8 @@ const definition = {
 
 type Wait = {
 	left: number;
-	readonly value: string | number | boolean | Vector3;
-	readonly valueType: "string" | "number" | "bool" | "vector3" | "byte";
+	readonly value: string | number | boolean | Vector3 | Color3;
+	readonly valueType: "string" | "number" | "bool" | "vector3" | "byte" | "color";
 	readonly tickBased: boolean;
 };
 

@@ -7,6 +7,7 @@ export const BlockConfigDefinitions = {
 		vector3: { config: Vector3.zero },
 		string: { config: "" },
 		byte: { config: 0 },
+		color: { config: new Color3(0, 0, 0) },
 	},
 	number: {
 		number: { config: 0 },
