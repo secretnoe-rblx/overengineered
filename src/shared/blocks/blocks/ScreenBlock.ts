@@ -12,6 +12,14 @@ const definition = {
 			displayName: "Data",
 			types: BlockConfigDefinitions.any,
 		},
+		textColor: {
+			displayName: "Text Color",
+			types: {
+				color: {
+					config: new Color3(1, 1, 1),
+				},
+			},
+		},
 	},
 	output: {},
 } satisfies BlockLogicFullBothDefinitions;
@@ -29,6 +37,7 @@ class Logic extends InstanceBlockLogic<typeof definition, ScreenBlock> {
 	static readonly events = {
 		update: new AutoC2SRemoteEvent<{
 			readonly block: ScreenBlock;
+			readonly color: Color3;
 			readonly text: string;
 			readonly translate: boolean;
 		}>("b_screen_update"),
@@ -50,15 +59,17 @@ class Logic extends InstanceBlockLogic<typeof definition, ScreenBlock> {
 
 			return tostring(data);
 		};
-		this.on(({ data }) => {
+		this.on(({ data, textColor }) => {
 			const datastr = dataToString(data);
 
 			if (this.instance.FindFirstChild("Part")) {
 				this.instance.Part.SurfaceGui.TextLabel.Text = datastr;
+				this.instance.Part.SurfaceGui.TextLabel.TextColor3 = textColor;
 			}
 
 			Logic.events.update.send({
 				block: this.instance,
+				color: textColor,
 				text: datastr,
 				translate: typeIs(data, "string"),
 			});
