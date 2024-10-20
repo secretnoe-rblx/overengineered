@@ -50,12 +50,13 @@ export class WeaponProjectile extends InstanceComponent<BasePart> {
 	static readonly BULLET_PROJECTILE: BasePart = BULLET;
 
 	constructor(
-		readonly startPosition: Vector3,
+		public startPosition: Vector3,
 		readonly projectileType: ProjectileType,
 		originalProjectilePart: BasePart,
-		readonly baseVelocity: Vector3,
-		readonly baseDamage: number,
+		public baseVelocity: Vector3,
+		public baseDamage: number,
 		lifetime?: number, //<--- seconds
+		public color?: Color3,
 	) {
 		const newModel = originalProjectilePart.Clone();
 		newModel.Position = startPosition;
@@ -70,8 +71,7 @@ export class WeaponProjectile extends InstanceComponent<BasePart> {
 		//ELONgate the projectile to avoid clipping
 		super(newModel);
 		this.projectilePart = newModel;
-		this.originalLifetime = lifetime;
-		this.modifiedLifetime = lifetime;
+		this.originalLifetime = this.modifiedLifetime = lifetime;
 		this.modifiedVelocity = baseVelocity;
 		this.projectilePart.PivotTo(CFrame.lookAlong(this.projectilePart.GetPivot().Position, baseVelocity));
 
@@ -130,6 +130,7 @@ export class WeaponProjectile extends InstanceComponent<BasePart> {
 			(1 - properties.Density / 100) * math.clamp(this.totalEffect?.heatDamage?.value ?? 0, 0, 1);
 
 		WeaponProjectile.damagedParts.set(part, inflictedDamage + explosiveDamage);
+		print(WeaponProjectile.damagedParts.get(part), partHealth);
 
 		if (!WeaponProjectile.damagedParts.has(part))
 			part.Destroying.Connect(() => WeaponProjectile.damagedParts.delete(part)); //damage here

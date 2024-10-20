@@ -9,8 +9,14 @@ export class LaserProjectile extends WeaponProjectile {
 		readonly baseDamage: number;
 	}>("laser_spawn", "RemoteEvent");
 
+	private laserVisualCopy;
+	private damage;
 	constructor(startPosition: Vector3, baseVelocity: Vector3, baseDamage: number) {
 		super(startPosition, "LASER", WeaponProjectile.LASER_PROJECTILE, baseVelocity.Unit, baseDamage);
+		this.laserVisualCopy = this.projectilePart.Clone();
+		this.laserVisualCopy.Parent = Workspace;
+		this.projectilePart.Transparency = 1;
+		this.damage = this.baseDamage;
 	}
 
 	onHit(part: BasePart, point: Vector3): void {
@@ -19,17 +25,22 @@ export class LaserProjectile extends WeaponProjectile {
 		//this.projectilePart.CanCollide = false;
 		//this.projectilePart.CanTouch = false;
 		//this.disable();
-		super.onHit(part, point);
+		//super.onHit(part, point);
 	}
 
 	onTick(dt: number, percentage: number, reversePercentage: number): void {
-		const res = Workspace.Shapecast(this.projectilePart, this.baseVelocity.mul(1000));
+		const res = Workspace.Shapecast(this.projectilePart, this.baseVelocity.Unit.mul(1023));
 		const dist = res ? res.Distance : 512;
-		this.projectilePart.Size = new Vector3(dist, this.projectilePart.Size.Y, this.projectilePart.Size.Z);
-		//TODO: very important vvvvvvvvvvvvvvvvvv
-		//get point between the emitter point and target
-		//set position to be the middle point
-		print(res?.Distance, this.projectilePart.Size);
+		this.laserVisualCopy.Size = new Vector3(dist, this.projectilePart.Size.Y, this.projectilePart.Size.Z);
+		this.laserVisualCopy.Position = this.projectilePart
+			.GetPivot()
+			.LookVector.mul(dist / 2)
+			.add(this.startPosition);
+
+		if (res) {
+			this.baseDamage = this.damage * dt;
+			super.onHit(res.Instance, res.Position);
+		}
 		super.onTick(dt, percentage, reversePercentage);
 	}
 }

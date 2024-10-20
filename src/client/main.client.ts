@@ -90,7 +90,7 @@ if (RunService.IsStudio() && Players.LocalPlayer.Name === "samlovebutter") {
 			20 + (math.random() - 0.5) * 10,
 			-(500 + (math.random() - 0.5) * 10),
 		),
-		baseDamage: 1,
+		baseDamage: 160.5,
 	});
 }
 if (RunService.IsStudio() && Players.LocalPlayer.Name === "i3ymm") {
