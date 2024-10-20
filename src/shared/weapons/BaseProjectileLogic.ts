@@ -18,14 +18,24 @@ export type projectileModifier = {
 	explosiveDamage?: modifierValue; //<-- area modifier
 };
 
-const PLASMA_BALL = Instances.assets.WaitForChild("WeaponProjectiles").WaitForChild("PlasmaProjectile") as BasePart;
-const BULLET = Instances.assets.WaitForChild("WeaponProjectiles").WaitForChild("BulletProjectile") as BasePart;
-const LASER = Instances.assets.WaitForChild("WeaponProjectiles").WaitForChild("LaserProjectile") as BasePart;
+export type baseWeaponProjectile = {
+	Projectile: BasePart;
+} & Model;
+
+const PLASMA_BALL = Instances.assets
+	.WaitForChild("WeaponProjectiles")
+	.WaitForChild("PlasmaProjectile") as baseWeaponProjectile;
+const BULLET = Instances.assets
+	.WaitForChild("WeaponProjectiles")
+	.WaitForChild("BulletProjectile") as baseWeaponProjectile;
+const LASER = Instances.assets
+	.WaitForChild("WeaponProjectiles")
+	.WaitForChild("LaserProjectile") as baseWeaponProjectile;
 
 const projectileFolder = new Instance("Folder", Workspace);
 projectileFolder.Name = "Projectiles";
 
-export type ProjectileType = "KINETIC" | "ROCKET" | "BOMB" | "LASER" | "PLASMA";
+export type ProjectileType = "KINETIC" | "EXPLOSIVE" | "ENERGY";
 
 export class WeaponProjectile extends InstanceComponent<BasePart> {
 	static readonly spawn = new AutoC2SRemoteEvent<{
@@ -45,20 +55,22 @@ export class WeaponProjectile extends InstanceComponent<BasePart> {
 	modifiedVelocity: Vector3;
 	static readonly damagedParts: Map<BasePart, number> = new Map();
 	readonly projectilePart: BasePart;
-	static readonly PLASMA_PROJECTILE: BasePart = PLASMA_BALL;
-	static readonly LASER_PROJECTILE: BasePart = LASER;
-	static readonly BULLET_PROJECTILE: BasePart = BULLET;
+	readonly originalProjectileModel;
+	static readonly PLASMA_PROJECTILE: baseWeaponProjectile = PLASMA_BALL;
+	static readonly LASER_PROJECTILE: baseWeaponProjectile = LASER;
+	static readonly BULLET_PROJECTILE: baseWeaponProjectile = BULLET;
 
 	constructor(
 		public startPosition: Vector3,
 		readonly projectileType: ProjectileType,
-		originalProjectilePart: BasePart,
+		originalProjectileModel: baseWeaponProjectile,
 		public baseVelocity: Vector3,
 		public baseDamage: number,
 		lifetime?: number, //<--- seconds
 		public color?: Color3,
 	) {
-		const newModel = originalProjectilePart.Clone();
+		const pmodel: baseWeaponProjectile = originalProjectileModel.Clone();
+		const newModel = pmodel.Projectile;
 		newModel.Position = startPosition;
 		newModel.CanCollide = false;
 		newModel.CanTouch = true;
@@ -66,14 +78,15 @@ export class WeaponProjectile extends InstanceComponent<BasePart> {
 		//newModel.CollisionGroup = "Projectile";
 		//newModel.EnableFluidForces = false;
 		newModel.AssemblyLinearVelocity = baseVelocity;
-		newModel.Parent = projectileFolder;
 		//transform projectile and shit
 		//ELONgate the projectile to avoid clipping
 		super(newModel);
 		this.projectilePart = newModel;
 		this.originalLifetime = this.modifiedLifetime = lifetime;
 		this.modifiedVelocity = baseVelocity;
-		this.projectilePart.PivotTo(CFrame.lookAlong(this.projectilePart.GetPivot().Position, baseVelocity));
+		this.projectilePart.PivotTo(CFrame.lookAlong(this.projectilePart.Position, baseVelocity));
+		this.originalProjectileModel = pmodel;
+		pmodel.Parent = projectileFolder;
 
 		this.event.subscribe(this.projectilePart.Touched, (part) => {
 			if (part.CollisionGroup === this.projectilePart.CollisionGroup) return;
@@ -130,7 +143,7 @@ export class WeaponProjectile extends InstanceComponent<BasePart> {
 			(1 - properties.Density / 100) * math.clamp(this.totalEffect?.heatDamage?.value ?? 0, 0, 1);
 
 		WeaponProjectile.damagedParts.set(part, inflictedDamage + explosiveDamage);
-		print(WeaponProjectile.damagedParts.get(part), partHealth);
+		//print(WeaponProjectile.damagedParts.get(part), partHealth);
 
 		if (!WeaponProjectile.damagedParts.has(part))
 			part.Destroying.Connect(() => WeaponProjectile.damagedParts.delete(part)); //damage here

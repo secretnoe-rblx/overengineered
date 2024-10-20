@@ -14,7 +14,7 @@ export class PlasmaProjectile extends WeaponProjectile {
 		readonly baseDamage: number;
 	}>("plasma_spawn", "RemoteEvent");
 	constructor(startPosition: Vector3, baseVelocity: Vector3, baseDamage: number) {
-		super(startPosition, "PLASMA", WeaponProjectile.PLASMA_PROJECTILE, baseVelocity, baseDamage, 5);
+		super(startPosition, "ENERGY", WeaponProjectile.PLASMA_PROJECTILE, baseVelocity, baseDamage, 5);
 		this.vectorForce = this.projectilePart.WaitForChild("VectorForce") as VectorForce;
 		this.updateLifetimeModifier(1);
 	}
