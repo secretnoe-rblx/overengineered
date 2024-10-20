@@ -107,6 +107,14 @@ declare global {
 }
 
 export const PlayerConfigDefinition = {
+	sprintSpeed: {
+		displayName: "Sprint speed",
+		type: "clampedNumber",
+		min: 20,
+		max: 200,
+		config: 60,
+		step: 0.01,
+	},
 	betterCamera: {
 		displayName: "Camera",
 		type: "camera",

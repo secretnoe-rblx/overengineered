@@ -66,6 +66,9 @@ export const SingleImpulseBlock = {
 	id: "singleimpulse",
 	displayName: "Signal Edge Detector",
 	description: "Converts a bit into a pulse",
+	search: {
+		partialAliases: ["edge", "rise", "single", "impulse"],
+	},
 
 	logic: { definition, ctor: Logic },
 	modelSource: {

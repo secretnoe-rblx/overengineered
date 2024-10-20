@@ -44,8 +44,8 @@ const definition = {
 
 type Wait = {
 	left: number;
-	readonly value: string | number | boolean | Vector3;
-	readonly valueType: "string" | "number" | "bool" | "vector3" | "byte";
+	readonly value: string | number | boolean | Vector3 | Color3;
+	readonly valueType: "string" | "number" | "bool" | "vector3" | "byte" | "color";
 	readonly tickBased: boolean;
 };
 
@@ -124,6 +124,9 @@ export const DelayBlock = {
 	id: "delayblock",
 	displayName: "Delay Block",
 	description: "Returns your value, but later",
+	search: {
+		partialAliases: ["wait"],
+	},
 
 	logic: { definition, ctor: Logic },
 	modelSource: {

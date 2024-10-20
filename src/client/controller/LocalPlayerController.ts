@@ -6,23 +6,25 @@ import { ObservableValue } from "engine/shared/event/ObservableValue";
 import { GameDefinitions } from "shared/data/GameDefinitions";
 import { Physics } from "shared/Physics";
 import { PartUtils } from "shared/utils/PartUtils";
+import type { PlayerDataStorage } from "client/PlayerDataStorage";
 import type { GameHostBuilder } from "engine/shared/GameHostBuilder";
 import type { LocalHeight } from "shared/Physics";
 
 class SprintLogic extends HostedService {
-	constructor(sprintSpeed: number) {
+	constructor(sprintSpeed: ReadonlyObservableValue<number>) {
 		super();
 
 		const isSprinting = new ObservableValue<boolean>(false);
-
-		// Update character walkspeed
-		isSprinting.subscribe((value) => {
+		const update = () => {
 			const humanoid = LocalPlayer.humanoid.get();
 			if (!humanoid) return;
 
 			const walkSpeed = 20;
-			humanoid.WalkSpeed = value ? sprintSpeed : walkSpeed;
-		});
+			humanoid.WalkSpeed = isSprinting.get() ? sprintSpeed.get() : walkSpeed;
+		};
+
+		isSprinting.subscribe(update);
+		this.event.subscribeObservable(sprintSpeed, update);
 
 		this.event.subscribeObservable(
 			InputController.inputType,
@@ -87,8 +89,11 @@ export namespace LocalPlayerController {
 	export function initializeDisablingFluidForces(host: GameHostBuilder): void {
 		host.services.registerService(DisableFluidForces);
 	}
-	export function initializeSprintLogic(host: GameHostBuilder, sprintSpeed: number): void {
-		host.services.registerService(SprintLogic).withArgs([sprintSpeed]);
+	export function initializeSprintLogic(host: GameHostBuilder): void {
+		host.services.registerService(SprintLogic).withArgs((di) => {
+			const sprintSpeed = di.resolve<PlayerDataStorage>().config.createBased((c) => c.sprintSpeed);
+			return [sprintSpeed];
+		});
 	}
 	export function initializeCameraMaxZoomDistance(host: GameHostBuilder, distance: number): void {
 		host.services.registerService(SetCameraMaxZoomDistance).withArgs([distance]);
