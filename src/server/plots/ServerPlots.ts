@@ -12,8 +12,24 @@ import type { SharedPlots } from "shared/building/SharedPlots";
 
 @injectable
 class ServerPlotController extends HostedService {
-	static tryCreate(player: Player, di: DIContainer, plots: SharedPlots) {
-		const tryGetFreePlot = (): SharedPlot | undefined => plots.plots.find((p) => p.ownerId.get() === undefined);
+	static tryCreate(player: Player, di: DIContainer, splots: ServerPlots, plots: SharedPlots) {
+		const tryGetFreePlot = (firstTime = true): SharedPlot | undefined => {
+			const plot = plots.plots.find((p) => p.ownerId.get() === undefined);
+			if (firstTime) return plot;
+			if (plot) return plot;
+
+			for (const plot of plots.plots) {
+				const ownerid = plot.ownerId.get();
+				if (!ownerid) return;
+
+				if (!Players.GetPlayerByUserId(ownerid)) {
+					$warn(`Plot ${plot.instance} was occupied by player ${ownerid} while being offline. Destroying...`);
+
+					splots.tryGetController(plot.instance)?.destroy();
+					return tryGetFreePlot(false);
+				}
+			}
+		};
 
 		const plot = tryGetFreePlot();
 		if (!plot) {
@@ -102,7 +118,7 @@ export class ServerPlots extends HostedService {
 		this.event.subscribeCollectionAdded(
 			PlayerWatcher.players,
 			(player) => {
-				const controller = ServerPlotController.tryCreate(player, di, plots);
+				const controller = ServerPlotController.tryCreate(player, di, this, plots);
 				if (!controller) return;
 
 				controller.onDestroy(() => {
