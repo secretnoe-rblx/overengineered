@@ -50,7 +50,7 @@ export namespace SandboxGame {
 
 		LoadingController.show("Pre-init");
 		LocalPlayerController.initializeDisablingFluidForces(builder);
-		LocalPlayerController.initializeSprintLogic(builder, RunService.IsStudio() ? 200 : 60);
+		LocalPlayerController.initializeSprintLogic(builder);
 		LocalPlayerController.initializeCameraMaxZoomDistance(builder, 512);
 		OtherPlayersController.initializeMassless(builder);
 		builder.services.registerService(RagdollController);
