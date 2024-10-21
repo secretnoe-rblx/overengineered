@@ -2,6 +2,7 @@ import { LoadingController } from "client/controller/LoadingController";
 import { LogControl } from "client/gui/static/LogControl";
 import { ClientComponent } from "engine/client/component/ClientComponent";
 import { InputController } from "engine/client/InputController";
+import { ObjectOverlayStorage } from "engine/shared/component/ObjectOverlayStorage";
 import { ObservableCollectionArr } from "engine/shared/event/ObservableCollection";
 import { Signal } from "engine/shared/event/Signal";
 
@@ -14,53 +15,67 @@ type Operation = {
 export class ActionController extends ClientComponent {
 	static readonly instance = new ActionController();
 
+	readonly state = new ObjectOverlayStorage({ canUndo: false, canRedo: false });
+
 	readonly onUndo = new Signal<(operation: Operation) => void>();
 	readonly onRedo = new Signal<(operation: Operation) => void>();
-	private readonly _history = new ObservableCollectionArr<Operation>();
-	private readonly _redoHistory = new ObservableCollectionArr<Operation>();
-	readonly history = this._history.asReadonly();
-	readonly redoHistory = this._redoHistory.asReadonly();
+	private readonly history = new ObservableCollectionArr<Operation>();
+	private readonly redoHistory = new ObservableCollectionArr<Operation>();
 
 	constructor() {
 		super();
 
+		this.event.subscribeImmediately(this.history.changed, () => {
+			this.state.get(99999).canUndo = this.history.size() !== 0 ? true : undefined;
+		});
+		this.event.subscribeImmediately(this.redoHistory.changed, () => {
+			this.state.get(99999).canRedo = this.redoHistory.size() !== 0 ? true : undefined;
+		});
+		this.onEnabledStateChange((enabled) => {
+			this.state.get(-999999999).canUndo = enabled ? undefined : false;
+			this.state.get(-999999999).canRedo = enabled ? undefined : false;
+		});
+
 		this.event.onKeyDown("Z", () => {
+			if (!this.state.getValues().canUndo) return;
+
 			if (!InputController.isCtrlPressed()) return;
 			if (LoadingController.isLoading.get()) return;
 			this.undo();
 		});
 		this.event.onKeyDown("Y", () => {
+			if (!this.state.getValues().canRedo) return;
+
 			if (!InputController.isCtrlPressed()) return;
 			if (LoadingController.isLoading.get()) return;
 			this.redo();
 		});
 	}
 
-	execute<TResult extends Response>(description: string, undo: () => Response, func: () => TResult) {
+	execute<TResult extends Response>(description: string, undo: () => Response, func: () => TResult): TResult {
 		const result = func();
-		if (result.success)
-			this.appendOperation({
-				description,
-				undo,
-				redo: func,
-			});
+		if (result.success) {
+			this.appendOperation({ description, undo, redo: func });
+		}
 
 		return result;
 	}
 
-	appendRedo(operation: Operation) {
-		this._redoHistory.push(operation);
+	appendRedo(operation: Operation): void {
+		this.redoHistory.push(operation);
 	}
-	appendOperation(operation: Operation) {
-		this._history.push(operation);
-		this._redoHistory.clear();
+	appendOperation(operation: Operation): void {
+		this.history.push(operation);
+		this.redoHistory.clear();
 	}
 
-	redo() {
-		const operation = this._redoHistory.pop();
+	redo(): boolean {
+		if (!this.state.getValues().canRedo) return false;
+
+		const operation = this.redoHistory.pop();
 		if (!operation) return false;
 
-		this._history.push(operation);
+		this.history.push(operation);
 		const response = operation.redo();
 		if (response && !response.success) {
 			LogControl.instance.addLine(`Error redoing "${operation.description}": ${response.message}`);
@@ -72,11 +87,13 @@ export class ActionController extends ClientComponent {
 		return true;
 	}
 
-	undo() {
-		const operation = this._history.pop();
+	undo(): boolean {
+		if (!this.state.getValues().canUndo) return false;
+
+		const operation = this.history.pop();
 		if (!operation) return false;
 
-		this._redoHistory.push(operation);
+		this.redoHistory.push(operation);
 		const response = operation.undo();
 		if (response && !response.success) {
 			LogControl.instance.addLine(`Error undoing "${operation.description}": ${response.message}`);

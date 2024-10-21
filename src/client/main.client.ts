@@ -102,45 +102,55 @@ if (RunService.IsStudio() && Players.LocalPlayer.Name === "i3ymm") {
 //
 
 task.spawn(() => {
+	if (true as boolean) return;
+
 	const d = 0.2;
 	const gui = Interface.getPlayerGui<{ test_delete_later: ScreenGui & { Build: GuiObject } }>().test_delete_later
 		.Build;
-	const child = gui.WaitForChild("Redo") as GuiObject;
 	const props: TransformProps = { duration: 0.2 };
 
-	while (true as boolean) {
-		Transforms.parallel(
-			Transforms.func(() => {
-				const [asc, childcopy] = Anim.createScreenForAnimating(child);
-				return Transforms.create()
-					.moveRelative(childcopy, new UDim2(0, 0, 0, -50), props)
-					.transform(childcopy, "Transparency", 1, props)
-					.then()
-					.destroy(asc);
-			}),
-			Anim.UIListLayout.animRemove(gui, child, props, "hide"),
-		).run(child);
+	const e = (child: GuiObject) => {
+		while (true as boolean) {
+			Transforms.parallel(
+				Transforms.func(() => {
+					const [asc, childcopy] = Anim.createScreenForAnimating(child);
+					return (
+						Transforms.create()
+							// .moveRelative(childcopy, new UDim2(0, 0, 0, -50), props)
+							.show(childcopy)
+							.fadeOutFrom1(childcopy, props)
+							.then()
+							.destroy(asc)
+					);
+				}),
+				Anim.UIListLayout.animRemove(gui, child, props, "hide"),
+			).run(child);
 
-		task.wait(d);
+			task.wait(d);
 
-		Transforms.parallel(
-			Transforms.func(() => {
-				const [asc, childcopy] = Anim.createScreenForAnimating(child);
-				return Transforms.create()
-					.moveRelative(childcopy, new UDim2(0, 0, 0, -50))
-					.transform(childcopy, "Transparency", 1)
-					.setVisible(childcopy, true)
+			Transforms.parallel(
+				Transforms.func(() => {
+					const [asc, childcopy] = Anim.createScreenForAnimating(child);
+					return (
+						Transforms.create()
+							// .moveRelative(childcopy, new UDim2(0, 0, 0, -50))
+							.show(childcopy)
+							// .moveRelative(childcopy, new UDim2(0, 0, 0, 50), props)
+							.fadeInFrom0(childcopy, props)
+							.then()
+							.destroy(asc)
+					);
+				}),
+				Anim.UIListLayout.animAdd(gui, child, props) //
 					.then()
-					.moveRelative(childcopy, new UDim2(0, 0, 0, 50), props)
-					.transform(childcopy, "Transparency", 0, props)
-					.then()
-					.destroy(asc);
-			}),
-			Anim.UIListLayout.animAdd(gui, child, props) //
-				.then()
-				.setVisible(child, true),
-		).run(child);
+					.show(child),
+			).run(child);
 
-		task.wait(d);
-	}
+			task.wait(d);
+		}
+	};
+
+	task.spawn(() => e(gui.WaitForChild("Undo") as GuiObject));
+	//task.spawn(() => e(gui.WaitForChild("Redo") as GuiObject));
+	//task.spawn(() => e(gui.WaitForChild("CenterOfMass") as GuiObject));
 });
