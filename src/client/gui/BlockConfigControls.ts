@@ -1230,7 +1230,7 @@ export class MultiBlockConfigControl extends Control implements Controls.Args {
 
 			for (const k of order ?? asMap(definitions).keys()) {
 				const definition = definitions[k];
-				if (definition.configHidden) continue;
+				if (definition.configHidden && !asMap(configs).any((uuid, c) => c[k].type === "wire")) continue;
 
 				const lconfigs = map(configs, (c) => c[k]);
 				const wrapper = this.add(
