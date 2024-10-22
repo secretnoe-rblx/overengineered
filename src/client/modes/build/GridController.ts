@@ -7,7 +7,7 @@ import { ObjectOverlayStorage } from "engine/shared/component/ObjectOverlayStora
 import { Transforms } from "engine/shared/component/Transforms";
 import type { FloatingWindowDefinition } from "client/gui/FloatingWindow";
 import type { GridEditorControlDefinition } from "client/gui/GridEditor";
-import type { Topbar } from "client/gui/Topbar";
+import type { MainScreenLayout } from "client/gui/MainScreenLayout";
 import type { EditMode } from "client/modes/build/BuildingMode";
 import type { EditTool } from "client/tools/EditTool";
 import type { ObservableValue } from "engine/shared/event/ObservableValue";
@@ -19,33 +19,40 @@ export class GridController extends Component {
 		rotateGrid: ObservableValue<number>,
 		editMode: ObservableValue<EditMode>,
 		@inject editTool: EditTool,
-		@inject topbar: Topbar,
+		@inject mainScreen: MainScreenLayout,
 	) {
 		super();
 
-		const gui = Interface.getInterface<{
+		const gridButton = this.parent(mainScreen.registerTopRightButton("Grid", true));
+		this.parent(
+			new ButtonControl(
+				gridButton.instance,
+				() => (controlOverlay.get(-1).Visible = !controlOverlay.get(-1).Visible),
+			),
+		);
+
+		const floatingGui = Interface.getInterface<{
 			Floating: { Grid: FloatingWindowDefinition & { Content: GridEditorControlDefinition } };
 		}>().Floating.Grid;
 
-		const floatingScreen = this.parent(FloatingWindow.create(gui));
-		floatingScreen.add(new GridEditorControl(gui.Content, moveGrid, rotateGrid, editMode));
+		const floatingScreen = this.parent(FloatingWindow.create(floatingGui));
+		floatingScreen.add(new GridEditorControl(floatingGui.Content, moveGrid, rotateGrid, editMode));
 
 		const controlOverlay = ObjectOverlayStorage.transform(
-			gui,
+			floatingGui,
 			{ Visible: false },
 			Transforms.commonProps.quadOut02,
 		);
 
 		this.event.subscribeObservable(
 			editTool.selectedMode,
-			(mode) => (controlOverlay.get(0).Visible = mode === undefined ? false : undefined),
+			(mode) => {
+				const visible = mode === undefined;
+
+				controlOverlay.get(0).Visible = visible;
+				gridButton.visibility.get(0).Visible = visible;
+			},
 			true,
-		);
-		this.parent(
-			new ButtonControl(
-				topbar.getRightButtonsGui<GuiButton>("Grid"),
-				() => (controlOverlay.get(-1).Visible = controlOverlay.get(-1).Visible ? undefined : true),
-			),
 		);
 	}
 }

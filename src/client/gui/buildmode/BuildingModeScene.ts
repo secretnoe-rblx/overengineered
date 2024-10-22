@@ -4,9 +4,7 @@ import { HotbarControl } from "client/gui/buildmode/HotbarControl";
 import { ButtonControl } from "client/gui/controls/Button";
 import { Interface } from "client/gui/Interface";
 import { Scene } from "client/gui/Scene";
-import { ActionController } from "client/modes/build/ActionController";
 import { requestMode } from "client/modes/PlayModeRequest";
-import { Control } from "engine/client/gui/Control";
 import { ComponentDisabler } from "engine/shared/component/ComponentDisabler";
 import { Transforms } from "engine/shared/component/Transforms";
 import type { HotbarControlDefinition } from "client/gui/buildmode/HotbarControl";
@@ -14,7 +12,6 @@ import type { SavePopup } from "client/gui/popup/SavePopup";
 import type { SettingsPopup } from "client/gui/popup/SettingsPopup";
 import type { Topbar } from "client/gui/Topbar";
 import type { BuildingMode } from "client/modes/build/BuildingMode";
-import type { EditTool } from "client/tools/EditTool";
 import type { ToolController } from "client/tools/ToolController";
 import type { TransformProps } from "engine/shared/component/Transform";
 
@@ -93,56 +90,6 @@ class TopbarButtonsControl extends Scene {
 	}
 }
 
-type TopbarRightButtonsControlDefinition = GuiObject & {
-	readonly Undo: GuiButton;
-	readonly Redo: GuiButton;
-	readonly CenterOfMass: GuiButton;
-};
-@injectable
-class TopbarRightButtonsControl extends Control<TopbarRightButtonsControlDefinition> {
-	constructor(
-		gui: TopbarRightButtonsControlDefinition,
-		@inject mode: BuildingMode,
-		@inject actionController: ActionController,
-		@inject editTool: EditTool,
-	) {
-		super(gui);
-
-		this.event.subscribeObservable(
-			editTool.selectedMode,
-			(mode) => {
-				const visible = mode === undefined;
-				// gui.Visible = mode === undefined;
-			},
-			true,
-		);
-
-		const undo = this.add(new ButtonControl(gui.Undo, () => ActionController.instance.undo()));
-		const redo = this.add(new ButtonControl(gui.Redo, () => ActionController.instance.redo()));
-
-		this.event.subscribeObservable(
-			actionController.state.value,
-			({ canUndo, canRedo }) => {
-				aorlc(canUndo, gui, undo.instance, props);
-				aorlc(canRedo, gui, redo.instance, props);
-			},
-			true,
-		);
-
-		const com = this.add(
-			new ButtonControl(gui.CenterOfMass, () => mode.centerOfMassEnabled.set(!mode.centerOfMassEnabled.get())),
-		);
-		this.event.subscribeObservable(
-			mode.centerOfMassEnabled,
-			(enabled) =>
-				Transforms.create()
-					.transform(com.instance, "Transparency", enabled ? 0 : 0.5, props)
-					.run(com.instance),
-			true,
-		);
-	}
-}
-
 @injectable
 export class BuildingModeScene extends Scene {
 	readonly actionbar;
@@ -158,17 +105,12 @@ export class BuildingModeScene extends Scene {
 		const topbarButtons = this.parent(
 			di.resolveForeignClass(TopbarButtonsControl, [topbar.getButtonsGui("Build")]),
 		);
-		const topbarRightButtons = this.parent(
-			di.resolveForeignClass(TopbarRightButtonsControl, [topbar.getRightButtonsGui("Build")]),
-		);
 
 		this.actionbar = topbarButtons;
 
 		const updateActionBarVisibility = () => {
 			const visible = !LoadingController.isLoading.get();
-
 			topbarButtons.setEnabled(visible);
-			topbarRightButtons.setVisible(visible);
 		};
 		this.event.subscribeObservable(LoadingController.isLoading, updateActionBarVisibility, true);
 

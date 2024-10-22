@@ -1,23 +1,22 @@
 import { ReplicatedStorage, StarterGui, UserInputService, Workspace } from "@rbxts/services";
+import { Anim } from "client/gui/Anim";
 import { ButtonControl } from "client/gui/controls/Button";
 import { Interface } from "client/gui/Interface";
 import { HostedService } from "engine/shared/di/HostedService";
-import { Element } from "engine/shared/Element";
 import { ObservableValue } from "engine/shared/event/ObservableValue";
-import type { Topbar } from "client/gui/Topbar";
+import type { MainScreenLayout } from "client/gui/MainScreenLayout";
 
 @injectable
 export class HideInterfaceController extends HostedService {
-	private readonly _visible = new ObservableValue(true);
-	readonly visible = this._visible.asReadonly();
+	private readonly visible = new ObservableValue(true);
 
-	private readonly guis = [Interface.getGameUI(), Interface.getUnscaledGameUI(), Interface.getInterface()] as const;
+	private readonly guis = [Interface.getGameUI(), Interface.getUnscaledGameUI(), Interface.getInterface2()] as const;
 	private currentUnhideScreen?: ScreenGui;
 
-	constructor(@inject topbar: Topbar) {
+	constructor(@inject mainScreen: MainScreenLayout) {
 		super();
 
-		this.event.subscribeObservable(this._visible, (visible) => {
+		this.event.subscribeObservable(this.visible, (visible) => {
 			if (visible) {
 				this.currentUnhideScreen?.Destroy();
 				this.currentUnhideScreen = undefined;
@@ -37,10 +36,10 @@ export class HideInterfaceController extends HostedService {
 				return;
 			}
 
-			this._visible.set(!this._visible.get());
+			this.visible.set(!this.visible.get());
 		});
 
-		this._visible.subscribe((visible) => {
+		this.visible.subscribe((visible) => {
 			// hide screen guis
 			for (const ui of this.guis) {
 				ui.Enabled = visible;
@@ -61,34 +60,20 @@ export class HideInterfaceController extends HostedService {
 			});
 		});
 
-		const hideButton = topbar.getRightButtonsGui<{ readonly Hide: GuiButton }>("Common").Hide;
-		this.parent(new ButtonControl(hideButton, () => this.hide(hideButton))).show();
+		const hideButton = mainScreen.registerTopRightButton("Hide", true);
+		this.parent(
+			new ButtonControl(hideButton.instance, () => {
+				this.currentUnhideScreen = this.createUnhideGui(hideButton.instance);
+				this.visible.set(false);
+			}),
+		).show();
 	}
 
 	private createUnhideGui(button: GuiButton): ScreenGui {
-		const ghost = button.Clone();
+		const [screen, ghost] = Anim.createScreenForAnimating(button);
 		ghost.Transparency = 0.8;
-		ghost.Position = new UDim2(0, button.AbsolutePosition.X, 0, button.AbsolutePosition.Y);
-		ghost.Size = new UDim2(0, button.AbsoluteSize.X, 0, button.AbsoluteSize.Y);
-		ghost.AnchorPoint = Vector2.zero;
 
-		new ButtonControl(ghost, () => this._visible.set(true)).show();
-
-		const screen = Element.create("ScreenGui", { Name: "UnhideScreenGui" }, { ghost });
-		screen.Parent = Interface.getPlayerGui();
-
+		new ButtonControl(ghost, () => this.visible.set(true)).show();
 		return screen;
-	}
-
-	/**
-	 * Hide the whole game interface.
-	 * @param button If not nil, uses this to create a ghost that on click will restore the visibility (for mobile devices which don't have any physical buttons)
-	 */
-	hide(button: GuiButton | undefined) {
-		if (button) {
-			this.currentUnhideScreen = this.createUnhideGui(button);
-		}
-
-		this._visible.set(false);
 	}
 }

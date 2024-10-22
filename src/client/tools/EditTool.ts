@@ -30,6 +30,7 @@ import type { MaterialColorEditControlDefinition } from "client/gui/buildmode/Ma
 import type { TextButtonDefinition } from "client/gui/controls/Button";
 import type { InputTooltips } from "client/gui/static/TooltipsControl";
 import type { Keybinds } from "client/Keybinds";
+import type { ActionController } from "client/modes/build/ActionController";
 import type { BuildingMode } from "client/modes/build/BuildingMode";
 import type { BlockSelectorModeGuiDefinition } from "client/tools/highlighters/BlockSelectorModeGui";
 import type { SharedPlot } from "shared/building/SharedPlot";
@@ -612,6 +613,7 @@ export class EditTool extends ToolBase {
 		@inject readonly mode: BuildingMode,
 		@inject private readonly blockList: BlockList,
 		@inject keybinds: Keybinds,
+		@inject actionController: ActionController,
 		@inject di: DIContainer,
 	) {
 		super(mode);
@@ -637,6 +639,10 @@ export class EditTool extends ToolBase {
 		this.event.subscribeObservable(this.selectedMode, (mode) =>
 			this.tooltipHolder.set(mode === undefined ? this.getTooltips() : {}),
 		);
+		this.event.subscribeObservable(this.selectedMode, (mode) => {
+			actionController.state.get(-7).canUndo = mode === undefined ? undefined : false;
+			actionController.state.get(-7).canRedo = mode === undefined ? undefined : false;
+		});
 
 		this.onDisable(() => this.selected.clear());
 		this.onDisable(() => this._selectedMode.set(undefined));

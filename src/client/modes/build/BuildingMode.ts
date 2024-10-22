@@ -1,5 +1,6 @@
 import { MirrorVisualizer } from "client/controller/MirrorVisualizer";
 import { BuildingModeScene } from "client/gui/buildmode/BuildingModeScene";
+import { ActionController } from "client/modes/build/ActionController";
 import { CenterOfMassController } from "client/modes/build/CenterOfMassController";
 import { GridController } from "client/modes/build/GridController";
 import { PlayMode } from "client/modes/PlayMode";
@@ -9,7 +10,6 @@ import { LocalPlayer } from "engine/client/LocalPlayer";
 import { NumberObservableValue } from "engine/shared/event/NumberObservableValue";
 import { ObservableValue } from "engine/shared/event/ObservableValue";
 import { SharedRagdoll } from "shared/SharedRagdoll";
-import type { ActionController } from "client/modes/build/ActionController";
 import type { SharedPlot } from "shared/building/SharedPlot";
 
 declare global {
@@ -32,15 +32,16 @@ export class BuildingMode extends PlayMode {
 	readonly gridEnabled = new ObservableValue(true);
 	readonly moveGrid = new NumberObservableValue<number>(1, 0, 256, 0.01);
 	readonly rotateGrid = new NumberObservableValue<number>(90, 0, 360, 0.01);
-	readonly centerOfMassEnabled = new ObservableValue<boolean>(false);
 	readonly editMode = new ObservableValue<EditMode>("global");
 
-	constructor(@inject di: DIContainer, @inject plot: SharedPlot, @inject actionController: ActionController) {
+	constructor(@inject di: DIContainer, @inject plot: SharedPlot) {
 		super();
 
 		di = di.beginScope((di) => {
 			di.registerSingletonValue(this);
+			di.registerSingletonClass(ActionController);
 			di.registerSingletonClass(ToolController);
+			di.registerSingletonClass(CenterOfMassController);
 			di.registerSingletonClass(GridController).withArgs([this.moveGrid, this.rotateGrid, this.editMode]);
 
 			di.registerSingletonFunc((di) => di.resolve<ToolController>().allTools.buildTool);
@@ -49,16 +50,6 @@ export class BuildingMode extends PlayMode {
 			di.registerSingletonFunc((di) => di.resolve<ToolController>().allTools.deleteTool);
 			di.registerSingletonFunc((di) => di.resolve<ToolController>().allTools.paintTool);
 			di.registerSingletonFunc((di) => di.resolve<ToolController>().allTools.wireTool);
-		});
-
-		const com = new CenterOfMassController(plot);
-		this.event.subscribeObservable(this.centerOfMassEnabled, (enabled) => com.setEnabled(enabled), true);
-		this.onDisable(() => com.disable());
-		this.onDestroy(() => com.destroy());
-
-		this.event.subInput((ih) => {
-			ih.onKeyDown("LeftControl", () => this.gridEnabled.set(false));
-			ih.onKeyUp("LeftControl", () => this.gridEnabled.set(true));
 		});
 
 		this.targetPlot = new ObservableValue<SharedPlot | undefined>(undefined).withDefault(plot);
@@ -70,14 +61,19 @@ export class BuildingMode extends PlayMode {
 
 			BlockSelect.blockRaycastParams.AddToFilter(plot.instance);
 		}, true);
-
 		this.mirrorVisualizer = this.parent(new MirrorVisualizer(this.targetPlot, this.mirrorMode));
 
 		this.toolController = this.parent(di.resolve<ToolController>());
-		this.parent(actionController);
 		this.gui = this.parent(di.resolveForeignClass(BuildingModeScene));
 
 		this.parent(di.resolve<GridController>());
+		this.parent(di.resolve<ActionController>());
+		this.parent(di.resolve<CenterOfMassController>());
+
+		this.event.subInput((ih) => {
+			ih.onKeyDown("LeftControl", () => this.gridEnabled.set(false));
+			ih.onKeyUp("LeftControl", () => this.gridEnabled.set(true));
+		});
 	}
 
 	getName(): PlayModes {

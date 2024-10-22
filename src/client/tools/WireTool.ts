@@ -3,7 +3,6 @@ import { ButtonControl } from "client/gui/controls/Button";
 import { GuiAnimator } from "client/gui/GuiAnimator";
 import { Interface } from "client/gui/Interface";
 import { LogControl } from "client/gui/static/LogControl";
-import { ActionController } from "client/modes/build/ActionController";
 import { ClientBuilding } from "client/modes/build/ClientBuilding";
 import { ToolBase } from "client/tools/ToolBase";
 import { ClientComponent } from "engine/client/component/ClientComponent";
@@ -19,6 +18,7 @@ import { Instances } from "engine/shared/fixes/Instances";
 import { BlockWireManager } from "shared/blockLogic/BlockWireManager";
 import { Colors } from "shared/Colors";
 import type { InputTooltips } from "client/gui/static/TooltipsControl";
+import type { ActionController } from "client/modes/build/ActionController";
 import type { BuildingMode } from "client/modes/build/BuildingMode";
 import type { BlockLogicTypes } from "shared/blockLogic/BlockLogicTypes";
 import type { SharedPlot } from "shared/building/SharedPlot";
@@ -674,6 +674,7 @@ export class WireTool extends ToolBase {
 
 	constructor(
 		@inject mode: BuildingMode,
+		@inject actionController: ActionController,
 		@inject private readonly blockList: BlockList,
 	) {
 		super(mode);
@@ -685,11 +686,11 @@ export class WireTool extends ToolBase {
 		this.onPrepare(() => this.createEverything());
 		this.onDisable(() => this.markers.clear());
 
-		this.event.subscribe(ActionController.instance.onUndo, () => {
+		this.event.subscribe(actionController.onUndo, () => {
 			this.disable();
 			this.enable();
 		});
-		this.event.subscribe(ActionController.instance.onRedo, () => {
+		this.event.subscribe(actionController.onRedo, () => {
 			this.disable();
 			this.enable();
 		});

@@ -101,10 +101,28 @@ export namespace Anim {
 	export function createScreenForAnimating<TChildren extends readonly GuiObject[]>(
 		...children: TChildren
 	): LuaTuple<[ScreenGui, ...TChildren]> {
+		const findScreen = (instance: Instance): ScreenGui | undefined => {
+			let parent = instance;
+			if (parent.IsA("ScreenGui")) {
+				return parent;
+			}
+
+			if (!parent.Parent) return;
+			parent = parent.Parent;
+		};
+
+		const childScreen = children[0] && findScreen(children[0]);
+
 		const clones = children.map(cloneWithAbsolutePosition) as unknown as TChildren;
 		const screen = Element.create(
 			"ScreenGui",
-			{ Parent: Interface.getPlayerGui() },
+			{
+				IgnoreGuiInset: childScreen?.IgnoreGuiInset,
+				ClipToDeviceSafeArea: childScreen?.ClipToDeviceSafeArea,
+				SafeAreaCompatibility: childScreen?.SafeAreaCompatibility,
+				ScreenInsets: childScreen?.ScreenInsets,
+				Parent: Interface.getPlayerGui(),
+			},
 			asObject(clones.mapToMap((child) => $tuple(child.Name, child))),
 		);
 

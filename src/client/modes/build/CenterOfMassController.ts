@@ -1,11 +1,15 @@
 import { ReplicatedStorage, Workspace } from "@rbxts/services";
+import { ButtonControl } from "client/gui/controls/Button";
 import { Interface } from "client/gui/Interface";
-import { ActionController } from "client/modes/build/ActionController";
 import { ClientComponent } from "engine/client/component/ClientComponent";
+import { Transforms } from "engine/shared/component/Transforms";
+import { ObservableValue } from "engine/shared/event/ObservableValue";
 import { BuildingManager } from "shared/building/BuildingManager";
 import { SharedPlot } from "shared/building/SharedPlot";
 import { Colors } from "shared/Colors";
 import { CustomRemotes } from "shared/Remotes";
+import type { MainScreenLayout } from "client/gui/MainScreenLayout";
+import type { ActionController } from "client/modes/build/ActionController";
 
 type CM = readonly [pos: Vector3, mass: number];
 const weightedAverage = (values: readonly CM[]) => {
@@ -17,12 +21,32 @@ const weightedAverage = (values: readonly CM[]) => {
 
 @injectable
 export class CenterOfMassController extends ClientComponent {
+	private readonly enabled = new ObservableValue(false);
+
 	private readonly viewportFrame;
 	private renderedBalls: Model[] = [];
 	private machineCOM: Model | undefined;
 
-	constructor(@inject plot: SharedPlot) {
+	constructor(
+		@inject plot: SharedPlot,
+		@inject actionController: ActionController,
+		@inject mainScreen: MainScreenLayout,
+	) {
 		super();
+
+		{
+			const button = mainScreen.registerTopRightButton("CenterOfMass", true);
+			const com = this.parent(new ButtonControl(button.instance, () => this.enabled.set(!this.enabled.get())));
+
+			this.event.subscribeObservable(
+				this.enabled,
+				(enabled) =>
+					Transforms.create()
+						.transform(com.instance, "Transparency", enabled ? 0 : 0.5, Transforms.commonProps.quadOut02)
+						.run(com.instance),
+				true,
+			);
+		}
 
 		this.viewportFrame = new Instance("ViewportFrame");
 		this.viewportFrame.Name = "WireViewportFrame";
@@ -85,13 +109,15 @@ export class CenterOfMassController extends ClientComponent {
 			this.renderedBalls.clear();
 		};
 
-		this.event.subscribe(ActionController.instance.onRedo, update);
-		this.event.subscribe(ActionController.instance.onUndo, update);
+		this.event.subscribe(actionController.onRedo, update);
+		this.event.subscribe(actionController.onUndo, update);
 		this.event.subscribe(CustomRemotes.slots.load.sent, clear);
 		this.event.subscribe(CustomRemotes.slots.load.completed, (v) => (v.success ? update() : undefined));
 		this.event.subscribe(SharedPlot.anyChanged, update);
 		this.event.onEnable(update);
 		this.onDisable(clear);
+
+		this.enabled.subscribe((enabled) => (enabled ? update() : clear()), true);
 	}
 
 	private calculateCentersOfMass(blocks: readonly BlockModel[]): readonly CM[] {

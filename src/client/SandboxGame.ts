@@ -18,6 +18,7 @@ import { AdminGui } from "client/gui/AdminGui";
 import { GuiAutoScaleController } from "client/gui/GuiAutoScaleController";
 import { HideInterfaceController } from "client/gui/HideInterfaceController";
 import { Interface } from "client/gui/Interface";
+import { MainScreenLayout } from "client/gui/MainScreenLayout";
 import { ControlsPopup } from "client/gui/popup/ControlsPopup";
 import { NewSettingsPopup } from "client/gui/popup/NewSettingsPopup";
 import { ReportSubmitController } from "client/gui/popup/ReportSubmitPopup";
@@ -26,7 +27,6 @@ import { SettingsPopup } from "client/gui/popup/SettingsPopup";
 import { WikiPopup } from "client/gui/popup/WikiPopup";
 import { Topbar } from "client/gui/Topbar";
 import { Keybinds } from "client/Keybinds";
-import { ActionController } from "client/modes/build/ActionController";
 import { ClientBuildingValidationController } from "client/modes/build/ClientBuildingValidationController";
 import { PlayModeController } from "client/modes/PlayModeController";
 import { PlayerDataInitializer } from "client/PlayerDataStorage";
@@ -93,7 +93,11 @@ export namespace SandboxGame {
 		builder.services.registerService(MusicController);
 		builder.services.registerService(GuiAutoScaleController);
 		builder.services.registerService(HideInterfaceController);
-		builder.services.registerSingletonValue(ActionController.instance);
+		builder.services
+			.registerSingletonClass(MainScreenLayout)
+			.autoInit()
+			.onInit((c) => c.enable());
+
 		builder.services
 			.registerSingletonClass(Topbar)
 			.withArgs([Interface.getInterface<{ Topbar: TopbarDefinition }>().Topbar])

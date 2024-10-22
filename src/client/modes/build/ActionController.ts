@@ -1,10 +1,35 @@
 import { LoadingController } from "client/controller/LoadingController";
+import { ButtonControl } from "client/gui/controls/Button";
 import { LogControl } from "client/gui/static/LogControl";
 import { ClientComponent } from "engine/client/component/ClientComponent";
 import { InputController } from "engine/client/InputController";
+import { Component } from "engine/shared/component/Component";
 import { ObjectOverlayStorage } from "engine/shared/component/ObjectOverlayStorage";
 import { ObservableCollectionArr } from "engine/shared/event/ObservableCollection";
 import { Signal } from "engine/shared/event/Signal";
+import type { MainScreenLayout } from "client/gui/MainScreenLayout";
+
+@injectable
+class ActionControllerGui extends Component {
+	constructor(@inject mainScreen: MainScreenLayout, @inject actionController: ActionController) {
+		super();
+
+		const undov = mainScreen.registerTopRightButton("Undo", false);
+		const redov = mainScreen.registerTopRightButton("Redo", false);
+
+		this.parent(new ButtonControl(undov.instance, () => actionController.undo()));
+		this.parent(new ButtonControl(redov.instance, () => actionController.redo()));
+
+		this.event.subscribeObservable(
+			actionController.state.value,
+			({ canUndo, canRedo }) => {
+				undov.visibility.get(0).Visible = canUndo;
+				redov.visibility.get(0).Visible = canRedo;
+			},
+			true,
+		);
+	}
+}
 
 type Operation = {
 	readonly description: string;
@@ -12,8 +37,10 @@ type Operation = {
 	readonly redo: () => void | Response;
 };
 
+@injectable
 export class ActionController extends ClientComponent {
-	static readonly instance = new ActionController();
+	/** @deprecated Use @inject instead */
+	static instance: ActionController;
 
 	readonly state = new ObjectOverlayStorage({ canUndo: false, canRedo: false });
 
@@ -22,8 +49,13 @@ export class ActionController extends ClientComponent {
 	private readonly history = new ObservableCollectionArr<Operation>();
 	private readonly redoHistory = new ObservableCollectionArr<Operation>();
 
-	constructor() {
+	constructor(@inject di: DIContainer) {
 		super();
+
+		this.parent(di.resolveForeignClass(ActionControllerGui));
+
+		if (ActionController.instance) throw "what";
+		ActionController.instance = this;
 
 		this.event.subscribeImmediately(this.history.changed, () => {
 			this.state.get(99999).canUndo = this.history.size() !== 0 ? true : undefined;
