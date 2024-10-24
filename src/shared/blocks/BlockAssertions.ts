@@ -129,7 +129,7 @@ export namespace BlockAssertions {
 			...assertFluidForcesIsDisabled(block),
 			...assertSomethingAnchored(block),
 			...assertCollisionGroup(block),
-			// ...assertNoRepeatedPartNames(block), temporarily removed
+			...assertNoRepeatedPartNames(block),
 		];
 	}
 
