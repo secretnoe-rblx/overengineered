@@ -81,15 +81,25 @@ export namespace BlockAssertions {
 		}
 	}
 	function* assertNoRepeatedPartNames(block: Model) {
-		const names = new Set<string>();
-		for (const item of block.GetDescendants()) {
-			if (!item.IsA("BasePart")) continue;
+		function* check(parent: Instance): Generator<string> {
+			const names = new Set<string>();
+			for (const child of parent.GetChildren()) {
+				for (const err of check(child)) {
+					yield err;
+				}
 
-			if (names.has(item.Name)) {
-				yield `Block ${block.Name} has duplicate child name ${item.Name}`;
+				if (!child.IsA("BasePart")) continue;
+
+				if (names.has(child.Name)) {
+					yield `Block ${block.Name} has duplicate child name ${child.Name}`;
+				}
+
+				names.add(child.Name);
 			}
+		}
 
-			names.add(item.Name);
+		for (const err of check(block)) {
+			yield err;
 		}
 	}
 	function checkSize(block: AssertedModel) {
