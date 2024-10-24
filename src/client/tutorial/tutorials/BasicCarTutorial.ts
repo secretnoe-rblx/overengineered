@@ -1,4 +1,3 @@
-import { ActionController } from "client/modes/build/ActionController";
 import { BasicCarTutorialDiffs } from "client/tutorial/tutorials/BasicCarTutorial.diff";
 import type { BuildingMode } from "client/modes/build/BuildingMode";
 import type { TutorialController, TutorialDescriber, TutorialRunnerPartList } from "client/tutorial/TutorialController";
@@ -17,15 +16,13 @@ export class BasicCarTutorial implements TutorialDescriber {
 		return [
 			() => [
 				t.funcPart(() => {
-					ActionController.instance.disable();
 					toolController.enabledTools.disableAll();
-					this.buildingMode.gui.actionbar.enabledButtons.enableOnly("settings");
+					this.buildingMode.switchTutorialMode(true);
 
 					t.onDestroy(() => {
-						ActionController.instance.enable();
 						toolController.enabledTools.enableAll();
-						this.buildingMode.gui.actionbar.enabledButtons.enableAll();
 						editTool.enabledModes.enableAll();
+						this.buildingMode.switchTutorialMode(false);
 					});
 				}),
 				t.partNextButton(),

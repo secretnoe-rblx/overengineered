@@ -5,7 +5,6 @@ import { Colors } from "shared/Colors";
 import type { TextButtonDefinition } from "client/gui/controls/Button";
 import type { HoveredBlocksSelectorMode } from "client/tools/highlighters/HoveredBlocksSelector";
 import type { BlockSelectorMode } from "client/tools/highlighters/MultiBlockSelector";
-import type { ObservableValue } from "engine/shared/event/ObservableValue";
 
 export type BlockSelectorModeGuiDefinition = GuiObject & {
 	readonly SingleSelection: TextButtonDefinition;

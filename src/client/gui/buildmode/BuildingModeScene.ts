@@ -8,6 +8,7 @@ import { requestMode } from "client/modes/PlayModeRequest";
 import { ComponentDisabler } from "engine/shared/component/ComponentDisabler";
 import { Transforms } from "engine/shared/component/Transforms";
 import type { HotbarControlDefinition } from "client/gui/buildmode/HotbarControl";
+import type { MainScreenLayout } from "client/gui/MainScreenLayout";
 import type { SavePopup } from "client/gui/popup/SavePopup";
 import type { SettingsPopup } from "client/gui/popup/SettingsPopup";
 import type { Topbar } from "client/gui/Topbar";
@@ -69,24 +70,6 @@ class TopbarButtonsControl extends Scene {
 		const saveButton = this.parent(new ButtonControl(gui.Save, () => di.resolve<SavePopup>().show()));
 		const settingsButton = this.parent(new ButtonControl(gui.Menu, () => di.resolve<SettingsPopup>().show()));
 		//const homeButton = this.parent(new ButtonControl(gui.Home, () => mode.teleportToPlot()));
-
-		this.event.subscribeObservable(
-			this.enabledButtons.enabled,
-			(enabled) => {
-				aorlc(enabled.includes("run"), gui, runButton.instance, props);
-				aorlc(enabled.includes("save"), gui, saveButton.instance, props);
-				aorlc(enabled.includes("settings"), gui, settingsButton.instance, props);
-				//homeButton.setVisible(enabled.includes("home"));
-			},
-			true,
-		);
-
-		this.onDisable(() => {
-			removelc(gui, runButton.instance, props);
-			removelc(gui, saveButton.instance, props);
-			removelc(gui, settingsButton.instance, props);
-			//removelc(gui, homeButton.instance, props);
-		});
 	}
 }
 
@@ -98,9 +81,27 @@ export class BuildingModeScene extends Scene {
 		@inject readonly mode: BuildingMode,
 		@inject tools: ToolController,
 		@inject topbar: Topbar,
+		@inject mainScreen: MainScreenLayout,
 		@inject di: DIContainer,
 	) {
 		super();
+
+		{
+			const runButton = mainScreen.registerTopCenterButton("Run");
+			this.event.subscribeObservable(mode.canRun, (canRun) => runButton.visible.set("build_main", canRun), true);
+
+			this.parent(new ButtonControl(runButton.instance, () => requestMode("ride")));
+		}
+		{
+			const savesButton = mainScreen.registerTopCenterButton("Saves");
+			this.event.subscribeObservable(
+				mode.canSaveOrLoad,
+				(canSaveOrLoad) => savesButton.visible.set("build_main", canSaveOrLoad),
+				true,
+			);
+
+			this.parent(new ButtonControl(savesButton.instance, () => di.resolve<SavePopup>().show()));
+		}
 
 		const topbarButtons = this.parent(
 			di.resolveForeignClass(TopbarButtonsControl, [topbar.getButtonsGui("Build")]),

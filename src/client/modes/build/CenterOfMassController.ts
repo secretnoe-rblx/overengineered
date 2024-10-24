@@ -35,7 +35,7 @@ export class CenterOfMassController extends ClientComponent {
 		super();
 
 		{
-			const button = mainScreen.registerTopRightButton("CenterOfMass", true);
+			const button = mainScreen.registerTopRightButton("CenterOfMass");
 			const com = this.parent(new ButtonControl(button.instance, () => this.enabled.set(!this.enabled.get())));
 
 			this.event.subscribeObservable(

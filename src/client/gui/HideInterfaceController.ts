@@ -60,7 +60,7 @@ export class HideInterfaceController extends HostedService {
 			});
 		});
 
-		const hideButton = mainScreen.registerTopRightButton("Hide", true);
+		const hideButton = mainScreen.registerTopRightButton("Hide");
 		this.parent(
 			new ButtonControl(hideButton.instance, () => {
 				this.currentUnhideScreen = this.createUnhideGui(hideButton.instance);

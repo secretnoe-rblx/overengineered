@@ -10,7 +10,6 @@ import type { GridEditorControlDefinition } from "client/gui/GridEditor";
 import type { MainScreenLayout } from "client/gui/MainScreenLayout";
 import type { EditMode } from "client/modes/build/BuildingMode";
 import type { EditTool } from "client/tools/EditTool";
-import type { ObservableValue } from "engine/shared/event/ObservableValue";
 
 @injectable
 export class GridController extends Component {
@@ -23,7 +22,7 @@ export class GridController extends Component {
 	) {
 		super();
 
-		const gridButton = this.parent(mainScreen.registerTopRightButton("Grid", true));
+		const gridButton = this.parent(mainScreen.registerTopRightButton("Grid"));
 		this.parent(
 			new ButtonControl(
 				gridButton.instance,
@@ -50,7 +49,7 @@ export class GridController extends Component {
 				const visible = mode === undefined;
 
 				controlOverlay.get(0).Visible = visible;
-				gridButton.visibility.get(0).Visible = visible;
+				gridButton.visible.set("editTool_active", visible);
 			},
 			true,
 		);

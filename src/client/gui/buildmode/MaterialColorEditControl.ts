@@ -13,7 +13,6 @@ import { GameDefinitions } from "shared/data/GameDefinitions";
 import type { ColorChooserDefinition } from "client/gui/ColorChooser";
 import type { ButtonControl, TextButtonDefinition } from "client/gui/controls/Button";
 import type { MaterialChooserDefinition } from "client/gui/MaterialChooser";
-import type { ObservableValue } from "engine/shared/event/ObservableValue";
 
 export type MaterialColorEditControlDefinition = GuiObject & {
 	readonly Color: GuiObject & {

@@ -2,7 +2,6 @@ import { ButtonControl } from "client/gui/controls/Button";
 import { NumberTextBoxControl } from "client/gui/controls/NumberTextBoxControl";
 import { Control } from "engine/client/gui/Control";
 import type { EditMode } from "client/modes/build/BuildingMode";
-import type { ObservableValue } from "engine/shared/event/ObservableValue";
 
 type NumberControlDefinition = GuiObject & {
 	readonly SubButton: GuiButton;

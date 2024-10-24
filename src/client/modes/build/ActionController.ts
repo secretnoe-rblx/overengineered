@@ -4,8 +4,8 @@ import { LogControl } from "client/gui/static/LogControl";
 import { ClientComponent } from "engine/client/component/ClientComponent";
 import { InputController } from "engine/client/InputController";
 import { Component } from "engine/shared/component/Component";
-import { ObjectOverlayStorage } from "engine/shared/component/ObjectOverlayStorage";
 import { ObservableCollectionArr } from "engine/shared/event/ObservableCollection";
+import { ObservableSwitch } from "engine/shared/event/ObservableSwitch";
 import { Signal } from "engine/shared/event/Signal";
 import type { MainScreenLayout } from "client/gui/MainScreenLayout";
 
@@ -14,20 +14,14 @@ class ActionControllerGui extends Component {
 	constructor(@inject mainScreen: MainScreenLayout, @inject actionController: ActionController) {
 		super();
 
-		const undov = mainScreen.registerTopRightButton("Undo", false);
-		const redov = mainScreen.registerTopRightButton("Redo", false);
+		const undov = mainScreen.registerTopRightButton("Undo");
+		const redov = mainScreen.registerTopRightButton("Redo");
 
 		this.parent(new ButtonControl(undov.instance, () => actionController.undo()));
 		this.parent(new ButtonControl(redov.instance, () => actionController.redo()));
 
-		this.event.subscribeObservable(
-			actionController.state.value,
-			({ canUndo, canRedo }) => {
-				undov.visibility.get(0).Visible = canUndo;
-				redov.visibility.get(0).Visible = canRedo;
-			},
-			true,
-		);
+		this.event.subscribeObservable(actionController.canUndo, (canUndo) => undov.visible.set("main", canUndo), true);
+		this.event.subscribeObservable(actionController.canRedo, (canRedo) => redov.visible.set("main", canRedo), true);
 	}
 }
 
@@ -42,7 +36,8 @@ export class ActionController extends ClientComponent {
 	/** @deprecated Use @inject instead */
 	static instance: ActionController;
 
-	readonly state = new ObjectOverlayStorage({ canUndo: false, canRedo: false });
+	readonly canUndo = new ObservableSwitch();
+	readonly canRedo = new ObservableSwitch();
 
 	readonly onUndo = new Signal<(operation: Operation) => void>();
 	readonly onRedo = new Signal<(operation: Operation) => void>();
@@ -57,29 +52,36 @@ export class ActionController extends ClientComponent {
 		if (ActionController.instance) throw "what";
 		ActionController.instance = this;
 
-		this.event.subscribeImmediately(this.history.changed, () => {
-			this.state.get(99999).canUndo = this.history.size() !== 0 ? true : undefined;
-		});
-		this.event.subscribeImmediately(this.redoHistory.changed, () => {
-			this.state.get(99999).canRedo = this.redoHistory.size() !== 0 ? true : undefined;
-		});
+		this.event.subscribeImmediately(this.history.changed, () =>
+			this.canUndo.set("main_history", this.history.size() !== 0),
+		);
+		this.event.subscribeImmediately(this.redoHistory.changed, () =>
+			this.canRedo.set("main_history", this.redoHistory.size() !== 0),
+		);
+
 		this.onEnabledStateChange((enabled) => {
-			this.state.get(-999999999).canUndo = enabled ? undefined : false;
-			this.state.get(-999999999).canRedo = enabled ? undefined : false;
+			this.canUndo.set("main_enabled", enabled);
+			this.canRedo.set("main_enabled", enabled);
 		});
+		this.event.subscribeObservable(
+			LoadingController.isLoading,
+			(loading) => {
+				this.canUndo.set("isLoading", !loading);
+				this.canRedo.set("isLoading", !loading);
+			},
+			true,
+		);
 
 		this.event.onKeyDown("Z", () => {
-			if (!this.state.getValues().canUndo) return;
-
+			if (!this.canUndo.get()) return;
 			if (!InputController.isCtrlPressed()) return;
-			if (LoadingController.isLoading.get()) return;
+
 			this.undo();
 		});
 		this.event.onKeyDown("Y", () => {
-			if (!this.state.getValues().canRedo) return;
-
+			if (!this.canRedo.get()) return;
 			if (!InputController.isCtrlPressed()) return;
-			if (LoadingController.isLoading.get()) return;
+
 			this.redo();
 		});
 	}
@@ -102,7 +104,7 @@ export class ActionController extends ClientComponent {
 	}
 
 	redo(): boolean {
-		if (!this.state.getValues().canRedo) return false;
+		if (!this.canRedo.get()) return false;
 
 		const operation = this.redoHistory.pop();
 		if (!operation) return false;
@@ -120,7 +122,7 @@ export class ActionController extends ClientComponent {
 	}
 
 	undo(): boolean {
-		if (!this.state.getValues().canUndo) return false;
+		if (!this.canUndo.get()) return false;
 
 		const operation = this.history.pop();
 		if (!operation) return false;

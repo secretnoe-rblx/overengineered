@@ -1,3 +1,4 @@
+import { LoadingController } from "client/controller/LoadingController";
 import { MirrorVisualizer } from "client/controller/MirrorVisualizer";
 import { BuildingModeScene } from "client/gui/buildmode/BuildingModeScene";
 import { ActionController } from "client/modes/build/ActionController";
@@ -8,6 +9,7 @@ import { BlockSelect } from "client/tools/highlighters/BlockSelect";
 import { ToolController } from "client/tools/ToolController";
 import { LocalPlayer } from "engine/client/LocalPlayer";
 import { NumberObservableValue } from "engine/shared/event/NumberObservableValue";
+import { ObservableSwitch } from "engine/shared/event/ObservableSwitch";
 import { ObservableValue } from "engine/shared/event/ObservableValue";
 import { SharedRagdoll } from "shared/SharedRagdoll";
 import type { SharedPlot } from "shared/building/SharedPlot";
@@ -24,6 +26,9 @@ export type EditMode = "global" | "local";
 
 @injectable
 export class BuildingMode extends PlayMode {
+	readonly canSaveOrLoad = new ObservableSwitch();
+	readonly canRun = new ObservableSwitch();
+
 	readonly mirrorMode = new ObservableValue<MirrorMode>({});
 	readonly targetPlot;
 	readonly mirrorVisualizer;
@@ -33,6 +38,8 @@ export class BuildingMode extends PlayMode {
 	readonly moveGrid = new NumberObservableValue<number>(1, 0, 256, 0.01);
 	readonly rotateGrid = new NumberObservableValue<number>(90, 0, 360, 0.01);
 	readonly editMode = new ObservableValue<EditMode>("global");
+
+	private readonly actionController;
 
 	constructor(@inject di: DIContainer, @inject plot: SharedPlot) {
 		super();
@@ -52,6 +59,15 @@ export class BuildingMode extends PlayMode {
 			di.registerSingletonFunc((di) => di.resolve<ToolController>().allTools.wireTool);
 		});
 
+		this.event.subscribeObservable(
+			LoadingController.isLoading,
+			(loading) => {
+				this.canRun.set("isNotLoading", !loading);
+				this.canSaveOrLoad.set("isNotLoading", !loading);
+			},
+			true,
+		);
+
 		this.targetPlot = new ObservableValue<SharedPlot | undefined>(undefined).withDefault(plot);
 		this.targetPlot.subscribe((plot, prev) => {
 			const index = BlockSelect.blockRaycastParams.FilterDescendantsInstances.indexOf(prev.instance);
@@ -66,8 +82,8 @@ export class BuildingMode extends PlayMode {
 		this.toolController = this.parent(di.resolve<ToolController>());
 		this.gui = this.parent(di.resolveForeignClass(BuildingModeScene));
 
+		this.actionController = this.parent(di.resolve<ActionController>());
 		this.parent(di.resolve<GridController>());
-		this.parent(di.resolve<ActionController>());
 		this.parent(di.resolve<CenterOfMassController>());
 
 		this.event.subInput((ih) => {
@@ -100,6 +116,18 @@ export class BuildingMode extends PlayMode {
 		rootPart.CFrame = new CFrame(pos);
 		rootPart.AssemblyLinearVelocity = Vector3.zero;
 		rootPart.AssemblyAngularVelocity = Vector3.zero;
+	}
+
+	switchTutorialMode(tutorialMode: boolean): void {
+		this.actionController.canUndo.set("build_tutorialMode", !tutorialMode);
+		this.actionController.canRedo.set("build_tutorialMode", !tutorialMode);
+
+		if (!tutorialMode) {
+			this.toolController.enabledTools.disableAll();
+		}
+
+		this.canSaveOrLoad.set("this_tutorialMode", !tutorialMode);
+		this.canRun.set("this_tutorialMode", !tutorialMode);
 	}
 
 	onSwitchToNext(mode: PlayModes | undefined) {}

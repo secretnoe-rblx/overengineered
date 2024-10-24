@@ -1,4 +1,3 @@
-import { ActionController } from "client/modes/build/ActionController";
 import { NewBasicPlaneTutorialDiffs } from "client/tutorial/tutorials/NewBasicPlaneTutorial.diff";
 import { InputController } from "engine/client/InputController";
 import type { BuildingMode } from "client/modes/build/BuildingMode";
@@ -18,15 +17,13 @@ export class NewBasicPlaneTutorial implements TutorialDescriber {
 		return [
 			() => [
 				t.funcPart(() => {
-					ActionController.instance.disable();
 					toolController.enabledTools.disableAll();
-					this.buildingMode.gui.actionbar.enabledButtons.enableOnly("settings");
+					this.buildingMode.switchTutorialMode(true);
 
 					t.onDestroy(() => {
-						ActionController.instance.enable();
 						toolController.enabledTools.enableAll();
-						this.buildingMode.gui.actionbar.enabledButtons.enableAll();
 						editTool.enabledModes.enableAll();
+						this.buildingMode.switchTutorialMode(true);
 					});
 				}),
 				t.partNextButton(),
