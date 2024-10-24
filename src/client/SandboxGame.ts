@@ -17,7 +17,7 @@ import { UpdatePopupController } from "client/controller/UpdatePopupController";
 import { AdminGui } from "client/gui/AdminGui";
 import { GuiAutoScaleController } from "client/gui/GuiAutoScaleController";
 import { HideInterfaceController } from "client/gui/HideInterfaceController";
-import { Interface } from "client/gui/Interface";
+import { MainScene } from "client/gui/MainScene";
 import { MainScreenLayout } from "client/gui/MainScreenLayout";
 import { ControlsPopup } from "client/gui/popup/ControlsPopup";
 import { NewSettingsPopup } from "client/gui/popup/NewSettingsPopup";
@@ -25,7 +25,6 @@ import { ReportSubmitController } from "client/gui/popup/ReportSubmitPopup";
 import { SavePopup } from "client/gui/popup/SavePopup";
 import { SettingsPopup } from "client/gui/popup/SettingsPopup";
 import { WikiPopup } from "client/gui/popup/WikiPopup";
-import { Topbar } from "client/gui/Topbar";
 import { Keybinds } from "client/Keybinds";
 import { ClientBuildingValidationController } from "client/modes/build/ClientBuildingValidationController";
 import { PlayModeController } from "client/modes/PlayModeController";
@@ -41,7 +40,6 @@ import { SharedPlots } from "shared/building/SharedPlots";
 import { GameDefinitions } from "shared/data/GameDefinitions";
 import { RemoteEvents } from "shared/RemoteEvents";
 import { CreateSandboxBlocks } from "shared/SandboxBlocks";
-import type { TopbarDefinition } from "client/gui/Topbar";
 import type { TutorialDescriber } from "client/tutorial/TutorialController";
 import type { GameHostBuilder } from "engine/shared/GameHostBuilder";
 import type { SharedPlot } from "shared/building/SharedPlot";
@@ -79,6 +77,8 @@ export namespace SandboxGame {
 		PlayModeController.initialize(builder);
 		ClientBuildingValidationController.initialize(builder);
 
+		builder.services.registerService(MainScene);
+
 		builder.services.registerService(GameEnvironmentController);
 		builder.services.registerService(EnvBlacklistsController);
 		SoundController.initializeAll(builder);
@@ -97,12 +97,6 @@ export namespace SandboxGame {
 			.registerSingletonClass(MainScreenLayout)
 			.autoInit()
 			.onInit((c) => c.enable());
-
-		builder.services
-			.registerSingletonClass(Topbar)
-			.withArgs([Interface.getInterface<{ Topbar: TopbarDefinition }>().Topbar])
-			.autoInit()
-			.onInit((control) => control.show());
 
 		if (!RunService.IsStudio()) {
 			builder.services.registerService(UpdatePopupController);

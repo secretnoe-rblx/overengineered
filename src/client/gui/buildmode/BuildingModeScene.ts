@@ -1,119 +1,41 @@
 import { LoadingController } from "client/controller/LoadingController";
-import { Anim } from "client/gui/Anim";
 import { HotbarControl } from "client/gui/buildmode/HotbarControl";
 import { ButtonControl } from "client/gui/controls/Button";
 import { Interface } from "client/gui/Interface";
 import { Scene } from "client/gui/Scene";
 import { requestMode } from "client/modes/PlayModeRequest";
-import { ComponentDisabler } from "engine/shared/component/ComponentDisabler";
-import { Transforms } from "engine/shared/component/Transforms";
 import type { HotbarControlDefinition } from "client/gui/buildmode/HotbarControl";
 import type { MainScreenLayout } from "client/gui/MainScreenLayout";
 import type { SavePopup } from "client/gui/popup/SavePopup";
-import type { SettingsPopup } from "client/gui/popup/SettingsPopup";
-import type { Topbar } from "client/gui/Topbar";
 import type { BuildingMode } from "client/modes/build/BuildingMode";
 import type { ToolController } from "client/tools/ToolController";
-import type { TransformProps } from "engine/shared/component/Transform";
-
-const addlc = (gui: GuiObject, child: GuiObject, props: TransformProps) => {
-	if (child.Visible) return;
-
-	Transforms.parallel(
-		Transforms.func(() => {
-			const [asc, childcopy] = Anim.createScreenForAnimating(child);
-			return Transforms.create() //
-				.show(childcopy)
-				.fadeInFrom0(childcopy, props)
-				.then()
-				.destroy(asc);
-		}),
-		Anim.UIListLayout.animAdd(gui, child, props) //
-			.then()
-			.show(child),
-	).run(child);
-};
-const removelc = (gui: GuiObject, child: GuiObject, props: TransformProps) => {
-	if (!child.Visible) return;
-
-	Transforms.parallel(
-		Transforms.func(() => {
-			const [asc, childcopy] = Anim.createScreenForAnimating(child);
-			return Transforms.create() //
-				.show(childcopy)
-				.fadeOutFrom1(childcopy, props)
-				.then()
-				.destroy(asc);
-		}),
-		Anim.UIListLayout.animRemove(gui, child, props, "hide"),
-	).run(child);
-};
-const aorlc = (add: boolean, gui: GuiObject, child: GuiObject, props: TransformProps) =>
-	add ? addlc(gui, child, props) : removelc(gui, child, props);
-const props = Transforms.commonProps.quadOut02;
-
-type TopbarButtonsControlDefinition = GuiObject & {
-	readonly Run: GuiButton;
-	readonly Save: GuiButton;
-	readonly Menu: GuiButton;
-	//readonly Home: GuiButton;
-};
-@injectable
-class TopbarButtonsControl extends Scene {
-	readonly allButtons = ["run", "save", "settings", "home"] as const;
-	readonly enabledButtons = new ComponentDisabler(this.allButtons);
-
-	constructor(gui: TopbarButtonsControlDefinition, @inject mode: BuildingMode, @inject di: DIContainer) {
-		super();
-
-		const runButton = this.parent(new ButtonControl(gui.Run, () => requestMode("ride")));
-		const saveButton = this.parent(new ButtonControl(gui.Save, () => di.resolve<SavePopup>().show()));
-		const settingsButton = this.parent(new ButtonControl(gui.Menu, () => di.resolve<SettingsPopup>().show()));
-		//const homeButton = this.parent(new ButtonControl(gui.Home, () => mode.teleportToPlot()));
-	}
-}
 
 @injectable
 export class BuildingModeScene extends Scene {
-	readonly actionbar;
-
 	constructor(
 		@inject readonly mode: BuildingMode,
 		@inject tools: ToolController,
-		@inject topbar: Topbar,
 		@inject mainScreen: MainScreenLayout,
 		@inject di: DIContainer,
 	) {
 		super();
 
-		{
-			const runButton = mainScreen.registerTopCenterButton("Run");
-			this.event.subscribeObservable(mode.canRun, (canRun) => runButton.visible.set("build_main", canRun), true);
+		const runButton = mainScreen.registerTopCenterButton("Run");
+		this.event.subscribeObservable(mode.canRun, (canRun) => runButton.visible.set("build_main", canRun), true);
+		this.parent(new ButtonControl(runButton.instance, () => requestMode("ride")));
 
-			this.parent(new ButtonControl(runButton.instance, () => requestMode("ride")));
-		}
-		{
-			const savesButton = mainScreen.registerTopCenterButton("Saves");
-			this.event.subscribeObservable(
-				mode.canSaveOrLoad,
-				(canSaveOrLoad) => savesButton.visible.set("build_main", canSaveOrLoad),
-				true,
-			);
-
-			this.parent(new ButtonControl(savesButton.instance, () => di.resolve<SavePopup>().show()));
-		}
-
-		const topbarButtons = this.parent(
-			di.resolveForeignClass(TopbarButtonsControl, [topbar.getButtonsGui("Build")]),
+		const savesButton = mainScreen.registerTopCenterButton("Saves");
+		this.event.subscribeObservable(
+			mode.canSaveOrLoad,
+			(canSaveOrLoad) => savesButton.visible.set("build_main", canSaveOrLoad),
+			true,
 		);
+		this.parent(new ButtonControl(savesButton.instance, () => di.resolve<SavePopup>().show()));
 
-		this.actionbar = topbarButtons;
-
-		const updateActionBarVisibility = () => {
-			const visible = !LoadingController.isLoading.get();
-			topbarButtons.setEnabled(visible);
-		};
-		this.event.subscribeObservable(LoadingController.isLoading, updateActionBarVisibility, true);
+		this.onEnabledStateChange((enabled) => {
+			runButton.visible.set("build_enabled", enabled);
+			savesButton.visible.set("build_enabled", enabled);
+		}, true);
 
 		const hotbarGui = Interface.getInterface<{ Hotbar: HotbarControlDefinition }>().Hotbar;
 		const toolbar = this.parent(new HotbarControl(tools, hotbarGui));

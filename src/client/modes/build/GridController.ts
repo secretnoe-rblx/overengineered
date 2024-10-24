@@ -29,6 +29,7 @@ export class GridController extends Component {
 				() => (controlOverlay.get(-1).Visible = !controlOverlay.get(-1).Visible),
 			),
 		);
+		this.onEnabledStateChange((enabled) => gridButton.visible.set("main_visible", enabled), true);
 
 		const floatingGui = Interface.getInterface<{
 			Floating: { Grid: FloatingWindowDefinition & { Content: GridEditorControlDefinition } };

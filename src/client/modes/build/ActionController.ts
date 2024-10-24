@@ -62,7 +62,7 @@ export class ActionController extends ClientComponent {
 		this.onEnabledStateChange((enabled) => {
 			this.canUndo.set("main_enabled", enabled);
 			this.canRedo.set("main_enabled", enabled);
-		});
+		}, true);
 		this.event.subscribeObservable(
 			LoadingController.isLoading,
 			(loading) => {

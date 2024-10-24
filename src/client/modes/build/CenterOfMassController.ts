@@ -2,8 +2,12 @@ import { ReplicatedStorage, Workspace } from "@rbxts/services";
 import { ButtonControl } from "client/gui/controls/Button";
 import { Interface } from "client/gui/Interface";
 import { ClientComponent } from "engine/client/component/ClientComponent";
+import { Component } from "engine/shared/component/Component";
+import { ComponentChild } from "engine/shared/component/ComponentChild";
+import { ComponentInstance } from "engine/shared/component/ComponentInstance";
 import { Transforms } from "engine/shared/component/Transforms";
-import { ObservableValue } from "engine/shared/event/ObservableValue";
+import { Element } from "engine/shared/Element";
+import { ObservableSwitch } from "engine/shared/event/ObservableSwitch";
 import { BuildingManager } from "shared/building/BuildingManager";
 import { SharedPlot } from "shared/building/SharedPlot";
 import { Colors } from "shared/Colors";
@@ -20,43 +24,26 @@ const weightedAverage = (values: readonly CM[]) => {
 };
 
 @injectable
-export class CenterOfMassController extends ClientComponent {
-	private readonly enabled = new ObservableValue(false);
+export class CenterOfMassVisualizer extends Component {
+	private readonly viewportFrame: ViewportFrame;
 
-	private readonly viewportFrame;
 	private renderedBalls: Model[] = [];
 	private machineCOM: Model | undefined;
 
-	constructor(
-		@inject plot: SharedPlot,
-		@inject actionController: ActionController,
-		@inject mainScreen: MainScreenLayout,
-	) {
+	constructor(parent: Instance, @inject actionController: ActionController) {
 		super();
 
-		{
-			const button = mainScreen.registerTopRightButton("CenterOfMass");
-			const com = this.parent(new ButtonControl(button.instance, () => this.enabled.set(!this.enabled.get())));
-
-			this.event.subscribeObservable(
-				this.enabled,
-				(enabled) =>
-					Transforms.create()
-						.transform(com.instance, "Transparency", enabled ? 0 : 0.5, Transforms.commonProps.quadOut02)
-						.run(com.instance),
-				true,
-			);
-		}
-
-		this.viewportFrame = new Instance("ViewportFrame");
-		this.viewportFrame.Name = "WireViewportFrame";
-		this.viewportFrame.Size = UDim2.fromScale(1, 1);
-		this.viewportFrame.CurrentCamera = Workspace.CurrentCamera;
-		this.viewportFrame.Transparency = 1;
-		this.viewportFrame.Parent = Interface.getGameUI();
-		this.viewportFrame.Ambient = Colors.white;
-		this.viewportFrame.LightColor = Colors.white;
-		this.viewportFrame.ZIndex = -1000;
+		this.viewportFrame = Element.create("ViewportFrame", {
+			Name: "WireViewportFrame",
+			Size: UDim2.fromScale(1, 1),
+			CurrentCamera: Workspace.CurrentCamera,
+			Transparency: 1,
+			Ambient: Colors.white,
+			LightColor: Colors.white,
+			ZIndex: -1000,
+			Parent: Interface.getGameUI(),
+		});
+		ComponentInstance.init(this, this.viewportFrame);
 
 		const update = () => {
 			if (!this.machineCOM) {
@@ -64,7 +51,7 @@ export class CenterOfMassController extends ClientComponent {
 				this.machineCOM.Parent = this.viewportFrame;
 			}
 
-			const blocks = plot.getBlocks();
+			const blocks = parent.GetChildren() as BlockModel[];
 			const pos = this.calculateCentersOfMass(blocks);
 
 			if (pos.size() > this.renderedBalls.size()) {
@@ -114,10 +101,11 @@ export class CenterOfMassController extends ClientComponent {
 		this.event.subscribe(CustomRemotes.slots.load.sent, clear);
 		this.event.subscribe(CustomRemotes.slots.load.completed, (v) => (v.success ? update() : undefined));
 		this.event.subscribe(SharedPlot.anyChanged, update);
-		this.event.onEnable(update);
-		this.onDisable(clear);
 
-		this.enabled.subscribe((enabled) => (enabled ? update() : clear()), true);
+		this.onEnabledStateChange((enabled) => {
+			if (enabled) update();
+			else clear();
+		});
 	}
 
 	private calculateCentersOfMass(blocks: readonly BlockModel[]): readonly CM[] {
@@ -168,5 +156,50 @@ export class CenterOfMassController extends ClientComponent {
 		}
 
 		return ass;
+	}
+}
+
+@injectable
+export class CenterOfMassController extends ClientComponent {
+	constructor(
+		@inject mainScreen: MainScreenLayout,
+		@inject plot: SharedPlot,
+		@inject actionController: ActionController,
+	) {
+		super();
+
+		const visualizerContainer = new ComponentChild<CenterOfMassVisualizer>(this);
+		const enabled = new ObservableSwitch();
+
+		this.event.subscribeObservable(
+			enabled,
+			(enabled) => {
+				if (enabled) {
+					visualizerContainer.set(new CenterOfMassVisualizer(plot.getBlocks()[0].Parent!, actionController));
+				} else {
+					visualizerContainer.clear();
+				}
+			},
+			true,
+		);
+
+		{
+			enabled.set("button", false);
+			const button = mainScreen.registerTopRightButton("CenterOfMass");
+			this.onEnabledStateChange((enabled) => button.visible.set("main_visible", enabled), true);
+
+			const com = this.parent(
+				new ButtonControl(button.instance, () => enabled.set("button", !enabled.getKeyed("button"))),
+			);
+
+			this.event.subscribeObservable(
+				enabled,
+				(enabled) =>
+					Transforms.create()
+						.transform(com.instance, "Transparency", enabled ? 0 : 0.5, Transforms.commonProps.quadOut02)
+						.run(com.instance),
+				true,
+			);
+		}
 	}
 }

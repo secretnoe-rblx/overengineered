@@ -32,7 +32,7 @@ export class MainScreenLayout extends Component {
 	}
 
 	registerTopCenterButton<T extends GuiButton>(name: string): AnimatedListControl<T> {
-		const button = new AnimatedListControl(this.instance.Top.Center.Main.WaitForChild(name) as T);
+		const button = this.parent(new AnimatedListControl(this.instance.Top.Center.Main.WaitForChild(name) as T));
 		button.visible.changed.Connect((visible) => {
 			button.instance.Visible = visible;
 		});
@@ -40,7 +40,7 @@ export class MainScreenLayout extends Component {
 		return button;
 	}
 	registerTopRightButton<T extends GuiButton>(name: string): AnimatedListControl<T> {
-		const button = new AnimatedListControl(this.instance.Top.Right.WaitForChild(name) as T);
+		const button = this.parent(new AnimatedListControl(this.instance.Top.Right.WaitForChild(name) as T));
 		button.visible.changed.Connect((visible) => {
 			button.instance.Visible = visible;
 		});

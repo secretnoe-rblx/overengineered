@@ -24,7 +24,7 @@ export class ConfirmPopup extends Popup<ConfirmPopupDefinition> {
 	private readonly cancelButton;
 	private readonly closeButton;
 
-	static showPopup(text: string, ps: string = "", okFunc: () => void, noFunc: () => void) {
+	static showPopup(text: string, ps: string = "", okFunc?: () => void, noFunc?: () => void) {
 		const popup = new ConfirmPopup(
 			Interface.getGameUI<{ Popup: { Confirm: ConfirmPopupDefinition } }>().Popup.Confirm.Clone(),
 			text,
@@ -35,7 +35,7 @@ export class ConfirmPopup extends Popup<ConfirmPopupDefinition> {
 
 		popup.show();
 	}
-	constructor(gui: ConfirmPopupDefinition, text: string, ps: string = "", okFunc: () => void, noFunc: () => void) {
+	constructor(gui: ConfirmPopupDefinition, text: string, ps: string = "", okFunc?: () => void, noFunc?: () => void) {
 		super(gui);
 
 		this.confirmButton = this.add(new ButtonControl(gui.Buttons.AcceptButton));
@@ -47,15 +47,15 @@ export class ConfirmPopup extends Popup<ConfirmPopupDefinition> {
 		this.gui.Content.TextLabel1.Text = text;
 		this.gui.Content.TextLabel2.Text = ps;
 		this.event.subscribe(this.confirmButton.activated, () => {
-			okFunc();
+			okFunc?.();
 			this.hide();
 		});
 		this.event.subscribe(this.cancelButton.activated, () => {
-			noFunc();
+			noFunc?.();
 			this.hide();
 		});
 		this.event.subscribe(this.closeButton.activated, () => {
-			noFunc();
+			noFunc?.();
 			this.hide();
 		});
 	}

@@ -15,6 +15,8 @@ import { LocalPlayer } from "engine/client/LocalPlayer";
 import { ComponentChild } from "engine/shared/component/ComponentChild";
 import { ContainerComponent } from "engine/shared/component/ContainerComponent";
 import { EventHandler } from "engine/shared/event/EventHandler";
+import { ObservableSwitch } from "engine/shared/event/ObservableSwitch";
+import { ObservableValue } from "engine/shared/event/ObservableValue";
 import { Signal } from "engine/shared/event/Signal";
 import { RobloxUnit } from "engine/shared/RobloxUnit";
 import { RocketBlocks } from "shared/blocks/blocks/RocketEngineBlocks";
@@ -25,84 +27,11 @@ import type { ClientMachine } from "client/blocks/ClientMachine";
 import type { TextButtonDefinition } from "client/gui/controls/Button";
 import type { CheckBoxControlDefinition } from "client/gui/controls/CheckBoxControl";
 import type { ProgressBarControlDefinition } from "client/gui/controls/ProgressBarControl";
-import type { Topbar } from "client/gui/Topbar";
+import type { MainScreenLayout } from "client/gui/MainScreenLayout";
 import type { RideMode } from "client/modes/ride/RideMode";
 import type { PlayerDataStorage } from "client/PlayerDataStorage";
 import type { RocketBlockLogic } from "shared/blocks/blocks/RocketEngineBlocks";
 
-type TopbarButtonsControlDefinition = GuiObject & {
-	readonly Stop: GuiButton;
-	readonly Sit: GuiButton;
-};
-@injectable
-class TopbarButtonsControl extends Control<TopbarButtonsControlDefinition> {
-	readonly sitButton;
-
-	constructor(gui: TopbarButtonsControlDefinition, controls: RideModeControls) {
-		super(gui);
-
-		const stopButton = this.add(new ButtonControl(this.gui.Stop));
-		const sitButton = this.add(new ButtonControl(this.gui.Sit));
-		this.sitButton = sitButton;
-
-		this.event.subscribe(stopButton.activated, () => requestMode("build"));
-		this.event.subscribe(sitButton.activated, () => CustomRemotes.modes.ride.teleportOnSeat.send());
-
-		this.event.subscribe(controls.onEnterSettingsMode, () => {
-			stopButton.hide();
-			sitButton.hide();
-		});
-		this.event.subscribe(controls.onQuitSettingsMode, () => {
-			stopButton.show();
-			sitButton.show();
-		});
-	}
-}
-
-type TopbarRightButtonsControlDefinition = GuiObject & {
-	readonly EditControls: GuiButton;
-	readonly ResetControls: GuiButton;
-	readonly Logic: GuiButton;
-};
-@injectable
-class TopbarRightButtonsControl extends Control<TopbarRightButtonsControlDefinition> {
-	readonly logicButton;
-
-	constructor(gui: TopbarRightButtonsControlDefinition, controls: RideModeControls) {
-		super(gui);
-
-		const controlSettingsButton = this.add(new ButtonControl(this.gui.EditControls));
-		const controlResetButton = this.add(new ButtonControl(this.gui.ResetControls));
-		controlResetButton.hide();
-
-		this.onPrepare((input) => {
-			if (input === "Touch") {
-				controlSettingsButton.show();
-			} else {
-				controlSettingsButton.hide();
-			}
-		});
-		this.event.subscribe(controlSettingsButton.activated, () => controls.toggleSettingsMode());
-
-		this.event.subscribe(controlResetButton.activated, async () => {
-			ConfirmPopup.showPopup(
-				"Reset the controls?",
-				"It will be impossible to undo this action",
-				() => controls.resetControls(),
-				() => {},
-			);
-		});
-
-		this.event.subscribe(controls.onEnterSettingsMode, () => {
-			controlResetButton.show();
-		});
-		this.event.subscribe(controls.onQuitSettingsMode, () => {
-			controlResetButton.hide();
-		});
-
-		this.logicButton = this.add(new ButtonControl(this.gui.Logic));
-	}
-}
 type RideModeControlsDefinition = GuiObject & {
 	readonly Overlay: GuiObject;
 	readonly Button: TextButtonDefinition;
@@ -349,8 +278,9 @@ export type RideModeSceneDefinition = GuiObject & {
 
 @injectable
 export class RideModeScene extends Control<RideModeSceneDefinition> {
-	private readonly topbarButtons;
-	private readonly topbarRightButtons;
+	readonly canSit = new ObservableSwitch();
+
+	private readonly logicButton;
 	private readonly controls;
 	private readonly info;
 
@@ -361,28 +291,77 @@ export class RideModeScene extends Control<RideModeSceneDefinition> {
 		gui: RideModeSceneDefinition,
 		@inject readonly mode: RideMode,
 		@inject playerData: PlayerDataStorage,
-		@inject topbar: Topbar,
+		@inject mainScreen: MainScreenLayout,
 	) {
 		super(gui);
+
+		const controlsEditMode = new ObservableValue(false);
+
+		this.event.subscribeObservable(
+			controlsEditMode,
+			(editMode) => {
+				this.canSit.set("ride_editControls", !editMode);
+				stopButton.visible.set("ride_editControls", !editMode);
+				logicButton.visible.set("ride_editControls", !editMode);
+
+				editControlsButton.visible.set("ride_editControls", editMode);
+				resetControlsButton.visible.set("ride_editControls", editMode);
+			},
+			true,
+		);
+		this.event.subscribeObservable(
+			LoadingController.isLoading,
+			(isLoading) => {
+				this.canSit.set("ride_isNotLoading", !isLoading);
+				stopButton.visible.set("ride_isNotLoading", !isLoading);
+				editControlsButton.visible.set("ride_isNotLoading", !isLoading);
+				resetControlsButton.visible.set("ride_isNotLoading", !isLoading);
+			},
+			true,
+		);
+
+		const stopButton = mainScreen.registerTopCenterButton("Stop");
+		this.parent(new ButtonControl(stopButton.instance, () => requestMode("build")));
+
+		const sitButton = mainScreen.registerTopCenterButton("Sit");
+		this.event.subscribeObservable(this.canSit, (canSit) => sitButton.visible.set("ride_main", canSit), true);
+		this.parent(new ButtonControl(sitButton.instance, () => CustomRemotes.modes.ride.teleportOnSeat.send()));
+
+		//
+
+		const editControlsButton = mainScreen.registerTopRightButton("EditControls");
+		this.onPrepare((input) => editControlsButton.visible.set("onlyTouch", input === "Touch"));
+		this.parent(new ButtonControl(editControlsButton.instance, () => this.controls.toggleSettingsMode()));
+
+		const resetControlsButton = mainScreen.registerTopRightButton("ResetControls");
+		this.parent(
+			new ButtonControl(resetControlsButton.instance, () =>
+				ConfirmPopup.showPopup("Reset the controls?", "It will be impossible to undo this action", () =>
+					this.controls.resetControls(),
+				),
+			),
+		);
+
+		const logicButton = mainScreen.registerTopRightButton("Logic");
+		this.logicButton = this.parent(new ButtonControl(logicButton.instance));
+
+		this.onEnabledStateChange((enabled) => {
+			this.canSit.set("ride_enabled", enabled);
+			stopButton.visible.set("ride_enabled", enabled);
+			editControlsButton.visible.set("ride_enabled", enabled);
+			resetControlsButton.visible.set("ride_enabled", enabled);
+			logicButton.visible.set("ride_enabled", enabled);
+		}, true);
+
+		//
 
 		this.controls = new RideModeControls(this.gui.Controls, playerData);
 		this.add(this.controls);
 
+		this.controls.onEnterSettingsMode.Connect(() => controlsEditMode.set(true));
+		this.controls.onQuitSettingsMode.Connect(() => controlsEditMode.set(false));
+
 		gui.FindFirstChild("ActionBar")!.Destroy();
-
-		this.topbarButtons = this.add(new TopbarButtonsControl(topbar.getButtonsGui("Ride"), this.controls));
-		this.topbarRightButtons = this.add(
-			new TopbarRightButtonsControl(topbar.getRightButtonsGui("Ride"), this.controls),
-		);
-
-		this.event.subscribeObservable(
-			LoadingController.isLoading,
-			(isLoading) => {
-				this.topbarButtons.setVisible(!isLoading);
-				this.topbarRightButtons.setVisible(!isLoading);
-			},
-			true,
-		);
 
 		this.info = new Control(this.gui.Info);
 		this.add(this.info);
@@ -393,7 +372,8 @@ export class RideModeScene extends Control<RideModeSceneDefinition> {
 
 	private addMeters(machine: IReadonlyContainerComponent) {
 		this.info.clear();
-		this.topbarButtons.sitButton.setVisible(
+		this.canSit.set(
+			"canNotSitIfNoSeat",
 			machine.getChildren().any((b) => b instanceof VehicleSeatBlock.logic.ctor),
 		);
 
@@ -512,7 +492,7 @@ export class RideModeScene extends Control<RideModeSceneDefinition> {
 
 		const logicDebug = component.add(new Control(this.gui.LogicDebug.Clone()));
 		logicDebug.instance.Parent = this.gui.LogicDebug.Parent;
-		component.event.subscribe(this.topbarRightButtons.logicButton.activated, () => {
+		component.event.subscribe(this.logicButton.activated, () => {
 			logicDebug.setVisible(!logicDebug.isVisible());
 		});
 		logicDebug.setVisible(false);
