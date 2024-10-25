@@ -1,7 +1,6 @@
 import { HttpService, Workspace } from "@rbxts/services";
 import { LoadingController } from "client/controller/LoadingController";
 import { MaterialColorEditControl } from "client/gui/buildmode/MaterialColorEditControl";
-import { ButtonControl } from "client/gui/controls/Button";
 import { LogControl } from "client/gui/static/LogControl";
 import { ClientBuilding } from "client/modes/build/ClientBuilding";
 import { BlockGhoster } from "client/tools/additional/BlockGhoster";
@@ -11,6 +10,7 @@ import { MultiBlockHighlightedSelector } from "client/tools/highlighters/MultiBl
 import { SelectedBlocksHighlighter } from "client/tools/highlighters/SelectedBlocksHighlighter";
 import { ToolBase } from "client/tools/ToolBase";
 import { ClientComponent } from "engine/client/component/ClientComponent";
+import { ButtonControl } from "engine/client/gui/Button";
 import { Control } from "engine/client/gui/Control";
 import { InputController } from "engine/client/InputController";
 import { ComponentChild } from "engine/shared/component/ComponentChild";
@@ -27,11 +27,11 @@ import { SharedBuilding } from "shared/building/SharedBuilding";
 import { Colors } from "shared/Colors";
 import { PartUtils } from "shared/utils/PartUtils";
 import type { MaterialColorEditControlDefinition } from "client/gui/buildmode/MaterialColorEditControl";
-import type { TextButtonDefinition } from "client/gui/controls/Button";
 import type { InputTooltips } from "client/gui/static/TooltipsControl";
 import type { Keybinds } from "client/Keybinds";
 import type { BuildingMode } from "client/modes/build/BuildingMode";
 import type { BlockSelectorModeGuiDefinition } from "client/tools/highlighters/BlockSelectorModeGui";
+import type { TextButtonDefinition } from "engine/client/gui/Button";
 import type { SharedPlot } from "shared/building/SharedPlot";
 
 namespace Scene {

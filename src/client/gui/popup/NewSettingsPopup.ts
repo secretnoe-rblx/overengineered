@@ -1,8 +1,8 @@
-import { ButtonControl } from "client/gui/controls/Button";
 import { PlayerSelectorColumnControl } from "client/gui/controls/PlayerSelectorListControl";
 import { ToggleControl } from "client/gui/controls/ToggleControl";
 import { Gui } from "client/gui/Gui";
 import { Popup } from "client/gui/Popup";
+import { ButtonControl } from "engine/client/gui/Button";
 import { InstanceComponent } from "engine/shared/component/InstanceComponent";
 import { CustomRemotes } from "shared/Remotes";
 import type { PlayerSelectorColumnControlDefinition } from "client/gui/controls/PlayerSelectorListControl";

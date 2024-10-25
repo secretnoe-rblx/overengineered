@@ -1,9 +1,9 @@
 import { ReplicatedStorage } from "@rbxts/services";
-import { LocalPlayer } from "engine/client/LocalPlayer";
-import { ButtonControl } from "client/gui/controls/Button";
 import { Gui } from "client/gui/Gui";
 import { Popup } from "client/gui/Popup";
 import { WikiCategoriesControl, WikiContentControl } from "client/wiki/WikiControl";
+import { ButtonControl } from "engine/client/gui/Button";
+import { LocalPlayer } from "engine/client/LocalPlayer";
 import type { WikiCategoriesControlDefinition, WikiContentControlDefinition } from "client/wiki/WikiControl";
 import type { GameHostBuilder } from "engine/shared/GameHostBuilder";
 

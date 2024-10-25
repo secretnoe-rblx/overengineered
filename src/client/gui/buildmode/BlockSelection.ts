@@ -1,9 +1,9 @@
 import { ContentProvider, GuiService, Players } from "@rbxts/services";
 import { BlockPreviewControl } from "client/gui/buildmode/BlockPreviewControl";
 import { BlockPipetteButton } from "client/gui/controls/BlockPipetteButton";
-import { TextButtonControl } from "client/gui/controls/Button";
 import { Gui } from "client/gui/Gui";
 import { GuiAnimator } from "client/gui/GuiAnimator";
+import { TextButtonControl } from "engine/client/gui/Button";
 import { Control } from "engine/client/gui/Control";
 import { ObservableValue } from "engine/shared/event/ObservableValue";
 import { Localization } from "engine/shared/Localization";

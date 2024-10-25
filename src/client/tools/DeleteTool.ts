@@ -1,12 +1,12 @@
 import { SoundController } from "client/controller/SoundController";
 import { MirrorEditorControl } from "client/gui/buildmode/MirrorEditorControl";
-import { ButtonControl } from "client/gui/controls/Button";
 import { GuiAnimator } from "client/gui/GuiAnimator";
 import { ConfirmPopup } from "client/gui/popup/ConfirmPopup";
 import { ClientBuilding } from "client/modes/build/ClientBuilding";
 import { MultiBlockSelector } from "client/tools/highlighters/MultiBlockSelector";
 import { SelectedBlocksHighlighter } from "client/tools/highlighters/SelectedBlocksHighlighter";
 import { ToolBase } from "client/tools/ToolBase";
+import { ButtonControl } from "engine/client/gui/Button";
 import { Control } from "engine/client/gui/Control";
 import { InputController } from "engine/client/InputController";
 import { ObservableCollectionSet } from "engine/shared/event/ObservableCollection";

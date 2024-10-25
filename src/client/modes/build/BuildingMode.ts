@@ -1,4 +1,3 @@
-import { LocalPlayer } from "engine/client/LocalPlayer";
 import { MirrorVisualizer } from "client/controller/MirrorVisualizer";
 import { BuildingModeScene } from "client/gui/buildmode/BuildingModeScene";
 import { Gui } from "client/gui/Gui";
@@ -6,6 +5,7 @@ import { CenterOfMassController } from "client/modes/build/CenterOfMassControlle
 import { PlayMode } from "client/modes/PlayMode";
 import { BlockSelect } from "client/tools/highlighters/BlockSelect";
 import { ToolController } from "client/tools/ToolController";
+import { LocalPlayer } from "engine/client/LocalPlayer";
 import { NumberObservableValue } from "engine/shared/event/NumberObservableValue";
 import { ObservableValue } from "engine/shared/event/ObservableValue";
 import { SharedRagdoll } from "shared/SharedRagdoll";

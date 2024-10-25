@@ -1,6 +1,6 @@
 import { Workspace } from "@rbxts/services";
-import { LocalPlayer } from "engine/client/LocalPlayer";
 import { Beacon } from "client/gui/Beacon";
+import { LocalPlayer } from "engine/client/LocalPlayer";
 import { Component } from "engine/shared/component/Component";
 import { ComponentKeyedChildren } from "engine/shared/component/ComponentKeyedChildren";
 import { HostedService } from "engine/shared/di/HostedService";
