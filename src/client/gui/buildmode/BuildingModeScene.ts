@@ -1,9 +1,9 @@
 import { LoadingController } from "client/controller/LoadingController";
 import { HotbarControl } from "client/gui/buildmode/HotbarControl";
-import { ButtonControl } from "client/gui/controls/Button";
 import { TouchActionControllerGui } from "client/gui/TouchActionControllerGui";
 import { ActionController } from "client/modes/build/ActionController";
 import { requestMode } from "client/modes/PlayModeRequest";
+import { ButtonControl } from "engine/client/gui/Button";
 import { Control } from "engine/client/gui/Control";
 import { ComponentDisabler } from "engine/shared/component/ComponentDisabler";
 import type { HotbarControlDefinition } from "client/gui/buildmode/HotbarControl";

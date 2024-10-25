@@ -1,7 +1,7 @@
-import { ButtonControl } from "client/gui/controls/Button";
 import { GridEditorControl } from "client/gui/GridEditor";
 import { Gui } from "client/gui/Gui";
 import { ActionController } from "client/modes/build/ActionController";
+import { ButtonControl } from "engine/client/gui/Button";
 import { Control } from "engine/client/gui/Control";
 import type { GridEditorControlDefinition } from "client/gui/GridEditor";
 import type { EditMode } from "client/modes/build/BuildingMode";

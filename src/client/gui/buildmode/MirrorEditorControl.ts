@@ -1,6 +1,6 @@
-import { ButtonControl } from "client/gui/controls/Button";
 import { NumberTextBoxControl } from "client/gui/controls/NumberTextBoxControl";
 import { ToggleControl } from "client/gui/controls/ToggleControl";
+import { ButtonControl } from "engine/client/gui/Button";
 import { Control } from "engine/client/gui/Control";
 import { ObservableValue } from "engine/shared/event/ObservableValue";
 import { ArgsSignal } from "engine/shared/event/Signal";

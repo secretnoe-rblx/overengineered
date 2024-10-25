@@ -1,8 +1,8 @@
-import { TextButtonControl } from "client/gui/controls/Button";
 import { Gui } from "client/gui/Gui";
+import { TextButtonControl } from "engine/client/gui/Button";
 import { Signal } from "engine/shared/event/Signal";
 import type { IClientBlockControl } from "client/blocks/ClientBlockControls";
-import type { TextButtonDefinition } from "client/gui/controls/Button";
+import type { TextButtonDefinition } from "engine/client/gui/Button";
 
 export type TouchModeButtonData = {
 	readonly name: string;

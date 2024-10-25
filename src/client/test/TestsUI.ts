@@ -1,8 +1,8 @@
-import { TextButtonControl } from "client/gui/controls/Button";
+import { TextButtonControl } from "engine/client/gui/Button";
 import { Control } from "engine/client/gui/Control";
 import { InstanceComponent } from "engine/shared/component/InstanceComponent";
 import { TestFramework } from "engine/shared/TestFramework";
-import type { TextButtonDefinition } from "client/gui/controls/Button";
+import type { TextButtonDefinition } from "engine/client/gui/Button";
 import type { UnitTest } from "engine/shared/TestFramework";
 
 export type TestsUIDefinition = ScreenGui & {

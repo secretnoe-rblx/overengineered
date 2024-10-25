@@ -1,7 +1,7 @@
-import { TextButtonControl } from "client/gui/controls/Button";
 import { AlertPopup } from "client/gui/popup/AlertPopup";
 import { ConfirmPopup } from "client/gui/popup/ConfirmPopup";
 import { SelectButtonPopup } from "client/gui/popup/SelectButtonPopup";
+import { TextButtonControl } from "engine/client/gui/Button";
 import { Control } from "engine/client/gui/Control";
 import { Element } from "engine/shared/Element";
 import type { ControlsPopup } from "client/gui/popup/ControlsPopup";
