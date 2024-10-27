@@ -14,31 +14,32 @@ export class ExplosionEffect extends EffectBase<Args> {
 		super("explosion_effect");
 	}
 
-	justRun({ part, index }: Args): number {
+	justRun({ part, index }: Args): void {
+		if (!part) return;
+
 		const soundIndex = index ?? math.random(0, this.soundsFolder.size() - 1);
 		const sound = this.soundsFolder[soundIndex].Clone() as Sound;
 
-		const partClone = part.Clone();
-		partClone.ClearAllChildren();
-		partClone.Transparency = 1;
-		partClone.Parent = Workspace;
-
-		sound.Parent = partClone;
+		sound.Parent = part;
 		sound.Play();
-		this.playVisualEffect(partClone);
-		Debris.AddItem(partClone, sound.TimeLength);
 
-		return soundIndex;
+		this.playVisualEffect(part);
+
+		Debris.AddItem(sound, sound.TimeLength);
 	}
 
 	private playVisualEffect(part: BasePart): void {
+		const partClone = part.Clone();
+		partClone.Parent = Workspace;
 		ReplicatedStorage.Assets.Effects.Explosion.GetChildren().forEach((effect) => {
 			task.spawn(() => {
 				const instance = effect.Clone() as ParticleEmitter;
-				instance.Parent = part;
+				instance.Parent = partClone;
 				instance.Enabled = true;
 				task.wait(0.1);
 				instance.Enabled = false;
+				task.wait(0.5);
+				partClone.Destroy();
 			});
 		});
 	}

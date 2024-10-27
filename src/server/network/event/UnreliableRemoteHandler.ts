@@ -5,10 +5,11 @@ import { ServerPlayers } from "server/ServerPlayers";
 import { BlockManager } from "shared/building/BlockManager";
 import { RemoteEvents } from "shared/RemoteEvents";
 import { CustomRemotes } from "shared/Remotes";
+import { PartUtils } from "shared/utils/PartUtils";
 import type { SpreadingFireController } from "server/SpreadingFireController";
 import type { ExplosionEffect } from "shared/effects/ExplosionEffect";
 import type { ImpactSoundEffect } from "shared/effects/ImpactSoundEffect";
-import type { ClientExplodeArgs } from "shared/RemoteEvents";
+import type { ExplodeArgs } from "shared/RemoteEvents";
 
 @injectable
 export class UnreliableRemoteController extends HostedService {
@@ -83,14 +84,30 @@ export class UnreliableRemoteController extends HostedService {
 		};
 
 		// TODO: Change this for some offensive update
-		const explode = (
-			player: Player | undefined,
-			{ origin, localParts, isFlammable, pressure, radius, soundIndex }: ClientExplodeArgs,
-		) => {
-			const parts = localParts.filter((value) => BlockManager.isActiveBlockPart(value));
+		const explode = (player: Player | undefined, { part, isFlammable, pressure, radius }: ExplodeArgs) => {
+			function isValidBlock(part: BasePart, player: Player | undefined): boolean {
+				if (!part) return false;
+				if (!part.IsDescendantOf(Workspace)) return false;
+
+				if (player) {
+					if (!part.Anchored && !part.AssemblyRootPart?.Anchored && part.GetNetworkOwner() !== player) {
+						return false;
+					}
+				}
+
+				return true;
+			}
+			if (!isValidBlock(part, player)) {
+				return;
+			}
+
+			radius = math.clamp(radius, 0, 16);
+			pressure = math.clamp(pressure, 0, 2500);
+
+			const hitParts = Workspace.GetPartBoundsInRadius(part.Position, radius);
 
 			if (isFlammable) {
-				const flameHitParts = Workspace.GetPartBoundsInRadius(origin.Position, radius * 1.5);
+				const flameHitParts = Workspace.GetPartBoundsInRadius(part.Position, radius * 1.5);
 
 				flameHitParts.forEach((part) => {
 					if (math.random(1, 8) === 1) {
@@ -99,24 +116,33 @@ export class UnreliableRemoteController extends HostedService {
 				});
 			}
 
-			const players = Players.GetPlayers().filter((p) => p !== player);
-			CustomRemotes.physics.normalizeRootparts.send(players, { parts: parts });
-			for (const localPart of parts) {
-				ServerPartUtils.BreakJoints(localPart);
-			}
+			hitParts.forEach((part) => {
+				if (!BlockManager.isActiveBlockPart(part)) {
+					return;
+				}
+
+				if (math.random(1, 2) === 1) {
+					const players = Players.GetPlayers().filter((p) => p !== player);
+					CustomRemotes.physics.normalizeRootparts.send(players, { parts: [part] });
+					ServerPartUtils.BreakJoints(part);
+				}
+
+				part.Velocity = new Vector3(
+					math.random(0, pressure / 40),
+					math.random(0, pressure / 40),
+					math.random(0, pressure / 40),
+				);
+			});
+
+			part.Transparency = 1;
+			PartUtils.applyToAllDescendantsOfType("Decal", part, (decal) => decal.Destroy());
 
 			// Explosion sound
-			RemoteEvents.ServerExplode.send(players, {
-				origin: origin,
-				radius: radius,
-				pressure: pressure,
-				isFlammable: isFlammable,
-				soundIndex: soundIndex,
-			});
+			explosionEffect.send(part, { part, index: undefined });
 		};
 
 		this.event.subscribe(RemoteEvents.ImpactBreak.invoked, impactBreakEvent);
 		this.event.subscribe(RemoteEvents.Burn.invoked, (_, parts) => burnEvent(parts));
-		this.event.subscribe(RemoteEvents.ClientExplode.invoked, explode);
+		this.event.subscribe(RemoteEvents.Explode.invoked, explode);
 	}
 }

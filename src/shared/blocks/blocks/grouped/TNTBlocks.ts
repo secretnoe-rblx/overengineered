@@ -1,6 +1,6 @@
 import { InstanceBlockLogic as InstanceBlockLogic } from "shared/blockLogic/BlockLogic";
 import { BlockCreation } from "shared/blocks/BlockCreation";
-import type { ExplosionManager } from "client/physics/Explosions";
+import { RemoteEvents } from "shared/RemoteEvents";
 import type { BlockLogicFullBothDefinitions, InstanceBlockLogicArgs } from "shared/blockLogic/BlockLogic";
 import type { BlockBuildersWithoutIdAndDefaults, BlockLogicInfo } from "shared/blocks/Block";
 
@@ -71,18 +71,14 @@ const definition = {
 } satisfies BlockLogicFullBothDefinitions;
 
 export type { Logic as TNTBlockLogic };
-@injectable
 class Logic extends InstanceBlockLogic<typeof definition> {
-	constructor(
-		block: InstanceBlockLogicArgs,
-		@inject private readonly explosion: ExplosionManager,
-	) {
+	constructor(block: InstanceBlockLogicArgs) {
 		super(definition, block);
 
 		const doExplode = (radius: number, pressure: number, flammable: boolean) => {
 			if (!this.instance.PrimaryPart) return;
 
-			explosion.explode(this.instance.PrimaryPart, radius, pressure * 3_000, flammable);
+			RemoteEvents.Explode.send({ part: this.instance.PrimaryPart, radius, pressure, isFlammable: flammable });
 			this.disable();
 		};
 
