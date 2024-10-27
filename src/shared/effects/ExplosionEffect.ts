@@ -1,4 +1,4 @@
-import { Debris, ReplicatedStorage, Workspace } from "@rbxts/services";
+import { Debris, ReplicatedStorage } from "@rbxts/services";
 import { EffectBase } from "shared/effects/EffectBase";
 
 ReplicatedStorage.WaitForChild("Assets");
@@ -29,17 +29,13 @@ export class ExplosionEffect extends EffectBase<Args> {
 	}
 
 	private playVisualEffect(part: BasePart): void {
-		const partClone = part.Clone();
-		partClone.Parent = Workspace;
 		ReplicatedStorage.Assets.Effects.Explosion.GetChildren().forEach((effect) => {
 			task.spawn(() => {
 				const instance = effect.Clone() as ParticleEmitter;
-				instance.Parent = partClone;
+				instance.Parent = part;
 				instance.Enabled = true;
 				task.wait(0.1);
 				instance.Enabled = false;
-				task.wait(0.5);
-				partClone.Destroy();
 			});
 		});
 	}
