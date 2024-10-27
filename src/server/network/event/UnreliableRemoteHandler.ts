@@ -6,7 +6,6 @@ import { BlockManager } from "shared/building/BlockManager";
 import { RemoteEvents } from "shared/RemoteEvents";
 import { CustomRemotes } from "shared/Remotes";
 import { PartUtils } from "shared/utils/PartUtils";
-import type { PlayerDatabase } from "server/database/PlayerDatabase";
 import type { SpreadingFireController } from "server/SpreadingFireController";
 import type { ExplosionEffect } from "shared/effects/ExplosionEffect";
 import type { ImpactSoundEffect } from "shared/effects/ImpactSoundEffect";
@@ -15,7 +14,6 @@ import type { ExplodeArgs } from "shared/RemoteEvents";
 @injectable
 export class UnreliableRemoteController extends HostedService {
 	constructor(
-		@inject players: PlayerDatabase,
 		@inject impactSoundEffect: ImpactSoundEffect,
 		@inject spreadingFire: SpreadingFireController,
 		@inject explosionEffect: ExplosionEffect,
@@ -23,13 +21,15 @@ export class UnreliableRemoteController extends HostedService {
 		super();
 
 		const breakQueue: Map<Player, BasePart[]> = new Map();
-
-		// PhysicsService.RegisterCollisionGroup("Wreckage");
-		// PhysicsService.CollisionGroupSetCollidable("Wreckage", "PlayerCharacters", false);
-		// PhysicsService.CollisionGroupSetCollidable("Wreckage", "Wreckage", false);
+		const serverBreakQueue: Set<BasePart> = new Set();
 
 		const impactBreakEvent = (player: Player | undefined, parts: BasePart[]) => {
-			if (!player) throw "ban forever fix this idk";
+			if (!player) {
+				for (const part of parts) {
+					serverBreakQueue.add(part);
+				}
+				return;
+			}
 
 			const newData = breakQueue.get(player) ?? [];
 			breakQueue.set(player, newData);
@@ -59,6 +59,20 @@ export class UnreliableRemoteController extends HostedService {
 					}
 				});
 			}
+
+			if (serverBreakQueue.size() > 0) {
+				const copy = [...serverBreakQueue];
+				serverBreakQueue.clear();
+
+				task.spawn(() => {
+					for (const block of copy) {
+						impactSoundEffect.send(block, { blocks: [block], index: undefined });
+						ServerPartUtils.BreakJoints(block);
+					}
+					const players = ServerPlayers.GetLoadedPlayers();
+					CustomRemotes.physics.normalizeRootparts.send(players, { parts: copy });
+				});
+			}
 		});
 
 		const burnEvent = (parts: BasePart[]) => {
@@ -69,6 +83,7 @@ export class UnreliableRemoteController extends HostedService {
 			});
 		};
 
+		// TODO: Change this for some offensive update
 		const explode = (player: Player | undefined, { part, isFlammable, pressure, radius }: ExplodeArgs) => {
 			function isValidBlock(part: BasePart, player: Player | undefined): boolean {
 				if (!part) return false;
