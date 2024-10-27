@@ -92,6 +92,10 @@ export class BuildingPlot extends ReadonlyPlot {
 		BlockManager.manager.uuid.set(model, uuid);
 		model.Name = uuid;
 
+		if (data.scale) {
+			SharedBuilding.scale(model, block.model, data.scale);
+		}
+
 		SharedBuilding.paint([model], data.color, data.material, true);
 		model.Parent = this.instance;
 
@@ -136,9 +140,12 @@ export class BuildingPlot extends ReadonlyPlot {
 			return success;
 		}
 
-		for (const { instance, position } of blocks) {
-			let bb = BB.fromModel(instance);
-			if (position) bb = bb.withCenter(position);
+		for (const { instance, position, scale } of blocks) {
+			const origInstance = this.blockList.blocks[BlockManager.manager.id.get(instance)]!.model;
+
+			const bb = BB.fromModel(origInstance)
+				.withCenter(position ?? instance.GetPivot())
+				.withSize((s) => s.mul(scale ?? BlockManager.manager.scale.get(instance) ?? Vector3.zero));
 
 			if (!this.boundingBox.isBBInside(bb)) {
 				return err("Invalid edit");
@@ -146,8 +153,16 @@ export class BuildingPlot extends ReadonlyPlot {
 		}
 
 		for (const req of blocks) {
-			const { instance, position } = req;
+			const { instance, position, scale } = req;
 			if (position) instance.PivotTo(position);
+			if (scale) {
+				SharedBuilding.scale(
+					instance,
+					this.blockList.blocks[BlockManager.manager.id.get(instance)]!.model,
+					scale,
+				);
+				BlockManager.manager.scale.set(instance, scale);
+			}
 
 			this._blockEdited.Fire(req);
 		}

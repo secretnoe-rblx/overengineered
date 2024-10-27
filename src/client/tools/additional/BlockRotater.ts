@@ -27,8 +27,9 @@ abstract class RotaterBase extends BlockEditorBase {
 		plot: SharedPlot,
 		blocks: readonly BlockModel[],
 		@inject private readonly playerDataStorage: PlayerDataStorage,
+		@inject blockList: BlockList,
 	) {
-		super(mode, plot, blocks);
+		super(mode, plot, blocks, blockList);
 		this.onPrepare(() => this.tooltipHolder.set(this.getTooltips()));
 	}
 

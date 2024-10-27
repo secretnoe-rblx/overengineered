@@ -1,5 +1,6 @@
 import { ContextActionService } from "@rbxts/services";
 import { ObservableMap } from "engine/shared/event/ObservableMap";
+import { Signal } from "engine/shared/event/Signal";
 import { Keys } from "engine/shared/fixes/Keys";
 
 type KeybindSubscription = {
@@ -7,9 +8,9 @@ type KeybindSubscription = {
 	readonly connection: SignalConnection;
 };
 
-export type { KeybindRegistration };
 class KeybindRegistration {
-	private readonly subscriptions = new Set<KeybindSubscription>();
+	private readonly indices: number[] = [];
+	private readonly subscriptions: { [k in number]?: Set<KeybindSubscription> } = {};
 	private keys: Set<KeyCode>;
 
 	constructor(
@@ -18,6 +19,25 @@ class KeybindRegistration {
 		defaultKeys: readonly KeyCode[],
 	) {
 		this.keys = new Set(defaultKeys);
+
+		ContextActionService.BindAction(
+			this.action,
+			(name, state, input) => {
+				if (name !== this.action) return;
+				for (const k of [...this.indices]) {
+					for (const { func } of [...(this.subscriptions[k] ?? new Set())]) {
+						const result = func(input);
+						if (result === Enum.ContextActionResult.Sink) {
+							return result;
+						}
+					}
+				}
+
+				return Enum.ContextActionResult.Pass;
+			},
+			false,
+			...this.keys.map((k) => Keys[k]),
+		);
 	}
 
 	getKeys() {
@@ -27,53 +47,31 @@ class KeybindRegistration {
 		this.keys = new Set(keys);
 	}
 
-	onDown(func: KeybindSubscription["func"]): SignalConnection {
+	onDown(func: KeybindSubscription["func"], priority?: number): SignalConnection {
 		return this.on((input) => {
 			if (input.UserInputState !== Enum.UserInputState.Begin) return;
 			return func(input);
-		});
+		}, priority);
 	}
-	onUp(func: KeybindSubscription["func"]): SignalConnection {
+	onUp(func: KeybindSubscription["func"], priority?: number): SignalConnection {
 		return this.on((input) => {
 			if (input.UserInputState !== Enum.UserInputState.Begin) return;
 			return func(input);
-		});
+		}, priority);
 	}
-	private on(func: KeybindSubscription["func"]): SignalConnection {
-		const { action: name, subscriptions } = this;
+	private on(func: KeybindSubscription["func"], priority?: number): SignalConnection {
+		priority ??= 0;
 
-		const connection: SignalConnection = {
-			Disconnect() {
-				ContextActionService.UnbindAction(name);
-				subscriptions.delete(sub);
-			},
-		};
+		const connection = Signal.connection(() => this.subscriptions[priority]?.delete(sub));
 		const sub = { func, connection };
-		this.subscriptions.add(sub);
 
-		this.reconnect();
+		if (!this.subscriptions[priority]) {
+			this.indices.push(priority);
+			this.indices.sort();
+		}
+		(this.subscriptions[priority] ??= new Set()).add(sub);
+
 		return connection;
-	}
-
-	private reconnect() {
-		ContextActionService.UnbindAction(this.action);
-
-		ContextActionService.BindAction(
-			this.action,
-			(name, state, input) => {
-				if (name !== this.action) return;
-				for (const { func } of this.subscriptions) {
-					const result = func(input);
-					if (result === Enum.ContextActionResult.Sink) {
-						return result;
-					}
-				}
-
-				return Enum.ContextActionResult.Pass;
-			},
-			false,
-			...this.keys.map((k) => Keys[k]),
-		);
 	}
 }
 
@@ -85,6 +83,15 @@ export class Keybinds {
 		let registration = this._registrations.get(action);
 		if (!registration) {
 			this._registrations.set(action, (registration = new KeybindRegistration(action, displayName, keys)));
+		}
+
+		return registration;
+	}
+
+	get(action: string): KeybindRegistration {
+		const registration = this._registrations.get(action);
+		if (!registration) {
+			throw `Unknown registration ${action}`;
 		}
 
 		return registration;

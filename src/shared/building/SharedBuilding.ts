@@ -34,6 +34,31 @@ export namespace SharedBuilding {
 		return result;
 	}
 
+	export function scale(block: BlockModel, originalModel: BlockModel, scale: Vector3) {
+		const origModelCenter = originalModel.GetPivot();
+		const blockCenter = block.GetPivot();
+
+		const update = (instance: Instance, origInstance: Instance) => {
+			// assuming no duplicate instance names on a single layer
+
+			for (const origChild of origInstance.GetChildren()) {
+				const name = origChild.Name;
+				const child = instance.WaitForChild(name);
+
+				if (child.IsA("BasePart") && origChild.IsA("BasePart")) {
+					child.Size = origChild.Size.mul(origChild.CFrame.Rotation.Inverse().mul(scale).Abs());
+
+					const offset = origModelCenter.ToObjectSpace(origChild.CFrame);
+					child.Position = blockCenter.ToWorldSpace(new CFrame(offset.Position.mul(scale))).Position;
+				}
+
+				update(child, origChild);
+			}
+		};
+
+		update(block, originalModel);
+	}
+
 	/**
 	 * Set the block material and color
 	 * @param byBuild If true, will force update block transparency

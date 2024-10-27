@@ -86,33 +86,36 @@ export namespace BuildingManager {
 		return undefined;
 	}
 
-	export function blockCanBePlacedAt(plot: SharedPlot, block: { readonly model: Model }, pivot: CFrame): boolean {
-		return serverBlockCanBePlacedAt(plot, block, pivot, Players.LocalPlayer);
+	export function blockCanBePlacedAt(
+		plot: SharedPlot,
+		block: { readonly model: Model },
+		pivot: CFrame,
+		scale: Vector3,
+	): boolean {
+		return serverBlockCanBePlacedAt(plot, block, pivot, scale, Players.LocalPlayer);
 	}
 
 	export function serverBlockCanBePlacedAt(
 		plot: SharedPlot,
 		block: { readonly model: Model },
 		pivot: CFrame,
+		scale: Vector3,
 		player: Player,
 	): boolean {
 		if (!plot.isBuildingAllowed(player ?? Players.LocalPlayer)) {
 			return false;
 		}
 
-		if (!plot.bounds.isBBInside(BB.fromModel(block.model).withCenter(pivot))) {
+		if (
+			!plot.bounds.isBBInside(
+				BB.fromModel(block.model)
+					.withCenter(pivot)
+					.withSize((s) => s.mul(scale)),
+			)
+		) {
 			return false;
 		}
 
-		// temporarily removed because useless and easily bypassable by other tools
-		/*if (RunService.IsClient()) {
-			const collideBlock = getBlockByPosition(pivot.Position);
-			if (collideBlock) {
-				return false;
-			}
-		}*/
-
-		// OK
 		return true;
 	}
 

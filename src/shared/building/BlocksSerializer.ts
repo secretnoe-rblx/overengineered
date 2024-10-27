@@ -54,8 +54,9 @@ interface SerializedBlockV3 extends SerializedBlockV2 {
 }
 interface SerializedBlockV4
 	extends ReplaceWith<SerializedBlockV3, { readonly config?: PlacedBlockConfig | undefined }> {}
+interface SerializedBlockV5 extends ReplaceWith<SerializedBlockV4, { readonly scale?: Vector3 | undefined }> {}
 
-export type LatestSerializedBlock = SerializedBlockV4;
+export type LatestSerializedBlock = SerializedBlockV5;
 export type LatestSerializedBlocks = SerializedBlocks<LatestSerializedBlock>;
 
 namespace Filter {
@@ -1542,11 +1543,12 @@ const getVersion = (version: number) => versions.find((v) => v.version === versi
 /** Methods to save and load buildings */
 export namespace BlocksSerializer {
 	type JsonBlock = ReplaceWith<
-		Omit<LatestSerializedBlock, "location" | "color" | "material">,
+		Omit<LatestSerializedBlock, "location" | "color" | "material" | "scale">,
 		{
 			readonly loc: SerializedCFrame;
 			readonly mat: SerializedEnum | undefined;
 			readonly col: SerializedColor | undefined;
+			readonly scl: string | undefined;
 		}
 	>;
 
@@ -1572,6 +1574,7 @@ export namespace BlocksSerializer {
 				loc: Serializer.CFrameSerializer.serialize(block.location),
 				col: block.color && Serializer.Color3Serializer.serialize(block.color),
 				mat: block.material && Serializer.EnumMaterialSerializer.serialize(block.material),
+				scl: block.scale && JSON.serialize(block.scale),
 			};
 		};
 
@@ -1610,6 +1613,7 @@ export namespace BlocksSerializer {
 				location: Serializer.CFrameSerializer.deserialize(block.loc),
 				color: block.col ? Serializer.Color3Serializer.deserialize(block.col) : undefined,
 				material: block.mat ? Serializer.EnumMaterialSerializer.deserialize(block.mat) : undefined,
+				scale: block.scl ? JSON.deserialize(block.scl) : undefined,
 			};
 		};
 
@@ -1636,6 +1640,7 @@ export namespace BlocksSerializer {
 			material: blockData.material ?? Enum.Material.Plastic,
 			config: blockData.config,
 			uuid: blockData.uuid,
+			scale: blockData.scale,
 		};
 	}
 }

@@ -31,7 +31,12 @@ export class ClientBuildingValidationController extends HostedService {
 
 				if (
 					!blocks.all((block) =>
-						BuildingManager.blockCanBePlacedAt(plot, blockList.blocks[block.id]!, block.location),
+						BuildingManager.blockCanBePlacedAt(
+							plot,
+							blockList.blocks[block.id]!,
+							block.location,
+							block.scale ?? Vector3.one,
+						),
 					)
 				) {
 					return errorResponse("Can't be placed here");

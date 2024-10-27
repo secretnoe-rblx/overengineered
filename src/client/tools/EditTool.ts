@@ -3,9 +3,8 @@ import { LoadingController } from "client/controller/LoadingController";
 import { MaterialColorEditControl } from "client/gui/buildmode/MaterialColorEditControl";
 import { LogControl } from "client/gui/static/LogControl";
 import { ClientBuilding } from "client/modes/build/ClientBuilding";
+import { BlockEditor } from "client/tools/additional/BlockEditor";
 import { BlockGhoster } from "client/tools/additional/BlockGhoster";
-import { BlockMover } from "client/tools/additional/BlockMover";
-import { BlockRotater } from "client/tools/additional/BlockRotater";
 import { MultiBlockHighlightedSelector } from "client/tools/highlighters/MultiBlockHighlightedSelector";
 import { SelectedBlocksHighlighter } from "client/tools/highlighters/SelectedBlocksHighlighter";
 import { ToolBase } from "client/tools/ToolBase";
@@ -80,12 +79,12 @@ namespace Scene {
 			readonly MoveButton: GuiButton;
 			readonly RotateButton: GuiButton;
 			readonly ScaleButton: GuiButton;
-			readonly CopyButton: GuiButton;
 			readonly PasteButton: GuiButton;
 			readonly DeleteButton: GuiButton;
 			readonly PaintButton: GuiButton;
 		};
 		readonly Bottom2: GuiObject & {
+			readonly CopyButton: GuiButton;
 			readonly MirrorXButton: GuiButton;
 			readonly MirrorYButton: GuiButton;
 			readonly MirrorZButton: GuiButton;
@@ -121,7 +120,7 @@ namespace Scene {
 			const move = this.add(new ButtonControl(this.gui.Bottom.MoveButton, () => tool.toggleMode("Move")));
 			const rotate = this.add(new ButtonControl(this.gui.Bottom.RotateButton, () => tool.toggleMode("Rotate")));
 			const copy = this.add(
-				new ButtonControl(this.gui.Bottom.CopyButton, () => {
+				new ButtonControl(this.gui.Bottom2.CopyButton, () => {
 					tool.copySelectedBlocks();
 					paste.setInteractable(true);
 				}),
@@ -138,6 +137,7 @@ namespace Scene {
 			const mirz = this.add(
 				new ButtonControl(this.gui.Bottom2.MirrorZButton, () => tool.mirrorSelectedBlocks("z")),
 			);
+			const scale = this.add(new ButtonControl(this.gui.Bottom.ScaleButton, () => tool.toggleMode("Scale")));
 
 			const multiValueSetter = <T>(instance: T, func: (value: boolean) => void) => {
 				const values: boolean[] = [];
@@ -158,6 +158,7 @@ namespace Scene {
 				Rotate: multiValueSetter(rotate, (v) => rotate.setInteractable(v)),
 				Paste: multiValueSetter(paste, (v) => paste.setInteractable(v)),
 				Paint: multiValueSetter(paint, (v) => paint.setInteractable(v)),
+				Scale: multiValueSetter(scale, (v) => scale.setInteractable(v)),
 
 				// other buttons
 				Copy: multiValueSetter(copy, (v) => copy.setInteractable(v)),
@@ -191,7 +192,12 @@ namespace Scene {
 						button.instance.instance.BackgroundColor3 =
 							mode === name ? Colors.accentDark : Colors.staticBackground;
 
-						const enabled = mode === undefined || mode === name;
+						const enabled =
+							mode === undefined ||
+							mode === name ||
+							(name === "Move" && (mode === "Rotate" || mode === "Scale")) ||
+							(name === "Rotate" && (mode === "Move" || mode === "Scale")) ||
+							(name === "Scale" && (mode === "Move" || mode === "Rotate"));
 						button.set(1, enabled);
 					}
 				},
@@ -321,38 +327,56 @@ const reGenerateUuids = (
 
 namespace Controllers {
 	@injectable
-	export class Move extends ClientComponent {
-		readonly step = new NumberObservableValue<number>(0.2, 0.01, 256, 0.01);
-		private readonly editor;
+	export class Edit extends ClientComponent {
+		private submitted = false;
+		private readonly editor: BlockEditor;
 
-		constructor(tool: EditTool, plot: SharedPlot, blocks: readonly BlockModel[], @inject di: DIContainer) {
+		constructor(
+			tool: EditTool,
+			private readonly plot: SharedPlot,
+			selected: readonly BlockModel[],
+			startMode: "move" | "rotate" | "scale",
+			@inject di: DIContainer,
+		) {
 			super();
+			this.editor = this.parent(di.resolveForeignClass(BlockEditor, [[...selected], startMode]));
 
-			this.editor = this.parent(BlockMover.create(tool.mode, plot, blocks, di));
-			this.event.subscribeObservable(tool.mode.moveGrid, (grid) => this.step.set(grid), true);
-			this.step.autoSet(this.editor.step);
+			this.event.subscribe(this.editor.completed, () => this.destroy());
+			this.onDestroy(() => this.submit(true));
+		}
 
-			this.onDestroy(() => {
-				const update = this.editor.getUpdate();
+		private submit(skipIfSame = true) {
+			if (this.submitted) return;
+			this.submitted = true;
+
+			const update = this.editor.getUpdate();
+
+			if (skipIfSame) {
 				for (const block of update) {
 					if (block.newPosition && block.newPosition !== block.origPosition) continue;
+					if (block.origScale && block.newScale && block.newScale !== block.origScale) continue;
 
 					return;
 				}
+			}
 
-				const response = ClientBuilding.editOperation.execute({ plot, blocks: update });
-				if (!response.success) {
-					LogControl.instance.addLine(response.message, Colors.red);
-					this.cancel();
-				}
-
-				if (tool.isEnabled()) {
-					tool.selected.setRange(blocks);
-				}
+			const response = ClientBuilding.editOperation.execute({
+				plot: this.plot,
+				blocks: this.editor.getUpdate(),
 			});
+			if (!response.success) {
+				LogControl.instance.addLine(response.message, Colors.red);
+				this.cancel();
+			}
+
+			return response.success;
 		}
 
+		deselected() {
+			this.submit(false);
+		}
 		cancel() {
+			this.submitted = true;
 			this.editor.cancel();
 		}
 	}
@@ -393,10 +417,11 @@ namespace Controllers {
 				return b;
 			});
 
-			this.editor = this.parent(BlockMover.create(tool.mode, plot, this.blocks, di));
+			this.editor = this.parent(di.resolveForeignClass(BlockEditor, [this.blocks, "move"]));
 			this.event.subscribeObservable(tool.mode.moveGrid, (grid) => this.step.set(grid), true);
 			this.step.autoSet(this.editor.step);
 
+			this.event.subscribe(this.editor.completed, () => this.destroy());
 			this.onDestroy(() => this.submit(true));
 		}
 
@@ -446,50 +471,7 @@ namespace Controllers {
 			}
 		}
 	}
-	@injectable
-	export class Rotate extends ClientComponent {
-		readonly step = new NumberObservableValue<number>(90, 0, 360, 0.01);
-		private readonly editor;
 
-		constructor(tool: EditTool, plot: SharedPlot, blocks: readonly BlockModel[], @inject di: DIContainer) {
-			super();
-
-			this.editor = this.parent(BlockRotater.create(tool.mode, plot, blocks, di));
-			this.event.subscribeObservable(tool.mode.rotateGrid, (grid) => this.step.set(grid), true);
-			this.step.autoSet(this.editor.step);
-
-			this.onDestroy(() => {
-				if (!this.editor.isValidRotation()) {
-					LogControl.instance.addLine("Invalid rotation", Colors.red);
-					this.cancel();
-					return;
-				}
-
-				const update = this.editor.getUpdate();
-				for (const block of update) {
-					if (block.newPosition && block.newPosition !== block.origPosition) continue;
-
-					return;
-				}
-
-				const response = ClientBuilding.editOperation.execute({ plot, blocks: update });
-				if (!response.success) {
-					LogControl.instance.addLine(response.message, Colors.red);
-					this.cancel();
-				}
-
-				if (tool.isEnabled()) {
-					tool.selected.setRange(blocks);
-				}
-
-				return response.success;
-			});
-		}
-
-		cancel() {
-			this.editor.cancel();
-		}
-	}
 	export class Paint extends ClientComponent {
 		private static readonly material = new ObservableValue<Enum.Material>(Enum.Material.Plastic);
 		private static readonly color = new ObservableValue<Color3>(new Color3(1, 1, 1));
@@ -580,7 +562,7 @@ const canBeSelected = (tool: EditTool, mode: EditToolButtons): boolean => {
 	return tool.selected.get().size() !== 0;
 };
 
-export type EditToolMode = "Move" | "Paste" | "Rotate" | "Paint";
+export type EditToolMode = "Move" | "Paste" | "Scale" | "Rotate" | "Paint";
 export type EditToolButtons = EditToolMode | "Copy" | "Delete" | "MirrorX" | "MirrorY" | "MirrorZ";
 
 @injectable
@@ -588,6 +570,7 @@ export class EditTool extends ToolBase {
 	readonly enabledModes = new ComponentDisabler<EditToolButtons>([
 		"Move",
 		"Rotate",
+		"Scale",
 		"Copy",
 		"Paste",
 		"Paint",
@@ -641,6 +624,12 @@ export class EditTool extends ToolBase {
 		this.onDisable(() => this.selected.clear());
 		this.onDisable(() => this._selectedMode.set(undefined));
 		this.event.subscribeObservable(this.targetPlot, () => this._selectedMode.set(undefined), true);
+
+		this.controller.childSet.Connect((child) => {
+			if (!child) {
+				this._selectedMode.set(undefined);
+			}
+		});
 		this.event.subscribeObservable(this.selectedMode, (mode) => {
 			if (!mode) {
 				const controller = this.controller.get();
@@ -657,13 +646,24 @@ export class EditTool extends ToolBase {
 				return;
 			}
 
-			this.controller.set(
-				di.resolveForeignClass(Controllers[mode] as typeof Controllers.Move, [
-					this,
-					this.targetPlot.get(),
-					[...selected],
-				]),
-			);
+			if (mode === "Move" || mode === "Rotate" || mode === "Scale") {
+				this.controller.set(
+					di.resolveForeignClass(Controllers.Edit, [
+						this,
+						this.targetPlot.get(),
+						[...selected],
+						mode.lower() as never,
+					]),
+				);
+			} else {
+				this.controller.set(
+					di.resolveForeignClass(Controllers[mode] as typeof Controllers.Paste, [
+						this,
+						this.targetPlot.get(),
+						[...selected],
+					]),
+				);
+			}
 		});
 
 		const move = keybinds.register("edit_move", "Edit tool > Move", ["F", "ButtonX"]);
@@ -671,6 +671,9 @@ export class EditTool extends ToolBase {
 
 		const rotate = keybinds.register("edit_rotate", "Edit tool > Rotate", ["R"]);
 		this.event.subscribeRegistration(() => rotate.onDown(() => this.toggleMode("Rotate")));
+
+		const scale = keybinds.register("edit_scale", "Edit tool > Scale", ["B"]);
+		this.event.subscribeRegistration(() => scale.onDown(() => this.toggleMode("Scale")));
 
 		const del = keybinds.register("edit_delete", "Edit tool > Delete", ["T"]);
 		this.event.subscribeRegistration(() => del.onDown(() => this.deleteSelectedBlocks()));

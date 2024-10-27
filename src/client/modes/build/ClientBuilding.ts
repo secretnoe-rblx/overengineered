@@ -179,6 +179,8 @@ export namespace ClientBuilding {
 	type EditBlockInfoBase = {
 		readonly origPosition: CFrame;
 		readonly newPosition?: CFrame;
+		readonly origScale?: Vector3;
+		readonly newScale?: Vector3;
 	};
 	export type EditBlockInfo = EditBlockInfoBase & { readonly instance: BlockModel };
 	type EditBlockRequestInfo = EditBlocksRequest["blocks"][number];
@@ -191,6 +193,8 @@ export namespace ClientBuilding {
 			uuid: BlockManager.manager.uuid.get(b.instance),
 			newPosition: b.newPosition,
 			origPosition: b.origPosition,
+			origScale: b.origScale,
+			newScale: b.newScale,
 		}));
 
 		const getOrigBlocks = (): readonly EditBlockRequestInfo[] =>
@@ -198,6 +202,7 @@ export namespace ClientBuilding {
 				(b): EditBlockRequestInfo => ({
 					instance: plot.getBlock(b.uuid),
 					position: b.origPosition,
+					scale: b.newScale,
 				}),
 			);
 		const getBlocks = (): readonly EditBlockRequestInfo[] =>
@@ -205,6 +210,7 @@ export namespace ClientBuilding {
 				(b): EditBlockRequestInfo => ({
 					instance: plot.getBlock(b.uuid),
 					position: b.newPosition,
+					scale: b.newScale,
 				}),
 			);
 

@@ -25,8 +25,9 @@ abstract class MoveBase extends BlockEditorBase {
 		plot: SharedPlot,
 		blocks: readonly BlockModel[],
 		@inject private readonly playerDataStorage: PlayerDataStorage,
+		@inject blockList: BlockList,
 	) {
-		super(mode, plot, blocks);
+		super(mode, plot, blocks, blockList);
 		this.onPrepare(() => this.tooltipHolder.set(this.getTooltips()));
 
 		// disable welds until movement end to prevent unanchored connected parts from moving with the selected blocks

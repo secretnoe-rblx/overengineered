@@ -20,6 +20,7 @@ export abstract class BlockEditorBase extends ClientComponent {
 		protected readonly mode: BuildingMode,
 		plot: SharedPlot,
 		blocks: readonly BlockModel[],
+		protected readonly blockList: BlockList,
 	) {
 		super();
 
@@ -38,6 +39,8 @@ export abstract class BlockEditorBase extends ClientComponent {
 			(b): ClientBuilding.EditBlockInfo => ({
 				...b,
 				newPosition: b.instance.GetPivot(),
+				origScale: Vector3.one,
+				newScale: Vector3.one,
 			}),
 		);
 	}

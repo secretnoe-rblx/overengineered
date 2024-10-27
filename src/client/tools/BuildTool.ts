@@ -576,9 +576,11 @@ namespace SinglePlaceController {
 
 			const canBePlaced =
 				areAllBlocksInsidePlot &&
-				BuildingManager.blockCanBePlacedAt(plot, selectedBlock, this.mainGhost.GetPivot()) &&
+				BuildingManager.blockCanBePlacedAt(plot, selectedBlock, this.mainGhost.GetPivot(), Vector3.one) &&
 				asMap(this.blockMirrorer.getMirroredModels()).all((k, ghosts) =>
-					ghosts.all((ghost) => BuildingManager.blockCanBePlacedAt(plot, selectedBlock, ghost.GetPivot())),
+					ghosts.all((ghost) =>
+						BuildingManager.blockCanBePlacedAt(plot, selectedBlock, ghost.GetPivot(), Vector3.one),
+					),
 				);
 
 			BlockGhoster.setColor(canBePlaced ? allowedColor : forbiddenColor);
@@ -630,6 +632,7 @@ namespace SinglePlaceController {
 					location: g.pos,
 					uuid: undefined,
 					config: undefined,
+					scale: undefined,
 				}),
 			);
 
@@ -1015,6 +1018,7 @@ namespace MultiPlaceController {
 						location: loc.pos,
 						uuid: undefined,
 						config: undefined,
+						scale: undefined,
 					}),
 				),
 			});
