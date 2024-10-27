@@ -1,7 +1,6 @@
 import { Workspace } from "@rbxts/services";
 import { HostedService } from "engine/shared/di/HostedService";
 import { RemoteEvents } from "shared/RemoteEvents";
-import { PartUtils } from "shared/utils/PartUtils";
 import type { SharedPlot } from "shared/building/SharedPlot";
 import type { ExplosionEffect } from "shared/effects/ExplosionEffect";
 
@@ -24,18 +23,20 @@ export class ExplosionManager extends HostedService {
 			value.IsDescendantOf(this.plot.instance),
 		);
 
-		for (const affectedPart of affectedParts) {
-			PartUtils.BreakJoints(affectedPart);
-		}
+		// for (const affectedPart of affectedParts) {
+		// 	PartUtils.BreakJoints(affectedPart);
+		// }
 
 		for (const affectedPart of affectedParts) {
-			// Roblox native behavior
-			const predictedVelocity = affectedPart.Position.sub(origin.Position)
-				.Unit.mul(pressure)
-				.div(affectedPart.Mass)
-				.div(6080);
+			affectedPart.ChildRemoved.Once(() => {
+				// Roblox native behavior
+				const predictedVelocity = affectedPart.Position.sub(origin.Position)
+					.Unit.mul(pressure)
+					.div(affectedPart.Mass)
+					.div(6080);
 
-			affectedPart.ApplyImpulse(predictedVelocity);
+				affectedPart.ApplyImpulse(predictedVelocity);
+			});
 		}
 
 		// No sound index - local run then
