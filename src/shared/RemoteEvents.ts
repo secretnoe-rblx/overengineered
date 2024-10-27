@@ -1,4 +1,5 @@
 import { AutoC2SRemoteEvent } from "engine/shared/event/C2SRemoteEvent";
+import { S2CRemoteEvent } from "engine/shared/event/PERemoteEvent";
 import { ExplosionEffect } from "shared/effects/ExplosionEffect";
 import { FireEffect } from "shared/effects/FireEffect";
 import { ImpactSoundEffect } from "shared/effects/ImpactSoundEffect";
@@ -7,11 +8,21 @@ import { SoundEffect } from "shared/effects/SoundEffect";
 import { SparksEffect } from "shared/effects/SparksEffect";
 import type { GameHostBuilder } from "engine/shared/GameHostBuilder";
 
-export type ExplodeArgs = {
-	readonly part: BasePart;
+export type ClientExplodeArgs = {
+	readonly origin: BasePart;
+	readonly localParts: BasePart[];
 	readonly radius: number;
 	readonly pressure: number;
 	readonly isFlammable: boolean;
+	readonly soundIndex: number;
+};
+
+export type ServerExplodeArgs = {
+	readonly origin: BasePart;
+	readonly radius: number;
+	readonly pressure: number;
+	readonly isFlammable: boolean;
+	readonly soundIndex: number;
 };
 
 export namespace RemoteEvents {
@@ -26,7 +37,9 @@ export namespace RemoteEvents {
 
 	export const Burn = new AutoC2SRemoteEvent<BasePart[]>("burn");
 	export const ImpactBreak = new AutoC2SRemoteEvent<BasePart[]>("impact_break");
-	export const Explode = new AutoC2SRemoteEvent<ExplodeArgs>("explode");
+
+	export const ClientExplode = new AutoC2SRemoteEvent<ClientExplodeArgs>("client_explode");
+	export const ServerExplode = new S2CRemoteEvent<ServerExplodeArgs>("server_explode");
 
 	// empty method just to trigger the constructors
 	export function initialize() {}

@@ -123,13 +123,14 @@ export class WeaponProjectile extends InstanceComponent<BasePart> {
 			}
 		}
 
-		const explode = (part: BasePart, radius: number) =>
-			RemoteEvents.Explode.send({
-				part,
-				radius,
-				pressure: 1,
-				isFlammable: false,
-			});
+		// TODO: Sorry samel this code is legacy now
+		// const explode = (part: BasePart, radius: number) =>
+		// 	RemoteEvents.Explode.send({
+		// 		part,
+		// 		radius,
+		// 		pressure: 1,
+		// 		isFlammable: false,
+		// 	});
 
 		const properties = this.projectilePart.CurrentPhysicalProperties;
 		const impactDamage = (this.totalEffect?.impactDamage?.value ?? 0) + this.baseDamage;
@@ -147,8 +148,8 @@ export class WeaponProjectile extends InstanceComponent<BasePart> {
 			part.Destroying.Connect(() => WeaponProjectile.damagedParts.delete(part)); //damage here
 		if (checkIfCanBeUnwelded(part)) RemoteEvents.ImpactBreak.send([part]); //unweld here
 		if (checkIfCanBeDestroyed(part)) part.Destroy(); //destroy here
-		if ((this.totalEffect.explosiveDamage?.value ?? 0) > 0)
-			explode(this.projectilePart, this.totalEffect.explosiveDamage?.value ?? 0); //explode here
+		// if ((this.totalEffect.explosiveDamage?.value ?? 0) > 0)
+		// 	explode(this.projectilePart, this.totalEffect.explosiveDamage?.value ?? 0); //explode here
 		if (tryYourLuck(ignitionChance)) RemoteEvents.Burn.send([part]); //put on fire here
 	}
 

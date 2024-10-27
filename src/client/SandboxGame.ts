@@ -28,6 +28,7 @@ import { Keybinds } from "client/Keybinds";
 import { ActionController } from "client/modes/build/ActionController";
 import { ClientBuildingValidationController } from "client/modes/build/ClientBuildingValidationController";
 import { PlayModeController } from "client/modes/PlayModeController";
+import { ExplosionManager } from "client/physics/Explosions";
 import { PlayerDataInitializer } from "client/PlayerDataStorage";
 import { TerrainController } from "client/terrain/TerrainController";
 import { BasicCarTutorial } from "client/tutorial/tutorials/BasicCarTutorial";
@@ -92,6 +93,7 @@ export namespace SandboxGame {
 		builder.services.registerService(MusicController);
 		builder.services.registerService(GuiAutoScaleController);
 		builder.services.registerService(HideInterfaceController);
+		builder.services.registerService(ExplosionManager);
 		ActionsGui.initialize(builder);
 
 		if (!RunService.IsStudio()) {
