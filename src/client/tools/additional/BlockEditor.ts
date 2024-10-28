@@ -249,11 +249,11 @@ class ScaleComponent extends ClientComponent {
 		this.event.subscribeObservable(step, updateFromCurrentMovement);
 
 		this.event.subInput((ih) => {
-			ih.onKeyDown("LeftControl", () => {
+			ih.onKeyDown("LeftAlt", () => {
 				centerBased.set("kb", true);
 				updateFromCurrentMovement();
 			});
-			ih.onKeyUp("LeftControl", () => {
+			ih.onKeyUp("LeftAlt", () => {
 				centerBased.set("kb", false);
 				updateFromCurrentMovement();
 			});
