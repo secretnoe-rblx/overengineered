@@ -11,6 +11,7 @@ import { ObservableValue } from "engine/shared/event/ObservableValue";
 import { ArgsSignal } from "engine/shared/event/Signal";
 import { BB } from "engine/shared/fixes/BB";
 import { Instances } from "engine/shared/fixes/Instances";
+import { MathUtils } from "engine/shared/fixes/MathUtils";
 import { BlockManager } from "shared/building/BlockManager";
 import { SharedBuilding } from "shared/building/SharedBuilding";
 import { Colors } from "shared/Colors";
@@ -67,7 +68,12 @@ const reposition = (blocks: readonly EditingBlock[], originalBB: BB, currentBB: 
 
 @injectable
 class MoveComponent extends Component {
-	constructor(handles: EditHandles, blocks: readonly EditingBlock[], originalBB: BB) {
+	constructor(
+		handles: EditHandles,
+		blocks: readonly EditingBlock[],
+		originalBB: BB,
+		step: ReadonlyObservableValue<number>,
+	) {
 		super();
 
 		const forEachHandle = (func: (handle: Handles) => void) => {
@@ -79,27 +85,50 @@ class MoveComponent extends Component {
 		this.onEnabledStateChange((enabled) => forEachHandle((handle) => (handle.Visible = enabled)));
 
 		let bb = BB.fromPart(handles);
-		const sub = (handle: Handles) => {
-			this.event.subscribe(handle.MouseDrag, (face, distance) => {
-				const direction = bb.center.Rotation.mul(Vector3.FromNormalId(face));
-				const diff = direction.mul(distance);
-				handles.PivotTo(bb.center.add(diff));
+		const update = (face: Enum.NormalId, distance: number) => {
+			distance = MathUtils.round(distance, step.get());
 
-				reposition(blocks, originalBB, BB.fromPart(handles));
+			const direction = bb.center.Rotation.mul(Vector3.FromNormalId(face));
+			const diff = direction.mul(distance);
+			handles.PivotTo(bb.center.add(diff));
+
+			reposition(blocks, originalBB, BB.fromPart(handles));
+		};
+
+		let currentMovement: { readonly face: Enum.NormalId; distance: number } | undefined;
+		const updateFromCurrentMovement = (): void => {
+			if (!currentMovement) return;
+			update(currentMovement.face, currentMovement.distance);
+		};
+
+		this.event.subscribeObservable(step, updateFromCurrentMovement);
+
+		forEachHandle((handle) => {
+			this.event.subscribe(handle.MouseDrag, (face, distance) => {
+				currentMovement ??= { face, distance };
+				currentMovement.distance = distance;
+
+				updateFromCurrentMovement();
 			});
 
 			this.event.subscribe(handle.MouseButton1Up, () => {
+				currentMovement = undefined;
+
 				bb = BB.fromPart(handles);
 				reposition(blocks, originalBB, bb);
 			});
-		};
-		forEachHandle(sub);
+		});
 	}
 }
 
 @injectable
 class RotateComponent extends Component {
-	constructor(handles: EditHandles, blocks: readonly EditingBlock[], originalBB: BB) {
+	constructor(
+		handles: EditHandles,
+		blocks: readonly EditingBlock[],
+		originalBB: BB,
+		step: ReadonlyObservableValue<number>,
+	) {
 		super();
 
 		const forEachHandle = (func: (handle: ArcHandles) => void) => {
@@ -108,16 +137,35 @@ class RotateComponent extends Component {
 
 		this.onEnabledStateChange((enabled) => forEachHandle((handle) => (handle.Visible = enabled)));
 
+		const update = (axis: Enum.Axis, relativeAngle: number) => {
+			relativeAngle = MathUtils.round(relativeAngle, math.rad(step.get()));
+
+			const diff = CFrame.fromAxisAngle(Vector3.FromAxis(axis), relativeAngle);
+			handles.PivotTo(bb.center.mul(diff));
+
+			reposition(blocks, originalBB, BB.fromPart(handles));
+		};
+
+		let currentRotation: { readonly axis: Enum.Axis; relativeAngle: number } | undefined;
+		const updateFromCurrentRotation = (): void => {
+			if (!currentRotation) return;
+			update(currentRotation.axis, currentRotation.relativeAngle);
+		};
+
+		this.event.subscribeObservable(step, updateFromCurrentRotation);
+
 		let bb = BB.fromPart(handles);
 		const sub = (handle: ArcHandles) => {
 			this.event.subscribe(handle.MouseDrag, (axis, relativeAngle, deltaRadius) => {
-				const diff = CFrame.fromAxisAngle(Vector3.FromAxis(axis), relativeAngle);
-				handles.PivotTo(bb.center.mul(diff));
+				currentRotation ??= { axis, relativeAngle };
+				currentRotation.relativeAngle = relativeAngle;
 
-				reposition(blocks, originalBB, BB.fromPart(handles));
+				updateFromCurrentRotation();
 			});
 
 			this.event.subscribe(handle.MouseButton1Up, () => {
+				currentRotation = undefined;
+
 				bb = BB.fromPart(handles);
 				reposition(blocks, originalBB, bb);
 			});
@@ -128,7 +176,12 @@ class RotateComponent extends Component {
 
 @injectable
 class ScaleComponent extends ClientComponent {
-	constructor(handles: EditHandles, blocks: readonly EditingBlock[], originalBB: BB) {
+	constructor(
+		handles: EditHandles,
+		blocks: readonly EditingBlock[],
+		originalBB: BB,
+		step: ReadonlyObservableValue<number>,
+	) {
 		super();
 
 		const forEachHandle = (func: (handle: Handles) => void) => {
@@ -153,9 +206,10 @@ class ScaleComponent extends ClientComponent {
 		);
 		let maxExistingBlockScale =
 			blocks.map((b) => b.block.PrimaryPart!.Size.div(b.origModel.PrimaryPart!.Size).findMax()).max() ?? 0;
-		print("me", maxExistingBlockScale);
 
 		const update = (face: Enum.NormalId, distance: number): void => {
+			distance = MathUtils.round(distance, step.get());
+
 			const negative =
 				face === Enum.NormalId.Front || face === Enum.NormalId.Bottom || face === Enum.NormalId.Left;
 
@@ -173,11 +227,9 @@ class ScaleComponent extends ClientComponent {
 				: globalNormal.mul(negative ? -1 : 1);
 			const g = gn.mul(distance * distanceMul);
 
-			print(g.Min(maxExistingBlockScales));
 			// TODO: block size restriction
 
 			const scaleDist = math.min(distance * distanceMul, (scaleMax - maxExistingBlockScale) * 2);
-			print(distance * distanceMul, (scaleMax - maxExistingBlockScale) * 2);
 			handles.Size = bb.originalSize.add(g);
 
 			handles.PivotTo(
@@ -193,6 +245,8 @@ class ScaleComponent extends ClientComponent {
 			if (!currentMovement) return;
 			update(currentMovement.face, currentMovement.distance);
 		};
+
+		this.event.subscribeObservable(step, updateFromCurrentMovement);
 
 		this.event.subInput((ih) => {
 			ih.onKeyDown("LeftControl", () => {
@@ -235,7 +289,6 @@ class ScaleComponent extends ClientComponent {
 					blocks.map((b) => b.block.PrimaryPart!.Size.div(b.origModel.PrimaryPart!.Size).Y).max() ?? 0,
 					blocks.map((b) => b.block.PrimaryPart!.Size.div(b.origModel.PrimaryPart!.Size).Z).max() ?? 0,
 				);
-				print("me", maxExistingBlockScale);
 			});
 		});
 	}
@@ -281,7 +334,8 @@ export class BlockEditor extends ClientComponent {
 	private readonly editBlocks: readonly EditingBlock[];
 	private readonly currentMode: ObservableValue<EditMode>;
 
-	readonly step = new ObservableValue<number>(1);
+	readonly moveStep = new ObservableValue<number>(1);
+	readonly rotateStep = new ObservableValue<number>(90);
 
 	constructor(
 		blocks: readonly BlockModel[],
@@ -318,9 +372,9 @@ export class BlockEditor extends ClientComponent {
 		handles.Size = bb.originalSize;
 
 		const modes: { readonly [k in EditMode]: () => Component } = {
-			move: () => di.resolveForeignClass(MoveComponent, [handles, this.editBlocks, bb]),
-			rotate: () => di.resolveForeignClass(RotateComponent, [handles, this.editBlocks, bb]),
-			scale: () => di.resolveForeignClass(ScaleComponent, [handles, this.editBlocks, bb]),
+			move: () => di.resolveForeignClass(MoveComponent, [handles, this.editBlocks, bb, this.moveStep]),
+			rotate: () => di.resolveForeignClass(RotateComponent, [handles, this.editBlocks, bb, this.rotateStep]),
+			scale: () => di.resolveForeignClass(ScaleComponent, [handles, this.editBlocks, bb, this.moveStep]),
 		};
 
 		const container = new ComponentChild(this);

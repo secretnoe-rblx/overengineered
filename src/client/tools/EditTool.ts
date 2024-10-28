@@ -340,6 +340,8 @@ namespace Controllers {
 		) {
 			super();
 			this.editor = this.parent(di.resolveForeignClass(BlockEditor, [[...selected], startMode]));
+			this.event.subscribeObservable(tool.mode.moveGrid, (grid) => this.editor.moveStep.set(grid), true);
+			this.event.subscribeObservable(tool.mode.rotateGrid, (grid) => this.editor.rotateStep.set(grid), true);
 
 			this.event.subscribe(this.editor.completed, () => this.destroy());
 			this.onDestroy(() => this.submit(true));
@@ -384,6 +386,7 @@ namespace Controllers {
 	@injectable
 	export class Paste extends ClientComponent {
 		readonly step = new NumberObservableValue<number>(1, 1, 256, 1);
+		readonly rotateStep = new ObservableValue<number>(90);
 		private readonly blocksRequests;
 		private readonly blocks;
 		private readonly editor;
@@ -419,7 +422,9 @@ namespace Controllers {
 
 			this.editor = this.parent(di.resolveForeignClass(BlockEditor, [this.blocks, "move"]));
 			this.event.subscribeObservable(tool.mode.moveGrid, (grid) => this.step.set(grid), true);
-			this.step.autoSet(this.editor.step);
+			this.event.subscribeObservable(tool.mode.rotateGrid, (grid) => this.rotateStep.set(grid), true);
+			this.step.autoSet(this.editor.moveStep);
+			this.rotateStep.autoSet(this.editor.rotateStep);
 
 			this.event.subscribe(this.editor.completed, () => this.destroy());
 			this.onDestroy(() => this.submit(true));
