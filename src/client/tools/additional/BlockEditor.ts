@@ -1,4 +1,3 @@
-import { Workspace } from "@rbxts/services";
 import { Gui } from "client/gui/Gui";
 import { ToolBase } from "client/tools/ToolBase";
 import { ClientComponent } from "engine/client/component/ClientComponent";
@@ -7,14 +6,12 @@ import { Control } from "engine/client/gui/Control";
 import { Component } from "engine/shared/component/Component";
 import { ComponentChild } from "engine/shared/component/ComponentChild";
 import { ComponentInstance } from "engine/shared/component/ComponentInstance";
-import { Element } from "engine/shared/Element";
 import { ObservableSwitch } from "engine/shared/event/ObservableSwitch";
 import { ObservableValue } from "engine/shared/event/ObservableValue";
 import { ArgsSignal } from "engine/shared/event/Signal";
 import { BB } from "engine/shared/fixes/BB";
 import { Instances } from "engine/shared/fixes/Instances";
 import { BlockManager } from "shared/building/BlockManager";
-import { BuildingManager } from "shared/building/BuildingManager";
 import { SharedBuilding } from "shared/building/SharedBuilding";
 import { Colors } from "shared/Colors";
 import type { Keybinds } from "client/Keybinds";
@@ -39,19 +36,22 @@ type EditHandles = BasePart & {
 };
 
 interface EditingBlock {
-	readonly definition: Block;
 	readonly block: BlockModel;
+	readonly origModel: BlockModel;
 	readonly origLocation: CFrame;
 	readonly origScale: Vector3;
 }
 
 type EditMode = "move" | "rotate" | "scale";
-type Axis = "x" | "y" | "z";
 
+const repositionOne = (block: BlockModel, origModel: BlockModel, location: CFrame, scale: Vector3) => {
+	block.PivotTo(location);
+	SharedBuilding.scale(block, origModel, scale);
+};
 const reposition = (blocks: readonly EditingBlock[], originalBB: BB, currentBB: BB) => {
 	const scalediff = currentBB.originalSize.div(originalBB.originalSize);
 
-	for (const { definition, block, origLocation, origScale } of blocks) {
+	for (const { block, origModel, origLocation, origScale } of blocks) {
 		const localToOriginalLocation = originalBB.center.ToObjectSpace(origLocation);
 
 		const newloc = currentBB.center.ToWorldSpace(
@@ -61,8 +61,7 @@ const reposition = (blocks: readonly EditingBlock[], originalBB: BB, currentBB: 
 			originalBB.center.ToObjectSpace(origLocation).Rotation.Inverse().mul(scalediff).Abs(),
 		);
 
-		block.PivotTo(newloc);
-		SharedBuilding.scale(block, definition.model, newscale);
+		repositionOne(block, origModel, newloc, newscale);
 	}
 };
 
@@ -148,12 +147,12 @@ class ScaleComponent extends ClientComponent {
 
 		const scaleMax = 4;
 		let maxExistingBlockScales = new Vector3(
-			blocks.map((b) => SharedBuilding.calculateScale(b.block, b.definition.model).X).max() ?? 0,
-			blocks.map((b) => SharedBuilding.calculateScale(b.block, b.definition.model).Y).max() ?? 0,
-			blocks.map((b) => SharedBuilding.calculateScale(b.block, b.definition.model).Z).max() ?? 0,
+			blocks.map((b) => b.block.PrimaryPart!.Size.div(b.origModel.PrimaryPart!.Size).X).max() ?? 0,
+			blocks.map((b) => b.block.PrimaryPart!.Size.div(b.origModel.PrimaryPart!.Size).Y).max() ?? 0,
+			blocks.map((b) => b.block.PrimaryPart!.Size.div(b.origModel.PrimaryPart!.Size).Z).max() ?? 0,
 		);
 		let maxExistingBlockScale =
-			blocks.map((b) => SharedBuilding.calculateScale(b.block, b.definition.model).findMax()).max() ?? 0;
+			blocks.map((b) => b.block.PrimaryPart!.Size.div(b.origModel.PrimaryPart!.Size).findMax()).max() ?? 0;
 		print("me", maxExistingBlockScale);
 
 		const update = (face: Enum.NormalId, distance: number): void => {
@@ -229,11 +228,12 @@ class ScaleComponent extends ClientComponent {
 				bb = BB.fromPart(handles);
 				reposition(blocks, originalBB, bb);
 				maxExistingBlockScale =
-					blocks.map((b) => SharedBuilding.calculateScale(b.block, b.definition.model).findMax()).max() ?? 0;
+					blocks.map((b) => b.block.PrimaryPart!.Size.div(b.origModel.PrimaryPart!.Size).findMax()).max() ??
+					0;
 				maxExistingBlockScales = new Vector3(
-					blocks.map((b) => SharedBuilding.calculateScale(b.block, b.definition.model).X).max() ?? 0,
-					blocks.map((b) => SharedBuilding.calculateScale(b.block, b.definition.model).Y).max() ?? 0,
-					blocks.map((b) => SharedBuilding.calculateScale(b.block, b.definition.model).Z).max() ?? 0,
+					blocks.map((b) => b.block.PrimaryPart!.Size.div(b.origModel.PrimaryPart!.Size).X).max() ?? 0,
+					blocks.map((b) => b.block.PrimaryPart!.Size.div(b.origModel.PrimaryPart!.Size).Y).max() ?? 0,
+					blocks.map((b) => b.block.PrimaryPart!.Size.div(b.origModel.PrimaryPart!.Size).Z).max() ?? 0,
 				);
 				print("me", maxExistingBlockScale);
 			});
@@ -247,25 +247,18 @@ type BlockEditorControlDefinition = GuiObject & {
 	readonly MoveButton: GuiButton;
 	readonly RotateButton: GuiButton;
 	readonly ScaleButton: GuiButton;
-	readonly MirrorXButton: GuiButton;
-	readonly MirrorYButton: GuiButton;
-	readonly MirrorZButton: GuiButton;
 };
 class BlockEditorControl extends Control<BlockEditorControlDefinition> {
 	constructor(
 		gui: BlockEditorControlDefinition,
 		currentMode: ReadonlyObservableValue<EditMode>,
 		set: (type: EditMode) => void,
-		mirror: (axis: Axis) => void,
 	) {
 		super(gui);
 
 		const move = this.add(new ButtonControl(gui.MoveButton, () => set("move")));
 		const rotate = this.add(new ButtonControl(gui.RotateButton, () => set("rotate")));
 		const scale = this.add(new ButtonControl(gui.ScaleButton, () => set("scale")));
-		const mirrorx = this.add(new ButtonControl(gui.MirrorXButton, () => mirror("x")));
-		const mirrory = this.add(new ButtonControl(gui.MirrorYButton, () => mirror("y")));
-		const mirrorz = this.add(new ButtonControl(gui.MirrorZButton, () => mirror("z")));
 
 		const buttons = { move, rotate, scale };
 		this.event.subscribeObservable(
@@ -285,8 +278,7 @@ export class BlockEditor extends ClientComponent {
 	private readonly _completed = new ArgsSignal();
 	readonly completed = this._completed.asReadonly();
 
-	private readonly origEditBlocks: readonly EditingBlock[];
-	private editBlocks: readonly EditingBlock[];
+	private readonly editBlocks: readonly EditingBlock[];
 	private readonly currentMode: ObservableValue<EditMode>;
 
 	readonly step = new ObservableValue<number>(1);
@@ -301,27 +293,17 @@ export class BlockEditor extends ClientComponent {
 		super();
 		this.currentMode = new ObservableValue<EditMode>(startMode);
 
-		const folder = Element.create("Folder", { Name: "BlockEditor", Parent: Workspace });
-		ComponentInstance.init(this, folder);
-
-		const createEditBlock = (b: BlockModel): EditingBlock => {
-			b = b.Clone();
-			b.FindFirstChildWhichIsA("SelectionBox")?.Destroy();
-			b.Parent = folder;
-
-			const definition = blockList.blocks[BlockManager.manager.id.get(b)]!;
-			const scale = SharedBuilding.calculateScale(b, definition.model);
+		this.editBlocks = blocks.map((b): EditingBlock => {
+			const origModel = blockList.blocks[BlockManager.manager.id.get(b)]!.model;
+			const scale = b.PrimaryPart!.Size.div(origModel.PrimaryPart!.Size);
 
 			return {
-				definition,
 				block: b,
+				origModel,
 				origLocation: b.GetPivot(),
 				origScale: scale,
 			};
-		};
-
-		this.editBlocks = blocks.map(createEditBlock);
-		this.origEditBlocks = this.editBlocks;
+		});
 
 		const handles = Instances.getAssets<{ EditHandles: EditHandles }>().EditHandles.Clone();
 		handles.Parent = Gui.getPlayerGui();
@@ -365,52 +347,8 @@ export class BlockEditor extends ClientComponent {
 		const scale = keybinds.get("edit_scale");
 		this.event.subscribeRegistration(() => scale.onDown(() => setModeByKey("scale"), -1));
 
-		//
-
-		const mirror = (axis: Axis): void => {
-			// doesn't work correctly
-
-			const newBlocks: EditingBlock[] = [];
-			for (const block of this.editBlocks) {
-				const nbs = BuildingManager.getMirroredBlocks(
-					handles.GetPivot(),
-					{ id: BlockManager.manager.id.get(block.block), pos: block.block.GetPivot() },
-					{ [axis]: 0 },
-					blockList,
-				);
-				const [newBlock] = nbs;
-
-				print("newd", newBlock.id, nbs);
-				const newDefinition = blockList.blocks[newBlock.id]!;
-				const instance = newDefinition.model.Clone();
-				instance.Name = block.block.Name;
-				instance.PivotTo(newBlock.pos);
-				SharedBuilding.scale(
-					instance,
-					newDefinition.model,
-					SharedBuilding.calculateScale(block.block, block.definition.model),
-				);
-
-				instance.Parent = folder;
-
-				newBlocks.push({
-					definition: newDefinition,
-					block: instance,
-					origLocation: bb.center.ToWorldSpace(handles.GetPivot().ToObjectSpace(newBlock.pos)),
-					origScale: block.origScale,
-				});
-
-				block.block.Destroy();
-			}
-			this.editBlocks = newBlocks;
-
-			container.set(modes[this.currentMode.get()]());
-		};
-
 		const gui = ToolBase.getToolGui<"Edit2", GuiObject & { EditBottom: BlockEditorControlDefinition }>().Edit2;
-		const control = this.parentGui(
-			new BlockEditorControl(gui.EditBottom.Clone(), this.currentMode, setModeByKey, mirror),
-		);
+		const control = this.parentGui(new BlockEditorControl(gui.EditBottom.Clone(), this.currentMode, setModeByKey));
 		control.instance.Parent = gui;
 	}
 
@@ -421,12 +359,14 @@ export class BlockEditor extends ClientComponent {
 				origPosition: b.origLocation,
 				newPosition: b.block.GetPivot(),
 				origScale: b.origScale,
-				newScale: SharedBuilding.calculateScale(b.block, b.definition.model),
+				newScale: b.block.PrimaryPart!.Size.div(b.origModel.PrimaryPart!.Size),
 			}),
 		);
 	}
 
 	cancel() {
-		//
+		for (const { block, origModel, origLocation, origScale } of this.editBlocks) {
+			repositionOne(block, origModel, origLocation, origScale);
+		}
 	}
 }
