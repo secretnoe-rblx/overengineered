@@ -1,4 +1,4 @@
-import { Workspace, RunService } from "@rbxts/services";
+import { RunService } from "@rbxts/services";
 import { Element } from "engine/shared/Element";
 import { Instances } from "engine/shared/fixes/Instances";
 import type { BlockWeldRegions } from "shared/blocks/Block";
@@ -81,27 +81,31 @@ export namespace BlockWeldInitializer {
 		const regions = createRegions();
 		if (!regions || regions.size() === 0) return;
 
-		const parts: BasePart[] = [];
+		// const parts: BasePart[] = [];
+		let i = 0;
 		for (const region of regions) {
 			const part = new Instance("Part");
+			part.Name = tostring(i++);
 			part.PivotTo(region.CFrame);
 			part.Size = region.Size;
-			part.Parent = Workspace;
+			part.Parent = parent;
 
-			parts.push(part);
+			// parts.push(part);
+
+			setColliderProperties(part);
 		}
 
-		const union = parts[0].UnionAsync(
-			parts.filter((_, i) => i !== 0),
-			Enum.CollisionFidelity.PreciseConvexDecomposition,
-		);
+		// const union = parts[0].UnionAsync(
+		// 	parts.filter((_, i) => i !== 0),
+		// 	Enum.CollisionFidelity.PreciseConvexDecomposition,
+		// );
 
-		for (const part of parts) {
-			part.Destroy();
-		}
+		// for (const part of parts) {
+		// 	part.Destroy();
+		// }
 
-		setColliderProperties(union);
-		union.Parent = parent;
+		// setColliderProperties(union);
+		// union.Parent = parent;
 
 		$log(`Adding automatic weld region to ${model.Name}`);
 	}
@@ -113,6 +117,11 @@ export namespace BlockWeldInitializer {
 
 		const colliders = folder.GetChildren() as unknown as readonly BasePart[];
 		if (colliders.size() === 0) return false;
+
+		// randomizing the names so there's no repeats
+		for (let i = 0; i < colliders.size(); i++) {
+			colliders[i].Name = tostring(i);
+		}
 
 		for (const [key, group] of colliders.groupBy((g) => (g.GetAttribute("target") as string | undefined) ?? "")) {
 			if (group.size() < 2) {
