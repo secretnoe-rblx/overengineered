@@ -6,6 +6,7 @@ import { Control } from "engine/client/gui/Control";
 import { Component } from "engine/shared/component/Component";
 import { ComponentChild } from "engine/shared/component/ComponentChild";
 import { ComponentInstance } from "engine/shared/component/ComponentInstance";
+import { ObservableSwitch } from "engine/shared/event/ObservableSwitch";
 import { ObservableValue } from "engine/shared/event/ObservableValue";
 import { ArgsSignal } from "engine/shared/event/Signal";
 import { BB } from "engine/shared/fixes/BB";
@@ -140,16 +141,19 @@ class ScaleComponent extends ClientComponent {
 
 		let bb = BB.fromPart(handles);
 
-		let centerBased = false;
-		let sameSize = false;
+		const centerBased = new ObservableSwitch(false);
+		const sameSize = new ObservableSwitch(false);
+		sameSize.set("multipleBlocks", blocks.size() > 1);
 
-		const sizeMin = 0;
-		const sizeMax = 8;
-
-		const localSizeToGlobal = (center: CFrame, size: Vector3): Vector3 =>
-			center.Rotation.PointToWorldSpace(size).Abs();
-		const globalSizeToLocal = (center: CFrame, size: Vector3): Vector3 =>
-			center.Rotation.Inverse().PointToWorldSpace(size).Abs();
+		const scaleMax = 4;
+		let maxExistingBlockScales = new Vector3(
+			blocks.map((b) => b.block.PrimaryPart!.Size.div(b.origModel.PrimaryPart!.Size).X).max() ?? 0,
+			blocks.map((b) => b.block.PrimaryPart!.Size.div(b.origModel.PrimaryPart!.Size).Y).max() ?? 0,
+			blocks.map((b) => b.block.PrimaryPart!.Size.div(b.origModel.PrimaryPart!.Size).Z).max() ?? 0,
+		);
+		let maxExistingBlockScale =
+			blocks.map((b) => b.block.PrimaryPart!.Size.div(b.origModel.PrimaryPart!.Size).findMax()).max() ?? 0;
+		print("me", maxExistingBlockScale);
 
 		const update = (face: Enum.NormalId, distance: number): void => {
 			const negative =
@@ -158,16 +162,23 @@ class ScaleComponent extends ClientComponent {
 			const globalNormal = Vector3.FromNormalId(face);
 			const localNormal = bb.center.Rotation.PointToObjectSpace(globalNormal);
 
-			const localPivot = centerBased //
+			const localPivot = centerBased.get() //
 				? Vector3.zero
 				: localNormal.mul(bb.originalSize.div(-2));
 
 			const distanceMul = (1 - localPivot.div(bb.originalSize).Abs().findMax()) * 2;
 
-			const gn = sameSize //
+			const gn = sameSize.get() //
 				? bb.originalSize.Unit
 				: globalNormal.mul(negative ? -1 : 1);
-			handles.Size = bb.originalSize.add(gn.mul(distance * distanceMul));
+			const g = gn.mul(distance * distanceMul);
+
+			print(g.Min(maxExistingBlockScales));
+			// TODO: block size restriction
+
+			const scaleDist = math.min(distance * distanceMul, (scaleMax - maxExistingBlockScale) * 2);
+			print(distance * distanceMul, (scaleMax - maxExistingBlockScale) * 2);
+			handles.Size = bb.originalSize.add(g);
 
 			handles.PivotTo(
 				bb.center.ToWorldSpace(
@@ -185,20 +196,20 @@ class ScaleComponent extends ClientComponent {
 
 		this.event.subInput((ih) => {
 			ih.onKeyDown("LeftControl", () => {
-				centerBased = true;
+				centerBased.set("kb", true);
 				updateFromCurrentMovement();
 			});
 			ih.onKeyUp("LeftControl", () => {
-				centerBased = false;
+				centerBased.set("kb", false);
 				updateFromCurrentMovement();
 			});
 
 			ih.onKeyDown("LeftShift", () => {
-				sameSize = true;
+				sameSize.set("kb", true);
 				updateFromCurrentMovement();
 			});
 			ih.onKeyUp("LeftShift", () => {
-				sameSize = false;
+				sameSize.set("kb", false);
 				updateFromCurrentMovement();
 			});
 		});
@@ -216,6 +227,15 @@ class ScaleComponent extends ClientComponent {
 
 				bb = BB.fromPart(handles);
 				reposition(blocks, originalBB, bb);
+				maxExistingBlockScale =
+					blocks.map((b) => b.block.PrimaryPart!.Size.div(b.origModel.PrimaryPart!.Size).findMax()).max() ??
+					0;
+				maxExistingBlockScales = new Vector3(
+					blocks.map((b) => b.block.PrimaryPart!.Size.div(b.origModel.PrimaryPart!.Size).X).max() ?? 0,
+					blocks.map((b) => b.block.PrimaryPart!.Size.div(b.origModel.PrimaryPart!.Size).Y).max() ?? 0,
+					blocks.map((b) => b.block.PrimaryPart!.Size.div(b.origModel.PrimaryPart!.Size).Z).max() ?? 0,
+				);
+				print("me", maxExistingBlockScale);
 			});
 		});
 	}
@@ -327,7 +347,7 @@ export class BlockEditor extends ClientComponent {
 		const scale = keybinds.get("edit_scale");
 		this.event.subscribeRegistration(() => scale.onDown(() => setModeByKey("scale"), -1));
 
-		const gui = ToolBase.getToolGui<"Edit", GuiObject & { EditBottom: BlockEditorControlDefinition }>().Edit;
+		const gui = ToolBase.getToolGui<"Edit2", GuiObject & { EditBottom: BlockEditorControlDefinition }>().Edit2;
 		const control = this.parentGui(new BlockEditorControl(gui.EditBottom.Clone(), this.currentMode, setModeByKey));
 		control.instance.Parent = gui;
 	}

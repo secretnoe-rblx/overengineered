@@ -600,7 +600,7 @@ export class EditTool extends ToolBase {
 		super(mode);
 
 		this.gui = this.parentGui(
-			new Scene.EditToolScene(ToolBase.getToolGui<"Edit", Scene.EditToolSceneDefinition>().Edit, this),
+			new Scene.EditToolScene(ToolBase.getToolGui<"Edit2", Scene.EditToolSceneDefinition>().Edit2, this),
 		);
 		this.parent(di.resolveForeignClass(SelectedBlocksHighlighter, [this.selected]));
 
