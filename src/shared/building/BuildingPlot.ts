@@ -94,6 +94,7 @@ export class BuildingPlot extends ReadonlyPlot {
 
 		if (data.scale) {
 			SharedBuilding.scale(model, block.model, data.scale);
+			BlockManager.manager.scale.set(model, data.scale);
 		}
 
 		SharedBuilding.paint([model], data.color, data.material, true);
