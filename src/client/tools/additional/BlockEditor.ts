@@ -4,6 +4,7 @@ import { ToolBase } from "client/tools/ToolBase";
 import { ClientComponent } from "engine/client/component/ClientComponent";
 import { ButtonControl } from "engine/client/gui/Button";
 import { Control } from "engine/client/gui/Control";
+import { InputController } from "engine/client/InputController";
 import { Component } from "engine/shared/component/Component";
 import { ComponentChild } from "engine/shared/component/ComponentChild";
 import { ComponentInstance } from "engine/shared/component/ComponentInstance";
@@ -391,9 +392,43 @@ export class BlockEditor extends ClientComponent {
 		handles.Parent = Gui.getPlayerGui();
 		ComponentInstance.init(this, handles);
 
-		handles.Move.XHandles.Visible = handles.Move.YHandles.Visible = handles.Move.ZHandles.Visible = false;
-		handles.Scale.XHandles.Visible = handles.Scale.YHandles.Visible = handles.Scale.ZHandles.Visible = false;
-		handles.Rotate.ArcHandles.Visible = false;
+		let prevCameraState: Enum.CameraType | undefined;
+		const initializeHandles = (handles: Handles | ArcHandles) => {
+			handles.Visible = false;
+
+			// disable camera on drag
+			this.event.subscribeRegistration(() => {
+				if (InputController.inputType.get() !== "Touch") {
+					return;
+				}
+
+				return [
+					handles.MouseButton1Down.Connect(() => {
+						const camera = Workspace.CurrentCamera;
+						if (!camera) return;
+
+						prevCameraState = camera.CameraType;
+						camera.CameraType = Enum.CameraType.Scriptable;
+					}),
+					handles.MouseButton1Up.Connect(() => {
+						if (!prevCameraState) return;
+
+						const camera = Workspace.CurrentCamera;
+						if (!camera) return;
+
+						camera.CameraType = prevCameraState;
+						prevCameraState = undefined;
+					}),
+				];
+			});
+		};
+		initializeHandles(handles.Move.XHandles);
+		initializeHandles(handles.Move.YHandles);
+		initializeHandles(handles.Move.ZHandles);
+		initializeHandles(handles.Scale.XHandles);
+		initializeHandles(handles.Scale.YHandles);
+		initializeHandles(handles.Scale.ZHandles);
+		initializeHandles(handles.Rotate.ArcHandles);
 
 		const bb = BB.fromModels(blocks);
 		handles.PivotTo(bb.center);
