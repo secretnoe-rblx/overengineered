@@ -1,3 +1,4 @@
+import { Workspace } from "@rbxts/services";
 import { Gui } from "client/gui/Gui";
 import { ToolBase } from "client/tools/ToolBase";
 import { ClientComponent } from "engine/client/component/ClientComponent";
@@ -6,6 +7,7 @@ import { Control } from "engine/client/gui/Control";
 import { Component } from "engine/shared/component/Component";
 import { ComponentChild } from "engine/shared/component/ComponentChild";
 import { ComponentInstance } from "engine/shared/component/ComponentInstance";
+import { Element } from "engine/shared/Element";
 import { ObservableSwitch } from "engine/shared/event/ObservableSwitch";
 import { ObservableValue } from "engine/shared/event/ObservableValue";
 import { ArgsSignal } from "engine/shared/event/Signal";
@@ -207,6 +209,31 @@ class ScaleComponent extends ClientComponent {
 		let maxExistingBlockScale =
 			blocks.map((b) => b.block.PrimaryPart!.Size.div(b.origModel.PrimaryPart!.Size).findMax()).max() ?? 0;
 
+		const pivot = Element.create(
+			"Part",
+			{
+				Anchored: true,
+				Size: Vector3.one.mul(0.2),
+				Color: Colors.white,
+				Shape: Enum.PartType.Ball,
+				Parent: Workspace,
+			},
+			{
+				highlight: Element.create("Highlight", {
+					FillColor: Colors.red,
+					DepthMode: Enum.HighlightDepthMode.AlwaysOnTop,
+				}),
+			},
+		);
+		ComponentInstance.init(this, pivot);
+
+		const calculatePivotPosition = (face: Enum.NormalId): Vector3 => {
+			const globalNormal = Vector3.FromNormalId(face);
+
+			return centerBased.get() //
+				? Vector3.zero
+				: globalNormal.mul(bb.originalSize.div(-2));
+		};
 		const update = (face: Enum.NormalId, distance: number): void => {
 			distance = MathUtils.round(distance, step.get());
 
@@ -214,23 +241,8 @@ class ScaleComponent extends ClientComponent {
 				face === Enum.NormalId.Front || face === Enum.NormalId.Bottom || face === Enum.NormalId.Left;
 
 			const globalNormal = Vector3.FromNormalId(face);
-
-			const localPivot = centerBased.get() //
-				? Vector3.zero
-				: globalNormal.mul(bb.originalSize.div(-2));
-
-			// const e = Element.create(
-			// 	"Part",
-			// 	{
-			// 		Anchored: true,
-			// 		Size: Vector3.one.mul(0.1),
-			// 		Color: Colors.red,
-			// 		Parent: Workspace,
-			// 		CFrame: bb.center.ToWorldSpace(new CFrame(localPivot)),
-			// 	},
-			// 	{ h: Element.create("Highlight", { DepthMode: Enum.HighlightDepthMode.AlwaysOnTop }) },
-			// );
-			// task.delay(1, () => e.Destroy());
+			const localPivot = calculatePivotPosition(face);
+			pivot.Position = bb.center.PointToWorldSpace(localPivot);
 
 			const distanceMul = (1 - localPivot.div(bb.originalSize).Abs().findMax()) * 2;
 
@@ -288,8 +300,12 @@ class ScaleComponent extends ClientComponent {
 				updateFromCurrentMovement();
 			});
 
+			this.event.subscribe(handle.MouseButton1Down, (face) => {
+				pivot.Position = bb.center.PointToWorldSpace(calculatePivotPosition(face));
+			});
 			this.event.subscribe(handle.MouseButton1Up, () => {
 				currentMovement = undefined;
+				pivot.CFrame = CFrame.identity;
 
 				bb = BB.fromPart(handles);
 				reposition(blocks, originalBB, bb);
