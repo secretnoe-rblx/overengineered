@@ -214,11 +214,23 @@ class ScaleComponent extends ClientComponent {
 				face === Enum.NormalId.Front || face === Enum.NormalId.Bottom || face === Enum.NormalId.Left;
 
 			const globalNormal = Vector3.FromNormalId(face);
-			const localNormal = bb.center.Rotation.PointToObjectSpace(globalNormal);
 
 			const localPivot = centerBased.get() //
 				? Vector3.zero
-				: localNormal.mul(bb.originalSize.div(-2));
+				: globalNormal.mul(bb.originalSize.div(-2));
+
+			// const e = Element.create(
+			// 	"Part",
+			// 	{
+			// 		Anchored: true,
+			// 		Size: Vector3.one.mul(0.1),
+			// 		Color: Colors.red,
+			// 		Parent: Workspace,
+			// 		CFrame: bb.center.ToWorldSpace(new CFrame(localPivot)),
+			// 	},
+			// 	{ h: Element.create("Highlight", { DepthMode: Enum.HighlightDepthMode.AlwaysOnTop }) },
+			// );
+			// task.delay(1, () => e.Destroy());
 
 			const distanceMul = (1 - localPivot.div(bb.originalSize).Abs().findMax()) * 2;
 
