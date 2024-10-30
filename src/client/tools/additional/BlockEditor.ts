@@ -140,10 +140,9 @@ class RotateComponent extends Component {
 		this.onEnabledStateChange((enabled) => forEachHandle((handle) => (handle.Visible = enabled)));
 
 		const update = (axis: Enum.Axis, relativeAngle: number) => {
-			relativeAngle = MathUtils.round(relativeAngle, math.rad(step.get()));
-
-			const diff = CFrame.fromAxisAngle(Vector3.FromAxis(axis), relativeAngle);
-			handles.PivotTo(bb.center.mul(diff));
+			const roundedRelativeAngle = MathUtils.round(relativeAngle, math.rad(step.get()));
+			handles.PivotTo(bb.center.mul(CFrame.fromAxisAngle(Vector3.FromAxis(axis), roundedRelativeAngle)));
+			handles.Rotate.Center.PivotTo(bb.center.mul(CFrame.fromAxisAngle(Vector3.FromAxis(axis), relativeAngle)));
 
 			reposition(blocks, originalBB, BB.fromPart(handles));
 		};
@@ -167,6 +166,7 @@ class RotateComponent extends Component {
 
 			this.event.subscribe(handle.MouseButton1Up, () => {
 				currentRotation = undefined;
+				handles.Rotate.Center.PivotTo(handles.GetPivot());
 
 				bb = BB.fromPart(handles);
 				reposition(blocks, originalBB, bb);
