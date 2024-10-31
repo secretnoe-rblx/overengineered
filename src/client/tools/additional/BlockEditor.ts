@@ -260,6 +260,7 @@ class RotateComponent extends Component implements EditComponent {
 		};
 
 		this.onEnabledStateChange((enabled) => forEachHandle((handle) => (handle.Visible = enabled)));
+		this.onEnable(() => (handles.Rotate.Center.Size = handles.Size));
 
 		const update = (axis: Enum.Axis, relativeAngle: number) => {
 			const roundedRelativeAngle = grid.get().constrain(relativeAngle);
