@@ -341,7 +341,11 @@ namespace Controllers {
 			this.editor = this.parent(
 				di.resolveForeignClass(BlockEditor, [[...selected], startMode, plot.boundingBox]),
 			);
-			this.editor.initializeGrids(tool.mode);
+			this.editor.initializeGrids({
+				moveGrid: tool.mode.moveGrid,
+				rotateGrid: tool.mode.rotateGrid,
+				scaleGrid: tool.mode.moveGrid,
+			});
 
 			this.event.subscribe(this.editor.completed, () => this.destroy());
 			this.onDestroy(() => this.submit(true));
@@ -432,7 +436,11 @@ namespace Controllers {
 			});
 
 			this.editor = this.parent(di.resolveForeignClass(BlockEditor, [this.blocks, "move", plot.boundingBox]));
-			this.editor.initializeGrids(tool.mode);
+			this.editor.initializeGrids({
+				moveGrid: tool.mode.moveGrid,
+				rotateGrid: tool.mode.rotateGrid,
+				scaleGrid: tool.mode.moveGrid,
+			});
 
 			this.event.subscribe(this.editor.completed, () => {
 				this.submit();
