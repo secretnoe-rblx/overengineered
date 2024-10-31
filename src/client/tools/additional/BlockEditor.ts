@@ -329,18 +329,21 @@ type BlockEditorControlDefinition = GuiObject & {
 	readonly MoveButton: GuiButton;
 	readonly RotateButton: GuiButton;
 	readonly ScaleButton: GuiButton;
+	readonly CompleteButton: GuiButton;
 };
 class BlockEditorControl extends Control<BlockEditorControlDefinition> {
 	constructor(
 		gui: BlockEditorControlDefinition,
 		currentMode: ReadonlyObservableValue<EditMode>,
 		set: (type: EditMode) => void,
+		commit: () => void,
 	) {
 		super(gui);
 
 		const move = this.add(new ButtonControl(gui.MoveButton, () => set("move")));
 		const rotate = this.add(new ButtonControl(gui.RotateButton, () => set("rotate")));
 		const scale = this.add(new ButtonControl(gui.ScaleButton, () => set("scale")));
+		this.add(new ButtonControl(gui.CompleteButton, commit));
 
 		const buttons = { move, rotate, scale };
 		this.event.subscribeObservable(
@@ -465,7 +468,11 @@ export class BlockEditor extends ClientComponent {
 		this.event.subscribeRegistration(() => scale.onDown(() => setModeByKey("scale"), -1));
 
 		const gui = ToolBase.getToolGui<"Edit2", GuiObject & { EditBottom: BlockEditorControlDefinition }>().Edit2;
-		const control = this.parentGui(new BlockEditorControl(gui.EditBottom.Clone(), this.currentMode, setModeByKey));
+		const control = this.parentGui(
+			new BlockEditorControl(gui.EditBottom.Clone(), this.currentMode, setModeByKey, () =>
+				this._completed.Fire(),
+			),
+		);
 		control.instance.Parent = gui;
 	}
 

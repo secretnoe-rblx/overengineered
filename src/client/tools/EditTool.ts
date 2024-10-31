@@ -431,26 +431,17 @@ namespace Controllers {
 			this.rotateStep.autoSet(this.editor.rotateStep);
 
 			this.event.subscribe(this.editor.completed, () => {
-				this.submit(true);
+				this.submit();
 				this.destroy();
 			});
-			this.onDestroy(() => this.submit(true));
+			this.onDestroy(() => this.submit());
 		}
 
-		private submit(skipIfSame = true) {
+		private submit() {
 			if (this.submitted) return;
 			this.submitted = true;
 
 			const update = this.editor.getUpdate();
-
-			if (skipIfSame) {
-				for (const block of update) {
-					if (block.newPosition && block.newPosition !== block.origPosition) continue;
-					if (block.newScale && block.origScale && block.newScale !== block.origScale) continue;
-
-					return;
-				}
-			}
 
 			const updateMap = update.mapToMap((u) => $tuple(BlockManager.manager.uuid.get(u.instance), u));
 
@@ -475,7 +466,7 @@ namespace Controllers {
 		}
 
 		deselected() {
-			this.submit(false);
+			this.submit();
 		}
 		cancel() {
 			this.submitted = true;
