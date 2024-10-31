@@ -157,6 +157,7 @@ const repositionOne = (block: BlockModel, origModel: BlockModel, location: CFram
 	block.PivotTo(location);
 	SharedBuilding.scale(block, origModel, scale);
 };
+const almostSame = (left: number, right: number) => math.abs(left - right) < 0.0001;
 const reposition = (blocks: readonly EditingBlock[], originalBB: BB, currentBB: BB) => {
 	const scalediff = currentBB.originalSize.div(originalBB.originalSize);
 
@@ -166,9 +167,15 @@ const reposition = (blocks: readonly EditingBlock[], originalBB: BB, currentBB: 
 		const newloc = currentBB.center.ToWorldSpace(
 			localToOriginalLocation.Rotation.add(localToOriginalLocation.Position.mul(scalediff)),
 		);
-		const newscale = origScale.mul(
-			originalBB.center.ToObjectSpace(origLocation).Rotation.Inverse().mul(scalediff).Abs(),
-		);
+
+		let newscale: Vector3;
+		if (almostSame(scalediff.X, scalediff.Y) && almostSame(scalediff.Y, scalediff.Z)) {
+			newscale = origScale.mul(scalediff.X);
+		} else {
+			newscale = origScale.mul(
+				originalBB.center.ToObjectSpace(origLocation).Rotation.PointToObjectSpace(scalediff).Abs(),
+			);
+		}
 
 		repositionOne(block, origModel, newloc, newscale);
 	}
