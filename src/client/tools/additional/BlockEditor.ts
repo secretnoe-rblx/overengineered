@@ -12,6 +12,7 @@ import { ComponentChild } from "engine/shared/component/ComponentChild";
 import { ComponentInstance } from "engine/shared/component/ComponentInstance";
 import { TransformService } from "engine/shared/component/TransformService";
 import { Element } from "engine/shared/Element";
+import { ObservableCollectionSet } from "engine/shared/event/ObservableCollection";
 import { ObservableSwitch } from "engine/shared/event/ObservableSwitch";
 import { ObservableValue } from "engine/shared/event/ObservableValue";
 import { ArgsSignal } from "engine/shared/event/Signal";
@@ -485,8 +486,8 @@ export class BlockEditor extends ClientComponent {
 
 	private readonly moveGrid = new ObservableValue<MoveGrid>(MoveGrid.def);
 	private readonly rotateGrid = new ObservableValue<RotateGrid>(RotateGrid.def);
-	private _isInBounds = new ObservableValue(true);
-	readonly isInBounds = this._isInBounds.asReadonly();
+	private _errors = new ObservableCollectionSet<string>();
+	readonly errors = this._errors.asReadonly();
 
 	constructor(
 		blocks: readonly BlockModel[],
@@ -515,7 +516,15 @@ export class BlockEditor extends ClientComponent {
 		handles.Parent = Gui.getPlayerGui();
 		ComponentInstance.init(this, handles);
 
-		const updateHandlesInBounds = () => this._isInBounds.set(bounds.isBBInside(BB.fromPart(handles)));
+		const updateHandlesInBounds = () => {
+			const str = "Out of bounds";
+
+			if (bounds.isBBInside(BB.fromPart(handles))) {
+				this._errors.remove(str);
+			} else {
+				this._errors.add(str);
+			}
+		};
 		this.event.readonlyObservableFromInstanceParam(handles, "CFrame").subscribe(updateHandlesInBounds);
 		this.event.readonlyObservableFromInstanceParam(handles, "Size").subscribe(updateHandlesInBounds);
 
@@ -527,16 +536,18 @@ export class BlockEditor extends ClientComponent {
 			Adornee: handles,
 			Parent: handles,
 		});
-		this.event.subscribeObservable(this._isInBounds, (isInBounds) => {
+		this.event.subscribe(this._errors.changed, () => {
+			const valid = this._errors.size() === 0;
+
 			const props = {
 				...TransformService.commonProps.quadOut02,
-				duration: isInBounds ? 0.5 : 0.1,
+				duration: valid ? 0.5 : 0.1,
 			};
 
 			TransformService.run(errIndicator, (tr) =>
 				tr
-					.transform("Transparency", isInBounds ? 1 : 0, props)
-					.transform("SurfaceTransparency", isInBounds ? 1 : 0.3, props),
+					.transform("Transparency", valid ? 1 : 0, props)
+					.transform("SurfaceTransparency", valid ? 1 : 0.3, props),
 			);
 		});
 

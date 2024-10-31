@@ -351,7 +351,11 @@ namespace Controllers {
 			if (this.submitted) return;
 			this.submitted = true;
 
-			if (!this.editor.isInBounds.get()) {
+			if (this.editor.errors.size() > 0) {
+				for (const err of this.editor.errors.get()) {
+					LogControl.instance.addLine(err, Colors.red);
+				}
+
 				this.cancel();
 				return;
 			}
@@ -441,7 +445,11 @@ namespace Controllers {
 			if (this.submitted) return;
 			this.submitted = true;
 
-			if (!this.editor.isInBounds.get()) {
+			if (this.editor.errors.size() > 0) {
+				for (const err of this.editor.errors.get()) {
+					LogControl.instance.addLine(err, Colors.red);
+				}
+
 				this.cancel();
 				return;
 			}
