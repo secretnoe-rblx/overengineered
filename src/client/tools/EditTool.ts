@@ -684,19 +684,19 @@ export class EditTool extends ToolBase {
 			}
 		});
 
-		const move = keybinds.register("edit_move", "Edit tool > Move", ["F", "ButtonX"]);
+		const move = keybinds.register("edit_move", ["Edit tool", "Move"], ["F", "ButtonX"]);
 		this.event.subscribeRegistration(() => move.onDown(() => this.toggleMode("Move")));
 
-		const rotate = keybinds.register("edit_rotate", "Edit tool > Rotate", ["R"]);
+		const rotate = keybinds.register("edit_rotate", ["Edit tool", "Rotate"], ["R"]);
 		this.event.subscribeRegistration(() => rotate.onDown(() => this.toggleMode("Rotate")));
 
-		const scale = keybinds.register("edit_scale", "Edit tool > Scale", ["B"]);
+		const scale = keybinds.register("edit_scale", ["Edit tool", "Scale"], ["B"]);
 		this.event.subscribeRegistration(() => scale.onDown(() => this.toggleMode("Scale")));
 
-		const del = keybinds.register("edit_delete", "Edit tool > Delete", ["T"]);
+		const del = keybinds.register("edit_delete", ["Edit tool", "Delete"], ["T"]);
 		this.event.subscribeRegistration(() => del.onDown(() => this.deleteSelectedBlocks()));
 
-		const paint = keybinds.register("edit_paint", "Edit tool > Paint", ["G"]);
+		const paint = keybinds.register("edit_paint", ["Edit tool", "Paint"], ["G"]);
 		this.event.subscribeRegistration(() => paint.onDown(() => this.toggleMode("Paint")));
 
 		this.event.onKeyDown("C", () => {

@@ -1,5 +1,7 @@
 import { RunService, UserInputService, Workspace } from "@rbxts/services";
 import { Gui } from "client/gui/Gui";
+import { TooltipsHolder } from "client/gui/static/TooltipsControl";
+import { Keybinds } from "client/Keybinds";
 import { MoveGrid } from "client/tools/additional/Grid";
 import { RotateGrid } from "client/tools/additional/Grid";
 import { ToolBase } from "client/tools/ToolBase";
@@ -21,7 +23,6 @@ import { Instances } from "engine/shared/fixes/Instances";
 import { BlockManager } from "shared/building/BlockManager";
 import { SharedBuilding } from "shared/building/SharedBuilding";
 import { Colors } from "shared/Colors";
-import type { Keybinds } from "client/Keybinds";
 import type { ClientBuilding } from "client/modes/build/ClientBuilding";
 
 type EditHandles = BasePart & {
@@ -177,6 +178,17 @@ interface EditComponent extends Component {
 	readonly error?: ReadonlyObservableValue<string | undefined>;
 }
 
+const centerBasedKb = Keybinds.registerDefinition(
+	"edit_scale_centerBased",
+	["Edit Tool", "Scale", "Scale from the center"],
+	["LeftAlt"],
+);
+const sameSizeKb = Keybinds.registerDefinition(
+	"edit_scale_sameSize",
+	["Edit Tool", "Scale", "Uniform scaling"],
+	["LeftShift"],
+);
+
 @injectable
 class MoveComponent extends ClientComponent implements EditComponent {
 	constructor(
@@ -308,6 +320,7 @@ class ScaleComponent extends ClientComponent implements EditComponent {
 		blocks: readonly EditingBlock[],
 		originalBB: BB,
 		grid: ReadonlyObservableValue<MoveGrid>,
+		@inject keybinds: Keybinds,
 	) {
 		super();
 
@@ -393,25 +406,19 @@ class ScaleComponent extends ClientComponent implements EditComponent {
 
 		this.event.subscribeObservable(grid, updateFromCurrentMovement);
 
-		this.event.subInput((ih) => {
-			ih.onKeyDown("LeftAlt", () => {
-				centerBased.set("kb", true);
-				updateFromCurrentMovement();
-			});
-			ih.onKeyUp("LeftAlt", () => {
-				centerBased.set("kb", false);
-				updateFromCurrentMovement();
-			});
+		// #region Keyboard controls initialization
+		const tooltips = this.parent(TooltipsHolder.createComponent("Edit Tool > Scale"));
+		tooltips.setFromKeybinds(keybinds, centerBasedKb, sameSizeKb);
 
-			ih.onKeyDown("LeftShift", () => {
-				sameSize.set("kb", true);
-				updateFromCurrentMovement();
-			});
-			ih.onKeyUp("LeftShift", () => {
-				sameSize.set("kb", false);
-				updateFromCurrentMovement();
-			});
+		this.event.subscribeObservable(keybinds.fromDefinition(centerBasedKb).isPressed, (value) => {
+			centerBased.set("kb", value);
+			updateFromCurrentMovement();
 		});
+		this.event.subscribeObservable(keybinds.fromDefinition(sameSizeKb).isPressed, (value) => {
+			sameSize.set("kb", value);
+			updateFromCurrentMovement();
+		});
+		// #endregion
 
 		forEachHandle((handle) => {
 			this.event.subscribe(handle.MouseDrag, (face, distance) => {

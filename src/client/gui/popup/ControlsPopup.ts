@@ -46,7 +46,7 @@ export class ControlsPopup extends Popup<ControlsPopupDefinition> {
 				}
 
 				const gui = this.template();
-				gui.HeadingLabel.Text = value.displayName;
+				gui.HeadingLabel.Text = value.displayPath[value.displayPath.size() - 1];
 
 				const control = new Control(gui);
 				const keyChooser = control.add(new KeyChooserControl(gui.Control));
