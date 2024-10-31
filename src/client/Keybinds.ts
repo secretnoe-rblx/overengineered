@@ -55,7 +55,7 @@ class KeybindRegistration {
 	}
 	onUp(func: KeybindSubscription["func"], priority?: number): SignalConnection {
 		return this.on((input) => {
-			if (input.UserInputState !== Enum.UserInputState.Begin) return;
+			if (input.UserInputState !== Enum.UserInputState.End) return;
 			return func(input);
 		}, priority);
 	}
