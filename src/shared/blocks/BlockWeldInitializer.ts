@@ -81,7 +81,6 @@ export namespace BlockWeldInitializer {
 		const regions = createRegions();
 		if (!regions || regions.size() === 0) return;
 
-		// const parts: BasePart[] = [];
 		let i = 0;
 		for (const region of regions) {
 			const part = new Instance("Part");
@@ -90,22 +89,8 @@ export namespace BlockWeldInitializer {
 			part.Size = region.Size;
 			part.Parent = parent;
 
-			// parts.push(part);
-
 			setColliderProperties(part);
 		}
-
-		// const union = parts[0].UnionAsync(
-		// 	parts.filter((_, i) => i !== 0),
-		// 	Enum.CollisionFidelity.PreciseConvexDecomposition,
-		// );
-
-		// for (const part of parts) {
-		// 	part.Destroy();
-		// }
-
-		// setColliderProperties(union);
-		// union.Parent = parent;
 
 		$log(`Adding automatic weld region to ${model.Name}`);
 	}
@@ -123,34 +108,9 @@ export namespace BlockWeldInitializer {
 			colliders[i].Name = tostring(i);
 		}
 
-		for (const [key, group] of colliders.groupBy((g) => (g.GetAttribute("target") as string | undefined) ?? "")) {
-			if (group.size() < 2) {
-				for (const collider of group) {
-					const newcollider = collider.Clone();
-					setColliderProperties(newcollider);
-					newcollider.Parent = parent;
-				}
-				continue;
-			}
-
-			const union = group[0].UnionAsync(
-				group.filter((_, i) => i !== 0),
-				// Default in studio for loading performance
-				RunService.IsStudio()
-					? Enum.CollisionFidelity.Default
-					: Enum.CollisionFidelity.PreciseConvexDecomposition,
-			);
-			setColliderProperties(union);
-			if (key !== "") {
-				(block as unknown as Record<string, BasePart>)[key].Anchored = true;
-				union.SetAttribute("target", key);
-			}
-
-			union.Parent = parent;
-
-			for (const collider of group) {
-				collider.Destroy();
-			}
+		for (const collider of colliders) {
+			setColliderProperties(collider);
+			collider.Parent = parent;
 		}
 
 		block.FindFirstChild(weldFolderName)?.Destroy();
