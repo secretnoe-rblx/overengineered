@@ -1,4 +1,4 @@
-import { Workspace } from "@rbxts/services";
+import { RunService, UserInputService, Workspace } from "@rbxts/services";
 import { Gui } from "client/gui/Gui";
 import { ToolBase } from "client/tools/ToolBase";
 import { ClientComponent } from "engine/client/component/ClientComponent";
@@ -46,6 +46,107 @@ interface EditingBlock {
 	readonly origScale: Vector3;
 }
 
+class HandleMovementController extends Component {
+	constructor(
+		handle: Handles,
+		sideways: ReadonlyObservableValue<boolean>,
+		update: (delta: Vector3) => void,
+		release: () => void,
+	) {
+		super();
+
+		const findRayPlaneIntersection = (
+			rayOrigin: Vector3,
+			rayDirection: Vector3,
+			planeOrigin: Vector3,
+			planeNormal: Vector3,
+		): Vector3 | undefined => {
+			const denominator = rayDirection.Dot(planeNormal);
+			if (math.abs(denominator) < 1e-6) {
+				return undefined;
+			}
+
+			const rayToPlane = planeOrigin.sub(rayOrigin);
+			const t = rayToPlane.Dot(planeNormal) / denominator;
+			if (t < 0) {
+				return undefined;
+			}
+
+			return rayOrigin.add(rayDirection.mul(t));
+		};
+		const calculateCursorDeltaVecOnPlane = (arrowPosition: Vector3, arrowDirection: Vector3): (() => Vector3) => {
+			const camera = Workspace.CurrentCamera;
+			if (!camera) return () => Vector3.zero;
+
+			const mouseLocation = UserInputService.GetMouseLocation();
+			const mouseRay = camera.ScreenPointToRay(mouseLocation.X, mouseLocation.Y);
+			const startingMouseRay = mouseRay;
+
+			const startingPosition = findRayPlaneIntersection(
+				mouseRay.Origin,
+				mouseRay.Direction,
+				arrowPosition,
+				mouseRay.Direction,
+			);
+			if (!startingPosition) return () => Vector3.zero;
+
+			return () => {
+				const camera = Workspace.CurrentCamera;
+				if (!camera) return Vector3.zero;
+
+				const mouseLocation = UserInputService.GetMouseLocation();
+				const mouseRay = camera.ScreenPointToRay(mouseLocation.X, mouseLocation.Y);
+
+				if (sideways.get()) {
+					const point = findRayPlaneIntersection(
+						mouseRay.Origin,
+						mouseRay.Direction,
+						startingPosition,
+						arrowDirection,
+					);
+					if (!point) return Vector3.zero;
+
+					return point.sub(startingPosition);
+				}
+
+				const point = findRayPlaneIntersection(
+					mouseRay.Origin,
+					mouseRay.Direction,
+					startingPosition,
+					startingMouseRay.Direction,
+				);
+				if (!point) return Vector3.zero;
+
+				const diff = point.sub(startingPosition);
+				const rotatedDiff = CFrame.lookAt(Vector3.zero, arrowDirection).PointToObjectSpace(diff);
+
+				return arrowDirection.mul(-rotatedDiff.Z);
+			};
+		};
+
+		let cu: (() => Vector3) | undefined;
+		const upd = () => {
+			if (!cu) return;
+			update(cu());
+		};
+		this.event.subscribe(RunService.Heartbeat, upd);
+		this.event.subscribeObservable(sideways, upd);
+
+		this.event.subscribe(handle.MouseButton1Down, (face) => {
+			if (!handle.Adornee) return;
+
+			cu = calculateCursorDeltaVecOnPlane(
+				handle.Adornee.Position,
+				handle.Adornee.CFrame.VectorToWorldSpace(Vector3.FromNormalId(face)),
+			);
+		});
+		this.event.subscribe(handle.MouseButton1Up, () => {
+			cu = undefined;
+			release();
+		});
+	}
+}
+
 type EditMode = "move" | "rotate" | "scale";
 
 const repositionOne = (block: BlockModel, origModel: BlockModel, location: CFrame, scale: Vector3) => {
@@ -70,7 +171,7 @@ const reposition = (blocks: readonly EditingBlock[], originalBB: BB, currentBB: 
 };
 
 @injectable
-class MoveComponent extends Component {
+class MoveComponent extends ClientComponent {
 	constructor(
 		handles: EditHandles,
 		blocks: readonly EditingBlock[],
@@ -87,39 +188,50 @@ class MoveComponent extends Component {
 
 		this.onEnabledStateChange((enabled) => forEachHandle((handle) => (handle.Visible = enabled)));
 
+		const sideways = new ObservableSwitch(false);
+
 		let bb = BB.fromPart(handles);
-		const update = (face: Enum.NormalId, distance: number) => {
-			distance = MathUtils.round(distance, step.get());
-
-			const direction = bb.center.Rotation.mul(Vector3.FromNormalId(face));
-			const diff = direction.mul(distance);
-			handles.PivotTo(bb.center.add(diff));
-
+		const update = (delta: Vector3) => {
+			handles.PivotTo(bb.center.add(delta.apply((value) => MathUtils.round(value, step.get()))));
 			reposition(blocks, originalBB, BB.fromPart(handles));
 		};
 
-		let currentMovement: { readonly face: Enum.NormalId; distance: number } | undefined;
+		let currentMovement: Vector3 | undefined;
 		const updateFromCurrentMovement = (): void => {
 			if (!currentMovement) return;
-			update(currentMovement.face, currentMovement.distance);
+			update(currentMovement);
 		};
 
 		this.event.subscribeObservable(step, updateFromCurrentMovement);
 
-		forEachHandle((handle) => {
-			this.event.subscribe(handle.MouseDrag, (face, distance) => {
-				currentMovement ??= { face, distance };
-				currentMovement.distance = distance;
-
+		this.event.subInput((ih) => {
+			ih.onKeyDown("LeftAlt", () => {
+				sideways.set("kb", true);
 				updateFromCurrentMovement();
 			});
-
-			this.event.subscribe(handle.MouseButton1Up, () => {
-				currentMovement = undefined;
-
-				bb = BB.fromPart(handles);
-				reposition(blocks, originalBB, bb);
+			ih.onKeyUp("LeftAlt", () => {
+				sideways.set("kb", false);
+				updateFromCurrentMovement();
 			});
+		});
+
+		forEachHandle((handle) => {
+			this.parent(
+				new HandleMovementController(
+					handle,
+					sideways,
+					(delta) => {
+						currentMovement = delta;
+						updateFromCurrentMovement();
+					},
+					() => {
+						currentMovement = undefined;
+
+						bb = BB.fromPart(handles);
+						reposition(blocks, originalBB, bb);
+					},
+				),
+			);
 		});
 	}
 }
