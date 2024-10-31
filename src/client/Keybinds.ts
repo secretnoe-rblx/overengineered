@@ -1,5 +1,6 @@
 import { ContextActionService } from "@rbxts/services";
 import { ObservableMap } from "engine/shared/event/ObservableMap";
+import { ObservableValue } from "engine/shared/event/ObservableValue";
 import { Signal } from "engine/shared/event/Signal";
 import { Keys } from "engine/shared/fixes/Keys";
 
@@ -13,9 +14,12 @@ class KeybindRegistration {
 	private readonly subscriptions: { [k in number]?: Set<KeybindSubscription> } = {};
 	private keys: Set<KeyCode>;
 
+	private readonly _isPressed = new ObservableValue(false);
+	readonly isPressed = this._isPressed.asReadonly();
+
 	constructor(
 		readonly action: string,
-		readonly displayName: string,
+		readonly displayPath: readonly string[],
 		defaultKeys: readonly KeyCode[],
 	) {
 		this.keys = new Set(defaultKeys);
@@ -38,6 +42,9 @@ class KeybindRegistration {
 			false,
 			...this.keys.map((k) => Keys[k]),
 		);
+
+		this.onDown(() => this._isPressed.set(true));
+		this.onUp(() => this._isPressed.set(false));
 	}
 
 	getKeys() {
@@ -75,14 +82,39 @@ class KeybindRegistration {
 	}
 }
 
+export interface KeybindDefinition {
+	readonly action: string;
+	readonly displayPath: readonly string[];
+	readonly keys: readonly KeyCode[];
+}
+
 export class Keybinds {
+	private static readonly definitions = new ObservableMap<string, KeybindDefinition>();
+
+	static registerDefinition(
+		action: string,
+		displayPath: readonly string[],
+		keys: readonly KeyCode[],
+	): KeybindDefinition {
+		let definition = this.definitions.get(action);
+		if (!definition) {
+			this.definitions.set(action, (definition = { action, displayPath, keys }));
+		}
+
+		return definition;
+	}
+
 	private readonly _registrations = new ObservableMap<string, KeybindRegistration>();
 	readonly registrations = this._registrations.asReadonly();
 
-	register(action: string, displayName: string, keys: readonly KeyCode[]): KeybindRegistration {
+	fromDefinition({ action, displayPath, keys }: KeybindDefinition): KeybindRegistration {
+		return this.register(action, displayPath, keys);
+	}
+
+	register(action: string, displayPath: readonly string[], keys: readonly KeyCode[]): KeybindRegistration {
 		let registration = this._registrations.get(action);
 		if (!registration) {
-			this._registrations.set(action, (registration = new KeybindRegistration(action, displayName, keys)));
+			this._registrations.set(action, (registration = new KeybindRegistration(action, displayPath, keys)));
 		}
 
 		return registration;
