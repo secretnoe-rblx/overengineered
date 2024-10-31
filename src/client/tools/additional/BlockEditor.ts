@@ -341,7 +341,21 @@ class ScaleComponent extends ClientComponent implements EditComponent {
 
 		const centerBased = new ObservableSwitch(false);
 		const sameSize = new ObservableSwitch(false);
-		sameSize.set("multipleBlocks", blocks.size() > 1);
+
+		// #region Block rotation check
+		const areRotations90DegreesApart = (cframeA: CFrame, cframeB: CFrame): boolean => {
+			const rotationDifference = cframeA.ToObjectSpace(cframeB);
+			const [_1, _2, _3, m00, m01, m02, m10, m11, m12, m20, m21, m22] = rotationDifference.GetComponents();
+
+			const is90DegreeMultiple = (value: number): boolean => math.deg(math.acos(value)) % 90 === 0;
+			return is90DegreeMultiple(m00) && is90DegreeMultiple(m11) && is90DegreeMultiple(m22);
+		};
+
+		sameSize.set(
+			"multipleBlocks",
+			blocks.any((b) => !areRotations90DegreesApart(bb.center, b.block.GetPivot())),
+		);
+		// #endregion
 
 		const pivot = Element.create(
 			"Part",
