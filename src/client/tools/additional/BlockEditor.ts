@@ -188,6 +188,11 @@ const sameSizeKb = Keybinds.registerDefinition(
 	["Edit Tool", "Scale", "Uniform scaling"],
 	["LeftShift"],
 );
+const sidewaysKb = Keybinds.registerDefinition(
+	"edit_move_sideways",
+	["Edit Tool", "Move", "Sideways movement"],
+	["LeftAlt"],
+);
 
 @injectable
 class MoveComponent extends ClientComponent implements EditComponent {
@@ -196,6 +201,7 @@ class MoveComponent extends ClientComponent implements EditComponent {
 		blocks: readonly EditingBlock[],
 		originalBB: BB,
 		grid: ReadonlyObservableValue<MoveGrid>,
+		@inject keybinds: Keybinds,
 	) {
 		super();
 
@@ -225,16 +231,15 @@ class MoveComponent extends ClientComponent implements EditComponent {
 
 		this.event.subscribeObservable(grid, updateFromCurrentMovement);
 
-		this.event.subInput((ih) => {
-			ih.onKeyDown("LeftAlt", () => {
-				sideways.set("kb", true);
-				updateFromCurrentMovement();
-			});
-			ih.onKeyUp("LeftAlt", () => {
-				sideways.set("kb", false);
-				updateFromCurrentMovement();
-			});
+		// #region Keyboard controls initialization
+		const tooltips = this.parent(TooltipsHolder.createComponent("Edit Tool > Move"));
+		tooltips.setFromKeybinds(keybinds, sidewaysKb);
+
+		this.event.subscribeObservable(keybinds.fromDefinition(sidewaysKb).isPressed, (value) => {
+			sideways.set("kb", value);
+			updateFromCurrentMovement();
 		});
+		// #endregion
 
 		forEachHandle((handle) => {
 			this.parent(
