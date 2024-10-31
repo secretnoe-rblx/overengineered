@@ -173,8 +173,12 @@ const reposition = (blocks: readonly EditingBlock[], originalBB: BB, currentBB: 
 	}
 };
 
+interface EditComponent extends Component {
+	readonly error?: ReadonlyObservableValue<string | undefined>;
+}
+
 @injectable
-class MoveComponent extends ClientComponent {
+class MoveComponent extends ClientComponent implements EditComponent {
 	constructor(
 		handles: EditHandles,
 		blocks: readonly EditingBlock[],
@@ -242,7 +246,7 @@ class MoveComponent extends ClientComponent {
 }
 
 @injectable
-class RotateComponent extends Component {
+class RotateComponent extends Component implements EditComponent {
 	constructor(
 		handles: EditHandles,
 		blocks: readonly EditingBlock[],
@@ -295,7 +299,9 @@ class RotateComponent extends Component {
 }
 
 @injectable
-class ScaleComponent extends ClientComponent {
+class ScaleComponent extends ClientComponent implements EditComponent {
+	readonly error = new ObservableValue<string | undefined>(undefined);
+
 	constructor(
 		handles: EditHandles,
 		blocks: readonly EditingBlock[],
@@ -317,15 +323,6 @@ class ScaleComponent extends ClientComponent {
 		const centerBased = new ObservableSwitch(false);
 		const sameSize = new ObservableSwitch(false);
 		sameSize.set("multipleBlocks", blocks.size() > 1);
-
-		const scaleMax = 4;
-		let maxExistingBlockScales = new Vector3(
-			blocks.map((b) => b.block.PrimaryPart!.Size.div(b.origModel.PrimaryPart!.Size).X).max() ?? 0,
-			blocks.map((b) => b.block.PrimaryPart!.Size.div(b.origModel.PrimaryPart!.Size).Y).max() ?? 0,
-			blocks.map((b) => b.block.PrimaryPart!.Size.div(b.origModel.PrimaryPart!.Size).Z).max() ?? 0,
-		);
-		let maxExistingBlockScale =
-			blocks.map((b) => b.block.PrimaryPart!.Size.div(b.origModel.PrimaryPart!.Size).findMax()).max() ?? 0;
 
 		const pivot = Element.create(
 			"Part",
@@ -353,8 +350,6 @@ class ScaleComponent extends ClientComponent {
 				: globalNormal.mul(bb.originalSize.div(-2));
 		};
 		const update = (face: Enum.NormalId, distance: number): void => {
-			// distance = MathUtils.round(distance, grid.get());
-
 			const negative =
 				face === Enum.NormalId.Front || face === Enum.NormalId.Bottom || face === Enum.NormalId.Left;
 
@@ -370,9 +365,6 @@ class ScaleComponent extends ClientComponent {
 			let g = gn.mul(distance * distanceMul);
 			g = grid.get().constrain(handles.GetPivot(), g);
 
-			// TODO: block size restriction
-
-			const scaleDist = math.min(distance * distanceMul, (scaleMax - maxExistingBlockScale) * 2);
 			handles.Size = bb.originalSize.add(g);
 
 			handles.PivotTo(
@@ -381,6 +373,15 @@ class ScaleComponent extends ClientComponent {
 				),
 			);
 			reposition(blocks, originalBB, BB.fromPart(handles));
+
+			const overscaled = blocks.any(
+				(b) => b.block.PrimaryPart!.Size.div(b.origModel.PrimaryPart!.Size).findMax() > 8,
+			);
+			if (overscaled) {
+				this.error.set("Some blocks are scaled too big (maximum is 8x)");
+			} else {
+				this.error.set(undefined);
+			}
 		};
 
 		let currentMovement: { readonly face: Enum.NormalId; distance: number } | undefined;
@@ -428,14 +429,6 @@ class ScaleComponent extends ClientComponent {
 
 				bb = BB.fromPart(handles);
 				reposition(blocks, originalBB, bb);
-				maxExistingBlockScale =
-					blocks.map((b) => b.block.PrimaryPart!.Size.div(b.origModel.PrimaryPart!.Size).findMax()).max() ??
-					0;
-				maxExistingBlockScales = new Vector3(
-					blocks.map((b) => b.block.PrimaryPart!.Size.div(b.origModel.PrimaryPart!.Size).X).max() ?? 0,
-					blocks.map((b) => b.block.PrimaryPart!.Size.div(b.origModel.PrimaryPart!.Size).Y).max() ?? 0,
-					blocks.map((b) => b.block.PrimaryPart!.Size.div(b.origModel.PrimaryPart!.Size).Z).max() ?? 0,
-				);
 			});
 		});
 	}
@@ -476,6 +469,20 @@ class BlockEditorControl extends Control<BlockEditorControlDefinition> {
 	}
 }
 
+class CompoundObservableSet<T extends defined> {
+	readonly set = new ObservableCollectionSet<T>();
+
+	addSource(observable: ReadonlyObservableValue<T | undefined>) {
+		observable.subscribe((value, prev) => {
+			if (value !== undefined) {
+				this.set.add(value);
+			} else if (prev !== undefined) {
+				this.set.remove(prev);
+			}
+		});
+	}
+}
+
 @injectable
 export class BlockEditor extends ClientComponent {
 	private readonly _completed = new ArgsSignal();
@@ -486,8 +493,8 @@ export class BlockEditor extends ClientComponent {
 
 	private readonly moveGrid = new ObservableValue<MoveGrid>(MoveGrid.def);
 	private readonly rotateGrid = new ObservableValue<RotateGrid>(RotateGrid.def);
-	private _errors = new ObservableCollectionSet<string>();
-	readonly errors = this._errors.asReadonly();
+	private _errors = new CompoundObservableSet<string>();
+	readonly errors = this._errors.set.asReadonly();
 
 	constructor(
 		blocks: readonly BlockModel[],
@@ -516,13 +523,12 @@ export class BlockEditor extends ClientComponent {
 		handles.Parent = Gui.getPlayerGui();
 		ComponentInstance.init(this, handles);
 
+		const inBoundsError = new ObservableValue<string | undefined>(undefined);
 		const updateHandlesInBounds = () => {
-			const str = "Out of bounds";
-
 			if (bounds.isBBInside(BB.fromPart(handles))) {
-				this._errors.remove(str);
+				inBoundsError.set(undefined);
 			} else {
-				this._errors.add(str);
+				inBoundsError.set("Out of bounds");
 			}
 		};
 		this.event.readonlyObservableFromInstanceParam(handles, "CFrame").subscribe(updateHandlesInBounds);
@@ -536,8 +542,8 @@ export class BlockEditor extends ClientComponent {
 			Adornee: handles,
 			Parent: handles,
 		});
-		this.event.subscribe(this._errors.changed, () => {
-			const valid = this._errors.size() === 0;
+		this.event.subscribe(this.errors.changed, () => {
+			const valid = this.errors.size() === 0;
 
 			const props = {
 				...TransformService.commonProps.quadOut02,
@@ -599,7 +605,11 @@ export class BlockEditor extends ClientComponent {
 			scale: () => di.resolveForeignClass(ScaleComponent, [handles, this.editBlocks, bb, this.moveGrid]),
 		};
 
-		const container = new ComponentChild(this);
+		const container = new ComponentChild<EditComponent>(this);
+		container.childSet.Connect((child) => {
+			if (!child?.error) return;
+			this._errors.addSource(child.error);
+		});
 		this.event.subscribeObservable(this.currentMode, (mode) => container.set(modes[mode]()), true);
 
 		//
