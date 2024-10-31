@@ -551,6 +551,7 @@ export class BlockEditor extends ClientComponent {
 		ComponentInstance.init(this, handles);
 
 		const inBoundsError = new ObservableValue<string | undefined>(undefined);
+		this._errors.addSource(inBoundsError);
 		const updateHandlesInBounds = () => {
 			if (bounds.isBBInside(BB.fromPart(handles))) {
 				inBoundsError.set(undefined);
