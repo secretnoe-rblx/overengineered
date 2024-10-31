@@ -412,8 +412,12 @@ namespace Controllers {
 			this.blocksRequests = blocks;
 			this.blocks = blocks.map((block) => {
 				const b = blockList.blocks[block.id]!.model.Clone();
+				BlockManager.manager.id.set(b, block.id);
 				BlockManager.manager.uuid.set(b, block.uuid);
+				BlockManager.manager.scale.set(b, block.scale);
 				b.PivotTo(block.location);
+				SharedBuilding.scale(b, blockList.blocks[block.id]!.model, block.scale);
+
 				PartUtils.ghostModel(b, Colors.blue);
 				b.Parent = ghostParent;
 
@@ -426,7 +430,10 @@ namespace Controllers {
 			this.step.autoSet(this.editor.moveStep);
 			this.rotateStep.autoSet(this.editor.rotateStep);
 
-			this.event.subscribe(this.editor.completed, () => this.destroy());
+			this.event.subscribe(this.editor.completed, () => {
+				this.submit(true);
+				this.destroy();
+			});
 			this.onDestroy(() => this.submit(true));
 		}
 
@@ -439,6 +446,7 @@ namespace Controllers {
 			if (skipIfSame) {
 				for (const block of update) {
 					if (block.newPosition && block.newPosition !== block.origPosition) continue;
+					if (block.newScale && block.origScale && block.newScale !== block.origScale) continue;
 
 					return;
 				}
@@ -451,6 +459,7 @@ namespace Controllers {
 				blocks: this.blocksRequests.map((b) => ({
 					...b,
 					location: updateMap.get(b.uuid)?.newPosition ?? b.location,
+					scale: updateMap.get(b.uuid)?.newScale ?? b.scale,
 				})),
 			});
 			if (!response.success) {

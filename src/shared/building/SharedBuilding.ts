@@ -34,7 +34,9 @@ export namespace SharedBuilding {
 		return result;
 	}
 
-	export function scale(block: BlockModel, originalModel: BlockModel, scale: Vector3) {
+	export function scale(block: BlockModel, originalModel: BlockModel, scale: Vector3 | undefined) {
+		scale ??= Vector3.one;
+
 		const origModelCenter = originalModel.GetPivot();
 		const blockCenter = block.GetPivot();
 
