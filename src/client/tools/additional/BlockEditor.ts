@@ -10,6 +10,7 @@ import { InputController } from "engine/client/InputController";
 import { Component } from "engine/shared/component/Component";
 import { ComponentChild } from "engine/shared/component/ComponentChild";
 import { ComponentInstance } from "engine/shared/component/ComponentInstance";
+import { TransformService } from "engine/shared/component/TransformService";
 import { Element } from "engine/shared/Element";
 import { ObservableSwitch } from "engine/shared/event/ObservableSwitch";
 import { ObservableValue } from "engine/shared/event/ObservableValue";
@@ -482,14 +483,15 @@ export class BlockEditor extends ClientComponent {
 	private readonly editBlocks: readonly EditingBlock[];
 	private readonly currentMode: ObservableValue<EditMode>;
 
-	readonly moveGrid = new ObservableValue<MoveGrid>(MoveGrid.def);
-	readonly rotateGrid = new ObservableValue<RotateGrid>(RotateGrid.def);
-
-	private readonly handles: EditHandles;
+	private readonly moveGrid = new ObservableValue<MoveGrid>(MoveGrid.def);
+	private readonly rotateGrid = new ObservableValue<RotateGrid>(RotateGrid.def);
+	private _isInBounds = new ObservableValue(true);
+	readonly isInBounds = this._isInBounds.asReadonly();
 
 	constructor(
 		blocks: readonly BlockModel[],
 		startMode: EditMode,
+		bounds: BB,
 		@inject keybinds: Keybinds,
 		@inject blockList: BlockList,
 		@inject di: DIContainer,
@@ -510,9 +512,33 @@ export class BlockEditor extends ClientComponent {
 		});
 
 		const handles = Instances.getAssets<{ EditHandles: EditHandles }>().EditHandles.Clone();
-		this.handles = handles;
 		handles.Parent = Gui.getPlayerGui();
 		ComponentInstance.init(this, handles);
+
+		const updateHandlesInBounds = () => this._isInBounds.set(bounds.isBBInside(BB.fromPart(handles)));
+		this.event.readonlyObservableFromInstanceParam(handles, "CFrame").subscribe(updateHandlesInBounds);
+		this.event.readonlyObservableFromInstanceParam(handles, "Size").subscribe(updateHandlesInBounds);
+
+		const errIndicator = Element.create("SelectionBox", {
+			Color3: Colors.red,
+			SurfaceColor3: Colors.red,
+			Transparency: 1,
+			SurfaceTransparency: 1,
+			Adornee: handles,
+			Parent: handles,
+		});
+		this.event.subscribeObservable(this._isInBounds, (isInBounds) => {
+			const props = {
+				...TransformService.commonProps.quadOut02,
+				duration: isInBounds ? 0.5 : 0.1,
+			};
+
+			TransformService.run(errIndicator, (tr) =>
+				tr
+					.transform("Transparency", isInBounds ? 1 : 0, props)
+					.transform("SurfaceTransparency", isInBounds ? 1 : 0.3, props),
+			);
+		});
 
 		let prevCameraState: Enum.CameraType | undefined;
 		const initializeHandles = (handles: Handles | ArcHandles) => {

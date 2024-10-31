@@ -338,7 +338,9 @@ namespace Controllers {
 			@inject di: DIContainer,
 		) {
 			super();
-			this.editor = this.parent(di.resolveForeignClass(BlockEditor, [[...selected], startMode]));
+			this.editor = this.parent(
+				di.resolveForeignClass(BlockEditor, [[...selected], startMode, plot.boundingBox]),
+			);
 			this.editor.initializeGrids(tool.mode);
 
 			this.event.subscribe(this.editor.completed, () => this.destroy());
@@ -348,6 +350,11 @@ namespace Controllers {
 		private submit(skipIfSame = true) {
 			if (this.submitted) return;
 			this.submitted = true;
+
+			if (!this.editor.isInBounds.get()) {
+				this.cancel();
+				return;
+			}
 
 			const update = this.editor.getUpdate();
 
@@ -362,7 +369,7 @@ namespace Controllers {
 
 			const response = ClientBuilding.editOperation.execute({
 				plot: this.plot,
-				blocks: this.editor.getUpdate(),
+				blocks: update,
 			});
 			if (!response.success) {
 				LogControl.instance.addLine(response.message, Colors.red);
@@ -420,7 +427,7 @@ namespace Controllers {
 				return b;
 			});
 
-			this.editor = this.parent(di.resolveForeignClass(BlockEditor, [this.blocks, "move"]));
+			this.editor = this.parent(di.resolveForeignClass(BlockEditor, [this.blocks, "move", plot.boundingBox]));
 			this.editor.initializeGrids(tool.mode);
 
 			this.event.subscribe(this.editor.completed, () => {
@@ -433,6 +440,11 @@ namespace Controllers {
 		private submit() {
 			if (this.submitted) return;
 			this.submitted = true;
+
+			if (!this.editor.isInBounds.get()) {
+				this.cancel();
+				return;
+			}
 
 			const update = this.editor.getUpdate();
 
