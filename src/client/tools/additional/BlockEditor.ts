@@ -1,5 +1,7 @@
 import { RunService, UserInputService, Workspace } from "@rbxts/services";
 import { Gui } from "client/gui/Gui";
+import { MoveGrid } from "client/tools/additional/Grid";
+import { RotateGrid } from "client/tools/additional/Grid";
 import { ToolBase } from "client/tools/ToolBase";
 import { ClientComponent } from "engine/client/component/ClientComponent";
 import { ButtonControl } from "engine/client/gui/Button";
@@ -14,7 +16,6 @@ import { ObservableValue } from "engine/shared/event/ObservableValue";
 import { ArgsSignal } from "engine/shared/event/Signal";
 import { BB } from "engine/shared/fixes/BB";
 import { Instances } from "engine/shared/fixes/Instances";
-import { MathUtils } from "engine/shared/fixes/MathUtils";
 import { BlockManager } from "shared/building/BlockManager";
 import { SharedBuilding } from "shared/building/SharedBuilding";
 import { Colors } from "shared/Colors";
@@ -176,7 +177,7 @@ class MoveComponent extends ClientComponent {
 		handles: EditHandles,
 		blocks: readonly EditingBlock[],
 		originalBB: BB,
-		step: ReadonlyObservableValue<number>,
+		grid: ReadonlyObservableValue<MoveGrid>,
 	) {
 		super();
 
@@ -189,10 +190,12 @@ class MoveComponent extends ClientComponent {
 		this.onEnabledStateChange((enabled) => forEachHandle((handle) => (handle.Visible = enabled)));
 
 		const sideways = new ObservableSwitch(false);
-
 		let bb = BB.fromPart(handles);
+
 		const update = (delta: Vector3) => {
-			handles.PivotTo(bb.center.add(delta.apply((value) => MathUtils.round(value, step.get()))));
+			delta = grid.get().constrain(handles.GetPivot(), delta);
+
+			handles.PivotTo(bb.center.add(delta));
 			reposition(blocks, originalBB, BB.fromPart(handles));
 		};
 
@@ -202,7 +205,7 @@ class MoveComponent extends ClientComponent {
 			update(currentMovement);
 		};
 
-		this.event.subscribeObservable(step, updateFromCurrentMovement);
+		this.event.subscribeObservable(grid, updateFromCurrentMovement);
 
 		this.event.subInput((ih) => {
 			ih.onKeyDown("LeftAlt", () => {
@@ -242,7 +245,7 @@ class RotateComponent extends Component {
 		handles: EditHandles,
 		blocks: readonly EditingBlock[],
 		originalBB: BB,
-		step: ReadonlyObservableValue<number>,
+		grid: ReadonlyObservableValue<RotateGrid>,
 	) {
 		super();
 
@@ -253,7 +256,7 @@ class RotateComponent extends Component {
 		this.onEnabledStateChange((enabled) => forEachHandle((handle) => (handle.Visible = enabled)));
 
 		const update = (axis: Enum.Axis, relativeAngle: number) => {
-			const roundedRelativeAngle = MathUtils.round(relativeAngle, math.rad(step.get()));
+			const roundedRelativeAngle = grid.get().constrain(relativeAngle);
 			handles.PivotTo(bb.center.mul(CFrame.fromAxisAngle(Vector3.FromAxis(axis), roundedRelativeAngle)));
 			handles.Rotate.Center.PivotTo(bb.center.mul(CFrame.fromAxisAngle(Vector3.FromAxis(axis), relativeAngle)));
 
@@ -266,7 +269,7 @@ class RotateComponent extends Component {
 			update(currentRotation.axis, currentRotation.relativeAngle);
 		};
 
-		this.event.subscribeObservable(step, updateFromCurrentRotation);
+		this.event.subscribeObservable(grid, updateFromCurrentRotation);
 
 		let bb = BB.fromPart(handles);
 		const sub = (handle: ArcHandles) => {
@@ -295,7 +298,7 @@ class ScaleComponent extends ClientComponent {
 		handles: EditHandles,
 		blocks: readonly EditingBlock[],
 		originalBB: BB,
-		step: ReadonlyObservableValue<number>,
+		grid: ReadonlyObservableValue<MoveGrid>,
 	) {
 		super();
 
@@ -348,7 +351,7 @@ class ScaleComponent extends ClientComponent {
 				: globalNormal.mul(bb.originalSize.div(-2));
 		};
 		const update = (face: Enum.NormalId, distance: number): void => {
-			distance = MathUtils.round(distance, step.get());
+			// distance = MathUtils.round(distance, grid.get());
 
 			const negative =
 				face === Enum.NormalId.Front || face === Enum.NormalId.Bottom || face === Enum.NormalId.Left;
@@ -362,7 +365,8 @@ class ScaleComponent extends ClientComponent {
 			const gn = sameSize.get() //
 				? bb.originalSize.Unit
 				: globalNormal.mul(negative ? -1 : 1);
-			const g = gn.mul(distance * distanceMul);
+			let g = gn.mul(distance * distanceMul);
+			g = grid.get().constrain(handles.GetPivot(), g);
 
 			// TODO: block size restriction
 
@@ -383,7 +387,7 @@ class ScaleComponent extends ClientComponent {
 			update(currentMovement.face, currentMovement.distance);
 		};
 
-		this.event.subscribeObservable(step, updateFromCurrentMovement);
+		this.event.subscribeObservable(grid, updateFromCurrentMovement);
 
 		this.event.subInput((ih) => {
 			ih.onKeyDown("LeftAlt", () => {
@@ -478,8 +482,10 @@ export class BlockEditor extends ClientComponent {
 	private readonly editBlocks: readonly EditingBlock[];
 	private readonly currentMode: ObservableValue<EditMode>;
 
-	readonly moveStep = new ObservableValue<number>(1);
-	readonly rotateStep = new ObservableValue<number>(90);
+	readonly moveGrid = new ObservableValue<MoveGrid>(MoveGrid.def);
+	readonly rotateGrid = new ObservableValue<RotateGrid>(RotateGrid.def);
+
+	private readonly handles: EditHandles;
 
 	constructor(
 		blocks: readonly BlockModel[],
@@ -504,6 +510,7 @@ export class BlockEditor extends ClientComponent {
 		});
 
 		const handles = Instances.getAssets<{ EditHandles: EditHandles }>().EditHandles.Clone();
+		this.handles = handles;
 		handles.Parent = Gui.getPlayerGui();
 		ComponentInstance.init(this, handles);
 
@@ -550,9 +557,9 @@ export class BlockEditor extends ClientComponent {
 		handles.Size = bb.originalSize;
 
 		const modes: { readonly [k in EditMode]: () => Component } = {
-			move: () => di.resolveForeignClass(MoveComponent, [handles, this.editBlocks, bb, this.moveStep]),
-			rotate: () => di.resolveForeignClass(RotateComponent, [handles, this.editBlocks, bb, this.rotateStep]),
-			scale: () => di.resolveForeignClass(ScaleComponent, [handles, this.editBlocks, bb, this.moveStep]),
+			move: () => di.resolveForeignClass(MoveComponent, [handles, this.editBlocks, bb, this.moveGrid]),
+			rotate: () => di.resolveForeignClass(RotateComponent, [handles, this.editBlocks, bb, this.rotateGrid]),
+			scale: () => di.resolveForeignClass(ScaleComponent, [handles, this.editBlocks, bb, this.moveGrid]),
 		};
 
 		const container = new ComponentChild(this);
@@ -586,6 +593,18 @@ export class BlockEditor extends ClientComponent {
 			),
 		);
 		control.instance.Parent = gui;
+	}
+
+	initializeGrids(buildMode: {
+		readonly moveGrid: ReadonlyObservableValue<number>;
+		readonly rotateGrid: ReadonlyObservableValue<number>;
+	}) {
+		this.event.subscribeObservable(buildMode.moveGrid, (grid) => this.moveGrid.set(MoveGrid.normal(grid)), true);
+		this.event.subscribeObservable(
+			buildMode.rotateGrid,
+			(grid) => this.rotateGrid.set(RotateGrid.normal(math.rad(grid))),
+			true,
+		);
 	}
 
 	getUpdate(): readonly ClientBuilding.EditBlockInfo[] {
