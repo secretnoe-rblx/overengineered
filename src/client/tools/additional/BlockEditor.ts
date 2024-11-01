@@ -411,7 +411,7 @@ class ScaleComponent extends ClientComponent implements EditComponent {
 				else if (direction.Y !== 0) axisValue = vector.Y;
 				else if (direction.Z !== 0) axisValue = vector.Z;
 
-				return vector.mul(1 / axisValue);
+				return vector.div(axisValue);
 			};
 
 			const gn = sameSize.get() //

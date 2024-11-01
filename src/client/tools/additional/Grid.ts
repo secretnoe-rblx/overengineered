@@ -51,7 +51,7 @@ export namespace ScaleGrid {
 					else if (direction.Y !== 0) axisValue = vector.Y;
 					else if (direction.Z !== 0) axisValue = vector.Z;
 
-					return vector.mul(1 / axisValue);
+					return vector.div(math.abs(axisValue));
 				};
 
 				const localAmount = rotation.VectorToObjectSpace(amount);
