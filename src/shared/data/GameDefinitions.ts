@@ -3,21 +3,15 @@ import { RobloxUnit } from "engine/shared/RobloxUnit";
 import { Throttler } from "engine/shared/Throttler";
 
 export namespace GameDefinitions {
-	export const APRIL_FOOLS = false;
-
 	export const GROUP = 1088368;
 	export const RANKS = {
 		255: {
-			name: "UNREAL",
-			color: Color3.fromRGB(0, 0, 0),
+			name: "Founder",
+			rainbow: true,
 		},
 		254: {
 			name: "Developer",
 			rainbow: true,
-		},
-		253: {
-			name: "Roblox Staff",
-			color: Color3.fromRGB(255, 255, 255),
 		},
 		3: {
 			name: "Tester",
