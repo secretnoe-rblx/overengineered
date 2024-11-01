@@ -136,5 +136,11 @@ const list: BlockBuildersWithoutIdAndDefaults = {
 		limit: 100,
 		logic,
 	},
+	halfsphericaltnt: {
+		displayName: "Half Spherical TNT",
+		description: "Had to cut corners. Unfortunately, sphere doesn't have corners.. So we sliced it in half!",
+		limit: 100,
+		logic,
+	},
 };
 export const TNTBlocks = BlockCreation.arrayFromObject(list);
