@@ -44,7 +44,7 @@ export namespace ScaleGrid {
 
 	export function normal(step: number | undefined): ScaleGrid {
 		return {
-			constrain: (localDirection, rotation, amount) => {
+			constrain: (globalDirection, rotation, amount) => {
 				const makeUnitWithAxis1 = (vector: Vector3, direction: Vector3) => {
 					let axisValue = 0;
 					if (direction.X !== 0) axisValue = vector.X;
@@ -55,6 +55,7 @@ export namespace ScaleGrid {
 				};
 
 				const localAmount = rotation.VectorToObjectSpace(amount);
+				const localDirection = rotation.VectorToObjectSpace(globalDirection);
 
 				const max = localDirection.mul(localAmount).Magnitude;
 				const stepped = MathUtils.round(max, step);
