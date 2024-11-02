@@ -1,4 +1,5 @@
 import { RunService, UserInputService, Workspace } from "@rbxts/services";
+import { Tooltip } from "client/gui/controls/Tooltip";
 import { Gui } from "client/gui/Gui";
 import { TooltipsHolder } from "client/gui/static/TooltipsControl";
 import { Keybinds } from "client/Keybinds";
@@ -6,12 +7,13 @@ import { MoveGrid, ScaleGrid } from "client/tools/additional/Grid";
 import { RotateGrid } from "client/tools/additional/Grid";
 import { ToolBase } from "client/tools/ToolBase";
 import { ClientComponent } from "engine/client/component/ClientComponent";
-import { ButtonControl } from "engine/client/gui/Button";
+import { ButtonControl, TextButtonControl } from "engine/client/gui/Button";
 import { Control } from "engine/client/gui/Control";
 import { InputController } from "engine/client/InputController";
 import { Component } from "engine/shared/component/Component";
 import { ComponentChild } from "engine/shared/component/ComponentChild";
 import { ComponentInstance } from "engine/shared/component/ComponentInstance";
+import { InstanceComponent } from "engine/shared/component/InstanceComponent";
 import { TransformService } from "engine/shared/component/TransformService";
 import { Element } from "engine/shared/Element";
 import { ObservableCollectionSet } from "engine/shared/event/ObservableCollection";
@@ -24,6 +26,7 @@ import { BlockManager } from "shared/building/BlockManager";
 import { SharedBuilding } from "shared/building/SharedBuilding";
 import { Colors } from "shared/Colors";
 import type { ClientBuilding } from "client/modes/build/ClientBuilding";
+import type { TextButtonDefinition } from "engine/client/gui/Button";
 
 type EditHandles = BasePart & {
 	readonly SelectionBox: SelectionBox;
@@ -210,6 +213,7 @@ class MoveComponent extends ClientComponent implements EditComponent {
 		blocks: readonly EditingBlock[],
 		originalBB: BB,
 		grid: ReadonlyObservableValue<MoveGrid>,
+		topControl: BlockEditorTopControl,
 		@inject keybinds: Keybinds,
 	) {
 		super();
@@ -268,6 +272,14 @@ class MoveComponent extends ClientComponent implements EditComponent {
 				),
 			);
 		});
+
+		const sidewaysBtn = topControl.create("SIDEWAYS", () => sideways.set("kb", !sideways.get()));
+		ComponentInstance.init(this, sidewaysBtn.instance);
+		this.event.subscribeObservable(
+			sideways,
+			(sideways) => (sidewaysBtn.instance.Transparency = sideways ? 0 : 0.5),
+			true,
+		);
 	}
 }
 
@@ -280,6 +292,7 @@ class RotateComponent extends Component implements EditComponent {
 		blocks: readonly EditingBlock[],
 		originalBB: BB,
 		grid: ReadonlyObservableValue<RotateGrid>,
+		topControl: BlockEditorTopControl,
 	) {
 		super();
 
@@ -338,6 +351,7 @@ class ScaleComponent extends ClientComponent implements EditComponent {
 		blocks: readonly EditingBlock[],
 		originalBB: BB,
 		grid: ReadonlyObservableValue<ScaleGrid>,
+		topControl: BlockEditorTopControl,
 		@inject keybinds: Keybinds,
 	) {
 		super();
@@ -354,21 +368,6 @@ class ScaleComponent extends ClientComponent implements EditComponent {
 
 		const centerBased = new ObservableSwitch(false);
 		const sameSize = new ObservableSwitch(false);
-
-		// #region Block rotation check
-		const areRotations90DegreesApart = (cframeA: CFrame, cframeB: CFrame): boolean => {
-			const rotationDifference = cframeA.ToObjectSpace(cframeB);
-			const [_1, _2, _3, m00, m01, m02, m10, m11, m12, m20, m21, m22] = rotationDifference.GetComponents();
-
-			const is90DegreeMultiple = (value: number): boolean => math.deg(math.acos(value)) % 90 === 0;
-			return is90DegreeMultiple(m00) && is90DegreeMultiple(m11) && is90DegreeMultiple(m22);
-		};
-
-		sameSize.set(
-			"multipleBlocks",
-			blocks.any((b) => !areRotations90DegreesApart(bb.center, b.block.GetPivot())),
-		);
-		// #endregion
 
 		const pivot = Element.create(
 			"Part",
@@ -480,20 +479,54 @@ class ScaleComponent extends ClientComponent implements EditComponent {
 				reposition(blocks, originalBB, bb);
 			});
 		});
+
+		const centerBasedBtn = topControl.create("CENTERED", () => centerBased.set("kb", !centerBased.get()));
+		ComponentInstance.init(this, centerBasedBtn.instance);
+		this.event.subscribeObservable(
+			centerBased,
+			(centerBased) => (centerBasedBtn.instance.Transparency = centerBased ? 0 : 0.5),
+			true,
+		);
+
+		const sameSizeBtn = topControl.create("UNIFORM", () => sameSize.set("kb", !sameSize.get()));
+		ComponentInstance.init(this, sameSizeBtn.instance);
+		this.event.subscribeObservable(
+			sameSize,
+			(sameSize) => (sameSizeBtn.instance.Transparency = sameSize ? 0 : 0.5),
+			true,
+		);
+		const sameSizeErr = this.parent(new ControlWithError(sameSizeBtn.instance));
+
+		// #region Block rotation check
+		const areRotations90DegreesApart = (cframeA: CFrame, cframeB: CFrame): boolean => {
+			const rotationDifference = cframeA.ToObjectSpace(cframeB);
+			const [_1, _2, _3, m00, m01, m02, m10, m11, m12, m20, m21, m22] = rotationDifference.GetComponents();
+
+			const is90DegreeMultiple = (value: number): boolean => math.deg(math.acos(value)) % 90 === 0;
+			return is90DegreeMultiple(m00) && is90DegreeMultiple(m11) && is90DegreeMultiple(m22);
+		};
+
+		if (blocks.any((b) => !areRotations90DegreesApart(bb.center, b.block.GetPivot()))) {
+			sameSize.set("multipleBlocks", true);
+			sameSizeErr.setError(
+				"Uniform scaling is forced because the selection has blocks with non-aligned rotations.",
+			);
+		}
+		// #endregion
 	}
 }
 
 //
 
-type BlockEditorControlDefinition = GuiObject & {
+type BlockEditorControlBottomDefinition = GuiObject & {
 	readonly MoveButton: GuiButton;
 	readonly RotateButton: GuiButton;
 	readonly ScaleButton: GuiButton;
 	readonly CompleteButton: GuiButton;
 };
-class BlockEditorControl extends Control<BlockEditorControlDefinition> {
+class BlockEditorBottomControl extends Control<BlockEditorControlBottomDefinition> {
 	constructor(
-		gui: BlockEditorControlDefinition,
+		gui: BlockEditorControlBottomDefinition,
 		currentMode: ReadonlyObservableValue<EditMode>,
 		set: (type: EditMode) => void,
 		commit: () => void,
@@ -515,6 +548,51 @@ class BlockEditorControl extends Control<BlockEditorControlDefinition> {
 			},
 			true,
 		);
+	}
+}
+
+type ControlWithErrorDefinition = GuiObject & {
+	readonly WarningImage: ImageLabel;
+};
+class ControlWithError extends InstanceComponent<ControlWithErrorDefinition> {
+	private tooltip?: SignalConnection;
+
+	constructor(gui: ControlWithErrorDefinition) {
+		super(gui);
+
+		gui.WarningImage.Visible = false;
+		this.onDisable(() => this.tooltip?.Disconnect());
+	}
+
+	setError(err: string | undefined) {
+		this.instance.WarningImage.Visible = err !== undefined;
+		this.tooltip?.Disconnect();
+
+		if (err) {
+			this.tooltip = Tooltip.init(this, err);
+		}
+	}
+}
+
+type BlockEditorTopControlDefinition = GuiObject & {
+	readonly Template: TextButtonDefinition & {
+		readonly WarningImage: ImageLabel;
+	};
+};
+class BlockEditorTopControl extends Control<BlockEditorTopControlDefinition> {
+	private readonly template;
+
+	constructor(gui: BlockEditorTopControlDefinition) {
+		super(gui);
+		this.template = this.asTemplate(gui.Template, true);
+	}
+
+	create(text: string, activated?: () => void): ButtonControl<BlockEditorTopControlDefinition["Template"]> {
+		const btn = this.add(new TextButtonControl(this.template(), activated));
+		btn.text.set(text);
+		btn.instance.WarningImage.Visible = false;
+
+		return btn;
 	}
 }
 
@@ -647,14 +725,46 @@ export class BlockEditor extends ClientComponent {
 		initializeHandles(handles.Scale.ZHandles);
 		initializeHandles(handles.Rotate.ArcHandles);
 
+		const setModeByKey = (mode: EditMode) => {
+			if (this.currentMode.get() === mode) {
+				this._completed.Fire();
+				return Enum.ContextActionResult.Sink;
+			}
+
+			this.currentMode.set(mode);
+			return Enum.ContextActionResult.Sink;
+		};
+
+		// #region
+		const gui = ToolBase.getToolGui<
+			"Edit2",
+			GuiObject & {
+				readonly EditBottom: BlockEditorControlBottomDefinition;
+				readonly EditTop: BlockEditorTopControlDefinition;
+			}
+		>().Edit2;
+		const bottomControl = this.parentGui(
+			new BlockEditorBottomControl(gui.EditBottom.Clone(), this.currentMode, setModeByKey, () =>
+				this._completed.Fire(),
+			),
+		);
+		bottomControl.instance.Parent = gui;
+
+		const topControl = this.parentGui(new BlockEditorTopControl(gui.EditTop.Clone()));
+		topControl.instance.Parent = gui;
+		// #endregion
+
 		const bb = BB.fromModels(blocks, editMode === "global" ? CFrame.identity : undefined);
 		handles.PivotTo(bb.center);
 		handles.Size = bb.originalSize;
 
 		const modes: { readonly [k in EditMode]: () => Component } = {
-			move: () => di.resolveForeignClass(MoveComponent, [handles, this.editBlocks, bb, this.moveGrid]),
-			rotate: () => di.resolveForeignClass(RotateComponent, [handles, this.editBlocks, bb, this.rotateGrid]),
-			scale: () => di.resolveForeignClass(ScaleComponent, [handles, this.editBlocks, bb, this.scaleGrid]),
+			move: () =>
+				di.resolveForeignClass(MoveComponent, [handles, this.editBlocks, bb, this.moveGrid, topControl]),
+			rotate: () =>
+				di.resolveForeignClass(RotateComponent, [handles, this.editBlocks, bb, this.rotateGrid, topControl]),
+			scale: () =>
+				di.resolveForeignClass(ScaleComponent, [handles, this.editBlocks, bb, this.scaleGrid, topControl]),
 		};
 
 		const container = new ComponentChild<EditComponent>(this);
@@ -666,16 +776,6 @@ export class BlockEditor extends ClientComponent {
 
 		//
 
-		const setModeByKey = (mode: EditMode) => {
-			if (this.currentMode.get() === mode) {
-				this._completed.Fire();
-				return Enum.ContextActionResult.Sink;
-			}
-
-			this.currentMode.set(mode);
-			return Enum.ContextActionResult.Sink;
-		};
-
 		const move = keybinds.get("edit_move");
 		this.event.subscribeRegistration(() => move.onDown(() => setModeByKey("move"), -1));
 
@@ -684,14 +784,6 @@ export class BlockEditor extends ClientComponent {
 
 		const scale = keybinds.get("edit_scale");
 		this.event.subscribeRegistration(() => scale.onDown(() => setModeByKey("scale"), -1));
-
-		const gui = ToolBase.getToolGui<"Edit2", GuiObject & { EditBottom: BlockEditorControlDefinition }>().Edit2;
-		const control = this.parentGui(
-			new BlockEditorControl(gui.EditBottom.Clone(), this.currentMode, setModeByKey, () =>
-				this._completed.Fire(),
-			),
-		);
-		control.instance.Parent = gui;
 	}
 
 	initializeGrids(grids: {

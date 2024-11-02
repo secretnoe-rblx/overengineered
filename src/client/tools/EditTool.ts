@@ -187,16 +187,15 @@ namespace Scene {
 			this.event.subscribeObservable(
 				tool.selectedMode,
 				(mode) => {
+					const visible = mode !== "Move" && mode !== "Rotate" && mode !== "Scale";
+					this.instance.Bottom.Visible = visible;
+					this.instance.Bottom2.Visible = visible;
+
 					for (const [name, button] of pairs(buttons)) {
 						button.instance.instance.BackgroundColor3 =
 							mode === name ? Colors.accentDark : Colors.staticBackground;
 
-						const enabled =
-							mode === undefined ||
-							mode === name ||
-							(name === "Move" && (mode === "Rotate" || mode === "Scale")) ||
-							(name === "Rotate" && (mode === "Move" || mode === "Scale")) ||
-							(name === "Scale" && (mode === "Move" || mode === "Rotate"));
+						const enabled = mode === undefined || mode === name;
 						button.set(1, enabled);
 					}
 				},

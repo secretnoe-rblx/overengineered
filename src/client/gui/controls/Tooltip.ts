@@ -6,6 +6,7 @@ import { InstanceComponent } from "engine/shared/component/InstanceComponent";
 import { TransformService } from "engine/shared/component/TransformService";
 import { HostedService } from "engine/shared/di/HostedService";
 import { EventHandler } from "engine/shared/event/EventHandler";
+import { ArgsSignal } from "engine/shared/event/Signal";
 
 type TooltipDefinition = GuiObject & {
 	readonly TextLabel: TextLabel;
@@ -94,7 +95,10 @@ class TooltipController extends HostedService {
 		this.tooltip.hideTooltip();
 	}
 
-	registerControl(control: Control, text: string | (() => string | undefined)) {
+	registerControl(
+		control: InstanceComponent<GuiObject>,
+		text: string | (() => string | undefined),
+	): SignalConnection {
 		let eh: EventHandler = new EventHandler();
 
 		eh.subscribe(control.instance.MouseEnter, () => {
@@ -114,18 +118,16 @@ class TooltipController extends HostedService {
 
 			this.hideTooltip();
 		};
-		control.onDestroy(() => {
+		const stop = () => {
 			hideIfShown();
 
 			eh?.unsubscribeAll();
 			eh = undefined!;
-		});
-		this.onDestroy(() => {
-			hideIfShown();
+		};
+		control.onDestroy(stop);
+		this.onDestroy(stop);
 
-			eh?.unsubscribeAll();
-			eh = undefined!;
-		});
+		return ArgsSignal.connection(stop);
 	}
 }
 
@@ -133,10 +135,10 @@ export namespace Tooltip {
 	let instance: TooltipController | undefined;
 
 	/** Initialize a tooltip at the control */
-	export function init(...args: Parameters<TooltipController["registerControl"]>): void {
+	export function init(...args: Parameters<TooltipController["registerControl"]>): SignalConnection {
 		instance ??= new TooltipController();
 
 		instance.enable();
-		instance.registerControl(...args);
+		return instance.registerControl(...args);
 	}
 }
