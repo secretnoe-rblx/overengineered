@@ -339,7 +339,12 @@ namespace Controllers {
 		) {
 			super();
 			this.editor = this.parent(
-				di.resolveForeignClass(BlockEditor, [[...selected], startMode, plot.boundingBox]),
+				di.resolveForeignClass(BlockEditor, [
+					[...selected],
+					startMode,
+					plot.boundingBox,
+					tool.mode.editMode.get(),
+				]),
 			);
 			this.editor.initializeGrids({
 				moveGrid: tool.mode.moveGrid,
@@ -435,7 +440,9 @@ namespace Controllers {
 				return b;
 			});
 
-			this.editor = this.parent(di.resolveForeignClass(BlockEditor, [this.blocks, "move", plot.boundingBox]));
+			this.editor = this.parent(
+				di.resolveForeignClass(BlockEditor, [this.blocks, "move", plot.boundingBox, tool.mode.editMode.get()]),
+			);
 			this.editor.initializeGrids({
 				moveGrid: tool.mode.moveGrid,
 				rotateGrid: tool.mode.rotateGrid,

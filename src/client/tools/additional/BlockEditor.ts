@@ -550,6 +550,7 @@ export class BlockEditor extends ClientComponent {
 		blocks: readonly BlockModel[],
 		startMode: EditMode,
 		bounds: BB,
+		editMode: "global" | "local",
 		@inject keybinds: Keybinds,
 		@inject blockList: BlockList,
 		@inject di: DIContainer,
@@ -646,7 +647,7 @@ export class BlockEditor extends ClientComponent {
 		initializeHandles(handles.Scale.ZHandles);
 		initializeHandles(handles.Rotate.ArcHandles);
 
-		const bb = BB.fromModels(blocks);
+		const bb = BB.fromModels(blocks, editMode === "global" ? CFrame.identity : undefined);
 		handles.PivotTo(bb.center);
 		handles.Size = bb.originalSize;
 
