@@ -34,7 +34,7 @@ class Logic extends InstanceBlockLogic<typeof definition, VehicleSeatModel> {
 
 		this.vehicleSeat = this.instance.VehicleSeat;
 		this.event.subscribeObservable(
-			this.event.observableFromInstanceParam(this.vehicleSeat, "Occupant"),
+			this.event.readonlyObservableFromInstanceParam(this.vehicleSeat, "Occupant"),
 			(occupant) => this.output.occupied.set("bool", occupant !== undefined),
 			true,
 		);

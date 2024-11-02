@@ -141,7 +141,7 @@ class Logic extends InstanceBlockLogic<typeof definition> {
 		this.onDisable(() => ticker.disable());
 		this.onDescendantDestroyed(() => ticker.destroy());
 
-		this.event.observableFromInstanceParam(Workspace, "CurrentCamera").subscribe((wcamera) => {
+		this.event.readonlyObservableFromInstanceParam(Workspace, "CurrentCamera").subscribe((wcamera) => {
 			const thisCamera = wcamera === camera;
 
 			ticker.setEnabled(thisCamera);
