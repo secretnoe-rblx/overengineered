@@ -57,7 +57,7 @@ class HandleMovementController extends Component {
 	constructor(
 		handle: Handles,
 		sideways: ReadonlyObservableValue<boolean>,
-		update: (delta: Vector3) => void,
+		update: (delta: Vector3, face: Enum.NormalId) => void,
 		release: () => void,
 	) {
 		super();
@@ -131,10 +131,11 @@ class HandleMovementController extends Component {
 			};
 		};
 
+		let f: Enum.NormalId | undefined;
 		let cu: (() => Vector3) | undefined;
 		const upd = () => {
-			if (!cu) return;
-			update(cu());
+			if (!cu || !f) return;
+			update(cu(), f);
 		};
 		this.event.subscribe(RunService.Heartbeat, upd);
 		this.event.subscribeObservable(sideways, upd);
@@ -142,6 +143,7 @@ class HandleMovementController extends Component {
 		this.event.subscribe(handle.MouseButton1Down, (face) => {
 			if (!handle.Adornee) return;
 
+			f = face;
 			cu = calculateCursorDeltaVecOnPlane(
 				handle.Adornee.Position,
 				handle.Adornee.CFrame.VectorToWorldSpace(Vector3.FromNormalId(face)),
@@ -149,6 +151,7 @@ class HandleMovementController extends Component {
 		});
 		this.event.subscribe(handle.MouseButton1Up, () => {
 			cu = undefined;
+			f = undefined;
 			release();
 		});
 	}
@@ -254,20 +257,74 @@ class MoveComponent extends ClientComponent implements EditComponent {
 		});
 		// #endregion
 
+		const createVisualizer = () => {
+			const instance = Instances.getAssets<{
+				MovementVisualizer: BasePart & { Decal: Decal };
+			}>().MovementVisualizer.Clone();
+			instance.Decal.Transparency = 1;
+
+			const size = 500;
+			instance.Size = new Vector3(0, size, size);
+
+			ComponentInstance.init(this, instance);
+			instance.Parent = Workspace;
+
+			let visible = false;
+
+			const props = {
+				...TransformService.commonProps.quadOut02,
+				duration: 0.5,
+			};
+
+			const update = (direction: Vector3, position: Vector3) => {
+				if (!sideways.get()) {
+					stop();
+					return;
+				}
+
+				if (!visible) {
+					visible = true;
+
+					TransformService.cancel(instance);
+					TransformService.run(instance.Decal, (tr) => tr.transform("Transparency", 0.95, props));
+				}
+
+				instance.CFrame = CFrame.lookAt(Vector3.zero, direction)
+					.mul(CFrame.Angles(0, math.rad(90), 0))
+					.add(position);
+			};
+
+			const stop = () => {
+				if (!visible) return;
+				visible = false;
+
+				TransformService.cancel(instance);
+				TransformService.run(instance.Decal, (tr) => tr.transform("Transparency", 1, props));
+			};
+
+			return { update, stop };
+		};
+		const visualizer = createVisualizer();
+
 		forEachHandle((handle) => {
 			this.parent(
 				new HandleMovementController(
 					handle,
 					sideways,
-					(delta) => {
+					(delta, face) => {
 						currentMovement = delta;
 						updateFromCurrentMovement();
+						visualizer.update(
+							bb.center.Rotation.mul(Vector3.FromNormalId(face)),
+							bb.center.Position.add(delta),
+						);
 					},
 					() => {
 						currentMovement = undefined;
 
 						bb = BB.fromPart(handles);
 						reposition(blocks, originalBB, bb);
+						visualizer.stop();
 					},
 				),
 			);
