@@ -87,6 +87,11 @@ class Logic extends InstanceBlockLogic<typeof definition> {
 		dot.Anchored = true;
 		dot.Size = new Vector3(dotSize, dotSize, dotSize);
 
+		this.onDisable(() => {
+			ray.Destroy();
+			dot.Destroy();
+		});
+
 		const raycastParams = new RaycastParams();
 		raycastParams.FilterDescendantsInstances = [this.instance];
 		raycastParams.FilterType = Enum.RaycastFilterType.Exclude;
