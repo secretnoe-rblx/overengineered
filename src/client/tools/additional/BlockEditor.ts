@@ -791,8 +791,28 @@ export class BlockEditor extends ClientComponent {
 		});
 
 		let prevCameraState: Enum.CameraType | undefined;
+		const releaseCamera = () => {
+			if (!prevCameraState) return;
+
+			const camera = Workspace.CurrentCamera;
+			if (!camera) return;
+
+			camera.CameraType = prevCameraState;
+			prevCameraState = undefined;
+		};
+		this.onDisable(releaseCamera);
+
 		const initializeHandles = (handles: Handles | ArcHandles) => {
 			handles.Visible = false;
+
+			this.event.subscribeObservable(
+				this.event.readonlyObservableFromInstanceParam(handles, "Visible"),
+				(visible) => {
+					if (!visible) {
+						releaseCamera();
+					}
+				},
+			);
 
 			// disable camera on drag
 			this.event.subscribeRegistration(() => {
@@ -800,24 +820,21 @@ export class BlockEditor extends ClientComponent {
 					return;
 				}
 
-				return handles.MouseButton1Down.Connect(() => {
-					const camera = Workspace.CurrentCamera;
-					if (!camera) return;
+				return [
+					handles.MouseButton1Down.Connect(() => {
+						const camera = Workspace.CurrentCamera;
+						if (!camera) return;
 
-					prevCameraState = camera.CameraType;
-					camera.CameraType = Enum.CameraType.Scriptable;
-				});
+						prevCameraState = camera.CameraType;
+						camera.CameraType = Enum.CameraType.Scriptable;
+					}),
+					handles.MouseButton1Up.Connect(releaseCamera),
+				];
 			});
 			this.event.subInput((ih) => {
 				ih.onInputEnded((b) => {
 					if (b.UserInputType !== Enum.UserInputType.Touch) return;
-					if (!prevCameraState) return;
-
-					const camera = Workspace.CurrentCamera;
-					if (!camera) return;
-
-					camera.CameraType = prevCameraState;
-					prevCameraState = undefined;
+					releaseCamera();
 				});
 			});
 		};
