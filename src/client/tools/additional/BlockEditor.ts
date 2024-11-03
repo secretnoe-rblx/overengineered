@@ -761,24 +761,25 @@ export class BlockEditor extends ClientComponent {
 					return;
 				}
 
-				return [
-					handles.MouseButton1Down.Connect(() => {
-						const camera = Workspace.CurrentCamera;
-						if (!camera) return;
+				return handles.MouseButton1Down.Connect(() => {
+					const camera = Workspace.CurrentCamera;
+					if (!camera) return;
 
-						prevCameraState = camera.CameraType;
-						camera.CameraType = Enum.CameraType.Scriptable;
-					}),
-					handles.MouseButton1Up.Connect(() => {
-						if (!prevCameraState) return;
+					prevCameraState = camera.CameraType;
+					camera.CameraType = Enum.CameraType.Scriptable;
+				});
+			});
+			this.event.subInput((ih) => {
+				ih.onInputEnded((b) => {
+					if (b.UserInputType !== Enum.UserInputType.Touch) return;
+					if (!prevCameraState) return;
 
-						const camera = Workspace.CurrentCamera;
-						if (!camera) return;
+					const camera = Workspace.CurrentCamera;
+					if (!camera) return;
 
-						camera.CameraType = prevCameraState;
-						prevCameraState = undefined;
-					}),
-				];
+					camera.CameraType = prevCameraState;
+					prevCameraState = undefined;
+				});
 			});
 		};
 		initializeHandles(handles.Move.XHandles);
