@@ -491,7 +491,14 @@ class ScaleComponent extends ClientComponent implements EditComponent {
 			if (overscaled) {
 				this.error.set("Some blocks are scaled too big (maximum is 8x)");
 			} else {
-				this.error.set(undefined);
+				const underscaled = blocks.any(
+					(b) => b.block.PrimaryPart!.Size.div(b.origModel.PrimaryPart!.Size).findMin() < 1 / 16,
+				);
+				if (underscaled) {
+					this.error.set("Some blocks are scaled too small (minimum is 1/16x)");
+				} else {
+					this.error.set(undefined);
+				}
 			}
 		};
 
