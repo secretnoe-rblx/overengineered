@@ -3,6 +3,7 @@ import { Tooltip } from "client/gui/controls/Tooltip";
 import { Gui } from "client/gui/Gui";
 import { TooltipsHolder } from "client/gui/static/TooltipsControl";
 import { Keybinds } from "client/Keybinds";
+import { FloatingText } from "client/tools/additional/FloatingText";
 import { MoveGrid, ScaleGrid } from "client/tools/additional/Grid";
 import { RotateGrid } from "client/tools/additional/Grid";
 import { ToolBase } from "client/tools/ToolBase";
@@ -22,6 +23,7 @@ import { ObservableValue } from "engine/shared/event/ObservableValue";
 import { ArgsSignal } from "engine/shared/event/Signal";
 import { BB } from "engine/shared/fixes/BB";
 import { Instances } from "engine/shared/fixes/Instances";
+import { Strings } from "engine/shared/fixes/String.propmacro";
 import { BlockManager } from "shared/building/BlockManager";
 import { SharedBuilding } from "shared/building/SharedBuilding";
 import { Colors } from "shared/Colors";
@@ -207,6 +209,17 @@ const sidewaysKb = Keybinds.registerDefinition(
 	["LeftAlt"],
 );
 
+const formatVecForFloatingText = (vec: Vector3): string => {
+	const format = (num: number): string => {
+		const str = Strings.prettyNumber(num, 0.01);
+		if (num > 0) return `+${str}`;
+
+		return `${str}`;
+	};
+
+	return `${format(vec.X)}, ${format(vec.Y)}, ${format(vec.Z)}`;
+};
+
 // #region Move
 // #endregion
 @injectable
@@ -232,11 +245,19 @@ class MoveComponent extends ClientComponent implements EditComponent {
 		const sideways = new ObservableSwitch(false);
 		let bb = BB.fromPart(handles);
 
+		const floatingText = this.parent(FloatingText.create(handles));
+		const startbb = bb;
+		const updateFloatingText = () =>
+			floatingText.text.set(formatVecForFloatingText(handles.Position.sub(startbb.center.Position)));
+		updateFloatingText();
+
 		const update = (delta: Vector3) => {
 			delta = grid.get().constrain(handles.GetPivot(), delta);
 
 			handles.PivotTo(bb.center.add(delta));
 			reposition(blocks, originalBB, BB.fromPart(handles));
+
+			updateFloatingText();
 		};
 
 		let currentMovement: Vector3 | undefined;
@@ -360,12 +381,24 @@ class RotateComponent extends Component implements EditComponent {
 		this.onEnabledStateChange((enabled) => forEachHandle((handle) => (handle.Visible = enabled)));
 		this.onEnable(() => (handles.Rotate.Center.Size = handles.Size));
 
+		let bb = BB.fromPart(handles);
+
+		const floatingText = this.parent(FloatingText.create(handles));
+		const startbb = bb;
+		const updateFloatingText = () => {
+			const [x, y, z] = handles.CFrame.Rotation.ToObjectSpace(startbb.center.Rotation).ToOrientation();
+			const vec = new Vector3(x, y, z).apply(math.deg);
+			floatingText.text.set(formatVecForFloatingText(vec));
+		};
+		updateFloatingText();
+
 		const update = (axis: Enum.Axis, relativeAngle: number) => {
 			const roundedRelativeAngle = grid.get().constrain(relativeAngle);
 			handles.PivotTo(bb.center.mul(CFrame.fromAxisAngle(Vector3.FromAxis(axis), roundedRelativeAngle)));
 			handles.Rotate.Center.PivotTo(bb.center.mul(CFrame.fromAxisAngle(Vector3.FromAxis(axis), relativeAngle)));
 
 			reposition(blocks, originalBB, BB.fromPart(handles));
+			updateFloatingText();
 		};
 
 		let currentRotation: { readonly axis: Enum.Axis; relativeAngle: number } | undefined;
@@ -376,7 +409,6 @@ class RotateComponent extends Component implements EditComponent {
 
 		this.event.subscribeObservable(grid, updateFromCurrentRotation);
 
-		let bb = BB.fromPart(handles);
 		const sub = (handle: ArcHandles) => {
 			this.event.subscribe(handle.MouseDrag, (axis, relativeAngle, deltaRadius) => {
 				currentRotation ??= { axis, relativeAngle };
@@ -444,6 +476,12 @@ class ScaleComponent extends ClientComponent implements EditComponent {
 		);
 		ComponentInstance.init(this, pivot);
 
+		const floatingText = this.parent(FloatingText.create(handles));
+		const startbb = bb;
+		const updateFloatingText = () =>
+			floatingText.text.set(formatVecForFloatingText(handles.Size.sub(startbb.originalSize)));
+		updateFloatingText();
+
 		const calculatePivotPosition = (face: Enum.NormalId): Vector3 => {
 			const globalNormal = Vector3.FromNormalId(face);
 
@@ -477,6 +515,7 @@ class ScaleComponent extends ClientComponent implements EditComponent {
 			g = grid.get().constrain(globalNormal, handles.GetPivot(), g);
 
 			handles.Size = bb.originalSize.add(g);
+			updateFloatingText();
 
 			handles.PivotTo(
 				bb.center.ToWorldSpace(
