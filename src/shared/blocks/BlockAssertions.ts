@@ -69,6 +69,29 @@ export namespace BlockAssertions {
 
 		yield `No parts in block '${block.Name}' are anchored!`;
 	}
+	function* assertNoPrimaryPartRotation(block: AssertedModel) {
+		if (block.PrimaryPart.CFrame.Rotation !== CFrame.identity) {
+			yield `Block ${block.Name} has a non-zero rotation in its PrimaryPart ${block.PrimaryPart.Name}`;
+		}
+	}
+	function* assertNoBallCylinderParts(block: Model) {
+		function* check(instance: Instance) {
+			for (const child of instance.GetChildren()) {
+				if (child.Parent?.Name === "WeldRegions") continue;
+
+				if (child.IsA("Part")) {
+					if (child.Shape === Enum.PartType.Ball || child.Shape === Enum.PartType.Cylinder) {
+						yield `Block ${block.Name} part ${child.Name} shape is ${tostring(child.Shape).sub("Enum.PartType.".size() + 1)} which does not scale good. Replace with union or a mesh.`;
+					}
+				}
+			}
+		}
+
+		for (const err of check(block)) {
+			yield err;
+		}
+	}
+
 	function* assertCollisionGroup(block: Model) {
 		for (const child of block.GetDescendants()) {
 			if (child.Parent?.Name === "WeldRegions") continue;
@@ -138,6 +161,8 @@ export namespace BlockAssertions {
 			...assertValidVelds(block),
 			...assertFluidForcesIsDisabled(block),
 			...assertSomethingAnchored(block),
+			...assertNoPrimaryPartRotation(block),
+			// ...assertNoBallCylinderParts(block),
 			...assertCollisionGroup(block),
 			...assertNoRepeatedPartNames(block),
 		];
