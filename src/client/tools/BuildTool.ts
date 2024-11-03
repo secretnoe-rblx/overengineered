@@ -11,6 +11,7 @@ import { ClientBuilding } from "client/modes/build/ClientBuilding";
 import { Signals } from "client/Signals";
 import { BlockGhoster } from "client/tools/additional/BlockGhoster";
 import { BlockMirrorer } from "client/tools/additional/BlockMirrorer";
+import { FloatingText } from "client/tools/additional/FloatingText";
 import { ToolBase } from "client/tools/ToolBase";
 import { ClientComponent } from "engine/client/component/ClientComponent";
 import { ClientComponentChild } from "engine/client/component/ClientComponentChild";
@@ -19,10 +20,8 @@ import { Control } from "engine/client/gui/Control";
 import { InputController } from "engine/client/InputController";
 import { Component } from "engine/shared/component/Component";
 import { ComponentChild } from "engine/shared/component/ComponentChild";
-import { InstanceComponent } from "engine/shared/component/InstanceComponent";
 import { ObjectOverlayStorage } from "engine/shared/component/ObjectOverlayStorage";
 import { TransformService } from "engine/shared/component/TransformService";
-import { Element } from "engine/shared/Element";
 import { ObservableValue } from "engine/shared/event/ObservableValue";
 import { AABB } from "engine/shared/fixes/AABB";
 import { BB } from "engine/shared/fixes/BB";
@@ -741,100 +740,6 @@ namespace SinglePlaceController {
 }
 
 namespace MultiPlaceController {
-	type FloatingTextDefinition = BasePart & {
-		readonly billboard: BillboardGui & {
-			readonly text: TextLabel;
-		};
-	};
-	class FloatingText extends InstanceComponent<FloatingTextDefinition> {
-		static create(adornee: Model) {
-			const instance = Element.create(
-				"Part",
-				{
-					Anchored: true,
-					Transparency: 1,
-					CanCollide: false,
-					CanTouch: false,
-					Size: new Vector3(1, 1, 1),
-				},
-				{
-					billboard: Element.create(
-						"BillboardGui",
-						{ Size: new UDim2(0, 200, 0, 50), AlwaysOnTop: true },
-						{
-							text: Element.create("TextLabel", {
-								Size: new UDim2(1, 0, 1, 0),
-								AutoLocalize: false,
-								BackgroundTransparency: 1,
-								FontFace: Element.newFont(Enum.Font.Ubuntu, Enum.FontWeight.Bold),
-								TextSize: 20,
-								TextColor3: Colors.black,
-								TextStrokeColor3: Colors.white,
-								TextStrokeTransparency: 0,
-							}),
-						},
-					),
-				},
-			);
-			instance.billboard.Adornee = instance;
-			instance.Parent = Workspace;
-
-			return new FloatingText(instance, adornee);
-		}
-
-		readonly counts = new ObservableValue<Vector3int16>(new Vector3int16());
-
-		constructor(instance: FloatingTextDefinition, adornee: Model) {
-			super(instance);
-
-			this.event.subscribe(RunService.Heartbeat, () => {
-				const closest = (origin: Vector3, points: readonly Vector3[]) => {
-					let result = new Vector3(math.huge, math.huge, math.huge);
-					let magnitude = math.huge;
-
-					for (const point of points) {
-						const mg = origin.sub(point).Magnitude;
-						if (mg < magnitude) {
-							result = point;
-							magnitude = mg;
-						}
-					}
-
-					return result;
-				};
-
-				const [mcf, ms] = adornee.GetBoundingBox();
-				const points: Vector3[] = [];
-				const addIfVisible = (point: Vector3) => {
-					const [, visible] = Workspace.CurrentCamera!.WorldToScreenPoint(point);
-					if (visible) points.push(point);
-				};
-
-				if (true as boolean) {
-					addIfVisible(mcf.Position);
-				} else {
-					addIfVisible(mcf.mul(new Vector3(ms.X / 2, ms.Y / 2, ms.Z / 2)));
-					addIfVisible(mcf.mul(new Vector3(-ms.X / 2, ms.Y / 2, ms.Z / 2)));
-					addIfVisible(mcf.mul(new Vector3(-ms.X / 2, -ms.Y / 2, ms.Z / 2)));
-					addIfVisible(mcf.mul(new Vector3(-ms.X / 2, ms.Y / 2, -ms.Z / 2)));
-					addIfVisible(mcf.mul(new Vector3(-ms.X / 2, -ms.Y / 2, -ms.Z / 2)));
-					addIfVisible(mcf.mul(new Vector3(ms.X / 2, -ms.Y / 2, ms.Z / 2)));
-					addIfVisible(mcf.mul(new Vector3(ms.X / 2, -ms.Y / 2, -ms.Z / 2)));
-					addIfVisible(mcf.mul(new Vector3(ms.X / 2, ms.Y / 2, -ms.Z / 2)));
-				}
-
-				const origin = Workspace.CurrentCamera?.CFrame?.Position;
-				if (!origin) return;
-
-				const fx = closest(origin, points);
-				instance.Position = fx;
-
-				const counts = this.counts.get();
-				instance.billboard.text.Text = `${counts.X}, ${counts.Y}, ${counts.Z}`;
-			});
-		}
-	}
-
 	export abstract class Base extends ClientComponent implements IController {
 		private readonly possibleFillRotationAxis = [Vector3.xAxis, Vector3.yAxis, Vector3.zAxis] as const;
 		private readonly fillLimit = 32;
@@ -941,7 +846,7 @@ namespace MultiPlaceController {
 			const xs = math.floor(toX / blockSize.X) + 1;
 			const ys = math.floor(toY / blockSize.Y) + 1;
 			const zs = math.floor(toZ / blockSize.Z) + 1;
-			this.floatingText.counts.set(new Vector3int16(xs, ys, zs));
+			this.floatingText.text.set(`${xs}, ${ys}, ${zs}`);
 
 			for (let x = 0; x <= toX; x += blockSize.X) {
 				for (let y = 0; y <= toY; y += blockSize.Y) {
