@@ -1,5 +1,4 @@
 import { HttpService, Workspace } from "@rbxts/services";
-import { LoadingController } from "client/controller/LoadingController";
 import { MaterialColorEditControl } from "client/gui/buildmode/MaterialColorEditControl";
 import { LogControl } from "client/gui/static/LogControl";
 import { ClientBuilding } from "client/modes/build/ClientBuilding";
@@ -11,7 +10,6 @@ import { ToolBase } from "client/tools/ToolBase";
 import { ClientComponent } from "engine/client/component/ClientComponent";
 import { ButtonControl } from "engine/client/gui/Button";
 import { Control } from "engine/client/gui/Control";
-import { InputController } from "engine/client/InputController";
 import { ComponentChild } from "engine/shared/component/ComponentChild";
 import { ComponentDisabler } from "engine/shared/component/ComponentDisabler";
 import { TransformService } from "engine/shared/component/TransformService";
@@ -713,18 +711,11 @@ export class EditTool extends ToolBase {
 		const paint = keybinds.register("edit_paint", ["Edit tool", "Paint"], ["G"]);
 		this.event.subscribeRegistration(() => paint.onDown(() => this.toggleMode("Paint")));
 
-		this.event.onKeyDown("C", () => {
-			if (!InputController.isCtrlPressed()) return;
-			if (LoadingController.isLoading.get()) return;
+		const copy = keybinds.register("edit_copy", ["Edit tool", "Copy"], ["C"]);
+		this.event.subscribeRegistration(() => copy.onDown(() => this.copySelectedBlocks()));
 
-			this.copySelectedBlocks();
-		});
-		this.event.onKeyDown("V", () => {
-			if (!InputController.isCtrlPressed()) return;
-			if (LoadingController.isLoading.get()) return;
-
-			this.toggleMode("Paste");
-		});
+		const paste = keybinds.register("edit_paste", ["Edit tool", "Paste"], ["V"]);
+		this.event.subscribeRegistration(() => paste.onDown(() => this.toggleMode("Paste")));
 	}
 
 	cancelCurrentMode() {
