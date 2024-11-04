@@ -92,6 +92,13 @@ export namespace BlockAssertions {
 		}
 	}
 
+	function* assertUsePartColor(block: Model) {
+		for (const part of block.GetDescendants()) {
+			if (part.IsA("UnionOperation") && !part.UsePartColor) {
+				yield `Block ${block.Name} part ${part.Name} has UsePartColor disabled`;
+			}
+		}
+	}
 	function* assertCollisionGroup(block: Model) {
 		for (const child of block.GetDescendants()) {
 			if (child.Parent?.Name === "WeldRegions") continue;
@@ -163,6 +170,7 @@ export namespace BlockAssertions {
 			...assertSomethingAnchored(block),
 			...assertNoPrimaryPartRotation(block),
 			// ...assertNoBallCylinderParts(block),
+			...assertUsePartColor(block),
 			...assertCollisionGroup(block),
 			...assertNoRepeatedPartNames(block),
 		];
