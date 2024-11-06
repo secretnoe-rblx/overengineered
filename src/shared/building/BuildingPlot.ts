@@ -89,16 +89,17 @@ export class BuildingPlot extends ReadonlyPlot {
 			BlockManager.manager.config.set(model, data.config);
 		}
 
+		BlockManager.manager.scale.set(model, data.scale);
 		BlockManager.manager.uuid.set(model, uuid);
 		model.Name = uuid;
 
-		if (data.scale) {
-			SharedBuilding.scale(model, block.model, data.scale);
-			BlockManager.manager.scale.set(model, data.scale);
-		}
-
 		SharedBuilding.paint([model], data.color, data.material, true);
 		model.Parent = this.instance;
+
+		// scaling has to be updated after parenting so the weld offset is updated
+		if (data.scale) {
+			SharedBuilding.scale(model, block.model, data.scale);
+		}
 
 		this._blockPlaced.Fire(model);
 		return { success: true, model: model };
