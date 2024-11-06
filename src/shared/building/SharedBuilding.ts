@@ -47,7 +47,9 @@ export namespace SharedBuilding {
 				const name = origChild.Name;
 				const child = instance.WaitForChild(name);
 
-				if (child.IsA("BasePart") && origChild.IsA("BasePart")) {
+				if (child.IsA("Attachment") && origChild.IsA("Attachment")) {
+					child.Position = origChild.Position.mul(scale);
+				} else if (child.IsA("BasePart") && origChild.IsA("BasePart")) {
 					child.Size = origChild.Size.mul(origChild.CFrame.Rotation.Inverse().mul(scale).Abs());
 
 					const offset = origModelCenter.ToObjectSpace(origChild.CFrame);
