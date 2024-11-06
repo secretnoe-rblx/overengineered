@@ -75,10 +75,7 @@ export class PlotWelder extends Component {
 				const child = instance.WaitForChild(name);
 
 				if (child.IsA("BasePart") && origChild.IsA("BasePart")) {
-					const origSizeMul = origChild.Size.apply((value) => (value < 0.3 ? 0 : value));
-					const origSizeAdd = origChild.Size.apply((value) => (value < 0.3 ? value : 0));
-
-					child.Size = origSizeMul.mul(origChild.CFrame.Rotation.Inverse().mul(scale).Abs()).add(origSizeAdd);
+					child.Size = origChild.Size.mul(origChild.CFrame.Rotation.Inverse().mul(scale).Abs());
 
 					const offset = origModelCenter.ToObjectSpace(origChild.CFrame);
 					child.Position = blockCenter.ToWorldSpace(new CFrame(offset.Position.mul(scale))).Position;
