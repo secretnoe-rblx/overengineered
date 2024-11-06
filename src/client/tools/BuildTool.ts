@@ -325,42 +325,15 @@ namespace Scene {
 				),
 			);
 
-			/*const settings = this.add(new Dropdown(gui.Settings));
-			this.event.subscribeObservable(
-				settings.isOpen,
-				(open) => {
-					settings.transform((tr) =>
-						tr.transform("BackgroundTransparency", open ? 0 : 0.8, {
-							...TransformService.commonProps.quadOut02,
-							duration: 0.1,
-						}),
-					);
-				},
-				true,
-			);
-			class Settings extends Control<BuildToolSceneDefinition["Settings"]["Content"]> {
-				constructor(gui: BuildToolSceneDefinition["Settings"]["Content"]) {
-					super(gui);
-
-					const toggleTemplate = this.asTemplate(gui.ToggleTemplate, true);
-
-					const gridc = this.add(new Control( toggleTemplate()))
-					const grid = gridc.add(new ToggleControl( gridc.instance.Control))
-
-					grid.
-				}
-			}
-			this.add(new Settings(gui.Settings.Content));*/
-
 			this.event.subscribeObservable(
 				this.blockSelector.selectedBlock,
-				(block) => {
-					this.tool.selectedBlock.set(block);
-					this.tool.blockRotation.set(CFrame.identity);
-					this.tool.blockScale.set(Vector3.one);
-				},
+				(block) => this.tool.selectedBlock.set(block),
 				true,
 			);
+			this.event.subscribeObservable(this.blockSelector.selectedBlock, () => {
+				this.tool.blockRotation.set(CFrame.identity);
+				this.tool.blockScale.set(Vector3.one);
+			});
 
 			{
 				const enable = () => {
