@@ -1,6 +1,7 @@
 import { RobloxUnit } from "engine/shared/RobloxUnit";
 import { InstanceBlockLogic as InstanceBlockLogic } from "shared/blockLogic/BlockLogic";
 import { BlockCreation } from "shared/blocks/BlockCreation";
+import { BlockManager } from "shared/building/BlockManager";
 import { RemoteEvents } from "shared/RemoteEvents";
 import type { BlockLogicFullBothDefinitions, InstanceBlockLogicArgs } from "shared/blockLogic/BlockLogic";
 import type { BlockBuildersWithoutIdAndDefaults } from "shared/blocks/Block";
@@ -142,6 +143,7 @@ class Logic extends InstanceBlockLogic<typeof servoDefinition, ServoMotorModel> 
 				(this.hingeConstraint.ServoMaxTorque = RobloxUnit.RowtonStuds_To_NewtonMeters(max_torque * 1_000_000)),
 		);
 
+		const scale = BlockManager.manager.scale.get(this.instance) ?? Vector3.one;
 		this.onTicc(() => {
 			const base = this.instance.FindFirstChild("Base") as BasePart | undefined;
 			const attach = this.instance.FindFirstChild("Attach") as BasePart | undefined;
@@ -150,7 +152,7 @@ class Logic extends InstanceBlockLogic<typeof servoDefinition, ServoMotorModel> 
 				return;
 			}
 
-			if (attach.Position.sub(base.Position).Magnitude > 3) {
+			if (attach.Position.sub(base.Position).Magnitude > 3 * scale.Y) {
 				RemoteEvents.ImpactBreak.send([base]);
 				this.disable();
 			}
