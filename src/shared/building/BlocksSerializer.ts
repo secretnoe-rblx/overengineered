@@ -1545,7 +1545,7 @@ const v31: UpgradableBlocksSerializer<SerializedBlocks<SerializedBlockV4>, typeo
 			) {
 				return {
 					...block,
-					location: block.location.mul(CFrame.Angles(0, 0, -90)),
+					location: block.location.mul(CFrame.Angles(0, 0, math.rad(-90))),
 				};
 			}
 			if (
@@ -1556,7 +1556,7 @@ const v31: UpgradableBlocksSerializer<SerializedBlocks<SerializedBlockV4>, typeo
 			) {
 				return {
 					...block,
-					location: block.location.mul(CFrame.Angles(0, -90, 0)),
+					location: block.location.mul(CFrame.Angles(0, math.rad(-90), 0)),
 				};
 			}
 
