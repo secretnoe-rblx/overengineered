@@ -608,7 +608,7 @@ namespace SinglePlaceController {
 
 			// filter out the blocks on the same location
 			blocks = new Map(
-				blocks.map((b) => [VectorUtils.roundVectorToNearestHalf(b.location.Position), b] as const),
+				blocks.map((b) => [b.location.Position.apply((v) => MathUtils.round(v, 0.001)), b] as const),
 			).map((_, b) => b);
 
 			const response = await ClientBuilding.placeOperation.execute({ plot: this.plot.get(), blocks });
@@ -888,7 +888,7 @@ namespace MultiPlaceController {
 			]);*/
 			// filter out the blocks on the same location
 			locations = new Map(
-				locations.map((b) => [VectorUtils.roundVectorToNearestHalf(b.pos.Position), b] as const),
+				locations.map((b) => [b.pos.Position.apply((v) => MathUtils.round(v, 0.001)), b] as const),
 			).map((_, b) => b);
 
 			const response = await ClientBuilding.placeOperation.execute({
