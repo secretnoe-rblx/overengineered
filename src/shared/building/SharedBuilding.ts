@@ -34,6 +34,10 @@ export namespace SharedBuilding {
 		return result;
 	}
 
+	export function calculateScale(block: Model, original: Model): Vector3 {
+		return block.PrimaryPart!.Size.div(original.PrimaryPart!.Size);
+	}
+
 	export function scale(block: BlockModel, originalModel: BlockModel, scale: Vector3 | undefined) {
 		scale ??= Vector3.one;
 

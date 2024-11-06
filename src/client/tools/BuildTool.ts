@@ -29,6 +29,7 @@ import { MathUtils } from "engine/shared/fixes/MathUtils";
 import { Marketplace } from "engine/shared/Marketplace";
 import { BlockManager } from "shared/building/BlockManager";
 import { BuildingManager } from "shared/building/BuildingManager";
+import { SharedBuilding } from "shared/building/SharedBuilding";
 import { Colors } from "shared/Colors";
 import { GameDefinitions } from "shared/data/GameDefinitions";
 import { VectorUtils } from "shared/utils/VectorUtils";
@@ -45,9 +46,10 @@ const mouse = Players.LocalPlayer.GetMouse();
 
 type ModelOnlyBlock = Pick<Block, "model">;
 
-const createBlockGhost = (block: ModelOnlyBlock): Model => {
+const createBlockGhost = (block: ModelOnlyBlock, scale: Vector3): BlockModel => {
 	const model = block.model.Clone();
 	BlockGhoster.ghostModel(model);
+	SharedBuilding.scale(model, block.model, scale);
 
 	// build tool 1 part coloring via transparency instead of highlighter
 	// PartUtils.switchDescendantsMaterial(this.previewBlock, this.selectedMaterial.get());
@@ -59,6 +61,7 @@ const createBlockGhost = (block: ModelOnlyBlock): Model => {
 const getMouseTargetBlockPositionV2 = (
 	block: ModelOnlyBlock,
 	rotation: CFrame,
+	scale: Vector3,
 	gridEnabled: boolean,
 	step: number,
 	info?: [target: BasePart, hit: CFrame, surface: Enum.NormalId],
@@ -72,7 +75,7 @@ const getMouseTargetBlockPositionV2 = (
 			return pos + offset;
 		};
 
-		const size = AABB.fromModel(selectedBlock.model, rotation).getSize();
+		const size = AABB.fromModel(selectedBlock.model, rotation).getSize().mul(scale);
 
 		return new Vector3(
 			normal.X === 0 ? from(pos.X, size.X) : pos.X,
@@ -103,7 +106,7 @@ const getMouseTargetBlockPositionV2 = (
 		return pos.sub(offset);
 	};
 	const addBlockSize = (selectedBlock: ModelOnlyBlock, normal: Vector3, pos: Vector3) => {
-		return pos.add(AABB.fromModel(selectedBlock.model, rotation).getSize().mul(normal).div(2));
+		return pos.add(AABB.fromModel(selectedBlock.model, rotation).getSize().mul(scale).mul(normal).div(2));
 	};
 
 	const target = info?.[0] ?? mouse.Target;
@@ -354,6 +357,7 @@ namespace Scene {
 				(block) => {
 					this.tool.selectedBlock.set(block);
 					this.tool.blockRotation.set(CFrame.identity);
+					this.tool.blockScale.set(Vector3.one);
 				},
 				true,
 			);
@@ -453,8 +457,9 @@ namespace SinglePlaceController {
 	abstract class Controller extends ClientComponent implements IController {
 		protected readonly state: BuildTool;
 
-		private mainGhost?: Model;
+		private mainGhost?: BlockModel;
 		protected readonly blockRotation;
+		protected readonly blockScale;
 		protected readonly selectedBlock;
 		protected readonly selectedColor;
 		protected readonly selectedMaterial;
@@ -472,6 +477,7 @@ namespace SinglePlaceController {
 			this.mirrorMode = state.mirrorMode.asReadonly();
 			this.plot = state.targetPlot;
 			this.blockRotation = state.blockRotation;
+			this.blockScale = state.blockScale;
 
 			this.blockMirrorer = this.parent(di.resolveForeignClass(BlockMirrorer));
 
@@ -510,7 +516,10 @@ namespace SinglePlaceController {
 			const mainPosition = this.mainGhost?.GetPivot().Position;
 			if (!mainPosition) return;
 
-			this.mainGhost?.PivotTo(this.blockRotation.get().add(mainPosition));
+			if (this.mainGhost) {
+				this.mainGhost.PivotTo(this.blockRotation.get().add(mainPosition));
+				SharedBuilding.scale(this.mainGhost, this.selectedBlock.get()!.model, this.blockScale.get());
+			}
 			this.blockMirrorer.updatePositions(this.plot.get().instance, this.mirrorMode.get());
 		}
 
@@ -531,33 +540,22 @@ namespace SinglePlaceController {
 				mainPosition = getMouseTargetBlockPosition(
 					selectedBlock,
 					this.blockRotation.get(),
+					this.blockScale.get(),
 					this.state.mode.gridEnabled.get(),
 					this.state.mode.moveGrid.get(),
 				);
 			}
 			if (!mainPosition) return;
 
-			this.mainGhost ??= createBlockGhost(selectedBlock);
-			this.blockMirrorer.blocks.set([{ id: selectedBlock.id, model: this.mainGhost }]);
+			this.mainGhost ??= createBlockGhost(selectedBlock, this.blockScale.get());
+			this.blockMirrorer.blocks.set([
+				{
+					id: selectedBlock.id,
+					model: this.mainGhost,
+					scale: this.blockScale.get(),
+				},
+			]);
 			this.mainGhost.PivotTo(this.blockRotation.get().add(mainPosition));
-
-			const prettyCFrame = (cframe: CFrame) => {
-				const round = (vec: Vector3) => new Vector3(math.round(vec.X), math.round(vec.Y), math.round(vec.Z));
-				const [, , , XX, XY, XZ, YX, YY, YZ, ZX, ZY, ZZ] = cframe.GetComponents();
-				return (
-					[XX, XY, XZ, YX, YY, YZ, ZX, ZY, ZZ]
-						.map(math.round)
-						.map(tostring)
-						.map((n) => (n.size() === 2 ? n : `+${n}`))
-						.join() +
-					" | " +
-					round(cframe.RightVector) +
-					" / " +
-					round(cframe.UpVector) +
-					" / " +
-					round(cframe.LookVector.mul(-1))
-				);
-			};
 
 			const plot = this.plot.get();
 			const getAreAllGhostsInsidePlot = () =>
@@ -628,10 +626,10 @@ namespace SinglePlaceController {
 					id: g.id,
 					color: this.selectedColor.get(),
 					material: this.selectedMaterial.get(),
+					scale: this.blockScale.get(),
 					location: g.pos,
 					uuid: undefined,
 					config: undefined,
-					scale: undefined,
 				}),
 			);
 
@@ -700,6 +698,7 @@ namespace SinglePlaceController {
 			const mainPosition = getMouseTargetBlockPosition(
 				selectedBlock,
 				this.blockRotation.get(),
+				this.blockScale.get(),
 				this.state.mode.gridEnabled.get(),
 				this.state.mode.moveGrid.get(),
 				this.prevTarget,
@@ -742,7 +741,7 @@ namespace SinglePlaceController {
 namespace MultiPlaceController {
 	export abstract class Base extends ClientComponent implements IController {
 		private readonly possibleFillRotationAxis = [Vector3.xAxis, Vector3.yAxis, Vector3.zAxis] as const;
-		private readonly fillLimit = 32;
+		private readonly blocksFillLimit = 16;
 		private readonly drawnGhostsMap = new Map<Vector3, Model>();
 		private readonly blockMirrorer;
 		private readonly floatingText;
@@ -761,6 +760,7 @@ namespace MultiPlaceController {
 			private readonly mirrorModes: MirrorMode,
 			private readonly plot: SharedPlot,
 			private readonly blockRotation: CFrame,
+			private readonly blockScale: Vector3,
 			di: DIContainer,
 		) {
 			super();
@@ -809,7 +809,9 @@ namespace MultiPlaceController {
 
 			this.oldPositions = positionsData;
 
-			this.blockMirrorer.blocks.set(this.drawnGhostsMap.map((_, m) => ({ id: this.selectedBlock.id, model: m })));
+			this.blockMirrorer.blocks.set(
+				this.drawnGhostsMap.map((_, m) => ({ id: this.selectedBlock.id, model: m, scale: this.blockScale })),
+			);
 			this.blockMirrorer.updatePositions(this.plot.instance, this.mirrorModes);
 		}
 
@@ -822,7 +824,7 @@ namespace MultiPlaceController {
 
 			for (const pos of positions) {
 				const ghostFrame = new CFrame(pos).mul(rotation);
-				const ghost = createBlockGhost(this.selectedBlock);
+				const ghost = createBlockGhost(this.selectedBlock, this.blockScale);
 				ghost.PivotTo(ghostFrame);
 				allGhosts.push(ghost);
 			}
@@ -836,21 +838,24 @@ namespace MultiPlaceController {
 			}
 
 			const aabb = AABB.fromModel(part);
-			const blockSize = aabb.withCenter(this.blockRotation.Rotation.add(aabb.getCenter())).getSize();
+			const baseBlockSize = BB.from(part).originalSize;
+			const blockSize = aabb
+				.withCenter(this.blockRotation.Rotation.add(aabb.getCenter()))
+				.getSize()
+				.mul(this.blockScale);
 			const diff = to.sub(from);
-			const toX = math.min(math.abs(diff.X), this.fillLimit);
-			const toY = math.min(math.abs(diff.Y), this.fillLimit);
-			const toZ = math.min(math.abs(diff.Z), this.fillLimit);
+
+			const trg = diff.Abs().Min(baseBlockSize.mul(this.blockScale).mul(this.blocksFillLimit).apply(math.floor));
 			const result: Vector3[] = [];
 
-			const xs = math.floor(toX / blockSize.X) + 1;
-			const ys = math.floor(toY / blockSize.Y) + 1;
-			const zs = math.floor(toZ / blockSize.Z) + 1;
+			const xs = math.floor(trg.X / blockSize.X) + 1;
+			const ys = math.floor(trg.Y / blockSize.Y) + 1;
+			const zs = math.floor(trg.Z / blockSize.Z) + 1;
 			this.floatingText.text.set(`${xs}, ${ys}, ${zs}`);
 
-			for (let x = 0; x <= toX; x += blockSize.X) {
-				for (let y = 0; y <= toY; y += blockSize.Y) {
-					for (let z = 0; z <= toZ; z += blockSize.Z) {
+			for (let x = 0; x <= trg.X; x += blockSize.X) {
+				for (let y = 0; y <= trg.Y; y += blockSize.Y) {
+					for (let z = 0; z <= trg.Z; z += blockSize.Z) {
 						const posX = math.sign(diff.X) * x + from.X;
 						const posY = math.sign(diff.Y) * y + from.Y;
 						const posZ = math.sign(diff.Z) * z + from.Z;
@@ -920,10 +925,10 @@ namespace MultiPlaceController {
 						id: loc.id,
 						color: this.selectedColor,
 						material: this.selectedMaterial,
+						scale: this.blockScale,
 						location: loc.pos,
 						uuid: undefined,
 						config: undefined,
-						scale: undefined,
 					}),
 				),
 			});
@@ -942,9 +947,20 @@ namespace MultiPlaceController {
 			mirrorModes: MirrorMode,
 			plot: SharedPlot,
 			blockRotation: CFrame,
+			blockScale: Vector3,
 			@inject di: DIContainer,
 		) {
-			super(pressPosition, selectedBlock, selectedColor, selectedMaterial, mirrorModes, plot, blockRotation, di);
+			super(
+				pressPosition,
+				selectedBlock,
+				selectedColor,
+				selectedMaterial,
+				mirrorModes,
+				plot,
+				blockRotation,
+				blockScale,
+				di,
+			);
 
 			this.event.subInput((ih) => {
 				const buttonUnpress = async () => {
@@ -977,9 +993,20 @@ namespace MultiPlaceController {
 			mirrorModes: MirrorMode,
 			plot: SharedPlot,
 			blockRotation: CFrame,
+			blockScale: Vector3,
 			@inject di: DIContainer,
 		) {
-			super(pressPosition, selectedBlock, selectedColor, selectedMaterial, mirrorModes, plot, blockRotation, di);
+			super(
+				pressPosition,
+				selectedBlock,
+				selectedColor,
+				selectedMaterial,
+				mirrorModes,
+				plot,
+				blockRotation,
+				blockScale,
+				di,
+			);
 
 			this.event.subInput((ih) => {
 				ih.onTouchTap(() => {
@@ -1063,6 +1090,7 @@ namespace MultiPlaceController {
 		const pressPosition = getMouseTargetBlockPosition(
 			selectedBlock,
 			state.blockRotation.get(),
+			state.blockScale.get(),
 			state.mode.gridEnabled.get(),
 			state.mode.moveGrid.get(),
 			prevTarget,
@@ -1078,6 +1106,7 @@ namespace MultiPlaceController {
 			state.mirrorMode.get(),
 			plot,
 			state.blockRotation.get(),
+			state.blockScale.get(),
 		] as const;
 
 		parent.set(
@@ -1098,6 +1127,7 @@ export class BuildTool extends ToolBase {
 	readonly selectedBlock = new ObservableValue<Block | undefined>(undefined);
 	readonly currentMode = new ComponentChild<IController>(this, true);
 	readonly blockRotation = new ObservableValue<CFrame>(CFrame.identity);
+	readonly blockScale = new ObservableValue<Vector3>(Vector3.one);
 	readonly controller;
 	readonly gui;
 
@@ -1183,8 +1213,10 @@ export class BuildTool extends ToolBase {
 
 		if (!target.IsDescendantOf(this.targetPlot.get().instance)) {
 			this.blockRotation.set(CFrame.identity);
+			this.blockScale.set(Vector3.one);
 		} else {
 			this.blockRotation.set(model.GetPivot().Rotation);
+			this.blockScale.set(BlockManager.manager.scale.get(model) ?? Vector3.one);
 		}
 	}
 
