@@ -6,6 +6,7 @@ import { MaterialColorEditControl } from "client/gui/buildmode/MaterialColorEdit
 import { MirrorEditorControl } from "client/gui/buildmode/MirrorEditorControl";
 import { DebugLog } from "client/gui/DebugLog";
 import { Gui } from "client/gui/Gui";
+import { ScaleEditorControl } from "client/gui/ScaleEditor";
 import { LogControl } from "client/gui/static/LogControl";
 import { ClientBuilding } from "client/modes/build/ClientBuilding";
 import { Signals } from "client/Signals";
@@ -36,6 +37,7 @@ import { VectorUtils } from "shared/utils/VectorUtils";
 import type { BlockSelectionControlDefinition } from "client/gui/buildmode/BlockSelection";
 import type { MaterialColorEditControlDefinition } from "client/gui/buildmode/MaterialColorEditControl";
 import type { MirrorEditorControlDefinition } from "client/gui/buildmode/MirrorEditorControl";
+import type { ScaleEditorControlDefinition } from "client/gui/ScaleEditor";
 import type { InputTooltips } from "client/gui/static/TooltipsControl";
 import type { BuildingMode } from "client/modes/build/BuildingMode";
 import type { SharedPlot } from "shared/building/SharedPlot";
@@ -305,6 +307,21 @@ namespace Scene {
 		constructor(gui: BuildToolSceneDefinition, tool: BuildTool) {
 			super(gui);
 			this.tool = tool;
+
+			const scaleEditorGui = Gui.getGameUI<{
+				BuildingMode: { Scale: GuiObject & { Content: ScaleEditorControlDefinition } };
+			}>().BuildingMode.Scale;
+			scaleEditorGui.Visible = false;
+			this.add(new ScaleEditorControl(scaleEditorGui.Content, tool.blockScale));
+
+			const scaleEditorBtn = this.add(
+				new ButtonControl(
+					Gui.getGameUI<{ BuildingMode: { Action: { Scale: GuiButton } } }>().BuildingMode.Action.Scale,
+					() => (scaleEditorGui.Visible = !scaleEditorGui.Visible),
+				),
+			);
+			this.onEnabledStateChange((enabled) => scaleEditorBtn.setVisible(enabled), true);
+			this.onDisable(() => (scaleEditorGui.Visible = false));
 
 			this.blockSelector = tool.di.resolveForeignClass(BlockSelectionControl, [gui.Inventory]);
 			this.blockSelector.show();
@@ -1100,7 +1117,9 @@ export class BuildTool extends ToolBase {
 	readonly selectedBlock = new ObservableValue<Block | undefined>(undefined);
 	readonly currentMode = new ComponentChild<IController>(this, true);
 	readonly blockRotation = new ObservableValue<CFrame>(CFrame.identity);
-	readonly blockScale = new ObservableValue<Vector3>(Vector3.one);
+	readonly blockScale = new ObservableValue<Vector3>(Vector3.one, (v) =>
+		v.Max(new Vector3(1 / 16, 1 / 16, 1 / 16)).Min(new Vector3(8, 8, 8)),
+	);
 	readonly controller;
 	readonly gui;
 
