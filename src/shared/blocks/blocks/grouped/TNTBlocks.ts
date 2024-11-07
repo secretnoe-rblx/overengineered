@@ -97,7 +97,11 @@ class Logic extends InstanceBlockLogic<typeof definition> {
 
 		const impactCache = this.initializeInputCache("impact");
 
-		this.event.subscribe(this.instance.PrimaryPart!.Touched, (part) => {
+		const part = (this.instance.FindFirstChild("Part") ??
+			this.instance.FindFirstChild("Union") ??
+			this.instance.PrimaryPart!) as BasePart;
+
+		this.event.subscribe(part.Touched, (part) => {
 			if (!impactCache.tryGet()) return;
 			if (radius === undefined || pressure === undefined || flammable === undefined) {
 				return;
@@ -106,7 +110,7 @@ class Logic extends InstanceBlockLogic<typeof definition> {
 				return;
 			}
 
-			const velocity1 = this.instance.PrimaryPart!.AssemblyLinearVelocity.Magnitude;
+			const velocity1 = part.AssemblyLinearVelocity.Magnitude;
 			const velocity2 = part.AssemblyLinearVelocity.Magnitude;
 
 			if (velocity1 > (velocity2 + 1) * 10) {
@@ -133,6 +137,12 @@ const list: BlockBuildersWithoutIdAndDefaults = {
 	sphericaltnt: {
 		displayName: "Spherical TNT",
 		description: "Catch this anarchid-man!",
+		limit: 100,
+		logic,
+	},
+	halfsphericaltnt: {
+		displayName: "Half Spherical TNT",
+		description: "Had to cut corners. Unfortunately, sphere doesn't have corners.. So we sliced it in half!",
 		limit: 100,
 		logic,
 	},

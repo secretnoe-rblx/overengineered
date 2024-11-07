@@ -43,6 +43,9 @@ const definition = {
 				vector3: {
 					config: new Vector3(0, 0, 1),
 				},
+				color: {
+					config: new Color3(0, 0, 1),
+				},
 			},
 			configHidden: true,
 		},
@@ -89,9 +92,13 @@ class Logic extends InstanceBlockLogic<typeof definition> {
 		this.on(({ posx, posy, color, update }) => {
 			if (!update) return;
 
+			if (typeIs(color, "Vector3")) {
+				color = Color3.fromRGB(color.X, color.Y, color.Z);
+			}
+
 			Logic.events.update.send({
 				block: block.instance,
-				color: Color3.fromRGB(color.X, color.Y, color.Z),
+				color,
 				frame: display[posx][posy],
 			});
 		});

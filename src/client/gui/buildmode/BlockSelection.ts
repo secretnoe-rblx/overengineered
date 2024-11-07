@@ -1,9 +1,9 @@
 import { ContentProvider, GuiService, Players } from "@rbxts/services";
 import { BlockPreviewControl } from "client/gui/buildmode/BlockPreviewControl";
 import { BlockPipetteButton } from "client/gui/controls/BlockPipetteButton";
-import { TextButtonControl } from "client/gui/controls/Button";
-import { Interface } from "client/gui/Interface";
 import { GuiAnimator } from "client/gui/GuiAnimator";
+import { Interface } from "client/gui/Interface";
+import { TextButtonControl } from "engine/client/gui/Button";
 import { Control } from "engine/client/gui/Control";
 import { ObservableValue } from "engine/shared/event/ObservableValue";
 import { Localization } from "engine/shared/Localization";
@@ -400,19 +400,25 @@ export class BlockSelectionControl extends Control<BlockSelectionControlDefiniti
 				processBlock(block);
 			}
 		} else {
-			const similar: Block[] = [];
+			const similar1: Block[] = [];
+			const similar2: Block[] = [];
 
 			for (const block of this.blockList.sorted) {
 				const cache = this.searchCache[block.id];
 
 				if (cache.exact.find((e) => e === lowerSearch) !== undefined) {
 					processBlock(block);
-				} else if (cache.fuzzy.any((f) => f.find(lowerSearch)[0] !== undefined)) {
-					similar.push(block);
+				} else if (cache.fuzzy.any((f) => f.startsWith(lowerSearch))) {
+					similar1.push(block);
+				} else if (cache.fuzzy.any((f) => f.contains(lowerSearch))) {
+					similar2.push(block);
 				}
 			}
 
-			for (const block of similar) {
+			for (const block of similar1) {
+				processBlock(block);
+			}
+			for (const block of similar2) {
 				processBlock(block);
 			}
 		}

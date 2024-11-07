@@ -1,22 +1,22 @@
 import { ColorChooser } from "client/gui/ColorChooser";
-import { TextButtonControl } from "client/gui/controls/Button";
 import { DropdownList } from "client/gui/controls/DropdownList";
 import { KeyChooserControl } from "client/gui/controls/KeyChooserControl";
 import { NumberTextBoxControl } from "client/gui/controls/NumberTextBoxControl";
 import { SliderControl } from "client/gui/controls/SliderControl";
 import { ToggleControl } from "client/gui/controls/ToggleControl";
 import { Interface } from "client/gui/Interface";
+import { TextButtonControl } from "engine/client/gui/Button";
 import { Control } from "engine/client/gui/Control";
 import { Signal } from "engine/shared/event/Signal";
 import { Objects } from "engine/shared/fixes/Objects";
 import type { ColorChooserDefinition } from "client/gui/ColorChooser";
-import type { TextButtonDefinition } from "client/gui/controls/Button";
 import type { DropdownListDefinition } from "client/gui/controls/DropdownList";
 import type { KeyChooserControlDefinition } from "client/gui/controls/KeyChooserControl";
 import type { NumberTextBoxControlDefinition } from "client/gui/controls/NumberTextBoxControl";
 import type { SliderControlDefinition } from "client/gui/controls/SliderControl";
 import type { ToggleControlDefinition } from "client/gui/controls/ToggleControl";
 import type { TutorialsService } from "client/tutorial/TutorialService";
+import type { TextButtonDefinition } from "engine/client/gui/Button";
 import type { ReadonlyArgsSignal } from "engine/shared/event/Signal";
 
 type ConfigPartDefinition<T extends GuiObject> = GuiObject & {

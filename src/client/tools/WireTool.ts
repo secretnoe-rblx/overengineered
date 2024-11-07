@@ -1,5 +1,4 @@
 import { GamepadService, GuiService, Players, ReplicatedStorage, RunService, Workspace } from "@rbxts/services";
-import { ButtonControl } from "client/gui/controls/Button";
 import { GuiAnimator } from "client/gui/GuiAnimator";
 import { Interface } from "client/gui/Interface";
 import { LogControl } from "client/gui/static/LogControl";
@@ -7,6 +6,7 @@ import { ClientBuilding } from "client/modes/build/ClientBuilding";
 import { ToolBase } from "client/tools/ToolBase";
 import { ClientComponent } from "engine/client/component/ClientComponent";
 import { ClientInstanceComponent } from "engine/client/component/ClientInstanceComponent";
+import { ButtonControl } from "engine/client/gui/Button";
 import { Control } from "engine/client/gui/Control";
 import { InputController } from "engine/client/InputController";
 import { Component } from "engine/shared/component/Component";
@@ -16,6 +16,7 @@ import { Element } from "engine/shared/Element";
 import { ObservableValue } from "engine/shared/event/ObservableValue";
 import { Instances } from "engine/shared/fixes/Instances";
 import { BlockWireManager } from "shared/blockLogic/BlockWireManager";
+import { BlockManager } from "shared/building/BlockManager";
 import { Colors } from "shared/Colors";
 import type { InputTooltips } from "client/gui/static/TooltipsControl";
 import type { ActionController } from "client/modes/build/ActionController";
@@ -88,12 +89,19 @@ namespace Markers {
 				new Vector3(0, 0, 0),
 			];
 		}
-		static createInstance(origin: BasePart, offset: Vector3 | number | "center"): MarkerComponentDefinition {
+		static createInstance(
+			origin: BasePart,
+			offset: Vector3 | number | "center",
+			scale: Vector3 | undefined,
+		): MarkerComponentDefinition {
 			if (typeIs(offset, "number")) {
 				offset = this.getPartMarkerPositions(origin)[offset];
 			}
 			if (offset === "center") {
 				offset = Vector3.zero;
+			}
+			if (scale) {
+				offset = offset.mul(scale);
 			}
 
 			const markerInstance = ReplicatedStorage.Assets.Wires.WireMarker.Clone();
@@ -773,6 +781,7 @@ export class WireTool extends ToolBase {
 				const markerInstance = Markers.Marker.createInstance(
 					blockInstance.PrimaryPart!,
 					markerpos !== undefined ? markerpos : size === 1 ? "center" : ai++,
+					BlockManager.manager.scale.get(blockInstance),
 				);
 
 				const component =

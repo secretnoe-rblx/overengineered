@@ -1,11 +1,11 @@
 import { GuiService } from "@rbxts/services";
-import { ButtonControl, TextButtonControl } from "client/gui/controls/Button";
-import { TextBoxControl } from "client/gui/controls/TextBoxControl";
 import { Interface } from "client/gui/Interface";
 import { Popup } from "client/gui/Popup";
+import { ButtonControl, TextButtonControl } from "engine/client/gui/Button";
 import { Control } from "engine/client/gui/Control";
+import { TextBoxControl } from "engine/client/gui/TextBoxControl";
 import { Signal } from "engine/shared/event/Signal";
-import type { ButtonDefinition, TextButtonDefinition } from "client/gui/controls/Button";
+import type { ButtonDefinition, TextButtonDefinition } from "engine/client/gui/Button";
 
 export type SelectButtonPopupDefinition = GuiObject & {
 	readonly Content: {

@@ -1,8 +1,8 @@
-import { TextButtonControl } from "client/gui/controls/Button";
-import { TextBoxControl } from "client/gui/controls/TextBoxControl";
-import { Interface } from "client/gui/Interface";
 import { GuiAnimator } from "client/gui/GuiAnimator";
+import { Interface } from "client/gui/Interface";
+import { TextButtonControl } from "engine/client/gui/Button";
 import { Control } from "engine/client/gui/Control";
+import { TextBoxControl } from "engine/client/gui/TextBoxControl";
 import { Element } from "engine/shared/Element";
 import { Colors } from "shared/Colors";
 import { Remotes } from "shared/Remotes";

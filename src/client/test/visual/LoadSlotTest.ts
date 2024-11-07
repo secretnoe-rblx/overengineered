@@ -1,5 +1,5 @@
-import { TextButtonControl } from "client/gui/controls/Button";
 import { NumberTextBoxControl } from "client/gui/controls/NumberTextBoxControl";
+import { TextButtonControl } from "engine/client/gui/Button";
 import { Control } from "engine/client/gui/Control";
 import { Element } from "engine/shared/Element";
 import { CustomRemotes } from "shared/Remotes";

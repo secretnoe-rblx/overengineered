@@ -67,7 +67,9 @@ class ToolInputController extends ClientComponent {
 @injectable
 export class ToolController extends ClientComponent {
 	readonly selectedTool = new ObservableValue<ToolBase | undefined>(undefined, (value) => {
-		if (value && this.enabledTools.isDisabled(value)) {
+		if (!value) return value;
+
+		if (this.enabledTools.isDisabled(value)) {
 			return undefined;
 		}
 

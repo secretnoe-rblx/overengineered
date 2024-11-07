@@ -59,6 +59,25 @@ export class BuildingMode extends PlayMode {
 			di.registerSingletonFunc((di) => di.resolve<ToolController>().allTools.wireTool);
 		});
 
+		let mg = this.moveGrid.get();
+		let rg = this.moveGrid.get();
+		this.event.subInput((ih) => {
+			ih.onKeyDown("LeftControl", () => {
+				this.gridEnabled.set(false);
+
+				mg = this.moveGrid.get();
+				this.moveGrid.set(0);
+
+				rg = this.rotateGrid.get();
+				this.rotateGrid.set(0);
+			});
+			ih.onKeyUp("LeftControl", () => {
+				this.gridEnabled.set(true);
+				this.moveGrid.set(mg);
+				this.rotateGrid.set(rg);
+			});
+		});
+
 		this.event.subscribeObservable(
 			LoadingController.isLoading,
 			(loading) => {
@@ -112,8 +131,8 @@ export class BuildingMode extends PlayMode {
 			task.wait();
 		}
 
-		const pos = this.targetPlot.get().getSpawnPosition();
-		rootPart.CFrame = new CFrame(pos);
+		const pos = this.targetPlot.get().getSpawnCFrame();
+		rootPart.CFrame = pos;
 		rootPart.AssemblyLinearVelocity = Vector3.zero;
 		rootPart.AssemblyAngularVelocity = Vector3.zero;
 	}

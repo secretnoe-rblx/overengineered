@@ -25,6 +25,7 @@ declare global {
 	type EditBlockRequest = {
 		readonly instance: BlockModel;
 		readonly position: CFrame | undefined;
+		readonly scale: Vector3 | undefined;
 	};
 	type EditBlocksRequest = {
 		readonly plot: PlotModel;

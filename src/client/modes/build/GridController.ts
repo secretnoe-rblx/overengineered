@@ -1,4 +1,4 @@
-import { ButtonControl } from "client/gui/controls/Button";
+import { ButtonControl } from "engine/client/gui/Button";
 import { FloatingWindow } from "client/gui/FloatingWindow";
 import { GridEditorControl } from "client/gui/GridEditor";
 import { Interface } from "client/gui/Interface";

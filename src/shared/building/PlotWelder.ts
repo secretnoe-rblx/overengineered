@@ -61,15 +61,46 @@ export class PlotWelder extends Component {
 		this.collidersParent.FindFirstChild(BlockManager.manager.uuid.get(block))?.Destroy();
 	}
 
+	private scaleWeldColliders(block: Model, originalModel: Model, scale: Vector3 | undefined) {
+		scale ??= Vector3.one;
+
+		const origModelCenter = originalModel.GetPivot();
+		const blockCenter = block.GetPivot();
+
+		const update = (instance: Instance, origInstance: Instance) => {
+			// assuming no duplicate instance names on a single layer
+
+			for (const origChild of origInstance.GetChildren()) {
+				const name = origChild.Name;
+				const child = instance.WaitForChild(name);
+
+				if (child.IsA("BasePart") && origChild.IsA("BasePart")) {
+					child.Size = origChild.Size.mul(origChild.CFrame.Rotation.Inverse().mul(scale).Abs());
+
+					const offset = origModelCenter.ToObjectSpace(origChild.CFrame);
+					child.Position = blockCenter.ToWorldSpace(new CFrame(offset.Position.mul(scale))).Position;
+				}
+
+				update(child, origChild);
+			}
+		};
+
+		update(block, originalModel);
+	}
+
 	weldOnPlot(block: BlockModel) {
 		const id = BlockManager.manager.id.get(block);
 		if (!id) return;
 
-		const collider = this.blockList.blocks[id]?.weldRegions?.Clone();
-		if (!collider) return;
+		const originalCollider = this.blockList.blocks[id]?.weldRegions;
+		if (!originalCollider) return;
+
+		const collider = originalCollider.Clone();
 
 		collider.Name = BlockManager.manager.uuid.get(block);
 		collider.PivotTo(block.GetPivot());
+		this.scaleWeldColliders(collider, originalCollider, BlockManager.manager.scale.get(block));
+
 		collider.Parent = this.collidersParent;
 
 		this.weld(collider);
@@ -121,6 +152,12 @@ export class PlotWelder extends Component {
 
 		this.unweldFromOtherBlocks(block);
 		child.PivotTo(newpivot);
+		this.scaleWeldColliders(
+			child,
+			this.blockList.blocks[BlockManager.manager.id.get(block)]!.weldRegions,
+			BlockManager.manager.scale.get(block),
+		);
+
 		this.weld(child);
 	}
 

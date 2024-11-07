@@ -28,17 +28,17 @@ copyScripts(game.GetService("StarterPlayer").WaitForChild("StarterPlayerScripts"
 copyScripts(game.GetService("ReplicatedStorage"), script.Parent!);
 
 import { StarterGui } from "@rbxts/services";
-import { ButtonControl, TextButtonControl } from "client/gui/controls/Button";
 import { LabelControl } from "client/gui/controls/LabelControl";
 import { NumberTextBoxControl } from "client/gui/controls/NumberTextBoxControl";
-import { TextBoxControl } from "client/gui/controls/TextBoxControl";
+import { ButtonControl, TextButtonControl } from "engine/client/gui/Button";
 import { Control } from "engine/client/gui/Control";
+import { TextBoxControl } from "engine/client/gui/TextBoxControl";
 import { ContainerComponent } from "engine/shared/component/ContainerComponent";
 import { Easing } from "engine/shared/component/Easing";
 import { EventHandler } from "engine/shared/event/EventHandler";
 import { ObservableValue } from "engine/shared/event/ObservableValue";
 import { ArgsSignal } from "engine/shared/event/Signal";
-import type { TextButtonDefinition } from "client/gui/controls/Button";
+import type { TextButtonDefinition } from "engine/client/gui/Button";
 import type { ComponentEvents } from "engine/shared/component/ComponentEvents";
 import type { Easable } from "engine/shared/component/Easing";
 

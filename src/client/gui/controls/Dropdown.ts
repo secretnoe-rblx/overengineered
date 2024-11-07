@@ -1,4 +1,4 @@
-import { ButtonControl } from "client/gui/controls/Button";
+import { ButtonControl } from "engine/client/gui/Button";
 import { Control } from "engine/client/gui/Control";
 import { OldTransformService } from "engine/shared/component/OldTransformService";
 import { ObservableValue } from "engine/shared/event/ObservableValue";

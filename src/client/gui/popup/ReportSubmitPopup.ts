@@ -1,13 +1,13 @@
 import { Base64 } from "@rbxts/crypto";
 import { GuiService, Players } from "@rbxts/services";
 import { SoundController } from "client/controller/SoundController";
-import { ButtonControl } from "client/gui/controls/Button";
 import { Interface } from "client/gui/Interface";
 import { Popup } from "client/gui/Popup";
+import { ButtonControl } from "engine/client/gui/Button";
 import { JSON } from "engine/shared/fixes/Json";
 import { GameDefinitions } from "shared/data/GameDefinitions";
-import type { ButtonDefinition } from "client/gui/controls/Button";
 import type { PlayerDataStorage } from "client/PlayerDataStorage";
+import type { ButtonDefinition } from "engine/client/gui/Button";
 import type { SharedPlot } from "shared/building/SharedPlot";
 
 const processDataForJsonSerializationForSubmit = (data: unknown): unknown => {

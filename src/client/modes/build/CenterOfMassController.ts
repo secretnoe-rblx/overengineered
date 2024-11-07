@@ -1,7 +1,7 @@
 import { ReplicatedStorage, Workspace } from "@rbxts/services";
-import { ButtonControl } from "client/gui/controls/Button";
 import { Interface } from "client/gui/Interface";
 import { ClientComponent } from "engine/client/component/ClientComponent";
+import { ButtonControl } from "engine/client/gui/Button";
 import { Component } from "engine/shared/component/Component";
 import { ComponentChild } from "engine/shared/component/ComponentChild";
 import { ComponentInstance } from "engine/shared/component/ComponentInstance";
@@ -34,7 +34,7 @@ export class CenterOfMassVisualizer extends Component {
 		super();
 
 		this.viewportFrame = Element.create("ViewportFrame", {
-			Name: "WireViewportFrame",
+			Name: "CenterOfMass",
 			Size: UDim2.fromScale(1, 1),
 			CurrentCamera: Workspace.CurrentCamera,
 			Transparency: 1,

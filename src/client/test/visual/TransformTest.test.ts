@@ -1,4 +1,4 @@
-import { ButtonControl } from "client/gui/controls/Button";
+import { ButtonControl } from "engine/client/gui/Button";
 import { Control } from "engine/client/gui/Control";
 import { Transforms } from "engine/shared/component/Transforms";
 import { Element } from "engine/shared/Element";

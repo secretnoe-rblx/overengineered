@@ -1,10 +1,10 @@
-import { TextButtonControl } from "client/gui/controls/Button";
+import { TextButtonControl } from "engine/client/gui/Button";
 import { Control } from "engine/client/gui/Control";
 import { OldTransformService } from "engine/shared/component/OldTransformService";
 import { ObservableValue } from "engine/shared/event/ObservableValue";
 import { ArgsSignal } from "engine/shared/event/Signal";
-import type { ButtonControl, TextButtonDefinition } from "client/gui/controls/Button";
 import type { DropdownDefinition } from "client/gui/controls/Dropdown";
+import type { ButtonControl, TextButtonDefinition } from "engine/client/gui/Button";
 
 export type DropdownListDefinition = DropdownDefinition & {
 	readonly Button: TextButtonDefinition;

@@ -5,6 +5,7 @@ import { Control } from "engine/client/gui/Control";
 import { InputController } from "engine/client/InputController";
 import { OldTransformService } from "engine/shared/component/OldTransformService";
 import { Element } from "engine/shared/Element";
+import type { KeybindDefinition, Keybinds } from "client/Keybinds";
 import type { InstanceComponent } from "engine/shared/component/InstanceComponent";
 
 const tooltipsGui = Interface.getGameUI<{ Help: { Controls: TooltipsControlDefinition } }>().Help.Controls;
@@ -107,8 +108,10 @@ export class TooltipsHolder extends ClientInstanceComponent<
 
 				if (key === "LeftControl") return "Ctrl";
 				if (key === "LeftShift") return "Shift";
+				if (key === "LeftAlt") return "Alt";
 				if (key === "RightControl") return "RCtrl";
 				if (key === "RightShift") return "RShift";
+				if (key === "RightAlt") return "RAlt";
 
 				return key;
 			};
@@ -145,6 +148,18 @@ export class TooltipsHolder extends ClientInstanceComponent<
 			tr.transform("Size", new UDim2(1, 0, 0, 0), OldTransformService.commonProps.quadOut02)
 				.then()
 				.func(() => tooltip.Destroy());
+		});
+	}
+
+	setFromKeybinds(keybinds: Keybinds, ...definitions: KeybindDefinition[]) {
+		this.set({
+			Desktop: definitions.map((d): Tooltip => {
+				const kb = keybinds.fromDefinition(d);
+				return {
+					text: kb.displayPath[kb.displayPath.size() - 1],
+					keys: [...kb.getKeys()],
+				};
+			}),
 		});
 	}
 

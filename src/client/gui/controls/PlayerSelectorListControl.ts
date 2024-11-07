@@ -1,6 +1,6 @@
 import { Players, RunService } from "@rbxts/services";
-import { ButtonControl } from "client/gui/controls/Button";
 import { DictionaryControl } from "client/gui/controls/DictionaryControl";
+import { ButtonControl } from "engine/client/gui/Button";
 import { Control } from "engine/client/gui/Control";
 import { OldTransformService } from "engine/shared/component/OldTransformService";
 import { ArgsSignal } from "engine/shared/event/Signal";

@@ -1,7 +1,6 @@
 import { RunService, UserInputService, Workspace } from "@rbxts/services";
 import { LoadingController } from "client/controller/LoadingController";
 import { LocalPlayerController } from "client/controller/LocalPlayerController";
-import { ButtonControl } from "client/gui/controls/Button";
 import { CheckBoxControl } from "client/gui/controls/CheckBoxControl";
 import { DictionaryControl } from "client/gui/controls/DictionaryControl";
 import { FormattedLabelControl } from "client/gui/controls/FormattedLabelControl";
@@ -9,6 +8,7 @@ import { ProgressBarControl } from "client/gui/controls/ProgressBarControl";
 import { ConfirmPopup } from "client/gui/popup/ConfirmPopup";
 import { TouchModeButtonControl } from "client/gui/ridemode/TouchModeButtonControl";
 import { requestMode } from "client/modes/PlayModeRequest";
+import { ButtonControl } from "engine/client/gui/Button";
 import { Control } from "engine/client/gui/Control";
 import { InputController } from "engine/client/InputController";
 import { LocalPlayer } from "engine/client/LocalPlayer";
@@ -24,12 +24,12 @@ import { VehicleSeatBlock } from "shared/blocks/blocks/VehicleSeatBlock";
 import { CustomRemotes } from "shared/Remotes";
 import { SlotsMeta } from "shared/SlotsMeta";
 import type { ClientMachine } from "client/blocks/ClientMachine";
-import type { TextButtonDefinition } from "client/gui/controls/Button";
 import type { CheckBoxControlDefinition } from "client/gui/controls/CheckBoxControl";
 import type { ProgressBarControlDefinition } from "client/gui/controls/ProgressBarControl";
 import type { MainScreenLayout } from "client/gui/MainScreenLayout";
 import type { RideMode } from "client/modes/ride/RideMode";
 import type { PlayerDataStorage } from "client/PlayerDataStorage";
+import type { TextButtonDefinition } from "engine/client/gui/Button";
 import type { RocketBlockLogic } from "shared/blocks/blocks/RocketEngineBlocks";
 
 type RideModeControlsDefinition = GuiObject & {

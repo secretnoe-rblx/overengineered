@@ -1,5 +1,5 @@
 import { LoadingController } from "client/controller/LoadingController";
-import { ButtonControl } from "client/gui/controls/Button";
+import { ButtonControl } from "engine/client/gui/Button";
 import { LogControl } from "client/gui/static/LogControl";
 import { ClientComponent } from "engine/client/component/ClientComponent";
 import { InputController } from "engine/client/InputController";

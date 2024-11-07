@@ -1,3 +1,4 @@
+import { RunService } from "@rbxts/services";
 import { RobloxUnit } from "engine/shared/RobloxUnit";
 import { InstanceBlockLogic as InstanceBlockLogic } from "shared/blockLogic/BlockLogic";
 import { BlockCreation } from "shared/blocks/BlockCreation";
@@ -77,7 +78,11 @@ class Logic extends InstanceBlockLogic<typeof definition> {
 	constructor(block: InstanceBlockLogicArgs) {
 		super(definition, block);
 
-		const view = this.instance.FindFirstChild("RadarView");
+		let updateTask: thread;
+		let minDistance = 0;
+		const originalView = this.instance.FindFirstChild("RadarView");
+		const view = originalView?.Clone();
+		originalView?.Destroy();
 		const metalPlate = this.instance.FindFirstChild("MetalPlate");
 		const maxDist = definition.input.maxDistance.types.number.clamp.max;
 		const halvedMaxDist = maxDist / 2;
@@ -85,7 +90,7 @@ class Logic extends InstanceBlockLogic<typeof definition> {
 		if (!view?.IsA("BasePart")) return;
 		if (!metalPlate?.IsA("BasePart")) return;
 
-		// view.Anchored = true;
+		view.Parent = this.instance;
 
 		const updateDistance = (detectionSize: number, maxDistance: number) => {
 			const ds = detectionSize * (detectionSize - math.sqrt(halvedMaxDist / (maxDistance + halvedMaxDist))) * 10;
@@ -105,47 +110,57 @@ class Logic extends InstanceBlockLogic<typeof definition> {
 			updateDistance(detectionSize, maxDistance);
 		});
 
-		this.onAlwaysInputs(({ minimalDistance }) => {
-			view.PivotTo(this.instance.PrimaryPart!.CFrame);
+		this.onAlwaysInputs(({ minimalDistance }) => (minDistance = minimalDistance));
 
-			if (this.closestDetectedPart?.Parent === undefined || this.triggerDistanceListUpdate) {
-				this.triggerDistanceListUpdate = false;
-				this.closestDetectedPart = this.findClosestPart(minimalDistance);
-			}
-
-			this.output.distance.set(
-				"vector3",
-				this.closestDetectedPart ? this.getDistanceTo(this.closestDetectedPart) : Vector3.zero,
-			);
-		});
-
-		const minimalDistanceCache = this.initializeInputCache("minimalDistance");
 		this.event.subscribe(view.Touched, (part) => {
 			if (part.HasTag("RADARVIEW")) return;
-			const minimalDistance = minimalDistanceCache.tryGet();
-			if (!minimalDistance) return;
-
-			if (this.getDistanceTo(part).Magnitude < minimalDistance) return;
+			if (!minDistance) return;
+			//if (this.getDistanceTo(part).Magnitude < minDistance) return;
 
 			this.allTouchedBlocks.add(part);
-			if (this.closestDetectedPart === undefined) {
-				return (this.closestDetectedPart = part);
-			}
+			//if (this.closestDetectedPart === undefined) {
+			//	return (this.closestDetectedPart = part);
+			//}
 
 			this.triggerDistanceListUpdate = true;
 		});
 
 		this.event.subscribe(view.TouchEnded, (part) => {
 			this.allTouchedBlocks.delete(part);
-			if (!this.triggerDistanceListUpdate) {
-				this.triggerDistanceListUpdate = part === this.closestDetectedPart;
+			if (this.triggerDistanceListUpdate) return;
+			this.triggerDistanceListUpdate = part === this.closestDetectedPart;
+		});
+
+		this.event.subscribe(RunService.Heartbeat, () => {
+			if (this.closestDetectedPart?.Parent === undefined || this.triggerDistanceListUpdate) {
+				this.triggerDistanceListUpdate = false;
+
+				this.closestDetectedPart = this.findClosestPart(minDistance);
+
+				if (updateTask) task.cancel(updateTask);
+				updateTask = task.delay(5, () => (this.triggerDistanceListUpdate = true));
 			}
+			this.output.distance.set(
+				"vector3",
+				this.closestDetectedPart ? this.getDistanceTo(this.closestDetectedPart) : Vector3.zero,
+			);
+
+			/*
+				this.closestDetectedPart = this.findClosestPart(minDistance);
+
+				if (this.closestDetectedPart) {
+					const d = this.getDistanceTo(this.closestDetectedPart);
+					this.output.distance.set("vector3", d);
+				} else this.output.distance.set("vector3", Vector3.zero);
+			*/
+
+			view.AssemblyLinearVelocity = Vector3.zero;
+			view.AssemblyAngularVelocity = Vector3.zero;
+			view.PivotTo(this.instance.PrimaryPart!.CFrame);
 		});
 
 		this.onDisable(() => {
-			const view = this.instance.FindFirstChild("RadarView") as BasePart | undefined;
 			if (view) view.Transparency = 1;
-
 			this.allTouchedBlocks.clear();
 		});
 	}
@@ -162,25 +177,25 @@ class Logic extends InstanceBlockLogic<typeof definition> {
 			return VectorUtils.apply(this.instance.GetPivot().ToObjectSpace(part.GetPivot()).Position, (v) =>
 				RobloxUnit.Studs_To_Meters(v),
 			);
-		else
-			return VectorUtils.apply(part.GetPivot().Position.sub(this.instance.GetPivot().Position), (v) =>
-				RobloxUnit.Studs_To_Meters(v),
-			);
+		return VectorUtils.apply(part.GetPivot().Position.sub(this.instance.GetPivot().Position), (v) =>
+			RobloxUnit.Studs_To_Meters(v),
+		);
 	};
 
 	private findClosestPart(minDist: number) {
-		let smallestDistance: number | undefined;
+		let smallestDistance: Vector3 | undefined;
 		let closestPart: BasePart | undefined;
 
 		for (const bp of this.allTouchedBlocks) {
-			const d = this.getDistanceTo(bp).Magnitude;
+			const d = this.getDistanceTo(bp);
 
+			if (d.Magnitude < minDist) continue;
 			if (smallestDistance === undefined) {
 				[smallestDistance, closestPart] = [d, bp];
 				continue;
 			}
 
-			if (d > smallestDistance || d < minDist) continue;
+			if (d.Magnitude > smallestDistance.Magnitude) continue;
 			[smallestDistance, closestPart] = [d, bp];
 		}
 		return closestPart;

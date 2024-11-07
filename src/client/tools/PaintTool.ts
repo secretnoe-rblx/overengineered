@@ -1,23 +1,23 @@
 import { Players } from "@rbxts/services";
-import { LocalPlayer } from "engine/client/LocalPlayer";
 import { MaterialColorEditControl } from "client/gui/buildmode/MaterialColorEditControl";
-import { ButtonControl } from "client/gui/controls/Button";
 import { ToggleControl } from "client/gui/controls/ToggleControl";
 import { Interface } from "client/gui/Interface";
 import { ClientBuilding } from "client/modes/build/ClientBuilding";
 import { MultiBlockSelector } from "client/tools/highlighters/MultiBlockSelector";
 import { ToolBase } from "client/tools/ToolBase";
 import { ClientComponent } from "engine/client/component/ClientComponent";
+import { ButtonControl } from "engine/client/gui/Button";
 import { Control } from "engine/client/gui/Control";
+import { LocalPlayer } from "engine/client/LocalPlayer";
 import { OldTransformService } from "engine/shared/component/OldTransformService";
 import { ObservableValue } from "engine/shared/event/ObservableValue";
 import { Marketplace } from "engine/shared/Marketplace";
 import { BlockManager } from "shared/building/BlockManager";
 import { GameDefinitions } from "shared/data/GameDefinitions";
 import type { MaterialColorEditControlDefinition } from "client/gui/buildmode/MaterialColorEditControl";
-import type { ButtonDefinition } from "client/gui/controls/Button";
 import type { ToggleControlDefinition } from "client/gui/controls/ToggleControl";
 import type { BuildingMode } from "client/modes/build/BuildingMode";
+import type { ButtonDefinition } from "engine/client/gui/Button";
 
 namespace Scene {
 	export type PaintToolSceneDefinition = GuiObject & {

@@ -1,5 +1,4 @@
 import { AutoC2SRemoteEvent } from "engine/shared/event/C2SRemoteEvent";
-import { ImpactBreakAutoC2SRemoteEvent } from "shared/block/impact/ImpactBreakAutoC2SRemoteEvent";
 import { ExplosionEffect } from "shared/effects/ExplosionEffect";
 import { FireEffect } from "shared/effects/FireEffect";
 import { ImpactSoundEffect } from "shared/effects/ImpactSoundEffect";
@@ -26,7 +25,7 @@ export namespace RemoteEvents {
 	}
 
 	export const Burn = new AutoC2SRemoteEvent<BasePart[]>("burn");
-	export const ImpactBreak = new ImpactBreakAutoC2SRemoteEvent("impact_break");
+	export const ImpactBreak = new AutoC2SRemoteEvent<BasePart[]>("impact_break");
 	export const Explode = new AutoC2SRemoteEvent<ExplodeArgs>("explode");
 
 	// empty method just to trigger the constructors

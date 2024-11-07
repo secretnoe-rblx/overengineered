@@ -1,9 +1,9 @@
 import { GuiService } from "@rbxts/services";
 import { SoundController } from "client/controller/SoundController";
-import { ButtonControl } from "client/gui/controls/Button";
 import { Interface } from "client/gui/Interface";
 import { Popup } from "client/gui/Popup";
-import type { ButtonDefinition } from "client/gui/controls/Button";
+import { ButtonControl } from "engine/client/gui/Button";
+import type { ButtonDefinition } from "engine/client/gui/Button";
 
 export type NotificationPopupDefinition = GuiObject & {
 	readonly Content: Frame & {

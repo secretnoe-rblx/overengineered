@@ -1,4 +1,4 @@
-import { ButtonControl } from "client/gui/controls/Button";
+import { ButtonControl } from "engine/client/gui/Button";
 import { Scene } from "client/gui/Scene";
 import { ObservableSwitch } from "engine/shared/event/ObservableSwitch";
 import type { MainScreenLayout } from "client/gui/MainScreenLayout";

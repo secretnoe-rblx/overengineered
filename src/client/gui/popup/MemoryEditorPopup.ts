@@ -1,12 +1,12 @@
-import { ButtonControl } from "client/gui/controls/Button";
 import { ByteTextBoxControl } from "client/gui/controls/ByteTextBoxControl";
-import { TextBoxControl } from "client/gui/controls/TextBoxControl";
 import { Interface } from "client/gui/Interface";
 import { Popup } from "client/gui/Popup";
 import { ConfirmPopup } from "client/gui/popup/ConfirmPopup";
 import { TextPopup } from "client/gui/popup/TextPopup";
 import { LogControl } from "client/gui/static/LogControl";
+import { ButtonControl } from "engine/client/gui/Button";
 import { Control } from "engine/client/gui/Control";
+import { TextBoxControl } from "engine/client/gui/TextBoxControl";
 import { OldTransformService } from "engine/shared/component/OldTransformService";
 import { Colors } from "shared/Colors";
 import { VectorUtils } from "shared/utils/VectorUtils";

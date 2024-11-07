@@ -2,10 +2,17 @@ import { BlockGhoster } from "client/tools/additional/BlockGhoster";
 import { Component } from "engine/shared/component/Component";
 import { ObservableValue } from "engine/shared/event/ObservableValue";
 import { BuildingManager } from "shared/building/BuildingManager";
+import { SharedBuilding } from "shared/building/SharedBuilding";
 
 @injectable
 export class BlockMirrorer extends Component {
-	readonly blocks = new ObservableValue<readonly { readonly id: BlockId; readonly model: Model }[]>([]);
+	readonly blocks = new ObservableValue<
+		readonly {
+			readonly id: BlockId;
+			readonly model: Model;
+			readonly scale?: Vector3;
+		}[]
+	>([]);
 	private readonly tracking = new Map<Model, Partial<Record<BlockId, Model[]>>>();
 
 	constructor(@inject private readonly blockList: BlockList) {
@@ -88,6 +95,10 @@ export class BlockMirrorer extends Component {
 				if (track.size() <= types[id]!) {
 					const instance = this.blockList.blocks[mirror.id]?.model.Clone();
 					if (!instance) continue;
+
+					if (block.scale) {
+						SharedBuilding.scale(instance, this.blockList.blocks[mirror.id]!.model, block.scale);
+					}
 
 					BlockGhoster.ghostModel(instance);
 					track.push(instance);

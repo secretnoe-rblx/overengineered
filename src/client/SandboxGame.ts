@@ -26,6 +26,7 @@ import { SavePopup } from "client/gui/popup/SavePopup";
 import { SettingsPopup } from "client/gui/popup/SettingsPopup";
 import { WikiPopup } from "client/gui/popup/WikiPopup";
 import { Keybinds } from "client/Keybinds";
+import { ActionController } from "client/modes/build/ActionController";
 import { ClientBuildingValidationController } from "client/modes/build/ClientBuildingValidationController";
 import { PlayModeController } from "client/modes/PlayModeController";
 import { PlayerDataInitializer } from "client/PlayerDataStorage";
@@ -50,11 +51,12 @@ export namespace SandboxGame {
 
 		LoadingController.show("Pre-init");
 		LocalPlayerController.initializeDisablingFluidForces(builder);
-		LocalPlayerController.initializeSprintLogic(builder, RunService.IsStudio() ? 200 : 60);
+		LocalPlayerController.initializeSprintLogic(builder);
 		LocalPlayerController.initializeCameraMaxZoomDistance(builder, 512);
 		OtherPlayersController.initializeMassless(builder);
 		builder.services.registerService(RagdollController);
 		RemoteEvents.initializeVisualEffects(builder);
+		builder.services.registerSingletonValue(ActionController.instance);
 
 		LoadingController.show("Waiting for server");
 		while (!(Workspace.HasTag("GameLoaded") as boolean | undefined)) {

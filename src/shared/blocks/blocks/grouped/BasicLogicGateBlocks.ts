@@ -331,7 +331,6 @@ namespace Mux {
 
 			const update = (_: unknown, ctx: { readonly tick: number }) => {
 				const value = valuecache.tryGet();
-				print(ctx.tick, "updating SUS", value, truevaluecache.tryGet(), falsevaluecache.tryGet());
 				if (value === undefined) return;
 
 				if (value) {

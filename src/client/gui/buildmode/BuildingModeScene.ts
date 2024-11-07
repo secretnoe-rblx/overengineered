@@ -1,9 +1,9 @@
 import { LoadingController } from "client/controller/LoadingController";
 import { HotbarControl } from "client/gui/buildmode/HotbarControl";
-import { ButtonControl } from "client/gui/controls/Button";
 import { Interface } from "client/gui/Interface";
 import { Scene } from "client/gui/Scene";
 import { requestMode } from "client/modes/PlayModeRequest";
+import { ButtonControl } from "engine/client/gui/Button";
 import type { HotbarControlDefinition } from "client/gui/buildmode/HotbarControl";
 import type { MainScreenLayout } from "client/gui/MainScreenLayout";
 import type { SavePopup } from "client/gui/popup/SavePopup";

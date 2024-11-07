@@ -1,4 +1,4 @@
-import { RunService, Workspace } from "@rbxts/services";
+import { Lighting, RunService, Workspace } from "@rbxts/services";
 import { Component } from "engine/shared/component/Component";
 import { Element } from "engine/shared/Element";
 import { AutoC2SRemoteEvent } from "engine/shared/event/C2SRemoteEvent";
@@ -10,6 +10,7 @@ import type { BlockLogicFullBothDefinitions, InstanceBlockLogicArgs } from "shar
 import type { BlockBuilder } from "shared/blocks/Block";
 
 const definition = {
+	inputOrder: ["enabled", "fov", "saturation", "brightness", "contrast", "tint"],
 	input: {
 		enabled: {
 			displayName: "Enabled",
@@ -26,6 +27,66 @@ const definition = {
 						canBeReversed: true,
 						canBeSwitch: true,
 					},
+				},
+			},
+		},
+		fov: {
+			displayName: "Field Of View",
+			types: {
+				number: {
+					config: 70,
+					clamp: {
+						showAsSlider: true,
+						min: 1,
+						max: 120,
+					},
+				},
+			},
+		},
+		saturation: {
+			displayName: "Saturation",
+			types: {
+				number: {
+					config: 0,
+					clamp: {
+						showAsSlider: true,
+						min: -1,
+						max: 1,
+					},
+				},
+			},
+		},
+		brightness: {
+			displayName: "Brightness",
+			types: {
+				number: {
+					config: 0,
+					clamp: {
+						showAsSlider: true,
+						min: -1,
+						max: 1,
+					},
+				},
+			},
+		},
+		contrast: {
+			displayName: "Contrast",
+			types: {
+				number: {
+					config: 0,
+					clamp: {
+						showAsSlider: true,
+						min: -1,
+						max: 1,
+					},
+				},
+			},
+		},
+		tint: {
+			displayName: "Tint",
+			types: {
+				color: {
+					config: Colors.white,
 				},
 			},
 		},
@@ -60,6 +121,19 @@ class Logic extends InstanceBlockLogic<typeof definition> {
 			Parent: this.instance,
 		});
 
+		const effect = Element.create("ColorCorrectionEffect", {
+			Enabled: false,
+			Name: `ColorCorrectionCamera_${block.instance}`,
+			Parent: Lighting,
+		});
+		this.onDisable(() => effect.Destroy());
+
+		this.onk(["fov"], ({ fov }) => (camera.FieldOfView = fov));
+		this.onk(["brightness"], ({ brightness }) => (effect.Brightness = brightness));
+		this.onk(["contrast"], ({ contrast }) => (effect.Contrast = contrast));
+		this.onk(["saturation"], ({ saturation }) => (effect.Saturation = saturation));
+		this.onk(["tint"], ({ tint }) => (effect.TintColor = tint));
+
 		const ticker = new Component();
 		ticker.event.subscribe(RunService.RenderStepped, () => {
 			camera.CFrame = target.CFrame;
@@ -67,14 +141,20 @@ class Logic extends InstanceBlockLogic<typeof definition> {
 		this.onDisable(() => ticker.disable());
 		this.onDescendantDestroyed(() => ticker.destroy());
 
-		this.event
-			.observableFromInstanceParam(Workspace, "CurrentCamera")
-			.subscribe((wcamera) => ticker.setEnabled(wcamera === camera));
+		this.event.readonlyObservableFromInstanceParam(Workspace, "CurrentCamera").subscribe((wcamera) => {
+			const thisCamera = wcamera === camera;
 
-		this.on(({ enabled }) => {
+			ticker.setEnabled(thisCamera);
+			effect.Enabled = thisCamera;
+		});
+
+		const fovCache = this.initializeInputCache("fov");
+
+		this.onk(["enabled"], ({ enabled }) => {
 			if (enabled) {
 				enabledCameras.add(this);
 				Workspace.CurrentCamera = camera;
+				camera.FieldOfView = fovCache.tryGet() ?? definition.input.fov.types.number.config;
 			} else {
 				enabledCameras.delete(this);
 				Workspace.CurrentCamera =

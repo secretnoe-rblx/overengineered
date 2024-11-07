@@ -23,6 +23,7 @@ import { BulletProjectile } from "shared/weapons/BulletProjectileLogic";
 import { GameHostBuilder } from "engine/shared/GameHostBuilder";
 import { gameInfo } from "shared/GameInfo";
 import { LaunchDataController } from "engine/server/network/LaunchDataController";
+import { LaserProjectile } from "shared/weapons/LaserProjectileLogic";
 
 const builder = new GameHostBuilder(gameInfo);
 SandboxGame.initialize(builder);
@@ -41,6 +42,7 @@ Workspace.AddTag("GameLoaded");
 
 PlasmaProjectile; // initializing the remote events
 BulletProjectile;
+LaserProjectile;
 
 Players.PlayerAdded.Connect((plr) => {
 	if (!RunService.IsStudio() && plr.AccountAge < 10) {
