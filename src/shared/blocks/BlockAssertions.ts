@@ -80,6 +80,8 @@ export namespace BlockAssertions {
 				if (child.Parent?.Name === "WeldRegions") continue;
 
 				if (child.IsA("Part")) {
+					if (child.HasTag("UNSCALABLE")) continue;
+
 					if (child.Shape === Enum.PartType.Ball || child.Shape === Enum.PartType.Cylinder) {
 						yield `Block ${block.Name} part ${child.Name} shape is ${tostring(child.Shape).sub("Enum.PartType.".size() + 1)} which does not scale good. Replace with union or a mesh.`;
 					}
@@ -169,7 +171,7 @@ export namespace BlockAssertions {
 			...assertFluidForcesIsDisabled(block),
 			...assertSomethingAnchored(block),
 			...assertNoPrimaryPartRotation(block),
-			// ...assertNoBallCylinderParts(block),
+			...assertNoBallCylinderParts(block),
 			...assertUsePartColor(block),
 			...assertCollisionGroup(block),
 			...assertNoRepeatedPartNames(block),
