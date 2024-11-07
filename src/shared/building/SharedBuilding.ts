@@ -52,7 +52,9 @@ export namespace SharedBuilding {
 				const child = instance.WaitForChild(name);
 
 				if (child.IsA("Attachment") && origChild.IsA("Attachment")) {
-					child.Position = origChild.Position.mul(scale);
+					child.Position = origChild.Position.mul(
+						(origChild.Parent! as BasePart).CFrame.Rotation.mul(scale).Abs(),
+					);
 				} else if (child.IsA("BasePart") && origChild.IsA("BasePart")) {
 					child.Size = origChild.Size.mul(origChild.CFrame.Rotation.Inverse().mul(scale).Abs());
 
