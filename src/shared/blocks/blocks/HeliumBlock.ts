@@ -1,6 +1,7 @@
 import { RunService } from "@rbxts/services";
 import { InstanceBlockLogic } from "shared/blockLogic/BlockLogic";
 import { BlockCreation } from "shared/blocks/BlockCreation";
+import { BlockManager } from "shared/building/BlockManager";
 import { GameEnvironment } from "shared/data/GameEnvironment";
 import { Physics } from "shared/Physics";
 import type { BlockLogicFullBothDefinitions } from "shared/blockLogic/BlockLogic";
@@ -46,6 +47,9 @@ class Logic extends InstanceBlockLogic<typeof definition, HeliumModel> {
 		this.part = this.instance.Part;
 		this.vectorForce = this.part.VectorForce;
 
+		const blockScale = BlockManager.manager.scale.get(this.instance) ?? Vector3.one;
+		const scale = blockScale.X * blockScale.Y * blockScale.Z;
+
 		const densityCache = this.initializeInputCache("density");
 		const update = () => {
 			const density = densityCache.tryGet();
@@ -56,7 +60,7 @@ class Logic extends InstanceBlockLogic<typeof definition, HeliumModel> {
 			const counterforce = Physics.GetGravityOnHeight(height) * this.part.Mass;
 			this.vectorForce.Force = new Vector3(
 				0,
-				((Physics.GetAirDensityOnHeight(height) * this.airDensityConstant) / density) * counterforce,
+				((Physics.GetAirDensityOnHeight(height) * this.airDensityConstant) / density) * counterforce * scale,
 				0,
 			);
 		};
