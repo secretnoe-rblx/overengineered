@@ -348,6 +348,7 @@ export class RideModeScene extends Control<RideModeSceneDefinition> {
 		this.onEnabledStateChange((enabled) => {
 			this.canSit.set("ride_enabled", enabled);
 			stopButton.visible.set("ride_enabled", enabled);
+			sitButton.visible.set("ride_enabled", enabled);
 			editControlsButton.visible.set("ride_enabled", enabled);
 			resetControlsButton.visible.set("ride_enabled", enabled);
 			logicButton.visible.set("ride_enabled", enabled);
