@@ -1,5 +1,6 @@
 import { InstanceBlockLogic } from "shared/blockLogic/BlockLogic";
 import { BlockCreation } from "shared/blocks/BlockCreation";
+import { BlockManager } from "shared/building/BlockManager";
 import type { BlockLogicFullBothDefinitions } from "shared/blockLogic/BlockLogic";
 import type { InstanceBlockLogicArgs } from "shared/blockLogic/BlockLogic";
 import type { BlockBuilder } from "shared/blocks/Block";
@@ -55,11 +56,14 @@ class Logic extends InstanceBlockLogic<typeof definition, BallastModel> {
 	constructor(block: InstanceBlockLogicArgs) {
 		super(definition, block);
 
+		const blockScale = BlockManager.manager.scale.get(this.instance) ?? Vector3.one;
+		const scale = blockScale.X * blockScale.Y * blockScale.Z;
+
 		this.on(({ density }) => {
 			const currentPhysProp = this.instance.Part.CurrentPhysicalProperties;
 			const materialPhysProp = new PhysicalProperties(this.instance.Part.Material);
 			const physProp = new PhysicalProperties(
-				materialPhysProp.Density + density,
+				materialPhysProp.Density + density * scale,
 				currentPhysProp.Friction,
 				currentPhysProp.Elasticity,
 				currentPhysProp.FrictionWeight,
