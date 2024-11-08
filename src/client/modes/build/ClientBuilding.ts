@@ -202,7 +202,7 @@ export namespace ClientBuilding {
 				(b): EditBlockRequestInfo => ({
 					instance: plot.getBlock(b.uuid),
 					position: b.origPosition,
-					scale: b.newScale,
+					scale: b.origScale,
 				}),
 			);
 		const getBlocks = (): readonly EditBlockRequestInfo[] =>
