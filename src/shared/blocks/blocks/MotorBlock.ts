@@ -72,6 +72,8 @@ export class Logic extends InstanceBlockLogic<typeof definition, MotorBlock> {
 	constructor(block: InstanceBlockLogicArgs) {
 		super(definition, block);
 
+		const blockScale = BlockManager.manager.scale.get(this.instance) ?? Vector3.one;
+		const scale = blockScale.X * blockScale.Y * blockScale.Z;
 		this.on((ctx) => {
 			if (!this.instance.FindFirstChild("Base")?.FindFirstChild("HingeConstraint")) {
 				this.disableAndBurn();
@@ -80,11 +82,10 @@ export class Logic extends InstanceBlockLogic<typeof definition, MotorBlock> {
 
 			this.instance.Base.HingeConstraint.AngularVelocity = ctx.rotationSpeed;
 			this.instance.Base.HingeConstraint.MotorMaxTorque = RobloxUnit.RowtonStuds_To_NewtonMeters(
-				ctx.max_torque * 1_000_000,
+				ctx.max_torque * 1_000_000 * scale,
 			);
 		});
 
-		const scale = BlockManager.manager.scale.get(this.instance) ?? Vector3.one;
 		this.onTicc(() => {
 			const base = this.instance.FindFirstChild("Base") as BasePart | undefined;
 			const attach = this.instance.FindFirstChild("Attach") as BasePart | undefined;
@@ -93,7 +94,7 @@ export class Logic extends InstanceBlockLogic<typeof definition, MotorBlock> {
 				return;
 			}
 
-			if (attach.Position.sub(base.Position).Magnitude > 3 * scale.Y) {
+			if (attach.Position.sub(base.Position).Magnitude > 3 * blockScale.Y) {
 				RemoteEvents.ImpactBreak.send([base]);
 
 				this.disable();

@@ -125,6 +125,9 @@ class Logic extends InstanceBlockLogic<typeof servoDefinition, ServoMotorModel> 
 	constructor(definition: typeof servoDefinition, block: InstanceBlockLogicArgs) {
 		super(definition, block);
 
+		const blockScale = BlockManager.manager.scale.get(this.instance) ?? Vector3.one;
+		const scale = blockScale.X * blockScale.Y * blockScale.Z;
+
 		this.hingeConstraint = this.instance.Base.HingeConstraint;
 		this.instance.GetDescendants().forEach((desc) => {
 			if (!desc.IsA("BasePart")) return;
@@ -140,10 +143,11 @@ class Logic extends InstanceBlockLogic<typeof servoDefinition, ServoMotorModel> 
 		this.onk(
 			["max_torque"],
 			({ max_torque }) =>
-				(this.hingeConstraint.ServoMaxTorque = RobloxUnit.RowtonStuds_To_NewtonMeters(max_torque * 1_000_000)),
+				(this.hingeConstraint.ServoMaxTorque = RobloxUnit.RowtonStuds_To_NewtonMeters(
+					max_torque * 1_000_000 * scale,
+				)),
 		);
 
-		const scale = BlockManager.manager.scale.get(this.instance) ?? Vector3.one;
 		this.onTicc(() => {
 			const base = this.instance.FindFirstChild("Base") as BasePart | undefined;
 			const attach = this.instance.FindFirstChild("Attach") as BasePart | undefined;
@@ -152,7 +156,7 @@ class Logic extends InstanceBlockLogic<typeof servoDefinition, ServoMotorModel> 
 				return;
 			}
 
-			if (attach.Position.sub(base.Position).Magnitude > 3 * scale.Y) {
+			if (attach.Position.sub(base.Position).Magnitude > 3 * blockScale.Y) {
 				RemoteEvents.ImpactBreak.send([base]);
 				this.disable();
 			}
