@@ -427,14 +427,14 @@ class WireComponent extends ClientInstanceComponent<WireComponentDefinition> {
 }
 
 namespace Visual {
-	const hidden: Record<string, Set<Markers.Marker>> = {};
+	const hidden: Record<string, Set<Markers.Marker> | undefined> = {};
 
 	function hide(tipe: string, marker: Markers.Marker) {
 		(hidden[tipe] ??= new Set()).add(marker);
 	}
 	function show(tipe: string, markers: readonly Markers.Marker[]) {
 		for (const marker of markers) {
-			hidden[tipe].delete(marker);
+			hidden[tipe]?.delete(marker);
 
 			const h = asMap(hidden).any((k, v) => v.has(marker));
 			if (h) continue;
