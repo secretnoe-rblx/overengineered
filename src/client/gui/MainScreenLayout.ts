@@ -28,11 +28,20 @@ export class MainScreenLayout extends Component {
 		this.instance = Interface.getInterface2();
 		ComponentInstance.init(this, this.instance);
 
-		//
+		const forEachChild = (parent: Instance, callback: (child: GuiObject) => void) => {
+			for (const child of parent.GetChildren()) {
+				if (!child.IsA("GuiObject")) continue;
+				callback(child);
+			}
+		};
+
+		forEachChild(this.instance.Top.Center.Main, (child) => (child.Visible = false));
+		forEachChild(this.instance.Top.Right, (child) => (child.Visible = false));
 	}
 
 	registerTopCenterButton<T extends GuiButton>(name: string): AnimatedListControl<T> {
 		const button = this.parent(new AnimatedListControl(this.instance.Top.Center.Main.WaitForChild(name) as T));
+		button.instance.Visible = true;
 		button.visible.changed.Connect((visible) => {
 			button.instance.Visible = visible;
 		});
@@ -41,6 +50,7 @@ export class MainScreenLayout extends Component {
 	}
 	registerTopRightButton<T extends GuiButton>(name: string): AnimatedListControl<T> {
 		const button = this.parent(new AnimatedListControl(this.instance.Top.Right.WaitForChild(name) as T));
+		button.instance.Visible = true;
 		button.visible.changed.Connect((visible) => {
 			button.instance.Visible = visible;
 		});
