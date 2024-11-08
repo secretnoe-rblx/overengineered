@@ -37,7 +37,7 @@ export class BuildingModeScene extends Scene {
 			savesButton.visible.set("build_enabled", enabled);
 		}, true);
 
-		const hotbarGui = Interface.getInterface<{ Hotbar: HotbarControlDefinition }>().Hotbar;
+		const hotbarGui = Interface.getInterface2<{ Hotbar: HotbarControlDefinition }>().Hotbar;
 		const toolbar = this.parent(new HotbarControl(tools, hotbarGui));
 
 		const updateToolbarVisibility = () => toolbar.setVisible(!LoadingController.isLoading.get());
