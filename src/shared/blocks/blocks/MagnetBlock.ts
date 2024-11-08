@@ -1,6 +1,7 @@
 import { RunService } from "@rbxts/services";
 import { InstanceBlockLogic } from "shared/blockLogic/BlockLogic";
 import { BlockCreation } from "shared/blocks/BlockCreation";
+import { BlockManager } from "shared/building/BlockManager";
 import { PartUtils } from "shared/utils/PartUtils";
 import type { BlockLogicFullBothDefinitions } from "shared/blockLogic/BlockLogic";
 import type { InstanceBlockLogicArgs } from "shared/blockLogic/BlockLogic";
@@ -115,9 +116,14 @@ class Logic extends InstanceBlockLogic<typeof definition> {
 	readonly part;
 	private strength = 0;
 
+	readonly scale: number;
+
 	constructor(block: InstanceBlockLogicArgs) {
 		super(definition, block);
 		this.part = this.instance.WaitForChild("Part") as BasePart;
+
+		const blockScale = BlockManager.manager.scale.get(block.instance) ?? Vector3.one;
+		this.scale = blockScale.X * blockScale.Y * blockScale.Z;
 
 		this.onk(["strength"], ({ strength }) => (this.strength = strength));
 		this.onk(["invertPolarity"], ({ invertPolarity }) => {
@@ -134,7 +140,7 @@ class Logic extends InstanceBlockLogic<typeof definition> {
 	}
 
 	getStrength(): number {
-		return this.strength;
+		return this.strength * this.scale;
 	}
 
 	destroy() {

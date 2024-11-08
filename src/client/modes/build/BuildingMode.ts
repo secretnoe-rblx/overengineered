@@ -44,9 +44,23 @@ export class BuildingMode extends PlayMode {
 		this.onDisable(() => com.disable());
 		this.onDestroy(() => com.destroy());
 
+		let mg = this.moveGrid.get();
+		let rg = this.moveGrid.get();
 		this.event.subInput((ih) => {
-			ih.onKeyDown("LeftControl", () => this.gridEnabled.set(false));
-			ih.onKeyUp("LeftControl", () => this.gridEnabled.set(true));
+			ih.onKeyDown("LeftControl", () => {
+				this.gridEnabled.set(false);
+
+				mg = this.moveGrid.get();
+				this.moveGrid.set(0);
+
+				rg = this.rotateGrid.get();
+				this.rotateGrid.set(0);
+			});
+			ih.onKeyUp("LeftControl", () => {
+				this.gridEnabled.set(true);
+				this.moveGrid.set(mg);
+				this.rotateGrid.set(rg);
+			});
 		});
 
 		this.targetPlot = new ObservableValue<SharedPlot | undefined>(undefined).withDefault(plot);

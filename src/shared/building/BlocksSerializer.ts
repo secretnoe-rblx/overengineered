@@ -54,8 +54,9 @@ interface SerializedBlockV3 extends SerializedBlockV2 {
 }
 interface SerializedBlockV4
 	extends ReplaceWith<SerializedBlockV3, { readonly config?: PlacedBlockConfig | undefined }> {}
+interface SerializedBlockV5 extends ReplaceWith<SerializedBlockV4, { readonly scale?: Vector3 | undefined }> {}
 
-export type LatestSerializedBlock = SerializedBlockV4;
+export type LatestSerializedBlock = SerializedBlockV5;
 export type LatestSerializedBlocks = SerializedBlocks<LatestSerializedBlock>;
 
 namespace Filter {
@@ -1529,11 +1530,50 @@ const v30: UpgradableBlocksSerializer<SerializedBlocks<SerializedBlockV4>, typeo
 	},
 };
 
+// rotated all blocks to 0, 0, 0
+const v31: UpgradableBlocksSerializer<SerializedBlocks<SerializedBlockV4>, typeof v30> = {
+	version: 31,
+
+	upgradeFrom(prev: SerializedBlocks<SerializedBlockV4>): SerializedBlocks<SerializedBlockV4> {
+		const update = (block: SerializedBlockV4): SerializedBlockV4 => {
+			if (
+				block.id === "cylindricaltnt" ||
+				block.id === "cylinder1x1" ||
+				block.id === "cylinder1x2" ||
+				block.id === "cylinder2x1" ||
+				block.id === "cylinder2x2"
+			) {
+				return {
+					...block,
+					location: block.location.mul(CFrame.Angles(0, 0, math.rad(-90))),
+				};
+			}
+			if (
+				block.id === "halfcornerwedgemirrored1x1" ||
+				block.id === "halfcornerwedgemirrored1x2" ||
+				block.id === "halfcornerwedgemirrored2x1" ||
+				block.id === "halfcornerwedgemirrored2x2"
+			) {
+				return {
+					...block,
+					location: block.location.mul(CFrame.Angles(0, math.rad(-90), 0)),
+				};
+			}
+
+			return block;
+		};
+
+		return {
+			version: this.version,
+			blocks: prev.blocks.map(update),
+		};
+	},
+};
 //
 
 const versions = [
 	...([v4, v5, v6, v7, v8, v9, v10, v11, v12, v13, v14, v15, v16, v17, v18, v19, v20, v21, v22] as const),
-	...([v23, v24, v25, v26, v27, v28, v29, v30] as const),
+	...([v23, v24, v25, v26, v27, v28, v29, v30, v31] as const),
 ] as const;
 const current = versions[versions.size() - 1] as typeof versions extends readonly [...unknown[], infer T] ? T : never;
 
@@ -1542,11 +1582,12 @@ const getVersion = (version: number) => versions.find((v) => v.version === versi
 /** Methods to save and load buildings */
 export namespace BlocksSerializer {
 	type JsonBlock = ReplaceWith<
-		Omit<LatestSerializedBlock, "location" | "color" | "material">,
+		Omit<LatestSerializedBlock, "location" | "color" | "material" | "scale">,
 		{
 			readonly loc: SerializedCFrame;
 			readonly mat: SerializedEnum | undefined;
 			readonly col: SerializedColor | undefined;
+			readonly scl: string | undefined;
 		}
 	>;
 
@@ -1572,6 +1613,7 @@ export namespace BlocksSerializer {
 				loc: Serializer.CFrameSerializer.serialize(block.location),
 				col: block.color && Serializer.Color3Serializer.serialize(block.color),
 				mat: block.material && Serializer.EnumMaterialSerializer.serialize(block.material),
+				scl: block.scale && JSON.serialize(block.scale),
 			};
 		};
 
@@ -1610,6 +1652,7 @@ export namespace BlocksSerializer {
 				location: Serializer.CFrameSerializer.deserialize(block.loc),
 				color: block.col ? Serializer.Color3Serializer.deserialize(block.col) : undefined,
 				material: block.mat ? Serializer.EnumMaterialSerializer.deserialize(block.mat) : undefined,
+				scale: block.scl ? JSON.deserialize(block.scl) : undefined,
 			};
 		};
 
@@ -1636,6 +1679,7 @@ export namespace BlocksSerializer {
 			material: blockData.material ?? Enum.Material.Plastic,
 			config: blockData.config,
 			uuid: blockData.uuid,
+			scale: blockData.scale,
 		};
 	}
 }

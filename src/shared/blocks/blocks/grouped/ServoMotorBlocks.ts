@@ -1,6 +1,7 @@
 import { RobloxUnit } from "engine/shared/RobloxUnit";
 import { InstanceBlockLogic as InstanceBlockLogic } from "shared/blockLogic/BlockLogic";
 import { BlockCreation } from "shared/blocks/BlockCreation";
+import { BlockManager } from "shared/building/BlockManager";
 import { RemoteEvents } from "shared/RemoteEvents";
 import type { BlockLogicFullBothDefinitions, InstanceBlockLogicArgs } from "shared/blockLogic/BlockLogic";
 import type { BlockBuildersWithoutIdAndDefaults } from "shared/blocks/Block";
@@ -124,6 +125,9 @@ class Logic extends InstanceBlockLogic<typeof servoDefinition, ServoMotorModel> 
 	constructor(definition: typeof servoDefinition, block: InstanceBlockLogicArgs) {
 		super(definition, block);
 
+		const blockScale = BlockManager.manager.scale.get(this.instance) ?? Vector3.one;
+		const scale = blockScale.X * blockScale.Y * blockScale.Z;
+
 		this.hingeConstraint = this.instance.Base.HingeConstraint;
 		this.instance.GetDescendants().forEach((desc) => {
 			if (!desc.IsA("BasePart")) return;
@@ -139,7 +143,9 @@ class Logic extends InstanceBlockLogic<typeof servoDefinition, ServoMotorModel> 
 		this.onk(
 			["max_torque"],
 			({ max_torque }) =>
-				(this.hingeConstraint.ServoMaxTorque = RobloxUnit.RowtonStuds_To_NewtonMeters(max_torque * 1_000_000)),
+				(this.hingeConstraint.ServoMaxTorque = RobloxUnit.RowtonStuds_To_NewtonMeters(
+					max_torque * 1_000_000 * scale,
+				)),
 		);
 
 		this.onTicc(() => {
@@ -150,7 +156,7 @@ class Logic extends InstanceBlockLogic<typeof servoDefinition, ServoMotorModel> 
 				return;
 			}
 
-			if (attach.Position.sub(base.Position).Magnitude > 3) {
+			if (attach.Position.sub(base.Position).Magnitude > 3 * blockScale.Y) {
 				RemoteEvents.ImpactBreak.send([base]);
 				this.disable();
 			}
