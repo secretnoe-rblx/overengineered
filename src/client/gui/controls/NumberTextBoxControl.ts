@@ -28,11 +28,11 @@ export class NumberTextBoxControl<TAllowNull extends boolean = false> extends Co
 	private textChanged = false;
 
 	constructor(gui: NumberTextBoxControlDefinition);
-	constructor(gui: NumberTextBoxControlDefinition, value: ObservableValue<number>);
+	constructor(gui: NumberTextBoxControlDefinition, value: ObservableValue<ToNum<TAllowNull>>);
 	constructor(gui: NumberTextBoxControlDefinition, min: number | undefined, max: number | undefined, step?: number);
 	constructor(
 		gui: NumberTextBoxControlDefinition,
-		min?: number | ObservableValue<number>,
+		min?: number | ObservableValue<ToNum<TAllowNull>>,
 		max?: number,
 		step?: number,
 	) {

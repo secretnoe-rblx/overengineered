@@ -12,7 +12,8 @@ import { ButtonControl } from "engine/client/gui/Button";
 import { Control } from "engine/client/gui/Control";
 import { ComponentChild } from "engine/shared/component/ComponentChild";
 import { ComponentDisabler } from "engine/shared/component/ComponentDisabler";
-import { OldTransformService } from "engine/shared/component/OldTransformService";
+import { Transforms } from "engine/shared/component/Transforms";
+import { TransformService } from "engine/shared/component/TransformService";
 import { Element } from "engine/shared/Element";
 import { ObservableCollectionSet } from "engine/shared/event/ObservableCollection";
 import { ObservableValue } from "engine/shared/event/ObservableValue";
@@ -43,23 +44,28 @@ namespace Scene {
 		constructor(gui: MultiBlockSelectorGuiDefinition, tool: EditTool) {
 			super();
 
-			const animationProps = OldTransformService.commonProps.quadOut02;
+			const animationProps = Transforms.commonProps.quadOut02;
 			const selectPlot = this.parent(new ButtonControl(gui.Top.SelectAllButton, () => tool.selectPlot()));
 			const deselectAll = this.parent(new ButtonControl(gui.Top.DeselectAllButton, () => tool.deselectAll()));
 
 			const animate = () => {
 				const buttonsAreActive = this.isEnabled() && tool.selectedMode.get() === undefined;
 
-				OldTransformService.run(gui.Top, (builder) =>
-					builder.transform("AnchorPoint", new Vector2(0.5, buttonsAreActive ? 0 : 0.8), animationProps),
+				TransformService.run(gui.Top, (builder, instance) =>
+					builder.transform(
+						instance,
+						"AnchorPoint",
+						new Vector2(0.5, buttonsAreActive ? 0 : 0.8),
+						animationProps,
+					),
 				);
 
 				for (const control of [selectPlot, deselectAll]) {
 					const button = control.instance;
 
 					button.AutoButtonColor = button.Active = buttonsAreActive;
-					OldTransformService.run(button, (builder) =>
-						builder.transform("Transparency", buttonsAreActive ? 0 : 0.6, animationProps),
+					TransformService.run(button, (builder, instance) =>
+						builder.transform(instance, "Transparency", buttonsAreActive ? 0 : 0.6, animationProps),
 					);
 				}
 			};
@@ -99,9 +105,9 @@ namespace Scene {
 			{
 				const cancel = this.add(new ButtonControl(this.gui.CancelButton, () => tool.cancelCurrentMode()));
 
-				const animateCancelButton = OldTransformService.boolStateMachine(
+				const animateCancelButton = Transforms.boolStateMachine(
 					cancel.instance,
-					OldTransformService.commonProps.quadOut02,
+					Transforms.commonProps.quadOut02,
 					{ Position: cancel.instance.Position, Transparency: 0 },
 					{ Position: cancel.instance.Position.add(new UDim2(0, 0, 0, 20)), Transparency: 1 },
 					(tr) => tr.func(() => (cancel.instance.Interactable = false)),
@@ -202,10 +208,10 @@ namespace Scene {
 			);
 		}
 
-		private readonly bottomVisibilityFunction = OldTransformService.multi(
-			OldTransformService.boolStateMachine(
+		private readonly bottomVisibilityFunction = Transforms.multiStateMachine(
+			Transforms.boolStateMachine(
 				this.instance.Bottom,
-				OldTransformService.commonProps.quadOut02,
+				Transforms.commonProps.quadOut02,
 				{ Position: this.instance.Bottom.Position },
 				{ Position: this.instance.Bottom.Position.add(new UDim2(0, 0, 0, 20)) },
 				(tr, visible) =>
@@ -218,7 +224,7 @@ namespace Scene {
 					}),
 				(tr, visible) => tr.func(() => super.setInstanceVisibilityFunction(visible)),
 			),
-			OldTransformService.boolStateMachine(this.instance, OldTransformService.commonProps.quadOut02, {}, {}),
+			Transforms.boolStateMachine(this.instance, Transforms.commonProps.quadOut02, {}, {}),
 		);
 		protected setInstanceVisibilityFunction(visible: boolean): void {
 			if (visible) {

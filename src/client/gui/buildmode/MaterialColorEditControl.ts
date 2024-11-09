@@ -5,7 +5,8 @@ import { MaterialChooser } from "client/gui/MaterialChooser";
 import { TextButtonControl } from "engine/client/gui/Button";
 import { Control } from "engine/client/gui/Control";
 import { ObjectOverlayStorage } from "engine/shared/component/ObjectOverlayStorage";
-import { OldTransformService } from "engine/shared/component/OldTransformService";
+import { Transforms } from "engine/shared/component/Transforms";
+import { TransformService } from "engine/shared/component/TransformService";
 import { SubmittableValue } from "engine/shared/event/SubmittableValue";
 import { Marketplace } from "engine/shared/Marketplace";
 import { Colors } from "shared/Colors";
@@ -83,9 +84,14 @@ export class MaterialColorEditControl extends Control<MaterialColorEditControlDe
 
 				const imgColor = value.ToHSV()[2] > 0.5 ? Colors.black : Colors.white;
 				if (this.gui.Color.Header.Pipette.ImageLabel.ImageColor3 !== imgColor) {
-					OldTransformService.cancel(this.gui.Color.Header.Pipette.ImageLabel);
-					OldTransformService.run(this.gui.Color.Header.Pipette.ImageLabel, (tr) =>
-						tr.transform("ImageColor3", imgColor, OldTransformService.commonProps.quadOut02),
+					TransformService.cancel(this.gui.Color.Header.Pipette.ImageLabel);
+					TransformService.run(this.gui.Color.Header.Pipette.ImageLabel, (tr) =>
+						tr.transform(
+							this.gui.Color.Header.Pipette.ImageLabel,
+							"ImageColor3",
+							imgColor,
+							Transforms.commonProps.quadOut02,
+						),
 					);
 				}
 			},
@@ -115,31 +121,34 @@ export class MaterialColorEditControl extends Control<MaterialColorEditControlDe
 
 			const defaultArrowSize = gui.Header.Arrow.Size;
 			this.heightOverlays[name].overlay.value.subscribe(({ state }) => {
-				OldTransformService.run(gui.Header.Arrow, (tr) => {
+				TransformService.run(gui.Header.Arrow, (tr) => {
 					if (state !== "hidden") {
 						tr.transform(
+							gui.Header.Arrow,
 							"Rotation",
 							state === "closed" ? 180 : 0,
-							OldTransformService.commonProps.quadOut02,
-						).transform("Size", defaultArrowSize, OldTransformService.commonProps.quadOut02);
+							Transforms.commonProps.quadOut02,
+						).transform(gui.Header.Arrow, "Size", defaultArrowSize, Transforms.commonProps.quadOut02);
 					} else {
-						tr.transform("Rotation", 360, OldTransformService.commonProps.quadOut02).transform(
+						tr.transform(gui.Header.Arrow, "Rotation", 360, Transforms.commonProps.quadOut02).transform(
+							gui.Header.Arrow,
 							"Size",
 							new UDim2(),
-							OldTransformService.commonProps.quadOut02,
+							Transforms.commonProps.quadOut02,
 						);
 					}
 				});
 
-				OldTransformService.run(gui, (tr) => {
+				TransformService.run(gui, (tr) => {
 					if (state !== "hidden") {
 						tr.func(() => (this.gui.Visible = true)).then();
 					}
 
 					tr.transform(
+						gui,
 						"Size",
 						new UDim2(gui.Size.X, this.heightOverlays[name].heights[state]),
-						OldTransformService.commonProps.quadOut02,
+						Transforms.commonProps.quadOut02,
 					);
 
 					if (state === "hidden") {
@@ -150,8 +159,8 @@ export class MaterialColorEditControl extends Control<MaterialColorEditControlDe
 
 			this.heightOverlays[name].overlay.get(-1).state = "hidden";
 			setOverlayVisibility((isvisible = defaultVisibility));
-			OldTransformService.finish(gui);
-			OldTransformService.finish(gui.Header.Arrow);
+			TransformService.finish(gui);
+			TransformService.finish(gui.Header.Arrow);
 		};
 		initVisibilityAnimation(materialbtn, "Material");
 		initVisibilityAnimation(colorbtn, "Color");

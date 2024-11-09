@@ -3,7 +3,6 @@ import { LoadingController } from "client/controller/LoadingController";
 import { SoundController } from "client/controller/SoundController";
 import { DictionaryControl } from "client/gui/controls/DictionaryControl";
 import { Control } from "engine/client/gui/Control";
-import { OldTransformService } from "engine/shared/component/OldTransformService";
 import { Transforms } from "engine/shared/component/Transforms";
 import { TransformService } from "engine/shared/component/TransformService";
 import { Colors } from "shared/Colors";
@@ -28,7 +27,7 @@ export class HotbarButtonControl extends Control<HotbarToolButtonControlDefiniti
 			tools.selectedTool.set(tool === tools.selectedTool.get() ? undefined : tool);
 		});
 
-		const selectedToolStateMachine = OldTransformService.boolStateMachine(
+		const selectedToolStateMachine = Transforms.boolStateMachine(
 			this.gui,
 			TransformService.commonProps.quadOut02,
 			{ BackgroundColor3: Colors.newGui.blue },
@@ -52,12 +51,10 @@ export type HotbarControlDefinition = GuiObject & {
 };
 
 export class HotbarControl extends Control<HotbarControlDefinition> {
-	private readonly tools;
 	private readonly nameLabel;
 
 	constructor(tools: ToolController, gui: HotbarControlDefinition) {
 		super(gui);
-		this.tools = tools;
 
 		// Disable roblox native backpack
 		StarterGui.SetCoreGuiEnabled(Enum.CoreGuiType.Backpack, false);
@@ -116,18 +113,6 @@ export class HotbarControl extends Control<HotbarControlDefinition> {
 
 		this.event.subscribeObservable(tools.selectedTool, (tool, prev) => this.toolChanged(tool, prev));
 		this.resetLabels();
-	}
-
-	private readonly visibilityFunction = OldTransformService.boolStateMachine(
-		this.gui,
-		OldTransformService.commonProps.quadOut02,
-		{ AnchorPoint: new Vector2(0.5, 1) },
-		{ AnchorPoint: new Vector2(0.5, 0) },
-		(tr, enabled) => (enabled ? tr.func(() => super.setInstanceVisibilityFunction(true)) : 0),
-		(tr, enabled) => (enabled ? 0 : tr.func(() => super.setInstanceVisibilityFunction(false))),
-	);
-	protected setInstanceVisibilityFunction(visible: boolean): void {
-		this.visibilityFunction(visible);
 	}
 
 	private toolChanged(tool: ToolBase | undefined, prev: ToolBase | undefined) {

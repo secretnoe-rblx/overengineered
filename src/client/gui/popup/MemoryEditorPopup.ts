@@ -7,7 +7,6 @@ import { LogControl } from "client/gui/static/LogControl";
 import { ButtonControl } from "engine/client/gui/Button";
 import { Control } from "engine/client/gui/Control";
 import { TextBoxControl } from "engine/client/gui/TextBoxControl";
-import { OldTransformService } from "engine/shared/component/OldTransformService";
 import { Colors } from "shared/Colors";
 import { VectorUtils } from "shared/utils/VectorUtils";
 
@@ -330,7 +329,9 @@ export class MemoryEditorPopup extends Popup<MemoryEditorPopupDefinition> {
 
 	show() {
 		super.show();
-		OldTransformService.run(this.instance, (transform) => transform.slideIn("top", 50, { duration: 0.2 }));
+		// TransformService.run(this.instance, (transform) =>
+		// 	transform.slideIn(this.instance, "top", 50, { duration: 0.2 }),
+		// );
 	}
 
 	getScale() {

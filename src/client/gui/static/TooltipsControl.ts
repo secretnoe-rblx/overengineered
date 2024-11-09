@@ -3,7 +3,8 @@ import { Interface } from "client/gui/Interface";
 import { ClientInstanceComponent } from "engine/client/component/ClientInstanceComponent";
 import { Control } from "engine/client/gui/Control";
 import { InputController } from "engine/client/InputController";
-import { OldTransformService } from "engine/shared/component/OldTransformService";
+import { Transforms } from "engine/shared/component/Transforms";
+import { TransformService } from "engine/shared/component/TransformService";
 import { Element } from "engine/shared/Element";
 import type { KeybindDefinition, Keybinds } from "client/Keybinds";
 import type { InstanceComponent } from "engine/shared/component/InstanceComponent";
@@ -130,11 +131,11 @@ export class TooltipsHolder extends ClientInstanceComponent<
 		}
 
 		if (this.isEnabled()) {
-			OldTransformService.run(button, (tr) =>
+			TransformService.run(button, (tr) =>
 				tr
-					.transform("Size", new UDim2(1, 0, 0, 0))
+					.transform(button, "Size", new UDim2(1, 0, 0, 0))
 					.then()
-					.transform("Size", new UDim2(1, 0, 0, 50), OldTransformService.commonProps.quadOut02),
+					.transform(button, "Size", new UDim2(1, 0, 0, 50), Transforms.commonProps.quadOut02),
 			);
 		} else {
 			button.Visible = false;
@@ -144,10 +145,10 @@ export class TooltipsHolder extends ClientInstanceComponent<
 	}
 
 	private destroyTooltip(tooltip: GuiObject) {
-		OldTransformService.run(tooltip, (tr) => {
-			tr.transform("Size", new UDim2(1, 0, 0, 0), OldTransformService.commonProps.quadOut02)
+		TransformService.run(tooltip, (tr) => {
+			tr.transform(tooltip, "Size", new UDim2(1, 0, 0, 0), Transforms.commonProps.quadOut02)
 				.then()
-				.func(() => tooltip.Destroy());
+				.destroy(tooltip);
 		});
 	}
 

@@ -4,7 +4,6 @@ import { Dropdown } from "client/gui/controls/Dropdown";
 import { TextButtonControl } from "engine/client/gui/Button";
 import { Control } from "engine/client/gui/Control";
 import { Transforms } from "engine/shared/component/Transforms";
-import { OldTransformService } from "engine/shared/component/OldTransformService";
 import { Element } from "engine/shared/Element";
 import { ArgsSignal } from "engine/shared/event/Signal";
 import { Colors } from "shared/Colors";
@@ -55,7 +54,7 @@ export class WikiCategoriesControl extends Control<WikiCategoriesControlDefiniti
 				child.instance,
 				child.instance.BackgroundColor3.Lerp(Colors.white, 0.2),
 				"BackgroundColor3",
-				OldTransformService.commonProps.quadOut02,
+				Transforms.commonProps.quadOut02,
 			)
 			.run(child.instance);
 

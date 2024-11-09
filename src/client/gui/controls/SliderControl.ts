@@ -55,8 +55,7 @@ export class SliderControl<TAllowNull extends boolean = false> extends Control<S
 		this.subscribeMovement();
 
 		if (this.parts.TextBox) {
-			const num = new NumberTextBoxControl<TAllowNull>(this.parts.TextBox, min, max, step);
-			num.value.bindTo(this.value);
+			const num = new NumberTextBoxControl<TAllowNull>(this.parts.TextBox, this.value);
 			this.event.subscribe(num.submitted, (value) => this._submitted.Fire(value));
 			this.add(num);
 		}

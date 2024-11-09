@@ -1,6 +1,7 @@
 import { TextButtonControl } from "engine/client/gui/Button";
 import { Control } from "engine/client/gui/Control";
-import { OldTransformService } from "engine/shared/component/OldTransformService";
+import { Transforms } from "engine/shared/component/Transforms";
+import { TransformService } from "engine/shared/component/TransformService";
 import { Colors } from "shared/Colors";
 import type { HoveredBlocksSelectorMode } from "client/tools/highlighters/HoveredBlocksSelector";
 import type { BlockSelectorMode } from "client/tools/highlighters/MultiBlockSelector";
@@ -32,10 +33,11 @@ export class BlockSelectorModeGui extends Control {
 					mode,
 					(active) => {
 						for (const [name, button] of pairs(buttons)) {
-							OldTransformService.run(button.instance, (builder, instance) =>
+							TransformService.run(button.instance, (builder, instance) =>
 								builder
 									.func(() => (instance.AutoButtonColor = instance.Active = active !== name))
 									.transform(
+										instance,
 										"BackgroundColor3",
 										active === name ? Colors.accentDark : Colors.staticBackground,
 										animationProps,
@@ -49,16 +51,21 @@ export class BlockSelectorModeGui extends Control {
 				const animate = (enable: boolean) => {
 					const buttonsAreActive = enable;
 
-					OldTransformService.run(gui, (builder) =>
-						builder.transform("AnchorPoint", new Vector2(buttonsAreActive ? 1 : 0, 0.5), animationProps),
+					TransformService.run(gui, (builder, instance) =>
+						builder.transform(
+							instance,
+							"AnchorPoint",
+							new Vector2(buttonsAreActive ? 1 : 0, 0.5),
+							animationProps,
+						),
 					);
 
 					for (const [, control] of pairs(buttons)) {
 						const button = control.instance;
 
 						button.AutoButtonColor = button.Active = buttonsAreActive;
-						OldTransformService.run(button, (builder) =>
-							builder.transform("Transparency", buttonsAreActive ? 0 : 0.6, animationProps),
+						TransformService.run(button, (builder, instance) =>
+							builder.transform(instance, "Transparency", buttonsAreActive ? 0 : 0.6, animationProps),
 						);
 					}
 				};
@@ -68,7 +75,7 @@ export class BlockSelectorModeGui extends Control {
 			}
 		}
 
-		const animationProps = OldTransformService.commonProps.quadOut02;
+		const animationProps = Transforms.commonProps.quadOut02;
 
 		const control = this.add(new MobileSelection(gui));
 		this.onPrepare((inputType) =>
