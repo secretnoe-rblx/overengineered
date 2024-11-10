@@ -28,6 +28,25 @@ const definition = {
 				},
 			},
 		},
+		showUpDistance: {
+			displayName: "Show Up Distance",
+			tooltip: "The distance at which you can see the marker.",
+			unit: "meters",
+			types: {
+				number: {
+					config: 0,
+				},
+			},
+		},
+		markerColor: {
+			displayName: "Marker Color",
+			tooltip: "The color of the marker.",
+			types: {
+				color: {
+					config: Colors.green,
+				},
+			},
+		},
 	},
 	output: {},
 } satisfies BlockLogicFullBothDefinitions;
@@ -58,10 +77,11 @@ class Logic extends InstanceBlockLogic<typeof definition> {
 
 		let timePassed = 0;
 		const maxTimeInSeconds = 1;
-		const tagetColor = Colors.green;
 		const startColor = Colors.black;
 
 		const en = this.initializeInputCache("enabled");
+		const mc = this.initializeInputCache("markerColor");
+		const dst = this.initializeInputCache("showUpDistance");
 		const beacon: beaconBlock = this.instance as beaconBlock;
 
 		const updateColor = (color: Color3) => {
@@ -75,6 +95,11 @@ class Logic extends InstanceBlockLogic<typeof definition> {
 		};
 
 		this.event.subscribe(RunService.Heartbeat, (seconds) => {
+			//апдейт минимальной дистанции срабатывания маяка
+			if (this.beaconInstance !== undefined) {
+				this.beaconInstance.showUpDistance = dst.get();
+			}
+
 			// ладно, я знаю как сделать хитрожопо, но потом хуй прочитаешь
 			// да и тем более это было не оптимизировано
 			if (!en.get()) {
@@ -85,11 +110,18 @@ class Logic extends InstanceBlockLogic<typeof definition> {
 			timePassed = (timePassed + seconds) % maxTimeInSeconds;
 			const progress = 1 - timePassed / maxTimeInSeconds;
 
-			updateColor(startColor.Lerp(tagetColor, progress));
+			updateColor(startColor.Lerp(mc.get(), progress));
 		});
 
 		this.onk(["text", "enabled"], ({ text, enabled }) => {
 			this.updateData(text, enabled);
+		});
+
+		this.onk(["markerColor"], ({ markerColor }) => {
+			if (this.beaconInstance === undefined) return;
+			this.beaconInstance.billboard.Title.TextColor3 = markerColor;
+			this.beaconInstance.billboard.ImageLabel.ImageColor3 = markerColor;
+			this.beaconInstance.billboard.Distance.TextColor3 = markerColor;
 		});
 
 		this.onDestroy(() => this.beaconInstance?.destroy());
