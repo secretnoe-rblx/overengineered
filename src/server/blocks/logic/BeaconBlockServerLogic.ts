@@ -3,7 +3,7 @@ import type { PlayModeController } from "server/modes/PlayModeController";
 import type { BeaconBlockLogic } from "shared/blocks/blocks/BeaconBlock";
 
 @injectable
-export class ServerBlockServerLogic extends ServerBlockLogic<typeof BeaconBlockLogic> {
+export class BeaconServerLogic extends ServerBlockLogic<typeof BeaconBlockLogic> {
 	constructor(logic: typeof BeaconBlockLogic, @inject playModeController: PlayModeController) {
 		super(logic, playModeController);
 
