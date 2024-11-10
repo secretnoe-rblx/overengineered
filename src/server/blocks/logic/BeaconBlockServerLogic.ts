@@ -8,7 +8,7 @@ export class BeaconServerLogic extends ServerBlockLogic<typeof BeaconBlockLogic>
 		super(logic, playModeController);
 
 		logic.events.update.invoked.Connect((player, data) => {
-			if (!this.isValidBlock(data.block as unknown as BlockModel, player)) return;
+			if (!this.isValidBlock(data.block, player)) return;
 			logic.updateLedColor(data);
 		});
 	}

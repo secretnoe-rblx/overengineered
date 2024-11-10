@@ -37,7 +37,7 @@ type beaconBlock = BlockModel & {
 };
 
 interface UpdateData {
-	readonly block: BasePart;
+	readonly block: beaconBlock;
 	readonly color: Color3;
 }
 
@@ -49,7 +49,7 @@ class Logic extends InstanceBlockLogic<typeof definition> {
 
 	static updateLedColor(data: UpdateData) {
 		if (!data.block) return;
-		data.block.Color = data.color;
+		data.block.LED.Color = data.color;
 	}
 
 	beaconInstance: Beacon | undefined;
@@ -66,7 +66,7 @@ class Logic extends InstanceBlockLogic<typeof definition> {
 
 		const updateColor = (color: Color3) => {
 			const data: UpdateData = {
-				block: beacon.LED,
+				block: beacon,
 				color: color,
 			};
 
