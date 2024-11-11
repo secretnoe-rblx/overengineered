@@ -1,5 +1,4 @@
 import { Workspace } from "@rbxts/services";
-import { DiscordLogging } from "engine/server/network/DiscordLogging";
 import { BadgeController } from "server/BadgeController";
 import { BaseGame } from "server/BaseGame";
 import { ServerBlockLogicController } from "server/blocks/ServerBlockLogicController";
@@ -14,7 +13,6 @@ import { ServerPlots } from "server/plots/ServerPlots";
 import { RagdollController } from "server/RagdollController";
 import { SpreadingFireController } from "server/SpreadingFireController";
 import { SharedPlots } from "shared/building/SharedPlots";
-import { GameDefinitions } from "shared/data/GameDefinitions";
 import { RemoteEvents } from "shared/RemoteEvents";
 import { CreateSandboxBlocks } from "shared/SandboxBlocks";
 import type { GameHostBuilder } from "engine/shared/GameHostBuilder";
@@ -27,14 +25,15 @@ export namespace SandboxGame {
 
 		BaseGame.initialize(builder);
 
-		builder.services.registerService(DiscordLogging).withArgs([
-			{
-				footerText:
-					`🔨 ${GameDefinitions.isTestPlace() ? "⚠️ Test" : ""} Build ${game.PlaceVersion}` +
-					(game.PrivateServerOwnerId !== 0 ? ", Private Server" : "") +
-					` (${game.JobId.sub(game.JobId.size() - 4)})`,
-			},
-		]);
+		// FIXME: Walkaround proxy is down, should we set up our own?
+		// builder.services.registerService(DiscordLogging).withArgs([
+		// 	{
+		// 		footerText:
+		// 			`🔨 ${GameDefinitions.isTestPlace() ? "⚠️ Test" : ""} Build ${game.PlaceVersion}` +
+		// 			(game.PrivateServerOwnerId !== 0 ? ", Private Server" : "") +
+		// 			` (${game.JobId.sub(game.JobId.size() - 4)})`,
+		// 	},
+		// ]);
 
 		builder.services.registerSingletonClass(PlayerDatabase);
 		builder.services.registerSingletonClass(SlotDatabase);

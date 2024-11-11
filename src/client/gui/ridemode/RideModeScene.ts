@@ -1,6 +1,7 @@
 import { RunService, UserInputService, Workspace } from "@rbxts/services";
 import { LoadingController } from "client/controller/LoadingController";
 import { LocalPlayerController } from "client/controller/LocalPlayerController";
+import { Beacon } from "client/gui/Beacon";
 import { CheckBoxControl } from "client/gui/controls/CheckBoxControl";
 import { DictionaryControl } from "client/gui/controls/DictionaryControl";
 import { FormattedLabelControl } from "client/gui/controls/FormattedLabelControl";
@@ -19,6 +20,7 @@ import { ObservableSwitch } from "engine/shared/event/ObservableSwitch";
 import { ObservableValue } from "engine/shared/event/ObservableValue";
 import { Signal } from "engine/shared/event/Signal";
 import { RobloxUnit } from "engine/shared/RobloxUnit";
+import { BeaconBlock } from "shared/blocks/blocks/BeaconBlock";
 import { RocketBlocks } from "shared/blocks/blocks/RocketEngineBlocks";
 import { VehicleSeatBlock } from "shared/blocks/blocks/VehicleSeatBlock";
 import { CustomRemotes } from "shared/Remotes";
@@ -30,6 +32,7 @@ import type { MainScreenLayout } from "client/gui/MainScreenLayout";
 import type { RideMode } from "client/modes/ride/RideMode";
 import type { PlayerDataStorage } from "client/PlayerDataStorage";
 import type { TextButtonDefinition } from "engine/client/gui/Button";
+import type { BeaconBlockLogic } from "shared/blocks/blocks/BeaconBlock";
 import type { RocketBlockLogic } from "shared/blocks/blocks/RocketEngineBlocks";
 
 type RideModeControlsDefinition = GuiObject & {
@@ -483,6 +486,20 @@ export class RideModeScene extends Control<RideModeSceneDefinition> {
 					),
 				);
 			});
+		}
+
+		{
+			//блок маяка костыль
+			const beaconBlockClass = BeaconBlock!.logic!.ctor;
+
+			const beacons = machine
+				.getChildren()
+				.filter((c) => c instanceof beaconBlockClass) as unknown as readonly BeaconBlockLogic[];
+
+			for (const beacon of beacons) {
+				beacon.beaconInstance = new Beacon(beacon.instance, beacon.definition.input.text.displayName);
+				beacon.updateData(beacon.definition.input.text.displayName, true);
+			}
 		}
 	}
 

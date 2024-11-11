@@ -144,8 +144,11 @@ class Logic extends InstanceBlockLogic<typeof definition, RCSEngineModel> {
 
 		// The strength depends on the material
 
+		const blockScale = BlockManager.manager.scale.get(this.instance) ?? Vector3.one;
+		const scale = blockScale.X * blockScale.Y * blockScale.Z;
+
 		const material = BlockManager.manager.material.get(this.instance);
-		const multiplier = math.max(1, math.round(new PhysicalProperties(material).Density / 2));
+		const multiplier = math.max(1, math.round(new PhysicalProperties(material).Density / 2)) * scale;
 
 		// Max power
 		this.maxPower = this.basePower * multiplier;
@@ -160,21 +163,22 @@ class Logic extends InstanceBlockLogic<typeof definition, RCSEngineModel> {
 
 			// Particles
 			const visualize = thrustPercentage !== 0;
-			const newParticleEmitterAcceleration = new Vector3(this.maxParticlesAcceleration * thrustPercentage, 0, 0);
+			const newParticleEmitterAcceleration = engine.particleEmitter
+				.GetPivot()
+				.RightVector.mul(this.maxParticlesAcceleration * thrustPercentage);
+
 			const particleEmmiterHasDifference =
 				engine.particleEmitter.Fire.Enabled !== visualize ||
-				math.abs(engine.particleEmitter.Fire.Acceleration.X - newParticleEmitterAcceleration.X) > 1;
+				engine.particleEmitter.Fire.Acceleration.sub(newParticleEmitterAcceleration).Abs().Magnitude > 1;
 
 			engine.particleEmitter.Fire.Enabled = visualize;
-			engine.particleEmitter.Fire.Acceleration = new Vector3(
-				this.maxParticlesAcceleration * thrustPercentage,
-				0,
-				0,
-			);
+			engine.particleEmitter.Fire.Acceleration = newParticleEmitterAcceleration;
 
 			// Sound
 			const newVolume =
-				Sound.getWorldVolume(this.instance.GetPivot().Y) * (this.maxSoundVolume * math.abs(thrustPercentage));
+				Sound.getWorldVolume(this.instance.GetPivot().Y) *
+				(this.maxSoundVolume * math.abs(thrustPercentage)) *
+				math.sqrt(scale);
 
 			const volumeHasDifference =
 				visualize !== engine.soundEmitter.Playing || math.abs(engine.soundEmitter.Volume - newVolume) > 0.005;

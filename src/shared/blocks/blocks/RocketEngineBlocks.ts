@@ -146,19 +146,16 @@ class Logic extends InstanceBlockLogic<typeof definition, RocketModel> {
 
 		// Particles
 		const visualize = thrustPercent !== 0;
-		const newParticleEmitterAcceleration = new Vector3(
-			this.maxParticlesAcceleration * thrustPercent * strengthPercent,
-			0,
-			0,
-		);
-		const particleEmmiterHasDifference =
-			this.particleEmitter.Enabled !== visualize ||
-			math.abs(this.particleEmitter.Acceleration.X - newParticleEmitterAcceleration.X) > 1;
-
-		this.particleEmitter.Enabled = visualize;
-		this.particleEmitter.Acceleration = this.instance
+		const newParticleEmitterAcceleration = this.instance
 			.GetPivot()
 			.RightVector.mul(this.maxParticlesAcceleration * thrustPercent * strengthPercent);
+
+		const particleEmmiterHasDifference =
+			this.particleEmitter.Enabled !== visualize ||
+			this.particleEmitter.Acceleration.sub(newParticleEmitterAcceleration).Abs().Magnitude > 1;
+
+		this.particleEmitter.Enabled = visualize;
+		this.particleEmitter.Acceleration = newParticleEmitterAcceleration;
 
 		// Sound
 		const newVolume =
