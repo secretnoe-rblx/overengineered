@@ -610,7 +610,7 @@ export class EditTool extends ToolBase {
 	readonly selectedMode = this._selectedMode.asReadonly();
 	readonly selected = new ObservableCollectionSet<BlockModel>();
 	readonly copied = new ObservableValue<readonly PlaceBlockRequestWithUuid[]>([]);
-	private readonly controller = new ComponentChild<IComponent & { cancel(): void } & ({} | { deselected(): void })>(
+	private readonly controller = new ComponentChild<Component & { cancel(): void } & ({} | { deselected(): void })>(
 		this,
 		true,
 	);

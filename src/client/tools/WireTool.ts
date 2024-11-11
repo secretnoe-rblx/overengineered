@@ -517,7 +517,7 @@ namespace Controllers {
 		});
 	};
 
-	export interface IController extends IComponent {
+	export interface IController extends Component {
 		readonly selectedMarker: ReadonlyObservableValue<Markers.Output | undefined>;
 
 		stopDragging(): void;

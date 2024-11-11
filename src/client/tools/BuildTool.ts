@@ -440,7 +440,7 @@ namespace Scene {
 	}
 }
 
-interface IController extends IComponent {
+interface IController extends Component {
 	rotate(axis: "x" | "y" | "z", inverted?: boolean): void;
 	place(): Promise<unknown>;
 }

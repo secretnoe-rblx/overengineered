@@ -237,7 +237,7 @@ namespace ClientBlockControlsNamespace {
 	}
 }
 
-export type IClientBlockControl = IComponent & {
+export type IClientBlockControl = Component & {
 	getTouchButtonDatas(): readonly TouchModeButtonData[];
 };
 

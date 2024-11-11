@@ -9,7 +9,7 @@ import type { HoveredBlocksSelectorMode } from "client/tools/highlighters/Hovere
 import type { ReadonlyArgsSignal } from "engine/shared/event/Signal";
 import type { SharedPlot } from "shared/building/SharedPlot";
 
-export interface BlockSelector extends IComponent {
+export interface BlockSelector extends Component {
 	readonly submit: ReadonlyArgsSignal<[blocks: readonly BlockModel[]]>;
 }
 

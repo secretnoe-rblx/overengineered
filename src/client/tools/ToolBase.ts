@@ -31,7 +31,7 @@ export abstract class ToolBase extends ClientComponent {
 	}
 
 	subscribeSomethingToCurrentPlot(
-		state: IComponent & { readonly event: ComponentEvents },
+		state: Component & { readonly event: ComponentEvents },
 		func: (plot: SharedPlot) => void,
 	) {
 		state.event.subscribeObservable(

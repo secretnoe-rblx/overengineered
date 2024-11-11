@@ -1,9 +1,9 @@
 import { Players, RunService, UserInputService } from "@rbxts/services";
 import { Interface } from "client/gui/Interface";
-import { rootComponents } from "client/test/RootComponents";
 import { ButtonControl } from "engine/client/gui/Button";
 import { Control } from "engine/client/gui/Control";
 import { InputController } from "engine/client/InputController";
+import { Component } from "engine/shared/component/Component";
 import { Element } from "engine/shared/Element";
 import { Colors } from "shared/Colors";
 import { GameDefinitions } from "shared/data/GameDefinitions";
@@ -112,7 +112,7 @@ const create = (): TreeControl => {
 };
 
 let tree: TreeControl | undefined;
-const update = () => {
+const update = (root: IDebuggableComponent) => {
 	if (!tree) throw "what";
 
 	const add = (component: object | IDebuggableComponent, tree: TreeControl) => {
@@ -135,14 +135,12 @@ const update = () => {
 		}
 	};
 
-	for (const root of rootComponents) {
-		add(root, tree);
-	}
+	add(root, tree);
 };
-const toggle = () => {
+const toggle = (root: IDebuggableComponent) => {
 	if (!tree) {
 		tree = create();
-		update();
+		update(root);
 		tree.show();
 		return;
 	} else {
@@ -160,5 +158,5 @@ UserInputService.InputBegan.Connect((input) => {
 	if (input.KeyCode !== Enum.KeyCode.F6) return;
 	if (!InputController.isShiftPressed()) return;
 
-	toggle();
+	toggle(new Component()); // TODO:
 });
