@@ -1,5 +1,6 @@
 import { InstanceBlockLogic } from "shared/blockLogic/BlockLogic";
 import { BlockCreation } from "shared/blocks/BlockCreation";
+import { BlockManager } from "shared/building/BlockManager";
 import type { BlockLogicFullBothDefinitions, InstanceBlockLogicArgs } from "shared/blockLogic/BlockLogic";
 import type { BlockBuilder } from "shared/blocks/Block";
 
@@ -78,6 +79,14 @@ export type { Logic as SuspensionBlockLogic };
 class Logic extends InstanceBlockLogic<typeof definition, SuspensionModel> {
 	constructor(block: InstanceBlockLogicArgs) {
 		super(definition, block);
+
+		const spring = this.instance.FindFirstChild("SpringSide")?.FindFirstChild("Spring") as
+			| SpringConstraint
+			| undefined;
+		if (spring) {
+			const scale = BlockManager.manager.scale.get(block.instance) ?? Vector3.one;
+			spring.Radius *= scale.findMin();
+		}
 
 		this.on(({ max_force, damping, stiffness, free_length }) => {
 			const spring = this.instance.FindFirstChild("SpringSide")?.FindFirstChild("Spring") as
