@@ -80,12 +80,14 @@ class Logic extends InstanceBlockLogic<typeof definition, SuspensionModel> {
 	constructor(block: InstanceBlockLogicArgs) {
 		super(definition, block);
 
+		const blockScale = BlockManager.manager.scale.get(block.instance) ?? Vector3.one;
+		const scale = blockScale.X * blockScale.Y * blockScale.Z;
+
 		const spring = this.instance.FindFirstChild("SpringSide")?.FindFirstChild("Spring") as
 			| SpringConstraint
 			| undefined;
 		if (spring) {
-			const scale = BlockManager.manager.scale.get(block.instance) ?? Vector3.one;
-			spring.Radius *= scale.findMin();
+			spring.Radius *= blockScale.findMin();
 		}
 
 		this.on(({ max_force, damping, stiffness, free_length }) => {
@@ -94,10 +96,10 @@ class Logic extends InstanceBlockLogic<typeof definition, SuspensionModel> {
 				| undefined;
 			if (!spring) return;
 
-			spring.MaxForce = max_force;
-			spring.Damping = damping;
-			spring.Stiffness = stiffness;
-			spring.FreeLength = free_length;
+			spring.MaxForce = max_force * scale;
+			spring.Damping = damping * scale;
+			spring.Stiffness = stiffness * scale;
+			spring.FreeLength = free_length * blockScale.Y;
 		});
 	}
 }
