@@ -1,7 +1,7 @@
-import { ButtonControl } from "engine/client/gui/Button";
 import { FloatingWindow } from "client/gui/FloatingWindow";
 import { GridEditorControl } from "client/gui/GridEditor";
 import { Interface } from "client/gui/Interface";
+import { ButtonComponent } from "engine/client/gui/ButtonComponent";
 import { Component } from "engine/shared/component/Component";
 import { ObjectOverlayStorage } from "engine/shared/component/ObjectOverlayStorage";
 import { Transforms } from "engine/shared/component/Transforms";
@@ -24,12 +24,11 @@ export class GridController extends Component {
 
 		const gridButton = this.parent(mainScreen.registerTopRightButton("Grid"));
 		this.parent(
-			new ButtonControl(
+			new ButtonComponent(
 				gridButton.instance,
 				() => (controlOverlay.get(-1).Visible = !controlOverlay.get(-1).Visible),
 			),
 		);
-		this.onEnabledStateChange((enabled) => gridButton.visible.set("main_visible", enabled), true);
 
 		const floatingGui = Interface.getInterface<{
 			Floating: { Grid: FloatingWindowDefinition & { Content: GridEditorControlDefinition } };

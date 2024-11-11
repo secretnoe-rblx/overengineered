@@ -10,6 +10,7 @@ import { ConfirmPopup } from "client/gui/popup/ConfirmPopup";
 import { TouchModeButtonControl } from "client/gui/ridemode/TouchModeButtonControl";
 import { requestMode } from "client/modes/PlayModeRequest";
 import { ButtonControl } from "engine/client/gui/Button";
+import { ButtonComponent } from "engine/client/gui/ButtonComponent";
 import { Control } from "engine/client/gui/Control";
 import { InputController } from "engine/client/InputController";
 import { LocalPlayer } from "engine/client/LocalPlayer";
@@ -323,39 +324,32 @@ export class RideModeScene extends Control<RideModeSceneDefinition> {
 			true,
 		);
 
-		const stopButton = mainScreen.registerTopCenterButton("Stop");
-		this.parent(new ButtonControl(stopButton.instance, () => requestMode("build")));
+		const stopButton = this.parent(mainScreen.registerTopCenterButton("Stop"));
+		this.parent(new ButtonComponent(stopButton.instance, () => requestMode("build")));
 
-		const sitButton = mainScreen.registerTopCenterButton("Sit");
+		const sitButton = this.parent(mainScreen.registerTopCenterButton("Sit"));
 		this.event.subscribeObservable(this.canSit, (canSit) => sitButton.visible.set("ride_main", canSit), true);
-		this.parent(new ButtonControl(sitButton.instance, () => CustomRemotes.modes.ride.teleportOnSeat.send()));
+		this.parent(new ButtonComponent(sitButton.instance, () => CustomRemotes.modes.ride.teleportOnSeat.send()));
 
 		//
 
-		const editControlsButton = mainScreen.registerTopRightButton("EditControls");
+		const editControlsButton = this.parent(mainScreen.registerTopRightButton("EditControls"));
 		this.onPrepare((input) => editControlsButton.visible.set("onlyTouch", input === "Touch"));
-		this.parent(new ButtonControl(editControlsButton.instance, () => this.controls.toggleSettingsMode()));
+		this.parent(new ButtonComponent(editControlsButton.instance, () => this.controls.toggleSettingsMode()));
 
-		const resetControlsButton = mainScreen.registerTopRightButton("ResetControls");
+		const resetControlsButton = this.parent(mainScreen.registerTopRightButton("ResetControls"));
 		this.parent(
-			new ButtonControl(resetControlsButton.instance, () =>
+			new ButtonComponent(resetControlsButton.instance, () =>
 				ConfirmPopup.showPopup("Reset the controls?", "It will be impossible to undo this action", () =>
 					this.controls.resetControls(),
 				),
 			),
 		);
 
-		const logicButton = mainScreen.registerTopRightButton("Logic");
-		this.logicButton = this.parent(new ButtonControl(logicButton.instance));
+		const logicButton = this.parent(mainScreen.registerTopRightButton("Logic"));
+		this.logicButton = this.parent(new ButtonComponent(logicButton.instance));
 
-		this.onEnabledStateChange((enabled) => {
-			this.canSit.set("ride_enabled", enabled);
-			stopButton.visible.set("ride_enabled", enabled);
-			sitButton.visible.set("ride_enabled", enabled);
-			editControlsButton.visible.set("ride_enabled", enabled);
-			resetControlsButton.visible.set("ride_enabled", enabled);
-			logicButton.visible.set("ride_enabled", enabled);
-		}, true);
+		this.onEnabledStateChange((enabled) => this.canSit.set("ride_enabled", enabled), true);
 
 		//
 

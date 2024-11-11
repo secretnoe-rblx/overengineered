@@ -1,7 +1,7 @@
 import { LoadingController } from "client/controller/LoadingController";
-import { ButtonControl } from "engine/client/gui/Button";
 import { LogControl } from "client/gui/static/LogControl";
 import { ClientComponent } from "engine/client/component/ClientComponent";
+import { ButtonComponent } from "engine/client/gui/ButtonComponent";
 import { InputController } from "engine/client/InputController";
 import { Component } from "engine/shared/component/Component";
 import { ObservableCollectionArr } from "engine/shared/event/ObservableCollection";
@@ -14,11 +14,11 @@ class ActionControllerGui extends Component {
 	constructor(@inject mainScreen: MainScreenLayout, @inject actionController: ActionController) {
 		super();
 
-		const undov = mainScreen.registerTopRightButton("Undo");
-		const redov = mainScreen.registerTopRightButton("Redo");
+		const undov = this.parent(mainScreen.registerTopRightButton("Undo"));
+		const redov = this.parent(mainScreen.registerTopRightButton("Redo"));
 
-		this.parent(new ButtonControl(undov.instance, () => actionController.undo()));
-		this.parent(new ButtonControl(redov.instance, () => actionController.redo()));
+		this.parent(new ButtonComponent(undov.instance, () => actionController.undo()));
+		this.parent(new ButtonComponent(redov.instance, () => actionController.redo()));
 
 		this.event.subscribeObservable(actionController.canUndo, (canUndo) => undov.visible.set("main", canUndo), true);
 		this.event.subscribeObservable(actionController.canRedo, (canRedo) => redov.visible.set("main", canRedo), true);

@@ -1,7 +1,6 @@
-import { Interface } from "client/gui/Interface";
 import { Scene } from "client/gui/Scene";
 import { requestMode } from "client/modes/PlayModeRequest";
-import { ButtonControl } from "engine/client/gui/Button";
+import { ButtonComponent } from "engine/client/gui/ButtonComponent";
 import type { MainScreenLayout } from "client/gui/MainScreenLayout";
 import type { SavePopup } from "client/gui/popup/SavePopup";
 import type { BuildingMode } from "client/modes/build/BuildingMode";
@@ -15,25 +14,16 @@ export class BuildingModeScene extends Scene {
 	) {
 		super();
 
-		this.onEnabledStateChange(
-			(enabled) => (Interface.getGameUI<{ BuildingMode: GuiObject }>().BuildingMode.Visible = enabled),
-		);
-
-		const runButton = mainScreen.registerTopCenterButton("Run");
+		const runButton = this.parent(mainScreen.registerTopCenterButton("Run"));
 		this.event.subscribeObservable(mode.canRun, (canRun) => runButton.visible.set("build_main", canRun), true);
-		this.parent(new ButtonControl(runButton.instance, () => requestMode("ride")));
+		this.parent(new ButtonComponent(runButton.instance, () => requestMode("ride")));
 
-		const savesButton = mainScreen.registerTopCenterButton("Saves");
+		const savesButton = this.parent(mainScreen.registerTopCenterButton("Saves"));
 		this.event.subscribeObservable(
 			mode.canSaveOrLoad,
 			(canSaveOrLoad) => savesButton.visible.set("build_main", canSaveOrLoad),
 			true,
 		);
-		this.parent(new ButtonControl(savesButton.instance, () => di.resolve<SavePopup>().show()));
-
-		this.onEnabledStateChange((enabled) => {
-			runButton.visible.set("build_enabled", enabled);
-			savesButton.visible.set("build_enabled", enabled);
-		}, true);
+		this.parent(new ButtonComponent(savesButton.instance, () => di.resolve<SavePopup>().show()));
 	}
 }

@@ -1,7 +1,7 @@
 import { ReplicatedStorage, Workspace } from "@rbxts/services";
 import { Interface } from "client/gui/Interface";
 import { ClientComponent } from "engine/client/component/ClientComponent";
-import { ButtonControl } from "engine/client/gui/Button";
+import { ButtonComponent } from "engine/client/gui/ButtonComponent";
 import { Component } from "engine/shared/component/Component";
 import { ComponentChild } from "engine/shared/component/ComponentChild";
 import { ComponentInstance } from "engine/shared/component/ComponentInstance";
@@ -185,11 +185,10 @@ export class CenterOfMassController extends ClientComponent {
 
 		{
 			enabled.set("button", false);
-			const button = mainScreen.registerTopRightButton("CenterOfMass");
-			this.onEnabledStateChange((enabled) => button.visible.set("main_visible", enabled), true);
+			const button = this.parent(mainScreen.registerTopRightButton("CenterOfMass"));
 
 			const com = this.parent(
-				new ButtonControl(button.instance, () => enabled.set("button", !enabled.getKeyed("button"))),
+				new ButtonComponent(button.instance, () => enabled.set("button", !enabled.getKeyed("button"))),
 			);
 
 			this.event.subscribeObservable(

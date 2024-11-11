@@ -38,6 +38,7 @@ import { VectorUtils } from "shared/utils/VectorUtils";
 import type { BlockSelectionControlDefinition } from "client/gui/buildmode/BlockSelection";
 import type { MaterialColorEditControlDefinition } from "client/gui/buildmode/MaterialColorEditControl";
 import type { MirrorEditorControlDefinition } from "client/gui/buildmode/MirrorEditorControl";
+import type { MainScreenLayout } from "client/gui/MainScreenLayout";
 import type { ScaleEditorControlDefinition } from "client/gui/ScaleEditor";
 import type { InputTooltips } from "client/gui/static/TooltipsControl";
 import type { BuildingMode } from "client/modes/build/BuildingMode";
@@ -297,6 +298,7 @@ namespace Scene {
 		readonly Inventory: BlockSelectionControlDefinition;
 		readonly Touch: TouchButtonsDefinition;
 	};
+	@injectable
 	export class BuildToolScene extends Control<BuildToolSceneDefinition> {
 		readonly tool;
 		readonly blockSelector;
@@ -304,7 +306,7 @@ namespace Scene {
 		private readonly blockInfo;
 		private readonly touchButtons;
 
-		constructor(gui: BuildToolSceneDefinition, tool: BuildTool) {
+		constructor(gui: BuildToolSceneDefinition, tool: BuildTool, @inject mainScreen: MainScreenLayout) {
 			super(gui);
 			this.tool = tool;
 
@@ -323,9 +325,8 @@ namespace Scene {
 			this.onEnabledStateChange((enabled) => scaleEditorBtn.setVisible(enabled), true);
 			this.onDisable(() => (scaleEditorGui.Visible = false));
 
-			this.blockSelector = tool.di.resolveForeignClass(BlockSelectionControl, [gui.Inventory]);
-			this.blockSelector.show();
-			this.add(this.blockSelector);
+			const inventory = this.parent(mainScreen.registerLeft<BlockSelectionControlDefinition>("Inventory"));
+			this.blockSelector = this.add(tool.di.resolveForeignClass(BlockSelectionControl, [inventory.instance]));
 
 			this.blockInfo = this.add(new BlockInfo(gui.Info, this.blockSelector.selectedBlock));
 			this.touchButtons = this.add(new TouchButtons(gui.Touch, this.blockSelector.selectedBlock));
@@ -1131,7 +1132,10 @@ export class BuildTool extends ToolBase {
 		super(mode);
 
 		this.gui = this.parentGui(
-			new Scene.BuildToolScene(ToolBase.getToolGui<"Build", Scene.BuildToolSceneDefinition>().Build, this),
+			di.resolveForeignClass(Scene.BuildToolScene, [
+				ToolBase.getToolGui<"Build", Scene.BuildToolSceneDefinition>().Build,
+				this,
+			]),
 		);
 
 		this.controller = this.parent(new Component());

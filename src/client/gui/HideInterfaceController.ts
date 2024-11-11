@@ -2,6 +2,7 @@ import { ReplicatedStorage, StarterGui, UserInputService, Workspace } from "@rbx
 import { Anim } from "client/gui/Anim";
 import { Interface } from "client/gui/Interface";
 import { ButtonControl } from "engine/client/gui/Button";
+import { ButtonComponent } from "engine/client/gui/ButtonComponent";
 import { HostedService } from "engine/shared/di/HostedService";
 import { ObservableValue } from "engine/shared/event/ObservableValue";
 import type { MainScreenLayout } from "client/gui/MainScreenLayout";
@@ -60,13 +61,13 @@ export class HideInterfaceController extends HostedService {
 			});
 		});
 
-		const hideButton = mainScreen.registerTopRightButton("Hide");
+		const hideButton = this.parent(mainScreen.registerTopRightButton("Hide"));
 		this.parent(
-			new ButtonControl(hideButton.instance, () => {
+			new ButtonComponent(hideButton.instance, () => {
 				this.currentUnhideScreen = this.createUnhideGui(hideButton.instance);
 				this.visible.set(false);
 			}),
-		).show();
+		);
 	}
 
 	private createUnhideGui(button: GuiButton): ScreenGui {
