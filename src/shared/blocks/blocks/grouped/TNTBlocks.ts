@@ -78,17 +78,17 @@ class Logic extends InstanceBlockLogic<typeof definition> {
 		const doExplode = (part: BasePart, radius: number, pressure: number, flammable: boolean) => {
 			if (!part) return;
 
-			RemoteEvents.Explode.send({ part: part, radius, pressure, isFlammable: flammable });
+			RemoteEvents.Explode.send({ part, radius, pressure, isFlammable: flammable });
 			this.disable();
 		};
 
-		const part = (this.instance.FindFirstChild("Part") ??
+		const mainPart = (this.instance.FindFirstChild("Part") ??
 			this.instance.FindFirstChild("Union") ??
 			this.instance.PrimaryPart!) as BasePart;
 
 		this.on(({ explode, radius, pressure, flammable }) => {
 			if (!explode) return;
-			doExplode(part, radius, pressure, flammable);
+			doExplode(mainPart, radius, pressure, flammable);
 		});
 
 		let radius: number | undefined;
@@ -101,7 +101,7 @@ class Logic extends InstanceBlockLogic<typeof definition> {
 
 		const impactCache = this.initializeInputCache("impact");
 
-		this.event.subscribe(part.Touched, (part) => {
+		this.event.subscribe(mainPart.Touched, (part) => {
 			if (!impactCache.tryGet()) return;
 			if (radius === undefined || pressure === undefined || flammable === undefined) {
 				return;
@@ -110,11 +110,11 @@ class Logic extends InstanceBlockLogic<typeof definition> {
 				return;
 			}
 
-			const velocity1 = part.AssemblyLinearVelocity.Magnitude;
+			const velocity1 = mainPart.AssemblyLinearVelocity.Magnitude;
 			const velocity2 = part.AssemblyLinearVelocity.Magnitude;
 
 			if (velocity1 > (velocity2 + 1) * 10) {
-				doExplode(part, radius, pressure, flammable);
+				doExplode(mainPart, radius, pressure, flammable);
 			}
 		});
 	}
