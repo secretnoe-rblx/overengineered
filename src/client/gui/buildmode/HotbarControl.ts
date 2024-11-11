@@ -50,10 +50,11 @@ export type HotbarControlDefinition = GuiObject & {
 	readonly NameLabel: TextLabel;
 };
 
+@injectable
 export class HotbarControl extends Control<HotbarControlDefinition> {
 	private readonly nameLabel;
 
-	constructor(tools: ToolController, gui: HotbarControlDefinition) {
+	constructor(gui: HotbarControlDefinition, @inject tools: ToolController) {
 		super(gui);
 
 		// Disable roblox native backpack
