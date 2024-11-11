@@ -171,11 +171,11 @@ namespace Scene {
 				MirrorY: multiValueSetter(miry, (v) => miry.setInteractable(v)),
 				MirrorZ: multiValueSetter(mirz, (v) => mirz.setInteractable(v)),
 			};
-			this.event.subscribeObservable(
-				tool.enabledModes.enabled,
-				(enabledModes) => {
+			this.event.subscribeImmediately(
+				tool.enabledModes.updated,
+				() => {
 					for (const [name, button] of pairs(buttons)) {
-						button.set(2, enabledModes.includes(name));
+						button.set(2, tool.enabledModes.isEnabled(name));
 					}
 				},
 				true,
@@ -604,18 +604,7 @@ export type EditToolButtons = EditToolMode | "Copy" | "Delete" | "MirrorX" | "Mi
 
 @injectable
 export class EditTool extends ToolBase {
-	readonly enabledModes = new ComponentDisabler<EditToolButtons>([
-		"Move",
-		"Rotate",
-		"Scale",
-		"Copy",
-		"Paste",
-		"Paint",
-		"Delete",
-		"MirrorX",
-		"MirrorY",
-		"MirrorZ",
-	]);
+	readonly enabledModes = new ComponentDisabler<EditToolButtons>();
 
 	private readonly _selectedMode = new ObservableValue<EditToolMode | undefined>(undefined);
 	readonly selectedMode = this._selectedMode.asReadonly();
@@ -736,7 +725,7 @@ export class EditTool extends ToolBase {
 	}
 
 	toggleMode(mode: EditToolMode | undefined) {
-		if (mode && !this.enabledModes.enabled.get().includes(mode)) {
+		if (mode && !this.enabledModes.isEnabled(mode)) {
 			this._selectedMode.set(undefined);
 			return;
 		}

@@ -1,17 +1,21 @@
 import { BasicCarTutorialDiffs } from "client/tutorial/tutorials/BasicCarTutorial.diff";
 import type { BuildingMode } from "client/modes/build/BuildingMode";
+import type { ToolController } from "client/tools/ToolController";
 import type { TutorialController, TutorialDescriber, TutorialRunnerPartList } from "client/tutorial/TutorialController";
 
 @injectable
 export class BasicCarTutorial implements TutorialDescriber {
 	readonly name = "Basics/car";
 
-	constructor(@inject private readonly buildingMode: BuildingMode) {}
+	constructor(
+		@inject private readonly buildingMode: BuildingMode,
+		@inject private readonly toolController: ToolController,
+	) {}
 
 	create(t: TutorialController): TutorialRunnerPartList {
 		const { saveVersion, diffs } = BasicCarTutorialDiffs;
-		const toolController = this.buildingMode.toolController;
-		const editTool = toolController.allTools.editTool;
+		const toolController = this.toolController;
+		const editTool = this.buildingMode.tools.editTool;
 
 		return [
 			() => [
@@ -38,7 +42,7 @@ export class BasicCarTutorial implements TutorialDescriber {
 			],
 
 			() => [
-				t.funcPart(() => toolController.enabledTools.enableOnly(toolController.allTools.buildTool)),
+				t.funcPart(() => toolController.enabledTools.enableOnly(this.buildingMode.tools.buildTool)),
 				t.processDiff(diffs.c1frame, saveVersion),
 				t.partText("First, let's build the frame for our car."),
 				t.translatedHintsPart(
@@ -52,14 +56,14 @@ export class BasicCarTutorial implements TutorialDescriber {
 			],
 
 			() => [
-				t.funcPart(() => toolController.enabledTools.enableOnly(toolController.allTools.deleteTool)),
+				t.funcPart(() => toolController.enabledTools.enableOnly(this.buildingMode.tools.deleteTool)),
 				t.processDiff(diffs.c2delete, saveVersion),
 				t.partText("Whoops, we placed one block too many. Delete it."),
 				t.translatedHintsPart(["Select the delete tool"]),
 			],
 
 			() => [
-				t.funcPart(() => toolController.enabledTools.enableOnly(toolController.allTools.buildTool)),
+				t.funcPart(() => toolController.enabledTools.enableOnly(this.buildingMode.tools.buildTool)),
 				t.combinePartsParallel(
 					t.processDiff(diffs.c3servo1, saveVersion),
 					t.combinePartsSequential(
@@ -77,7 +81,7 @@ export class BasicCarTutorial implements TutorialDescriber {
 
 			() => [
 				t.funcPart(() => {
-					toolController.enabledTools.enableOnly(toolController.allTools.editTool);
+					toolController.enabledTools.enableOnly(this.buildingMode.tools.editTool);
 					editTool.enabledModes.enableOnly("Move");
 				}),
 				t.processDiff(diffs.c4moveup, saveVersion),
@@ -91,25 +95,25 @@ export class BasicCarTutorial implements TutorialDescriber {
 			],
 
 			() => [
-				t.funcPart(() => toolController.enabledTools.enableOnly(toolController.allTools.buildTool)),
+				t.funcPart(() => toolController.enabledTools.enableOnly(this.buildingMode.tools.buildTool)),
 				t.processDiff(diffs.c5motor, saveVersion),
 				t.partText("Great! Let's install motors that will turn the wheels and move the car!"),
 			],
 
 			() => [
-				t.funcPart(() => toolController.enabledTools.enableOnly(toolController.allTools.buildTool)),
+				t.funcPart(() => toolController.enabledTools.enableOnly(this.buildingMode.tools.buildTool)),
 				t.processDiff(diffs.c6wheels, saveVersion),
 				t.partText("Nice, now you can install wheels"),
 			],
 
 			() => [
-				t.funcPart(() => toolController.enabledTools.enableOnly(toolController.allTools.buildTool)),
+				t.funcPart(() => toolController.enabledTools.enableOnly(this.buildingMode.tools.buildTool)),
 				t.processDiff(diffs.c7seat, saveVersion),
 				t.partText("Now, the main peace - the vehicle seat."),
 			],
 
 			() => [
-				t.funcPart(() => toolController.enabledTools.enableOnly(toolController.allTools.configTool)),
+				t.funcPart(() => toolController.enabledTools.enableOnly(this.buildingMode.tools.configTool)),
 				t.processDiff(diffs.c8cfgmotorsright, saveVersion),
 				t.partText(
 					"It's time to adjust the controls, let's start with the rotary mechanism. Configure the right side motors first.",
@@ -123,7 +127,7 @@ export class BasicCarTutorial implements TutorialDescriber {
 			],
 
 			() => [
-				t.funcPart(() => toolController.enabledTools.enableOnly(toolController.allTools.configTool)),
+				t.funcPart(() => toolController.enabledTools.enableOnly(this.buildingMode.tools.configTool)),
 				t.processDiff(diffs.c9cfgmotorsleft, saveVersion),
 				t.partText(
 					"Great! Now configure the left side motors of your car. Configure them like the right side, but inversed",
@@ -144,7 +148,7 @@ export class BasicCarTutorial implements TutorialDescriber {
 			],
 
 			() => [
-				t.funcPart(() => toolController.enabledTools.enableOnly(toolController.allTools.configTool)),
+				t.funcPart(() => toolController.enabledTools.enableOnly(this.buildingMode.tools.configTool)),
 				t.processDiff(diffs.c10cfgservo, saveVersion),
 				t.partText("Time to configure servomotors. This is necessary for the car to be able to turn"),
 				t.hintsPart(

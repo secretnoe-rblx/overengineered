@@ -777,7 +777,7 @@ export class BlockEditor extends ClientComponent {
 			Adornee: handles,
 			Parent: handles,
 		});
-		this.event.subscribe(this.errors.changed, () => {
+		this.event.subscribe(this.errors.collectionChanged, () => {
 			const valid = this.errors.size() === 0;
 
 			const props = {

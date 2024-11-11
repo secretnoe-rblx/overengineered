@@ -31,6 +31,7 @@ import { ClientBuildingValidationController } from "client/modes/build/ClientBui
 import { PlayModeController } from "client/modes/PlayModeController";
 import { PlayerDataInitializer } from "client/PlayerDataStorage";
 import { TerrainController } from "client/terrain/TerrainController";
+import { ToolController } from "client/tools/ToolController";
 import { BasicCarTutorial } from "client/tutorial/tutorials/BasicCarTutorial";
 import { BasicPlaneTutorial } from "client/tutorial/tutorials/BasicPlaneTutorial";
 import { NewBasicPlaneTutorial } from "client/tutorial/tutorials/NewBasicPlaneTutorial";
@@ -80,6 +81,7 @@ export namespace SandboxGame {
 		ClientBuildingValidationController.initialize(builder);
 
 		builder.services.registerService(MainScene);
+		builder.services.registerService(ToolController);
 
 		builder.services.registerService(GameEnvironmentController);
 		builder.services.registerService(EnvBlacklistsController);

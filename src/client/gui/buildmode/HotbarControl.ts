@@ -54,7 +54,7 @@ export type HotbarControlDefinition = GuiObject & {
 export class HotbarControl extends Control<HotbarControlDefinition> {
 	private readonly nameLabel;
 
-	constructor(gui: HotbarControlDefinition, @inject tools: ToolController) {
+	constructor(gui: HotbarControlDefinition, @inject toolController: ToolController) {
 		super(gui);
 
 		// Disable roblox native backpack
@@ -67,27 +67,23 @@ export class HotbarControl extends Control<HotbarControlDefinition> {
 		this.nameLabel = this.add(new Control(this.gui.NameLabel));
 
 		this.event.subscribeObservable(
-			tools.visibleTools.enabled,
-			(visible) => {
+			toolController.tools,
+			(tools) => {
 				toolButtons.clear();
 
 				let index = 0;
-				for (const tool of tools.allToolsOrdered) {
-					if (!visible.includes(tool)) {
-						continue;
-					}
-
-					const button = new HotbarButtonControl(template(), tools, tool, ++index);
+				for (const tool of tools) {
+					const button = new HotbarButtonControl(template(), toolController, tool, ++index);
 					toolButtons.keyedChildren.add(tool, button);
 				}
 			},
 			true,
 		);
-		this.event.subscribeObservable(
-			tools.enabledTools.enabled,
-			(enabled) => {
+		this.event.subscribeImmediately(
+			toolController.enabledTools.updated,
+			() => {
 				for (const [tool, control] of toolButtons.keyedChildren.getAll()) {
-					const isenabled = enabled.includes(tool);
+					const isenabled = toolController.enabledTools.isEnabled(tool);
 
 					control.instance.BackgroundTransparency = isenabled ? 0.2 : 0.6;
 					control.instance.Active = isenabled;
@@ -112,7 +108,7 @@ export class HotbarControl extends Control<HotbarControlDefinition> {
 			this.gui.Tools.GamepadRight.ImageLabel.Image = UserInputService.GetImageForKeyCode(Enum.KeyCode.ButtonR1);
 		});
 
-		this.event.subscribeObservable(tools.selectedTool, (tool, prev) => this.toolChanged(tool, prev));
+		this.event.subscribeObservable(toolController.selectedTool, (tool, prev) => this.toolChanged(tool, prev));
 		this.resetLabels();
 	}
 

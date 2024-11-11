@@ -686,6 +686,7 @@ export class TutorialController extends Component {
 		@inject private readonly plot: ReadonlyPlot,
 		@inject readonly buildingMode: BuildingMode,
 		@inject private readonly blockList: BlockList,
+		@inject private readonly buildTool: BuildTool,
 		@inject di: DIContainer,
 	) {
 		super();
@@ -794,13 +795,7 @@ export class TutorialController extends Component {
 	/** Wait for blocks building */
 	partBuild(blocks: LatestSerializedBlocks): TutorialPartRegistration {
 		const hc = this.showBlocks(blocks);
-		const exec = Steps.execute(
-			Steps.Build.wait,
-			this,
-			blocks,
-			this.buildingMode.toolController.allTools.buildTool,
-			this.sharedPlot,
-		);
+		const exec = Steps.execute(Steps.Build.wait, this, blocks, this.buildingMode.tools.buildTool, this.sharedPlot);
 
 		return {
 			...exec,

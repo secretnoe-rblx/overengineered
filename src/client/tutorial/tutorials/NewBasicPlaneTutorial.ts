@@ -1,18 +1,22 @@
 import { NewBasicPlaneTutorialDiffs } from "client/tutorial/tutorials/NewBasicPlaneTutorial.diff";
 import { InputController } from "engine/client/InputController";
 import type { BuildingMode } from "client/modes/build/BuildingMode";
+import type { ToolController } from "client/tools/ToolController";
 import type { TutorialController, TutorialDescriber, TutorialRunnerPartList } from "client/tutorial/TutorialController";
 
 @injectable
 export class NewBasicPlaneTutorial implements TutorialDescriber {
 	readonly name = "Basics/plane";
 
-	constructor(@inject private readonly buildingMode: BuildingMode) {}
+	constructor(
+		@inject private readonly buildingMode: BuildingMode,
+		@inject private readonly toolController: ToolController,
+	) {}
 
 	create(t: TutorialController): TutorialRunnerPartList {
 		const { saveVersion, diffs } = NewBasicPlaneTutorialDiffs;
-		const toolController = this.buildingMode.toolController;
-		const editTool = toolController.allTools.editTool;
+		const toolController = this.toolController;
+		const editTool = this.buildingMode.tools.editTool;
 
 		return [
 			() => [
@@ -40,7 +44,7 @@ export class NewBasicPlaneTutorial implements TutorialDescriber {
 			],
 
 			() => [
-				t.funcPart(() => toolController.enabledTools.enableOnly(toolController.allTools.buildTool)),
+				t.funcPart(() => toolController.enabledTools.enableOnly(this.buildingMode.tools.buildTool)),
 				t.processDiff(diffs.base, saveVersion),
 				t.partText("First, let's build the frame for your plane."),
 				t.translatedHintsPart(
@@ -54,7 +58,7 @@ export class NewBasicPlaneTutorial implements TutorialDescriber {
 			],
 
 			() => [
-				t.funcPart(() => toolController.enabledTools.enableOnly(toolController.allTools.buildTool)),
+				t.funcPart(() => toolController.enabledTools.enableOnly(this.buildingMode.tools.buildTool)),
 				t.processDiff(diffs.engineAndSeat, saveVersion),
 				t.partText(
 					"Now let's place the engine and the seat.\nThe engine will power your plane and the seat will provide a comfortable flight!",
@@ -66,7 +70,7 @@ export class NewBasicPlaneTutorial implements TutorialDescriber {
 				),
 			],
 			() => [
-				t.funcPart(() => toolController.enabledTools.enableOnly(toolController.allTools.buildTool)),
+				t.funcPart(() => toolController.enabledTools.enableOnly(this.buildingMode.tools.buildTool)),
 				t.processDiff(diffs.basicWings, saveVersion),
 				t.partText("Well done! Now place some wings."),
 				t.translatedHintsPart(
@@ -77,7 +81,7 @@ export class NewBasicPlaneTutorial implements TutorialDescriber {
 			],
 			() => [
 				t.funcPart(() => {
-					toolController.enabledTools.enableOnly(toolController.allTools.editTool);
+					toolController.enabledTools.enableOnly(this.buildingMode.tools.editTool);
 					editTool.enabledModes.enableOnly("Move");
 				}),
 				t.processDiff(diffs.moveAll, saveVersion),
@@ -93,7 +97,7 @@ export class NewBasicPlaneTutorial implements TutorialDescriber {
 			],
 
 			() => [
-				t.funcPart(() => toolController.enabledTools.enableOnly(toolController.allTools.buildTool)),
+				t.funcPart(() => toolController.enabledTools.enableOnly(this.buildingMode.tools.buildTool)),
 				t.processDiff(diffs.servo, saveVersion),
 				t.partText(
 					"It's time to place the servos.\nThese are used to precisely rotate something to an angle.\nWe're going to control many things using these.",
@@ -109,14 +113,14 @@ export class NewBasicPlaneTutorial implements TutorialDescriber {
 			],
 
 			() => [
-				t.funcPart(() => toolController.enabledTools.enableOnly(toolController.allTools.deleteTool)),
+				t.funcPart(() => toolController.enabledTools.enableOnly(this.buildingMode.tools.deleteTool)),
 				t.processDiff(diffs.removeExtraServo, saveVersion),
 				t.partText("Oh, what's that? Seems that we placed an extra servo!\nLet's remove it."),
 				t.translatedHintsPart(["Select the delete tool"], ["Remove the highlighted block"], [""]),
 			],
 
 			() => [
-				t.funcPart(() => toolController.enabledTools.enableOnly(toolController.allTools.buildTool)),
+				t.funcPart(() => toolController.enabledTools.enableOnly(this.buildingMode.tools.buildTool)),
 				t.processDiff(diffs.controlWings, saveVersion),
 				t.partText("Alright, let's place the rest of the wings."),
 				t.translatedHintsPart(
@@ -129,7 +133,7 @@ export class NewBasicPlaneTutorial implements TutorialDescriber {
 			],
 
 			() => [
-				t.funcPart(() => toolController.enabledTools.enableOnly(toolController.allTools.buildTool)),
+				t.funcPart(() => toolController.enabledTools.enableOnly(this.buildingMode.tools.buildTool)),
 				t.processDiff(diffs.prepareForWheels, saveVersion),
 				t.partText(
 					"All your plane lacks now is wheels.\nBut how do we connect them?\nUsing bearings and hinges of course!",
@@ -143,7 +147,7 @@ export class NewBasicPlaneTutorial implements TutorialDescriber {
 			],
 
 			() => [
-				t.funcPart(() => toolController.enabledTools.enableOnly(toolController.allTools.buildTool)),
+				t.funcPart(() => toolController.enabledTools.enableOnly(this.buildingMode.tools.buildTool)),
 				t.processDiff(diffs.placeWheels, saveVersion),
 				t.partText("Almost done! Now just place wheels and we're done with building."),
 				t.translatedHintsPart(
@@ -161,7 +165,7 @@ export class NewBasicPlaneTutorial implements TutorialDescriber {
 				),
 			],
 			() => [
-				t.funcPart(() => toolController.enabledTools.enableOnly(toolController.allTools.configTool)),
+				t.funcPart(() => toolController.enabledTools.enableOnly(this.buildingMode.tools.configTool)),
 				t.processDiff(diffs.configureAllServos, saveVersion),
 				t.partText("Let's configure these servos!"),
 				t.translatedHintsPart(
@@ -189,7 +193,7 @@ export class NewBasicPlaneTutorial implements TutorialDescriber {
 				),
 			],
 			() => [
-				t.funcPart(() => toolController.enabledTools.enableOnly(toolController.allTools.configTool)),
+				t.funcPart(() => toolController.enabledTools.enableOnly(this.buildingMode.tools.configTool)),
 				t.processDiff(diffs.configureRoll, saveVersion),
 				t.partText(
 					"Set up the servos that are used to control horizontal tilt (roll) of your plane.\n These are located just behind your front main pair of wings.",
@@ -203,7 +207,7 @@ export class NewBasicPlaneTutorial implements TutorialDescriber {
 			],
 
 			() => [
-				t.funcPart(() => toolController.enabledTools.enableOnly(toolController.allTools.configTool)),
+				t.funcPart(() => toolController.enabledTools.enableOnly(this.buildingMode.tools.configTool)),
 				t.processDiff(diffs.configurePitch, saveVersion),
 				t.partText(
 					`Great. Now we need to adjust the back wings.\nThey are responsible for the forward tilt (pitch)`,
@@ -229,7 +233,7 @@ export class NewBasicPlaneTutorial implements TutorialDescriber {
 			],
 
 			() => [
-				t.funcPart(() => toolController.enabledTools.enableOnly(toolController.allTools.configTool)),
+				t.funcPart(() => toolController.enabledTools.enableOnly(this.buildingMode.tools.configTool)),
 				t.processDiff(diffs.configureYaw, saveVersion),
 				t.partText(
 					"Time to configure the last two servos. One is on the back (on top of your tail) and another right under the nose of your plane",
@@ -243,7 +247,7 @@ export class NewBasicPlaneTutorial implements TutorialDescriber {
 			],
 
 			() => [
-				t.funcPart(() => toolController.enabledTools.enableOnly(toolController.allTools.configTool)),
+				t.funcPart(() => toolController.enabledTools.enableOnly(this.buildingMode.tools.configTool)),
 				t.processDiff(diffs.configureEngine, saveVersion),
 				t.partText("And, finally, adjust the engine controls"),
 				t.translatedHintsPart(

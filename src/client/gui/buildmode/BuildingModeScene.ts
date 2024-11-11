@@ -1,3 +1,4 @@
+import { Interface } from "client/gui/Interface";
 import { Scene } from "client/gui/Scene";
 import { requestMode } from "client/modes/PlayModeRequest";
 import { ButtonControl } from "engine/client/gui/Button";
@@ -13,6 +14,10 @@ export class BuildingModeScene extends Scene {
 		@inject di: DIContainer,
 	) {
 		super();
+
+		this.onEnabledStateChange(
+			(enabled) => (Interface.getGameUI<{ BuildingMode: GuiObject }>().BuildingMode.Visible = enabled),
+		);
 
 		const runButton = mainScreen.registerTopCenterButton("Run");
 		this.event.subscribeObservable(mode.canRun, (canRun) => runButton.visible.set("build_main", canRun), true);

@@ -5,13 +5,21 @@ import { ActionController } from "client/modes/build/ActionController";
 import { CenterOfMassController } from "client/modes/build/CenterOfMassController";
 import { GridController } from "client/modes/build/GridController";
 import { PlayMode } from "client/modes/PlayMode";
+import { BuildTool } from "client/tools/BuildTool";
+import { ConfigTool } from "client/tools/ConfigTool";
+import { DeleteTool } from "client/tools/DeleteTool";
+import { EditTool } from "client/tools/EditTool";
 import { BlockSelect } from "client/tools/highlighters/BlockSelect";
-import { ToolController } from "client/tools/ToolController";
+import { PaintTool } from "client/tools/PaintTool";
+import { WireTool } from "client/tools/WireTool";
 import { LocalPlayer } from "engine/client/LocalPlayer";
 import { NumberObservableValue } from "engine/shared/event/NumberObservableValue";
 import { ObservableSwitch } from "engine/shared/event/ObservableSwitch";
 import { ObservableValue } from "engine/shared/event/ObservableValue";
+import { Objects } from "engine/shared/fixes/Objects";
 import { SharedRagdoll } from "shared/SharedRagdoll";
+import type { ToolBase } from "client/tools/ToolBase";
+import type { ToolController } from "client/tools/ToolController";
 import type { SharedPlot } from "shared/building/SharedPlot";
 
 declare global {
@@ -32,32 +40,41 @@ export class BuildingMode extends PlayMode {
 	readonly mirrorMode = new ObservableValue<MirrorMode>({});
 	readonly targetPlot;
 	readonly mirrorVisualizer;
-	readonly toolController;
 	readonly gui;
 	readonly gridEnabled = new ObservableValue(true);
 	readonly moveGrid = new NumberObservableValue<number>(1, 0, 256, 0.01);
 	readonly rotateGrid = new NumberObservableValue<number>(90, 0, 360, 0.01);
 	readonly editMode = new ObservableValue<EditMode>("global");
+	readonly tools;
 
 	private readonly actionController;
 
-	constructor(@inject di: DIContainer, @inject plot: SharedPlot) {
+	constructor(
+		@inject plot: SharedPlot,
+		@inject private readonly toolController: ToolController,
+		@inject di: DIContainer,
+	) {
 		super();
 
 		di = di.beginScope((di) => {
 			di.registerSingletonValue(this);
 			di.registerSingletonClass(ActionController);
-			di.registerSingletonClass(ToolController);
 			di.registerSingletonClass(CenterOfMassController);
 			di.registerSingletonClass(GridController).withArgs([this.moveGrid, this.rotateGrid, this.editMode]);
 
-			di.registerSingletonFunc((di) => di.resolve<ToolController>().allTools.buildTool);
-			di.registerSingletonFunc((di) => di.resolve<ToolController>().allTools.configTool);
-			di.registerSingletonFunc((di) => di.resolve<ToolController>().allTools.editTool);
-			di.registerSingletonFunc((di) => di.resolve<ToolController>().allTools.deleteTool);
-			di.registerSingletonFunc((di) => di.resolve<ToolController>().allTools.paintTool);
-			di.registerSingletonFunc((di) => di.resolve<ToolController>().allTools.wireTool);
+			di.registerSingletonClass(BuildTool);
+			di.registerSingletonClass(EditTool);
+			di.registerSingletonClass(DeleteTool);
+			di.registerSingletonClass(ConfigTool);
+			di.registerSingletonClass(PaintTool);
+			di.registerSingletonClass(WireTool);
 		});
+
+		this.event.subscribeObservable(
+			toolController.selectedTool,
+			(tool) => this.mirrorVisualizer.setEnabled(tool?.supportsMirror() ?? false),
+			true,
+		);
 
 		let mg = this.moveGrid.get();
 		let rg = this.moveGrid.get();
@@ -98,7 +115,6 @@ export class BuildingMode extends PlayMode {
 		}, true);
 		this.mirrorVisualizer = this.parent(new MirrorVisualizer(this.targetPlot, this.mirrorMode));
 
-		this.toolController = this.parent(di.resolve<ToolController>());
 		this.gui = this.parent(di.resolveForeignClass(BuildingModeScene));
 
 		this.actionController = this.parent(di.resolve<ActionController>());
@@ -109,6 +125,21 @@ export class BuildingMode extends PlayMode {
 			ih.onKeyDown("LeftControl", () => this.gridEnabled.set(false));
 			ih.onKeyUp("LeftControl", () => this.gridEnabled.set(true));
 		});
+
+		const tools = [
+			["buildTool", di.resolve<BuildTool>()],
+			["editTool", di.resolve<EditTool>()],
+			["deleteTool", di.resolve<DeleteTool>()],
+			["configTool", di.resolve<ConfigTool>()],
+			["paintTool", di.resolve<PaintTool>()],
+			["wireTool", di.resolve<WireTool>()],
+		] as const;
+		const toolsArr: readonly ToolBase[] = tools.map((t) => t[1]);
+
+		this.tools = Objects.fromEntries(tools);
+
+		this.onEnable(() => toolController.tools.add(...toolsArr));
+		this.onDisable(() => toolController.tools.remove(...toolsArr));
 	}
 
 	getName(): PlayModes {

@@ -52,10 +52,10 @@ export class ActionController extends ClientComponent {
 		if (ActionController.instance) throw "what";
 		ActionController.instance = this;
 
-		this.event.subscribeImmediately(this.history.changed, () =>
+		this.event.subscribeImmediately(this.history.collectionChanged, () =>
 			this.canUndo.set("main_history", this.history.size() !== 0),
 		);
-		this.event.subscribeImmediately(this.redoHistory.changed, () =>
+		this.event.subscribeImmediately(this.redoHistory.collectionChanged, () =>
 			this.canRedo.set("main_history", this.redoHistory.size() !== 0),
 		);
 
