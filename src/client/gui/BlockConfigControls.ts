@@ -1262,7 +1262,6 @@ export class MultiBlockConfigControl extends Control implements Controls.Args {
 						const grouped = grouped2.get(definition.group) ?? [];
 						if (grouped.size() === 1) return;
 
-						needsClearing = true;
 						configs = map(configs, (c) => {
 							const ret = { ...c };
 
@@ -1272,6 +1271,7 @@ export class MultiBlockConfigControl extends Control implements Controls.Args {
 								if (t.type === "wire") continue;
 								if (t.type === setType) continue;
 
+								needsClearing = true;
 								ret[key] = BlockConfig.addDefaults({ [key]: { type: setType } } as never, definitions)[
 									key
 								];
