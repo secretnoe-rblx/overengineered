@@ -74,18 +74,19 @@ namespace Markers {
 		};
 	};
 	export abstract class Marker extends ClientInstanceComponent<MarkerComponentDefinition> {
-		private static getPartMarkerPositions(part: BasePart): Vector3[] {
-			const averageSize = (part.Size.X + part.Size.Y + part.Size.Z) / 3;
-			const halfSize = averageSize / 2;
+		private static getPartMarkerPositions(originalOrigin: BasePart): Vector3[] {
+			const sizeX = originalOrigin.Size.X / 2;
+			const sizeY = originalOrigin.Size.Y / 2;
+			const sizeZ = originalOrigin.Size.Z / 2;
 			const offset = 0.25;
 
 			return [
-				new Vector3(-halfSize + offset, 0, 0),
-				new Vector3(halfSize - offset, 0, 0),
-				new Vector3(0, 0, -halfSize + offset),
-				new Vector3(0, 0, halfSize - offset),
-				new Vector3(0, -halfSize + offset, 0),
-				new Vector3(0, halfSize - offset, 0),
+				new Vector3(-sizeX + offset, 0, 0),
+				new Vector3(sizeX - offset, 0, 0),
+				new Vector3(0, 0, -sizeZ + offset),
+				new Vector3(0, 0, sizeZ - offset),
+				new Vector3(0, -sizeY + offset, 0),
+				new Vector3(0, sizeY - offset, 0),
 				new Vector3(0, 0, 0),
 			];
 		}
@@ -93,9 +94,10 @@ namespace Markers {
 			origin: BasePart,
 			offset: Vector3 | number | "center",
 			scale: Vector3 | undefined,
+			originalOrigin: BasePart,
 		): MarkerComponentDefinition {
 			if (typeIs(offset, "number")) {
-				offset = this.getPartMarkerPositions(origin)[offset];
+				offset = this.getPartMarkerPositions(originalOrigin)[offset];
 			}
 			if (offset === "center") {
 				offset = Vector3.zero;
@@ -781,6 +783,7 @@ export class WireTool extends ToolBase {
 					blockInstance.PrimaryPart!,
 					markerpos !== undefined ? markerpos : size === 1 ? "center" : ai++,
 					BlockManager.manager.scale.get(blockInstance),
+					this.blockList.blocks[BlockManager.manager.id.get(blockInstance)]!.model.PrimaryPart!,
 				);
 
 				const component =
