@@ -608,7 +608,7 @@ class ScaleComponent extends ClientComponent implements EditComponent {
 
 			const is90DegreeMultiple = (value: number): boolean => {
 				const degrees = math.deg(math.acos(value));
-				return math.abs(degrees % 90) < 0.001 || math.abs((degrees % 90) - 90) < 0.001;
+				return math.abs(degrees % 90) < 0.1 || math.abs((degrees % 90) - 90) < 0.1;
 			};
 			return is90DegreeMultiple(m00) && is90DegreeMultiple(m11) && is90DegreeMultiple(m22);
 		};
