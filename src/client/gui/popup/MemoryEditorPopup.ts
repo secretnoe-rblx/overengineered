@@ -7,6 +7,7 @@ import { LogControl } from "client/gui/static/LogControl";
 import { ButtonControl } from "engine/client/gui/Button";
 import { Control } from "engine/client/gui/Control";
 import { TextBoxControl } from "engine/client/gui/TextBoxControl";
+import { ComponentChildren } from "engine/shared/component/ComponentChildren";
 import { Colors } from "shared/Colors";
 import { VectorUtils } from "shared/utils/VectorUtils";
 
@@ -46,7 +47,9 @@ export type MemoryEditorRecordsDefinition = ScrollingFrame & {
 	Template: MemoryEditorRecordDefinition;
 };
 
-class MemoryEditorRow extends Control<MemoryEditorRecordDefinition, ByteTextBoxControl> {
+class MemoryEditorRow extends Control<MemoryEditorRecordDefinition> {
+	private readonly columns;
+
 	constructor(
 		gui: MemoryEditorRecordDefinition,
 		private readonly popup: MemoryEditorPopup,
@@ -54,6 +57,8 @@ class MemoryEditorRow extends Control<MemoryEditorRecordDefinition, ByteTextBoxC
 		recolorPreviousUntil: (index: number) => void,
 	) {
 		super(gui);
+
+		this.columns = this.parent(new ComponentChildren<ByteTextBoxControl>().withParentInstance(gui));
 
 		this.onEnable(() => {
 			// Address
@@ -69,7 +74,7 @@ class MemoryEditorRow extends Control<MemoryEditorRecordDefinition, ByteTextBoxC
 				tb.TextColor3 = popup.data[row * 16 + i] !== undefined ? Colors.white : Color3.fromRGB(180, 180, 180);
 
 				const idx = i;
-				const control = this.add(new ByteTextBoxControl(tb));
+				const control = this.columns.add(new ByteTextBoxControl(tb));
 				control.value.set(popup.data[row * 16 + i] ?? 0);
 				control.submitted.Connect((value) => {
 					tb.TextColor3 = Colors.white;
@@ -97,7 +102,7 @@ class MemoryEditorRow extends Control<MemoryEditorRecordDefinition, ByteTextBoxC
 	}
 
 	updateColor(index: number) {
-		this.getChildren()[index].instance.TextColor3 =
+		this.columns.getAll()[index].instance.TextColor3 =
 			this.popup.data[this.row * 16 + index] !== undefined ? Colors.white : Color3.fromRGB(180, 180, 180);
 	}
 }
@@ -122,8 +127,7 @@ class MemoryEditorRows extends Control<MemoryEditorRecordsDefinition> {
 		this.template = this.asTemplate(this.gui.Template, false);
 		this.gui.Template.Visible = false;
 
-		this.rows = new Control<GuiObject, MemoryEditorRow>(this.gui);
-		this.add(this.rows);
+		this.rows = this.parent(new ComponentChildren<MemoryEditorRow>().withParentInstance(this.gui));
 
 		// Dynamic scroll
 		this.gui.GetPropertyChangedSignal("CanvasPosition").Connect(() => {
@@ -154,7 +158,7 @@ class MemoryEditorRows extends Control<MemoryEditorRecordsDefinition> {
 
 		const loadBelow = () => {
 			if (this.rowCursor >= this.popup.bytesLimit / 16) return;
-			if (this.rows.getChildren().size() < this.contentSize) return;
+			if (this.rows.getAll().size() < this.contentSize) return;
 			this.rowCursor += this.getContentSection();
 
 			this.spawnRows();
@@ -175,7 +179,7 @@ class MemoryEditorRows extends Control<MemoryEditorRecordsDefinition> {
 			const row = i + this.rowCursor;
 			if (row >= this.popup.bytesLimit / 16) break;
 
-			const children = this.rows.getChildren();
+			const children = this.rows.getAll();
 			this.rows.add(
 				new MemoryEditorRow(this.template(), this.popup, row, (index) => {
 					for (let i = 0; i < math.ceil(index / 16) + 2; i++) {

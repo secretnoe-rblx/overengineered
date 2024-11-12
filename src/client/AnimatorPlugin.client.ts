@@ -33,7 +33,8 @@ import { NumberTextBoxControl } from "client/gui/controls/NumberTextBoxControl";
 import { ButtonControl, TextButtonControl } from "engine/client/gui/Button";
 import { Control } from "engine/client/gui/Control";
 import { TextBoxControl } from "engine/client/gui/TextBoxControl";
-import { ContainerComponent } from "engine/shared/component/ContainerComponent";
+import { Component } from "engine/shared/component/Component";
+import { ComponentChildren } from "engine/shared/component/ComponentChildren";
 import { Easing } from "engine/shared/component/Easing";
 import { EventHandler } from "engine/shared/event/EventHandler";
 import { ObservableValue } from "engine/shared/event/ObservableValue";
@@ -199,7 +200,7 @@ class Timeline extends Control<TimelineDefinition> {
 		const lineTemplate = this.asTemplate(gui.Lines.Visual.LineTemplate, true);
 		const timeTemplate = this.asTemplate(gui.Time.TimeTemplate, true);
 
-		const visualControl = this.add(new Control(gui));
+		const visualControl = this.parent(new ComponentChildren().withParentInstance(gui));
 		const createVisual = () => {
 			visualControl.clear();
 
@@ -742,7 +743,9 @@ class AnimationTimeline extends Control<AnimationTimelineDefinition> {
 		this.event.subscribe(this.timeline.submit, stopPlaying);
 
 		const timelinePartTemplate = this.asTemplate(gui.Timeline.Lines.Animations.Template);
-		const timelinePartList = this.add(new Control<GuiObject, TimelinePart>(gui.Timeline.Lines.Animations));
+		const timelinePartList = this.parent(
+			new ComponentChildren<TimelinePart>().withParentInstance(gui.Timeline.Lines.Animations),
+		);
 		this.event.subscribeObservable(
 			this.animation,
 			(animations) => {
@@ -778,7 +781,7 @@ class AnimationTimeline extends Control<AnimationTimelineDefinition> {
 		);
 
 		const animationButtonTemplate = this.asTemplate(gui.Animations.ScrollingFrame.Template);
-		const animationList = this.add(new Control(gui.Animations.ScrollingFrame));
+		const animationList = this.parent(new ComponentChildren().withParentInstance(gui.Animations.ScrollingFrame));
 		this.event.subscribeObservable(
 			this.animation,
 			(animations) => {
@@ -822,8 +825,8 @@ const rootgui = gui;
 gui.Visible = true;
 gui.Parent = widget;
 
-const root = new ContainerComponent();
-const timeline = root.add(new AnimationTimeline(gui));
+const root = new Component();
+const timeline = root.parent(new AnimationTimeline(gui));
 
 root.setEnabled(widget.Enabled);
 pluginButton.Click.Connect(() => {

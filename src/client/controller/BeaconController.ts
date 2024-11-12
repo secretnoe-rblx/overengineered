@@ -43,7 +43,7 @@ export class BeaconController extends HostedService {
 
 	private initializePlayerBeacons(): Component {
 		const component = new Component();
-		const playerBeacons = new ComponentKeyedChildren<number, Beacon>(component);
+		const playerBeacons = component.parent(new ComponentKeyedChildren<number, Beacon>());
 
 		const createPlayerBeacon = (player: Player) => {
 			// spawn() just in case of infinite wait for something

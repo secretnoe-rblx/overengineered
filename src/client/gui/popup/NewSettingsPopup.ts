@@ -3,7 +3,7 @@ import { ToggleControl } from "client/gui/controls/ToggleControl";
 import { Interface } from "client/gui/Interface";
 import { Popup } from "client/gui/Popup";
 import { ButtonControl } from "engine/client/gui/Button";
-import { InstanceComponent } from "engine/shared/component/InstanceComponent";
+import { ComponentChildren } from "engine/shared/component/ComponentChildren";
 import { CustomRemotes } from "shared/Remotes";
 import type { PlayerSelectorColumnControlDefinition } from "client/gui/controls/PlayerSelectorListControl";
 import type { GameHostBuilder } from "engine/shared/GameHostBuilder";
@@ -62,7 +62,7 @@ export class NewSettingsPopup extends Popup<NewSettingsPopupDefinition> {
 		host.services.registerTransientFunc((ctx) => ctx.resolveForeignClass(this, [gui.Clone()]));
 	}
 
-	private readonly sceneParent;
+	private readonly sceneChildren;
 
 	constructor(
 		gui: NewSettingsPopupDefinition,
@@ -70,14 +70,14 @@ export class NewSettingsPopup extends Popup<NewSettingsPopupDefinition> {
 	) {
 		super(gui);
 
-		this.sceneParent = this.add(new InstanceComponent(this.gui));
+		this.sceneChildren = this.parent(new ComponentChildren().withParentInstance(this.gui));
 
 		this.add(new ButtonControl(this.gui.Heading.CloseButton, () => this.hide()));
 		this.setScene("Main");
 	}
 
 	loadScene(scene: Scenes) {
-		this.sceneParent.clear();
+		this.sceneChildren.clear();
 
 		if (scene === "Main") {
 			// TODO: make this scene
@@ -102,8 +102,8 @@ export class NewSettingsPopup extends Popup<NewSettingsPopupDefinition> {
 				CustomRemotes.gui.settings.permissions.isolationMode.send(value);
 			}, true);
 
-			this.sceneParent.add(blacklist);
-			this.sceneParent.add(isolationMode);
+			this.sceneChildren.add(blacklist);
+			this.sceneChildren.add(isolationMode);
 			return;
 		}
 

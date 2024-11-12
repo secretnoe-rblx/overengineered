@@ -1,11 +1,11 @@
 import { MarketplaceService, Players } from "@rbxts/services";
-import { ButtonControl } from "engine/client/gui/Button";
+import { ButtonComponent } from "engine/client/gui/ButtonComponent";
 import { Control } from "engine/client/gui/Control";
 import { SubmittableValue } from "engine/shared/event/SubmittableValue";
 import { Marketplace } from "engine/shared/Marketplace";
 import { GameDefinitions } from "shared/data/GameDefinitions";
 
-class MaterialButton extends ButtonControl {
+class MaterialButton extends ButtonComponent {
 	constructor(gui: GuiButton, set: (material: Enum.Material) => void, gamePass?: number) {
 		super(gui);
 
@@ -64,7 +64,7 @@ export class MaterialChooser extends Control<MaterialChooserDefinition> {
 			if (!instance.IsA("ImageButton")) continue;
 
 			const gamepassid = instance.Name === "Neon" ? GameDefinitions.GAMEPASSES.NeonMaterial : undefined;
-			this.add(new MaterialButton(instance, (material) => value.submit(material), gamepassid));
+			this.parent(new MaterialButton(instance, (material) => value.submit(material), gamepassid));
 		}
 	}
 }

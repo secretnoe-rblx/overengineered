@@ -52,10 +52,10 @@ class MultiKeyPartControl extends Control<MultiKeyPartControlDefinition> {
 		const value = new SubmittableValue(new ObservableValue<MultiKeyPart>({ key, value: num }));
 		this.value = value.asHalfReadonly();
 
-		const keyChooser = this.add(new KeyOrStringChooserControl(gui.Button.Button));
+		const keyChooser = this.parent(new KeyOrStringChooserControl(gui.Button.Button));
 		keyChooser.submitted.Connect((key) => value.submit({ ...value.get(), key }));
 
-		const numbertb = this.add(new NumberTextBoxControl(gui.Number, min, max));
+		const numbertb = this.parent(new NumberTextBoxControl(gui.Number, min, max));
 		numbertb.submitted.Connect((num) => value.submit({ ...value.get(), value: num }));
 
 		this.event.subscribeObservable(
@@ -67,7 +67,7 @@ class MultiKeyPartControl extends Control<MultiKeyPartControlDefinition> {
 			true,
 		);
 
-		const delButton = this.add(new ButtonControl(gui.DeleteButton, () => this._deleted.Fire()));
+		const delButton = this.parent(new ButtonControl(gui.DeleteButton, () => this._deleted.Fire()));
 		Tooltip.init(delButton, "Remove the key from the list");
 	}
 }
@@ -97,8 +97,7 @@ export class MultiKeyNumberControl extends Control<MultiKeyNumberControlDefiniti
 
 		const template = this.asTemplate(gui.Template, true);
 
-		const children = new ComponentChildren<MultiKeyPartControl>(this);
-		children.onAdded.Connect((control) => (control.instance.Parent = this.instance));
+		const children = this.parent(new ComponentChildren<MultiKeyPartControl>().withParentInstance(gui));
 
 		const submit = () => {
 			const values = children.getAll().map((c) => c.value.get());
@@ -140,7 +139,7 @@ export class MultiKeyNumberControl extends Control<MultiKeyNumberControlDefiniti
 			add(key, value);
 		}
 
-		this.add(
+		this.parent(
 			new ButtonControl(gui.Add.Button, () => {
 				add();
 				submit();

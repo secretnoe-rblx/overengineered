@@ -36,11 +36,15 @@ export class AdminGui extends HostedService {
 		let destroy: (() => void) | undefined;
 		const create = () => {
 			const parent = new InstanceComponent(
-				Element.create("ScreenGui", { AutoLocalize: false, Name: "TestScreenGui", Parent: Interface.getPlayerGui() }),
+				Element.create("ScreenGui", {
+					AutoLocalize: false,
+					Name: "TestScreenGui",
+					Parent: Interface.getPlayerGui(),
+				}),
 			);
 
 			const tabs = TabControl.create();
-			parent.add(tabs);
+			parent.parent(tabs);
 
 			const wrapNonVisual = (
 				name: string,

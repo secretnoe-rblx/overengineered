@@ -168,7 +168,7 @@ export class CenterOfMassController extends ClientComponent {
 	) {
 		super();
 
-		const visualizerContainer = new ComponentChild<CenterOfMassVisualizer>(this);
+		const visualizerContainer = this.parent(new ComponentChild<CenterOfMassVisualizer>());
 		const enabled = new ObservableSwitch();
 
 		this.event.subscribeObservable(

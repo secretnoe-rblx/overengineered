@@ -8,17 +8,17 @@ import { Element } from "engine/shared/Element";
 import { Strings } from "engine/shared/fixes/String.propmacro";
 
 class CategoryControl extends Control {
-	readonly unnamed = new ComponentChildren<LabelControl>(this);
-	readonly named = new ComponentKeyedChildren<defined, LabelControl>(this);
-	readonly categories = new ComponentKeyedChildren<defined, CategoryControl>(this);
+	readonly unnamed;
+	readonly named;
+	readonly categories;
 	tempDisabled = false;
 
 	constructor(gui: GuiObject) {
 		super(gui);
 
-		this.unnamed.onAdded.Connect((c) => (c.instance.Parent = gui));
-		this.named.onAdded.Connect((k, c) => (c.instance.Parent = gui));
-		this.categories.onAdded.Connect((k, c) => (c.instance.Parent = gui));
+		this.unnamed = this.parent(new ComponentChildren<LabelControl>().withParentInstance(gui));
+		this.named = this.parent(new ComponentKeyedChildren<defined, LabelControl>().withParentInstance(gui));
+		this.categories = this.parent(new ComponentKeyedChildren<defined, CategoryControl>().withParentInstance(gui));
 	}
 }
 

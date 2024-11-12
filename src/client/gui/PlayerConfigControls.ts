@@ -7,6 +7,7 @@ import { ToggleControl } from "client/gui/controls/ToggleControl";
 import { Interface } from "client/gui/Interface";
 import { TextButtonControl } from "engine/client/gui/Button";
 import { Control } from "engine/client/gui/Control";
+import { ComponentChildren } from "engine/shared/component/ComponentChildren";
 import { Signal } from "engine/shared/event/Signal";
 import { Objects } from "engine/shared/fixes/Objects";
 import type { ColorChooserDefinition } from "client/gui/ColorChooser";
@@ -63,7 +64,7 @@ namespace ControlsSource {
 		) {
 			super(templates.toggle(), definition.displayName);
 
-			const control = this.add(new ToggleControl(this.gui.Control));
+			const control = this.parent(new ToggleControl(this.gui.Control));
 			control.value.set(config);
 
 			this.event.subscribe(control.submitted, (value) => this.submitted.Fire(value));
@@ -79,7 +80,7 @@ namespace ControlsSource {
 		) {
 			super(templates.color(), definition.displayName);
 
-			const control = this.add(new ColorChooser(this.gui.Control));
+			const control = this.parent(new ColorChooser(this.gui.Control));
 			control.value.set(config);
 
 			this.event.subscribe(control.value.submitted, (value) => this.submitted.Fire(value));
@@ -111,7 +112,7 @@ namespace ControlsSource {
 			} as const satisfies PlayerConfigTypes.Definitions;
 			const _compilecheck: ConfigDefinitionsToConfig<keyof typeof def, typeof def> = config;
 
-			const control = this.add(new MultiPlayerConfigControl(this.gui.Control, di));
+			const control = this.parent(new MultiPlayerConfigControl(this.gui.Control, di));
 			control.set(config, def);
 			this.event.subscribe(control.configUpdated, (key, value) => {
 				this.submitted.Fire((config = { ...config, [key]: value }));
@@ -157,7 +158,7 @@ namespace ControlsSource {
 			} as const satisfies PlayerConfigTypes.Definitions;
 			const _compilecheck: ConfigDefinitionsToConfig<keyof typeof def, typeof def> = config;
 
-			const control = this.add(new MultiPlayerConfigControl<typeof def>(this.gui.Control, di));
+			const control = this.parent(new MultiPlayerConfigControl<typeof def>(this.gui.Control, di));
 			control.set(config, def);
 			this.event.subscribe(control.configUpdated, (key, value) => {
 				this.submitted.Fire((config = { ...config, [key]: value }));
@@ -185,7 +186,7 @@ namespace ControlsSource {
 		) {
 			super(templates.slider(), definition.displayName);
 
-			const control = this.add(
+			const control = this.parent(
 				new SliderControl(this.gui.Control, definition.min, definition.max, definition.step),
 			);
 			control.value.set(config);
@@ -222,7 +223,7 @@ namespace ControlsSource {
 			} as const satisfies PlayerConfigTypes.Definitions;
 			const _compilecheck: ConfigDefinitionsToConfig<keyof typeof def, typeof def> = config;
 
-			const control = this.add(new MultiPlayerConfigControl(this.gui.Control, di));
+			const control = this.parent(new MultiPlayerConfigControl(this.gui.Control, di));
 			control.set(config, def);
 			this.event.subscribe(control.configUpdated, (key, value) => {
 				this.submitted.Fire((config = { ...config, [key]: value }));
@@ -239,7 +240,7 @@ namespace ControlsSource {
 		) {
 			super(templates.dropdown(), definition.displayName);
 
-			const control = this.add(new DropdownList<T>(this.gui.Control));
+			const control = this.parent(new DropdownList<T>(this.gui.Control));
 			for (const item of definition.items) {
 				control.addItem(item);
 			}
@@ -282,7 +283,7 @@ namespace ControlsSource {
 			} as const satisfies PlayerConfigTypes.Definitions;
 			const _compilecheck: ConfigDefinitionsToConfig<keyof typeof def, typeof def> = config;
 
-			const control = this.add(new MultiPlayerConfigControl(this.gui.Control, di));
+			const control = this.parent(new MultiPlayerConfigControl(this.gui.Control, di));
 			control.set(config, def);
 			this.event.subscribe(control.configUpdated, (key, value) => {
 				this.submitted.Fire((config = { ...config, [key]: value }));
@@ -340,7 +341,7 @@ namespace ControlsSource {
 			const _compilecheck1: ConfigDefinitionsToConfig<keyof typeof selectionDef, typeof selectionDef> =
 				config.selection;
 
-			const parent = this.add(new Control(this.gui.Control));
+			const parent = this.parent(new Control(this.gui.Control));
 
 			// single block selection
 			{
@@ -381,7 +382,7 @@ namespace ControlsSource {
 		) {
 			super(templates.key(), definition.displayName);
 
-			const control = this.add(new KeyChooserControl(this.gui.Control));
+			const control = this.parent(new KeyChooserControl(this.gui.Control));
 			control.value.set(config);
 
 			this.event.subscribe(control.submitted, (value) => this.submitted.Fire(value));
@@ -397,7 +398,7 @@ namespace ControlsSource {
 		) {
 			super(templates.number(), definition.displayName);
 
-			const control = this.add(new NumberTextBoxControl(this.gui.Control));
+			const control = this.parent(new NumberTextBoxControl(this.gui.Control));
 			control.value.set(config);
 
 			this.event.subscribe(control.submitted, (value) => this.submitted.Fire(value));
@@ -468,7 +469,7 @@ namespace ControlsSource {
 			} as const satisfies PlayerConfigTypes.Definitions;
 			const _compilecheck: ConfigDefinitionsToConfig<keyof typeof def, typeof def> = config;
 
-			const control = this.add(new MultiPlayerConfigControl<typeof def>(this.gui.Control, di));
+			const control = this.parent(new MultiPlayerConfigControl<typeof def>(this.gui.Control, di));
 			control.set(config, def);
 			this.event.subscribe(control.configUpdated, (key, value) => {
 				this.submitted.Fire((config = { ...config, [key]: value }));
@@ -504,7 +505,7 @@ namespace ControlsSource {
 		) {
 			super(templates.multi(), definition.displayName);
 
-			const list = this.add(new Control(this.gui.Control));
+			const list = this.parent(new Control(this.gui.Control));
 			for (const tutorial of tutorials.allTutorials) {
 				list.add(
 					new TextButtonControl(
@@ -551,7 +552,7 @@ namespace ControlsSource {
 			} as const satisfies PlayerConfigTypes.Definitions;
 			const _compilecheck: ConfigDefinitionsToConfig<keyof typeof def, typeof def> = config;
 
-			const control = this.add(new MultiPlayerConfigControl<typeof def>(this.gui.Control, di));
+			const control = this.parent(new MultiPlayerConfigControl<typeof def>(this.gui.Control, di));
 			control.set(config, def);
 			this.event.subscribe(control.configUpdated, (key, value) => {
 				this.submitted.Fire((config = { ...config, [key]: value }));
@@ -591,7 +592,7 @@ namespace ControlsSource {
 			} as const satisfies PlayerConfigTypes.Definitions;
 			const _compilecheck: ConfigDefinitionsToConfig<keyof typeof def, typeof def> = config;
 
-			const control = this.add(new MultiPlayerConfigControl<typeof def>(this.gui.Control, di));
+			const control = this.parent(new MultiPlayerConfigControl<typeof def>(this.gui.Control, di));
 			control.set(config, def);
 			this.event.subscribe(control.configUpdated, (key, value) => {
 				this.submitted.Fire((config = { ...config, [key]: value }));
@@ -634,19 +635,21 @@ export class MultiPlayerConfigControl<
 	>();
 
 	private settedElements = new Map<keyof TDef, ConfigControl<keyof PlayerConfigTypes.Types>>();
+	private readonly children;
 
 	constructor(
 		gui: ConfigControlDefinition,
 		@inject private readonly di: DIContainer,
 	) {
 		super(gui);
+		this.children = this.parent(new ComponentChildren().withParentInstance(gui));
 	}
 
 	get<TKey extends keyof TDef>(key: TKey): ConfigControl<TDef[TKey]["type"]> {
 		return this.settedElements.get(key)!;
 	}
 	set(config: ConfigDefinitionsToConfig<keyof TDef, TDef>, definition: TDef) {
-		this.clear();
+		this.children.clear();
 		this.settedElements.clear();
 
 		for (const [id, def] of Objects.entriesArray(definition).sort(
@@ -656,7 +659,7 @@ export class MultiPlayerConfigControl<
 				Controls[def.type] as typeof Controls.bool,
 				[config[id], def] as never,
 			);
-			this.add(control);
+			this.children.add(control);
 			this.settedElements.set(id, control);
 
 			control.submitted.Connect((value) => this.configUpdated.Fire(id as string, value as never));

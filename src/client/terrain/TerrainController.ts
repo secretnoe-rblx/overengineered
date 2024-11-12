@@ -13,7 +13,7 @@ export class TerrainController extends HostedService {
 	constructor(@inject playerData: PlayerDataStorage) {
 		super();
 
-		const loaders = new ComponentChildren<ChunkLoader>(this, true);
+		const loaders = this.parent(new ComponentChildren<ChunkLoader>(true));
 		const terrain = playerData.config.createBased((c) => c.terrain);
 
 		this.event.subscribeObservable(

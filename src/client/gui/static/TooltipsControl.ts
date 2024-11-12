@@ -7,7 +7,6 @@ import { Transforms } from "engine/shared/component/Transforms";
 import { TransformService } from "engine/shared/component/TransformService";
 import { Element } from "engine/shared/Element";
 import type { KeybindDefinition, Keybinds } from "client/Keybinds";
-import type { InstanceComponent } from "engine/shared/component/InstanceComponent";
 
 const tooltipsGui = Interface.getGameUI<{ Help: { Controls: TooltipsControlDefinition } }>().Help.Controls;
 tooltipsGui.Visible = true;
@@ -37,10 +36,7 @@ type TooltipsControlDefinition = GuiObject & {
 	};
 };
 
-export class TooltipsHolder extends ClientInstanceComponent<
-	GuiObject,
-	InstanceComponent<typeof tooltipsGui.KeyboardTemplate>
-> {
+export class TooltipsHolder extends ClientInstanceComponent<GuiObject> {
 	static createComponent(category: string): TooltipsHolder {
 		const gui = Element.create(
 			"Frame",

@@ -11,9 +11,9 @@ class NumberControl extends Control<NumberControlDefinition> {
 	constructor(gui: NumberControlDefinition, value: ObservableValue<number>) {
 		super(gui);
 
-		this.add(new ButtonControl(gui.AddButton, () => value.set(value.get() + 1)));
-		this.add(new ButtonControl(gui.SubButton, () => value.set(value.get() - 1)));
-		this.add(new NumberTextBoxControl(gui.ValueTextBox, value));
+		this.parent(new ButtonControl(gui.AddButton, () => value.set(value.get() + 1)));
+		this.parent(new ButtonControl(gui.SubButton, () => value.set(value.get() - 1)));
+		this.parent(new NumberTextBoxControl(gui.ValueTextBox, value));
 	}
 }
 
@@ -44,13 +44,13 @@ export class ScaleEditorControl extends Control<ScaleEditorControlDefinition> {
 			return value;
 		};
 
-		this.add(new NumberControl(gui.ScaleXControl, createVectorNum("X")));
-		this.add(new NumberControl(gui.ScaleYControl, createVectorNum("Y")));
-		this.add(new NumberControl(gui.ScaleZControl, createVectorNum("Z")));
+		this.parent(new NumberControl(gui.ScaleXControl, createVectorNum("X")));
+		this.parent(new NumberControl(gui.ScaleYControl, createVectorNum("Y")));
+		this.parent(new NumberControl(gui.ScaleZControl, createVectorNum("Z")));
 
-		const all = this.add(new NumberTextBoxControl(gui.ScaleAllControl.ValueTextBox, 1 / 16, 8));
+		const all = this.parent(new NumberTextBoxControl(gui.ScaleAllControl.ValueTextBox, 1 / 16, 8));
 		all.value.set(1);
-		this.add(
+		this.parent(
 			new ButtonControl(gui.ScaleAllControl.ConfirmButton, () => {
 				const val = all.value.get();
 				scale.set(new Vector3(val, val, val));

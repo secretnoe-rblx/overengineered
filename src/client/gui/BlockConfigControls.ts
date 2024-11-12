@@ -13,6 +13,7 @@ import { ButtonControl } from "engine/client/gui/Button";
 import { Control } from "engine/client/gui/Control";
 import { TextBoxControl } from "engine/client/gui/TextBoxControl";
 import { ComponentChild } from "engine/shared/component/ComponentChild";
+import { ComponentChildren } from "engine/shared/component/ComponentChildren";
 import { ObservableValue } from "engine/shared/event/ObservableValue";
 import { ArgsSignal } from "engine/shared/event/Signal";
 import { Objects } from "engine/shared/fixes/Objects";
@@ -112,8 +113,8 @@ const map = <T, TOut extends defined>(
 
 //
 
-const template = Interface.getGameUI<{ Templates: { Config: { Template: ConfigValueWrapperDefinition } } }>().Templates.Config
-	.Template;
+const template = Interface.getGameUI<{ Templates: { Config: { Template: ConfigValueWrapperDefinition } } }>().Templates
+	.Config.Template;
 
 const setWrapperColor = (wrapper: ConfigValueWrapper, valueType: PrimitiveKeys) => {
 	wrapper.typeColor.set(BlockWireManager.types[valueType].color);
@@ -130,7 +131,7 @@ const initTooltip = (
 	let tooltip = definition.tooltip;
 	if (definition.unit) tooltip += ` (${definition.unit})`;
 
-	Tooltip.init(control.add(new Control(control.instance.HeadingLabel)), tooltip);
+	Tooltip.init(control.parent(new Control(control.instance.HeadingLabel)), tooltip);
 };
 
 namespace Controls {
@@ -200,7 +201,7 @@ namespace Controls {
 			wrapper.content.set(control);
 
 			wrapper.instance.Parent = parent.control;
-			(parentTo ?? parent).add(wrapper);
+			(parentTo ?? parent).parent(wrapper);
 			return $tuple(wrapper, control);
 		};
 		const addSingleTypeWrapperAuto = <TKey extends PrimitiveKeys>(
@@ -255,7 +256,7 @@ namespace Controls {
 			) {
 				super(templates.Redirect());
 
-				const btn = this.add(
+				const btn = this.parent(
 					new ButtonControl(this.gui.Control, () => args.travelTo(firstValue(config)!.blockUuid)),
 				);
 
@@ -269,7 +270,7 @@ namespace Controls {
 			constructor(templates: templates, definition: MiniPrimitives["bool"], config: ConfigParts<"bool">) {
 				super(templates.Checkbox());
 
-				const control = this.add(new CheckBoxControl(this.control));
+				const control = this.parent(new CheckBoxControl(this.control));
 				control.value.set(sameOrUndefined(config));
 
 				control.submitted.Connect((v) => this.submitted.Fire((config = map(config, (_) => v))));
@@ -282,7 +283,7 @@ namespace Controls {
 
 				const gui = this.control as NumberTextBoxControlDefinition;
 
-				const control = this.add(
+				const control = this.parent(
 					definition.clamp
 						? new NumberTextBoxControl<true>(
 								gui,
@@ -308,7 +309,7 @@ namespace Controls {
 				const gui = this.control as SliderControlDefinition;
 				const clamp = definition.clamp;
 
-				const control = this.add(
+				const control = this.parent(
 					new SliderControl<true>(gui, clamp.min, clamp.max, clamp.step, {
 						Knob: gui.Control.Knob,
 						Filled: gui.Control.Filled,
@@ -325,7 +326,7 @@ namespace Controls {
 			constructor(templates: templates, definition: MiniPrimitives["string"], config: ConfigParts<"string">) {
 				super(templates.Text());
 
-				const control = this.add(new TextBoxControl(this.control));
+				const control = this.parent(new TextBoxControl(this.control));
 				control.text.set(sameOrUndefined(config) ?? "");
 
 				control.submitted.Connect((v) => this.submitted.Fire((config = map(config, (_) => v))));
@@ -335,7 +336,7 @@ namespace Controls {
 			constructor(templates: templates, definition: MiniPrimitives["byte"], config: ConfigParts<"byte">) {
 				super(templates.Byte());
 
-				const control = this.add(
+				const control = this.parent(
 					new ByteEditor(this.control, {
 						Buttons: this.gui.Control.Bottom.Buttons,
 						TextBox: this.gui.Control.Top.TextBox,
@@ -352,7 +353,7 @@ namespace Controls {
 			constructor(templates: templates, definition: MiniPrimitives["key"], config: ConfigParts<"key">) {
 				super(templates.Key());
 
-				this.keyChooser = this.add(new KeyOrStringChooserControl<true>(this.control));
+				this.keyChooser = this.parent(new KeyOrStringChooserControl<true>(this.control));
 				this.keyChooser.value.set(sameOrUndefined(config));
 
 				this.keyChooser.submitted.Connect((v) => this.submitted.Fire((config = map(config, (_) => v))));
@@ -381,7 +382,7 @@ namespace Controls {
 						return true;
 					});
 
-				const control = this.add(
+				const control = this.parent(
 					new ButtonControl(this.control, () => {
 						MemoryEditorPopup.showPopup(definition.lengthLimit, [...(value() ?? [])], (v) =>
 							this.submitted.Fire((config = map(config, (_) => v))),
@@ -398,7 +399,7 @@ namespace Controls {
 			constructor(templates: templates, definition: MiniPrimitives["color"], config: ConfigParts<"color">) {
 				super(templates.Color());
 
-				const control = this.add(new ColorChooser(this.control));
+				const control = this.parent(new ColorChooser(this.control));
 				control.value.set(sameOrUndefined(config) ?? Colors.white);
 
 				control.value.submitted.Connect((v) => this.submitted.Fire((config = map(config, (_) => v))));
@@ -454,7 +455,7 @@ namespace Controls {
 			constructor(templates: templates, definition: MiniPrimitives["enum"], config: ConfigParts<"enum">) {
 				super(templates.Dropdown());
 
-				const control = this.add(new DropdownList<string>(this.control));
+				const control = this.parent(new DropdownList<string>(this.control));
 				for (const value of definition.elementOrder) {
 					const { displayName, tooltip } = definition.elements[value];
 
@@ -941,16 +942,10 @@ class ConfigValueWrapper extends Control<ConfigValueWrapperDefinition> {
 		super(gui);
 
 		this.event.subscribeObservable(this.typeColor, (color) => (gui.TypeLine.BackgroundColor3 = color), true);
+		this.dropdown = this.parent(new DropdownList<mk>(gui.Content.TypeDropdown));
+		this.content = this.parent(new ComponentChild<Control>()).withParentInstance(gui.Content);
 
-		this.dropdown = this.add(new DropdownList<mk>(gui.Content.TypeDropdown));
-
-		this.content = new ComponentChild<Control>(this);
-		this.content.childSet.Connect((child) => {
-			if (!child) return;
-			child.instance.Parent = gui.Content;
-		});
-
-		this.controls = this.add(new Control(gui.Content.TypeControllable));
+		this.controls = this.parent(new Control(gui.Content.TypeControllable));
 		this.controllable = this.controls.add(new CheckBoxControl(this.controls.instance.Controllable.Control));
 	}
 }
@@ -969,7 +964,7 @@ class ConfigAutoValueWrapper extends Control<ConfigValueWrapperDefinition> {
 	) {
 		super(gui);
 
-		const control = this.add(new ConfigValueWrapper(gui));
+		const control = this.parent(new ConfigValueWrapper(gui));
 
 		// without a connector we can only configure the value with the config tool; thus, "unset" makes zero sense
 		if (!definition.connectorHidden) {
@@ -1200,6 +1195,8 @@ export class MultiBlockConfigControl extends Control implements Controls.Args {
 	private readonly _submitted = new ArgsSignal<[config: BlocksConfig]>();
 	readonly submitted = this._submitted.asReadonly();
 
+	private readonly children;
+
 	constructor(
 		gui: GuiObject,
 		definitions: VisualBlockConfigDefinitions,
@@ -1209,6 +1206,8 @@ export class MultiBlockConfigControl extends Control implements Controls.Args {
 		@inject di: DIContainer,
 	) {
 		super(gui);
+
+		this.children = this.parent(new ComponentChildren());
 
 		if (order) {
 			const nonexistent = asMap(definitions)
@@ -1233,7 +1232,7 @@ export class MultiBlockConfigControl extends Control implements Controls.Args {
 				if (definition.configHidden && !asMap(configs).any((uuid, c) => c[k].type === "wire")) continue;
 
 				const lconfigs = map(configs, (c) => c[k]);
-				const wrapper = this.add(
+				const wrapper = this.children.add(
 					di.resolveForeignClass(ConfigAutoValueWrapper, [
 						template.Clone(),
 						definition,
@@ -1284,7 +1283,7 @@ export class MultiBlockConfigControl extends Control implements Controls.Args {
 					}
 
 					if (needsClearing) {
-						this.clear();
+						this.children.clear();
 						create();
 					}
 				});

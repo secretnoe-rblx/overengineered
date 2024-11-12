@@ -90,7 +90,7 @@ export class ToolController extends ClientComponent {
 		let wasSetByLoading = false;
 		this.onEnable(() => (wasSetByLoading = false));
 
-		const inputParent = new ComponentChild<ToolInputController>(this);
+		const inputParent = this.parent(new ComponentChild<ToolInputController>());
 		this.tools.subscribe(() => inputParent.set(new ToolInputController(this)), true);
 
 		this.event.subscribeObservable(

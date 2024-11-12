@@ -97,7 +97,7 @@ class TooltipController extends HostedService {
 	}
 
 	registerControl(
-		control: InstanceComponent<GuiObject>,
+		control: { readonly instance: GuiObject; onDestroy(func: () => void): void },
 		text: string | (() => string | undefined),
 	): SignalConnection {
 		let eh: EventHandler = new EventHandler();

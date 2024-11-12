@@ -1,5 +1,6 @@
 import { RunService } from "@rbxts/services";
-import { ContainerComponent } from "engine/shared/component/ContainerComponent";
+import { Component } from "engine/shared/component/Component";
+import { ComponentChildren } from "engine/shared/component/ComponentChildren";
 import { ObservableValue } from "engine/shared/event/ObservableValue";
 import { ImpactController } from "shared/block/impact/ImpactController";
 import { BlockConfig } from "shared/blockLogic/BlockConfig";
@@ -15,9 +16,10 @@ type BlockData = {
 };
 
 @injectable
-export class SharedMachine extends ContainerComponent<GenericBlockLogic> {
+export class SharedMachine extends Component {
 	readonly occupiedByLocalPlayer = new ObservableValue(true);
 	private impactController?: ImpactController;
+	readonly blocks;
 	protected readonly blocksMap = new Map<BlockUuid, BlockData>();
 	readonly runner = this.parent(new BlockLogicRunner());
 
@@ -26,6 +28,7 @@ export class SharedMachine extends ContainerComponent<GenericBlockLogic> {
 		@inject private readonly di: DIContainer,
 	) {
 		super();
+		this.blocks = this.parent(new ComponentChildren<GenericBlockLogic>());
 	}
 
 	/** Add blocks to the machine, initialize it and start */
@@ -44,7 +47,7 @@ export class SharedMachine extends ContainerComponent<GenericBlockLogic> {
 			if (!logicctor) continue;
 
 			const logic = di.resolveForeignClass(logicctor, [block]);
-			this.add(logic);
+			this.blocks.add(logic);
 			this.blocksMap.set(block.uuid, { block, logic });
 		}
 
@@ -69,7 +72,7 @@ export class SharedMachine extends ContainerComponent<GenericBlockLogic> {
 	}
 
 	initializeSpeedLimiter() {
-		const seat = this.getChildren().find((c) => c instanceof VehicleSeatBlock.logic.ctor) as
+		const seat = this.blocks.getAll().find((c) => c instanceof VehicleSeatBlock.logic.ctor) as
 			| VehicleSeatBlockLogic
 			| undefined;
 		if (!seat) return;

@@ -68,7 +68,7 @@ class ColorChooserSliders extends Control<ColorChooserDefinition["Sliders"]> {
 				this.setBySelf = false;
 			});
 			slider.value.subscribe(updateSliderColors);
-			this.add(slider);
+			this.parent(slider);
 
 			return slider;
 		};
@@ -102,15 +102,15 @@ class ColorChooserInputs extends Control<ColorChooserDefinition["Inputs"]> {
 		const getColorFromRgbTextBoxes = () => Color3.fromRGB(rtext.value.get(), gtext.value.get(), btext.value.get());
 		const submitFromRgb = () => this._value.submit(getColorFromRgbTextBoxes());
 
-		const rtext = this.add(new NumberTextBoxControl(this.gui.ManualRed, 0, 255, 1));
-		const gtext = this.add(new NumberTextBoxControl(this.gui.ManualGreen, 0, 255, 1));
-		const btext = this.add(new NumberTextBoxControl(this.gui.ManualBlue, 0, 255, 1));
+		const rtext = this.parent(new NumberTextBoxControl(this.gui.ManualRed, 0, 255, 1));
+		const gtext = this.parent(new NumberTextBoxControl(this.gui.ManualGreen, 0, 255, 1));
+		const btext = this.parent(new NumberTextBoxControl(this.gui.ManualBlue, 0, 255, 1));
 
 		this.event.subscribe(rtext.submitted, submitFromRgb);
 		this.event.subscribe(gtext.submitted, submitFromRgb);
 		this.event.subscribe(btext.submitted, submitFromRgb);
 
-		const hextext = this.add(new TextBoxControl(this.gui.ManualHex));
+		const hextext = this.parent(new TextBoxControl(this.gui.ManualHex));
 		this.event.subscribe(hextext.submitted, (hex) => {
 			try {
 				this._value.submit(Color3.fromHex(hex));
@@ -144,7 +144,7 @@ export class ColorChooser extends Control<ColorChooserDefinition> {
 		value ??= SubmittableValue.from<Color3>(Color3.fromRGB(255, 255, 255));
 		this.value = value.asHalfReadonly();
 
-		const sliders = this.add(new ColorChooserSliders(gui.Sliders));
+		const sliders = this.parent(new ColorChooserSliders(gui.Sliders));
 		sliders.moved.Connect((v) => {
 			value.set(v);
 			inputs.value.set(v);
@@ -155,7 +155,7 @@ export class ColorChooser extends Control<ColorChooserDefinition> {
 			value.submit(v);
 		});
 
-		const inputs = this.add(new ColorChooserInputs(gui.Inputs));
+		const inputs = this.parent(new ColorChooserInputs(gui.Inputs));
 		inputs.value.submitted.Connect((v) => {
 			value.set(v);
 			sliders.value.set(v);

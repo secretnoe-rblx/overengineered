@@ -893,7 +893,7 @@ export class BlockEditor extends ClientComponent {
 				di.resolveForeignClass(ScaleComponent, [handles, this.editBlocks, bb, this.scaleGrid, topControl]),
 		};
 
-		const container = new ComponentChild<EditComponent>(this);
+		const container = this.parent(new ComponentChild<EditComponent>());
 		container.childSet.Connect((child) => {
 			if (!child?.error) return;
 			this._errors.addSource(child.error);

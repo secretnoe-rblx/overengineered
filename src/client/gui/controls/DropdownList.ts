@@ -1,5 +1,6 @@
 import { TextButtonControl } from "engine/client/gui/Button";
 import { Control } from "engine/client/gui/Control";
+import { ComponentChildren } from "engine/shared/component/ComponentChildren";
 import { Transforms } from "engine/shared/component/Transforms";
 import { TransformService } from "engine/shared/component/TransformService";
 import { ObservableValue } from "engine/shared/event/ObservableValue";
@@ -30,7 +31,7 @@ export class DropdownList<TValue extends string = string> extends Control<Dropdo
 		this.itemTemplate = this.asTemplate(this.gui.Content.Template);
 
 		this.button = this.add(new TextButtonControl(this.gui.Button));
-		this.contents = this.add(new Control<GuiObject, TextButtonControl>(this.gui.Content));
+		this.contents = this.parent(new ComponentChildren<TextButtonControl>().withParentInstance(this.gui.Content));
 
 		this.event.subscribe(this.button.activated, () => this.toggle());
 		this.event.subscribeObservable(
@@ -45,7 +46,7 @@ export class DropdownList<TValue extends string = string> extends Control<Dropdo
 		this.contentsVisible = !this.contentsVisible;
 
 		let height = this.button.instance.Size.Y.Offset;
-		for (const button of this.contents.getChildren()) {
+		for (const button of this.contents.getAll()) {
 			TransformService.run(button.instance, (tr) =>
 				tr
 					.func(() => {

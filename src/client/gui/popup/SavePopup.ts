@@ -5,6 +5,7 @@ import { ConfirmPopup } from "client/gui/popup/ConfirmPopup";
 import { ButtonControl } from "engine/client/gui/Button";
 import { Control } from "engine/client/gui/Control";
 import { TextBoxControl } from "engine/client/gui/TextBoxControl";
+import { ComponentChildren } from "engine/shared/component/ComponentChildren";
 import { Transforms } from "engine/shared/component/Transforms";
 import { TransformService } from "engine/shared/component/TransformService";
 import { ObservableValue } from "engine/shared/event/ObservableValue";
@@ -192,9 +193,7 @@ class SaveSlots extends Control<SaveSlotsDefinition> {
 		this.template = this.asTemplate(this.gui.Template);
 		this.commentTemplate = this.asTemplate(this.gui.CommentTemplate);
 
-		this.slots = new Control(this.gui);
-		this.add(this.slots);
-
+		this.slots = this.parent(new ComponentChildren().withParentInstance(gui));
 		const recreate = () => {
 			this.slots.clear();
 
@@ -221,7 +220,7 @@ class SaveSlots extends Control<SaveSlotsDefinition> {
 						this._onLoad.Fire();
 					});
 					item.onOpened.Connect(() => {
-						for (const slot of this.slots.getChildren()) {
+						for (const slot of this.slots.getAll()) {
 							if (!(slot instanceof SaveItem)) continue;
 							if (slot === item) continue;
 

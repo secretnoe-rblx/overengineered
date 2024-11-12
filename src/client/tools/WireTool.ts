@@ -120,6 +120,7 @@ namespace Markers {
 		readonly availableTypes;
 		sameGroupMarkers?: readonly Marker[];
 		protected pauseColors = false;
+		protected readonly children;
 
 		constructor(
 			readonly block: BlockModel,
@@ -128,6 +129,8 @@ namespace Markers {
 			readonly plot: SharedPlot,
 		) {
 			super(instance);
+
+			this.children = this.parent(new ComponentChildren().withParentInstance(instance));
 
 			this.onEnable(() => (this.instance.Enabled = true));
 			this.onDisable(() => (this.instance.Enabled = false));
@@ -141,9 +144,9 @@ namespace Markers {
 		}
 
 		private initTooltips() {
-			const tooltipParent = new ComponentChild<
-				Control<GuiObject & { WireInfoLabel: TextLabel; TypeTextLabel: TextLabel }>
-			>(this, true);
+			const tooltipParent = this.parent(
+				new ComponentChild<Control<GuiObject & { WireInfoLabel: TextLabel; TypeTextLabel: TextLabel }>>(true),
+			);
 			const createTooltip = () => {
 				const wireInfoSource = Instances.getAssets<{
 					Wires: { WireInfo: GuiObject & { WireInfoLabel: TextLabel; TypeTextLabel: TextLabel } };
@@ -232,10 +235,12 @@ namespace Markers {
 				marker.connected,
 				(connected) => {
 					this.updateConnectedVisual(connected !== undefined);
-					this.clear();
+					this.children.clear();
 
 					if (connected) {
-						const wire = this.add(WireComponent.create(componentMap.get(connected) as Output, this));
+						const wire = this.children.add(
+							WireComponent.create(componentMap.get(connected) as Output, this),
+						);
 						wire.instance.Parent = wireParent;
 					}
 				},
@@ -566,7 +571,7 @@ namespace Controllers {
 
 			super();
 
-			const currentMoverContainer = new ComponentChild<WireMover>(this, true);
+			const currentMoverContainer = this.parent(new ComponentChild<WireMover>(true));
 			this.currentMoverContainer = currentMoverContainer;
 			currentMoverContainer.childSet.Connect((child) => this.selectedMarker.set(child?.marker));
 			let hoverMarker: Markers.Input | undefined;
@@ -677,8 +682,8 @@ namespace Controllers {
 @injectable
 export class WireTool extends ToolBase {
 	readonly selectedMarker = new ObservableValue<Markers.Output | undefined>(undefined);
-	private readonly markers = this.parent(new ComponentChildren<Markers.Marker>(this, true));
-	private readonly controllerContainer = new ComponentChild<Controllers.IController>(this, true);
+	private readonly markers = this.parent(new ComponentChildren<Markers.Marker>(true));
+	private readonly controllerContainer = this.parent(new ComponentChild<Controllers.IController>(true));
 
 	constructor(
 		@inject mode: BuildingMode,

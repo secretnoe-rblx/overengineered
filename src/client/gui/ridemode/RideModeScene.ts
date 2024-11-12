@@ -3,7 +3,6 @@ import { LoadingController } from "client/controller/LoadingController";
 import { LocalPlayerController } from "client/controller/LocalPlayerController";
 import { Beacon } from "client/gui/Beacon";
 import { CheckBoxControl } from "client/gui/controls/CheckBoxControl";
-import { DictionaryControl } from "client/gui/controls/DictionaryControl";
 import { FormattedLabelControl } from "client/gui/controls/FormattedLabelControl";
 import { ProgressBarControl } from "client/gui/controls/ProgressBarControl";
 import { ConfirmPopup } from "client/gui/popup/ConfirmPopup";
@@ -14,8 +13,10 @@ import { ButtonComponent } from "engine/client/gui/ButtonComponent";
 import { Control } from "engine/client/gui/Control";
 import { InputController } from "engine/client/InputController";
 import { LocalPlayer } from "engine/client/LocalPlayer";
+import { Component } from "engine/shared/component/Component";
 import { ComponentChild } from "engine/shared/component/ComponentChild";
-import { ContainerComponent } from "engine/shared/component/ContainerComponent";
+import { ComponentChildren } from "engine/shared/component/ComponentChildren";
+import { ComponentKeyedChildren } from "engine/shared/component/ComponentKeyedChildren";
 import { EventHandler } from "engine/shared/event/EventHandler";
 import { ObservableSwitch } from "engine/shared/event/ObservableSwitch";
 import { ObservableValue } from "engine/shared/event/ObservableValue";
@@ -33,6 +34,8 @@ import type { MainScreenLayout } from "client/gui/MainScreenLayout";
 import type { RideMode } from "client/modes/ride/RideMode";
 import type { PlayerDataStorage } from "client/PlayerDataStorage";
 import type { TextButtonDefinition } from "engine/client/gui/Button";
+import type { ReadonlyComponentChildren } from "engine/shared/component/ComponentChildren";
+import type { GenericBlockLogic } from "shared/blockLogic/BlockLogic";
 import type { BeaconBlockLogic } from "shared/blocks/blocks/BeaconBlock";
 import type { RocketBlockLogic } from "shared/blocks/blocks/RocketEngineBlocks";
 
@@ -40,12 +43,14 @@ type RideModeControlsDefinition = GuiObject & {
 	readonly Overlay: GuiObject;
 	readonly Button: TextButtonDefinition;
 };
-export class RideModeControls extends DictionaryControl<RideModeControlsDefinition, string, Control> {
+export class RideModeControls extends Control<RideModeControlsDefinition> {
 	readonly onEnterSettingsMode = new Signal<() => void>();
 	readonly onQuitSettingsMode = new Signal<() => void>();
 
 	private readonly overlayTemplate;
 	private quitSettingsMode?: () => void;
+
+	private readonly keyedChildren;
 
 	constructor(
 		gui: RideModeControlsDefinition,
@@ -53,6 +58,7 @@ export class RideModeControls extends DictionaryControl<RideModeControlsDefiniti
 	) {
 		super(gui);
 
+		this.keyedChildren = this.parent(new ComponentKeyedChildren<string, Control>().withParentInstance(gui));
 		this.overlayTemplate = this.asTemplate(this.gui.Overlay);
 
 		this.onDisable(() => {
@@ -90,14 +96,15 @@ export class RideModeControls extends DictionaryControl<RideModeControlsDefiniti
 			return;
 		}
 
-		const overlay = new Control(new Instance("Frame"));
-		this.add(overlay);
+		const mode = new Component();
+
+		const overlayInstance = new Instance("Frame");
+		mode.onDestroy(() => overlayInstance.Destroy());
+		const overlay = mode.parent(new ComponentChildren().withParentInstance(overlayInstance));
 		const ehandlers: EventHandler[] = [];
 		let inputting = false;
 
 		for (const [_, child] of this.keyedChildren.getAll()) {
-			if (child === overlay) continue;
-
 			const instance = this.overlayTemplate();
 			instance.Position = new UDim2(0, 0, 0, 0);
 			instance.Size = new UDim2(1, 0, 1, 0);
@@ -168,13 +175,13 @@ export class RideModeControls extends DictionaryControl<RideModeControlsDefiniti
 
 		this.onEnterSettingsMode.Fire();
 		this.quitSettingsMode = async () => {
-			for (const child of overlay.getChildren()) {
+			for (const child of overlay.getAll()) {
 				if (!(child instanceof Control)) continue;
 				child.instance.Active = true;
 			}
 
 			this.onQuitSettingsMode.Fire();
-			this.remove(overlay);
+			mode.destroy();
 
 			for (const eh of ehandlers) {
 				eh.unsubscribeAll();
@@ -196,8 +203,8 @@ export class RideModeControls extends DictionaryControl<RideModeControlsDefiniti
 	}
 
 	start(machine: ClientMachine) {
-		this.clear();
-		machine.onDestroy(() => this.clear());
+		this.keyedChildren.clear();
+		machine.onDestroy(() => this.keyedChildren.clear());
 		machine.occupiedByLocalPlayer.subscribe((occupied) => {
 			if (occupied) this.show();
 			else this.hide();
@@ -361,18 +368,17 @@ export class RideModeScene extends Control<RideModeSceneDefinition> {
 
 		gui.FindFirstChild("ActionBar")!.Destroy();
 
-		this.info = new Control(this.gui.Info);
-		this.add(this.info);
+		this.info = this.parent(new ComponentChildren<Control>().withParentInstance(this.gui.Info));
 
 		this.infoTemplate = this.asTemplate(this.gui.Info.Template);
 		this.infoTextTemplate = this.asTemplate(this.gui.Info.TextTemplate);
 	}
 
-	private addMeters(machine: IReadonlyContainerComponent) {
+	private addMeters(machine: Component & { readonly blocks: ReadonlyComponentChildren<GenericBlockLogic> }) {
 		this.info.clear();
 		this.canSit.set(
 			"canNotSitIfNoSeat",
-			machine.getChildren().any((b) => b instanceof VehicleSeatBlock.logic.ctor),
+			machine.blocks.getAll().any((b) => b instanceof VehicleSeatBlock.logic.ctor),
 		);
 
 		const init = (
@@ -412,8 +418,8 @@ export class RideModeScene extends Control<RideModeSceneDefinition> {
 		{
 			const rocketClass = RocketBlocks[0]!.logic!.ctor;
 
-			const rockets = machine
-				.getChildren()
+			const rockets = machine.blocks
+				.getAll()
 				.filter((c) => c instanceof rocketClass) as unknown as readonly RocketBlockLogic[];
 			if (rockets.size() !== 0) {
 				init("Thrust", "%s %%", this.infoTemplate(), 0, 100, 1, (control) => {
@@ -486,8 +492,8 @@ export class RideModeScene extends Control<RideModeSceneDefinition> {
 			//блок маяка костыль
 			const beaconBlockClass = BeaconBlock!.logic!.ctor;
 
-			const beacons = machine
-				.getChildren()
+			const beacons = machine.blocks
+				.getAll()
 				.filter((c) => c instanceof beaconBlockClass) as unknown as readonly BeaconBlockLogic[];
 
 			for (const beacon of beacons) {
@@ -498,11 +504,11 @@ export class RideModeScene extends Control<RideModeSceneDefinition> {
 	}
 
 	private initLogicController(machine: ClientMachine) {
-		const component = this.current.set(new ContainerComponent());
+		const component = this.current.set(new Component());
 
 		this.gui.LogicDebug.Visible = false;
 
-		const logicDebug = component.add(new Control(this.gui.LogicDebug.Clone()));
+		const logicDebug = component.parent(new Control(this.gui.LogicDebug.Clone()));
 		logicDebug.instance.Parent = this.gui.LogicDebug.Parent;
 		component.event.subscribe(this.logicButton.activated, () => {
 			logicDebug.setVisible(!logicDebug.isVisible());
@@ -513,7 +519,7 @@ export class RideModeScene extends Control<RideModeSceneDefinition> {
 		logicDebug.onEnable(() => pauseOnStart.value.set(this.mode.pauseOnStart.get()));
 		logicDebug.event.subscribe(pauseOnStart.submitted, (value) => this.mode.pauseOnStart.set(value));
 
-		const visualizer = new ComponentChild(component, true);
+		const visualizer = component.parent(new ComponentChild(true));
 		logicDebug.add(
 			new ButtonControl(logicDebug.instance.Content.Buttons.Visualizer, () => {
 				if (visualizer.get()) {
@@ -548,7 +554,7 @@ export class RideModeScene extends Control<RideModeSceneDefinition> {
 		);
 	}
 
-	private readonly current = new ComponentChild(this, true);
+	private readonly current = this.parent(new ComponentChild(true));
 
 	start(machine: ClientMachine) {
 		if (InputController.inputType.get() === "Touch") {

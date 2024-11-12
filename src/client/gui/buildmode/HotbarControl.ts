@@ -1,8 +1,8 @@
 import { StarterGui, UserInputService } from "@rbxts/services";
 import { LoadingController } from "client/controller/LoadingController";
 import { SoundController } from "client/controller/SoundController";
-import { DictionaryControl } from "client/gui/controls/DictionaryControl";
 import { Control } from "engine/client/gui/Control";
+import { ComponentKeyedChildren } from "engine/shared/component/ComponentKeyedChildren";
 import { Transforms } from "engine/shared/component/Transforms";
 import { TransformService } from "engine/shared/component/TransformService";
 import { Colors } from "shared/Colors";
@@ -61,8 +61,9 @@ export class HotbarControl extends Control<HotbarControlDefinition> {
 		StarterGui.SetCoreGuiEnabled(Enum.CoreGuiType.Backpack, false);
 
 		const template = this.asTemplate(this.gui.Tools.ToolTemplate);
-		const toolButtons = new DictionaryControl<GuiObject, ToolBase, HotbarButtonControl>(this.gui.Tools);
-		this.add(toolButtons);
+		const toolButtons = this.parent(
+			new ComponentKeyedChildren<ToolBase, HotbarButtonControl>().withParentInstance(this.gui.Tools),
+		);
 
 		this.nameLabel = this.add(new Control(this.gui.NameLabel));
 
@@ -74,7 +75,7 @@ export class HotbarControl extends Control<HotbarControlDefinition> {
 				let index = 0;
 				for (const tool of tools) {
 					const button = new HotbarButtonControl(template(), toolController, tool, ++index);
-					toolButtons.keyedChildren.add(tool, button);
+					toolButtons.add(tool, button);
 				}
 			},
 			true,
@@ -82,7 +83,7 @@ export class HotbarControl extends Control<HotbarControlDefinition> {
 		this.event.subscribeImmediately(
 			toolController.enabledTools.updated,
 			() => {
-				for (const [tool, control] of toolButtons.keyedChildren.getAll()) {
+				for (const [tool, control] of toolButtons.getAll()) {
 					const isenabled = toolController.enabledTools.isEnabled(tool);
 
 					control.instance.BackgroundTransparency = isenabled ? 0.2 : 0.6;
@@ -95,7 +96,7 @@ export class HotbarControl extends Control<HotbarControlDefinition> {
 		);
 
 		this.event.onPrepare((inputType) => {
-			for (const button of toolButtons.keyedChildren.getAll()) {
+			for (const button of toolButtons.getAll()) {
 				button[1].instance.NumLabel.Visible = inputType === "Desktop";
 			}
 

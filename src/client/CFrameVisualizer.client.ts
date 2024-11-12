@@ -29,7 +29,7 @@ copyScripts(game.GetService("ReplicatedStorage"), script.Parent!);
 
 import { TextButtonControl } from "engine/client/gui/Button";
 import { Control } from "engine/client/gui/Control";
-import { ContainerComponent } from "engine/shared/component/ContainerComponent";
+import { Component } from "engine/shared/component/Component";
 import { Element } from "engine/shared/Element";
 import { Colors } from "shared/Colors";
 
@@ -142,8 +142,8 @@ const gui: PluginGuiDefinition = Element.create("Frame", {
 gui.Visible = true;
 gui.Parent = widget;
 
-const root = new ContainerComponent();
-const control = root.add(new PluginControl(gui));
+const root = new Component();
+const control = root.parent(new PluginControl(gui));
 
 root.setEnabled(widget.Enabled);
 pluginButton.Click.Connect(() => {

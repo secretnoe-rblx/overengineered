@@ -12,7 +12,7 @@ type TreeControlDefinition = GuiObject & {
 	readonly Main: GuiButton;
 	readonly Children: Frame;
 };
-class TreeControl extends Control<TreeControlDefinition, Control> {
+class TreeControl extends Control<TreeControlDefinition> {
 	static createChildList(main: GuiButton): TreeControl {
 		const createElement = Element.create;
 		const gui = createElement(

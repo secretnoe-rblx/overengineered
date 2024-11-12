@@ -81,7 +81,7 @@ export class MultiBlockSelector extends ClientComponent {
 			box: () => new BoxSelector(plot.get(), filter),
 		};
 
-		const selectorParent = new ComponentChild<BlockSelector>(this);
+		const selectorParent = this.parent(new ComponentChild<BlockSelector>());
 		selectorParent.childSet.Connect((child) => {
 			if (child) {
 				child.submit.Connect((blocks) => this._submit.Fire(blocks));

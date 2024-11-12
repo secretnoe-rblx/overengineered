@@ -20,7 +20,7 @@ class PlotFloatingImageController extends Component {
 	constructor(plot: SharedPlot) {
 		super();
 
-		const container = new ComponentChild(this);
+		const container = this.parent(new ComponentChild());
 		const create = (player: Player) => {
 			const gui = ReplicatedStorage.Assets.PlotOwnerGui.Clone();
 			gui.UserImage.Image = Players.GetUserThumbnailAsync(

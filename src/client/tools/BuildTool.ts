@@ -1116,7 +1116,7 @@ export class BuildTool extends ToolBase {
 	readonly selectedMaterial = new ObservableValue<Enum.Material>(Enum.Material.Plastic);
 	readonly selectedColor = new ObservableValue<Color3>(Color3.fromRGB(255, 255, 255));
 	readonly selectedBlock = new ObservableValue<Block | undefined>(undefined);
-	readonly currentMode = new ComponentChild<IController>(this, true);
+	readonly currentMode = this.parent(new ComponentChild<IController>(true));
 	readonly blockRotation = new ObservableValue<CFrame>(CFrame.identity);
 	readonly blockScale = new ObservableValue<Vector3>(Vector3.one, (v) =>
 		v.Max(new Vector3(1 / 16, 1 / 16, 1 / 16)).Min(new Vector3(8, 8, 8)),

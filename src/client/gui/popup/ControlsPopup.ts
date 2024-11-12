@@ -1,9 +1,9 @@
-import { DictionaryControl } from "client/gui/controls/DictionaryControl";
 import { KeyChooserControl } from "client/gui/controls/KeyChooserControl";
 import { Interface } from "client/gui/Interface";
 import { Popup } from "client/gui/Popup";
 import { ButtonControl } from "engine/client/gui/Button";
 import { Control } from "engine/client/gui/Control";
+import { ComponentKeyedChildren } from "engine/shared/component/ComponentKeyedChildren";
 import type { KeyChooserControlDefinition } from "client/gui/controls/KeyChooserControl";
 import type { Keybinds } from "client/Keybinds";
 import type { GameHostBuilder } from "engine/shared/GameHostBuilder";
@@ -36,12 +36,12 @@ export class ControlsPopup extends Popup<ControlsPopupDefinition> {
 		this.template = this.asTemplate(gui.Content.Template, true);
 		this.add(new ButtonControl(gui.Heading.CloseButton, () => this.hide()));
 
-		const children = new DictionaryControl<GuiObject, string, Control>(gui.Content);
+		const children = this.parent(new ComponentKeyedChildren<string, Control>().withParentInstance(gui.Content));
 		this.event.subscribeMap(
 			keybinds.registrations,
 			(key, value) => {
 				if (!value) {
-					children.keyedChildren.remove(key);
+					children.remove(key);
 					return;
 				}
 
@@ -53,7 +53,7 @@ export class ControlsPopup extends Popup<ControlsPopupDefinition> {
 				keyChooser.value.set([...value.getKeys()][0]);
 				keyChooser.value.changed.Connect((key) => value.setKeys([key]));
 
-				children.keyedChildren.add(key, control);
+				children.add(key, control);
 			},
 			true,
 		);

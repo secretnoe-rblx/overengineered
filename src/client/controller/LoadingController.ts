@@ -57,7 +57,7 @@ class LoadingPopup extends Control<LoadingPopupDefinition> {
 
 	constructor(gui: LoadingPopupDefinition) {
 		super(gui);
-		this.loadingImage = this.add(new LoadingImage(gui.LoadingImage));
+		this.loadingImage = this.parent(new LoadingImage(gui.LoadingImage));
 	}
 
 	show(): void {

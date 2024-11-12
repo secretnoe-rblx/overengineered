@@ -6,6 +6,7 @@ import { ClientBuilding } from "client/modes/build/ClientBuilding";
 import { ButtonControl } from "engine/client/gui/Button";
 import { Control } from "engine/client/gui/Control";
 import { Component } from "engine/shared/component/Component";
+import { ComponentChildren } from "engine/shared/component/ComponentChildren";
 import { ComponentInstance } from "engine/shared/component/ComponentInstance";
 import { ArgsSignal, Signal } from "engine/shared/event/Signal";
 import { Objects } from "engine/shared/fixes/Objects";
@@ -158,10 +159,10 @@ export class TutorialTasksControl extends Control<TutorialTasksDefinition> {
 		this.gui.Parent = Interface.getGameUI();
 
 		this.taskTemplate = this.asTemplate(this.gui.Content.TaskList.Task);
-		this.taskList = this.add(new Control(this.gui.Content.TaskList));
+		this.taskList = this.parent(new ComponentChildren<Control>().withParentInstance(this.gui.Content.TaskList));
 
 		this.hintTemplate = this.asTemplate(this.gui.Content.HintList.Hint);
-		this.hintList = this.add(new Control(this.gui.Content.HintList));
+		this.hintList = this.parent(new ComponentChildren<Control>().withParentInstance(this.gui.Content.HintList));
 	}
 
 	setTasks(tasks: readonly string[]) {
@@ -178,7 +179,7 @@ export class TutorialTasksControl extends Control<TutorialTasksDefinition> {
 	}
 	setHints(hints: readonly string[]) {
 		this.hintList.clear();
-		this.hintList.setVisible(hints.size() !== 0);
+		this.gui.Content.HintList.Visible = hints.size() !== 0;
 
 		for (const hint of hints) {
 			const gui = this.hintTemplate();

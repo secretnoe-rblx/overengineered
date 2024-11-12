@@ -1,8 +1,9 @@
 import { BlockPreviewControl } from "client/gui/buildmode/BlockPreviewControl";
-import { DictionaryControl } from "client/gui/controls/DictionaryControl";
 import { Dropdown } from "client/gui/controls/Dropdown";
 import { TextButtonControl } from "engine/client/gui/Button";
 import { Control } from "engine/client/gui/Control";
+import { ComponentChildren } from "engine/shared/component/ComponentChildren";
+import { ComponentKeyedChildren } from "engine/shared/component/ComponentKeyedChildren";
 import { Transforms } from "engine/shared/component/Transforms";
 import { Element } from "engine/shared/Element";
 import { ArgsSignal } from "engine/shared/event/Signal";
@@ -27,27 +28,24 @@ export class WikiCategoriesControl extends Control<WikiCategoriesControlDefiniti
 		super(gui);
 
 		this.itemTemplate = this.asTemplate(gui.ScrollingFrame.Template, true);
-		this.list = this.add(new DictionaryControl<ScrollingFrame, string>(gui.ScrollingFrame));
+		this.list = this.parent(new ComponentKeyedChildren<string, Control>().withParentInstance(gui.ScrollingFrame));
 	}
 
 	addItems(items: readonly { readonly id: string; readonly title: string; readonly parent?: string }[]) {
 		for (const { id, title } of items) {
-			const control = this.list.keyedChildren.add(
-				id,
-				new TextButtonControl(this.itemTemplate(), () => this._clicked.Fire(id)),
-			);
+			const control = this.list.add(id, new TextButtonControl(this.itemTemplate(), () => this._clicked.Fire(id)));
 			control.text.set(title);
 		}
 	}
 
 	select(id: string) {
-		const child = this.list.keyedChildren.get(id);
+		const child = this.list.get(id);
 		if (!child) return;
 
 		const pos = child.instance.AbsolutePosition.sub(
-			this.list.instance.AbsolutePosition.sub(this.list.instance.CanvasPosition),
+			this.gui.ScrollingFrame.AbsolutePosition.sub(this.gui.ScrollingFrame.CanvasPosition),
 		);
-		this.list.instance.CanvasPosition = pos;
+		this.gui.ScrollingFrame.CanvasPosition = pos;
 
 		Transforms.create()
 			.flash(
@@ -99,7 +97,7 @@ export class WikiContentControl extends Control<WikiContentControlDefinition> {
 	) {
 		super(gui);
 
-		this.contents = this.add(new Control(gui.ScrollingFrame));
+		this.contents = this.parent(new ComponentChildren().withParentInstance(gui.ScrollingFrame));
 		this.contentsItemTemplate = this.asTemplate(gui.ScrollingFrame.ContentsTemplate.Content.Template, true);
 		this.contentsTemplate = this.asTemplate(gui.ScrollingFrame.ContentsTemplate, true);
 		this.stringTemplate = this.asTemplate(gui.ScrollingFrame.StringTemplate, true);

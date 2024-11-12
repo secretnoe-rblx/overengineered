@@ -11,6 +11,7 @@ import { ClientComponent } from "engine/client/component/ClientComponent";
 import { ButtonControl } from "engine/client/gui/Button";
 import { Control } from "engine/client/gui/Control";
 import { ComponentChild } from "engine/shared/component/ComponentChild";
+import { ComponentChildren } from "engine/shared/component/ComponentChildren";
 import { ComponentDisabler } from "engine/shared/component/ComponentDisabler";
 import { Transforms } from "engine/shared/component/Transforms";
 import { TransformService } from "engine/shared/component/TransformService";
@@ -97,13 +98,18 @@ namespace Scene {
 
 	export class EditToolScene extends Control<EditToolSceneDefinition> {
 		readonly tool;
+		private readonly buttons;
 
 		constructor(gui: EditToolSceneDefinition, tool: EditTool) {
 			super(gui);
 			this.tool = tool;
 
+			this.buttons = this.parent(new ComponentChildren().withParentInstance(gui));
+
 			{
-				const cancel = this.add(new ButtonControl(this.gui.CancelButton, () => tool.cancelCurrentMode()));
+				const cancel = this.buttons.add(
+					new ButtonControl(this.gui.CancelButton, () => tool.cancelCurrentMode()),
+				);
 
 				const animateCancelButton = Transforms.boolStateMachine(
 					cancel.instance,
@@ -121,27 +127,37 @@ namespace Scene {
 				);
 			}
 
-			const move = this.add(new ButtonControl(this.gui.Bottom.MoveButton, () => tool.toggleMode("Move")));
-			const rotate = this.add(new ButtonControl(this.gui.Bottom.RotateButton, () => tool.toggleMode("Rotate")));
-			const copy = this.add(
+			const move = this.buttons.add(new ButtonControl(this.gui.Bottom.MoveButton, () => tool.toggleMode("Move")));
+			const rotate = this.buttons.add(
+				new ButtonControl(this.gui.Bottom.RotateButton, () => tool.toggleMode("Rotate")),
+			);
+			const copy = this.buttons.add(
 				new ButtonControl(this.gui.Bottom2.CopyButton, () => {
 					tool.copySelectedBlocks();
 					paste.setInteractable(true);
 				}),
 			);
-			const paste = this.add(new ButtonControl(this.gui.Bottom.PasteButton, () => tool.toggleMode("Paste")));
-			const paint = this.add(new ButtonControl(this.gui.Bottom.PaintButton, () => tool.toggleMode("Paint")));
-			const del = this.add(new ButtonControl(this.gui.Bottom.DeleteButton, () => tool.deleteSelectedBlocks()));
-			const mirx = this.add(
+			const paste = this.buttons.add(
+				new ButtonControl(this.gui.Bottom.PasteButton, () => tool.toggleMode("Paste")),
+			);
+			const paint = this.buttons.add(
+				new ButtonControl(this.gui.Bottom.PaintButton, () => tool.toggleMode("Paint")),
+			);
+			const del = this.buttons.add(
+				new ButtonControl(this.gui.Bottom.DeleteButton, () => tool.deleteSelectedBlocks()),
+			);
+			const mirx = this.buttons.add(
 				new ButtonControl(this.gui.Bottom2.MirrorXButton, () => tool.mirrorSelectedBlocks("x")),
 			);
-			const miry = this.add(
+			const miry = this.buttons.add(
 				new ButtonControl(this.gui.Bottom2.MirrorYButton, () => tool.mirrorSelectedBlocks("y")),
 			);
-			const mirz = this.add(
+			const mirz = this.buttons.add(
 				new ButtonControl(this.gui.Bottom2.MirrorZButton, () => tool.mirrorSelectedBlocks("z")),
 			);
-			const scale = this.add(new ButtonControl(this.gui.Bottom.ScaleButton, () => tool.toggleMode("Scale")));
+			const scale = this.buttons.add(
+				new ButtonControl(this.gui.Bottom.ScaleButton, () => tool.toggleMode("Scale")),
+			);
 
 			const multiValueSetter = <T>(instance: T, func: (value: boolean) => void) => {
 				const values: boolean[] = [];
@@ -216,7 +232,7 @@ namespace Scene {
 				{ Position: this.instance.Bottom.Position.add(new UDim2(0, 0, 0, 20)) },
 				(tr, visible) =>
 					tr.func(() => {
-						for (const [, button] of pairs(this.getChildren())) {
+						for (const [, button] of pairs(this.buttons.getAll())) {
 							if (button instanceof ButtonControl) {
 								button.setVisible(visible);
 							}
@@ -610,9 +626,8 @@ export class EditTool extends ToolBase {
 	readonly selectedMode = this._selectedMode.asReadonly();
 	readonly selected = new ObservableCollectionSet<BlockModel>();
 	readonly copied = new ObservableValue<readonly PlaceBlockRequestWithUuid[]>([]);
-	private readonly controller = new ComponentChild<Component & { cancel(): void } & ({} | { deselected(): void })>(
-		this,
-		true,
+	private readonly controller = this.parent(
+		new ComponentChild<Component & { cancel(): void } & ({} | { deselected(): void })>(true),
 	);
 	private readonly selector;
 	readonly gui;
