@@ -28,6 +28,7 @@ import { BlockManager } from "shared/building/BlockManager";
 import { SharedBuilding } from "shared/building/SharedBuilding";
 import { Colors } from "shared/Colors";
 import type { ClientBuilding } from "client/modes/build/ClientBuilding";
+import type { PlayerDataStorage } from "client/PlayerDataStorage";
 import type { TextButtonDefinition } from "engine/client/gui/Button";
 
 type EditHandles = BasePart & {
@@ -737,6 +738,7 @@ export class BlockEditor extends ClientComponent {
 		editMode: "global" | "local",
 		@inject keybinds: Keybinds,
 		@inject blockList: BlockList,
+		@inject playerData: PlayerDataStorage,
 		@inject di: DIContainer,
 	) {
 		super();
@@ -757,6 +759,22 @@ export class BlockEditor extends ClientComponent {
 		const handles = Instances.getAssets<{ EditHandles: EditHandles }>().EditHandles.Clone();
 		handles.Parent = Gui.getPlayerGui();
 		ComponentInstance.init(this, handles);
+
+		this.event.subscribeObservable(
+			playerData.config,
+			(config) => {
+				const visuals = config.visuals.multiSelection;
+				const sb = handles.SelectionBox;
+
+				sb.Color3 = visuals.borderColor;
+				sb.Transparency = visuals.borderTransparency;
+				sb.LineThickness = visuals.borderThickness;
+
+				sb.SurfaceColor3 = visuals.surfaceColor;
+				sb.SurfaceTransparency = visuals.surfaceTransparency;
+			},
+			true,
+		);
 
 		const inBoundsError = new ObservableValue<string | undefined>(undefined);
 		this._errors.addSource(inBoundsError);
