@@ -1,6 +1,7 @@
 import { StarterGui, UserInputService } from "@rbxts/services";
 import { LoadingController } from "client/controller/LoadingController";
 import { SoundController } from "client/controller/SoundController";
+import { ClientInstanceComponent } from "engine/client/component/ClientInstanceComponent";
 import { Control } from "engine/client/gui/Control";
 import { ComponentKeyedChildren } from "engine/shared/component/ComponentKeyedChildren";
 import { Transforms } from "engine/shared/component/Transforms";
@@ -18,17 +19,17 @@ export class HotbarButtonControl extends Control<HotbarToolButtonControlDefiniti
 	constructor(gui: HotbarToolButtonControlDefinition, tools: ToolController, tool: ToolBase, index: number) {
 		super(gui);
 
-		this.gui.Name = tool.getDisplayName();
-		this.gui.ImageLabel.Image = tool.getImageID();
-		this.gui.NumLabel.Text = tostring(index);
+		this.instance.Name = tool.getDisplayName();
+		this.instance.ImageLabel.Image = tool.getImageID();
+		this.instance.NumLabel.Text = tostring(index);
 
-		this.event.subscribe(this.gui.Activated, () => {
+		this.event.subscribe(this.instance.Activated, () => {
 			if (LoadingController.isLoading.get()) return;
 			tools.selectedTool.set(tool === tools.selectedTool.get() ? undefined : tool);
 		});
 
 		const selectedToolStateMachine = Transforms.boolStateMachine(
-			this.gui,
+			this.instance,
 			TransformService.commonProps.quadOut02,
 			{ BackgroundColor3: Colors.newGui.blue },
 			{ BackgroundColor3: Colors.newGui.staticBackground },
@@ -51,7 +52,7 @@ export type HotbarControlDefinition = GuiObject & {
 };
 
 @injectable
-export class HotbarControl extends Control<HotbarControlDefinition> {
+export class HotbarControl extends ClientInstanceComponent<HotbarControlDefinition> {
 	private readonly nameLabel;
 
 	constructor(gui: HotbarControlDefinition, @inject toolController: ToolController) {
@@ -60,12 +61,12 @@ export class HotbarControl extends Control<HotbarControlDefinition> {
 		// Disable roblox native backpack
 		StarterGui.SetCoreGuiEnabled(Enum.CoreGuiType.Backpack, false);
 
-		const template = this.asTemplate(this.gui.Tools.ToolTemplate);
+		const template = this.asTemplate(this.instance.Tools.ToolTemplate);
 		const toolButtons = this.parent(
-			new ComponentKeyedChildren<ToolBase, HotbarButtonControl>().withParentInstance(this.gui.Tools),
+			new ComponentKeyedChildren<ToolBase, HotbarButtonControl>().withParentInstance(this.instance.Tools),
 		);
 
-		this.nameLabel = this.add(new Control(this.gui.NameLabel));
+		this.nameLabel = this.parent(new Control(this.instance.NameLabel));
 
 		this.event.subscribeObservable(
 			toolController.tools,
@@ -100,13 +101,17 @@ export class HotbarControl extends Control<HotbarControlDefinition> {
 				button[1].instance.NumLabel.Visible = inputType === "Desktop";
 			}
 
-			this.gui.Tools.GamepadLeft.Visible = inputType === "Gamepad";
-			this.gui.Tools.GamepadRight.Visible = inputType === "Gamepad";
+			this.instance.Tools.GamepadLeft.Visible = inputType === "Gamepad";
+			this.instance.Tools.GamepadRight.Visible = inputType === "Gamepad";
 		});
 
 		this.event.onPrepareGamepad(() => {
-			this.gui.Tools.GamepadLeft.ImageLabel.Image = UserInputService.GetImageForKeyCode(Enum.KeyCode.ButtonL1);
-			this.gui.Tools.GamepadRight.ImageLabel.Image = UserInputService.GetImageForKeyCode(Enum.KeyCode.ButtonR1);
+			this.instance.Tools.GamepadLeft.ImageLabel.Image = UserInputService.GetImageForKeyCode(
+				Enum.KeyCode.ButtonL1,
+			);
+			this.instance.Tools.GamepadRight.ImageLabel.Image = UserInputService.GetImageForKeyCode(
+				Enum.KeyCode.ButtonR1,
+			);
 		});
 
 		this.event.subscribeObservable(toolController.selectedTool, (tool, prev) => this.toolChanged(tool, prev));

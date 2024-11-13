@@ -37,6 +37,22 @@ export class Popup<T extends GuiObject = GuiObject> extends Control<T> {
 				},
 			),
 		);
+
+		this.setupShowOnEnable();
+
+		this.onEnable(() => {
+			this.parentScreen.enable();
+			Popup.onAnyShow.Fire();
+		});
+		this.onDisable(() => {
+			this.parentScreen.instance.Destroy();
+			Popup.onAnyHide.Fire();
+
+			// 1 for UIScale
+			if (Popup.popupsScreenGui.GetChildren().size() === 1) {
+				Popup.onAllHide.Fire();
+			}
+		});
 	}
 
 	private static tweenBlur(size: number) {
@@ -46,18 +62,9 @@ export class Popup<T extends GuiObject = GuiObject> extends Control<T> {
 	}
 
 	show() {
-		super.show();
-		this.parentScreen.enable();
-		Popup.onAnyShow.Fire();
+		this.enable();
 	}
 	hide() {
-		super.hide();
-		this.parentScreen.instance.Destroy();
-		Popup.onAnyHide.Fire();
-
-		// 1 for UIScale
-		if (Popup.popupsScreenGui.GetChildren().size() === 1) {
-			Popup.onAllHide.Fire();
-		}
+		this.disable();
 	}
 }

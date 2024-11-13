@@ -56,12 +56,12 @@ class TreeControl extends Control<TreeControlDefinition> {
 
 		this.main.instance.BackgroundColor3 = Colors.accent;
 		this.event.subscribe(this.main.activated, () => {
-			if (this.childContainer.isVisible()) {
+			if (this.childContainer.isInstanceVisible()) {
 				this.main.instance.BackgroundColor3 = Colors.accentDark;
-				this.childContainer.hide();
+				this.childContainer.disableHide();
 			} else {
 				this.main.instance.BackgroundColor3 = Colors.accent;
-				this.childContainer.show();
+				this.childContainer.enableShow();
 			}
 		});
 	}
@@ -141,7 +141,7 @@ const toggle = (root: IDebuggableComponent) => {
 	if (!tree) {
 		tree = create();
 		update(root);
-		tree.show();
+		tree.enableShow();
 		return;
 	} else {
 		tree.destroy();

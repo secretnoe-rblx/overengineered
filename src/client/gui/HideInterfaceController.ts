@@ -74,7 +74,7 @@ export class HideInterfaceController extends HostedService {
 		const [screen, ghost] = Anim.createScreenForAnimating(button);
 		ghost.Transparency = 0.8;
 
-		new ButtonControl(ghost, () => this.visible.set(true)).show();
+		new ButtonControl(ghost, () => this.visible.set(true)).enableShow();
 		return screen;
 	}
 }

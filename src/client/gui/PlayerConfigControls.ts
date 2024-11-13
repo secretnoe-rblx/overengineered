@@ -169,8 +169,8 @@ namespace ControlsSource {
 			const playerCentered = control.get("playerCentered");
 
 			const setImprovedControlsEnabled = (enabled: boolean) => {
-				strictFollow.setVisible(enabled);
-				playerCentered.setVisible(enabled);
+				strictFollow.setEnabledAndVisible(enabled);
+				playerCentered.setEnabledAndVisible(enabled);
 			};
 			this.event.subscribe(improved.submitted, setImprovedControlsEnabled);
 			setImprovedControlsEnabled(config.improved);
@@ -483,11 +483,11 @@ namespace ControlsSource {
 			const triangleAddSandBelowSeaLevel = control.get("triangleAddSandBelowSeaLevel");
 
 			const setImprovedControlsEnabled = (kind: string & typeof config.kind) => {
-				resolutionControl.setVisible(kind === "Triangle");
-				triangleAddSandBelowSeaLevel.setVisible(kind === "Triangle");
-				waterControl.setVisible(kind === "Triangle");
-				foliageControl.setVisible(kind === "Classic");
-				snowOnly.setVisible(kind !== "Water" && kind !== "Lava");
+				resolutionControl.setEnabledAndVisible(kind === "Triangle");
+				triangleAddSandBelowSeaLevel.setEnabledAndVisible(kind === "Triangle");
+				waterControl.setEnabledAndVisible(kind === "Triangle");
+				foliageControl.setEnabledAndVisible(kind === "Classic");
+				snowOnly.setEnabledAndVisible(kind !== "Water" && kind !== "Lava");
 			};
 			this.event.subscribe(kindControl.submitted, setImprovedControlsEnabled);
 			setImprovedControlsEnabled(config.kind);
@@ -561,7 +561,7 @@ namespace ControlsSource {
 			const byKeyControl = control.get("triggerByKey");
 			const keyControl = control.get("triggerKey");
 
-			const setImprovedControlsEnabled = (byKey: boolean) => keyControl.setVisible(byKey);
+			const setImprovedControlsEnabled = (byKey: boolean) => keyControl.setEnabledAndVisible(byKey);
 			this.event.subscribe(byKeyControl.submitted, setImprovedControlsEnabled);
 			setImprovedControlsEnabled(config.triggerByKey);
 		}
@@ -603,8 +603,8 @@ namespace ControlsSource {
 			const fluidForcesEverything = control.get("advanced_aerodynamics");
 
 			const updateVisibility = () => {
-				fluidForcesEverything.setVisible(!config.simplified_aerodynamics);
-				legacyWings.setVisible(!config.advanced_aerodynamics);
+				fluidForcesEverything.setEnabledAndVisible(!config.simplified_aerodynamics);
+				legacyWings.setEnabledAndVisible(!config.advanced_aerodynamics);
 			};
 			updateVisibility();
 		}

@@ -14,22 +14,25 @@ type TooltipDefinition = GuiObject & {
 };
 class TooltipControl extends Control<TooltipDefinition> {
 	showTooltip(text: string) {
-		this.show();
+		this.setInstanceVisibility(true);
 
 		this.instance.TextLabel.Text = "";
-		TransformService.cancel(this.instance.TextLabel);
-		TransformService.run(this.instance.TextLabel, (tr) =>
-			tr.setText(this.instance.TextLabel, text, "Text", Transforms.commonProps.quadOut02),
+		TransformService.run(
+			this.instance.TextLabel,
+			(tr) => tr.setText(this.instance.TextLabel, text, "Text", Transforms.commonProps.quadOut02),
+			true,
 		);
 	}
 
 	hideTooltip() {
-		TransformService.cancel(this.instance.TextLabel);
-		TransformService.run(this.instance.TextLabel, (tr) =>
-			tr
-				.setText(this.instance.TextLabel, "", "Text", Transforms.commonProps.quadOut02)
-				.then()
-				.func(() => this.hide()),
+		TransformService.run(
+			this.instance.TextLabel,
+			(tr) =>
+				tr
+					.setText(this.instance.TextLabel, "", "Text", Transforms.commonProps.quadOut02)
+					.then()
+					.func(() => this.setInstanceVisibility(false)),
+			true,
 		);
 	}
 }
@@ -56,7 +59,7 @@ class TooltipController extends HostedService {
 
 		this.tooltip = new TooltipControl(Interface.getTemplates<{ Tooltip: TooltipDefinition }>().Tooltip.Clone());
 		this.tooltip.instance.Parent = screen;
-		this.tooltip.hide();
+		this.tooltip.setInstanceVisibility(false);
 		this.onDestroy(() => this.tooltip.destroy());
 
 		this.parent(new AutoUIScaledControl(this.tooltip.instance));
@@ -68,7 +71,7 @@ class TooltipController extends HostedService {
 
 		this.tooltip.onEnable(() => (this.tooltip.instance.Position = getMousePosition()));
 		this.event.subscribe(RunService.Heartbeat, () => {
-			if (!this.tooltip.isVisible()) return;
+			if (!this.tooltip.isInstanceVisible()) return;
 
 			TransformService.cancel(this.tooltip.instance);
 			TransformService.run(this.tooltip.instance, (tr) =>
@@ -81,7 +84,7 @@ class TooltipController extends HostedService {
 	}
 
 	private showTooltip(gui: GuiObject, text: string) {
-		// delayig to allow hideTooltip to be executed first
+		// delaying to allow hideTooltip to be executed first
 		task.delay(0, () => {
 			this.currentObject = gui;
 

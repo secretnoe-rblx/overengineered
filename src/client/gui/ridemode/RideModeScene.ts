@@ -206,8 +206,8 @@ export class RideModeControls extends Control<RideModeControlsDefinition> {
 		this.keyedChildren.clear();
 		machine.onDestroy(() => this.keyedChildren.clear());
 		machine.occupiedByLocalPlayer.subscribe((occupied) => {
-			if (occupied) this.show();
-			else this.hide();
+			if (occupied) this.enableShow();
+			else this.disableHide();
 		}, true);
 
 		const inputType = InputController.inputType.get();
@@ -511,9 +511,9 @@ export class RideModeScene extends Control<RideModeSceneDefinition> {
 		const logicDebug = component.parent(new Control(this.gui.LogicDebug.Clone()));
 		logicDebug.instance.Parent = this.gui.LogicDebug.Parent;
 		component.event.subscribe(this.logicButton.activated, () => {
-			logicDebug.setVisible(!logicDebug.isVisible());
+			logicDebug.setEnabledAndVisible(!logicDebug.isInstanceVisible());
 		});
-		logicDebug.setVisible(false);
+		logicDebug.disableHide();
 
 		const pauseOnStart = logicDebug.add(new CheckBoxControl(logicDebug.instance.Content.PauseOnStart.Control));
 		logicDebug.onEnable(() => pauseOnStart.value.set(this.mode.pauseOnStart.get()));

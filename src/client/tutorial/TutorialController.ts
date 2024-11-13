@@ -700,8 +700,8 @@ export class TutorialController extends Component {
 		this.ghostPlot = di.resolveForeignClass(TutorialPlot, [plot]);
 
 		this.event.subscribeObservable(LoadingController.isLoading, (isloading) => {
-			this.ui.setVisible(!isloading);
-			this.uiTasks.setVisible(!isloading);
+			this.ui.setEnabledAndVisible(!isloading);
+			this.uiTasks.setEnabledAndVisible(!isloading);
 		});
 
 		this.onEnable(() => {

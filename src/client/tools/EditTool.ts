@@ -8,8 +8,8 @@ import { MultiBlockHighlightedSelector } from "client/tools/highlighters/MultiBl
 import { SelectedBlocksHighlighter } from "client/tools/highlighters/SelectedBlocksHighlighter";
 import { ToolBase } from "client/tools/ToolBase";
 import { ClientComponent } from "engine/client/component/ClientComponent";
+import { ClientInstanceComponent } from "engine/client/component/ClientInstanceComponent";
 import { ButtonControl } from "engine/client/gui/Button";
-import { Control } from "engine/client/gui/Control";
 import { ComponentChild } from "engine/shared/component/ComponentChild";
 import { ComponentChildren } from "engine/shared/component/ComponentChildren";
 import { ComponentDisabler } from "engine/shared/component/ComponentDisabler";
@@ -31,6 +31,7 @@ import type { ActionController } from "client/modes/build/ActionController";
 import type { BuildingMode } from "client/modes/build/BuildingMode";
 import type { BlockSelectorModeGuiDefinition } from "client/tools/highlighters/BlockSelectorModeGui";
 import type { TextButtonDefinition } from "engine/client/gui/Button";
+import type { Control } from "engine/client/gui/Control";
 import type { SharedPlot } from "shared/building/SharedPlot";
 
 namespace Scene {
@@ -96,7 +97,7 @@ namespace Scene {
 		};
 	}
 
-	export class EditToolScene extends Control<EditToolSceneDefinition> {
+	export class EditToolScene extends ClientInstanceComponent<EditToolSceneDefinition> {
 		readonly tool;
 		private readonly buttons;
 
@@ -108,7 +109,7 @@ namespace Scene {
 
 			{
 				const cancel = this.buttons.add(
-					new ButtonControl(this.gui.CancelButton, () => tool.cancelCurrentMode()),
+					new ButtonControl(this.instance.CancelButton, () => tool.cancelCurrentMode()),
 				);
 
 				const animateCancelButton = Transforms.boolStateMachine(
@@ -127,36 +128,38 @@ namespace Scene {
 				);
 			}
 
-			const move = this.buttons.add(new ButtonControl(this.gui.Bottom.MoveButton, () => tool.toggleMode("Move")));
+			const move = this.buttons.add(
+				new ButtonControl(this.instance.Bottom.MoveButton, () => tool.toggleMode("Move")),
+			);
 			const rotate = this.buttons.add(
-				new ButtonControl(this.gui.Bottom.RotateButton, () => tool.toggleMode("Rotate")),
+				new ButtonControl(this.instance.Bottom.RotateButton, () => tool.toggleMode("Rotate")),
 			);
 			const copy = this.buttons.add(
-				new ButtonControl(this.gui.Bottom2.CopyButton, () => {
+				new ButtonControl(this.instance.Bottom2.CopyButton, () => {
 					tool.copySelectedBlocks();
 					paste.setInteractable(true);
 				}),
 			);
 			const paste = this.buttons.add(
-				new ButtonControl(this.gui.Bottom.PasteButton, () => tool.toggleMode("Paste")),
+				new ButtonControl(this.instance.Bottom.PasteButton, () => tool.toggleMode("Paste")),
 			);
 			const paint = this.buttons.add(
-				new ButtonControl(this.gui.Bottom.PaintButton, () => tool.toggleMode("Paint")),
+				new ButtonControl(this.instance.Bottom.PaintButton, () => tool.toggleMode("Paint")),
 			);
 			const del = this.buttons.add(
-				new ButtonControl(this.gui.Bottom.DeleteButton, () => tool.deleteSelectedBlocks()),
+				new ButtonControl(this.instance.Bottom.DeleteButton, () => tool.deleteSelectedBlocks()),
 			);
 			const mirx = this.buttons.add(
-				new ButtonControl(this.gui.Bottom2.MirrorXButton, () => tool.mirrorSelectedBlocks("x")),
+				new ButtonControl(this.instance.Bottom2.MirrorXButton, () => tool.mirrorSelectedBlocks("x")),
 			);
 			const miry = this.buttons.add(
-				new ButtonControl(this.gui.Bottom2.MirrorYButton, () => tool.mirrorSelectedBlocks("y")),
+				new ButtonControl(this.instance.Bottom2.MirrorYButton, () => tool.mirrorSelectedBlocks("y")),
 			);
 			const mirz = this.buttons.add(
-				new ButtonControl(this.gui.Bottom2.MirrorZButton, () => tool.mirrorSelectedBlocks("z")),
+				new ButtonControl(this.instance.Bottom2.MirrorZButton, () => tool.mirrorSelectedBlocks("z")),
 			);
 			const scale = this.buttons.add(
-				new ButtonControl(this.gui.Bottom.ScaleButton, () => tool.toggleMode("Scale")),
+				new ButtonControl(this.instance.Bottom.ScaleButton, () => tool.toggleMode("Scale")),
 			);
 
 			const multiValueSetter = <T>(instance: T, func: (value: boolean) => void) => {
@@ -222,32 +225,35 @@ namespace Scene {
 				},
 				true,
 			);
-		}
 
-		private readonly bottomVisibilityFunction = Transforms.multiStateMachine(
-			Transforms.boolStateMachine(
-				this.instance.Bottom,
-				Transforms.commonProps.quadOut02,
-				{ Position: this.instance.Bottom.Position },
-				{ Position: this.instance.Bottom.Position.add(new UDim2(0, 0, 0, 20)) },
-				(tr, visible) =>
-					tr.func(() => {
-						for (const [, button] of pairs(this.buttons.getAll())) {
-							if (button instanceof ButtonControl) {
-								button.setVisible(visible);
-							}
-						}
-					}),
-				(tr, visible) => tr.func(() => super.setInstanceVisibilityFunction(visible)),
-			),
-			Transforms.boolStateMachine(this.instance, Transforms.commonProps.quadOut02, {}, {}),
-		);
-		protected setInstanceVisibilityFunction(visible: boolean): void {
-			if (visible) {
-				super.setInstanceVisibilityFunction(visible);
-			}
+			const initAnimation = () => {
+				const bottomVisibilityFunction = Transforms.multiStateMachine(
+					Transforms.boolStateMachine(
+						this.instance.Bottom,
+						Transforms.commonProps.quadOut02,
+						{ Position: this.instance.Bottom.Position },
+						{ Position: this.instance.Bottom.Position.add(new UDim2(0, 0, 0, 20)) },
+						(tr, visible) =>
+							tr.func(() => {
+								for (const [, button] of pairs(this.buttons.getAll())) {
+									if (button instanceof ButtonControl) {
+										button.setEnabledAndVisible(visible);
+									}
+								}
+							}),
+						(tr, visible) => tr.setVisible(this.instance, visible),
+					),
+					Transforms.boolStateMachine(this.instance, Transforms.commonProps.quadOut02, {}, {}),
+				);
+				this.onEnabledStateChange((enabled) => {
+					if (enabled) {
+						this.instance.Visible = true;
+					}
 
-			this.bottomVisibilityFunction(visible);
+					bottomVisibilityFunction(enabled);
+				});
+			};
+			initAnimation();
 		}
 	}
 }
@@ -553,11 +559,9 @@ namespace Controllers {
 
 			const ui = tool.gui.instance.Paint.Clone();
 			ui.Parent = tool.gui.instance.Paint.Parent;
-			const materialColorEditor = this.parentGui(new MaterialColorEditControl(ui, true));
+			const materialColorEditor = this.parent(new MaterialColorEditControl(ui, true));
 			this.materialColorEditor = materialColorEditor;
 			materialColorEditor.autoSubscribe(Paint.material, Paint.color);
-			this.onEnable(() => materialColorEditor.setVisible(true));
-			this.onDisable(() => materialColorEditor.setVisible(false));
 
 			this.event.subscribeObservable(
 				Paint.material,
@@ -641,7 +645,7 @@ export class EditTool extends ToolBase {
 	) {
 		super(mode);
 
-		this.gui = this.parentGui(
+		this.gui = this.parent(
 			new Scene.EditToolScene(ToolBase.getToolGui<"Edit2", Scene.EditToolSceneDefinition>().Edit2, this),
 		);
 		this.parent(di.resolveForeignClass(SelectedBlocksHighlighter, [this.selected]));

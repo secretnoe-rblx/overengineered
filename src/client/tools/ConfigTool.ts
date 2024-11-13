@@ -93,13 +93,6 @@ namespace Scene {
 			});
 		}
 
-		show() {
-			super.show();
-
-			GuiAnimator.transition(this.gui.ParamsSelection, 0.2, "right");
-			GuiAnimator.transition(this.gui.Bottom.DeselectButton, 0.22, "down");
-		}
-
 		private currentConfigControl?: MultiBlockConfigControl;
 		private updateConfigs(selected: readonly BlockModel[]) {
 			this.currentConfigControl?.destroy();

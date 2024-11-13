@@ -34,8 +34,6 @@ type MainScreenLayoutDefinition = ScreenGui & {
 export class MainScreenLayout extends Component {
 	private readonly instance: MainScreenLayoutDefinition;
 
-	readonly hotbar: HotbarControl;
-
 	constructor(@inject di: DIContainer) {
 		super();
 
@@ -44,13 +42,11 @@ export class MainScreenLayout extends Component {
 		this.onEnabledStateChange((enabled) => (this.instance.Enabled = enabled));
 
 		const initHotbar = () => {
-			const hotbar = this.parentGui(
+			const hotbar = this.parent(
 				di.resolveForeignClass(HotbarControl, [
 					Interface.getInterface2<{ Hotbar: HotbarControlDefinition }>().Hotbar,
 				]),
 			);
-
-			this.event.subscribeObservable(LoadingController.isLoading, (loading) => hotbar.setVisible(!loading), true);
 
 			const visibilityFunction = Transforms.boolStateMachine(
 				hotbar.instance,
@@ -62,9 +58,9 @@ export class MainScreenLayout extends Component {
 			);
 			hotbar.onEnabledStateChange(visibilityFunction);
 
-			return hotbar;
+			this.event.subscribeObservable(LoadingController.isLoading, (loading) => hotbar.setEnabled(!loading), true);
 		};
-		this.hotbar = initHotbar();
+		initHotbar();
 
 		const forEachChild = (parent: Instance, callback: (child: GuiObject) => void) => {
 			for (const child of parent.GetChildren()) {

@@ -1,5 +1,4 @@
 import { GamepadService, GuiService, Players, ReplicatedStorage, RunService, Workspace } from "@rbxts/services";
-import { GuiAnimator } from "client/gui/GuiAnimator";
 import { Interface } from "client/gui/Interface";
 import { LogControl } from "client/gui/static/LogControl";
 import { ClientBuilding } from "client/modes/build/ClientBuilding";
@@ -356,12 +355,6 @@ namespace Scene {
 		private cancel() {
 			this.tool.stopDragging();
 			this.update();
-		}
-
-		show() {
-			super.show();
-
-			GuiAnimator.transition(this.gui.TextLabel, 0.2, "down");
 		}
 	}
 }

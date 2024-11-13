@@ -117,7 +117,7 @@ export class AdminGui extends HostedService {
 				),
 			];
 			for (const [name, content] of tests) {
-				content.hide();
+				content.disableHide();
 				tabs.addTab(name, content);
 			}
 

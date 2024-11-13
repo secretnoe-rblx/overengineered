@@ -77,11 +77,6 @@ namespace Scene {
 				}
 			});
 		}
-
-		show() {
-			super.show();
-			GuiAnimator.transition(this.gui.Bottom.DeleteAllButton, 0.2, "up");
-		}
 	}
 }
 

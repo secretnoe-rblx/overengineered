@@ -7,8 +7,8 @@ import { MultiBlockSelector } from "client/tools/highlighters/MultiBlockSelector
 import { ToolBase } from "client/tools/ToolBase";
 import { ClientComponent } from "engine/client/component/ClientComponent";
 import { ButtonControl } from "engine/client/gui/Button";
-import { Control } from "engine/client/gui/Control";
 import { LocalPlayer } from "engine/client/LocalPlayer";
+import { InstanceComponent } from "engine/shared/component/InstanceComponent";
 import { Transforms } from "engine/shared/component/Transforms";
 import { ObservableValue } from "engine/shared/event/ObservableValue";
 import { Marketplace } from "engine/shared/Marketplace";
@@ -39,16 +39,17 @@ namespace Scene {
 		};
 	};
 
-	export class PaintToolScene extends Control<PaintToolSceneDefinition> {
+	export class PaintToolScene extends InstanceComponent<PaintToolSceneDefinition> {
 		readonly tool;
-		private readonly materialColorEditor;
 
 		constructor(gui: PaintToolSceneDefinition, tool: PaintTool) {
 			super(gui);
 			this.tool = tool;
 
-			this.add(new ButtonControl(this.gui.Top.SetMaterialsButton, () => this.paintEverything(false, true)));
-			this.add(new ButtonControl(this.gui.Top.SetColorsButton, () => this.paintEverything(true, false)));
+			this.parent(
+				new ButtonControl(this.instance.Top.SetMaterialsButton, () => this.paintEverything(false, true)),
+			);
+			this.parent(new ButtonControl(this.instance.Top.SetColorsButton, () => this.paintEverything(true, false)));
 
 			const enable = () => {
 				// to not paint a block
@@ -60,8 +61,7 @@ namespace Scene {
 				this.tool.controller.disable();
 			};
 
-			const materialColorEditor = this.add(new MaterialColorEditControl(this.gui.Bottom));
-			this.materialColorEditor = materialColorEditor;
+			const materialColorEditor = this.parent(new MaterialColorEditControl(this.instance.Bottom));
 			materialColorEditor.autoSubscribe(tool.selectedMaterial, tool.selectedColor);
 
 			materialColorEditor.materialPipette.onStart.Connect(disable);
@@ -69,29 +69,30 @@ namespace Scene {
 			materialColorEditor.colorPipette.onStart.Connect(disable);
 			materialColorEditor.colorPipette.onEnd.Connect(enable);
 
-			const materialEnabler = this.add(new ToggleControl(this.gui.Bottom.Material.Header.EnabledToggle));
+			const materialEnabler = this.parent(new ToggleControl(this.instance.Bottom.Material.Header.EnabledToggle));
 			materialEnabler.value.set(tool.enableMaterial.get());
 			this.event.subscribeObservable(materialEnabler.value, (value) => tool.enableMaterial.set(value));
-			const colorEnabler = this.add(new ToggleControl(this.gui.Bottom.Color.Header.EnabledToggle));
+			const colorEnabler = this.parent(new ToggleControl(this.instance.Bottom.Color.Header.EnabledToggle));
 			colorEnabler.value.set(tool.enableColor.get());
 			this.event.subscribeObservable(colorEnabler.value, (value) => tool.enableColor.set(value));
+
+			const initAnimations = () => {
+				const visibilityStateMachine = Transforms.boolStateMachine(
+					this.instance.Top,
+					Transforms.commonProps.quadOut02,
+					{ AnchorPoint: this.instance.Top.AnchorPoint },
+					{ AnchorPoint: new Vector2(0.5, 1) },
+					(tr, enabled) => (enabled ? tr.show(this.instance) : 0),
+					(tr, enabled) => (enabled ? 0 : tr.waitForTransformOfChildren(this).then().hide(this.instance)),
+				);
+
+				this.onEnabledStateChange(visibilityStateMachine);
+			};
+			initAnimations();
 		}
 
 		private paintEverything(enableColor?: boolean, enableMaterial?: boolean) {
 			this.tool.paintEverything(enableColor, enableMaterial);
-		}
-
-		private readonly visibilityStateMachine = Transforms.boolStateMachine(
-			this.gui.Top,
-			Transforms.commonProps.quadOut02,
-			{ AnchorPoint: this.gui.Top.AnchorPoint },
-			{ AnchorPoint: new Vector2(0.5, 1) },
-			(tr, enabled) => (enabled ? tr.func(() => super.setInstanceVisibilityFunction(true)) : 0),
-			(tr, enabled) => (enabled ? 0 : tr.func(() => super.setInstanceVisibilityFunction(false))),
-		);
-		protected setInstanceVisibilityFunction(visible: boolean): void {
-			this.materialColorEditor.setVisible(visible);
-			this.visibilityStateMachine(visible);
 		}
 	}
 }
@@ -152,7 +153,7 @@ export class PaintTool extends ToolBase {
 	constructor(@inject mode: BuildingMode) {
 		super(mode);
 
-		this.parentGui(
+		this.parent(
 			new Scene.PaintToolScene(ToolBase.getToolGui<"Paint", Scene.PaintToolSceneDefinition>().Paint, this),
 		);
 		this.controller = this.parent(new Controller(this));

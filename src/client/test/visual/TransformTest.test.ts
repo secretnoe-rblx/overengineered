@@ -176,8 +176,8 @@ namespace TransformTests {
 			const bnotinteractable = newbtn("Not interactable", 9 + 1);
 			const visual = list.add(new ButtonControl(newbtn("Button", 10 + 1)));
 
-			list.add(new ButtonControl(bvisible, () => visual.show()));
-			list.add(new ButtonControl(bnotvisible, () => visual.hide()));
+			list.add(new ButtonControl(bvisible, () => visual.enableShow()));
+			list.add(new ButtonControl(bnotvisible, () => visual.disableHide()));
 			list.add(new ButtonControl(binteractable, () => visual.setInteractable(true)));
 			list.add(new ButtonControl(bnotinteractable, () => visual.setInteractable(false)));
 		}

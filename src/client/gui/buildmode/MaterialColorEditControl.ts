@@ -3,7 +3,7 @@ import { ColorChooser } from "client/gui/ColorChooser";
 import { BlockPipetteButton } from "client/gui/controls/BlockPipetteButton";
 import { MaterialChooser } from "client/gui/MaterialChooser";
 import { TextButtonControl } from "engine/client/gui/Button";
-import { Control } from "engine/client/gui/Control";
+import { InstanceComponent } from "engine/shared/component/InstanceComponent";
 import { ObjectOverlayStorage } from "engine/shared/component/ObjectOverlayStorage";
 import { Transforms } from "engine/shared/component/Transforms";
 import { TransformService } from "engine/shared/component/TransformService";
@@ -37,7 +37,7 @@ export type MaterialColorEditControlDefinition = GuiObject & {
 };
 
 /** Material preview with an edit button */
-export class MaterialColorEditControl extends Control<MaterialColorEditControlDefinition> {
+export class MaterialColorEditControl extends InstanceComponent<MaterialColorEditControlDefinition> {
 	readonly materialPipette;
 	readonly colorPipette;
 
@@ -55,23 +55,23 @@ export class MaterialColorEditControl extends Control<MaterialColorEditControlDe
 		const colorv = SubmittableValue.from<Color3>(Color3.fromRGB(255, 255, 255));
 		this.colorv = colorv.asHalfReadonly();
 
-		const material = this.add(new MaterialChooser(gui.Material.Content, materialv));
-		const color = this.add(new ColorChooser(gui.Color.Content, colorv));
+		const material = this.parent(new MaterialChooser(gui.Material.Content, materialv));
+		const color = this.parent(new ColorChooser(gui.Color.Content, colorv));
 
-		const materialbtn = this.add(new TextButtonControl(this.gui.Material.Header));
+		const materialbtn = this.parent(new TextButtonControl(this.instance.Material.Header));
 		this.event.subscribeObservable(
 			material.value.value,
 			(value) => {
-				const imgl = this.gui.Material.Content.FindFirstChild(value.Name) as ImageLabel & {
+				const imgl = this.instance.Material.Content.FindFirstChild(value.Name) as ImageLabel & {
 					readonly TextLabel: TextLabel;
 				};
-				this.gui.Material.Header.Pipette.Image = imgl.Image;
+				this.instance.Material.Header.Pipette.Image = imgl.Image;
 				materialbtn.text.set(imgl.TextLabel.Text);
 			},
 			true,
 		);
 
-		const colorbtn = this.add(new TextButtonControl(this.gui.Color.Header));
+		const colorbtn = this.parent(new TextButtonControl(this.instance.Color.Header));
 		this.event.subscribeObservable(
 			color.value.value,
 			(value) => colorbtn.text.set("#" + value.ToHex().upper()),
@@ -80,17 +80,17 @@ export class MaterialColorEditControl extends Control<MaterialColorEditControlDe
 		this.event.subscribeObservable(
 			color.value.value,
 			(value) => {
-				this.gui.Color.Header.Pipette.BackgroundColor3 = value;
+				this.instance.Color.Header.Pipette.BackgroundColor3 = value;
 
 				const imgColor = value.ToHSV()[2] > 0.5 ? Colors.black : Colors.white;
-				if (this.gui.Color.Header.Pipette.ImageLabel.ImageColor3 !== imgColor) {
-					TransformService.cancel(this.gui.Color.Header.Pipette.ImageLabel);
-					TransformService.run(this.gui.Color.Header.Pipette.ImageLabel, (tr) =>
+				if (this.instance.Color.Header.Pipette.ImageLabel.ImageColor3 !== imgColor) {
+					TransformService.cancel(this.instance.Color.Header.Pipette.ImageLabel);
+					TransformService.run(this.instance.Color.Header.Pipette.ImageLabel, (tr) =>
 						tr.transform(
-							this.gui.Color.Header.Pipette.ImageLabel,
+							this.instance.Color.Header.Pipette.ImageLabel,
 							"ImageColor3",
 							imgColor,
-							Transforms.commonProps.quadOut02,
+							Transforms.quadOut02,
 						),
 					);
 				}
@@ -115,58 +115,49 @@ export class MaterialColorEditControl extends Control<MaterialColorEditControlDe
 			const setOverlayVisibility = (visible: boolean) =>
 				(this.heightOverlays[name].overlay.get(0).state = visible ? undefined : "closed");
 
-			const gui = this.gui[name];
+			const gui = this.instance[name];
 			let isvisible = false;
 			this.event.subscribe(button.activated, () => setOverlayVisibility((isvisible = !isvisible)));
 
 			const defaultArrowSize = gui.Header.Arrow.Size;
 			this.heightOverlays[name].overlay.value.subscribe(({ state }) => {
-				TransformService.run(gui.Header.Arrow, (tr) => {
-					if (state !== "hidden") {
-						tr.transform(
-							gui.Header.Arrow,
-							"Rotation",
-							state === "closed" ? 180 : 0,
-							Transforms.commonProps.quadOut02,
-						).transform(gui.Header.Arrow, "Size", defaultArrowSize, Transforms.commonProps.quadOut02);
-					} else {
-						tr.transform(gui.Header.Arrow, "Rotation", 360, Transforms.commonProps.quadOut02).transform(
-							gui.Header.Arrow,
-							"Size",
-							new UDim2(),
-							Transforms.commonProps.quadOut02,
-						);
-					}
-				});
+				const tr = Transforms.create();
 
-				TransformService.run(gui, (tr) => {
-					if (state !== "hidden") {
-						tr.func(() => (this.gui.Visible = true)).then();
-					}
+				if (state !== "hidden") {
+					tr.transform(gui.Header.Arrow, "Rotation", state === "closed" ? 180 : 0, Transforms.quadOut02);
+					tr.transform(gui.Header.Arrow, "Size", defaultArrowSize, Transforms.quadOut02);
+				} else {
+					tr.transform(gui.Header.Arrow, "Rotation", 360, Transforms.quadOut02);
+					tr.transform(gui.Header.Arrow, "Size", new UDim2(), Transforms.quadOut02);
+				}
 
-					tr.transform(
-						gui,
-						"Size",
-						new UDim2(gui.Size.X, this.heightOverlays[name].heights[state]),
-						Transforms.commonProps.quadOut02,
-					);
+				if (state !== "hidden") {
+					tr.show(this.instance).then();
+				}
 
-					if (state === "hidden") {
-						tr.then().func(() => (this.gui.Visible = false));
-					}
-				});
+				tr.transform(
+					gui,
+					"Size",
+					new UDim2(gui.Size.X, this.heightOverlays[name].heights[state]),
+					Transforms.quadOut02,
+				);
+
+				if (state === "hidden") {
+					tr.then().hide(this.instance);
+				}
+
+				tr.run(this);
 			});
 
 			this.heightOverlays[name].overlay.get(-1).state = "hidden";
 			setOverlayVisibility((isvisible = defaultVisibility));
-			TransformService.finish(gui);
-			TransformService.finish(gui.Header.Arrow);
+			TransformService.finish(this);
 		};
 		initVisibilityAnimation(materialbtn, "Material");
 		initVisibilityAnimation(colorbtn, "Color");
 
-		this.materialPipette = this.add(
-			BlockPipetteButton.forMaterial(this.gui.Material.Header.Pipette, (m) => {
+		this.materialPipette = this.parent(
+			BlockPipetteButton.forMaterial(this.instance.Material.Header.Pipette, (m) => {
 				if (
 					m === Enum.Material.Neon &&
 					!Marketplace.Gamepass.has(Players.LocalPlayer, GameDefinitions.GAMEPASSES.NeonMaterial)
@@ -177,9 +168,15 @@ export class MaterialColorEditControl extends Control<MaterialColorEditControlDe
 				materialv.submit(m);
 			}),
 		);
-		this.colorPipette = this.add(
-			BlockPipetteButton.forColor(this.gui.Color.Header.Pipette, (c) => colorv.submit(c)),
+		this.colorPipette = this.parent(
+			BlockPipetteButton.forColor(this.instance.Color.Header.Pipette, (c) => colorv.submit(c)),
 		);
+
+		this.onEnabledStateChange((enabled) => {
+			for (const [, overlay] of pairs(this.heightOverlays)) {
+				overlay.overlay.get(-1).state = enabled ? undefined : "hidden";
+			}
+		});
 	}
 
 	autoSubscribe(material: ObservableValue<Enum.Material>, color: ObservableValue<Color3>) {
@@ -188,11 +185,5 @@ export class MaterialColorEditControl extends Control<MaterialColorEditControlDe
 
 		this.event.subscribeObservable(color, (m) => this.colorv.set(m), true, true);
 		this.event.subscribe(this.colorv.submitted, (v) => color.set(v));
-	}
-
-	protected setInstanceVisibilityFunction(visible: boolean): void {
-		for (const [, overlay] of pairs(this.heightOverlays)) {
-			overlay.overlay.get(-1).state = visible ? undefined : "hidden";
-		}
 	}
 }

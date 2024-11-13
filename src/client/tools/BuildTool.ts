@@ -16,6 +16,7 @@ import { FloatingText } from "client/tools/additional/FloatingText";
 import { ToolBase } from "client/tools/ToolBase";
 import { ClientComponent } from "engine/client/component/ClientComponent";
 import { ClientComponentChild } from "engine/client/component/ClientComponentChild";
+import { ClientInstanceComponent } from "engine/client/component/ClientInstanceComponent";
 import { ButtonControl } from "engine/client/gui/Button";
 import { Control } from "engine/client/gui/Control";
 import { InputController } from "engine/client/InputController";
@@ -299,7 +300,7 @@ namespace Scene {
 		readonly Touch: TouchButtonsDefinition;
 	};
 	@injectable
-	export class BuildToolScene extends Control<BuildToolSceneDefinition> {
+	export class BuildToolScene extends ClientInstanceComponent<BuildToolSceneDefinition> {
 		readonly tool;
 		readonly blockSelector;
 		private readonly materialColorSelector;
@@ -314,32 +315,34 @@ namespace Scene {
 				BuildingMode: { Scale: GuiObject & { Content: ScaleEditorControlDefinition } };
 			}>().BuildingMode.Scale;
 			scaleEditorGui.Visible = false;
-			this.add(new ScaleEditorControl(scaleEditorGui.Content, tool.blockScale));
+			this.parent(new ScaleEditorControl(scaleEditorGui.Content, tool.blockScale));
 
-			const scaleEditorBtn = this.add(
+			const scaleEditorBtn = this.parent(
 				new ButtonControl(
 					Interface.getGameUI<{ BuildingMode: { Action: { Scale: GuiButton } } }>().BuildingMode.Action.Scale,
 					() => (scaleEditorGui.Visible = !scaleEditorGui.Visible),
 				),
 			);
-			this.onEnabledStateChange((enabled) => scaleEditorBtn.setVisible(enabled), true);
+			this.onEnabledStateChange((enabled) => scaleEditorBtn.setEnabledAndVisible(enabled), true);
 			this.onDisable(() => (scaleEditorGui.Visible = false));
 
 			const inventory = this.parent(mainScreen.registerLeft<BlockSelectionControlDefinition>("Inventory"));
-			this.blockSelector = this.add(tool.di.resolveForeignClass(BlockSelectionControl, [inventory.instance]));
+			this.blockSelector = this.parent(tool.di.resolveForeignClass(BlockSelectionControl, [inventory.instance]));
 
-			this.blockInfo = this.add(new BlockInfo(gui.Info, this.blockSelector.selectedBlock));
-			this.touchButtons = this.add(new TouchButtons(gui.Touch, this.blockSelector.selectedBlock));
+			this.blockInfo = this.parent(new BlockInfo(gui.Info, this.blockSelector.selectedBlock));
+			this.touchButtons = this.parent(new TouchButtons(gui.Touch, this.blockSelector.selectedBlock));
 
-			const mirrorEditor = this.add(new MirrorEditorControl(this.gui.Mirror.Content, tool.targetPlot.get()));
+			const mirrorEditor = this.parent(
+				new MirrorEditorControl(this.instance.Mirror.Content, tool.targetPlot.get()),
+			);
 			this.event.subscribeObservable(tool.mirrorMode, (val) => mirrorEditor.value.set(val), true);
 			this.event.subscribe(mirrorEditor.submitted, (val) => tool.mirrorMode.set(val));
 
-			this.onEnable(() => (this.gui.Mirror.Visible = false));
-			this.add(
+			this.onEnable(() => (this.instance.Mirror.Visible = false));
+			this.parent(
 				new ButtonControl(
-					this.gui.ActionBar.Buttons.Mirror,
-					() => (this.gui.Mirror.Visible = !this.gui.Mirror.Visible),
+					this.instance.ActionBar.Buttons.Mirror,
+					() => (this.instance.Mirror.Visible = !this.instance.Mirror.Visible),
 				),
 			);
 
@@ -363,7 +366,7 @@ namespace Scene {
 				const disable = () => {
 					this.tool.controller.disable();
 				};
-				const materialColorEditor = this.add(new MaterialColorEditControl(this.gui.Bottom));
+				const materialColorEditor = this.parent(new MaterialColorEditControl(this.instance.Bottom));
 				this.materialColorSelector = materialColorEditor;
 				materialColorEditor.autoSubscribe(tool.selectedMaterial, tool.selectedColor);
 
@@ -393,49 +396,57 @@ namespace Scene {
 			};
 
 			this.event.subscribeObservable(tool.selectedBlock, updateSelectedBlock);
+
+			const initAnimation = () => {
+				const visibilityStateMachine = Transforms.multiStateMachine(
+					Transforms.boolStateMachine(
+						this.instance.Inventory,
+						Transforms.commonProps.quadOut02,
+						{
+							AnchorPoint: this.instance.Inventory.AnchorPoint,
+							Position: this.instance.Inventory.Position,
+						},
+						{
+							AnchorPoint: new Vector2(1, this.instance.Inventory.AnchorPoint.Y),
+							Position: new UDim2(new UDim(), this.instance.Inventory.Position.Y),
+						},
+					),
+					Transforms.boolStateMachine(
+						this.instance.ActionBar,
+						Transforms.commonProps.quadOut02,
+						{ AnchorPoint: this.instance.ActionBar.AnchorPoint },
+						{ AnchorPoint: new Vector2(0.5, 1) },
+						(tr, enabled) => (enabled ? tr.show(this.instance) : 0),
+						(tr, enabled) => (enabled ? 0 : tr.hide(this.instance)),
+					),
+				);
+
+				this.onEnabledStateChange((enabled) => {
+					this.blockInfo.setEnabledAndVisible(enabled);
+					this.touchButtons.setEnabledAndVisible(enabled);
+					visibilityStateMachine(enabled);
+				});
+			};
+			initAnimation();
 		}
 
 		protected prepareTouch(): void {
 			// Touchscreen controls
-			this.eventHandler.subscribe(this.gui.Touch.PlaceButton.MouseButton1Click, () => this.tool.placeBlock());
-			this.eventHandler.subscribe(this.gui.Touch.MultiPlaceButton.MouseButton1Click, () =>
+			this.eventHandler.subscribe(this.instance.Touch.PlaceButton.MouseButton1Click, () =>
+				this.tool.placeBlock(),
+			);
+			this.eventHandler.subscribe(this.instance.Touch.MultiPlaceButton.MouseButton1Click, () =>
 				this.tool.multiPlaceBlock(),
 			);
-			this.eventHandler.subscribe(this.gui.Touch.RotateRButton.MouseButton1Click, () =>
+			this.eventHandler.subscribe(this.instance.Touch.RotateRButton.MouseButton1Click, () =>
 				this.tool.rotateBlock("x", true),
 			);
-			this.eventHandler.subscribe(this.gui.Touch.RotateTButton.MouseButton1Click, () =>
+			this.eventHandler.subscribe(this.instance.Touch.RotateTButton.MouseButton1Click, () =>
 				this.tool.rotateBlock("y", true),
 			);
-			this.eventHandler.subscribe(this.gui.Touch.RotateYButton.MouseButton1Click, () =>
+			this.eventHandler.subscribe(this.instance.Touch.RotateYButton.MouseButton1Click, () =>
 				this.tool.rotateBlock("z", true),
 			);
-		}
-
-		private readonly visibilityStateMachine = Transforms.multiStateMachine(
-			Transforms.boolStateMachine(
-				this.gui.Inventory,
-				Transforms.commonProps.quadOut02,
-				{ AnchorPoint: this.gui.Inventory.AnchorPoint, Position: this.gui.Inventory.Position },
-				{
-					AnchorPoint: new Vector2(1, this.gui.Inventory.AnchorPoint.Y),
-					Position: new UDim2(new UDim(), this.gui.Inventory.Position.Y),
-				},
-			),
-			Transforms.boolStateMachine(
-				this.gui.ActionBar,
-				Transforms.commonProps.quadOut02,
-				{ AnchorPoint: this.gui.ActionBar.AnchorPoint },
-				{ AnchorPoint: new Vector2(0.5, 1) },
-				(tr, enabled) => (enabled ? tr.func(() => super.setInstanceVisibilityFunction(true)) : 0),
-				(tr, enabled) => (enabled ? 0 : tr.func(() => super.setInstanceVisibilityFunction(false))),
-			),
-		);
-		protected setInstanceVisibilityFunction(visible: boolean): void {
-			this.materialColorSelector.setVisible(visible);
-			this.blockInfo.setVisible(visible);
-			this.touchButtons.setVisible(visible);
-			this.visibilityStateMachine(visible);
 		}
 	}
 }
@@ -1131,7 +1142,7 @@ export class BuildTool extends ToolBase {
 	) {
 		super(mode);
 
-		this.gui = this.parentGui(
+		this.gui = this.parent(
 			di.resolveForeignClass(Scene.BuildToolScene, [
 				ToolBase.getToolGui<"Build", Scene.BuildToolSceneDefinition>().Build,
 				this,

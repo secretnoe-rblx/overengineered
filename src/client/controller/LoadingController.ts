@@ -1,50 +1,53 @@
 import { Workspace } from "@rbxts/services";
 import { Interface } from "client/gui/Interface";
 import { Control } from "engine/client/gui/Control";
+import { InstanceComponent } from "engine/shared/component/InstanceComponent";
 import { Transforms } from "engine/shared/component/Transforms";
 import { TransformService } from "engine/shared/component/TransformService";
 import { ObservableValue } from "engine/shared/event/ObservableValue";
-import type { TransformProps } from "engine/shared/component/Transform";
 
 class LoadingImage extends Control {
-	runShowAnimation() {
-		const startanim = () => {
-			if (!this.isEnabled()) return;
+	constructor(gui: GuiObject) {
+		super(gui);
 
+		this.onEnable(() => {
+			const startanim = () => {
+				if (!this.isEnabled()) return;
+
+				Transforms.create()
+					.transform(this.instance, "Rotation", this.instance.Rotation + 90, {
+						duration: 0.8,
+						style: "Quad",
+						direction: "InOut",
+					})
+					.then()
+					.func(startanim)
+					.run(this.instance);
+			};
+
+			TransformService.cancel(this.instance);
 			Transforms.create()
-				.transform(this.instance, "Rotation", this.instance.Rotation + 90, {
-					duration: 0.8,
+				.then()
+				.transform(this.instance, "Rotation", () => this.instance.Rotation + 270, {
+					duration: 0.3,
 					style: "Quad",
-					direction: "InOut",
+					direction: "Out",
 				})
 				.then()
 				.func(startanim)
 				.run(this.instance);
-		};
+		});
 
-		TransformService.cancel(this.instance);
-		Transforms.create()
-			.then()
-			.transform(this.instance, "Rotation", () => this.instance.Rotation + 270, {
-				duration: 0.3,
-				style: "Quad",
-				direction: "Out",
-			})
-			.then()
-			.func(startanim)
-			.run(this.instance);
-	}
-	runHideAnimation() {
-		this.disable();
-
-		TransformService.cancel(this.instance);
-		Transforms.create()
-			.transform(this.instance, "Rotation", () => this.instance.Rotation - 270, {
-				duration: 0.3,
-				style: "Quad",
-				direction: "In",
-			})
-			.run(this.instance);
+		this.onDisable(() => {
+			TransformService.cancel(this.instance);
+			Transforms.create()
+				.transform(this.instance, "Rotation", () => this.instance.Rotation - 270, {
+					duration: 0.3,
+					style: "Quad",
+					direction: "In",
+				})
+				.run(this.instance);
+		});
 	}
 }
 
@@ -52,52 +55,31 @@ type LoadingPopupDefinition = GuiObject & {
 	readonly LoadingImage: GuiObject;
 	readonly TextLabel: TextLabel;
 };
-class LoadingPopup extends Control<LoadingPopupDefinition> {
-	private readonly loadingImage;
-
+class LoadingPopup extends InstanceComponent<LoadingPopupDefinition> {
 	constructor(gui: LoadingPopupDefinition) {
 		super(gui);
-		this.loadingImage = this.parent(new LoadingImage(gui.LoadingImage));
-	}
 
-	show(): void {
-		if (this.isEnabled()) {
-			return;
-		}
+		this.parent(new LoadingImage(gui.LoadingImage));
 
-		super.show();
-		TransformService.cancel(this.instance);
+		this.onEnable(() => {
+			Transforms.create() //
+				.show(this.instance)
+				.moveY(this.instance, new UDim(0, 80), { duration: 0.3, style: "Quad", direction: "Out" })
+				.run(this.instance, true);
+		});
+		this.onDisable(() => {
+			Transforms.create()
+				.moveY(this.instance, new UDim(0, -200), { duration: 0.4, style: "Quad", direction: "In" })
+				.then()
+				.hide(this.instance)
+				.run(this.instance, true);
+		});
 
-		this.loadingImage.runShowAnimation();
-		const params: TransformProps = {
-			duration: 0.3,
-			style: "Quad",
-			direction: "Out",
-		};
-		Transforms.create() //
-			.moveY(this.instance, new UDim(0, 80), params)
-			.run(this.instance);
-	}
-	hide(): void {
-		const params: TransformProps = {
-			duration: 0.4,
-			style: "Quad",
-			direction: "In",
-		};
-
-		task.wait(0.5);
-
-		this.loadingImage.runHideAnimation();
-		TransformService.cancel(this.instance);
-		Transforms.create()
-			.moveY(this.instance, new UDim(0, -200), params)
-			.then()
-			.func(() => super.hide())
-			.run(this.instance);
+		this.instance.Visible = false;
 	}
 
 	setText(text: string) {
-		this.gui.TextLabel.Text = text;
+		this.instance.TextLabel.Text = text;
 	}
 }
 
@@ -110,13 +92,11 @@ spawn(() => {
 
 	const loading = new LoadingImage(gui);
 	loading.enable();
-	loading.runShowAnimation();
 
-	task.delay(10_000, () => loading.disable());
+	task.delay(60, () => loading.disable());
 });
 
 const control = new LoadingPopup(Interface.getGameUI<{ Loading: LoadingPopupDefinition }>().Loading);
-control.hide();
 
 const state = new ObservableValue<boolean>(false);
 export namespace LoadingController {
@@ -125,11 +105,11 @@ export namespace LoadingController {
 	export function show(text: string) {
 		$log(text);
 		control.setText(`${text}...`);
-		control.show();
+		control.enable();
 		state.set(true);
 	}
 	export function hide() {
-		control.hide();
+		control.disable();
 		state.set(false);
 	}
 

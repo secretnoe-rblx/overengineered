@@ -23,11 +23,8 @@ class CategoryControl extends Control {
 }
 
 const mainControl = new CategoryControl(Interface.getGameUI<{ DebugLog: GuiObject }>().DebugLog);
-if (RunService.IsStudio()) {
-	mainControl.show();
-} else {
-	mainControl.hide();
-}
+mainControl.setEnabledAndVisible(RunService.IsStudio());
+
 const disabled = !mainControl.isEnabled();
 const disabledCategoryObject = {};
 

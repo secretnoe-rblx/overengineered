@@ -57,16 +57,16 @@ export class TabControl extends Control<TabControlDefinition> {
 
 		content.instance.Parent = this.gui.Content;
 		this.add(content);
-		content.hide();
+		content.disableHide();
 
 		const button = this.addButton();
 		button.text.set(name);
 		button.activated.Connect(() => {
 			for (const [_, tab] of this.tabs) {
-				tab.hide();
+				tab.disableHide();
 			}
 
-			content.show();
+			content.enableShow();
 		});
 	}
 }

@@ -279,9 +279,4 @@ export class SavePopup extends Popup<SlotsPopupDefinition> {
 		const search = this.add(new TextBoxControl(gui.Search));
 		this.event.subscribeObservable(search.text, (text) => slots.search.set(text), true);
 	}
-
-	show() {
-		super.show();
-		// TransformService.run(this.instance, (transform) => transform.slideIn("top", 50, { duration: 0.2 }));
-	}
 }

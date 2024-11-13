@@ -331,13 +331,6 @@ export class MemoryEditorPopup extends Popup<MemoryEditorPopupDefinition> {
 		this.add(addressTextBox);
 	}
 
-	show() {
-		super.show();
-		// TransformService.run(this.instance, (transform) =>
-		// 	transform.slideIn(this.instance, "top", 50, { duration: 0.2 }),
-		// );
-	}
-
 	getScale() {
 		return this.parentScreen.getScale();
 	}

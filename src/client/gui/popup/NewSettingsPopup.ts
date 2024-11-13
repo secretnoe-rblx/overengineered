@@ -98,7 +98,7 @@ export class NewSettingsPopup extends Popup<NewSettingsPopupDefinition> {
 			});
 
 			isolationMode.value.subscribe((value) => {
-				blacklist.setVisible(!value);
+				blacklist.setEnabledAndVisible(!value);
 				CustomRemotes.gui.settings.permissions.isolationMode.send(value);
 			}, true);
 
