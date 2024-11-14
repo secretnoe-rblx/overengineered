@@ -124,7 +124,7 @@ class Logic extends InstanceBlockLogic<typeof definition> {
 			this.beaconInstance.billboard.Distance.TextColor3 = markerColor;
 		});
 
-		this.onDestroy(() => this.beaconInstance?.destroy());
+		this.onDisable(() => this.beaconInstance?.destroy());
 	}
 
 	//ВЫЗЫВАЕТСЯ ИЗ ВНЕ (RideModeScene.ts)! НЕ МЕНЯТЬ!
