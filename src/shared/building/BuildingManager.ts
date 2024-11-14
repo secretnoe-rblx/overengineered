@@ -122,6 +122,7 @@ export namespace BuildingManager {
 	type MirroredBlock = {
 		readonly id: BlockId;
 		readonly pos: CFrame;
+		readonly scale: Vector3;
 	};
 	export function getMirroredBlocks(
 		center: CFrame,
@@ -182,6 +183,7 @@ export namespace BuildingManager {
 				pos: new CFrame(mirrorCFrame.ToWorldSpace(new CFrame(pos.X, pos.Y, -pos.Z)).Position).mul(
 					rotated.Rotation,
 				),
+				scale: block.pos.Rotation.ToObjectSpace(rotated.Rotation).mul(block.scale).Abs(),
 			};
 		};
 

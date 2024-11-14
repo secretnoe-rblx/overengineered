@@ -767,7 +767,11 @@ export class EditTool extends ToolBase {
 		const mirrored = selected.map((s): PlaceBlockRequest => {
 			const mirrored = BuildingManager.getMirroredBlocks(
 				center,
-				{ id: BlockManager.manager.id.get(s), pos: s.GetPivot() },
+				{
+					id: BlockManager.manager.id.get(s),
+					pos: s.GetPivot(),
+					scale: BlockManager.manager.scale.get(s) ?? Vector3.one,
+				},
 				{
 					x: axis === "x" ? 0 : undefined,
 					y: axis === "y" ? 0 : undefined,
@@ -781,6 +785,7 @@ export class EditTool extends ToolBase {
 				...placeToBlockRequest(s),
 				location: mirrored[0].pos,
 				id: mirrored[0].id,
+				scale: mirrored[0].scale,
 			};
 		});
 

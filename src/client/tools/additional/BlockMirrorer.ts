@@ -62,7 +62,7 @@ export class BlockMirrorer extends Component {
 		for (const block of blocks) {
 			const mirrored = BuildingManager.getMirroredBlocks(
 				plot.BuildingArea.GetPivot(),
-				{ id: block.id, pos: block.model.GetPivot() },
+				{ id: block.id, pos: block.model.GetPivot(), scale: block.scale ?? Vector3.one },
 				mode,
 				this.blockList,
 			).filter((m) => m.pos.Position !== block.model.GetPivot().Position);
@@ -97,7 +97,7 @@ export class BlockMirrorer extends Component {
 					if (!instance) continue;
 
 					if (block.scale) {
-						SharedBuilding.scale(instance, this.blockList.blocks[mirror.id]!.model, block.scale);
+						SharedBuilding.scale(instance, this.blockList.blocks[mirror.id]!.model, mirror.scale);
 					}
 
 					BlockGhoster.ghostModel(instance);
