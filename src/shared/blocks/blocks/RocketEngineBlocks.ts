@@ -194,12 +194,18 @@ const list: BlockBuildersWithoutIdAndDefaults = {
 		displayName: "Rocket Engine",
 		description: "Engines your rocket into the space and onto the ground",
 		logic,
+		mirror: {
+			behaviour: "offset180",
+		},
 		limit: 50,
 	},
 	smallrocketengine: {
 		displayName: "Small Rocket Engine",
 		description: "Engines your rocket into the space and onto the ground",
 		logic,
+		mirror: {
+			behaviour: "offset180",
+		},
 		limit: 50,
 	},
 };
