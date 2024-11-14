@@ -33,8 +33,9 @@ const definition = {
 	},
 } satisfies BlockLogicFullBothDefinitions;
 
+const allReceivers = new Map<number, Set<Logic>>();
 RadioTransmitterBlock.logic.ctor.sendEvent.invoked.Connect(({ frequency, value, valueType }) => {
-	Logic.allReceivers.get(frequency)?.forEach((v) => {
+	allReceivers.get(frequency)?.forEach((v) => {
 		v.setOutput(valueType, value);
 		v.blinkLed();
 	});
@@ -42,24 +43,22 @@ RadioTransmitterBlock.logic.ctor.sendEvent.invoked.Connect(({ frequency, value, 
 
 export type { Logic as RadioReceiverBlockLogic };
 class Logic extends BlockLogic<typeof definition> {
-	static readonly allReceivers = new Map<number, Set<Logic>>();
 	private readonly colorFade = Color3.fromRGB(0, 0, 0);
 	private readonly originalColor;
-	private readonly led;
 
 	constructor(block: BlockLogicArgs) {
 		super(definition, block);
 
-		this.led = block.instance?.FindFirstChild("LED") as BasePart | undefined;
-		this.originalColor = this.led?.Color ?? Colors.black;
+		const led = block.instance?.FindFirstChild("LED") as BasePart | undefined;
+		this.originalColor = led?.Color ?? Colors.black;
 
 		const changeFrequency = (freq: number, prev: number) => {
-			if (!Logic.allReceivers.get(freq)) {
-				Logic.allReceivers.set(freq, new Set());
+			if (!allReceivers.get(freq)) {
+				allReceivers.set(freq, new Set());
 			}
 
-			Logic.allReceivers.get(prev)?.delete(this);
-			Logic.allReceivers.get(freq)?.add(this);
+			allReceivers.get(prev)?.delete(this);
+			allReceivers.get(freq)?.add(this);
 		};
 
 		let prevFrequency = -1;
@@ -68,7 +67,7 @@ class Logic extends BlockLogic<typeof definition> {
 			changeFrequency(frequency, prevFrequency);
 		});
 
-		this.onDisable(() => Logic.allReceivers.get(prevFrequency)?.delete(this));
+		this.onDisable(() => allReceivers.get(prevFrequency)?.delete(this));
 	}
 
 	setOutput(
@@ -79,10 +78,11 @@ class Logic extends BlockLogic<typeof definition> {
 	}
 
 	blinkLed() {
-		if (!this.led) return;
+		const led = this.instance?.FindFirstChild("LED") as BasePart | undefined;
+		if (!led) return;
 
-		this.led.Color = this.colorFade;
-		task.delay(0.1, () => (this.led ? (this.led.Color = this.originalColor) : ""));
+		led.Color = this.colorFade;
+		task.delay(0.1, () => (led.Color = this.originalColor));
 	}
 }
 

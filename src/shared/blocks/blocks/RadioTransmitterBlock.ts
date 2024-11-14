@@ -44,13 +44,12 @@ class Logic extends BlockLogic<typeof definition> {
 
 	private readonly colorFade = Color3.fromRGB(0, 0, 0);
 	private readonly originalColor;
-	private readonly led;
 
 	constructor(block: BlockLogicArgs) {
 		super(definition, block);
 
-		this.led = block.instance?.FindFirstChild("LED") as BasePart | undefined;
-		this.originalColor = this.led?.Color ?? Colors.black;
+		const led = block.instance?.FindFirstChild("LED") as BasePart | undefined;
+		this.originalColor = led?.Color ?? Colors.black;
 
 		this.on(({ value, valueType, frequency }) => {
 			this.blinkLed();
@@ -59,10 +58,11 @@ class Logic extends BlockLogic<typeof definition> {
 	}
 
 	blinkLed() {
-		if (!this.led) return;
+		const led = this.instance?.FindFirstChild("LED") as BasePart | undefined;
+		if (!led) return;
 
-		this.led.Color = this.colorFade;
-		task.delay(0.1, () => (this.led ? (this.led.Color = this.originalColor) : ""));
+		led.Color = this.colorFade;
+		task.delay(0.1, () => (led.Color = this.originalColor));
 	}
 }
 
