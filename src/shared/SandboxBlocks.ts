@@ -24,6 +24,7 @@ import { TNTBlocks } from "shared/blocks/blocks/grouped/TNTBlocks";
 import { WheelBlocks } from "shared/blocks/blocks/grouped/WheelBlocks";
 import { WingBlocks } from "shared/blocks/blocks/grouped/WingsBlocks";
 import { HeliumBlock } from "shared/blocks/blocks/HeliumBlock";
+import { HingeBlock } from "shared/blocks/blocks/HingeBlock";
 import { ImpulseGeneratorBlock } from "shared/blocks/blocks/ImpulseGeneratorBlock";
 import { KeySensorBlock } from "shared/blocks/blocks/KeySensorBlock";
 import { LaserBlock } from "shared/blocks/blocks/LaserBlock";
@@ -72,6 +73,7 @@ export const CreateSandboxBlocks = (di: DIContainer): BlockList => {
 
 		PistonBlock,
 		MotorBlock,
+		HingeBlock,
 		RCSEngineBlock,
 		DisconnectBlock,
 		RopeBlock,
