@@ -120,7 +120,7 @@ export namespace BlockConfig {
 					return defConfig;
 				}
 
-				return { ...defConfig, ...obj.config };
+				return { ...(defConfig as {}), ...(obj.config as {}) } as never;
 			}
 
 			return obj.config;
