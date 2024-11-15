@@ -53,6 +53,7 @@ interface ReplicatedStorage {
 			Z: BasePart;
 		};
 		MoveHandles: MoveHandles;
+		ResizeHandles: MoveHandles;
 		RotateHandles: RotateHandles;
 		Effects: Folder & {
 			Fire: Folder;

@@ -3,8 +3,6 @@ import { GameDefinitions } from "shared/data/GameDefinitions";
 import { TerrainDataInfo } from "shared/TerrainDataInfo";
 import type { ChunkGenerator } from "client/terrain/ChunkLoader";
 
-const aprilFools = GameDefinitions.APRIL_FOOLS;
-
 const terrainData = TerrainDataInfo.data;
 const materialData: number[][] = [];
 
@@ -111,7 +109,7 @@ infterrainActor.Load.Event.ConnectParallel((chunkX: number, chunkZ: number, load
 				material = Enum.Material.Snow;
 			}
 
-			if (!aprilFools && loadFoliage) {
+			if (loadFoliage) {
 				for (const modelData of terrainData.models) {
 					if (math.fmod(voxelX, modelData[2]) !== 0 || math.fmod(voxelZ, modelData[2]) !== 0) {
 						continue;
@@ -236,21 +234,16 @@ infterrainActor.Load.Event.ConnectParallel((chunkX: number, chunkZ: number, load
 				const occupancy = heightd4 - yHeight;
 
 				if (occupancy > 0) {
-					materials[x][y][z] = aprilFools ? Enum.Material.Basalt : material;
-					occupancys[x][y][z] = aprilFools ? 0.3 : occupancy;
+					materials[x][y][z] = material;
+					occupancys[x][y][z] = occupancy;
 				} else {
 					const occupancy = terrainData.waterHeight / 4 - yHeight;
 					if (occupancy <= 0) {
 						continue;
 					}
 
-					if (aprilFools) {
-						materials[x][y][z] = Enum.Material.Air;
-						occupancys[x][y][z] = 0;
-					} else {
-						materials[x][y][z] = Enum.Material.Water;
-						occupancys[x][y][z] = occupancy;
-					}
+					materials[x][y][z] = Enum.Material.Water;
+					occupancys[x][y][z] = occupancy;
 				}
 			}
 		}

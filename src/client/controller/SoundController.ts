@@ -1,4 +1,4 @@
-import { Players, ReplicatedStorage, RunService, Workspace } from "@rbxts/services";
+import { Players, ReplicatedStorage, RunService, TweenService, Workspace } from "@rbxts/services";
 import { LocalPlayerController } from "client/controller/LocalPlayerController";
 import { Signals } from "client/Signals";
 import { LocalPlayer } from "engine/client/LocalPlayer";
@@ -104,8 +104,13 @@ class WindSoundEffect extends HostedService {
 			const volume = (maxVolume / 100) * ratio;
 			const soundSpeed = (maxSoundSpeed / 100) * ratio;
 
-			sound.Volume = SoundController.getWorldVolume(volume);
-			sound.PlaybackSpeed = soundSpeed;
+			TweenService.Create(sound, new TweenInfo(0.25), {
+				Volume: SoundController.getWorldVolume(volume),
+				PlaybackSpeed: soundSpeed,
+			}).Play();
+
+			// sound.Volume = SoundController.getWorldVolume(volume);
+			// sound.PlaybackSpeed = soundSpeed;
 		});
 	}
 }

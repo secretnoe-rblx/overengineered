@@ -99,6 +99,7 @@ class Logic extends InstanceBlockLogic<typeof definition, RocketModel> {
 	private readonly maxParticlesAcceleration = 120;
 
 	private cachedThrust = 0;
+	private readonly multipler;
 
 	constructor(
 		block: InstanceBlockLogicArgs,
@@ -115,16 +116,12 @@ class Logic extends InstanceBlockLogic<typeof definition, RocketModel> {
 		this.particleEmitter = this.instance.EffectEmitter.Fire;
 
 		// Math
-		let multiplier = math.round((colbox.Size.X * colbox.Size.Y * colbox.Size.Z) / 16);
-
-		// i dont remember why
-		if (multiplier !== 1) {
-			multiplier *= 2;
-		}
+		let multiplier = (colbox.Size.X * colbox.Size.Y * colbox.Size.Z) / 16;
+		this.multipler = multiplier;
 
 		// The strength depends on the material
 		const material = BlockManager.manager.material.get(this.instance);
-		multiplier *= math.max(1, math.round(new PhysicalProperties(material).Density / 2));
+		multiplier *= math.max(1, new PhysicalProperties(material).Density / 2);
 
 		// Max power
 		this.maxPower = this.basePower * multiplier;
@@ -149,25 +146,22 @@ class Logic extends InstanceBlockLogic<typeof definition, RocketModel> {
 
 		// Particles
 		const visualize = thrustPercent !== 0;
-		const newParticleEmitterAcceleration = new Vector3(
-			this.maxParticlesAcceleration * thrustPercent * strengthPercent,
-			0,
-			0,
-		);
+		const newParticleEmitterAcceleration = this.instance
+			.GetPivot()
+			.RightVector.mul(this.maxParticlesAcceleration * thrustPercent * strengthPercent);
+
 		const particleEmmiterHasDifference =
 			this.particleEmitter.Enabled !== visualize ||
-			math.abs(this.particleEmitter.Acceleration.X - newParticleEmitterAcceleration.X) > 1;
+			this.particleEmitter.Acceleration.sub(newParticleEmitterAcceleration).Abs().Magnitude > 1;
 
 		this.particleEmitter.Enabled = visualize;
-		this.particleEmitter.Acceleration = new Vector3(
-			this.maxParticlesAcceleration * thrustPercent * strengthPercent,
-			0,
-			0,
-		);
+		this.particleEmitter.Acceleration = newParticleEmitterAcceleration;
 
 		// Sound
 		const newVolume =
-			Sound.getWorldVolume(this.instance.GetPivot().Y) * (this.maxSoundVolume * thrustPercent * strengthPercent);
+			Sound.getWorldVolume(this.instance.GetPivot().Y) *
+			(this.maxSoundVolume * thrustPercent * strengthPercent) *
+			math.sqrt(this.multipler);
 
 		const volumeHasDifference = visualize !== this.sound.Playing || math.abs(this.sound.Volume - newVolume) > 0.005;
 		this.sound.Playing = visualize;
@@ -200,12 +194,18 @@ const list: BlockBuildersWithoutIdAndDefaults = {
 		displayName: "Rocket Engine",
 		description: "Engines your rocket into the space and onto the ground",
 		logic,
+		mirror: {
+			behaviour: "offset180",
+		},
 		limit: 50,
 	},
 	smallrocketengine: {
 		displayName: "Small Rocket Engine",
 		description: "Engines your rocket into the space and onto the ground",
 		logic,
+		mirror: {
+			behaviour: "offset180",
+		},
 		limit: 50,
 	},
 };

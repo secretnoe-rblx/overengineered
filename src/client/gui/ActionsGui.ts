@@ -1,5 +1,5 @@
-import { TextButtonControl } from "client/gui/controls/Button";
 import { Gui } from "client/gui/Gui";
+import { TextButtonControl } from "engine/client/gui/Button";
 import { Control } from "engine/client/gui/Control";
 import { Component } from "engine/shared/component/Component";
 import type { HideInterfaceController } from "client/gui/HideInterfaceController";

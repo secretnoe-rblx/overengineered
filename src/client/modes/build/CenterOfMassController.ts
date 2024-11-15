@@ -25,7 +25,7 @@ export class CenterOfMassController extends ClientComponent {
 		super();
 
 		this.viewportFrame = new Instance("ViewportFrame");
-		this.viewportFrame.Name = "WireViewportFrame";
+		this.viewportFrame.Name = "CenterOfMass";
 		this.viewportFrame.Size = UDim2.fromScale(1, 1);
 		this.viewportFrame.CurrentCamera = Workspace.CurrentCamera;
 		this.viewportFrame.Transparency = 1;

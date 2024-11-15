@@ -1450,7 +1450,7 @@ const other = {
 		logic: logic(
 			{
 				input: {
-					value: defpartsf.any("Value", { group: "1" }),
+					value: defpartsf.any("Value", { group: "1", configHidden: true }),
 				},
 				output: {
 					result: {

@@ -69,6 +69,38 @@ export namespace BlockAssertions {
 
 		yield `No parts in block '${block.Name}' are anchored!`;
 	}
+	function* assertNoPrimaryPartRotation(block: AssertedModel) {
+		if (block.PrimaryPart.CFrame.Rotation !== CFrame.identity) {
+			yield `Block ${block.Name} has a non-zero rotation in its PrimaryPart ${block.PrimaryPart.Name}`;
+		}
+	}
+	function* assertNoBallCylinderParts(block: Model) {
+		function* check(instance: Instance) {
+			for (const child of instance.GetChildren()) {
+				if (child.Parent?.Name === "WeldRegions") continue;
+
+				if (child.IsA("Part")) {
+					if (child.HasTag("UNSCALABLE")) continue;
+
+					if (child.Shape === Enum.PartType.Ball || child.Shape === Enum.PartType.Cylinder) {
+						yield `Block ${block.Name} part ${child.Name} shape is ${tostring(child.Shape).sub("Enum.PartType.".size() + 1)} which does not scale good. Replace with union or a mesh.`;
+					}
+				}
+			}
+		}
+
+		for (const err of check(block)) {
+			yield err;
+		}
+	}
+
+	function* assertUsePartColor(block: Model) {
+		for (const part of block.GetDescendants()) {
+			if (part.IsA("UnionOperation") && !part.UsePartColor) {
+				yield `Block ${block.Name} part ${part.Name} has UsePartColor disabled`;
+			}
+		}
+	}
 	function* assertCollisionGroup(block: Model) {
 		for (const child of block.GetDescendants()) {
 			if (child.Parent?.Name === "WeldRegions") continue;
@@ -81,15 +113,25 @@ export namespace BlockAssertions {
 		}
 	}
 	function* assertNoRepeatedPartNames(block: Model) {
-		const names = new Set<string>();
-		for (const item of block.GetDescendants()) {
-			if (!item.IsA("BasePart")) continue;
+		function* check(parent: Instance): Generator<string> {
+			const names = new Set<string>();
+			for (const child of parent.GetChildren()) {
+				for (const err of check(child)) {
+					yield err;
+				}
 
-			if (names.has(item.Name)) {
-				yield `Block ${block.Name} has duplicate child name ${item.Name}`;
+				if (!child.IsA("BasePart")) continue;
+
+				if (names.has(child.Name)) {
+					yield `Block ${block.Name} has duplicate child name ${child.Name}`;
+				}
+
+				names.add(child.Name);
 			}
+		}
 
-			names.add(item.Name);
+		for (const err of check(block)) {
+			yield err;
 		}
 	}
 	function checkSize(block: AssertedModel) {
@@ -128,8 +170,11 @@ export namespace BlockAssertions {
 			...assertValidVelds(block),
 			...assertFluidForcesIsDisabled(block),
 			...assertSomethingAnchored(block),
+			...assertNoPrimaryPartRotation(block),
+			...assertNoBallCylinderParts(block),
+			...assertUsePartColor(block),
 			...assertCollisionGroup(block),
-			// ...assertNoRepeatedPartNames(block), temporarily removed
+			...assertNoRepeatedPartNames(block),
 		];
 	}
 

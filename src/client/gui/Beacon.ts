@@ -12,7 +12,8 @@ type BeaconBillboardGui = GuiObject & {
 };
 
 export class Beacon extends InstanceComponent<PVInstance> {
-	private readonly billboard;
+	readonly billboard;
+	showUpDistance = 30;
 
 	constructor(part: PVInstance, name: string) {
 		super(part);
@@ -38,9 +39,8 @@ export class Beacon extends InstanceComponent<PVInstance> {
 				part.GetPivot().Position.sub(character.GetPivot().Position).Magnitude,
 			);
 
-			const cutoffDistance = 30;
 			const transparencyMultiplier = 0.8;
-			const transparency = 1 - math.clamp((distance - cutoffDistance) / 10, 0, 1) * transparencyMultiplier;
+			const transparency = 1 - math.clamp(distance - this.showUpDistance, 0, 1) * transparencyMultiplier;
 
 			this.billboard.ImageLabel.ImageTransparency = transparency;
 			this.billboard.Title.TextTransparency = transparency;
@@ -48,11 +48,8 @@ export class Beacon extends InstanceComponent<PVInstance> {
 
 			if (transparency >= 1) return;
 
-			let distancestr: string;
-			if (distance > 1000) distancestr = `${math.floor(distance / 100) / 10} km`;
-			else distancestr = `${math.floor(distance)} m`;
-
-			this.billboard.Distance.Text = distancestr;
+			this.billboard.Distance.Text =
+				distance > 1000 ? `${math.floor(distance / 100) / 10} km` : `${math.floor(distance)} m`;
 			const [screenPos, isVisible] = Workspace.CurrentCamera!.WorldToViewportPoint(part.GetPivot().Position);
 			const screenSize = Workspace.CurrentCamera!.ViewportSize;
 			const adjustableOffset =

@@ -9,7 +9,7 @@ import { ClientComponent } from "engine/client/component/ClientComponent";
 import { LocalPlayer } from "engine/client/LocalPlayer";
 import { ComponentChild } from "engine/shared/component/ComponentChild";
 import { ComponentDisabler } from "engine/shared/component/ComponentDisabler";
-import { MiddlewaredObservableValue } from "engine/shared/event/MiddlewaredObservableValue";
+import { ObservableValue } from "engine/shared/event/ObservableValue";
 import { Objects } from "engine/shared/fixes/Objects";
 import type { BuildingMode } from "client/modes/build/BuildingMode";
 import type { ToolBase } from "client/tools/ToolBase";
@@ -66,7 +66,15 @@ class ToolInputController extends ClientComponent {
 
 @injectable
 export class ToolController extends ClientComponent {
-	readonly selectedTool = new MiddlewaredObservableValue<ToolBase | undefined>(undefined);
+	readonly selectedTool = new ObservableValue<ToolBase | undefined>(undefined, (value) => {
+		if (!value) return value;
+
+		if (this.enabledTools.isDisabled(value)) {
+			return undefined;
+		}
+
+		return value;
+	});
 	readonly visibleTools: ComponentDisabler<ToolBase>;
 	readonly enabledTools: ComponentDisabler<ToolBase>;
 
@@ -81,15 +89,6 @@ export class ToolController extends ClientComponent {
 			this.selectedTool.set(undefined);
 		});
 
-		this.selectedTool.addMiddleware((value) => {
-			if (!value) return value;
-
-			if (this.enabledTools.isDisabled(value)) {
-				return undefined;
-			}
-
-			return value;
-		});
 		this.selectedTool.subscribe((tool, prev) => {
 			prev?.disable();
 			tool?.enable();

@@ -33,18 +33,21 @@ class Logic extends InstanceBlockLogic<typeof definition, VehicleSeatModel> {
 		super(definition, block);
 
 		this.vehicleSeat = this.instance.VehicleSeat;
+		this.event.subscribeObservable(
+			this.event.readonlyObservableFromInstanceParam(this.vehicleSeat, "Occupant"),
+			(occupant) => this.output.occupied.set("bool", occupant !== undefined),
+			true,
+		);
 
-		const update = () => {
-			const occupant = this.vehicleSeat.Occupant;
-			if (RunService.IsClient()) {
-				machine.occupiedByLocalPlayer.set(occupant?.Parent === Players.LocalPlayer.Character);
-			}
-
-			this.output.occupied.set("bool", occupant !== undefined);
-		};
-
-		this.event.subscribe(this.vehicleSeat.GetPropertyChangedSignal("Occupant"), update);
-		this.onEnable(update);
+		if (RunService.IsClient()) {
+			this.vehicleSeat
+				.GetPropertyChangedSignal("Occupant")
+				.Connect(() =>
+					machine.occupiedByLocalPlayer.set(
+						this.vehicleSeat.Occupant?.Parent === Players.LocalPlayer.Character,
+					),
+				);
+		}
 	}
 
 	getDebugInfo(ctx: BlockLogicTickContext): readonly string[] {

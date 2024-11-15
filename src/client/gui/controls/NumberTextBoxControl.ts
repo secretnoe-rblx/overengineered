@@ -12,12 +12,10 @@ class NumberObservableValue<T extends number | undefined = number> extends Obser
 		readonly max: number | undefined,
 		readonly step?: number,
 	) {
-		super(value);
-	}
-
-	protected processValue(value: T) {
-		if (value === undefined) return value;
-		return MathUtils.clamp(value, this.min, this.max, this.step) as T;
+		super(value, (value) => {
+			if (value === undefined) return value;
+			return MathUtils.clamp(value, this.min, this.max, this.step) as T;
+		});
 	}
 }
 

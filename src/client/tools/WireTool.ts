@@ -1,5 +1,4 @@
 import { GamepadService, GuiService, Players, ReplicatedStorage, RunService, Workspace } from "@rbxts/services";
-import { ButtonControl } from "client/gui/controls/Button";
 import { Gui } from "client/gui/Gui";
 import { GuiAnimator } from "client/gui/GuiAnimator";
 import { LogControl } from "client/gui/static/LogControl";
@@ -8,6 +7,7 @@ import { ClientBuilding } from "client/modes/build/ClientBuilding";
 import { ToolBase } from "client/tools/ToolBase";
 import { ClientComponent } from "engine/client/component/ClientComponent";
 import { ClientInstanceComponent } from "engine/client/component/ClientInstanceComponent";
+import { ButtonControl } from "engine/client/gui/Button";
 import { Control } from "engine/client/gui/Control";
 import { InputController } from "engine/client/InputController";
 import { Component } from "engine/shared/component/Component";
@@ -17,6 +17,7 @@ import { Element } from "engine/shared/Element";
 import { ObservableValue } from "engine/shared/event/ObservableValue";
 import { Instances } from "engine/shared/fixes/Instances";
 import { BlockWireManager } from "shared/blockLogic/BlockWireManager";
+import { BlockManager } from "shared/building/BlockManager";
 import { Colors } from "shared/Colors";
 import type { InputTooltips } from "client/gui/static/TooltipsControl";
 import type { BuildingMode } from "client/modes/build/BuildingMode";
@@ -73,27 +74,36 @@ namespace Markers {
 		};
 	};
 	export abstract class Marker extends ClientInstanceComponent<MarkerComponentDefinition> {
-		private static getPartMarkerPositions(part: BasePart): Vector3[] {
-			const averageSize = (part.Size.X + part.Size.Y + part.Size.Z) / 3;
-			const halfSize = averageSize / 2;
+		private static getPartMarkerPositions(originalOrigin: BasePart): Vector3[] {
+			const sizeX = originalOrigin.Size.X / 2;
+			const sizeY = originalOrigin.Size.Y / 2;
+			const sizeZ = originalOrigin.Size.Z / 2;
 			const offset = 0.25;
 
 			return [
-				new Vector3(-halfSize + offset, 0, 0),
-				new Vector3(halfSize - offset, 0, 0),
-				new Vector3(0, 0, -halfSize + offset),
-				new Vector3(0, 0, halfSize - offset),
-				new Vector3(0, -halfSize + offset, 0),
-				new Vector3(0, halfSize - offset, 0),
+				new Vector3(-sizeX + offset, 0, 0),
+				new Vector3(sizeX - offset, 0, 0),
+				new Vector3(0, 0, -sizeZ + offset),
+				new Vector3(0, 0, sizeZ - offset),
+				new Vector3(0, -sizeY + offset, 0),
+				new Vector3(0, sizeY - offset, 0),
 				new Vector3(0, 0, 0),
 			];
 		}
-		static createInstance(origin: BasePart, offset: Vector3 | number | "center"): MarkerComponentDefinition {
+		static createInstance(
+			origin: BasePart,
+			offset: Vector3 | number | "center",
+			scale: Vector3 | undefined,
+			originalOrigin: BasePart,
+		): MarkerComponentDefinition {
 			if (typeIs(offset, "number")) {
-				offset = this.getPartMarkerPositions(origin)[offset];
+				offset = this.getPartMarkerPositions(originalOrigin)[offset];
 			}
 			if (offset === "center") {
 				offset = Vector3.zero;
+			}
+			if (scale) {
+				offset = offset.mul(scale);
 			}
 
 			const markerInstance = ReplicatedStorage.Assets.Wires.WireMarker.Clone();
@@ -772,6 +782,8 @@ export class WireTool extends ToolBase {
 				const markerInstance = Markers.Marker.createInstance(
 					blockInstance.PrimaryPart!,
 					markerpos !== undefined ? markerpos : size === 1 ? "center" : ai++,
+					BlockManager.manager.scale.get(blockInstance),
+					this.blockList.blocks[BlockManager.manager.id.get(blockInstance)]!.model.PrimaryPart!,
 				);
 
 				const component =

@@ -1,8 +1,8 @@
-import { ButtonControl } from "client/gui/controls/Button";
 import { DictionaryControl } from "client/gui/controls/DictionaryControl";
 import { KeyChooserControl } from "client/gui/controls/KeyChooserControl";
 import { Gui } from "client/gui/Gui";
 import { Popup } from "client/gui/Popup";
+import { ButtonControl } from "engine/client/gui/Button";
 import { Control } from "engine/client/gui/Control";
 import type { KeyChooserControlDefinition } from "client/gui/controls/KeyChooserControl";
 import type { Keybinds } from "client/Keybinds";
@@ -46,7 +46,7 @@ export class ControlsPopup extends Popup<ControlsPopupDefinition> {
 				}
 
 				const gui = this.template();
-				gui.HeadingLabel.Text = value.displayName;
+				gui.HeadingLabel.Text = value.displayPath[value.displayPath.size() - 1];
 
 				const control = new Control(gui);
 				const keyChooser = control.add(new KeyChooserControl(gui.Control));

@@ -70,6 +70,9 @@ export class SharedPlot extends InstanceComponent<PlotModel> {
 	tryGetBlock(uuid: BlockUuid): BlockModel | undefined {
 		return this.instance.Blocks.FindFirstChild(uuid) as BlockModel | undefined;
 	}
+	getSpawnCFrame() {
+		return new CFrame(this.getSpawnPosition()).mul(CFrame.Angles(0, math.rad(90), 0));
+	}
 	getSpawnPosition() {
 		return this.instance.BuildingArea.GetPivot().Position.add(
 			new Vector3(this.instance.BuildingArea.ExtentsSize.X / 2 + 2, 10, 0),

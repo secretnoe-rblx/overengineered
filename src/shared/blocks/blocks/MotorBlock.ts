@@ -1,6 +1,7 @@
 import { RobloxUnit } from "engine/shared/RobloxUnit";
 import { InstanceBlockLogic } from "shared/blockLogic/BlockLogic";
 import { BlockCreation } from "shared/blocks/BlockCreation";
+import { BlockManager } from "shared/building/BlockManager";
 import { RemoteEvents } from "shared/RemoteEvents";
 import type { BlockLogicFullBothDefinitions, InstanceBlockLogicArgs } from "shared/blockLogic/BlockLogic";
 import type { BlockBuilder } from "shared/blocks/Block";
@@ -71,6 +72,8 @@ export class Logic extends InstanceBlockLogic<typeof definition, MotorBlock> {
 	constructor(block: InstanceBlockLogicArgs) {
 		super(definition, block);
 
+		const blockScale = BlockManager.manager.scale.get(this.instance) ?? Vector3.one;
+		const scale = blockScale.X * blockScale.Y * blockScale.Z;
 		this.on((ctx) => {
 			if (!this.instance.FindFirstChild("Base")?.FindFirstChild("HingeConstraint")) {
 				this.disableAndBurn();
@@ -79,7 +82,7 @@ export class Logic extends InstanceBlockLogic<typeof definition, MotorBlock> {
 
 			this.instance.Base.HingeConstraint.AngularVelocity = ctx.rotationSpeed;
 			this.instance.Base.HingeConstraint.MotorMaxTorque = RobloxUnit.RowtonStuds_To_NewtonMeters(
-				ctx.max_torque * 1_000_000,
+				ctx.max_torque * 1_000_000 * scale,
 			);
 		});
 
@@ -91,7 +94,7 @@ export class Logic extends InstanceBlockLogic<typeof definition, MotorBlock> {
 				return;
 			}
 
-			if (attach.Position.sub(base.Position).Magnitude > 3) {
+			if (attach.Position.sub(base.Position).Magnitude > 3 * blockScale.Y) {
 				RemoteEvents.ImpactBreak.send([base]);
 
 				this.disable();

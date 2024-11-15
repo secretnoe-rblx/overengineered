@@ -1,17 +1,17 @@
 import { ColorChooser } from "client/gui/ColorChooser";
-import { ButtonControl } from "client/gui/controls/Button";
 import { ByteEditor } from "client/gui/controls/ByteEditorControl";
 import { CheckBoxControl } from "client/gui/controls/CheckBoxControl";
 import { DropdownList } from "client/gui/controls/DropdownList";
 import { KeyOrStringChooserControl } from "client/gui/controls/KeyOrStringChooserControl";
 import { NumberTextBoxControl } from "client/gui/controls/NumberTextBoxControl";
 import { SliderControl } from "client/gui/controls/SliderControl";
-import { TextBoxControl } from "client/gui/controls/TextBoxControl";
 import { Tooltip } from "client/gui/controls/Tooltip";
 import { Gui } from "client/gui/Gui";
 import { MultiKeyNumberControl } from "client/gui/MultiKeyNumberControl";
 import { MemoryEditorPopup } from "client/gui/popup/MemoryEditorPopup";
+import { ButtonControl } from "engine/client/gui/Button";
 import { Control } from "engine/client/gui/Control";
+import { TextBoxControl } from "engine/client/gui/TextBoxControl";
 import { ComponentChild } from "engine/shared/component/ComponentChild";
 import { ObservableValue } from "engine/shared/event/ObservableValue";
 import { ArgsSignal } from "engine/shared/event/Signal";
@@ -25,8 +25,8 @@ import type { CheckBoxControlDefinition } from "client/gui/controls/CheckBoxCont
 import type { DropdownListDefinition } from "client/gui/controls/DropdownList";
 import type { KeyOrStringChooserControlDefinition } from "client/gui/controls/KeyOrStringChooserControl";
 import type { NumberTextBoxControlDefinition } from "client/gui/controls/NumberTextBoxControl";
-import type { TextBoxControlDefinition } from "client/gui/controls/TextBoxControl";
 import type { MultiKeyNumberControlDefinition, MultiKeyPart } from "client/gui/MultiKeyNumberControl";
+import type { TextBoxControlDefinition } from "engine/client/gui/TextBoxControl";
 import type { BlockConfigPart } from "shared/blockLogic/BlockConfig";
 import type { BlockLogicWithConfigDefinitionTypes } from "shared/blockLogic/BlockLogic";
 import type { BlockLogicTypes } from "shared/blockLogic/BlockLogicTypes";
@@ -1230,7 +1230,7 @@ export class MultiBlockConfigControl extends Control implements Controls.Args {
 
 			for (const k of order ?? asMap(definitions).keys()) {
 				const definition = definitions[k];
-				if (definition.configHidden) continue;
+				if (definition.configHidden && !asMap(configs).any((uuid, c) => c[k].type === "wire")) continue;
 
 				const lconfigs = map(configs, (c) => c[k]);
 				const wrapper = this.add(
@@ -1262,7 +1262,6 @@ export class MultiBlockConfigControl extends Control implements Controls.Args {
 						const grouped = grouped2.get(definition.group) ?? [];
 						if (grouped.size() === 1) return;
 
-						needsClearing = true;
 						configs = map(configs, (c) => {
 							const ret = { ...c };
 
@@ -1272,6 +1271,7 @@ export class MultiBlockConfigControl extends Control implements Controls.Args {
 								if (t.type === "wire") continue;
 								if (t.type === setType) continue;
 
+								needsClearing = true;
 								ret[key] = BlockConfig.addDefaults({ [key]: { type: setType } } as never, definitions)[
 									key
 								];

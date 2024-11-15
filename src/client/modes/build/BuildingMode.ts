@@ -1,4 +1,3 @@
-import { LocalPlayer } from "engine/client/LocalPlayer";
 import { MirrorVisualizer } from "client/controller/MirrorVisualizer";
 import { BuildingModeScene } from "client/gui/buildmode/BuildingModeScene";
 import { Gui } from "client/gui/Gui";
@@ -6,6 +5,7 @@ import { CenterOfMassController } from "client/modes/build/CenterOfMassControlle
 import { PlayMode } from "client/modes/PlayMode";
 import { BlockSelect } from "client/tools/highlighters/BlockSelect";
 import { ToolController } from "client/tools/ToolController";
+import { LocalPlayer } from "engine/client/LocalPlayer";
 import { NumberObservableValue } from "engine/shared/event/NumberObservableValue";
 import { ObservableValue } from "engine/shared/event/ObservableValue";
 import { SharedRagdoll } from "shared/SharedRagdoll";
@@ -44,9 +44,23 @@ export class BuildingMode extends PlayMode {
 		this.onDisable(() => com.disable());
 		this.onDestroy(() => com.destroy());
 
+		let mg = this.moveGrid.get();
+		let rg = this.moveGrid.get();
 		this.event.subInput((ih) => {
-			ih.onKeyDown("LeftControl", () => this.gridEnabled.set(false));
-			ih.onKeyUp("LeftControl", () => this.gridEnabled.set(true));
+			ih.onKeyDown("LeftControl", () => {
+				this.gridEnabled.set(false);
+
+				mg = this.moveGrid.get();
+				this.moveGrid.set(0);
+
+				rg = this.rotateGrid.get();
+				this.rotateGrid.set(0);
+			});
+			ih.onKeyUp("LeftControl", () => {
+				this.gridEnabled.set(true);
+				this.moveGrid.set(mg);
+				this.rotateGrid.set(rg);
+			});
 		});
 
 		this.targetPlot = new ObservableValue<SharedPlot | undefined>(undefined).withDefault(plot);
@@ -92,8 +106,8 @@ export class BuildingMode extends PlayMode {
 			task.wait();
 		}
 
-		const pos = this.targetPlot.get().getSpawnPosition();
-		rootPart.CFrame = new CFrame(pos);
+		const pos = this.targetPlot.get().getSpawnCFrame();
+		rootPart.CFrame = pos;
 		rootPart.AssemblyLinearVelocity = Vector3.zero;
 		rootPart.AssemblyAngularVelocity = Vector3.zero;
 	}

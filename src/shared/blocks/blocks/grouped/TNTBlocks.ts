@@ -75,16 +75,20 @@ class Logic extends InstanceBlockLogic<typeof definition> {
 	constructor(block: InstanceBlockLogicArgs) {
 		super(definition, block);
 
-		const doExplode = (radius: number, pressure: number, flammable: boolean) => {
-			if (!this.instance.PrimaryPart) return;
+		const doExplode = (part: BasePart, radius: number, pressure: number, flammable: boolean) => {
+			if (!part) return;
 
-			RemoteEvents.Explode.send({ part: this.instance.PrimaryPart, radius, pressure, isFlammable: flammable });
+			RemoteEvents.Explode.send({ part, radius, pressure, isFlammable: flammable });
 			this.disable();
 		};
 
+		const mainPart = (this.instance.FindFirstChild("Part") ??
+			this.instance.FindFirstChild("Union") ??
+			this.instance.PrimaryPart!) as BasePart;
+
 		this.on(({ explode, radius, pressure, flammable }) => {
 			if (!explode) return;
-			doExplode(radius, pressure, flammable);
+			doExplode(mainPart, radius, pressure, flammable);
 		});
 
 		let radius: number | undefined;
@@ -97,7 +101,7 @@ class Logic extends InstanceBlockLogic<typeof definition> {
 
 		const impactCache = this.initializeInputCache("impact");
 
-		this.event.subscribe(this.instance.PrimaryPart!.Touched, (part) => {
+		this.event.subscribe(mainPart.Touched, (part) => {
 			if (!impactCache.tryGet()) return;
 			if (radius === undefined || pressure === undefined || flammable === undefined) {
 				return;
@@ -106,11 +110,11 @@ class Logic extends InstanceBlockLogic<typeof definition> {
 				return;
 			}
 
-			const velocity1 = this.instance.PrimaryPart!.AssemblyLinearVelocity.Magnitude;
+			const velocity1 = mainPart.AssemblyLinearVelocity.Magnitude;
 			const velocity2 = part.AssemblyLinearVelocity.Magnitude;
 
 			if (velocity1 > (velocity2 + 1) * 10) {
-				doExplode(radius, pressure, flammable);
+				doExplode(mainPart, radius, pressure, flammable);
 			}
 		});
 	}
@@ -133,6 +137,12 @@ const list: BlockBuildersWithoutIdAndDefaults = {
 	sphericaltnt: {
 		displayName: "Spherical TNT",
 		description: "Catch this anarchid-man!",
+		limit: 100,
+		logic,
+	},
+	halfsphericaltnt: {
+		displayName: "Half Spherical TNT",
+		description: "Had to cut corners. Unfortunately, sphere doesn't have corners.. So we sliced it in half!",
 		limit: 100,
 		logic,
 	},

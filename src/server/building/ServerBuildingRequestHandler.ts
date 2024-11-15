@@ -70,7 +70,15 @@ export class ServerBuildingRequestHandler extends HostedService {
 			const b = this.blockList.blocks[block.id];
 			if (!b) return err("Unknown block id");
 
-			if (!BuildingManager.serverBlockCanBePlacedAt(plotc.plot, b, block.location, this.player)) {
+			if (
+				!BuildingManager.serverBlockCanBePlacedAt(
+					plotc.plot,
+					b,
+					block.location,
+					block.scale ?? Vector3.one,
+					this.player,
+				)
+			) {
 				return err("Can't be placed here");
 			}
 

@@ -35,7 +35,7 @@ class Logic extends BlockLogic<typeof definition> {
 
 			this.output.position.set(
 				"vector3",
-				camera.CFrame.Position.add(new Vector3(0, GameDefinitions.HEIGHT_OFFSET, 0)),
+				camera.CFrame.Position.sub(new Vector3(0, GameDefinitions.HEIGHT_OFFSET, 0)),
 			);
 			this.output.direction.set("vector3", camera.CFrame.LookVector);
 			this.output.up.set("vector3", camera.CFrame.UpVector);

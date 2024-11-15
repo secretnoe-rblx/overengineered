@@ -1,7 +1,7 @@
 import { ReplicatedStorage, StarterGui, UserInputService, Workspace } from "@rbxts/services";
-import { ButtonControl } from "client/gui/controls/Button";
 import { Gui } from "client/gui/Gui";
 import { ScaledScreenGui } from "client/gui/ScaledScreenGui";
+import { ButtonControl } from "engine/client/gui/Button";
 import { HostedService } from "engine/shared/di/HostedService";
 import { ObservableValue } from "engine/shared/event/ObservableValue";
 

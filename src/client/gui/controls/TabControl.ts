@@ -1,4 +1,4 @@
-import { TextButtonControl } from "client/gui/controls/Button";
+import { TextButtonControl } from "engine/client/gui/Button";
 import { Control } from "engine/client/gui/Control";
 import { Element } from "engine/shared/Element";
 

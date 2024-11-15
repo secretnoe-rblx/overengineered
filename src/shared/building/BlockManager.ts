@@ -9,6 +9,7 @@ declare global {
 		readonly color: Color3;
 		readonly material: Enum.Material;
 		readonly config: PlacedBlockConfig | undefined;
+		readonly scale: Vector3 | undefined;
 	};
 
 	type PlacedBlockData<T extends BlockModel = BlockModel> = BlockDataBase & { readonly instance: T };
@@ -65,6 +66,11 @@ export namespace BlockManager {
 			get: (block) => block.GetAttribute("uuid") as BlockUuid,
 		},
 
+		scale: {
+			set: (block, value) => block.SetAttribute("scale", value),
+			get: (block) => block.GetAttribute("scale") as Vector3 | undefined,
+		},
+
 		material: {
 			set: (block, value) => block.SetAttribute("material", Serializer.EnumMaterialSerializer.serialize(value)),
 			get: (block) => {
@@ -99,6 +105,7 @@ export namespace BlockManager {
 			material: manager.material.get(model),
 			uuid: manager.uuid.get(model),
 			config: manager.config.get(model),
+			scale: manager.scale.get(model),
 		};
 	}
 }
