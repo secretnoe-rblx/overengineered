@@ -15,25 +15,16 @@ export class UpdatePopupController extends HostedService {
 				return;
 			}
 
-			if (lastVersion < 100) {
+			if (lastVersion <= 123) {
 				AlertPopup.showPopup(
 					`
-The game has been updated!
+Scaling Update 📏
 
-The internals of the logic system have been reworked from scratch, so something will break. But don't worry.
-If you encounter any problem, just don't save the broken building and let us know about it in our community server!
-There you can also check out the changes in this update.
-					`.trim(),
-				);
-			} else if (lastVersion < 101) {
-				AlertPopup.showPopup(
-					`
-Again, so you don't forget.
-The game has been UPDATED!!!!!
+You can now scale blocks! Yes, all of them. At once.
+Up to 8x bigger or 16x smaller.
+To scale blocks use either edit tool (new "scale" option) or build tool (scaling editor in the top right)
 
-The internals of the logic system have been *reworked from scratch*, so something *will* break. But don't worry.
-If you encounter any problem, just don't save the broken building and LET US KNOW ABOUT IT IN OUR COMMUNITY SERVER! Otherwise we won't be able to fix it.
-You can also check out the changes of this update there.
+You can find more information in our community server.
 					`.trim(),
 				);
 			}
