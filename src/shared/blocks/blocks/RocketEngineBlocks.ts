@@ -132,6 +132,22 @@ class Logic extends InstanceBlockLogic<typeof definition, RocketModel> {
 			this.update(thrust, strength);
 		});
 
+		this.onEnable(() => {
+			const scale = math.sqrt(BlockManager.manager.scale.get(this.instance)?.findMin() ?? 1);
+			this.particleEmitter.Size = new NumberSequence(
+				this.particleEmitter.Size.Keypoints.map(
+					(k) => new NumberSequenceKeypoint(k.Time, k.Value * scale, k.Envelope),
+				),
+			);
+
+			this.particleEffect.send(this.instance.PrimaryPart!, {
+				particle: this.particleEmitter,
+				isEnabled: false,
+				acceleration: this.particleEmitter.Acceleration,
+				scale,
+			});
+		});
+
 		this.onDisable(() => this.update(0, 0));
 	}
 
