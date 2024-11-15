@@ -484,17 +484,15 @@ namespace Steps {
 						.map((uuid, blocks): ClientBuilding.UpdateConfigArgs["configs"][number] => ({
 							block: plot.getBlock(uuid),
 							cfg: (() => {
-								const config = BlockManager.manager.config.get(plot.getBlock(uuid)) ?? {};
+								const config = BlockConfig.addDefaults(
+									BlockManager.manager.config.get(plot.getBlock(uuid)) ?? {},
+									blockList.blocks[BlockManager.manager.id.get(plot.getBlock(uuid))]!.logic!
+										.definition.input,
+								);
+
 								return asObject(
 									blocks.mapToMap(({ key, value }) =>
-										$tuple(
-											key,
-											BlockConfig.addDefaults(
-												Objects.deepCombine(config, { [key]: value }) as PlacedBlockConfig,
-												blockList.blocks[BlockManager.manager.id.get(plot.getBlock(uuid))]!
-													.logic!.definition.input,
-											)[key],
-										),
+										$tuple(key, Objects.deepCombine(config[key], value as never)),
 									),
 								);
 							})(),

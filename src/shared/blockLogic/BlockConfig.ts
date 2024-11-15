@@ -120,7 +120,7 @@ export namespace BlockConfig {
 					return defConfig;
 				}
 
-				return Objects.deepCombine(defConfig, obj.config);
+				return { ...defConfig, ...obj.config };
 			}
 
 			return obj.config;
@@ -153,7 +153,7 @@ export namespace BlockConfig {
 					return defConfig;
 				}
 
-				return Objects.deepCombine(defConfig, obj.controlConfig);
+				return { ...defConfig, ...obj.controlConfig };
 			}
 
 			return obj.controlConfig;
