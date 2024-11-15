@@ -419,7 +419,7 @@ namespace Controllers {
 				{ Parent: Workspace },
 				{ highlight: BlockGhoster.createHighlight({ FillColor: Colors.blue }) },
 			);
-			this.onDestroy(() => ghostParent.Destroy());
+			this.onDestroy(() => task.delay(0.1, () => ghostParent.Destroy()));
 
 			const blocks = reGenerateUuids(plot, tool.copied.get());
 			this.blocksRequests = blocks;
