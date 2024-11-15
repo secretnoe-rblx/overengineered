@@ -16,6 +16,7 @@ import { GravitySensorBlock } from "shared/blocks/blocks/GravitySensorBlock";
 import { BasicLogicGateBlocks } from "shared/blocks/blocks/grouped/BasicLogicGateBlocks";
 import { BasicOperationBlocks } from "shared/blocks/blocks/grouped/BasicOperationBlocks";
 import { BuildingBlocks } from "shared/blocks/blocks/grouped/BuildingBlocks";
+import { HingeBlocks } from "shared/blocks/blocks/grouped/HingeBlocks";
 import { LampBlocks } from "shared/blocks/blocks/grouped/LampBlocks";
 import { MechanicalBlocks } from "shared/blocks/blocks/grouped/MechanicalBlocks";
 import { ServoMotorBlocks } from "shared/blocks/blocks/grouped/ServoMotorBlocks";
@@ -24,7 +25,6 @@ import { TNTBlocks } from "shared/blocks/blocks/grouped/TNTBlocks";
 import { WheelBlocks } from "shared/blocks/blocks/grouped/WheelBlocks";
 import { WingBlocks } from "shared/blocks/blocks/grouped/WingsBlocks";
 import { HeliumBlock } from "shared/blocks/blocks/HeliumBlock";
-import { HingeBlock } from "shared/blocks/blocks/HingeBlock";
 import { ImpulseGeneratorBlock } from "shared/blocks/blocks/ImpulseGeneratorBlock";
 import { KeySensorBlock } from "shared/blocks/blocks/KeySensorBlock";
 import { LaserBlock } from "shared/blocks/blocks/LaserBlock";
@@ -70,10 +70,10 @@ export const CreateSandboxBlocks = (di: DIContainer): BlockList => {
 		...RocketBlocks,
 		...ServoMotorBlocks,
 		...TNTBlocks,
+		...HingeBlocks,
 
 		PistonBlock,
 		MotorBlock,
-		HingeBlock,
 		RCSEngineBlock,
 		DisconnectBlock,
 		RopeBlock,
