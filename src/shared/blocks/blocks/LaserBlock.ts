@@ -32,7 +32,7 @@ const definition = {
 			displayName: "Transparency",
 			types: {
 				number: {
-					config: 0 as number,
+					config: 0.9 as number,
 					clamp: {
 						showAsSlider: true,
 						min: 0,
@@ -45,7 +45,7 @@ const definition = {
 			displayName: "Ray color",
 			types: {
 				color: {
-					config: Color3.fromRGB(255, 0, 0),
+					config: Color3.fromRGB(255, 255, 255),
 				},
 			},
 			connectorHidden: true,
@@ -54,7 +54,7 @@ const definition = {
 			displayName: "Dot color",
 			types: {
 				color: {
-					config: Color3.fromRGB(255, 255, 0),
+					config: Color3.fromRGB(255, 255, 255),
 				},
 			},
 			connectorHidden: true,
@@ -68,7 +68,7 @@ const definition = {
 		targetColor: {
 			displayName: "Target Color",
 			types: ["vector3"],
-			tooltip: "Black (0,0,0) by default",
+			tooltip: "Black color (0, 0, 0) by default and if nothing found",
 		},
 	},
 } satisfies BlockLogicFullBothDefinitions;
