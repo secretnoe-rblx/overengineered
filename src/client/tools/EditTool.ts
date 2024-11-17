@@ -807,6 +807,7 @@ export class EditTool extends ToolBase {
 			Desktop: [
 				{ keys: ["F"], text: "Move" },
 				{ keys: ["R"], text: "Rotate" },
+				{ keys: ["B"], text: "Scale" },
 				{ keys: ["T"], text: "Delete" },
 				{ keys: ["G"], text: "Paint" },
 				{ keys: ["LeftControl", "C"], text: "Copy" },
