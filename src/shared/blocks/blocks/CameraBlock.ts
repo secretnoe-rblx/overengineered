@@ -135,9 +135,8 @@ class Logic extends InstanceBlockLogic<typeof definition> {
 		this.onk(["tint"], ({ tint }) => (effect.TintColor = tint));
 
 		const ticker = new Component();
-		ticker.event.subscribe(RunService.RenderStepped, () => {
-			camera.CFrame = target.CFrame;
-		});
+		ticker.onDisable(() => disable());
+		ticker.event.subscribe(RunService.RenderStepped, () => (camera.CFrame = target.CFrame));
 		this.onDisable(() => ticker.disable());
 		this.onDescendantDestroyed(() => ticker.destroy());
 
@@ -150,26 +149,27 @@ class Logic extends InstanceBlockLogic<typeof definition> {
 
 		const fovCache = this.initializeInputCache("fov");
 
+		const disable = () => {
+			enabledCameras.delete(this);
+			Workspace.CurrentCamera =
+				(Objects.firstKey(enabledCameras)?.instance.FindFirstChild("Camera") as Camera | undefined) ??
+				defaultCamera;
+		};
+
 		this.onk(["enabled"], ({ enabled }) => {
 			if (enabled) {
 				enabledCameras.add(this);
 				Workspace.CurrentCamera = camera;
 				camera.FieldOfView = fovCache.tryGet() ?? definition.input.fov.types.number.config;
 			} else {
-				enabledCameras.delete(this);
-				Workspace.CurrentCamera =
-					(Objects.firstKey(enabledCameras)?.instance.FindFirstChild("Camera") as Camera | undefined) ??
-					defaultCamera;
+				disable();
 			}
 
 			Logic.events.update.send({ block: this.instance, enabled });
 			Logic.update(this.instance, enabled);
 		});
 
-		this.onDisable(() => {
-			enabledCameras.delete(this);
-			Workspace.CurrentCamera = defaultCamera;
-		});
+		this.onDisable(disable);
 	}
 
 	static update(block: BlockModel, enabled: boolean) {
