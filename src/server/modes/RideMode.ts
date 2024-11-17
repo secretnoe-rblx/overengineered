@@ -39,7 +39,6 @@ export class RideMode implements PlayModeBase {
 		const hrp = player.Character?.FindFirstChild("Humanoid") as Humanoid | undefined;
 		if (!hrp) return;
 		if (hrp.Sit) return;
-		if (hrp.Health <= 0) return;
 
 		const plot = this.serverPlots.plots.getPlotByOwnerID(player.UserId);
 		const blocks = this.serverPlots.plots.getPlotComponent(plot).getBlocks();
@@ -53,6 +52,8 @@ export class RideMode implements PlayModeBase {
 			vehicleSeat.Occupant.Sit = false;
 			task.wait(0.5);
 		}
+
+		if (hrp.Health <= 0) return;
 
 		vehicleSeat.Sit(hrp);
 	}
