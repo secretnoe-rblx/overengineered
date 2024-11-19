@@ -116,7 +116,7 @@ class Logic extends InstanceBlockLogic<typeof definition, RocketModel> {
 		this.particleEmitter = this.instance.EffectEmitter.Fire;
 
 		// Math
-		let multiplier = (colbox.Size.X * colbox.Size.Y * colbox.Size.Z) / 16;
+		let multiplier = (colbox.Size.X * colbox.Size.Y * colbox.Size.Z) / 8;
 		this.multipler = multiplier;
 
 		// The strength depends on the material
