@@ -80,10 +80,22 @@ class Logic extends InstanceBlockLogic<typeof definition> {
 
 		const dotSize = 0.3;
 
-		const ray = this.instance.FindFirstChild("Ray") as BasePart;
+		const ray = this.instance.FindFirstChild("Ray") as BasePart | undefined;
+		if (!ray) {
+			warn(`Ray of laser is nil`);
+			this.disableAndBurn();
+			return;
+		}
+
 		ray.Anchored = true;
 
-		const dot = this.instance.FindFirstChild("Dot") as BasePart;
+		const dot = this.instance.FindFirstChild("Dot") as BasePart | undefined;
+		if (!dot) {
+			warn(`Dot of laser is nil`);
+			this.disableAndBurn();
+			return;
+		}
+
 		dot.Anchored = true;
 		dot.Size = new Vector3(dotSize, dotSize, dotSize);
 
