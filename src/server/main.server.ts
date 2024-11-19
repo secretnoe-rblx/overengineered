@@ -24,6 +24,7 @@ import { GameHostBuilder } from "engine/shared/GameHostBuilder";
 import { gameInfo } from "shared/GameInfo";
 import { LaunchDataController } from "engine/server/network/LaunchDataController";
 import { LaserProjectile } from "shared/weapons/LaserProjectileLogic";
+import { GameDefinitions } from "shared/data/GameDefinitions";
 
 const builder = new GameHostBuilder(gameInfo);
 SandboxGame.initialize(builder);
@@ -45,7 +46,7 @@ BulletProjectile;
 LaserProjectile;
 
 Players.PlayerAdded.Connect((plr) => {
-	if (!RunService.IsStudio() && plr.AccountAge < 10) {
+	if (!RunService.IsStudio() && plr.AccountAge < 10 && !GameDefinitions.isTestPlace()) {
 		plr.Kick("Your account is too young, due to security reasons you must wait 10 days before you can play.");
 	}
 });

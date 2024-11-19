@@ -16,7 +16,7 @@ export interface BlockSelector extends Component {
 export type BlockSelectorMode = HoveredBlocksSelectorMode | "box";
 export type MultiBlockSelectorConfiguration = {
 	readonly enabled?: readonly BlockSelectorMode[];
-	readonly filter?: (block: BlockModel) => boolean;
+	readonly filter?: (blocks: readonly BlockModel[]) => readonly BlockModel[];
 };
 export class MultiBlockSelector extends ClientComponent {
 	private readonly _submit = new ArgsSignal<[blocks: readonly BlockModel[]]>();
@@ -56,22 +56,25 @@ export class MultiBlockSelector extends ClientComponent {
 		this.onEnable(setBasedOnCurrentInput);
 
 		const origModeFuncs = HoveredBlocksSelector.Modes;
-		const empty = [] as const;
-		const filter = (block: BlockModel): boolean => {
-			if (config?.filter?.(block) === false) {
-				return false;
-			}
+		const filter = (blocks: readonly BlockModel[]): readonly BlockModel[] => {
+			blocks = blocks.filter(plot.get().hasBlock.bind(plot.get()));
+			blocks = config?.filter?.(blocks) ?? blocks;
 
-			if (!plot.get().hasBlock(block)) {
-				return false;
-			}
-
-			return true;
+			return blocks;
 		};
-		const functions: Readonly<Record<HoveredBlocksSelectorMode, (block: BlockModel) => readonly BlockModel[]>> = {
-			single: !filter ? origModeFuncs.single : (block) => (filter(block) ? [block] : empty),
-			assembly: !filter ? origModeFuncs.assembly : (block) => origModeFuncs.assembly(block).filter(filter),
-			machine: !filter ? origModeFuncs.machine : (block) => origModeFuncs.machine(block).filter(filter),
+		const functions: Readonly<
+			Record<
+				HoveredBlocksSelectorMode,
+				(block: BlockModel, highlighted: ReadonlySet<BlockModel>) => readonly BlockModel[]
+			>
+		> = {
+			single: !filter ? origModeFuncs.single : (block, highlighted) => filter([block, ...highlighted]),
+			assembly: !filter
+				? origModeFuncs.assembly
+				: (block, highlighted) => filter([...origModeFuncs.assembly(block), ...highlighted]),
+			machine: !filter
+				? origModeFuncs.machine
+				: (block, highlighted) => filter([...origModeFuncs.machine(block), ...highlighted]),
 		};
 
 		const modes: Readonly<Record<BlockSelectorMode, () => BlockSelector>> = {

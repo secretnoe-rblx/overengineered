@@ -18,7 +18,7 @@ const mirror = (di: DIContainer, blockid: BlockId, initialRotation?: CFrame) => 
 
 	const mirrored = BuildingManager.getMirroredBlocks(
 		new CFrame(396, -16377, 359),
-		{ id: blockid, pos: main.GetPivot() },
+		{ id: blockid, pos: main.GetPivot(), scale: Vector3.one },
 		{ x: 0, y: 0, z: 0 },
 		di.resolve<BlockList>(),
 	);

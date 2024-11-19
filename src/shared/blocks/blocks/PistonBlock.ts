@@ -63,6 +63,22 @@ const definition = {
 				},
 			},
 		},
+		responsiveness: {
+			displayName: "Responsiveness",
+			tooltip: "Specifies the sharpness of the piston in reaching the max length",
+			types: {
+				number: {
+					config: 45,
+					clamp: {
+						showAsSlider: true,
+						min: 0,
+						max: 100,
+						step: 0.01,
+					},
+				},
+			},
+			connectorHidden: true,
+		},
 	},
 	output: {},
 } satisfies BlockLogicFullBothDefinitions;
@@ -86,7 +102,8 @@ export class Logic extends InstanceBlockLogic<typeof definition, Piston> {
 
 			this.instance.Bottom.PrismaticConstraint.Speed = speed;
 			this.instance.Bottom.PrismaticConstraint.TargetPosition = ctx.extend;
-			this.instance.Bottom.PrismaticConstraint.ServoMaxForce = ctx.maxforce;
+			this.instance.Bottom.PrismaticConstraint.ServoMaxForce = ctx.maxforce * 1000;
+			this.instance.Bottom.PrismaticConstraint.LinearResponsiveness = ctx.responsiveness;
 
 			Logic.events.update.send({
 				block: this.instance,

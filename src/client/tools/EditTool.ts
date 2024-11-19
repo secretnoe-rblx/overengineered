@@ -448,7 +448,7 @@ namespace Controllers {
 				{ Parent: Workspace },
 				{ highlight: BlockGhoster.createHighlight({ FillColor: Colors.blue }) },
 			);
-			this.onDestroy(() => ghostParent.Destroy());
+			this.onDestroy(() => task.delay(0.1, () => ghostParent.Destroy()));
 
 			const blocks = reGenerateUuids(plot, tool.copied.get());
 			this.blocksRequests = blocks;
@@ -787,7 +787,11 @@ export class EditTool extends ToolBase {
 		const mirrored = selected.map((s): PlaceBlockRequest => {
 			const mirrored = BuildingManager.getMirroredBlocks(
 				center,
-				{ id: BlockManager.manager.id.get(s), pos: s.GetPivot() },
+				{
+					id: BlockManager.manager.id.get(s),
+					pos: s.GetPivot(),
+					scale: BlockManager.manager.scale.get(s) ?? Vector3.one,
+				},
 				{
 					x: axis === "x" ? 0 : undefined,
 					y: axis === "y" ? 0 : undefined,
@@ -801,6 +805,7 @@ export class EditTool extends ToolBase {
 				...placeToBlockRequest(s),
 				location: mirrored[0].pos,
 				id: mirrored[0].id,
+				scale: mirrored[0].scale,
 			};
 		});
 
@@ -822,6 +827,7 @@ export class EditTool extends ToolBase {
 			Desktop: [
 				{ keys: ["F"], text: "Move" },
 				{ keys: ["R"], text: "Rotate" },
+				{ keys: ["B"], text: "Scale" },
 				{ keys: ["T"], text: "Delete" },
 				{ keys: ["G"], text: "Paint" },
 				{ keys: ["LeftControl", "C"], text: "Copy" },

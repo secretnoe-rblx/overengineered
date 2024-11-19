@@ -47,12 +47,22 @@ export namespace ScaleGrid {
 			constrain: (globalDirection, rotation, amount) => {
 				const makeUnitWithAxis1 = (vector: Vector3, direction: Vector3) => {
 					let axisValue = 0;
-					if (direction.X !== 0) axisValue = vector.X;
-					else if (direction.Y !== 0) axisValue = vector.Y;
-					else if (direction.Z !== 0) axisValue = vector.Z;
+					const [x, y, z] = [math.abs(vector.X), math.abs(vector.Y), math.abs(vector.Z)];
 
-					return vector.div(math.abs(axisValue));
+					if (direction.X !== 0 && axisValue < x) {
+						axisValue = x;
+					}
+					if (direction.Y !== 0 && axisValue < y) {
+						axisValue = y;
+					}
+					if (direction.Z !== 0 && axisValue < z) {
+						axisValue = z;
+					}
+
+					return vector.div(axisValue);
 				};
+
+				rotation = rotation.Rotation;
 
 				const localAmount = rotation.VectorToObjectSpace(amount);
 				const localDirection = rotation.VectorToObjectSpace(globalDirection);

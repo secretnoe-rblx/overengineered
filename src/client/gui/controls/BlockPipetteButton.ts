@@ -89,7 +89,7 @@ export class BlockPipetteButton extends ButtonControl {
 
 		return pipette;
 	}
-	static forColor(gui: ButtonDefinition, clicked: (material: Color3) => void) {
+	static forColor(gui: ButtonDefinition, clicked: (color: Color3) => void) {
 		const pipette = new BlockPipetteButton(gui);
 		pipette.onSelect.Connect((part) => {
 			if (part.IsA("BasePart")) {

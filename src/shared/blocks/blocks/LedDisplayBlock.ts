@@ -5,7 +5,7 @@ import type { BlockLogicFullBothDefinitions, InstanceBlockLogicArgs } from "shar
 import type { BlockBuilder } from "shared/blocks/Block";
 
 const definition = {
-	inputOrder: ["posx", "posy", "color", "update"],
+	inputOrder: ["posx", "posy", "color", "update", "reset"],
 	input: {
 		posx: {
 			displayName: "Position X",
@@ -41,16 +41,25 @@ const definition = {
 			displayName: "Color",
 			types: {
 				vector3: {
-					config: new Vector3(0, 0, 1),
+					config: new Vector3(0, 0, 0),
 				},
 				color: {
-					config: new Color3(0, 0, 1),
+					config: new Color3(0, 0, 0),
 				},
 			},
 			configHidden: true,
 		},
 		update: {
 			displayName: "Update",
+			types: {
+				bool: {
+					config: false,
+				},
+			},
+			configHidden: true,
+		},
+		reset: {
+			displayName: "Reset",
 			types: {
 				bool: {
 					config: false,
@@ -67,18 +76,26 @@ class Logic extends InstanceBlockLogic<typeof definition> {
 	static readonly events = {
 		prepare: new AutoC2SRemoteEvent<{
 			readonly block: BlockModel;
+			readonly baseColor: Color3;
 		}>("leddisplay_prepare"), // TODO: fix this shit crap
 		update: new AutoC2SRemoteEvent<{
 			readonly block: BlockModel;
 			readonly color: Color3;
 			readonly frame: Frame;
 		}>("leddisplay_update"),
+		fill: new AutoC2SRemoteEvent<{
+			readonly block: BlockModel;
+			readonly color: Color3;
+			readonly frames: Frame[][];
+		}>("leddisplay_fill"),
 	} as const;
 
 	constructor(block: InstanceBlockLogicArgs) {
 		super(definition, block);
 
-		Logic.events.prepare.send({ block: block.instance });
+		const baseColor = this.definition.input.color.types.color.config;
+
+		Logic.events.prepare.send({ block: block.instance, baseColor: baseColor });
 		const gui = block.instance.WaitForChild("Screen").WaitForChild("SurfaceGui");
 
 		const display: Frame[][] = new Array(8);
@@ -100,6 +117,16 @@ class Logic extends InstanceBlockLogic<typeof definition> {
 				block: block.instance,
 				color,
 				frame: display[posx][posy],
+			});
+		});
+
+		this.on(({ reset }) => {
+			if (!reset) return;
+
+			Logic.events.fill.send({
+				block: block.instance,
+				color: baseColor,
+				frames: display,
 			});
 		});
 	}

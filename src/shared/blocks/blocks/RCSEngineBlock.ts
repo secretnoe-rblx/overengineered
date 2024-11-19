@@ -236,6 +236,22 @@ class Logic extends InstanceBlockLogic<typeof definition, RCSEngineModel> {
 			}
 		});
 
+		this.onEnable(() => {
+			const scale = math.sqrt(BlockManager.manager.scale.get(this.instance)?.findMin() ?? 1);
+			for (const emitter of this.engineData.map((d) => d.particleEmitter.Fire)) {
+				emitter.Size = new NumberSequence(
+					emitter.Size.Keypoints.map((k) => new NumberSequenceKeypoint(k.Time, k.Value * scale, k.Envelope)),
+				);
+
+				this.particleEffect.send(this.instance.PrimaryPart!, {
+					particle: emitter,
+					isEnabled: false,
+					acceleration: emitter.Acceleration,
+					scale,
+				});
+			}
+		});
+
 		this.onDisable(() => update());
 	}
 }
