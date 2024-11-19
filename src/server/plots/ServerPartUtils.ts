@@ -5,6 +5,7 @@ import { PartUtils } from "shared/utils/PartUtils";
 export namespace ServerPartUtils {
 	export function switchDescendantsAnchor(model: Instance, isAnchored: boolean) {
 		PartUtils.applyToAllDescendantsOfType("BasePart", model, (part) => {
+			if (part.HasTag("ANCHORED")) return;
 			part.Anchored = isAnchored;
 		});
 	}
