@@ -110,7 +110,7 @@ class ReportSubmitPopup extends Popup<ReportSubmitPopupDefinition> {
 				uid: Players.LocalPlayer.UserId,
 				uname: Players.LocalPlayer.Name,
 				udname: Players.LocalPlayer.DisplayName,
-				text: "Never gonna give you up",
+				text: text ?? "Never gonna give you up",
 				env: GameDefinitions.getEnvironmentInfo(),
 				trace: debug.traceback(undefined, 1)?.split("\n"),
 				data: processDataForJsonSerializationForSubmit(data),
