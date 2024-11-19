@@ -46,6 +46,8 @@ export class ReportSubmitController {
 	) {}
 
 	submit(data: object, text?: string) {
+		warn(text);
+
 		const popup = new ReportSubmitPopup(
 			Gui.getGameUI<{
 				Popup: { Crossplatform: { ReportSubmit: ReportSubmitPopupDefinition } };
