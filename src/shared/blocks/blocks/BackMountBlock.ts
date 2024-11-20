@@ -100,7 +100,7 @@ export const BackMountBlock = {
 	id: "backmount",
 	displayName: "Back Mount",
 	description: "A mountable backpack. You can weld stuff to it and wear it.",
-	limit: 1,
+	limit: 15,
 
 	logic: { definition, ctor: Logic },
 } as const satisfies BlockBuilder;
