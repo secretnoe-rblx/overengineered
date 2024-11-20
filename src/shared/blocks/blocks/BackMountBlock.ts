@@ -1,5 +1,6 @@
 import { Players, RunService } from "@rbxts/services";
 import { AutoC2SRemoteEvent } from "engine/shared/event/C2SRemoteEvent";
+import { Keys } from "engine/shared/fixes/Keys";
 import { PlayerInfo } from "engine/shared/PlayerInfo";
 import { InstanceBlockLogic } from "shared/blockLogic/BlockLogic";
 import { BlockCreation } from "shared/blocks/BlockCreation";
@@ -9,29 +10,32 @@ import type { BlockBuilder } from "shared/blocks/Block";
 
 const definition = {
 	input: {
-		detch: {
-			displayName: "Detach",
-			tooltip: "Detach the mount",
+		detach: {
+			displayName: "Attach/Detach",
+			tooltip: "Attach or detach the back mount.",
 			types: {
 				bool: {
 					config: false,
+					control: {
+						config: {
+							enabled: true,
+							key: "H" as KeyCode,
+							switch: false,
+							reversed: false,
+						},
+						canBeSwitch: false,
+						canBeReversed: false,
+					},
 				},
 			},
 		},
 	},
-	output: {
-		occupied: {
-			displayName: "Mounted",
-			types: ["bool"],
-		},
-	},
+	output: {},
 } satisfies BlockLogicFullBothDefinitions;
-
-//z is FORWARD
-const forwardVector = Vector3.zAxis;
 
 type BackMountModel = BlockModel & {
 	PlayerWeldConstraint: WeldConstraint;
+	DragDetector: DragDetector;
 };
 
 export type { Logic as BackMountBlockLogic };
@@ -41,15 +45,13 @@ class Logic extends InstanceBlockLogic<typeof definition, BackMountModel> {
 	static readonly events = {
 		init: new AutoC2SRemoteEvent<{
 			readonly block: BlockModel;
-			readonly torso: BasePart;
 		}>("backmount_init"),
 		weldMountToPlayer: new AutoC2SRemoteEvent<{
 			readonly block: BlockModel;
-			readonly torso: BasePart;
+			readonly humanoid: Humanoid;
 		}>("backmount_weld"),
 		unweldMountFromPlayer: new AutoC2SRemoteEvent<{
 			readonly block: BlockModel;
-			readonly torso: BasePart;
 		}>("backmount_unweld"),
 	} as const;
 
@@ -58,17 +60,38 @@ class Logic extends InstanceBlockLogic<typeof definition, BackMountModel> {
 
 		if (!RunService.IsClient()) return;
 		//get humanoid
+		let humanoid: Humanoid | undefined;
+		const pp = new Instance("ProximityPrompt");
+		pp.Enabled = true;
+		pp.KeyboardKeyCode = Keys[this.definition.input.detach.types.bool.control.config.key];
+		pp.ActionText = "Attach";
+		pp.MaxActivationDistance = 12;
+		pp.Parent = this.instance;
 
 		this.onEnable(() => {
 			const stuff = this.parent(new PlayerInfo(Players.LocalPlayer));
-			const humanoid: Humanoid | undefined = stuff.humanoid.get();
-			const torso = humanoid?.RootPart;
-			print(humanoid, torso);
-			if (!torso) return;
+			humanoid = stuff.humanoid.get();
+			if (!humanoid) return;
+			Logic.events.init.send({ block: this.instance });
 
-			Logic.events.init.send({ block: this.instance, torso });
+			this.event.subscribe(pp.Triggered, () => {
+				if (!humanoid) return;
+				Logic.events.weldMountToPlayer.send({ block: this.instance, humanoid });
+				pp.Enabled = false;
+			});
 		});
 
+		this.onk(["detach"], ({ detach }) => {
+			if (!humanoid) return;
+			if (!detach) return;
+			if (pp.Enabled) return;
+			Logic.events.unweldMountFromPlayer.send({ block: this.instance });
+			pp.Enabled = true;
+		});
+
+		this.onDisable(() => {
+			Logic.events.unweldMountFromPlayer.send({ block: this.instance });
+		});
 		//Logic.events.weldMountToPlayer.send({ block: this.instance, torso });
 	}
 
