@@ -92,20 +92,7 @@ class Logic extends InstanceBlockLogic<typeof definition, BackMountModel> {
 		this.onDisable(() => {
 			Logic.events.unweldMountFromPlayer.send({ block: this.instance });
 		});
-		//Logic.events.weldMountToPlayer.send({ block: this.instance, torso });
 	}
-
-	/*
-
-idk either, man
-
-	getDebugInfo(ctx: BlockLogicTickContext): readonly string[] {
-		const char = this.vehicleSeat.Occupant?.Parent;
-		const player = char && Players.GetPlayerFromCharacter(char);
-
-		return [...super.getDebugInfo(ctx), `${"replace" ? "Not o" : "O"}cciuped by ${player?.Name}`];
-	}
-		*/
 }
 
 export const BackMountBlock = {
