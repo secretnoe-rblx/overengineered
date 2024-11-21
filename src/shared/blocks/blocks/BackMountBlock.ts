@@ -5,7 +5,6 @@ import { PlayerInfo } from "engine/shared/PlayerInfo";
 import { InstanceBlockLogic } from "shared/blockLogic/BlockLogic";
 import { BlockCreation } from "shared/blocks/BlockCreation";
 import type { BlockLogicFullBothDefinitions, InstanceBlockLogicArgs } from "shared/blockLogic/BlockLogic";
-import type { SharedMachine } from "shared/blockLogic/SharedMachine";
 import type { BlockBuilder } from "shared/blocks/Block";
 
 const definition = {
@@ -48,7 +47,6 @@ type BackMountModel = BlockModel & {
 
 export type { Logic as BackMountBlockLogic };
 
-@injectable
 class Logic extends InstanceBlockLogic<typeof definition, BackMountModel> {
 	static readonly events = {
 		init: new AutoC2SRemoteEvent<{
@@ -63,7 +61,7 @@ class Logic extends InstanceBlockLogic<typeof definition, BackMountModel> {
 		}>("backmount_unweld"),
 	} as const;
 
-	constructor(block: InstanceBlockLogicArgs, @inject machine: SharedMachine) {
+	constructor(block: InstanceBlockLogicArgs) {
 		super(definition, block);
 
 		if (!RunService.IsClient()) return;
@@ -81,7 +79,14 @@ class Logic extends InstanceBlockLogic<typeof definition, BackMountModel> {
 			pp.Enabled = false;
 		});
 
-		this.onEnable(() => Logic.events.init.send({ block: this.instance }));
+		this.onEnable(() => {
+			Logic.events.init.send({ block: this.instance });
+			const humanoid = stuff.humanoid.get();
+			if (!humanoid) return;
+			this.event.subscribe(humanoid.Died, () =>
+				Logic.events.unweldMountFromPlayer.send({ block: this.instance }),
+			);
+		});
 
 		const stuff = this.parent(new PlayerInfo(Players.LocalPlayer));
 
