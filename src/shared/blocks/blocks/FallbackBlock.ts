@@ -54,7 +54,7 @@ export const FallbackBlock = {
 
 	logic: { definition, ctor: Logic },
 	modelSource: {
-		model: BlockCreation.Model.fAutoCreated("GenericLogicBlockPrefab", "FALLBACK"),
+		model: BlockCreation.Model.fAutoCreated("DoubleGenericLogicBlockPrefab", "FALLBACK"),
 		category: () => BlockCreation.Categories.other,
 	},
 } as const satisfies BlockBuilder;
