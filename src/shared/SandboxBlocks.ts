@@ -11,6 +11,7 @@ import { ControllerBlock } from "shared/blocks/blocks/ControllerBlock";
 import { CounterBlock } from "shared/blocks/blocks/CounterBlock";
 import { DelayBlock } from "shared/blocks/blocks/DelayBlock";
 import { DisconnectBlock } from "shared/blocks/blocks/DisconnectBlock";
+import { FallbackBlock } from "shared/blocks/blocks/FallbackBlock";
 import { FireSensorBlock } from "shared/blocks/blocks/FireSensorBlock";
 import { GPSSensorBlock } from "shared/blocks/blocks/GPSSensorBlock";
 import { GravitySensorBlock } from "shared/blocks/blocks/GravitySensorBlock";
@@ -95,6 +96,7 @@ export const CreateSandboxBlocks = (di: DIContainer): BlockList => {
 		BackMountBlock,
 
 		DelayBlock,
+		FallbackBlock,
 		SingleImpulseBlock,
 		ImpulseGeneratorBlock,
 		CounterBlock,
