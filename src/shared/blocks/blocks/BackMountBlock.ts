@@ -1,4 +1,4 @@
-import { Players, RunService } from "@rbxts/services";
+import { Players, RunService, UserInputService } from "@rbxts/services";
 import { AutoC2SRemoteEvent } from "engine/shared/event/C2SRemoteEvent";
 import { Keys } from "engine/shared/fixes/Keys";
 import { PlayerInfo } from "engine/shared/PlayerInfo";
@@ -10,27 +10,35 @@ import type { BlockBuilder } from "shared/blocks/Block";
 
 const definition = {
 	input: {
-		detach: {
+		detachKey: {
+			displayName: "Attach/Detach",
+			tooltip: "Attach or detach the back mount.",
+			types: {
+				key: {
+					config: "H" as KeyCode,
+				},
+			},
+			connectorHidden: true,
+		},
+
+		detachBool: {
 			displayName: "Attach/Detach",
 			tooltip: "Attach or detach the back mount.",
 			types: {
 				bool: {
 					config: false,
-					control: {
-						config: {
-							enabled: true,
-							key: "H" as KeyCode,
-							switch: false,
-							reversed: false,
-						},
-						canBeSwitch: false,
-						canBeReversed: false,
-					},
 				},
 			},
+			configHidden: true,
 		},
 	},
-	output: {},
+	output: {
+		mounted: {
+			displayName: "Occupied",
+			tooltip: "Returns true if player is mounted",
+			types: ["bool"],
+		},
+	},
 } satisfies BlockLogicFullBothDefinitions;
 
 type BackMountModel = BlockModel & {
@@ -60,34 +68,44 @@ class Logic extends InstanceBlockLogic<typeof definition, BackMountModel> {
 
 		if (!RunService.IsClient()) return;
 		//get humanoid
-		let humanoid: Humanoid | undefined;
 		const pp = new Instance("ProximityPrompt");
 		pp.Enabled = true;
-		pp.KeyboardKeyCode = Keys[this.definition.input.detach.types.bool.control.config.key];
 		pp.ActionText = "Attach";
 		pp.MaxActivationDistance = 12;
+		pp.KeyboardKeyCode = Keys[this.definition.input.detachKey.types.key.config];
 		pp.Parent = this.instance;
 
-		this.onEnable(() => {
-			const stuff = this.parent(new PlayerInfo(Players.LocalPlayer));
-			humanoid = stuff.humanoid.get();
-			if (!humanoid) return;
-			Logic.events.init.send({ block: this.instance });
+		const stuff = this.parent(new PlayerInfo(Players.LocalPlayer));
+		this.onEnable(() => Logic.events.init.send({ block: this.instance }));
 
+		this.onEnable(() => {
 			this.event.subscribe(pp.Triggered, () => {
+				const humanoid = stuff.humanoid.get();
 				if (!humanoid) return;
 				Logic.events.weldMountToPlayer.send({ block: this.instance, humanoid });
 				pp.Enabled = false;
 			});
 		});
 
-		this.onk(["detach"], ({ detach }) => {
+		const detach = ({ detachBool }: { detachBool: boolean }) => {
+			const humanoid = stuff.humanoid.get();
 			if (!humanoid) return;
-			if (!detach) return;
+			if (!detachBool) return;
 			if (pp.Enabled) return;
 			Logic.events.unweldMountFromPlayer.send({ block: this.instance });
 			pp.Enabled = true;
+		};
+		this.onk(["detachKey"], ({ detachKey }) => {
+			pp.KeyboardKeyCode = Keys[detachKey as KeyCode];
 		});
+
+		this.event.subscribe(UserInputService.InputBegan, (input, gameProccessed) => {
+			if (gameProccessed) return;
+			if (input.KeyCode !== pp.KeyboardKeyCode) return;
+			detach({ detachBool: true });
+		});
+
+		this.onk(["detachBool"], detach);
 
 		this.onDisable(() => {
 			Logic.events.unweldMountFromPlayer.send({ block: this.instance });
