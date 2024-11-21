@@ -14,7 +14,7 @@ export class BackMountBlockServerLogic extends ServerBlockLogic<typeof BackMount
 
 		logic.events.init.invoked.Connect((player, { block }) => {
 			if (!this.isValidBlock(block, player)) return;
-			(block as d).mainPart.Anchored = true;
+			(block as d).mainPart.Anchored = false; //set true
 		});
 
 		logic.events.weldMountToPlayer.invoked.Connect((player, { block, humanoid }) => {
