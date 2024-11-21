@@ -1,4 +1,5 @@
 import { ServerBlockLogic } from "server/blocks/ServerBlockLogic";
+import { SharedRagdoll } from "shared/SharedRagdoll";
 import type { PlayModeController } from "server/modes/PlayModeController";
 import type { BackMountBlockLogic } from "shared/blocks/blocks/BackMountBlock";
 
@@ -19,9 +20,22 @@ export class BackMountBlockServerLogic extends ServerBlockLogic<typeof BackMount
 
 		logic.events.weldMountToPlayer.invoked.Connect((player, { block, humanoid }) => {
 			if (!this.isValidBlock(block, player)) return;
-			const torso = humanoid.RootPart;
+
+			let torso: BasePart;
+			switch (humanoid.RigType) {
+				case Enum.HumanoidRigType.R6:
+					torso = humanoid.Parent?.FindFirstChild("Torso") as BasePart;
+					break;
+				case Enum.HumanoidRigType.R15:
+					torso = humanoid.Parent?.FindFirstChild("UpperTorso") as BasePart;
+					break;
+				default:
+					throw "what";
+			}
 			if (!torso) return;
-			torso.PivotTo(block.GetPivot());
+
+			SharedRagdoll.setPlayerRagdoll(humanoid, false);
+			humanoid.RootPart?.PivotTo(block.GetPivot());
 			(block as d).PlayerWeldConstraint.Part1 = torso;
 			(block as d).mainPart.Anchored = false;
 		});

@@ -67,30 +67,27 @@ class Logic extends InstanceBlockLogic<typeof definition, BackMountModel> {
 		super(definition, block);
 
 		if (!RunService.IsClient()) return;
-		//get humanoid
+
 		const pp = new Instance("ProximityPrompt");
 		pp.Enabled = true;
 		pp.ActionText = "Attach";
 		pp.MaxActivationDistance = 12;
 		pp.KeyboardKeyCode = Keys[this.definition.input.detachKey.types.key.config];
 		pp.Parent = this.instance;
-
-		const stuff = this.parent(new PlayerInfo(Players.LocalPlayer));
-		this.onEnable(() => Logic.events.init.send({ block: this.instance }));
-
-		this.onEnable(() => {
-			this.event.subscribe(pp.Triggered, () => {
-				const humanoid = stuff.humanoid.get();
-				if (!humanoid) return;
-				Logic.events.weldMountToPlayer.send({ block: this.instance, humanoid });
-				pp.Enabled = false;
-			});
-		});
-
-		const detach = ({ detachBool }: { detachBool: boolean }) => {
+		this.event.subscribe(pp.Triggered, () => {
 			const humanoid = stuff.humanoid.get();
 			if (!humanoid) return;
-			if (!detachBool) return;
+			Logic.events.weldMountToPlayer.send({ block: this.instance, humanoid });
+			pp.Enabled = false;
+		});
+
+		this.onEnable(() => Logic.events.init.send({ block: this.instance }));
+
+		const stuff = this.parent(new PlayerInfo(Players.LocalPlayer));
+
+		const detach = () => {
+			const humanoid = stuff.humanoid.get();
+			if (!humanoid) return;
 			if (pp.Enabled) return;
 			Logic.events.unweldMountFromPlayer.send({ block: this.instance });
 			pp.Enabled = true;
@@ -102,10 +99,14 @@ class Logic extends InstanceBlockLogic<typeof definition, BackMountModel> {
 		this.event.subscribe(UserInputService.InputBegan, (input, gameProccessed) => {
 			if (gameProccessed) return;
 			if (input.KeyCode !== pp.KeyboardKeyCode) return;
-			detach({ detachBool: true });
+			if (!pp.Enabled) return;
+			detach();
 		});
 
-		this.onk(["detachBool"], detach);
+		this.onk(["detachBool"], ({ detachBool }) => {
+			if (!detachBool) return;
+			detach();
+		});
 
 		this.onDisable(() => {
 			Logic.events.unweldMountFromPlayer.send({ block: this.instance });
