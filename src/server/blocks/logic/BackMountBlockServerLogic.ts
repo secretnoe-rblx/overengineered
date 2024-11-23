@@ -5,7 +5,7 @@ import type { BackMountBlockLogic } from "shared/blocks/blocks/BackMountBlock";
 
 type d = BlockModel & {
 	mainPart: BasePart;
-	PlayerWeldConstraint: WeldConstraint;
+	PlayerWeldConstraint: Motor6D;
 };
 
 @injectable
@@ -16,6 +16,7 @@ export class BackMountBlockServerLogic extends ServerBlockLogic<typeof BackMount
 		logic.events.init.invoked.Connect((player, { block }) => {
 			if (!this.isValidBlock(block, player)) return;
 			(block as d).mainPart.Anchored = false; //set true
+			//(block as d).PlayerWeldConstraint.Part0 = (block as d).mainPart;
 		});
 
 		logic.events.weldMountToPlayer.invoked.Connect((player, { block, humanoid }) => {
@@ -36,6 +37,9 @@ export class BackMountBlockServerLogic extends ServerBlockLogic<typeof BackMount
 
 			SharedRagdoll.setPlayerRagdoll(humanoid, false);
 			humanoid.RootPart?.PivotTo(block.GetPivot());
+			(block as d).PlayerWeldConstraint.C1 = (block as d).PlayerWeldConstraint.C0.add(
+				new Vector3(0, 0, torso.Size.Z / 2 + 0.3),
+			);
 			(block as d).PlayerWeldConstraint.Part1 = torso;
 			(block as d).mainPart.Anchored = false;
 		});

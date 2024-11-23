@@ -41,7 +41,6 @@ const definition = {
 } satisfies BlockLogicFullBothDefinitions;
 
 type BackMountModel = BlockModel & {
-	PlayerWeldConstraint: WeldConstraint;
 	DragDetector: DragDetector;
 };
 
@@ -94,8 +93,8 @@ class Logic extends InstanceBlockLogic<typeof definition, BackMountModel> {
 			const humanoid = stuff.humanoid.get();
 			if (!humanoid) return;
 			if (pp.Enabled) return;
-			Logic.events.unweldMountFromPlayer.send({ block: this.instance });
 			pp.Enabled = true;
+			Logic.events.unweldMountFromPlayer.send({ block: this.instance });
 		};
 		this.onk(["detachKey"], ({ detachKey }) => {
 			pp.KeyboardKeyCode = Keys[detachKey as KeyCode];
@@ -104,7 +103,6 @@ class Logic extends InstanceBlockLogic<typeof definition, BackMountModel> {
 		this.event.subscribe(UserInputService.InputBegan, (input, gameProccessed) => {
 			if (gameProccessed) return;
 			if (input.KeyCode !== pp.KeyboardKeyCode) return;
-			if (!pp.Enabled) return;
 			detach();
 		});
 
