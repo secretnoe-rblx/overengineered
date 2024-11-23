@@ -6,7 +6,7 @@ import type { BlockLogicArgs, BlockLogicFullBothDefinitions } from "shared/block
 import type { BlockBuilder } from "shared/blocks/Block";
 
 const definition = {
-	inputOrder: ["set", "value", "defaultValue", "reset"],
+	inputOrder: ["value", "fallback"],
 	input: {
 		value: {
 			displayName: "Value",
