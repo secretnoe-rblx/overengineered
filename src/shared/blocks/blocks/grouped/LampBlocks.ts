@@ -1,3 +1,4 @@
+import { Colors } from "engine/shared/Colors";
 import { AutoC2SRemoteEvent } from "engine/shared/event/C2SRemoteEvent";
 import { InstanceBlockLogic } from "shared/blockLogic/BlockLogic";
 import { BlockConfigDefinitions } from "shared/blocks/BlockConfigDefinitions";
@@ -23,6 +24,14 @@ const definition = {
 						step: 0.1,
 					},
 					config: 20,
+				},
+			},
+		},
+		color: {
+			displayName: "Color",
+			types: {
+				color: {
+					config: Colors.white,
 				},
 			},
 		},
@@ -61,16 +70,16 @@ class Logic extends InstanceBlockLogic<typeof definition> {
 	constructor(args: InstanceBlockLogicArgs) {
 		super(definition, args);
 
-		const color = BlockManager.manager.color.get(args.instance);
+		const blockColor = BlockManager.manager.color.get(args.instance);
 
-		this.on(({ enabled, brightness, lightRange, enabledChanged }) => {
+		this.on(({ enabled, brightness, lightRange, color, enabledChanged }) => {
 			// Send the request only if enabled or enabling
 			if (!enabled && !enabledChanged) return;
 
 			const data: UpdateData = {
 				block: this.instance,
 				state: enabled,
-				color: color,
+				color: color.Lerp(blockColor, 0.5),
 				brightness: brightness * 0.2, // a.k.a. / 100 * 40 and 30% off
 				range: lightRange * 0.6, // a.k.a. / 100 * 60
 			};
