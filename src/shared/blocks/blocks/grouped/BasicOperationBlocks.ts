@@ -1212,7 +1212,7 @@ const byte = {
 				},
 			},
 			({ value }) => ({
-				result: { type: "byte", value: value % 255 },
+				result: { type: "byte", value: value > 0 ? value % 256 : 256 - (-value % 256) },
 			}),
 		),
 	},
