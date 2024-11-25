@@ -1,7 +1,14 @@
-import { BlockLogic } from "shared/blockLogic/BlockLogic";
+import { BlockLogic, CalculatableBlockLogic } from "shared/blockLogic/BlockLogic";
+import { BlockLogicValueResults } from "shared/blockLogic/BlockLogicValueStorage";
 import { BlockConfigDefinitions } from "shared/blocks/BlockConfigDefinitions";
 import { BlockCreation } from "shared/blocks/BlockCreation";
-import type { BlockLogicArgs, BlockLogicFullBothDefinitions } from "shared/blockLogic/BlockLogic";
+import type {
+	AllInputKeysToObject,
+	AllOutputKeysToObject,
+	BlockLogicArgs,
+	BlockLogicFullBothDefinitions,
+	BlockLogicTickContext,
+} from "shared/blockLogic/BlockLogic";
 import type { BlockBuilder, BlockCategoryPath, BlockModelSource } from "shared/blocks/Block";
 
 const autoModel = (prefab: BlockCreation.Model.PrefabName, text: string, category: BlockCategoryPath) => {
@@ -56,26 +63,27 @@ namespace And {
 			const value1cache = this.initializeRecalcInputCache("value1");
 			const value2cache = this.initializeRecalcInputCache("value2");
 
-			this.onkRecalcInputs(["value1"], ({ value1 }) => {
-				if (!value1) {
-					this.output.result.set("bool", false);
-					return;
-				}
+			this.onkRecalcInputs(
+				[],
+				() => {
+					const value1 = value1cache.tryGet();
+					const value2 = value2cache.tryGet();
 
-				const value2 = value2cache.tryGet();
-				if (value2 === undefined) return;
-				this.output.result.set("bool", value1 && value2);
-			});
-			this.onkRecalcInputs(["value2"], ({ value2 }) => {
-				if (!value2) {
-					this.output.result.set("bool", false);
-					return;
-				}
+					if (value1 === false || value2 === false) {
+						return this.output.result.set("bool", false);
+					}
 
-				const value1 = value1cache.tryGet();
-				if (value1 === undefined) return;
-				this.output.result.set("bool", value2 && value1);
-			});
+					if (value1 === undefined || value2 === undefined) {
+						return this.output.result.unset();
+					}
+
+					this.output.result.set("bool", value1 && value2);
+				},
+				(result) => {
+					if (result !== BlockLogicValueResults.availableLater) return;
+					this.output.result.unset();
+				},
+			);
 		}
 	}
 
@@ -100,26 +108,27 @@ namespace Or {
 			const value1cache = this.initializeRecalcInputCache("value1");
 			const value2cache = this.initializeRecalcInputCache("value2");
 
-			this.onkRecalcInputs(["value1"], ({ value1 }) => {
-				if (value1) {
-					this.output.result.set("bool", true);
-					return;
-				}
+			this.onkRecalcInputs(
+				[],
+				() => {
+					const value1 = value1cache.tryGet();
+					const value2 = value2cache.tryGet();
 
-				const value2 = value2cache.tryGet();
-				if (value2 === undefined) return;
-				this.output.result.set("bool", value1 || value2);
-			});
-			this.onkRecalcInputs(["value2"], ({ value2 }) => {
-				if (value2) {
-					this.output.result.set("bool", true);
-					return;
-				}
+					if (value1 === true || value2 === true) {
+						return this.output.result.set("bool", true);
+					}
 
-				const value1 = value1cache.tryGet();
-				if (value1 === undefined) return;
-				this.output.result.set("bool", value2 || value1);
-			});
+					if (value1 === undefined || value2 === undefined) {
+						return this.output.result.unset();
+					}
+
+					this.output.result.set("bool", value1 || value2);
+				},
+				(result) => {
+					if (result !== BlockLogicValueResults.availableLater) return;
+					this.output.result.unset();
+				},
+			);
 		}
 	}
 
@@ -144,26 +153,27 @@ namespace Nand {
 			const value1cache = this.initializeRecalcInputCache("value1");
 			const value2cache = this.initializeRecalcInputCache("value2");
 
-			this.onkRecalcInputs(["value1"], ({ value1 }) => {
-				if (!value1) {
-					this.output.result.set("bool", true);
-					return;
-				}
+			this.onkRecalcInputs(
+				[],
+				() => {
+					const value1 = value1cache.tryGet();
+					const value2 = value2cache.tryGet();
 
-				const value2 = value2cache.tryGet();
-				if (value2 === undefined) return;
-				this.output.result.set("bool", !(value1 && value2));
-			});
-			this.onkRecalcInputs(["value2"], ({ value2 }) => {
-				if (!value2) {
-					this.output.result.set("bool", true);
-					return;
-				}
+					if (value1 === false || value2 === false) {
+						return this.output.result.set("bool", true);
+					}
 
-				const value1 = value1cache.tryGet();
-				if (value1 === undefined) return;
-				this.output.result.set("bool", !(value2 && value1));
-			});
+					if (value1 === undefined || value2 === undefined) {
+						return this.output.result.unset();
+					}
+
+					this.output.result.set("bool", !(value1 && value2));
+				},
+				(result) => {
+					if (result !== BlockLogicValueResults.availableLater) return;
+					this.output.result.unset();
+				},
+			);
 		}
 	}
 
@@ -188,26 +198,27 @@ namespace Nor {
 			const value1cache = this.initializeRecalcInputCache("value1");
 			const value2cache = this.initializeRecalcInputCache("value2");
 
-			this.onkRecalcInputs(["value1"], ({ value1 }) => {
-				if (value1) {
-					this.output.result.set("bool", false);
-					return;
-				}
+			this.onkRecalcInputs(
+				[],
+				() => {
+					const value1 = value1cache.tryGet();
+					const value2 = value2cache.tryGet();
 
-				const value2 = value2cache.tryGet();
-				if (value2 === undefined) return;
-				this.output.result.set("bool", !(value1 || value2));
-			});
-			this.onkRecalcInputs(["value2"], ({ value2 }) => {
-				if (value2) {
-					this.output.result.set("bool", false);
-					return;
-				}
+					if (value1 === true || value2 === true) {
+						return this.output.result.set("bool", false);
+					}
 
-				const value1 = value1cache.tryGet();
-				if (value1 === undefined) return;
-				this.output.result.set("bool", !(value2 || value1));
-			});
+					if (value1 === undefined || value2 === undefined) {
+						return this.output.result.unset();
+					}
+
+					this.output.result.set("bool", !(value1 || value2));
+				},
+				(result) => {
+					if (result !== BlockLogicValueResults.availableLater) return;
+					this.output.result.unset();
+				},
+			);
 		}
 	}
 
@@ -225,13 +236,16 @@ namespace Nor {
 namespace Xor {
 	const definition = defs.bool2_bool;
 
-	class Logic extends BlockLogic<typeof definition> {
+	class Logic extends CalculatableBlockLogic<typeof definition> {
 		constructor(block: BlockLogicArgs) {
 			super(definition, block);
+		}
 
-			this.onRecalcInputs(({ value1, value2 }) => {
-				this.output.result.set("bool", value1 !== value2);
-			});
+		protected override calculate(
+			{ value1, value2 }: AllInputKeysToObject<(typeof definition)["input"]>,
+			ctx: BlockLogicTickContext,
+		): AllOutputKeysToObject<(typeof definition)["output"]> | BlockLogicValueResults {
+			return { result: { type: "bool", value: value1 !== value2 } };
 		}
 	}
 
@@ -249,13 +263,16 @@ namespace Xor {
 namespace Xnor {
 	const definition = defs.bool2_bool;
 
-	class Logic extends BlockLogic<typeof definition> {
+	class Logic extends CalculatableBlockLogic<typeof definition> {
 		constructor(block: BlockLogicArgs) {
 			super(definition, block);
+		}
 
-			this.onRecalcInputs(({ value1, value2 }) => {
-				this.output.result.set("bool", !(value1 !== value2));
-			});
+		protected override calculate(
+			{ value1, value2 }: AllInputKeysToObject<(typeof definition)["input"]>,
+			ctx: BlockLogicTickContext,
+		): AllOutputKeysToObject<(typeof definition)["output"]> | BlockLogicValueResults {
+			return { result: { type: "bool", value: !(value1 !== value2) } };
 		}
 	}
 
@@ -273,13 +290,16 @@ namespace Xnor {
 namespace Not {
 	const definition = defs.bool1_bool;
 
-	class Logic extends BlockLogic<typeof definition> {
+	class Logic extends CalculatableBlockLogic<typeof definition> {
 		constructor(block: BlockLogicArgs) {
 			super(definition, block);
+		}
 
-			this.onRecalcInputs(({ value }) => {
-				this.output.result.set("bool", !value);
-			});
+		protected override calculate(
+			{ value }: AllInputKeysToObject<(typeof definition)["input"]>,
+			ctx: BlockLogicTickContext,
+		): AllOutputKeysToObject<(typeof definition)["output"]> | BlockLogicValueResults {
+			return { result: { type: "bool", value: !value } };
 		}
 	}
 
@@ -329,28 +349,37 @@ namespace Mux {
 			const truevaluecache = this.initializeRecalcInputCache("truevalue");
 			const falsevaluecache = this.initializeRecalcInputCache("falsevalue");
 
-			const update = (_: unknown, ctx: { readonly tick: number }) => {
-				const value = valuecache.tryGet();
-				if (value === undefined) return;
-
-				if (value) {
-					const ret = truevaluecache.tryGet();
-					const rettype = truevaluecache.tryGetType();
-					if (ret !== undefined && rettype !== undefined) {
-						this.output.result.set(rettype, ret);
+			this.onkRecalcInputs(
+				[],
+				() => {
+					const value = valuecache.tryGet();
+					if (value === undefined) {
+						return this.output.result.unset();
 					}
-				} else {
-					const ret = falsevaluecache.tryGet();
-					const rettype = falsevaluecache.tryGetType();
-					if (ret !== undefined && rettype !== undefined) {
-						this.output.result.set(rettype, ret);
-					}
-				}
-			};
 
-			this.onkRecalcInputs(["value"], update);
-			this.onkRecalcInputs(["truevalue"], update);
-			this.onkRecalcInputs(["falsevalue"], update);
+					if (value) {
+						const ret = truevaluecache.tryGet();
+						const rettype = truevaluecache.tryGetType();
+						if (ret !== undefined && rettype !== undefined) {
+							this.output.result.set(rettype, ret);
+						} else {
+							this.output.result.unset();
+						}
+					} else {
+						const ret = falsevaluecache.tryGet();
+						const rettype = falsevaluecache.tryGetType();
+						if (ret !== undefined && rettype !== undefined) {
+							this.output.result.set(rettype, ret);
+						} else {
+							this.output.result.unset();
+						}
+					}
+				},
+				(result) => {
+					if (result !== BlockLogicValueResults.availableLater) return;
+					this.output.result.unset();
+				},
+			);
 		}
 	}
 
