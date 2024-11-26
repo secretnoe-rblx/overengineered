@@ -36,17 +36,20 @@ class SprintLogic extends HostedService {
 				ContextActionService.BindAction(
 					"Sprint",
 					(name, inputState) => {
-						isSprinting.set(inputState === Enum.UserInputState.Begin);
+						if (inputState !== Enum.UserInputState.Begin) return;
+
+						isSprinting.set(!isSprinting.get());
+						ContextActionService.SetTitle("Sprint", isSprinting.get() ? "On" : "");
+
 						return Enum.ContextActionResult.Pass;
 					},
 					inputType === "Touch",
 					Enum.KeyCode.LeftShift,
 					Enum.KeyCode.ButtonY,
 				);
-				ContextActionService.SetImage("Sprint", "rbxassetid://9555118706");
 				ContextActionService.SetDescription("Sprint", "Allows you to move more quickly");
-				ContextActionService.SetPosition("Sprint", new UDim2(0, 20, 0, 50));
-				ContextActionService.SetTitle("Sprint", "Sprint");
+				ContextActionService.SetImage("Sprint", "rbxassetid://9555118706");
+				//ContextActionService.SetPosition("Sprint", new UDim2(0, 5, 0, 50));
 			},
 			true,
 		);
