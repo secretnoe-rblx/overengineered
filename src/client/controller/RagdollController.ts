@@ -1,4 +1,5 @@
 import { ContextActionService } from "@rbxts/services";
+import { InputController } from "engine/client/InputController";
 import { LocalPlayer } from "engine/client/LocalPlayer";
 import { Component } from "engine/shared/component/Component";
 import { ComponentEvents } from "engine/shared/component/ComponentEvents";
@@ -125,35 +126,41 @@ function initRagdollKey(
 
 				return Enum.ContextActionResult.Pass;
 			},
-			false,
+			InputController.inputType.get() === "Touch",
 			Keys[key],
 		);
+
+		ContextActionService.SetDescription(actionName, "funny falling");
+		ContextActionService.SetImage(actionName, "rbxassetid://9555118706");
 	}
 	function unbind() {
 		ContextActionService.UnbindAction(actionName);
 	}
 
 	let can = true;
-	event.subscribeObservable(
-		key,
-		({ triggerKey, triggerByKey }) => {
-			unbind();
-			if (!triggerByKey) return;
+	const rebind = () => {
+		const { triggerKey, triggerByKey } = key.get();
+		can = true;
 
-			bind(triggerKey, () => {
-				if (!can) return;
+		unbind();
+		if (!triggerByKey) return;
 
-				const humanoid = LocalPlayer.humanoid.get();
-				if (!humanoid || humanoid.Sit) return;
+		bind(triggerKey, () => {
+			if (!can) return;
 
-				const ragdolling = isPlayerRagdolling(humanoid);
-				can = false;
-				task.delay(1, () => (can = true));
-				task.spawn(() => SharedRagdoll.event.send(!ragdolling));
-			});
-		},
-		true,
-	);
+			const humanoid = LocalPlayer.humanoid.get();
+			if (!humanoid || humanoid.Sit) return;
+
+			const ragdolling = isPlayerRagdolling(humanoid);
+			can = false;
+			task.delay(1, () => (can = true));
+			task.spawn(() => SharedRagdoll.event.send(!ragdolling));
+		});
+	};
+
+	event.subscribeObservable(key, rebind);
+	event.subscribeObservable(InputController.inputType, rebind);
+	event.onEnable(rebind);
 }
 
 @injectable
