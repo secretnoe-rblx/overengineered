@@ -1,5 +1,5 @@
-import { ButtonControl } from "engine/client/gui/Button";
-import { Control } from "engine/client/gui/Control";
+import { ButtonComponent, ButtonControl } from "engine/client/gui/Button";
+import { Control, Control2 } from "engine/client/gui/Control";
 import { Transforms } from "engine/shared/component/Transforms";
 import { Element } from "engine/shared/Element";
 import { Colors } from "shared/Colors";
@@ -174,12 +174,20 @@ namespace TransformTests {
 			const bnotvisible = newbtn("Not visible", 7 + 1);
 			const binteractable = newbtn("Interactable", 8 + 1);
 			const bnotinteractable = newbtn("Not interactable", 9 + 1);
-			const visual = list.add(new ButtonControl(newbtn("Button", 10 + 1)));
+			// const visual = list.add(new ButtonControl(newbtn("Button", 10 + 1)));
+			const visual = list.add(
+				new Control2(newbtn("Button", 10 + 1)) //
+					.withParented((i) => new ButtonComponent(i)),
+			);
 
-			list.add(new ButtonControl(bvisible, () => visual.enableShow()));
-			list.add(new ButtonControl(bnotvisible, () => visual.disableHide()));
-			list.add(new ButtonControl(binteractable, () => visual.setInteractable(true)));
-			list.add(new ButtonControl(bnotinteractable, () => visual.setInteractable(false)));
+			list.add(new ButtonControl(bvisible, () => visual.setVisibilityAndState(true)));
+			list.add(new ButtonControl(bnotvisible, () => visual.setVisibilityAndState(false)));
+			list.add(
+				new ButtonControl(binteractable, () => visual.getComponent<ButtonControl>().setInteractable(true)),
+			);
+			list.add(
+				new ButtonControl(bnotinteractable, () => visual.getComponent<ButtonControl>().setInteractable(false)),
+			);
 		}
 
 		return list;

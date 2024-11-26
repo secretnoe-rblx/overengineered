@@ -31,7 +31,7 @@ import type { ActionController } from "client/modes/build/ActionController";
 import type { BuildingMode } from "client/modes/build/BuildingMode";
 import type { BlockSelectorModeGuiDefinition } from "client/tools/highlighters/BlockSelectorModeGui";
 import type { TextButtonDefinition } from "engine/client/gui/Button";
-import type { Control } from "engine/client/gui/Control";
+import type { InstanceComponent } from "engine/shared/component/InstanceComponent";
 import type { SharedPlot } from "shared/building/SharedPlot";
 
 namespace Scene {
@@ -173,7 +173,7 @@ namespace Scene {
 					},
 				} as const;
 			};
-			type mvs = ReturnType<typeof multiValueSetter<Control>>;
+			type mvs = ReturnType<typeof multiValueSetter<InstanceComponent<GuiObject>>>;
 
 			const buttons: Readonly<Record<EditToolButtons, mvs>> = {
 				// edit tool modes
@@ -225,35 +225,6 @@ namespace Scene {
 				},
 				true,
 			);
-
-			const initAnimation = () => {
-				const bottomVisibilityFunction = Transforms.multiStateMachine(
-					Transforms.boolStateMachine(
-						this.instance.Bottom,
-						Transforms.commonProps.quadOut02,
-						{ Position: this.instance.Bottom.Position },
-						{ Position: this.instance.Bottom.Position.add(new UDim2(0, 0, 0, 20)) },
-						(tr, visible) =>
-							tr.func(() => {
-								for (const [, button] of pairs(this.buttons.getAll())) {
-									if (button instanceof ButtonControl) {
-										button.setEnabledAndVisible(visible);
-									}
-								}
-							}),
-						(tr, visible) => tr.setVisible(this.instance, visible),
-					),
-					Transforms.boolStateMachine(this.instance, Transforms.commonProps.quadOut02, {}, {}),
-				);
-				this.onEnabledStateChange((enabled) => {
-					if (enabled) {
-						this.instance.Visible = true;
-					}
-
-					bottomVisibilityFunction(enabled);
-				});
-			};
-			initAnimation();
 		}
 	}
 }

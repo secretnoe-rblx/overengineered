@@ -20,7 +20,7 @@ export class TouchModeButtonControl extends TextButtonControl {
 	constructor(gui: TouchModeButtonControlDefinition) {
 		super(gui);
 
-		this.event.subscribe(this.gui.InputBegan, (input) => {
+		this.event.subscribe(gui.InputBegan, (input) => {
 			if (
 				input.UserInputType !== Enum.UserInputType.MouseButton1 &&
 				input.UserInputType !== Enum.UserInputType.Touch
@@ -29,7 +29,7 @@ export class TouchModeButtonControl extends TextButtonControl {
 
 			this.pressed.Fire();
 		});
-		this.event.subscribe(this.gui.InputEnded, (input) => {
+		this.event.subscribe(gui.InputEnded, (input) => {
 			if (
 				input.UserInputType !== Enum.UserInputType.MouseButton1 &&
 				input.UserInputType !== Enum.UserInputType.Touch

@@ -270,6 +270,7 @@ export class ConfigTool extends ToolBase {
 		};
 
 		this.parent(new MultiBlockHighlightedSelector(mode.targetPlot, this.selected, undefined, { filter }));
+		this.onDisable(() => this.unselectAll());
 	}
 
 	selectBlockByUuid(uuid: BlockUuid) {
@@ -285,10 +286,5 @@ export class ConfigTool extends ToolBase {
 
 	getImageID(): string {
 		return "http://www.roblox.com/asset/?id=15414751900";
-	}
-
-	disable() {
-		super.disable();
-		this.unselectAll();
 	}
 }

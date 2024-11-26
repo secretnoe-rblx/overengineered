@@ -19,7 +19,7 @@ export class BlockPipetteButton extends ButtonControl {
 	constructor(gui: ButtonDefinition) {
 		super(gui);
 
-		const bg = this.gui.BackgroundColor3;
+		const bg = gui.BackgroundColor3;
 		let stop: (() => void) | undefined;
 
 		const g = (part: BasePart): BasePart | BlockModel | undefined => {
@@ -35,14 +35,14 @@ export class BlockPipetteButton extends ButtonControl {
 			}
 
 			this.onStart.Fire();
-			this.gui.BackgroundColor3 = Colors.accentLight;
+			gui.BackgroundColor3 = Colors.accentLight;
 
 			const visualizer = new HoveredPartHighlighter(g);
 			visualizer.enable();
 
 			const eh = new EventHandler();
 			stop = () => {
-				this.gui.BackgroundColor3 = bg;
+				gui.BackgroundColor3 = bg;
 				visualizer.destroy();
 				eh.unsubscribeAll();
 				this.onEnd.Fire();

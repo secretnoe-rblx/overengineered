@@ -11,7 +11,7 @@ namespace ColorChooserTests {
 		}>().Templates.Color.Clone();
 
 		return new Control(colorparent)
-			.withAdded(new ColorChooser(colorparent.Content))
+			.withParented(new ColorChooser(colorparent.Content))
 			.with((c) => (c.instance.Position = new UDim2()))
 			.with((c) => (c.instance.AnchorPoint = new Vector2()));
 	}

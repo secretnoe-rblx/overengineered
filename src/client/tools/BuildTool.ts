@@ -17,8 +17,8 @@ import { ToolBase } from "client/tools/ToolBase";
 import { ClientComponent } from "engine/client/component/ClientComponent";
 import { ClientComponentChild } from "engine/client/component/ClientComponentChild";
 import { ClientInstanceComponent } from "engine/client/component/ClientInstanceComponent";
-import { ButtonControl } from "engine/client/gui/Button";
-import { Control } from "engine/client/gui/Control";
+import { ButtonComponent, ButtonControl } from "engine/client/gui/Button";
+import { Control, Control2 } from "engine/client/gui/Control";
 import { InputController } from "engine/client/InputController";
 import { Component } from "engine/shared/component/Component";
 import { ComponentChild } from "engine/shared/component/ComponentChild";
@@ -318,12 +318,14 @@ namespace Scene {
 			this.parent(new ScaleEditorControl(scaleEditorGui.Content, tool.blockScale));
 
 			const scaleEditorBtn = this.parent(
-				new ButtonControl(
+				new Control2(
 					Interface.getGameUI<{ BuildingMode: { Action: { Scale: GuiButton } } }>().BuildingMode.Action.Scale,
-					() => (scaleEditorGui.Visible = !scaleEditorGui.Visible),
+				).withParented(
+					(tr) => new ButtonComponent(tr, () => (scaleEditorGui.Visible = !scaleEditorGui.Visible)),
 				),
 			);
-			this.onEnabledStateChange((enabled) => scaleEditorBtn.setEnabledAndVisible(enabled), true);
+
+			this.onEnabledStateChange((enabled) => scaleEditorBtn.setVisibilityAndState(enabled), true);
 			this.onDisable(() => (scaleEditorGui.Visible = false));
 
 			const inventory = this.parent(mainScreen.registerLeft<BlockSelectionControlDefinition>("Inventory"));

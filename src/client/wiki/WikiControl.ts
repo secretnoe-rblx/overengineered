@@ -28,7 +28,9 @@ export class WikiCategoriesControl extends Control<WikiCategoriesControlDefiniti
 		super(gui);
 
 		this.itemTemplate = this.asTemplate(gui.ScrollingFrame.Template, true);
-		this.list = this.parent(new ComponentKeyedChildren<string, Control>().withParentInstance(gui.ScrollingFrame));
+		this.list = this.parent(
+			new ComponentKeyedChildren<string, TextButtonControl>().withParentInstance(gui.ScrollingFrame),
+		);
 	}
 
 	addItems(items: readonly { readonly id: string; readonly title: string; readonly parent?: string }[]) {
@@ -120,8 +122,8 @@ export class WikiContentControl extends Control<WikiContentControlDefinition> {
 		// this.contents.instance.CanvasPosition
 		return dropdown;
 	}
-	private contentFromEntries(entries: readonly WikiEntryContent[]): readonly Control[] {
-		const controls: Control[] = [];
+	private contentFromEntries(entries: readonly WikiEntryContent[]): readonly Component[] {
+		const controls: Component[] = [];
 		const context: ContentContext = { h1s: [] };
 
 		for (const part of entries) {
@@ -134,7 +136,7 @@ export class WikiContentControl extends Control<WikiContentControlDefinition> {
 
 		return controls;
 	}
-	private contentFromEntry(entry: WikiEntryContent, context: ContentContext): Control {
+	private contentFromEntry(entry: WikiEntryContent, context: ContentContext): Component {
 		if (typeIs(entry, "string")) {
 			const gui = this.stringTemplate();
 			gui.Text = entry

@@ -27,9 +27,9 @@ export class TestsUI extends InstanceComponent<TestsUIDefinition> {
 		const testButtonTemplate = this.asTemplate(gui.TestList.Template);
 		const subTestButtonTemplate = this.asTemplate(gui.SubTestList.Template);
 
-		const ctestList = this.parent(new ComponentChildren<Control>().withParentInstance(gui.TestList));
-		const csubTestList = this.parent(new ComponentChildren<Control>().withParentInstance(gui.SubTestList));
-		const ccontent = this.parent(new ComponentChildren<Control>().withParentInstance(gui.Content));
+		const ctestList = this.parent(new ComponentChildren<Component>().withParentInstance(gui.TestList));
+		const csubTestList = this.parent(new ComponentChildren<Component>().withParentInstance(gui.SubTestList));
+		const ccontent = this.parent(new ComponentChildren<Component>().withParentInstance(gui.Content));
 
 		//
 

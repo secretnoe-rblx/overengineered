@@ -1,13 +1,11 @@
 import { ReplicatedStorage, Workspace } from "@rbxts/services";
 import { Interface } from "client/gui/Interface";
 import { ClientComponent } from "engine/client/component/ClientComponent";
-import { ButtonComponent } from "engine/client/gui/ButtonComponent";
+import { ButtonControl } from "engine/client/gui/Button";
 import { Component } from "engine/shared/component/Component";
-import { ComponentChild } from "engine/shared/component/ComponentChild";
 import { ComponentInstance } from "engine/shared/component/ComponentInstance";
 import { Transforms } from "engine/shared/component/Transforms";
 import { Element } from "engine/shared/Element";
-import { ObservableSwitch } from "engine/shared/event/ObservableSwitch";
 import { BuildingManager } from "shared/building/BuildingManager";
 import { SharedPlot } from "shared/building/SharedPlot";
 import { Colors } from "shared/Colors";
@@ -168,37 +166,18 @@ export class CenterOfMassController extends ClientComponent {
 	) {
 		super();
 
-		const visualizerContainer = this.parent(new ComponentChild<CenterOfMassVisualizer>());
-		const enabled = new ObservableSwitch();
+		const visualier = this.parent(new CenterOfMassVisualizer(plot.instance.Blocks, actionController));
 
-		this.event.subscribeObservable(
-			enabled,
-			(enabled) => {
-				if (enabled) {
-					visualizerContainer.set(new CenterOfMassVisualizer(plot.getBlocks()[0].Parent!, actionController));
-				} else {
-					visualizerContainer.clear();
-				}
-			},
+		const button = this.parent(mainScreen.registerTopRightButton("CenterOfMass"));
+		visualier.disable("button");
+		const comButton = button.parent(new ButtonControl(button.instance, () => visualier.switchEnabled("button")));
+
+		visualier.onEnabledStateChange(
+			(enabled) =>
+				Transforms.create()
+					.transform(comButton.instance, "Transparency", enabled ? 0 : 0.5, Transforms.commonProps.quadOut02)
+					.run(comButton.instance),
 			true,
 		);
-
-		{
-			enabled.set("button", false);
-			const button = this.parent(mainScreen.registerTopRightButton("CenterOfMass"));
-
-			const com = this.parent(
-				new ButtonComponent(button.instance, () => enabled.set("button", !enabled.getKeyed("button"))),
-			);
-
-			this.event.subscribeObservable(
-				enabled,
-				(enabled) =>
-					Transforms.create()
-						.transform(com.instance, "Transparency", enabled ? 0 : 0.5, Transforms.commonProps.quadOut02)
-						.run(com.instance),
-				true,
-			);
-		}
 	}
 }

@@ -9,8 +9,7 @@ import { ConfirmPopup } from "client/gui/popup/ConfirmPopup";
 import { TouchModeButtonControl } from "client/gui/ridemode/TouchModeButtonControl";
 import { requestMode } from "client/modes/PlayModeRequest";
 import { ButtonControl } from "engine/client/gui/Button";
-import { ButtonComponent } from "engine/client/gui/ButtonComponent";
-import { Control } from "engine/client/gui/Control";
+import { Control, Control2 } from "engine/client/gui/Control";
 import { InputController } from "engine/client/InputController";
 import { LocalPlayer } from "engine/client/LocalPlayer";
 import { Component } from "engine/shared/component/Component";
@@ -35,6 +34,7 @@ import type { RideMode } from "client/modes/ride/RideMode";
 import type { PlayerDataStorage } from "client/PlayerDataStorage";
 import type { TextButtonDefinition } from "engine/client/gui/Button";
 import type { ReadonlyComponentChildren } from "engine/shared/component/ComponentChildren";
+import type { InstanceComponent } from "engine/shared/component/InstanceComponent";
 import type { GenericBlockLogic } from "shared/blockLogic/BlockLogic";
 import type { BeaconBlockLogic } from "shared/blocks/blocks/BeaconBlock";
 import type { RocketBlockLogic } from "shared/blocks/blocks/RocketEngineBlocks";
@@ -43,7 +43,7 @@ type RideModeControlsDefinition = GuiObject & {
 	readonly Overlay: GuiObject;
 	readonly Button: TextButtonDefinition;
 };
-export class RideModeControls extends Control<RideModeControlsDefinition> {
+export class RideModeControls extends Control2<RideModeControlsDefinition> {
 	readonly onEnterSettingsMode = new Signal<() => void>();
 	readonly onQuitSettingsMode = new Signal<() => void>();
 
@@ -56,9 +56,11 @@ export class RideModeControls extends Control<RideModeControlsDefinition> {
 		gui: RideModeControlsDefinition,
 		private readonly playerData: PlayerDataStorage,
 	) {
-		super(gui);
+		super(gui, { showOnEnable: true });
 
-		this.keyedChildren = this.parent(new ComponentKeyedChildren<string, Control>().withParentInstance(gui));
+		this.keyedChildren = this.parent(
+			new ComponentKeyedChildren<string, InstanceComponent<GuiObject>>().withParentInstance(gui),
+		);
 		this.overlayTemplate = this.asTemplate(this.gui.Overlay);
 
 		this.onDisable(() => {
@@ -68,7 +70,7 @@ export class RideModeControls extends Control<RideModeControlsDefinition> {
 		});
 	}
 
-	resetControl(btn: Control, pos: number) {
+	resetControl(btn: InstanceComponent<GuiObject>, pos: number) {
 		const size = btn.instance.Size;
 
 		let x = 0.95;
@@ -206,8 +208,7 @@ export class RideModeControls extends Control<RideModeControlsDefinition> {
 		this.keyedChildren.clear();
 		machine.onDestroy(() => this.keyedChildren.clear());
 		machine.occupiedByLocalPlayer.subscribe((occupied) => {
-			if (occupied) this.enableShow();
-			else this.disableHide();
+			this.isVisible.set("machineSeatOccupiedByPlayer", occupied);
 		}, true);
 
 		const inputType = InputController.inputType.get();
@@ -312,11 +313,11 @@ export class RideModeScene extends Control<RideModeSceneDefinition> {
 			controlsEditMode,
 			(editMode) => {
 				this.canSit.set("ride_editControls", !editMode);
-				stopButton.visible.set("ride_editControls", !editMode);
-				logicButton.visible.set("ride_editControls", !editMode);
+				stopButton.isVisible.set("ride_editControls", !editMode);
+				logicButton.isVisible.set("ride_editControls", !editMode);
 
-				editControlsButton.visible.set("ride_editControls", editMode);
-				resetControlsButton.visible.set("ride_editControls", editMode);
+				editControlsButton.isVisible.set("ride_editControls", editMode);
+				resetControlsButton.isVisible.set("ride_editControls", editMode);
 			},
 			true,
 		);
@@ -324,29 +325,29 @@ export class RideModeScene extends Control<RideModeSceneDefinition> {
 			LoadingController.isLoading,
 			(isLoading) => {
 				this.canSit.set("ride_isNotLoading", !isLoading);
-				stopButton.visible.set("ride_isNotLoading", !isLoading);
-				editControlsButton.visible.set("ride_isNotLoading", !isLoading);
-				resetControlsButton.visible.set("ride_isNotLoading", !isLoading);
+				stopButton.isVisible.set("ride_isNotLoading", !isLoading);
+				editControlsButton.isVisible.set("ride_isNotLoading", !isLoading);
+				resetControlsButton.isVisible.set("ride_isNotLoading", !isLoading);
 			},
 			true,
 		);
 
 		const stopButton = this.parent(mainScreen.registerTopCenterButton("Stop"));
-		this.parent(new ButtonComponent(stopButton.instance, () => requestMode("build")));
+		this.parent(new ButtonControl(stopButton.instance, () => requestMode("build")));
 
 		const sitButton = this.parent(mainScreen.registerTopCenterButton("Sit"));
-		this.event.subscribeObservable(this.canSit, (canSit) => sitButton.visible.set("ride_main", canSit), true);
-		this.parent(new ButtonComponent(sitButton.instance, () => CustomRemotes.modes.ride.teleportOnSeat.send()));
+		this.event.subscribeObservable(this.canSit, (canSit) => sitButton.isVisible.set("ride_main", canSit), true);
+		this.parent(new ButtonControl(sitButton.instance, () => CustomRemotes.modes.ride.teleportOnSeat.send()));
 
 		//
 
 		const editControlsButton = this.parent(mainScreen.registerTopRightButton("EditControls"));
-		this.onPrepare((input) => editControlsButton.visible.set("onlyTouch", input === "Touch"));
-		this.parent(new ButtonComponent(editControlsButton.instance, () => this.controls.toggleSettingsMode()));
+		this.onPrepare((input) => editControlsButton.isVisible.set("onlyTouch", input === "Touch"));
+		this.parent(new ButtonControl(editControlsButton.instance, () => this.controls.toggleSettingsMode()));
 
 		const resetControlsButton = this.parent(mainScreen.registerTopRightButton("ResetControls"));
 		this.parent(
-			new ButtonComponent(resetControlsButton.instance, () =>
+			new ButtonControl(resetControlsButton.instance, () =>
 				ConfirmPopup.showPopup("Reset the controls?", "It will be impossible to undo this action", () =>
 					this.controls.resetControls(),
 				),
@@ -354,7 +355,7 @@ export class RideModeScene extends Control<RideModeSceneDefinition> {
 		);
 
 		const logicButton = this.parent(mainScreen.registerTopRightButton("Logic"));
-		this.logicButton = this.parent(new ButtonComponent(logicButton.instance));
+		this.logicButton = this.parent(new ButtonControl(logicButton.instance));
 
 		this.onEnabledStateChange((enabled) => this.canSit.set("ride_enabled", enabled), true);
 
@@ -508,12 +509,11 @@ export class RideModeScene extends Control<RideModeSceneDefinition> {
 
 		this.gui.LogicDebug.Visible = false;
 
-		const logicDebug = component.parent(new Control(this.gui.LogicDebug.Clone()));
+		const logicDebug = component.parent(new Control2(this.gui.LogicDebug.Clone(), { showOnEnable: true }));
 		logicDebug.instance.Parent = this.gui.LogicDebug.Parent;
-		component.event.subscribe(this.logicButton.activated, () => {
-			logicDebug.setEnabledAndVisible(!logicDebug.isInstanceVisible());
-		});
-		logicDebug.disableHide();
+
+		logicDebug.disable("button");
+		component.event.subscribe(this.logicButton.activated, () => logicDebug.switchEnabled("button"));
 
 		const pauseOnStart = logicDebug.add(new CheckBoxControl(logicDebug.instance.Content.PauseOnStart.Control));
 		logicDebug.onEnable(() => pauseOnStart.value.set(this.mode.pauseOnStart.get()));

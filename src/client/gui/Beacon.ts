@@ -30,6 +30,7 @@ export class Beacon extends InstanceComponent<PVInstance> {
 		this.billboard.Position = new UDim2(0, 1, 0, 1);
 		this.billboard.Parent = Interface.getUnscaledGameUI();
 		this.billboard.Title.Text = name;
+		this.onEnabledStateChange((enabled) => (this.billboard.Visible = enabled), true);
 
 		this.event.subscribe(RunService.RenderStepped, () => {
 			const character = Players.LocalPlayer.Character;
@@ -96,14 +97,5 @@ export class Beacon extends InstanceComponent<PVInstance> {
 
 			this.billboard.Position = new UDim2(0, pos_x, 0, pos_y);
 		});
-	}
-
-	enable(): void {
-		super.enable();
-		this.billboard.Visible = true;
-	}
-	disable(): void {
-		super.disable();
-		this.billboard.Visible = false;
 	}
 }

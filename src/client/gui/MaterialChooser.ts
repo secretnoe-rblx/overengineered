@@ -1,11 +1,11 @@
 import { MarketplaceService, Players } from "@rbxts/services";
-import { ButtonComponent } from "engine/client/gui/ButtonComponent";
+import { ButtonControl } from "engine/client/gui/Button";
 import { Control } from "engine/client/gui/Control";
 import { SubmittableValue } from "engine/shared/event/SubmittableValue";
 import { Marketplace } from "engine/shared/Marketplace";
 import { GameDefinitions } from "shared/data/GameDefinitions";
 
-class MaterialButton extends ButtonComponent {
+class MaterialButton extends ButtonControl {
 	constructor(gui: GuiButton, set: (material: Enum.Material) => void, gamePass?: number) {
 		super(gui);
 

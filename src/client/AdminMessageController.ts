@@ -51,18 +51,18 @@ export namespace AdminMessageController {
 				},
 			),
 		)
-			.withAdded(
+			.withParented(
 				TextButtonControl.create({ Text: "test", Size: new UDim2(0, 100, 0, 30) }, () =>
 					AdminMessageController.send("MESSAGE TEST THIS IS A WARNING\nNOT"),
 				),
 			)
-			.withAdded(
+			.withParented(
 				TextButtonControl.create({ Text: "restart", Size: new UDim2(0, 100, 0, 30) }, () =>
 					AdminMessageController.send("Server restart\nSave your builds"),
 				),
 			)
-			.withAdded(tb)
-			.withAdded(
+			.withParented(tb)
+			.withParented(
 				TextButtonControl.create({ Text: "custom", Size: new UDim2(0, 100, 0, 30) }, () =>
 					AdminMessageController.send(tb.text.get()),
 				),

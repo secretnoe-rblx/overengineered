@@ -1,6 +1,6 @@
-import { Interface } from "client/gui/Interface";
 import { GuiAnimator } from "client/gui/GuiAnimator";
-import { Control } from "engine/client/gui/Control";
+import { Interface } from "client/gui/Interface";
+import { Control2 } from "engine/client/gui/Control";
 import { Colors } from "shared/Colors";
 
 export type LogControlDefinition = GuiObject & {
@@ -9,7 +9,7 @@ export type LogControlDefinition = GuiObject & {
 	};
 };
 
-export class LogControl extends Control<LogControlDefinition> {
+export class LogControl extends Control2<LogControlDefinition> {
 	static readonly instance = new LogControl(
 		Interface.getGameUI<{
 			Log: LogControlDefinition;
@@ -19,8 +19,8 @@ export class LogControl extends Control<LogControlDefinition> {
 	private readonly lineTemplate;
 
 	constructor(gui: LogControlDefinition) {
-		super(gui);
-		this.lineTemplate = this.asTemplate(this.gui.Template);
+		super(gui, { showOnEnable: true });
+		this.lineTemplate = this.asTemplate(gui.Template);
 	}
 
 	addLine(text: string, color: Color3 = Colors.white) {
@@ -31,7 +31,7 @@ export class LogControl extends Control<LogControlDefinition> {
 		const line = this.lineTemplate();
 		line.TextLabel.Text = text;
 		line.TextLabel.TextColor3 = color;
-		line.Parent = this.gui;
+		line.Parent = this.instance;
 
 		GuiAnimator.transition(line.TextLabel, 0.3, "right");
 		spawn(() => {

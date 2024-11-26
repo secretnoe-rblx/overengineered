@@ -19,16 +19,9 @@ export class MirrorVisualizer extends ClientComponent {
 			prev?.instance.FindFirstChild("Mirrors")?.ClearAllChildren();
 			this.recreate();
 		});
-	}
 
-	enable() {
-		super.enable();
-		this.recreate();
-	}
-
-	disable() {
-		super.disable();
-		this.plot.get()?.instance.FindFirstChild("Mirrors")?.ClearAllChildren();
+		this.onEnable(() => this.recreate());
+		this.onDisable(() => this.plot.get()?.instance.FindFirstChild("Mirrors")?.ClearAllChildren());
 	}
 
 	private recreate() {

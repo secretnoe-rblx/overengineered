@@ -1,22 +1,12 @@
 import { LoadingController } from "client/controller/LoadingController";
 import { HotbarControl } from "client/gui/buildmode/HotbarControl";
 import { Interface } from "client/gui/Interface";
+import { Control2 } from "engine/client/gui/Control";
 import { Component } from "engine/shared/component/Component";
 import { ComponentInstance } from "engine/shared/component/ComponentInstance";
-import { InstanceComponent } from "engine/shared/component/InstanceComponent";
 import { Transforms } from "engine/shared/component/Transforms";
 import { TransformService } from "engine/shared/component/TransformService";
-import { ObservableSwitch } from "engine/shared/event/ObservableSwitch";
 import type { HotbarControlDefinition } from "client/gui/buildmode/HotbarControl";
-
-class HidableControl<T extends GuiObject> extends InstanceComponent<T> {
-	readonly visible = new ObservableSwitch();
-
-	constructor(instance: T) {
-		super(instance);
-		this.onEnabledStateChange((enabled) => this.visible.set("main_visible$", enabled));
-	}
-}
 
 //
 
@@ -74,26 +64,26 @@ export class MainScreenLayout extends Component {
 		forEachChild(this.instance.Left, (child) => (child.Visible = false));
 	}
 
-	registerTopCenterButton<T extends GuiButton>(name: string): HidableControl<T> {
-		const control = new HidableControl(this.instance.Top.Center.Main.WaitForChild(name) as T);
-		control.visible.subscribe((visible) => {
+	registerTopCenterButton<T extends GuiButton>(name: string): Control2<T> {
+		const control = new Control2(this.instance.Top.Center.Main.WaitForChild(name) as T);
+		control.isVisible.subscribe((visible) => {
 			control.instance.Visible = visible;
 		});
 
 		return control;
 	}
-	registerTopRightButton<T extends GuiButton>(name: string): HidableControl<T> {
-		const control = new HidableControl(this.instance.Top.Right.WaitForChild(name) as T);
-		control.visible.subscribe((visible) => {
+	registerTopRightButton<T extends GuiButton>(name: string): Control2<T> {
+		const control = new Control2(this.instance.Top.Right.WaitForChild(name) as T);
+		control.isVisible.subscribe((visible) => {
 			control.instance.Visible = visible;
 		});
 
 		return control;
 	}
 
-	registerLeft<T extends GuiObject>(name: string): HidableControl<T> {
-		const control = new HidableControl(this.instance.Left.WaitForChild(name) as T);
-		control.visible.subscribe((visible) => {
+	registerLeft<T extends GuiObject>(name: string): Control2<T> {
+		const control = new Control2(this.instance.Left.WaitForChild(name) as T);
+		control.isVisible.subscribe((visible) => {
 			control.instance.Visible = visible;
 		});
 

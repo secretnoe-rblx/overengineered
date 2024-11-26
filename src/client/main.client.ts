@@ -53,7 +53,7 @@ Objects.awaitThrow(
 
 LoadingController.show("Loading the rest");
 
-LogControl.instance.enableShow();
+host.parent(LogControl.instance);
 
 InputController.inputType.subscribe((newInputType) =>
 	LogControl.instance.addLine("New input type set to " + newInputType, Colors.yellow),

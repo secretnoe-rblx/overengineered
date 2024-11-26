@@ -129,7 +129,7 @@ class CategoryControl extends TextButtonControl<CategoryControlDefinition> {
 		this.text.set(text);
 
 		if (blocks.size() !== 0) {
-			const preview = this.add(new BlockPreviewControl(template.ViewportFrame));
+			const preview = this.parent(new BlockPreviewControl(template.ViewportFrame));
 			let blockIndex = 0;
 
 			const update = () => preview.set(blocks[blockIndex++ % blocks.size()]);
@@ -148,7 +148,7 @@ class BlockControl extends TextButtonControl<BlockControlDefinition> {
 		super(template);
 
 		this.text.set(block.displayName);
-		this.add(new BlockPreviewControl(template.ViewportFrame, block.model));
+		this.parent(new BlockPreviewControl(template.ViewportFrame, block.model));
 	}
 }
 
@@ -218,9 +218,7 @@ export class BlockSelectionControl extends Control<BlockSelectionControlDefiniti
 		this.categories = Categories.createCategoryTreeFromBlocks(blockList.sorted);
 
 		this.list = this.parent(
-			new ComponentChildren<BlockControl | CategoryControl>().withParentInstance(
-				this.gui.Content.ScrollingFrame,
-			),
+			new ComponentChildren<BlockControl | CategoryControl>().withParentInstance(this.gui.Content.ScrollingFrame),
 		);
 
 		this.breadcrumbs = this.parent(
@@ -255,7 +253,7 @@ export class BlockSelectionControl extends Control<BlockSelectionControlDefiniti
 	}
 
 	private create(selectedCategory: BlockCategoryPath, animated: boolean) {
-		const highlightButton = (control: Control) =>
+		const highlightButton = (control: InstanceComponent) =>
 			(Interface.getTemplates<{ Highlight: GuiObject }>().Highlight.Clone().Parent = control.instance);
 
 		let idx = 0;
