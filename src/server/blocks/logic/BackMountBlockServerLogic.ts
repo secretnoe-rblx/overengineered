@@ -3,50 +3,45 @@ import { SharedRagdoll } from "shared/SharedRagdoll";
 import type { PlayModeController } from "server/modes/PlayModeController";
 import type { BackMountBlockLogic } from "shared/blocks/blocks/BackMountBlock";
 
-type d = BlockModel & {
-	mainPart: BasePart;
-	PlayerWeldConstraint: Motor6D;
-};
-
 @injectable
 export class BackMountBlockServerLogic extends ServerBlockLogic<typeof BackMountBlockLogic> {
 	constructor(logic: typeof BackMountBlockLogic, @inject playModeController: PlayModeController) {
 		super(logic, playModeController);
 
-		logic.events.init.invoked.Connect((player, { block }) => {
-			if (!this.isValidBlock(block, player)) return;
-			(block as d).mainPart.Anchored = false; //set true
-			//(block as d).PlayerWeldConstraint.Part0 = (block as d).mainPart;
-		});
+		logic.events.weldMountToPlayer.invoked.Connect((player, { block, connectToRootPart }) => {
+			if (!this.isValidBlock(block, player, false)) return;
 
-		logic.events.weldMountToPlayer.invoked.Connect((player, { block, humanoid }) => {
-			if (!this.isValidBlock(block, player)) return;
+			const humanoid = player?.Character?.FindFirstChild("Humanoid") as Humanoid | undefined;
+			if (!humanoid) return;
 
-			let torso: BasePart;
-			switch (humanoid.RigType) {
-				case Enum.HumanoidRigType.R6:
-					torso = humanoid.Parent?.FindFirstChild("Torso") as BasePart;
-					break;
-				case Enum.HumanoidRigType.R15:
-					torso = humanoid.Parent?.FindFirstChild("UpperTorso") as BasePart;
-					break;
-				default:
-					throw "what";
-			}
+			let torso: BasePart | undefined;
+			if (!connectToRootPart) {
+				switch (humanoid.RigType) {
+					case Enum.HumanoidRigType.R6:
+						torso = humanoid.Parent?.FindFirstChild("Torso") as BasePart;
+						break;
+					case Enum.HumanoidRigType.R15:
+						torso = humanoid.Parent?.FindFirstChild("UpperTorso") as BasePart;
+						break;
+					default:
+						throw "what";
+				}
+			} else torso = humanoid.RootPart;
+
 			if (!torso) return;
 
 			SharedRagdoll.setPlayerRagdoll(humanoid, false);
+			block.PlayerWeldConstraint.C1 = new CFrame(0, 0, torso.Size.Z / 2 + 0.3);
+			block.PlayerWeldConstraint.Part1 = torso;
 			humanoid.RootPart?.PivotTo(block.GetPivot());
-			(block as d).PlayerWeldConstraint.C1 = (block as d).PlayerWeldConstraint.C0.add(
-				new Vector3(0, 0, torso.Size.Z / 2 + 0.3),
-			);
-			(block as d).PlayerWeldConstraint.Part1 = torso;
-			(block as d).mainPart.Anchored = false;
 		});
 
 		logic.events.unweldMountFromPlayer.invoked.Connect((player, { block }) => {
 			if (!this.isValidBlock(block, player)) return;
-			(block as d).PlayerWeldConstraint.Part1 = (block as d).PlayerWeldConstraint.Part0;
+
+			if (block.PlayerWeldConstraint.Part1 && player?.Character?.IsAncestorOf(block.PlayerWeldConstraint.Part1)) {
+				block.PlayerWeldConstraint.Part1 = undefined;
+			}
 		});
 	}
 }

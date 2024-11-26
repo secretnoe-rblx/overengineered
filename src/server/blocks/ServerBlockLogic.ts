@@ -12,7 +12,11 @@ export abstract class ServerBlockLogic<T extends GenericBlockLogicCtor> {
 		this.logic = logic;
 	}
 
-	protected isValidBlock(block: BlockModel | undefined, player: Player | undefined): boolean {
+	protected isValidBlock(
+		block: BlockModel | undefined,
+		player: Player | undefined,
+		checkOwnership: boolean = true,
+	): boolean {
 		if (!block) return false;
 		if (!block.IsDescendantOf(Workspace)) return false;
 
@@ -22,6 +26,7 @@ export abstract class ServerBlockLogic<T extends GenericBlockLogicCtor> {
 			}
 
 			if (
+				checkOwnership &&
 				!block.PrimaryPart?.Anchored &&
 				!block.PrimaryPart?.AssemblyRootPart?.Anchored &&
 				block.PrimaryPart?.GetNetworkOwner() !== player
