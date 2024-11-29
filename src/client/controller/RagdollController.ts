@@ -131,7 +131,8 @@ function initRagdollKey(
 		);
 
 		ContextActionService.SetDescription(actionName, "funny falling");
-		ContextActionService.SetImage(actionName, "rbxassetid://9555118706");
+		ContextActionService.SetImage(actionName, "rbxassetid://110824406341723");
+		ContextActionService.SetPosition(actionName, new UDim2(0, 150, 0, 50));
 	}
 	function unbind() {
 		ContextActionService.UnbindAction(actionName);

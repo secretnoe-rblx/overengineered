@@ -36,11 +36,15 @@ class SprintLogic extends HostedService {
 				ContextActionService.BindAction(
 					"Sprint",
 					(name, inputState) => {
-						if (inputState !== Enum.UserInputState.Begin) return;
+						if (inputType === "Touch") {
+							if (inputState !== Enum.UserInputState.Begin) return;
 
-						isSprinting.set(!isSprinting.get());
+							isSprinting.set(!isSprinting.get());
+						} else {
+							isSprinting.set(inputState === Enum.UserInputState.Begin);
+						}
+
 						ContextActionService.SetTitle("Sprint", isSprinting.get() ? "On" : "");
-
 						return Enum.ContextActionResult.Pass;
 					},
 					inputType === "Touch",
@@ -49,7 +53,7 @@ class SprintLogic extends HostedService {
 				);
 				ContextActionService.SetDescription("Sprint", "Allows you to move more quickly");
 				ContextActionService.SetImage("Sprint", "rbxassetid://9555118706");
-				//ContextActionService.SetPosition("Sprint", new UDim2(0, 5, 0, 50));
+				ContextActionService.SetPosition("Sprint", new UDim2(0, 60, 0, 100));
 			},
 			true,
 		);
