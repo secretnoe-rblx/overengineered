@@ -7,6 +7,7 @@ import { Component } from "engine/shared/component/Component";
 import { Element } from "engine/shared/Element";
 import { Colors } from "shared/Colors";
 import { GameDefinitions } from "shared/data/GameDefinitions";
+import type { DebuggableComponent } from "engine/shared/component/Component2";
 
 type TreeControlDefinition = GuiObject & {
 	readonly Main: GuiButton;
@@ -112,10 +113,10 @@ const create = (): TreeControl => {
 };
 
 let tree: TreeControl | undefined;
-const update = (root: IDebuggableComponent) => {
+const update = (root: DebuggableComponent) => {
 	if (!tree) throw "what";
 
-	const add = (component: object | IDebuggableComponent, tree: TreeControl) => {
+	const add = (component: object | DebuggableComponent, tree: TreeControl) => {
 		const childtree = tree.childContainer.add(
 			TreeControl.createChildList(
 				Element.create("TextButton", {
@@ -137,7 +138,7 @@ const update = (root: IDebuggableComponent) => {
 
 	add(root, tree);
 };
-const toggle = (root: IDebuggableComponent) => {
+const toggle = (root: DebuggableComponent) => {
 	if (!tree) {
 		tree = create();
 		update(root);

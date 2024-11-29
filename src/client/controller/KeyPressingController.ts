@@ -1,4 +1,4 @@
-import { ClientComponent } from "engine/client/component/ClientComponent";
+import { Component } from "engine/shared/component/Component";
 import { Signal } from "engine/shared/event/Signal";
 import { isKey } from "engine/shared/fixes/Keys";
 
@@ -112,7 +112,7 @@ export type KeyDefinition<TKeys extends string> = {
 };
 export type KeyDefinitions<TKeys extends string> = { readonly [k in TKeys]: KeyDefinition<TKeys> };
 
-export class KeyPressingDefinitionsController<T extends KeyDefinitions<string>> extends ClientComponent {
+export class KeyPressingDefinitionsController<T extends KeyDefinitions<string>> extends Component {
 	readonly controller;
 
 	constructor(definitions: T) {

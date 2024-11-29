@@ -50,7 +50,7 @@ namespace Scene {
 					() => (this.gui.Mirror.Visible = !this.gui.Mirror.Visible),
 				),
 			);
-			this.onPrepare((inputType) => {
+			this.event.onPrepare((inputType) => {
 				this.gui.TouchControls.Visible = false;
 				this.gui.Bottom.DeleteAllButton.Visible = inputType !== "Gamepad";
 			});
@@ -106,14 +106,14 @@ export class DeleteTool extends ToolBase {
 		};
 		const stuff = this.parent(new MultiBlockSelector(mode.targetPlot));
 		stuff.submit.Connect(fireSelected);
+
+		this.event.onPrepareGamepad((eh, ih) => {
+			ih.onKeyDown("ButtonY", () => this.onClearAllRequested.Fire());
+		});
 	}
 
 	supportsMirror() {
 		return false;
-	}
-
-	protected prepareGamepad(): void {
-		this.inputHandler.onKeyDown("ButtonY", () => this.onClearAllRequested.Fire());
 	}
 
 	deleteHighlightedBlocks() {

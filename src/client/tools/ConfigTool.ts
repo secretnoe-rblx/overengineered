@@ -87,7 +87,7 @@ namespace Scene {
 				this.currentConfigControl?.destroy();
 				this.currentConfigControl = undefined;
 			});
-			this.onPrepare((inputType) => {
+			this.event.onPrepare((inputType) => {
 				this.gui.Bottom.DeselectButton.Visible = inputType !== "Gamepad";
 			});
 		}

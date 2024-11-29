@@ -3,14 +3,13 @@ import { Interface } from "client/gui/Interface";
 import { LogControl } from "client/gui/static/LogControl";
 import { ClientBuilding } from "client/modes/build/ClientBuilding";
 import { ToolBase } from "client/tools/ToolBase";
-import { ClientComponent } from "engine/client/component/ClientComponent";
-import { ClientInstanceComponent } from "engine/client/component/ClientInstanceComponent";
 import { ButtonControl } from "engine/client/gui/Button";
 import { Control } from "engine/client/gui/Control";
 import { InputController } from "engine/client/InputController";
 import { Component } from "engine/shared/component/Component";
 import { ComponentChild } from "engine/shared/component/ComponentChild";
 import { ComponentChildren } from "engine/shared/component/ComponentChildren";
+import { InstanceComponent } from "engine/shared/component/InstanceComponent";
 import { Element } from "engine/shared/Element";
 import { ObservableValue } from "engine/shared/event/ObservableValue";
 import { Instances } from "engine/shared/fixes/Instances";
@@ -72,7 +71,7 @@ namespace Markers {
 			readonly Filled: Frame;
 		};
 	};
-	export abstract class Marker extends ClientInstanceComponent<MarkerComponentDefinition> {
+	export abstract class Marker extends InstanceComponent<MarkerComponentDefinition> {
 		private static getPartMarkerPositions(originalOrigin: BasePart): Vector3[] {
 			const sizeX = originalOrigin.Size.X / 2;
 			const sizeY = originalOrigin.Size.Y / 2;
@@ -166,15 +165,15 @@ namespace Markers {
 			};
 			const removeTooltip = () => tooltipParent.clear();
 
-			this.onPrepare((inputType) => {
+			this.event.onPrepare((inputType, eh) => {
 				if (inputType === "Desktop") {
-					this.eventHandler.subscribe(this.instance.TextButton.MouseEnter, createTooltip);
-					this.eventHandler.subscribe(this.instance.TextButton.MouseLeave, removeTooltip);
+					eh.subscribe(this.instance.TextButton.MouseEnter, createTooltip);
+					eh.subscribe(this.instance.TextButton.MouseLeave, removeTooltip);
 				} else if (inputType === "Touch") {
 					createTooltip();
 				} else if (inputType === "Gamepad") {
-					this.eventHandler.subscribe(this.instance.TextButton.MouseEnter, createTooltip);
-					this.eventHandler.subscribe(this.instance.TextButton.MouseLeave, removeTooltip);
+					eh.subscribe(this.instance.TextButton.MouseEnter, createTooltip);
+					eh.subscribe(this.instance.TextButton.MouseLeave, removeTooltip);
 				}
 
 				if (inputType === "Gamepad") {
@@ -318,7 +317,7 @@ namespace Scene {
 
 			this.tool.selectedMarker.subscribe(() => this.update(), true);
 			this.event.subscribe(GuiService.GetPropertyChangedSignal("SelectedObject"), () => this.update());
-			this.onPrepare(() => this.update());
+			this.event.onPrepare(() => this.update());
 		}
 
 		private update() {
@@ -362,7 +361,7 @@ namespace Scene {
 }
 
 type WireComponentDefinition = Part;
-class WireComponent extends ClientInstanceComponent<WireComponentDefinition> {
+class WireComponent extends InstanceComponent<WireComponentDefinition> {
 	private static readonly visibleTransparency = 0.4;
 	static createInstance(): WireComponentDefinition {
 		return Element.create("Part", {
@@ -522,12 +521,12 @@ namespace Controllers {
 
 		stopDragging(): void;
 	}
-	export class Desktop extends ClientComponent implements IController {
+	export class Desktop extends Component implements IController {
 		readonly selectedMarker = new ObservableValue<Markers.Output | undefined>(undefined);
 		private readonly currentMoverContainer;
 
 		constructor(markers: readonly Markers.Marker[]) {
-			class WireMover extends ClientInstanceComponent<WireComponentDefinition> {
+			class WireMover extends InstanceComponent<WireComponentDefinition> {
 				readonly marker;
 
 				constructor(instance: WireComponentDefinition, marker: Markers.Output) {
@@ -691,7 +690,7 @@ export class WireTool extends ToolBase {
 			new Scene.WireToolScene(ToolBase.getToolGui<"Wire", Scene.WireToolSceneDefinition>().Wire, this),
 		);
 
-		this.onPrepare(() => this.createEverything());
+		this.event.onPrepare(() => this.createEverything());
 		this.onDisable(() => this.markers.clear());
 
 		this.event.subscribe(actionController.onUndo, () => {

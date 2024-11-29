@@ -1,14 +1,14 @@
 import { Players } from "@rbxts/services";
 import { Interface } from "client/gui/Interface";
 import { TooltipsHolder } from "client/gui/static/TooltipsControl";
-import { ClientComponent } from "engine/client/component/ClientComponent";
+import { Component } from "engine/shared/component/Component";
 import type { InputTooltips } from "client/gui/static/TooltipsControl";
 import type { BuildingMode } from "client/modes/build/BuildingMode";
 import type { ComponentEvents } from "engine/shared/component/ComponentEvents";
 import type { SharedPlot } from "shared/building/SharedPlot";
 
 /** An abstract class of tools for working with the world */
-export abstract class ToolBase extends ClientComponent {
+export abstract class ToolBase extends Component {
 	readonly mirrorMode;
 	readonly targetPlot;
 

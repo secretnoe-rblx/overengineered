@@ -1,6 +1,5 @@
 import { ReplicatedStorage, Workspace } from "@rbxts/services";
 import { Interface } from "client/gui/Interface";
-import { ClientComponent } from "engine/client/component/ClientComponent";
 import { ButtonControl } from "engine/client/gui/Button";
 import { Component } from "engine/shared/component/Component";
 import { ComponentInstance } from "engine/shared/component/ComponentInstance";
@@ -158,7 +157,7 @@ export class CenterOfMassVisualizer extends Component {
 }
 
 @injectable
-export class CenterOfMassController extends ClientComponent {
+export class CenterOfMassController extends Component {
 	constructor(
 		@inject mainScreen: MainScreenLayout,
 		@inject plot: SharedPlot,
@@ -166,13 +165,13 @@ export class CenterOfMassController extends ClientComponent {
 	) {
 		super();
 
-		const visualier = this.parent(new CenterOfMassVisualizer(plot.instance.Blocks, actionController));
+		const visualizer = this.parent(new CenterOfMassVisualizer(plot.instance.Blocks, actionController));
 
 		const button = this.parent(mainScreen.registerTopRightButton("CenterOfMass"));
-		visualier.disable("button");
-		const comButton = button.parent(new ButtonControl(button.instance, () => visualier.switchEnabled("button")));
+		visualizer.disable("button");
+		const comButton = button.parent(new ButtonControl(button.instance, () => visualizer.switchEnabled("button")));
 
-		visualier.onEnabledStateChange(
+		visualizer.onEnabledStateChange(
 			(enabled) =>
 				Transforms.create()
 					.transform(comButton.instance, "Transparency", enabled ? 0 : 0.5, Transforms.commonProps.quadOut02)

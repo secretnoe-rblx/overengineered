@@ -7,12 +7,12 @@ import { BlockGhoster } from "client/tools/additional/BlockGhoster";
 import { MultiBlockHighlightedSelector } from "client/tools/highlighters/MultiBlockHighlightedSelector";
 import { SelectedBlocksHighlighter } from "client/tools/highlighters/SelectedBlocksHighlighter";
 import { ToolBase } from "client/tools/ToolBase";
-import { ClientComponent } from "engine/client/component/ClientComponent";
-import { ClientInstanceComponent } from "engine/client/component/ClientInstanceComponent";
 import { ButtonControl } from "engine/client/gui/Button";
+import { Component } from "engine/shared/component/Component";
 import { ComponentChild } from "engine/shared/component/ComponentChild";
 import { ComponentChildren } from "engine/shared/component/ComponentChildren";
 import { ComponentDisabler } from "engine/shared/component/ComponentDisabler";
+import { InstanceComponent } from "engine/shared/component/InstanceComponent";
 import { Transforms } from "engine/shared/component/Transforms";
 import { TransformService } from "engine/shared/component/TransformService";
 import { Element } from "engine/shared/Element";
@@ -31,7 +31,6 @@ import type { ActionController } from "client/modes/build/ActionController";
 import type { BuildingMode } from "client/modes/build/BuildingMode";
 import type { BlockSelectorModeGuiDefinition } from "client/tools/highlighters/BlockSelectorModeGui";
 import type { TextButtonDefinition } from "engine/client/gui/Button";
-import type { InstanceComponent } from "engine/shared/component/InstanceComponent";
 import type { SharedPlot } from "shared/building/SharedPlot";
 
 namespace Scene {
@@ -42,7 +41,7 @@ namespace Scene {
 			readonly DeselectAllButton: TextButtonDefinition;
 		};
 	};
-	export class MultiBlockSelectorGui extends ClientComponent {
+	export class MultiBlockSelectorGui extends Component {
 		constructor(gui: MultiBlockSelectorGuiDefinition, tool: EditTool) {
 			super();
 
@@ -97,7 +96,7 @@ namespace Scene {
 		};
 	}
 
-	export class EditToolScene extends ClientInstanceComponent<EditToolSceneDefinition> {
+	export class EditToolScene extends InstanceComponent<EditToolSceneDefinition> {
 		readonly tool;
 		private readonly buttons;
 
@@ -323,7 +322,7 @@ const reGenerateUuids = (
 
 namespace Controllers {
 	@injectable
-	export class Edit extends ClientComponent {
+	export class Edit extends Component {
 		private submitted = false;
 		private readonly editor: BlockEditor;
 
@@ -399,7 +398,7 @@ namespace Controllers {
 	}
 
 	@injectable
-	export class Paste extends ClientComponent {
+	export class Paste extends Component {
 		private readonly blocksRequests;
 		private readonly blocks;
 		private readonly editor;
@@ -502,7 +501,7 @@ namespace Controllers {
 		}
 	}
 
-	export class Paint extends ClientComponent {
+	export class Paint extends Component {
 		private static readonly material = new ObservableValue<Enum.Material>(Enum.Material.Plastic);
 		private static readonly color = new ObservableValue<Color3>(new Color3(1, 1, 1));
 		private readonly origData: ReadonlyMap<

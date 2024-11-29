@@ -1,6 +1,5 @@
 import { LoadingController } from "client/controller/LoadingController";
 import { LogControl } from "client/gui/static/LogControl";
-import { ClientComponent } from "engine/client/component/ClientComponent";
 import { ButtonControl } from "engine/client/gui/Button";
 import { InputController } from "engine/client/InputController";
 import { Component } from "engine/shared/component/Component";
@@ -40,7 +39,7 @@ type Operation = {
 };
 
 @injectable
-export class ActionController extends ClientComponent {
+export class ActionController extends Component {
 	/** @deprecated Use @inject instead */
 	static instance: ActionController;
 

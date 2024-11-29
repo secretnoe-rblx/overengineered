@@ -58,9 +58,7 @@ export class ConfirmPopup extends Popup<ConfirmPopupDefinition> {
 			noFunc?.();
 			this.hide();
 		});
-	}
 
-	protected prepareGamepad(): void {
-		GuiService.SelectedObject = this.cancelButton.instance;
+		this.event.onPrepareGamepad(() => (GuiService.SelectedObject = this.cancelButton.instance));
 	}
 }

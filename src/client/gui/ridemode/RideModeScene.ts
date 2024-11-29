@@ -342,7 +342,7 @@ export class RideModeScene extends Control<RideModeSceneDefinition> {
 		//
 
 		const editControlsButton = this.parent(mainScreen.registerTopRightButton("EditControls"));
-		this.onPrepare((input) => editControlsButton.isVisible.set("onlyTouch", input === "Touch"));
+		this.event.onPrepare((input) => editControlsButton.isVisible.set("onlyTouch", input === "Touch"));
 		this.parent(new ButtonControl(editControlsButton.instance, () => this.controls.toggleSettingsMode()));
 
 		const resetControlsButton = this.parent(mainScreen.registerTopRightButton("ResetControls"));

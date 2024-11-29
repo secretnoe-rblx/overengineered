@@ -137,9 +137,7 @@ class ReportSubmitPopup extends Popup<ReportSubmitPopupDefinition> {
 			this.hide();
 		});
 		this.add(new ButtonControl(this.gui.Heading.CloseButton, () => this.hide()));
-	}
 
-	protected prepareGamepad(): void {
-		GuiService.SelectedObject = this.okButton.instance;
+		this.event.onPrepareGamepad(() => (GuiService.SelectedObject = this.okButton.instance));
 	}
 }

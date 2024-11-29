@@ -1,13 +1,12 @@
 import { GuiService, Players } from "@rbxts/services";
 import { Interface } from "client/gui/Interface";
 import { Signals } from "client/Signals";
-import { ClientComponent } from "engine/client/component/ClientComponent";
-import { InputController } from "engine/client/InputController";
+import { Component } from "engine/shared/component/Component";
 import { ObservableValue } from "engine/shared/event/ObservableValue";
 import { PlayerUtils } from "engine/shared/utils/PlayerUtils";
 import { SharedPlot } from "shared/building/SharedPlot";
 
-export class HoveredPartHighlighter<T extends Instance> extends ClientComponent {
+export class HoveredPartHighlighter<T extends Instance> extends Component {
 	readonly highlightedPart = new ObservableValue<T | undefined>(undefined);
 
 	constructor(map?: (part: BasePart) => T | undefined) {
@@ -69,22 +68,20 @@ export class HoveredPartHighlighter<T extends Instance> extends ClientComponent 
 			this.highlightedPart.set(selectionBox.Parent);
 		};
 
-		const prepare = () => {
-			this.eventHandler.subscribe(SharedPlot.anyChanged, updatePosition);
+		this.event.onPrepare((inputType, eventHandler, inputHandler) => {
+			eventHandler.subscribe(SharedPlot.anyChanged, updatePosition);
 
-			if (InputController.inputType.get() === "Desktop") {
-				this.eventHandler.subscribe(mouse.Move, updatePosition);
-				this.eventHandler.subscribe(Signals.CAMERA.MOVED, updatePosition);
-			} else if (InputController.inputType.get() === "Gamepad") {
-				this.eventHandler.subscribe(Signals.CAMERA.MOVED, updatePosition);
-			} else if (InputController.inputType.get() === "Touch") {
-				this.inputHandler.onTouchTap(updatePosition);
+			if (inputType === "Desktop") {
+				eventHandler.subscribe(mouse.Move, updatePosition);
+				eventHandler.subscribe(Signals.CAMERA.MOVED, updatePosition);
+			} else if (inputType === "Gamepad") {
+				eventHandler.subscribe(Signals.CAMERA.MOVED, updatePosition);
+			} else if (inputType === "Touch") {
+				inputHandler.onTouchTap(updatePosition);
 			}
 
 			updatePosition();
-		};
-
-		this.event.onPrepare(prepare);
+		});
 		this.onDisable(destroyHighlight);
 	}
 }

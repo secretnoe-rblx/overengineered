@@ -53,9 +53,7 @@ export class AlertPopup extends Popup<AlertPopupDefinition> {
 			this.okButton.setInteractable(true);
 			closeButton.setInteractable(true);
 		});
-	}
 
-	protected prepareGamepad(): void {
-		GuiService.SelectedObject = this.okButton.instance;
+		this.event.onPrepareGamepad(() => (GuiService.SelectedObject = this.okButton.instance));
 	}
 }

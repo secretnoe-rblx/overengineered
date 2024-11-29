@@ -51,9 +51,7 @@ export class TextPopup extends Popup<TextPopupDefinition> {
 			noFunc();
 			this.hide();
 		});
-	}
 
-	protected prepareGamepad(): void {
-		GuiService.SelectedObject = this.gui.ScrollingFrame.TextBox;
+		this.event.onPrepareGamepad(() => (GuiService.SelectedObject = this.gui.ScrollingFrame.TextBox));
 	}
 }

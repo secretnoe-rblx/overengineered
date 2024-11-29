@@ -10,6 +10,7 @@ import { ArgsSignal } from "engine/shared/event/Signal";
 import { Colors } from "shared/Colors";
 import type { DropdownDefinition } from "client/gui/controls/Dropdown";
 import type { TextButtonDefinition } from "engine/client/gui/Button";
+import type { Component } from "engine/shared/component/Component";
 
 export type WikiCategoriesControlDefinition = GuiObject & {
 	readonly ScrollingFrame: ScrollingFrame & {

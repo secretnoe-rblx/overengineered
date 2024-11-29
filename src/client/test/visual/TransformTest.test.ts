@@ -177,7 +177,7 @@ namespace TransformTests {
 			// const visual = list.add(new ButtonControl(newbtn("Button", 10 + 1)));
 			const visual = list.add(
 				new Control2(newbtn("Button", 10 + 1)) //
-					.withParented((i) => new ButtonComponent(i)),
+					.withParentedWithInstance((i) => new ButtonComponent(i)),
 			);
 
 			list.add(new ButtonControl(bvisible, () => visual.setVisibilityAndState(true)));

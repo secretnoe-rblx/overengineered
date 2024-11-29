@@ -123,9 +123,7 @@ export class SelectButtonPopup<const TAllowCustomString extends boolean> extends
 			this.hide();
 			cancelFunc();
 		});
-	}
 
-	protected prepareGamepad(): void {
-		GuiService.SelectedObject = this.cancelButton.instance;
+		this.event.onPrepareGamepad(() => (GuiService.SelectedObject = this.cancelButton.instance));
 	}
 }

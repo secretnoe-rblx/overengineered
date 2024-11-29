@@ -5,9 +5,9 @@ import { Interface } from "client/gui/Interface";
 import { ClientBuilding } from "client/modes/build/ClientBuilding";
 import { MultiBlockSelector } from "client/tools/highlighters/MultiBlockSelector";
 import { ToolBase } from "client/tools/ToolBase";
-import { ClientComponent } from "engine/client/component/ClientComponent";
 import { ButtonControl } from "engine/client/gui/Button";
 import { LocalPlayer } from "engine/client/LocalPlayer";
+import { Component } from "engine/shared/component/Component";
 import { InstanceComponent } from "engine/shared/component/InstanceComponent";
 import { Transforms } from "engine/shared/component/Transforms";
 import { ObservableValue } from "engine/shared/event/ObservableValue";
@@ -97,7 +97,7 @@ namespace Scene {
 	}
 }
 
-class Controller extends ClientComponent {
+class Controller extends Component {
 	constructor(tool: PaintTool) {
 		super();
 

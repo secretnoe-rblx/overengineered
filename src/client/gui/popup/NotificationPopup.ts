@@ -43,9 +43,7 @@ export class NotificationPopup extends Popup<NotificationPopupDefinition> {
 		this.gui.Content.TextLabel2.Text = ps;
 		this.event.subscribe(this.okButton.activated, () => this.hide());
 		this.event.subscribe(this.closeButton.activated, () => this.hide());
-	}
 
-	protected prepareGamepad(): void {
-		GuiService.SelectedObject = this.okButton.instance;
+		this.event.onPrepareGamepad(() => (GuiService.SelectedObject = this.okButton.instance));
 	}
 }

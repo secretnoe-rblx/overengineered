@@ -1,7 +1,7 @@
 import { Signals } from "client/Signals";
 import { BlockSelect } from "client/tools/highlighters/BlockSelect";
 import { MultiModelHighlighter } from "client/tools/highlighters/MultiModelHighlighter";
-import { ClientComponent } from "engine/client/component/ClientComponent";
+import { Component } from "engine/shared/component/Component";
 import { ObservableValue } from "engine/shared/event/ObservableValue";
 import { ArgsSignal } from "engine/shared/event/Signal";
 import { BuildingManager } from "shared/building/BuildingManager";
@@ -9,7 +9,7 @@ import { SharedPlot } from "shared/building/SharedPlot";
 import type { BlockSelector } from "client/tools/highlighters/MultiBlockSelector";
 
 export type HoveredBlocksSelectorMode = keyof typeof HoveredBlocksSelector.Modes;
-export class HoveredBlocksSelector extends ClientComponent implements BlockSelector {
+export class HoveredBlocksSelector extends Component implements BlockSelector {
 	static readonly Modes = {
 		single: (block: BlockModel): BlockModel[] => [block],
 		assembly: BuildingManager.getAssemblyBlocks,
@@ -60,7 +60,7 @@ export class HoveredBlocksSelector extends ClientComponent implements BlockSelec
 			highlighter.enable();
 		};
 
-		this.onPrepare((inputType, eh, ih) => {
+		this.event.onPrepare((inputType, eh, ih) => {
 			eh.subscribe(SharedPlot.anyChanged, updateTarget);
 			ih.onInputBegan(() => {
 				prevTarget = undefined;
@@ -84,10 +84,10 @@ export class HoveredBlocksSelector extends ClientComponent implements BlockSelec
 				ih.onMouse1Down(() => (pressing = true), false);
 				ih.onMouse1Up(submit, true);
 			} else if (inputType === "Gamepad") {
-				this.inputHandler.onKeyDown("ButtonX", () => (pressing = true));
-				this.inputHandler.onKeyUp("ButtonX", submit);
+				ih.onKeyDown("ButtonX", () => (pressing = true));
+				ih.onKeyUp("ButtonX", submit);
 			} else if (inputType === "Touch") {
-				this.inputHandler.onInputEnded((input) => {
+				ih.onInputEnded((input) => {
 					if (input.UserInputType !== Enum.UserInputType.Touch) return;
 
 					pressing = true;

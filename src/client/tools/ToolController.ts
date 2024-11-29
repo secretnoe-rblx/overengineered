@@ -1,17 +1,17 @@
 import { LoadingController } from "client/controller/LoadingController";
-import { ClientComponent } from "engine/client/component/ClientComponent";
 import { LocalPlayer } from "engine/client/LocalPlayer";
+import { Component } from "engine/shared/component/Component";
 import { ComponentChild } from "engine/shared/component/ComponentChild";
 import { ComponentDisabler } from "engine/shared/component/ComponentDisabler";
 import { ObservableCollectionArr } from "engine/shared/event/ObservableCollection";
 import { ObservableValue } from "engine/shared/event/ObservableValue";
 import type { ToolBase } from "client/tools/ToolBase";
 
-class ToolInputController extends ClientComponent {
+class ToolInputController extends Component {
 	constructor(toolController: ToolController) {
 		super();
 
-		this.event.onPrepareDesktop(() => {
+		this.event.onPrepareDesktop((eh, ih) => {
 			const keycodes: readonly KeyCode[] = [
 				"One",
 				"Two",
@@ -25,7 +25,7 @@ class ToolInputController extends ClientComponent {
 			];
 
 			toolController.tools.get().forEach((tool, i) => {
-				this.inputHandler.onKeyDown(keycodes[i], () =>
+				ih.onKeyDown(keycodes[i], () =>
 					toolController.selectedTool.set(tool === toolController.selectedTool.get() ? undefined : tool),
 				);
 			});
@@ -49,16 +49,16 @@ class ToolInputController extends ClientComponent {
 
 			toolController.selectedTool.set(toolController.tools.get()[newIndex]);
 		};
-		this.event.onPrepareGamepad(() => {
-			this.inputHandler.onKeyDown("ButtonB", () => toolController.selectedTool.set(undefined));
-			this.inputHandler.onKeyDown("ButtonR1", () => gamepadSelectTool(true));
-			this.inputHandler.onKeyDown("ButtonL1", () => gamepadSelectTool(false));
+		this.event.onPrepareGamepad((eh, ih) => {
+			ih.onKeyDown("ButtonB", () => toolController.selectedTool.set(undefined));
+			ih.onKeyDown("ButtonR1", () => gamepadSelectTool(true));
+			ih.onKeyDown("ButtonL1", () => gamepadSelectTool(false));
 		});
 	}
 }
 
 @injectable
-export class ToolController extends ClientComponent {
+export class ToolController extends Component {
 	readonly selectedTool = new ObservableValue<ToolBase | undefined>(undefined, (value) => {
 		if (!value) return value;
 

@@ -1,12 +1,12 @@
 import { Players, Workspace } from "@rbxts/services";
 import { Interface } from "client/gui/Interface";
-import { ClientComponent } from "engine/client/component/ClientComponent";
 import { InputController } from "engine/client/InputController";
+import { Component } from "engine/shared/component/Component";
 import { ArgsSignal } from "engine/shared/event/Signal";
 import type { BlockSelector } from "client/tools/highlighters/MultiBlockSelector";
 import type { SharedPlot } from "shared/building/SharedPlot";
 
-export class BoxSelector extends ClientComponent implements BlockSelector {
+export class BoxSelector extends Component implements BlockSelector {
 	private readonly _submit = new ArgsSignal<[blocks: readonly BlockModel[]]>();
 	readonly submit = this._submit.asReadonly();
 

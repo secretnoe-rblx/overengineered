@@ -8,7 +8,6 @@ import { FloatingText } from "client/tools/additional/FloatingText";
 import { MoveGrid, ScaleGrid } from "client/tools/additional/Grid";
 import { RotateGrid } from "client/tools/additional/Grid";
 import { ToolBase } from "client/tools/ToolBase";
-import { ClientComponent } from "engine/client/component/ClientComponent";
 import { ButtonControl, TextButtonControl } from "engine/client/gui/Button";
 import { Control } from "engine/client/gui/Control";
 import { InputController } from "engine/client/InputController";
@@ -225,7 +224,7 @@ const formatVecForFloatingText = (vec: Vector3): string => {
 // #region Move
 // #endregion
 @injectable
-class MoveComponent extends ClientComponent implements EditComponent {
+class MoveComponent extends Component implements EditComponent {
 	constructor(
 		handles: EditHandles,
 		blocks: readonly EditingBlock[],
@@ -436,7 +435,7 @@ class RotateComponent extends Component implements EditComponent {
 // #region Scale
 // #endregion
 @injectable
-class ScaleComponent extends ClientComponent implements EditComponent {
+class ScaleComponent extends Component implements EditComponent {
 	readonly error = new ObservableValue<string | undefined>(undefined);
 
 	constructor(
@@ -724,7 +723,7 @@ class CompoundObservableSet<T extends defined> {
 }
 
 @injectable
-export class BlockEditor extends ClientComponent {
+export class BlockEditor extends Component {
 	private readonly _completed = new ArgsSignal();
 	readonly completed = this._completed.asReadonly();
 

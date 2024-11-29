@@ -1,8 +1,8 @@
 import { UserInputService } from "@rbxts/services";
 import { Interface } from "client/gui/Interface";
-import { ClientInstanceComponent } from "engine/client/component/ClientInstanceComponent";
 import { Control } from "engine/client/gui/Control";
 import { InputController } from "engine/client/InputController";
+import { InstanceComponent } from "engine/shared/component/InstanceComponent";
 import { Transforms } from "engine/shared/component/Transforms";
 import { TransformService } from "engine/shared/component/TransformService";
 import { Element } from "engine/shared/Element";
@@ -36,7 +36,7 @@ type TooltipsControlDefinition = GuiObject & {
 	};
 };
 
-export class TooltipsHolder extends ClientInstanceComponent<GuiObject> {
+export class TooltipsHolder extends InstanceComponent<GuiObject> {
 	static createComponent(category: string): TooltipsHolder {
 		const gui = Element.create(
 			"Frame",
@@ -63,7 +63,7 @@ export class TooltipsHolder extends ClientInstanceComponent<GuiObject> {
 	private tooltips: InputTooltips = {};
 	constructor(instance: GuiObject) {
 		super(instance);
-		this.onPrepare(() => this.set(this.tooltips));
+		this.event.onPrepare(() => this.set(this.tooltips));
 		this.onDisable(() => this.justSet({}));
 	}
 

@@ -4,6 +4,7 @@ import { ComponentChildren } from "engine/shared/component/ComponentChildren";
 import { InstanceComponent } from "engine/shared/component/InstanceComponent";
 import { TestFramework } from "engine/shared/TestFramework";
 import type { TextButtonDefinition } from "engine/client/gui/Button";
+import type { Component } from "engine/shared/component/Component";
 import type { UnitTest } from "engine/shared/TestFramework";
 
 export type TestsUIDefinition = ScreenGui & {

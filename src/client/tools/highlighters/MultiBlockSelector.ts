@@ -1,7 +1,7 @@
 import { UserInputService } from "@rbxts/services";
 import { BoxSelector } from "client/tools/highlighters/BoxSelector";
 import { HoveredBlocksSelector } from "client/tools/highlighters/HoveredBlocksSelector";
-import { ClientComponent } from "engine/client/component/ClientComponent";
+import { Component } from "engine/shared/component/Component";
 import { ComponentChild } from "engine/shared/component/ComponentChild";
 import { ObservableValue } from "engine/shared/event/ObservableValue";
 import { ArgsSignal } from "engine/shared/event/Signal";
@@ -18,7 +18,7 @@ export type MultiBlockSelectorConfiguration = {
 	readonly enabled?: readonly BlockSelectorMode[];
 	readonly filter?: (blocks: readonly BlockModel[]) => readonly BlockModel[];
 };
-export class MultiBlockSelector extends ClientComponent {
+export class MultiBlockSelector extends Component {
 	private readonly _submit = new ArgsSignal<[blocks: readonly BlockModel[]]>();
 	readonly submit = this._submit.asReadonly();
 	readonly mode = new ObservableValue<BlockSelectorMode>("single");

@@ -9,6 +9,7 @@ import { ComponentChildren } from "engine/shared/component/ComponentChildren";
 import { ObservableValue } from "engine/shared/event/ObservableValue";
 import { Localization } from "engine/shared/Localization";
 import { Colors } from "shared/Colors";
+import type { InstanceComponent } from "engine/shared/component/InstanceComponent";
 import type { BlockCategoryPath } from "shared/blocks/Block";
 
 type Category = {
@@ -253,7 +254,7 @@ export class BlockSelectionControl extends Control<BlockSelectionControlDefiniti
 	}
 
 	private create(selectedCategory: BlockCategoryPath, animated: boolean) {
-		const highlightButton = (control: InstanceComponent) =>
+		const highlightButton = (control: InstanceComponent<Instance>) =>
 			(Interface.getTemplates<{ Highlight: GuiObject }>().Highlight.Clone().Parent = control.instance);
 
 		let idx = 0;

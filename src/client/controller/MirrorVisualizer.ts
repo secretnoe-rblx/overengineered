@@ -1,8 +1,8 @@
 import { ReplicatedStorage } from "@rbxts/services";
-import { ClientComponent } from "engine/client/component/ClientComponent";
+import { Component } from "engine/shared/component/Component";
 import type { SharedPlot } from "shared/building/SharedPlot";
 
-export class MirrorVisualizer extends ClientComponent {
+export class MirrorVisualizer extends Component {
 	private readonly plot: ReadonlyObservableValue<SharedPlot>;
 	private readonly mirrorMode: ReadonlyObservableValue<MirrorMode>;
 	private readonly template;

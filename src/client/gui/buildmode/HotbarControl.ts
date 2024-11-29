@@ -1,9 +1,9 @@
 import { StarterGui, UserInputService } from "@rbxts/services";
 import { LoadingController } from "client/controller/LoadingController";
 import { SoundController } from "client/controller/SoundController";
-import { ClientInstanceComponent } from "engine/client/component/ClientInstanceComponent";
 import { Control } from "engine/client/gui/Control";
 import { ComponentKeyedChildren } from "engine/shared/component/ComponentKeyedChildren";
+import { InstanceComponent } from "engine/shared/component/InstanceComponent";
 import { Transforms } from "engine/shared/component/Transforms";
 import { TransformService } from "engine/shared/component/TransformService";
 import { Colors } from "shared/Colors";
@@ -52,7 +52,7 @@ export type HotbarControlDefinition = GuiObject & {
 };
 
 @injectable
-export class HotbarControl extends ClientInstanceComponent<HotbarControlDefinition> {
+export class HotbarControl extends InstanceComponent<HotbarControlDefinition> {
 	private readonly nameLabel;
 
 	constructor(gui: HotbarControlDefinition, @inject toolController: ToolController) {

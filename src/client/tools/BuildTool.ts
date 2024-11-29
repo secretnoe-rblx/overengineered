@@ -14,14 +14,13 @@ import { BlockGhoster } from "client/tools/additional/BlockGhoster";
 import { BlockMirrorer } from "client/tools/additional/BlockMirrorer";
 import { FloatingText } from "client/tools/additional/FloatingText";
 import { ToolBase } from "client/tools/ToolBase";
-import { ClientComponent } from "engine/client/component/ClientComponent";
 import { ClientComponentChild } from "engine/client/component/ClientComponentChild";
-import { ClientInstanceComponent } from "engine/client/component/ClientInstanceComponent";
 import { ButtonComponent, ButtonControl } from "engine/client/gui/Button";
 import { Control, Control2 } from "engine/client/gui/Control";
 import { InputController } from "engine/client/InputController";
 import { Component } from "engine/shared/component/Component";
 import { ComponentChild } from "engine/shared/component/ComponentChild";
+import { InstanceComponent } from "engine/shared/component/InstanceComponent";
 import { ObjectOverlayStorage } from "engine/shared/component/ObjectOverlayStorage";
 import { Transforms } from "engine/shared/component/Transforms";
 import { TransformService } from "engine/shared/component/TransformService";
@@ -300,7 +299,7 @@ namespace Scene {
 		readonly Touch: TouchButtonsDefinition;
 	};
 	@injectable
-	export class BuildToolScene extends ClientInstanceComponent<BuildToolSceneDefinition> {
+	export class BuildToolScene extends InstanceComponent<BuildToolSceneDefinition> {
 		readonly tool;
 		readonly blockSelector;
 		private readonly materialColorSelector;
@@ -430,25 +429,20 @@ namespace Scene {
 				});
 			};
 			initAnimation();
-		}
 
-		protected prepareTouch(): void {
-			// Touchscreen controls
-			this.eventHandler.subscribe(this.instance.Touch.PlaceButton.MouseButton1Click, () =>
-				this.tool.placeBlock(),
-			);
-			this.eventHandler.subscribe(this.instance.Touch.MultiPlaceButton.MouseButton1Click, () =>
-				this.tool.multiPlaceBlock(),
-			);
-			this.eventHandler.subscribe(this.instance.Touch.RotateRButton.MouseButton1Click, () =>
-				this.tool.rotateBlock("x", true),
-			);
-			this.eventHandler.subscribe(this.instance.Touch.RotateTButton.MouseButton1Click, () =>
-				this.tool.rotateBlock("y", true),
-			);
-			this.eventHandler.subscribe(this.instance.Touch.RotateYButton.MouseButton1Click, () =>
-				this.tool.rotateBlock("z", true),
-			);
+			this.event.onPrepareTouch((eh) => {
+				eh.subscribe(this.instance.Touch.PlaceButton.MouseButton1Click, () => this.tool.placeBlock());
+				eh.subscribe(this.instance.Touch.MultiPlaceButton.MouseButton1Click, () => this.tool.multiPlaceBlock());
+				eh.subscribe(this.instance.Touch.RotateRButton.MouseButton1Click, () =>
+					this.tool.rotateBlock("x", true),
+				);
+				eh.subscribe(this.instance.Touch.RotateTButton.MouseButton1Click, () =>
+					this.tool.rotateBlock("y", true),
+				);
+				eh.subscribe(this.instance.Touch.RotateYButton.MouseButton1Click, () =>
+					this.tool.rotateBlock("z", true),
+				);
+			});
 		}
 	}
 }
@@ -458,7 +452,7 @@ interface IController extends Component {
 	place(): Promise<unknown>;
 }
 namespace SinglePlaceController {
-	abstract class Controller extends ClientComponent implements IController {
+	abstract class Controller extends Component implements IController {
 		protected readonly state: BuildTool;
 
 		private mainGhost?: BlockModel;
@@ -485,7 +479,7 @@ namespace SinglePlaceController {
 
 			this.blockMirrorer = this.parent(di.resolveForeignClass(BlockMirrorer));
 
-			this.onPrepare(() => this.updateBlockPosition());
+			this.event.onPrepare(() => this.updateBlockPosition());
 			this.event.subscribeObservable(this.mirrorMode, () => this.updateBlockPosition());
 			this.event.subscribe(Signals.CAMERA.MOVED, () => this.updateBlockPosition());
 			this.event.subscribeObservable(this.selectedBlock, () => this.destroyGhosts());
@@ -744,7 +738,7 @@ namespace SinglePlaceController {
 }
 
 namespace MultiPlaceController {
-	export abstract class Base extends ClientComponent implements IController {
+	export abstract class Base extends Component implements IController {
 		private readonly possibleFillRotationAxis = [Vector3.xAxis, Vector3.yAxis, Vector3.zAxis] as const;
 		private readonly blocksFillLimit = 16;
 		private readonly drawnGhostsMap = new Map<Vector3, Model>();
@@ -1035,7 +1029,7 @@ namespace MultiPlaceController {
 		}
 	}
 
-	abstract class Starter extends ClientComponent {
+	abstract class Starter extends Component {
 		constructor(state: BuildTool, parent: ComponentChild<IController>) {
 			super();
 		}
