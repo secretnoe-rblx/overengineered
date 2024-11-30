@@ -51,7 +51,7 @@ const definition = {
 			},
 		},
 		colorMixing: {
-			displayName: "Color Mixing Priority",
+			displayName: "Color Priority",
 			types: {
 				enum: inferEnumLogicType({
 					config: "paint",
@@ -64,6 +64,7 @@ const definition = {
 					},
 				}),
 			},
+			connectorHidden: true,
 		},
 	},
 	output: {},
