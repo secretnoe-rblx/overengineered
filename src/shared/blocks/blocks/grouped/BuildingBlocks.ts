@@ -36,6 +36,10 @@ const blocks = {
 		displayName: "Half Cone",
 		description: "As half as much geometry jokes in this one. Still no ice cream tho...",
 	},
+	cutcone: {
+		displayName: "Cut Cone",
+		description: "Filled with weird geome",
+	},
 	halfblock: {
 		displayName: "Half Block",
 		description: "Like a block, but with a small caveat...",

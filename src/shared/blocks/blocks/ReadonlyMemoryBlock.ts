@@ -14,7 +14,6 @@ const definition = {
 					config: false,
 				},
 			},
-			configHidden: true,
 		},
 		address: {
 			displayName: "Address",

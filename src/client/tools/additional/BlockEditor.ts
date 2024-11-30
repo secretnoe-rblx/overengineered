@@ -1,6 +1,5 @@
 import { RunService, UserInputService, Workspace } from "@rbxts/services";
 import { Tooltip } from "client/gui/controls/Tooltip";
-import { DebugLog } from "client/gui/DebugLog";
 import { Interface } from "client/gui/Interface";
 import { TooltipsHolder } from "client/gui/static/TooltipsControl";
 import { Keybinds } from "client/Keybinds";
@@ -515,9 +514,7 @@ class ScaleComponent extends Component implements EditComponent {
 				? makeUnitWithAxis1(bb.originalSize, globalNormal)
 				: globalNormal.mul(negative ? -1 : 1);
 			let g = gn.mul(distance * distanceMul);
-			DebugLog.category("gb", { g });
 			g = grid.get().constrain(globalNormal, handles.GetPivot(), g);
-			DebugLog.category("ga", { g });
 
 			handles.Size = bb.originalSize.add(g);
 			updateFloatingText();
@@ -612,7 +609,6 @@ class ScaleComponent extends Component implements EditComponent {
 
 			const is90DegreeMultiple = (value: number): boolean => {
 				const degrees = math.deg(math.acos(math.clamp(value, 0, 1)));
-				print("q", value, degrees);
 				return math.abs(degrees % 90) < 0.1 || math.abs((degrees % 90) - 90) < 0.1;
 			};
 			return is90DegreeMultiple(m00) && is90DegreeMultiple(m11) && is90DegreeMultiple(m22);

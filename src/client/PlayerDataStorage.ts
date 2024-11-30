@@ -46,7 +46,9 @@ export namespace PlayerDataInitializer {
 			data: d.data ?? {},
 		};
 
-		$log("Configuration loaded: " + HttpService.JSONEncode(data.settings));
+		$log(
+			`Configuration loaded (v${data.settings["version" as never] ?? "?"}): ${HttpService.JSONEncode(data.settings)}`,
+		);
 		return data;
 	}
 }

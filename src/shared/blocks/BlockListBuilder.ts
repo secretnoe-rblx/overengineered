@@ -71,13 +71,15 @@ export namespace BlockListBuilder {
 		}
 
 		const blocks = asObject(
-			builders.mapToMap((b) =>
-				$tuple(b.id, {
-					...b,
-					id: b.id,
-					...remoteBlocks[b.id],
-				} satisfies Block),
-			),
+			builders
+				.filter((b) => b.id in remoteBlocks)
+				.mapToMap((b) =>
+					$tuple(b.id, {
+						...b,
+						id: b.id,
+						...remoteBlocks[b.id],
+					} satisfies Block),
+				),
 		);
 
 		if (RunService.IsStudio() && RunService.IsServer()) {

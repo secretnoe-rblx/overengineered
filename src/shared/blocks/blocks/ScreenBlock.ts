@@ -48,7 +48,7 @@ class Logic extends InstanceBlockLogic<typeof definition, ScreenBlock> {
 
 		const dataToString = (data: unknown): string => {
 			if (typeIs(data, "Vector3")) {
-				return `${dataToString(data.X)}\n${dataToString(data.Y)}\n${dataToString(data.Z)}`;
+				return `${dataToString(data.X)}x\n${dataToString(data.Y)}y\n${dataToString(data.Z)}z`;
 			}
 			if (typeIs(data, "number")) {
 				const isHighPresicion = data % 0.001 !== 0;
