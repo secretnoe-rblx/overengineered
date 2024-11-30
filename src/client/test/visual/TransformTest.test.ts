@@ -1,4 +1,3 @@
-import { ButtonComponent } from "engine/client/gui/Button";
 import { Control, Control2 } from "engine/client/gui/Control";
 import { Transforms } from "engine/shared/component/Transforms";
 import { Element } from "engine/shared/Element";
@@ -30,9 +29,9 @@ namespace TransformTests {
 		{
 			const tweenable = newbtn("instant transparency", 0);
 			const component = list.add(new Control2(tweenable));
-			const btn = component.add(new ButtonComponent(component.instance));
+			const btn = component.add(new Control2(component.instance));
 			component.enable();
-			btn.activated.Connect(() =>
+			btn.addButtonAction(() =>
 				transform(component, (t, i) =>
 					t.func(() => (tweenable.Transparency = 0)).transform(i, "Transparency", 0.9),
 				),
@@ -42,9 +41,9 @@ namespace TransformTests {
 		{
 			const tweenable = newbtn("transparency over 1sec", 1);
 			const component = list.add(new Control2(tweenable));
-			const btn = component.add(new ButtonComponent(component.instance));
+			const btn = component.add(new Control2(component.instance));
 			component.enable();
-			btn.activated.Connect(() =>
+			btn.addButtonAction(() =>
 				transform(component, (t, i) =>
 					t //
 						.func(() => {
@@ -62,9 +61,9 @@ namespace TransformTests {
 		{
 			const tweenable = newbtn("transparency over 1sec after 1sec", 2);
 			const component = list.add(new Control2(tweenable));
-			const btn = component.add(new ButtonComponent(component.instance));
+			const btn = component.add(new Control2(component.instance));
 			component.enable();
-			btn.activated.Connect(() =>
+			btn.addButtonAction(() =>
 				transform(component, (t, i) =>
 					t.func(() => {
 						const tr = i.Transparency;
@@ -87,10 +86,10 @@ namespace TransformTests {
 			tweenable.AnchorPoint = new Vector2(0.5, 0.5);
 
 			const component = list.add(new Control2(tweenable));
-			const btn = component.add(new ButtonComponent(component.instance));
+			const btn = component.add(new Control2(component.instance));
 			component.enable();
 
-			btn.activated.Connect(() => {
+			btn.addButtonAction(() => {
 				const anim = 1 as number;
 				if (anim === 0) {
 					transform(component, (transform, i) =>
@@ -160,17 +159,17 @@ namespace TransformTests {
 		{
 			const tweenable = newbtn("flash color", 4);
 			const component = list.add(new Control2(tweenable));
-			const btn = component.add(new ButtonComponent(component.instance));
+			const btn = component.add(new Control2(component.instance));
 			component.enable();
-			btn.activated.Connect(() => transform(component, (t, i) => t.flashColor(i, Colors.red)));
+			btn.addButtonAction(() => transform(component, (t, i) => t.flashColor(i, Colors.red)));
 		}
 
 		{
 			const tweenable = newbtn("flash position", 5);
 			const component = list.add(new Control2(tweenable));
-			const btn = component.add(new ButtonComponent(component.instance));
+			const btn = component.add(new Control2(component.instance));
 			component.enable();
-			btn.activated.Connect(() =>
+			btn.addButtonAction(() =>
 				transform(component, (t, i) => t.flash(i, new UDim2(0, 200, 0, 200), "Position")),
 			);
 		}
@@ -180,13 +179,13 @@ namespace TransformTests {
 			const bnotvisible = newbtn("Not visible", 7 + 1);
 			const binteractable = newbtn("Interactable", 8 + 1);
 			const bnotinteractable = newbtn("Not interactable", 9 + 1);
-			// const visual = list.add(new ButtonComponent(newbtn("Button", 10 + 1)));
+			// const visual = list.add(new Control2(newbtn("Button", 10 + 1)));
 			const visual = list.add(new Control2(newbtn("Button", 10 + 1)));
 
-			list.add(new ButtonComponent(bvisible, () => visual.setVisibilityAndState(true)));
-			list.add(new ButtonComponent(bnotvisible, () => visual.setVisibilityAndState(false)));
-			list.add(new ButtonComponent(binteractable, () => visual.setButtonInteractable(true)));
-			list.add(new ButtonComponent(bnotinteractable, () => visual.setButtonInteractable(false)));
+			list.add(new Control2(bvisible).withButtonAction(() => visual.setVisibilityAndState(true)));
+			list.add(new Control2(bnotvisible).withButtonAction(() => visual.setVisibilityAndState(false)));
+			list.add(new Control2(binteractable).withButtonAction(() => visual.setButtonInteractable(true)));
+			list.add(new Control2(bnotinteractable).withButtonAction(() => visual.setButtonInteractable(false)));
 		}
 
 		return list;

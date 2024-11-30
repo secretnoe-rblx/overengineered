@@ -1,6 +1,5 @@
 import { Players, RunService, UserInputService } from "@rbxts/services";
 import { Interface } from "client/gui/Interface";
-import { ButtonComponent } from "engine/client/gui/Button";
 import { Control, Control2 } from "engine/client/gui/Control";
 import { InputController } from "engine/client/InputController";
 import { Component } from "engine/shared/component/Component";
@@ -58,7 +57,7 @@ class TreeControl extends Control<TreeControlDefinition> {
 		this.main.instance.BackgroundColor3 = Colors.accent;
 
 		this.main.parent(
-			new ButtonComponent(this.main.instance, () => {
+			new Control2(this.main.instance).withButtonAction(() => {
 				if (this.childContainer.isInstanceVisible()) {
 					this.main.instance.BackgroundColor3 = Colors.accentDark;
 					this.childContainer.disableHide();

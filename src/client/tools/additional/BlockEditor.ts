@@ -8,7 +8,7 @@ import { FloatingText } from "client/tools/additional/FloatingText";
 import { MoveGrid, ScaleGrid } from "client/tools/additional/Grid";
 import { RotateGrid } from "client/tools/additional/Grid";
 import { ToolBase } from "client/tools/ToolBase";
-import { ButtonControl, ButtonTextComponent2 } from "engine/client/gui/Button";
+import { ButtonControl } from "engine/client/gui/Button";
 import { Control, Control2 } from "engine/client/gui/Control";
 import { InputController } from "engine/client/InputController";
 import { Component } from "engine/shared/component/Component";
@@ -707,7 +707,7 @@ class BlockEditorTopControl extends Control<BlockEditorTopControlDefinition> {
 			btn.withButtonAction(activated);
 		}
 
-		btn.getComponent(ButtonTextComponent2).text.set(text);
+		btn.setButtonText(text);
 		btn.instance.WarningImage.Visible = false;
 
 		return btn;

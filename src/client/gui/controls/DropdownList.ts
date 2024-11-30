@@ -1,4 +1,3 @@
-import { ButtonTextComponent2 } from "engine/client/gui/Button";
 import { Control, Control2 } from "engine/client/gui/Control";
 import { ComponentChildren } from "engine/shared/component/ComponentChildren";
 import { Transforms } from "engine/shared/component/Transforms";
@@ -83,7 +82,7 @@ export class DropdownList<TValue extends string = string> extends Control<Dropdo
 			this.names.set(name, text);
 		}
 
-		btn.getComponent(ButtonTextComponent2).text.set(text ?? name);
+		btn.setButtonText(text ?? name);
 		btn.instance.Interactable = false;
 		this.contents.add(btn);
 
