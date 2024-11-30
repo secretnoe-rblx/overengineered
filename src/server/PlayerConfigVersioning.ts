@@ -186,8 +186,14 @@ const current = versions[versions.size() - 1] as typeof versions extends readonl
 
 export namespace PlayerConfigUpdater {
 	export function update(config: object | { readonly version: number }) {
-		const version = "version" in config ? config.version : versions[versions.size() - 1].version;
+		if (!("version" in config)) {
+			config = {
+				...config,
+				version: v10.version,
+			};
+		}
 
+		const version = "version" in config ? config.version : v10.version;
 		for (let i = version + 1; i <= current.version; i++) {
 			const newver = versions.find((v) => v.version === i);
 			if (!newver || !("update" in newver)) continue;
