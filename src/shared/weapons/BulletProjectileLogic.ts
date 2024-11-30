@@ -23,7 +23,7 @@ export class BulletProjectile extends WeaponProjectile {
 			new Vector3(0, startedWithSize.Y / 2, 0),
 		);
 
-		super.onHit(part, point);
+		super.onHit(part, point, true);
 	}
 
 	onTick(dt: number, percentage: number, reversePercentage: number): void {

@@ -47,6 +47,19 @@ export class WeaponProjectile extends InstanceComponent<BasePart> {
 		readonly lifetime?: number; //<--- seconds
 	}>("projectile_spawn", "RemoteEvent");
 
+	static readonly sync_hit = new AutoC2SRemoteEvent<{
+		readonly startPosition: Vector3;
+		readonly projectileType: ProjectileType;
+		readonly projectilePart: BasePart;
+		readonly baseVelocity: Vector3;
+		readonly baseDamage: number;
+		readonly lifetime?: number; //<--- seconds
+	}>("projectile_sync_hit", "RemoteEvent");
+
+	static readonly sync_position = new AutoC2SRemoteEvent<{
+		readonly projectile: WeaponProjectile;
+	}>("projectile_sync_position", "RemoteEvent");
+
 	rawModifiers: projectileModifier[] = [];
 	totalEffect: projectileModifier = {};
 	originalLifetime: number | undefined;
@@ -54,6 +67,7 @@ export class WeaponProjectile extends InstanceComponent<BasePart> {
 	currentLifetime: number = 0;
 	modifiedVelocity: Vector3;
 	static readonly damagedParts: Map<BasePart, number> = new Map();
+	static readonly unweldedParts: Map<BasePart, number> = new Map();
 	readonly projectilePart: BasePart;
 	readonly originalProjectileModel;
 	static readonly PLASMA_PROJECTILE: baseWeaponProjectile = PLASMA_BALL;
@@ -102,6 +116,9 @@ export class WeaponProjectile extends InstanceComponent<BasePart> {
 		this.enable();
 	}
 
+	readonly checkIfCanBeUnwelded = (damage: number, partHealth: number) => damage > partHealth / 4;
+	readonly checkIfCanBeDestroyed = (damage: number, partHealth: number) => damage > partHealth;
+
 	applyDamageToPart(part: BasePart) {
 		this.recalculateEffects();
 
@@ -110,9 +127,8 @@ export class WeaponProjectile extends InstanceComponent<BasePart> {
 			(part.Mass * part.CurrentPhysicalProperties.Elasticity * part.CurrentPhysicalProperties.ElasticityWeight) /
 			magicNumber;
 
-		const checkIfCanBeUnwelded = (part: BasePart) =>
-			(WeaponProjectile.damagedParts.get(part) ?? 0) > partHealth / 4;
-		const checkIfCanBeDestroyed = (part: BasePart) => (WeaponProjectile.damagedParts.get(part) ?? 0) > partHealth;
+		WeaponProjectile.damagedParts.get(part) ?? 0;
+
 		const tryYourLuck = (num: number): boolean => math.random() < num;
 		function createExplosion(part: BasePart, diameter: number, force: number, enableEffect?: boolean) {
 			//affect blocks in radius/diameter somehow
@@ -132,21 +148,50 @@ export class WeaponProjectile extends InstanceComponent<BasePart> {
 			});
 
 		const properties = this.projectilePart.CurrentPhysicalProperties;
-		const impactDamage = (this.totalEffect?.impactDamage?.value ?? 0) + this.baseDamage;
-		const inflictedDamage = (WeaponProjectile.damagedParts.get(part) ?? 0) + impactDamage;
 		const explosiveDamage = this.totalEffect?.explosiveDamage?.value ?? 0;
+		const impactDamage = (this.totalEffect?.impactDamage?.value ?? 0) + this.baseDamage;
+		const totalDamage =
+			(WeaponProjectile.damagedParts.get(part) ?? 0) + (WeaponProjectile.unweldedParts.get(part) ?? 0);
+		const inflictedDamage = totalDamage + impactDamage + explosiveDamage;
 		const ignitionChance = //
 			//basically density == chance, because density can't be bigger than 100, right? right..?
 			// (1 - (density[0.01...100] / 100)) * fireChance
 			(1 - properties.Density / 100) * math.clamp(this.totalEffect?.heatDamage?.value ?? 0, 0, 1);
 
-		WeaponProjectile.damagedParts.set(part, inflictedDamage + explosiveDamage);
+		(!WeaponProjectile.unweldedParts.has(part)
+			? WeaponProjectile.damagedParts
+			: WeaponProjectile.unweldedParts
+		).set(part, inflictedDamage);
 		//print(WeaponProjectile.damagedParts.get(part), partHealth);
 
 		if (!WeaponProjectile.damagedParts.has(part))
 			part.Destroying.Connect(() => WeaponProjectile.damagedParts.delete(part)); //damage here
-		if (checkIfCanBeUnwelded(part)) RemoteEvents.ImpactBreak.send([part]); //unweld here
-		if (checkIfCanBeDestroyed(part)) part.Destroy(); //destroy here
+
+		// if can be unwelded then make it fall appart and go into a different category
+		if (this.checkIfCanBeUnwelded(WeaponProjectile.damagedParts.get(part) ?? 0, partHealth)) {
+			RemoteEvents.ImpactBreak.send([part]); //unweld here
+			if (WeaponProjectile.damagedParts.has(part)) {
+				WeaponProjectile.unweldedParts.set(part, WeaponProjectile.damagedParts.get(part)!);
+				WeaponProjectile.damagedParts.delete(part);
+			}
+		}
+
+		//print(WeaponProjectile.damagedParts.has(part), WeaponProjectile.unweldedParts.has(part));
+		print(
+			WeaponProjectile.damagedParts.get(part) ?? 0,
+			WeaponProjectile.unweldedParts.get(part) ?? 0,
+			partHealth / 4,
+			partHealth,
+		);
+
+		// if can be destroyed then destroy ig
+		if (
+			this.checkIfCanBeDestroyed(
+				(WeaponProjectile.damagedParts.get(part) ?? 0) + (WeaponProjectile.unweldedParts.get(part) ?? 0),
+				partHealth,
+			)
+		)
+			part.Destroy(); //destroy here
 		if ((this.totalEffect.explosiveDamage?.value ?? 0) > 0)
 			explode(this.projectilePart, this.totalEffect.explosiveDamage?.value ?? 0); //explode here
 		if (tryYourLuck(ignitionChance)) RemoteEvents.Burn.send([part]); //put on fire here

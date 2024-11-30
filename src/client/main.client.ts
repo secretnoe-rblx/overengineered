@@ -71,7 +71,7 @@ if (RunService.IsStudio() && Players.LocalPlayer.Name === "samlovebutter") {
 	//&& (false as boolean)
 	/*
 	while (true as boolean) {
-		BulletProjectile.spawn.send({
+		PlasmaProjectile.spawn.send({
 			startPosition: new Vector3(359, -16360, 330),
 			baseVelocity: new Vector3(
 				0 + (math.random() - 0.5) * 10,

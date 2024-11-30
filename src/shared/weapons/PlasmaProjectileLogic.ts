@@ -59,7 +59,7 @@ export class PlasmaProjectile extends WeaponProjectile {
 				task.wait();
 			}
 
-			super.onHit(part, point);
+			super.onHit(part, point, true);
 		});
 	}
 
