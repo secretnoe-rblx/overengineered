@@ -8,8 +8,8 @@ import { FloatingText } from "client/tools/additional/FloatingText";
 import { MoveGrid, ScaleGrid } from "client/tools/additional/Grid";
 import { RotateGrid } from "client/tools/additional/Grid";
 import { ToolBase } from "client/tools/ToolBase";
-import { ButtonControl, TextButtonControl } from "engine/client/gui/Button";
-import { Control } from "engine/client/gui/Control";
+import { ButtonControl, ButtonTextComponent2 } from "engine/client/gui/Button";
+import { Control, Control2 } from "engine/client/gui/Control";
 import { InputController } from "engine/client/InputController";
 import { Component } from "engine/shared/component/Component";
 import { ComponentChild } from "engine/shared/component/ComponentChild";
@@ -645,9 +645,10 @@ class BlockEditorBottomControl extends Control<BlockEditorControlBottomDefinitio
 	) {
 		super(gui);
 
-		const move = this.add(new ButtonControl(gui.MoveButton, () => set("move")));
-		const rotate = this.add(new ButtonControl(gui.RotateButton, () => set("rotate")));
-		const scale = this.add(new ButtonControl(gui.ScaleButton, () => set("scale")));
+		const move = this.parent(new Control2(gui.MoveButton)).withButtonAction(() => set("move"));
+		const rotate = this.parent(new Control2(gui.RotateButton)).withButtonAction(() => set("rotate"));
+		const scale = this.parent(new Control2(gui.ScaleButton)).withButtonAction(() => set("scale"));
+
 		this.add(new ButtonControl(gui.CompleteButton, commit));
 
 		const buttons = { move, rotate, scale };
@@ -699,9 +700,14 @@ class BlockEditorTopControl extends Control<BlockEditorTopControlDefinition> {
 		this.template = this.asTemplate(gui.Template, true);
 	}
 
-	create(text: string, activated?: () => void): ButtonControl<BlockEditorTopControlDefinition["Template"]> {
-		const btn = this.add(new TextButtonControl(this.template(), activated));
-		btn.text.set(text);
+	create(text: string, activated?: () => void): Control2<BlockEditorTopControlDefinition["Template"]> {
+		const btn = this.add(new Control2(this.template()));
+
+		if (activated) {
+			btn.withButtonAction(activated);
+		}
+
+		btn.getComponent(ButtonTextComponent2).text.set(text);
 		btn.instance.WarningImage.Visible = false;
 
 		return btn;

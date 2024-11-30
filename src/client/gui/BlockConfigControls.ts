@@ -9,8 +9,7 @@ import { Tooltip } from "client/gui/controls/Tooltip";
 import { Interface } from "client/gui/Interface";
 import { MultiKeyNumberControl } from "client/gui/MultiKeyNumberControl";
 import { MemoryEditorPopup } from "client/gui/popup/MemoryEditorPopup";
-import { ButtonControl } from "engine/client/gui/Button";
-import { Control } from "engine/client/gui/Control";
+import { Control, Control2 } from "engine/client/gui/Control";
 import { TextBoxControl } from "engine/client/gui/TextBoxControl";
 import { ComponentChild } from "engine/shared/component/ComponentChild";
 import { ComponentChildren } from "engine/shared/component/ComponentChildren";
@@ -256,12 +255,12 @@ namespace Controls {
 			) {
 				super(templates.Redirect());
 
-				const btn = this.parent(
-					new ButtonControl(this.gui.Control, () => args.travelTo(firstValue(config)!.blockUuid)),
+				const btn = this.parent(new Control2(this.gui.Control)).withButtonAction(() =>
+					args.travelTo(firstValue(config)!.blockUuid),
 				);
 
 				if (asMap(config).size() !== 1) {
-					btn.setInteractable(false);
+					btn.setButtonInteractable(false);
 				}
 			}
 		}
@@ -382,16 +381,14 @@ namespace Controls {
 						return true;
 					});
 
-				const control = this.parent(
-					new ButtonControl(this.control, () => {
-						MemoryEditorPopup.showPopup(definition.lengthLimit, [...(value() ?? [])], (v) =>
-							this.submitted.Fire((config = map(config, (_) => v))),
-						);
-					}),
-				);
+				const control = this.parent(new Control2(this.control)).withButtonAction(() => {
+					MemoryEditorPopup.showPopup(definition.lengthLimit, [...(value() ?? [])], (v) =>
+						this.submitted.Fire((config = map(config, (_) => v))),
+					);
+				});
 
 				if (!value()) {
-					control.setInteractable(false);
+					control.setButtonInteractable(false);
 				}
 			}
 		}
@@ -946,7 +943,7 @@ class ConfigValueWrapper extends Control<ConfigValueWrapperDefinition> {
 		this.content = this.parent(new ComponentChild<Control>()).withParentInstance(gui.Content);
 
 		this.controls = this.parent(new Control(gui.Content.TypeControllable));
-		this.controllable = this.controls.add(new CheckBoxControl(this.controls.instance.Controllable.Control));
+		this.controllable = this.controls.parent(new CheckBoxControl(this.controls.instance.Controllable.Control));
 	}
 }
 

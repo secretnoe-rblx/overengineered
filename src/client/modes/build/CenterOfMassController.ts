@@ -1,6 +1,7 @@
 import { ReplicatedStorage, Workspace } from "@rbxts/services";
 import { Interface } from "client/gui/Interface";
 import { ButtonControl } from "engine/client/gui/Button";
+import { Control2 } from "engine/client/gui/Control";
 import { Component } from "engine/shared/component/Component";
 import { ComponentInstance } from "engine/shared/component/ComponentInstance";
 import { ComponentStateContainer } from "engine/shared/component/ComponentStateContainer";
@@ -173,7 +174,8 @@ export class CenterOfMassController extends Component {
 
 		const button = this.parent(mainScreen.registerTopRightButton("CenterOfMass"));
 		visualizerState.set("button", false);
-		const comButton = button.parent(new ButtonControl(button.instance, () => visualizerState.switch("button")));
+		const comButton = button.parent(new Control2(button.instance));
+		comButton.parent(new ButtonControl(comButton.instance, () => visualizerState.switch("button")));
 
 		this.event.subscribeObservable(
 			visualizerState,

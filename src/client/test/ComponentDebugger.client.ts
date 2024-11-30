@@ -1,7 +1,7 @@
 import { Players, RunService, UserInputService } from "@rbxts/services";
 import { Interface } from "client/gui/Interface";
-import { ButtonControl } from "engine/client/gui/Button";
-import { Control } from "engine/client/gui/Control";
+import { ButtonComponent } from "engine/client/gui/Button";
+import { Control, Control2 } from "engine/client/gui/Control";
 import { InputController } from "engine/client/InputController";
 import { Component } from "engine/shared/component/Component";
 import { Element } from "engine/shared/Element";
@@ -47,24 +47,27 @@ class TreeControl extends Control<TreeControlDefinition> {
 		return new TreeControl(gui);
 	}
 
-	private readonly main: ButtonControl;
+	private readonly main: Control2<GuiButton>;
 	readonly childContainer: Control;
 
 	constructor(gui: TreeControlDefinition) {
 		super(gui);
-		this.main = this.add(new ButtonControl(gui.Main));
+		this.main = this.add(new Control2(gui.Main));
 		this.childContainer = this.add(new Control(this.gui.Children));
 
 		this.main.instance.BackgroundColor3 = Colors.accent;
-		this.event.subscribe(this.main.activated, () => {
-			if (this.childContainer.isInstanceVisible()) {
-				this.main.instance.BackgroundColor3 = Colors.accentDark;
-				this.childContainer.disableHide();
-			} else {
-				this.main.instance.BackgroundColor3 = Colors.accent;
-				this.childContainer.enableShow();
-			}
-		});
+
+		this.main.parent(
+			new ButtonComponent(this.main.instance, () => {
+				if (this.childContainer.isInstanceVisible()) {
+					this.main.instance.BackgroundColor3 = Colors.accentDark;
+					this.childContainer.disableHide();
+				} else {
+					this.main.instance.BackgroundColor3 = Colors.accent;
+					this.childContainer.enableShow();
+				}
+			}),
+		);
 	}
 }
 

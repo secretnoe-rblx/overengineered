@@ -1,8 +1,8 @@
 import { GuiService } from "@rbxts/services";
 import { Interface } from "client/gui/Interface";
 import { Popup } from "client/gui/Popup";
-import { ButtonControl, TextButtonControl } from "engine/client/gui/Button";
-import { Control } from "engine/client/gui/Control";
+import { TextButtonControl } from "engine/client/gui/Button";
+import { Control, Control2 } from "engine/client/gui/Control";
 import { TextBoxControl } from "engine/client/gui/TextBoxControl";
 import { Signal } from "engine/shared/event/Signal";
 import type { ButtonDefinition, TextButtonDefinition } from "engine/client/gui/Button";
@@ -51,19 +51,19 @@ export class SelectButtonPopup<const TAllowCustomString extends boolean> extends
 		cancelFunc: () => void,
 	) {
 		super(gui);
-		this.cancelButton = this.add(new ButtonControl(gui.Buttons.CancelButton));
-		this.closeButton = this.add(new ButtonControl(gui.Head.CloseButton));
+		this.cancelButton = this.add(new Control2(gui.Buttons.CancelButton));
+		this.closeButton = this.add(new Control2(gui.Head.CloseButton));
 
 		const customTextBox = this.add(new TextBoxControl(gui.Content.CustomTextBox));
-		const acceptButton = this.add(new ButtonControl(gui.Content.AcceptButton));
+		const acceptButton = this.add(new Control2(gui.Content.AcceptButton));
 		if (allowCustomString) {
-			acceptButton.activated.Connect(() => {
+			acceptButton.addButtonAction(() => {
 				this.hide();
 				confirmFunc(customTextBox.text.get() as KeyCode);
 			});
 		} else {
 			customTextBox.instance.Interactable = false;
-			acceptButton.setInteractable(false);
+			acceptButton.setButtonInteractable(false);
 		}
 
 		const list = new Control(gui.Content.ScrollingFrame);
@@ -115,11 +115,11 @@ export class SelectButtonPopup<const TAllowCustomString extends boolean> extends
 			this.hide();
 			confirmFunc(key);
 		});
-		this.event.subscribe(this.cancelButton.activated, () => {
+		this.cancelButton.addButtonAction(() => {
 			this.hide();
 			cancelFunc();
 		});
-		this.event.subscribe(this.closeButton.activated, () => {
+		this.closeButton.addButtonAction(() => {
 			this.hide();
 			cancelFunc();
 		});

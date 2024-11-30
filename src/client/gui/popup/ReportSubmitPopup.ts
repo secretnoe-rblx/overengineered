@@ -4,6 +4,7 @@ import { SoundController } from "client/controller/SoundController";
 import { Interface } from "client/gui/Interface";
 import { Popup } from "client/gui/Popup";
 import { ButtonControl } from "engine/client/gui/Button";
+import { Control2 } from "engine/client/gui/Control";
 import { JSON } from "engine/shared/fixes/Json";
 import { GameDefinitions } from "shared/data/GameDefinitions";
 import type { PlayerDataStorage } from "client/PlayerDataStorage";
@@ -95,7 +96,7 @@ class ReportSubmitPopup extends Popup<ReportSubmitPopupDefinition> {
 	constructor(gui: ReportSubmitPopupDefinition, data: unknown, text?: string, okFunc?: () => void) {
 		super(gui);
 
-		this.okButton = this.add(new ButtonControl(gui.Content.Buttons.OkButton));
+		this.okButton = this.add(new Control2(gui.Content.Buttons.OkButton));
 
 		SoundController.getSounds().Warning.Play();
 
@@ -132,7 +133,7 @@ class ReportSubmitPopup extends Popup<ReportSubmitPopupDefinition> {
 			}
 		}
 
-		this.event.subscribe(this.okButton.activated, () => {
+		this.okButton.addButtonAction(() => {
 			okFunc?.();
 			this.hide();
 		});

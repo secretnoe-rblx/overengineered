@@ -3,7 +3,7 @@ import { Interface } from "client/gui/Interface";
 import { Popup } from "client/gui/Popup";
 import { ConfirmPopup } from "client/gui/popup/ConfirmPopup";
 import { ButtonControl } from "engine/client/gui/Button";
-import { Control } from "engine/client/gui/Control";
+import { Control, Control2 } from "engine/client/gui/Control";
 import { TextBoxControl } from "engine/client/gui/TextBoxControl";
 import { ComponentChildren } from "engine/shared/component/ComponentChildren";
 import { Transforms } from "engine/shared/component/Transforms";
@@ -83,8 +83,8 @@ class SaveItem extends Control<SlotRecordDefinition> {
 			}
 		};
 
-		const saveButton = this.add(new ButtonControl(this.gui.Content.SaveButton, save));
-		const loadButton = this.add(new ButtonControl(this.gui.Content.LoadButton, load));
+		const saveButton = this.add(new Control2(this.gui.Content.SaveButton).withButtonAction(save));
+		const loadButton = this.add(new Control2(this.gui.Content.LoadButton).withButtonAction(load));
 		const nametb = this.add(new TextBoxControl(this.gui.Content.SlotName.SlotNameTextBox));
 		nametb.submitted.Connect(() => send({ name: nametb.text.get() }));
 
@@ -92,12 +92,12 @@ class SaveItem extends Control<SlotRecordDefinition> {
 			await playerData.sendPlayerSlot({ ...slotData, index: meta.index, save: false });
 		};
 
-		const buttons: ButtonControl[] = [];
+		const buttons: Control2[] = [];
 		for (const child of this.gui.Deep.ColorSelection.GetChildren()) {
 			if (!child.IsA("GuiButton")) continue;
 
 			const button = this.add(
-				new ButtonControl(child, () =>
+				new Control2(child).withButtonAction(() =>
 					send({ color: Serializer.Color3Serializer.serialize(child.BackgroundColor3) }),
 				),
 			);
@@ -127,7 +127,7 @@ class SaveItem extends Control<SlotRecordDefinition> {
 			}
 		};
 
-		saveButton.setInteractable(interactable);
+		saveButton.setButtonInteractable(interactable);
 		this.gui.Content.SlotName.ImageLabel.Image = interactable ? EDITABLE_IMAGE : NOT_EDITABLE_IMAGE;
 
 		setControlActive(this.gui.Content.SlotName.SlotNameTextBox);

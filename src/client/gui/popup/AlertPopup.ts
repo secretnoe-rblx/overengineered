@@ -2,7 +2,7 @@ import { GuiService } from "@rbxts/services";
 import { SoundController } from "client/controller/SoundController";
 import { Interface } from "client/gui/Interface";
 import { Popup } from "client/gui/Popup";
-import { ButtonControl } from "engine/client/gui/Button";
+import { Control2 } from "engine/client/gui/Control";
 import type { ButtonDefinition } from "engine/client/gui/Button";
 
 export type AlertPopupDefinition = GuiObject & {
@@ -34,24 +34,24 @@ export class AlertPopup extends Popup<AlertPopupDefinition> {
 	constructor(gui: AlertPopupDefinition, text: string, okFunc?: () => void) {
 		super(gui);
 
-		this.okButton = this.add(new ButtonControl(gui.Content.Buttons.OkButton));
+		this.okButton = this.add(new Control2(gui.Content.Buttons.OkButton));
 
 		SoundController.getSounds().Warning.Play();
 
 		this.gui.Content.Text.Text = text;
 
-		this.event.subscribe(this.okButton.activated, () => {
+		this.okButton.addButtonAction(() => {
 			okFunc?.();
 			this.hide();
 		});
 
-		const closeButton = this.add(new ButtonControl(this.gui.Heading.CloseButton, () => this.hide()));
+		const closeButton = this.add(new Control2(this.gui.Heading.CloseButton).withButtonAction(() => this.hide()));
 
-		this.okButton.setInteractable(false);
-		closeButton.setInteractable(false);
+		this.okButton.setButtonInteractable(false);
+		closeButton.setButtonInteractable(false);
 		task.delay(3, () => {
-			this.okButton.setInteractable(true);
-			closeButton.setInteractable(true);
+			this.okButton.setButtonInteractable(true);
+			closeButton.setButtonInteractable(true);
 		});
 
 		this.event.onPrepareGamepad(() => (GuiService.SelectedObject = this.okButton.instance));

@@ -2,7 +2,7 @@ import { GuiService } from "@rbxts/services";
 import { SoundController } from "client/controller/SoundController";
 import { Interface } from "client/gui/Interface";
 import { Popup } from "client/gui/Popup";
-import { ButtonControl } from "engine/client/gui/Button";
+import { Control2 } from "engine/client/gui/Control";
 import type { ButtonDefinition } from "engine/client/gui/Button";
 
 export type ConfirmPopupDefinition = GuiObject & {
@@ -38,23 +38,23 @@ export class ConfirmPopup extends Popup<ConfirmPopupDefinition> {
 	constructor(gui: ConfirmPopupDefinition, text: string, ps: string = "", okFunc?: () => void, noFunc?: () => void) {
 		super(gui);
 
-		this.confirmButton = this.add(new ButtonControl(gui.Buttons.AcceptButton));
-		this.cancelButton = this.add(new ButtonControl(gui.Buttons.CancelButton));
-		this.closeButton = this.add(new ButtonControl(gui.Head.CloseButton));
+		this.confirmButton = this.add(new Control2(gui.Buttons.AcceptButton));
+		this.cancelButton = this.add(new Control2(gui.Buttons.CancelButton));
+		this.closeButton = this.add(new Control2(gui.Head.CloseButton));
 
 		SoundController.getSounds().Warning.Play();
 
 		this.gui.Content.TextLabel1.Text = text;
 		this.gui.Content.TextLabel2.Text = ps;
-		this.event.subscribe(this.confirmButton.activated, () => {
+		this.confirmButton.addButtonAction(() => {
 			okFunc?.();
 			this.hide();
 		});
-		this.event.subscribe(this.cancelButton.activated, () => {
+		this.cancelButton.addButtonAction(() => {
 			noFunc?.();
 			this.hide();
 		});
-		this.event.subscribe(this.closeButton.activated, () => {
+		this.closeButton.addButtonAction(() => {
 			noFunc?.();
 			this.hide();
 		});

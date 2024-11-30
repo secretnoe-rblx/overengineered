@@ -7,7 +7,7 @@ import { BlockGhoster } from "client/tools/additional/BlockGhoster";
 import { MultiBlockHighlightedSelector } from "client/tools/highlighters/MultiBlockHighlightedSelector";
 import { SelectedBlocksHighlighter } from "client/tools/highlighters/SelectedBlocksHighlighter";
 import { ToolBase } from "client/tools/ToolBase";
-import { ButtonControl } from "engine/client/gui/Button";
+import { Control2 } from "engine/client/gui/Control";
 import { Component } from "engine/shared/component/Component";
 import { ComponentChild } from "engine/shared/component/ComponentChild";
 import { ComponentChildren } from "engine/shared/component/ComponentChildren";
@@ -46,8 +46,12 @@ namespace Scene {
 			super();
 
 			const animationProps = Transforms.commonProps.quadOut02;
-			const selectPlot = this.parent(new ButtonControl(gui.Top.SelectAllButton, () => tool.selectPlot()));
-			const deselectAll = this.parent(new ButtonControl(gui.Top.DeselectAllButton, () => tool.deselectAll()));
+			const selectPlot = this.parent(new Control2(gui.Top.SelectAllButton)).withButtonAction(() =>
+				tool.selectPlot(),
+			);
+			const deselectAll = this.parent(new Control2(gui.Top.DeselectAllButton)).withButtonAction(() =>
+				tool.deselectAll(),
+			);
 
 			const animate = () => {
 				const buttonsAreActive = this.isEnabled() && tool.selectedMode.get() === undefined;
@@ -107,9 +111,9 @@ namespace Scene {
 			this.buttons = this.parent(new ComponentChildren().withParentInstance(gui));
 
 			{
-				const cancel = this.buttons.add(
-					new ButtonControl(this.instance.CancelButton, () => tool.cancelCurrentMode()),
-				);
+				const cancel = this.buttons
+					.add(new Control2(this.instance.CancelButton))
+					.withButtonAction(() => tool.cancelCurrentMode());
 
 				const animateCancelButton = Transforms.boolStateMachine(
 					cancel.instance,
@@ -128,37 +132,43 @@ namespace Scene {
 			}
 
 			const move = this.buttons.add(
-				new ButtonControl(this.instance.Bottom.MoveButton, () => tool.toggleMode("Move")),
+				new Control2(this.instance.Bottom.MoveButton).withButtonAction(() => tool.toggleMode("Move")),
 			);
 			const rotate = this.buttons.add(
-				new ButtonControl(this.instance.Bottom.RotateButton, () => tool.toggleMode("Rotate")),
+				new Control2(this.instance.Bottom.RotateButton).withButtonAction(() => tool.toggleMode("Rotate")),
 			);
 			const copy = this.buttons.add(
-				new ButtonControl(this.instance.Bottom2.CopyButton, () => {
+				new Control2(this.instance.Bottom2.CopyButton).withButtonAction(() => {
 					tool.copySelectedBlocks();
-					paste.setInteractable(true);
+					paste.setButtonInteractable(true);
 				}),
 			);
 			const paste = this.buttons.add(
-				new ButtonControl(this.instance.Bottom.PasteButton, () => tool.toggleMode("Paste")),
+				new Control2(this.instance.Bottom.PasteButton).withButtonAction(() => tool.toggleMode("Paste")),
 			);
 			const paint = this.buttons.add(
-				new ButtonControl(this.instance.Bottom.PaintButton, () => tool.toggleMode("Paint")),
+				new Control2(this.instance.Bottom.PaintButton).withButtonAction(() => tool.toggleMode("Paint")),
 			);
 			const del = this.buttons.add(
-				new ButtonControl(this.instance.Bottom.DeleteButton, () => tool.deleteSelectedBlocks()),
+				new Control2(this.instance.Bottom.DeleteButton).withButtonAction(() => tool.deleteSelectedBlocks()),
 			);
 			const mirx = this.buttons.add(
-				new ButtonControl(this.instance.Bottom2.MirrorXButton, () => tool.mirrorSelectedBlocks("x")),
+				new Control2(this.instance.Bottom2.MirrorXButton).withButtonAction(() =>
+					tool.mirrorSelectedBlocks("x"),
+				),
 			);
 			const miry = this.buttons.add(
-				new ButtonControl(this.instance.Bottom2.MirrorYButton, () => tool.mirrorSelectedBlocks("y")),
+				new Control2(this.instance.Bottom2.MirrorYButton).withButtonAction(() =>
+					tool.mirrorSelectedBlocks("y"),
+				),
 			);
 			const mirz = this.buttons.add(
-				new ButtonControl(this.instance.Bottom2.MirrorZButton, () => tool.mirrorSelectedBlocks("z")),
+				new Control2(this.instance.Bottom2.MirrorZButton).withButtonAction(() =>
+					tool.mirrorSelectedBlocks("z"),
+				),
 			);
 			const scale = this.buttons.add(
-				new ButtonControl(this.instance.Bottom.ScaleButton, () => tool.toggleMode("Scale")),
+				new Control2(this.instance.Bottom.ScaleButton).withButtonAction(() => tool.toggleMode("Scale")),
 			);
 
 			const multiValueSetter = <T>(instance: T, func: (value: boolean) => void) => {
@@ -176,18 +186,18 @@ namespace Scene {
 
 			const buttons: Readonly<Record<EditToolButtons, mvs>> = {
 				// edit tool modes
-				Move: multiValueSetter(move, (v) => move.setInteractable(v)),
-				Rotate: multiValueSetter(rotate, (v) => rotate.setInteractable(v)),
-				Paste: multiValueSetter(paste, (v) => paste.setInteractable(v)),
-				Paint: multiValueSetter(paint, (v) => paint.setInteractable(v)),
-				Scale: multiValueSetter(scale, (v) => scale.setInteractable(v)),
+				Move: multiValueSetter(move, (v) => move.setButtonInteractable(v)),
+				Rotate: multiValueSetter(rotate, (v) => rotate.setButtonInteractable(v)),
+				Paste: multiValueSetter(paste, (v) => paste.setButtonInteractable(v)),
+				Paint: multiValueSetter(paint, (v) => paint.setButtonInteractable(v)),
+				Scale: multiValueSetter(scale, (v) => scale.setButtonInteractable(v)),
 
 				// other buttons
-				Copy: multiValueSetter(copy, (v) => copy.setInteractable(v)),
-				Delete: multiValueSetter(del, (v) => del.setInteractable(v)),
-				MirrorX: multiValueSetter(mirx, (v) => mirx.setInteractable(v)),
-				MirrorY: multiValueSetter(miry, (v) => miry.setInteractable(v)),
-				MirrorZ: multiValueSetter(mirz, (v) => mirz.setInteractable(v)),
+				Copy: multiValueSetter(copy, (v) => copy.setButtonInteractable(v)),
+				Delete: multiValueSetter(del, (v) => del.setButtonInteractable(v)),
+				MirrorX: multiValueSetter(mirx, (v) => mirx.setButtonInteractable(v)),
+				MirrorY: multiValueSetter(miry, (v) => miry.setButtonInteractable(v)),
+				MirrorZ: multiValueSetter(mirz, (v) => mirz.setButtonInteractable(v)),
 			};
 			this.event.subscribeImmediately(
 				tool.enabledModes.updated,

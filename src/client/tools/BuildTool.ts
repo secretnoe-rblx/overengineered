@@ -15,7 +15,7 @@ import { BlockMirrorer } from "client/tools/additional/BlockMirrorer";
 import { FloatingText } from "client/tools/additional/FloatingText";
 import { ToolBase } from "client/tools/ToolBase";
 import { ClientComponentChild } from "engine/client/component/ClientComponentChild";
-import { ButtonComponent, ButtonControl } from "engine/client/gui/Button";
+import { ButtonControl } from "engine/client/gui/Button";
 import { Control, Control2 } from "engine/client/gui/Control";
 import { InputController } from "engine/client/InputController";
 import { Component } from "engine/shared/component/Component";
@@ -319,10 +319,8 @@ namespace Scene {
 			const scaleEditorBtn = this.parent(
 				new Control2(
 					Interface.getGameUI<{ BuildingMode: { Action: { Scale: GuiButton } } }>().BuildingMode.Action.Scale,
-				).withParentedWithInstance(
-					(tr) => new ButtonComponent(tr, () => (scaleEditorGui.Visible = !scaleEditorGui.Visible)),
 				),
-			);
+			).withButtonAction(() => (scaleEditorGui.Visible = !scaleEditorGui.Visible));
 
 			this.onEnabledStateChange((enabled) => scaleEditorBtn.setVisibilityAndState(enabled), true);
 			this.onDisable(() => (scaleEditorGui.Visible = false));

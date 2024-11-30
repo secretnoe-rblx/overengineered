@@ -1,12 +1,12 @@
-import { TextButtonControl } from "engine/client/gui/Button";
-import { Control } from "engine/client/gui/Control";
+import { ButtonTextComponent2 } from "engine/client/gui/Button";
+import { Control, Control2 } from "engine/client/gui/Control";
 import { ComponentChildren } from "engine/shared/component/ComponentChildren";
 import { Transforms } from "engine/shared/component/Transforms";
 import { TransformService } from "engine/shared/component/TransformService";
 import { ObservableValue } from "engine/shared/event/ObservableValue";
 import { ArgsSignal } from "engine/shared/event/Signal";
 import type { DropdownDefinition } from "client/gui/controls/Dropdown";
-import type { ButtonControl, TextButtonDefinition } from "engine/client/gui/Button";
+import type { TextButtonDefinition } from "engine/client/gui/Button";
 
 export type DropdownListDefinition = DropdownDefinition & {
 	readonly Button: TextButtonDefinition;
@@ -30,13 +30,12 @@ export class DropdownList<TValue extends string = string> extends Control<Dropdo
 
 		this.itemTemplate = this.asTemplate(this.gui.Content.Template);
 
-		this.button = this.add(new TextButtonControl(this.gui.Button));
-		this.contents = this.parent(new ComponentChildren<TextButtonControl>().withParentInstance(this.gui.Content));
+		this.button = this.add(new Control2(this.gui.Button)).withButtonAction(() => this.toggle());
+		this.contents = this.parent(new ComponentChildren<Control2>().withParentInstance(this.gui.Content));
 
-		this.event.subscribe(this.button.activated, () => this.toggle());
 		this.event.subscribeObservable(
 			this.selectedItem,
-			(v) => this.button.text.set(v === undefined ? "" : (this.names.get(v) ?? v)),
+			(v) => this.button.setButtonText(v === undefined ? "" : (this.names.get(v) ?? v)),
 			true,
 		);
 	}
@@ -71,8 +70,10 @@ export class DropdownList<TValue extends string = string> extends Control<Dropdo
 		}
 	}
 
-	addItem(name: TValue, text?: string): ButtonControl {
-		const btn = new TextButtonControl(this.itemTemplate(), () => {
+	addItem(name: TValue, text?: string): Control2 {
+		const btn = new Control2(this.itemTemplate());
+
+		btn.addButtonAction(() => {
 			this._submitted.Fire(name);
 			this.selectedItem.set(name);
 			this.toggle();
@@ -82,7 +83,7 @@ export class DropdownList<TValue extends string = string> extends Control<Dropdo
 			this.names.set(name, text);
 		}
 
-		btn.text.set(text ?? name);
+		btn.getComponent(ButtonTextComponent2).text.set(text ?? name);
 		btn.instance.Interactable = false;
 		this.contents.add(btn);
 

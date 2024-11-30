@@ -2,7 +2,7 @@ import { GuiService } from "@rbxts/services";
 import { SoundController } from "client/controller/SoundController";
 import { Interface } from "client/gui/Interface";
 import { Popup } from "client/gui/Popup";
-import { ButtonControl } from "engine/client/gui/Button";
+import { Control2 } from "engine/client/gui/Control";
 import type { ButtonDefinition } from "engine/client/gui/Button";
 
 export type NotificationPopupDefinition = GuiObject & {
@@ -34,15 +34,15 @@ export class NotificationPopup extends Popup<NotificationPopupDefinition> {
 	constructor(gui: NotificationPopupDefinition, text: string, ps: string = "") {
 		super(gui);
 
-		this.okButton = this.add(new ButtonControl(gui.Buttons.OkButton));
-		this.closeButton = this.add(new ButtonControl(gui.Head.CloseButton));
+		this.okButton = this.add(new Control2(gui.Buttons.OkButton));
+		this.closeButton = this.add(new Control2(gui.Head.CloseButton));
 
 		SoundController.getSounds().Warning.Play();
 
 		this.gui.Content.TextLabel1.Text = text;
 		this.gui.Content.TextLabel2.Text = ps;
-		this.event.subscribe(this.okButton.activated, () => this.hide());
-		this.event.subscribe(this.closeButton.activated, () => this.hide());
+		this.okButton.addButtonAction(() => this.hide());
+		this.closeButton.addButtonAction(() => this.hide());
 
 		this.event.onPrepareGamepad(() => (GuiService.SelectedObject = this.okButton.instance));
 	}
