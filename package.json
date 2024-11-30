@@ -7,7 +7,7 @@
 		"build": "rbxtsc",
 		"watch": "rbxtsc -w"
 	},
-	"keywords": [],
+	"keywords": [ ],
 	"author": "anywaymachines",
 	"license": "ISC",
 	"workspaces": [
