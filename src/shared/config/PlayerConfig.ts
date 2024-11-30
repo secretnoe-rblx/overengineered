@@ -178,7 +178,7 @@ export const PlayerConfigDefinition = {
 			foliage: true as boolean,
 			loadDistance: 24 as number,
 			water: false as boolean,
-			snowOnly: false as boolean,
+			snowOnly: true as boolean,
 			triangleAddSandBelowSeaLevel: false as boolean,
 		},
 	},
