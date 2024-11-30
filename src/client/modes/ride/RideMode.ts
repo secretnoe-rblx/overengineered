@@ -39,12 +39,14 @@ export class RideMode extends PlayMode {
 		});
 
 		const alignPositionInstance = new Instance("AlignPosition");
+		alignPositionInstance.Name = "_AlignPosition";
 		alignPositionInstance.Mode = Enum.PositionAlignmentMode.OneAttachment;
 		alignPositionInstance.MaxForce = math.huge;
 		alignPositionInstance.MaxVelocity = math.huge;
 		alignPositionInstance.Responsiveness = 200;
 
 		const alignOrientationInstance = new Instance("AlignOrientation");
+		alignOrientationInstance.Name = "_AlignOrientation";
 		alignOrientationInstance.Mode = Enum.OrientationAlignmentMode.OneAttachment;
 		alignOrientationInstance.MaxAngularVelocity = math.huge;
 		alignOrientationInstance.MaxTorque = math.huge;
@@ -64,6 +66,15 @@ export class RideMode extends PlayMode {
 				alignOrientation.Parent = part;
 			}
 		});
+	}
+
+	static denormalizeRootparts(block: BlockModel): void {
+		for (const child of block.GetDescendants()) {
+			if (!child.IsA("BasePart")) continue;
+
+			child.FindFirstChild("_AlignPosition")?.Destroy();
+			child.FindFirstChild("_AlignOrientation")?.Destroy();
+		}
 	}
 
 	getName(): PlayModes {
