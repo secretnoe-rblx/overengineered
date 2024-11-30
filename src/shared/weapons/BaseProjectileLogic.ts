@@ -177,13 +177,14 @@ export class WeaponProjectile extends InstanceComponent<BasePart> {
 		}
 
 		//print(WeaponProjectile.damagedParts.has(part), WeaponProjectile.unweldedParts.has(part));
+		/*
 		print(
 			WeaponProjectile.damagedParts.get(part) ?? 0,
 			WeaponProjectile.unweldedParts.get(part) ?? 0,
 			partHealth / 4,
 			partHealth,
 		);
-
+*/
 		// if can be destroyed then destroy ig
 		if (
 			this.checkIfCanBeDestroyed(
