@@ -6,6 +6,7 @@ import { ComponentDisabler } from "engine/shared/component/ComponentDisabler";
 import { ObservableCollectionArr } from "engine/shared/event/ObservableCollection";
 import { ObservableValue } from "engine/shared/event/ObservableValue";
 import type { ToolBase } from "client/tools/ToolBase";
+import type { DebuggableComponent } from "engine/shared/component/Component";
 
 class ToolInputController extends Component {
 	constructor(toolController: ToolController) {
@@ -111,7 +112,7 @@ export class ToolController extends Component {
 		);
 	}
 
-	getDebugChildren(): readonly IDebuggableComponent[] {
+	getDebugChildren(): readonly DebuggableComponent[] {
 		return [...super.getDebugChildren(), ...this.tools.get()];
 	}
 }

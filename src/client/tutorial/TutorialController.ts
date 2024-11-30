@@ -918,7 +918,7 @@ export class TutorialController extends Component {
 			this.ui.onCancel.Connect(() => (canceled = true)),
 		);
 
-		this.eventHandler.register(Signal.connection(() => connection?.Disconnect()));
+		this.event.eventHandler.register(Signal.connection(() => connection?.Disconnect()));
 
 		const thr = task.spawn(() => {
 			reg.wait();

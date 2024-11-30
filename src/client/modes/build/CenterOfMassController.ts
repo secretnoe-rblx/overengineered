@@ -3,6 +3,7 @@ import { Interface } from "client/gui/Interface";
 import { ButtonControl } from "engine/client/gui/Button";
 import { Component } from "engine/shared/component/Component";
 import { ComponentInstance } from "engine/shared/component/ComponentInstance";
+import { ComponentStateContainer } from "engine/shared/component/ComponentStateContainer";
 import { Transforms } from "engine/shared/component/Transforms";
 import { Element } from "engine/shared/Element";
 import { BuildingManager } from "shared/building/BuildingManager";
@@ -165,13 +166,17 @@ export class CenterOfMassController extends Component {
 	) {
 		super();
 
-		const visualizer = this.parent(new CenterOfMassVisualizer(plot.instance.Blocks, actionController));
+		const visualizerState = ComponentStateContainer.create(
+			this,
+			new CenterOfMassVisualizer(plot.instance.Blocks, actionController),
+		);
 
 		const button = this.parent(mainScreen.registerTopRightButton("CenterOfMass"));
-		visualizer.disable("button");
-		const comButton = button.parent(new ButtonControl(button.instance, () => visualizer.switchEnabled("button")));
+		visualizerState.set("button", false);
+		const comButton = button.parent(new ButtonControl(button.instance, () => visualizerState.switch("button")));
 
-		visualizer.onEnabledStateChange(
+		this.event.subscribeObservable(
+			visualizerState,
 			(enabled) =>
 				Transforms.create()
 					.transform(comButton.instance, "Transparency", enabled ? 0 : 0.5, Transforms.commonProps.quadOut02)

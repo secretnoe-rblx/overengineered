@@ -319,7 +319,7 @@ namespace Scene {
 			const scaleEditorBtn = this.parent(
 				new Control2(
 					Interface.getGameUI<{ BuildingMode: { Action: { Scale: GuiButton } } }>().BuildingMode.Action.Scale,
-				).withParented(
+				).withParentedWithInstance(
 					(tr) => new ButtonComponent(tr, () => (scaleEditorGui.Visible = !scaleEditorGui.Visible)),
 				),
 			);
@@ -453,7 +453,7 @@ interface IController extends Component {
 }
 namespace SinglePlaceController {
 	abstract class Controller extends Component implements IController {
-		protected readonly state: BuildTool;
+		protected readonly tool: BuildTool;
 
 		private mainGhost?: BlockModel;
 		protected readonly blockRotation;
@@ -468,7 +468,7 @@ namespace SinglePlaceController {
 		protected constructor(state: BuildTool, di: DIContainer) {
 			super();
 
-			this.state = state;
+			this.tool = state;
 			this.selectedBlock = state.selectedBlock.asReadonly();
 			this.selectedColor = state.selectedColor.asReadonly();
 			this.selectedMaterial = state.selectedMaterial.asReadonly();
@@ -539,8 +539,8 @@ namespace SinglePlaceController {
 					selectedBlock,
 					this.blockRotation.get(),
 					this.blockScale.get(),
-					this.state.mode.gridEnabled.get(),
-					this.state.mode.moveGrid.get(),
+					this.tool.mode.gridEnabled.get(),
+					this.tool.mode.moveGrid.get(),
 				);
 			}
 			if (!mainPosition) return;
@@ -698,8 +698,8 @@ namespace SinglePlaceController {
 				selectedBlock,
 				this.blockRotation.get(),
 				this.blockScale.get(),
-				this.state.mode.gridEnabled.get(),
-				this.state.mode.moveGrid.get(),
+				this.tool.mode.gridEnabled.get(),
+				this.tool.mode.moveGrid.get(),
 				this.prevTarget,
 			);
 			super.updateBlockPosition(mainPosition);
@@ -961,7 +961,7 @@ namespace MultiPlaceController {
 				di,
 			);
 
-			this.event.subInput((ih) => {
+			this.event.subInput((ih, eh) => {
 				const buttonUnpress = async () => {
 					const result = await this.place();
 					if (result && !result.success) {
@@ -972,7 +972,7 @@ namespace MultiPlaceController {
 				};
 				ih.onMouse1Up(buttonUnpress, true);
 				ih.onKeyUp("ButtonR2", buttonUnpress);
-				this.eventHandler.subscribe(UserInputService.TouchEnded, buttonUnpress);
+				eh.subscribe(UserInputService.TouchEnded, buttonUnpress);
 			});
 
 			this.event.subscribe(mouse.Move, () => this.updateGhosts());

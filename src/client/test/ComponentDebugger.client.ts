@@ -7,7 +7,7 @@ import { Component } from "engine/shared/component/Component";
 import { Element } from "engine/shared/Element";
 import { Colors } from "shared/Colors";
 import { GameDefinitions } from "shared/data/GameDefinitions";
-import type { DebuggableComponent } from "engine/shared/component/Component2";
+import type { DebuggableComponent } from "engine/shared/component/Component";
 
 type TreeControlDefinition = GuiObject & {
 	readonly Main: GuiButton;

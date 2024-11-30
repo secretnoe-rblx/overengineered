@@ -512,8 +512,9 @@ export class RideModeScene extends Control<RideModeSceneDefinition> {
 		const logicDebug = component.parent(new Control2(this.gui.LogicDebug.Clone(), { showOnEnable: true }));
 		logicDebug.instance.Parent = this.gui.LogicDebug.Parent;
 
-		logicDebug.disable("button");
-		component.event.subscribe(this.logicButton.activated, () => logicDebug.switchEnabled("button"));
+		// TODO:::
+		// logicDebug.disable("button");
+		// component.event.subscribe(this.logicButton.activated, () => logicDebug.switchEnabled("button"));
 
 		const pauseOnStart = logicDebug.add(new CheckBoxControl(logicDebug.instance.Content.PauseOnStart.Control));
 		logicDebug.onEnable(() => pauseOnStart.value.set(this.mode.pauseOnStart.get()));
