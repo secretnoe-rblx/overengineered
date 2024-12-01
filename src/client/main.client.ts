@@ -60,7 +60,6 @@ AdminMessageController.initialize();
 ServerRestartController.initialize();
 // Atmosphere.initialize();
 
-LoadingController.hide();
 CustomRemotes.player.loaded.send();
 $log("Client loaded.");
 

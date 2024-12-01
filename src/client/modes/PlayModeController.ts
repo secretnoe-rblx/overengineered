@@ -6,7 +6,10 @@ import { RideMode } from "client/modes/ride/RideMode";
 import { LocalPlayer } from "engine/client/LocalPlayer";
 import { HostedService } from "engine/shared/di/HostedService";
 import { ObservableValue } from "engine/shared/event/ObservableValue";
+import { Objects } from "engine/shared/fixes/Objects";
 import { CustomRemotes } from "shared/Remotes";
+import { SlotsMeta } from "shared/SlotsMeta";
+import type { PlayerDataStorage } from "client/PlayerDataStorage";
 import type { GameHostBuilder } from "engine/shared/GameHostBuilder";
 
 @injectable
@@ -19,7 +22,7 @@ export class PlayModeController extends HostedService {
 		host.services.registerSingletonClass(RideMode);
 		host.services.registerService(PlayModeController);
 	}
-	constructor(@inject build: BuildingMode, @inject ride: RideMode) {
+	constructor(@inject build: BuildingMode, @inject ride: RideMode, @inject playerData: PlayerDataStorage) {
 		super();
 
 		GuiService.SetGameplayPausedNotificationEnabled(false);
@@ -62,7 +65,15 @@ export class PlayModeController extends HostedService {
 		this.setMode(this.playmode.get(), undefined);
 
 		this.onEnable(() => {
-			spawn(() => requestMode("build"));
+			spawn(() => {
+				requestMode("build");
+
+				if (playerData.config.get().autoLoad) {
+					task.delay(0.5, () =>
+						Objects.awaitThrow(playerData.loadPlayerSlot(SlotsMeta.quitSlotIndex, false)),
+					);
+				}
+			});
 			LocalPlayer.spawnEvent.Connect(() => spawn(() => requestMode("build")));
 		});
 	}

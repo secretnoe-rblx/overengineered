@@ -107,6 +107,11 @@ declare global {
 }
 
 export const PlayerConfigDefinition = {
+	autoLoad: {
+		displayName: "Automatically load last slot",
+		type: "bool",
+		config: true as boolean,
+	},
 	sprintSpeed: {
 		displayName: "Sprint speed",
 		type: "clampedNumber",
