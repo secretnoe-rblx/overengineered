@@ -1,7 +1,6 @@
 import { Workspace } from "@rbxts/services";
 import { Gui } from "client/gui/Gui";
 import { Control } from "engine/client/gui/Control";
-import { TransformService } from "engine/shared/component/TransformService";
 import { ObservableValue } from "engine/shared/event/ObservableValue";
 import type { TransformProps } from "engine/shared/component/Transform";
 
@@ -38,7 +37,7 @@ class LoadingImage extends Control {
 	runHideAnimation() {
 		this.disable();
 
-		TransformService.cancel(this.instance);
+		this.cancelTransforms();
 		this.transform((transform, instance) =>
 			transform.then().transform("Rotation", () => instance.Rotation - 270, {
 				duration: 0.3,
@@ -62,10 +61,6 @@ class LoadingPopup extends Control<LoadingPopupDefinition> {
 	}
 
 	show(): void {
-		if (this.isEnabled()) {
-			return;
-		}
-
 		super.show();
 		this.cancelTransforms();
 
@@ -84,6 +79,7 @@ class LoadingPopup extends Control<LoadingPopupDefinition> {
 			direction: "In",
 		};
 
+		this.disable();
 		this.loadingImage.runHideAnimation();
 		this.cancelTransforms();
 		this.transform((tr) =>

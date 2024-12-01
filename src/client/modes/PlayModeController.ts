@@ -69,8 +69,8 @@ export class PlayModeController extends HostedService {
 				requestMode("build");
 
 				if (playerData.config.get().autoLoad) {
-					task.delay(0.5, () =>
-						Objects.awaitThrow(playerData.loadPlayerSlot(SlotsMeta.quitSlotIndex, false)),
+					Objects.awaitThrow(
+						playerData.loadPlayerSlot(SlotsMeta.quitSlotIndex, false, "Loading the autosave"),
 					);
 				}
 			});
