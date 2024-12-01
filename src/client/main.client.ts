@@ -14,7 +14,9 @@ import { Colors } from "shared/Colors";
 import { gameInfo } from "shared/GameInfo";
 import { RemoteEvents } from "shared/RemoteEvents";
 import { CustomRemotes } from "shared/Remotes";
+import { SlotsMeta } from "shared/SlotsMeta";
 import { LaserProjectile } from "shared/weapons/LaserProjectileLogic";
+import type { PlayerDataStorage } from "client/PlayerDataStorage";
 
 LoadingController.show("Initializing");
 Gui.getGameUI<{ VERSION: TextLabel }>().VERSION.Text = `v${RunService.IsStudio() ? "studio" : game.PlaceVersion}`;
@@ -60,8 +62,16 @@ AdminMessageController.initialize();
 ServerRestartController.initialize();
 // Atmosphere.initialize();
 
+LoadingController.hide();
 CustomRemotes.player.loaded.send();
 $log("Client loaded.");
+
+{
+	const playerData = host.services.resolve<PlayerDataStorage>();
+	if (playerData.config.get().autoLoad) {
+		Objects.awaitThrow(playerData.loadPlayerSlot(SlotsMeta.quitSlotIndex, false, "Loading the autosave"));
+	}
+}
 
 //host.services.resolveForeignClass(CenterOfMassController).enable();
 

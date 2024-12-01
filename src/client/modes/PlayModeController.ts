@@ -6,9 +6,7 @@ import { RideMode } from "client/modes/ride/RideMode";
 import { LocalPlayer } from "engine/client/LocalPlayer";
 import { HostedService } from "engine/shared/di/HostedService";
 import { ObservableValue } from "engine/shared/event/ObservableValue";
-import { Objects } from "engine/shared/fixes/Objects";
 import { CustomRemotes } from "shared/Remotes";
-import { SlotsMeta } from "shared/SlotsMeta";
 import type { PlayerDataStorage } from "client/PlayerDataStorage";
 import type { GameHostBuilder } from "engine/shared/GameHostBuilder";
 
@@ -65,15 +63,7 @@ export class PlayModeController extends HostedService {
 		this.setMode(this.playmode.get(), undefined);
 
 		this.onEnable(() => {
-			spawn(() => {
-				requestMode("build");
-
-				if (playerData.config.get().autoLoad) {
-					Objects.awaitThrow(
-						playerData.loadPlayerSlot(SlotsMeta.quitSlotIndex, false, "Loading the autosave"),
-					);
-				}
-			});
+			spawn(() => requestMode("build"));
 			LocalPlayer.spawnEvent.Connect(() => spawn(() => requestMode("build")));
 		});
 	}

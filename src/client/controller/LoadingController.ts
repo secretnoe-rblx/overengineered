@@ -79,7 +79,7 @@ class LoadingPopup extends Control<LoadingPopupDefinition> {
 			direction: "In",
 		};
 
-		this.disable();
+		this.loadingImage.disable();
 		this.loadingImage.runHideAnimation();
 		this.cancelTransforms();
 		this.transform((tr) =>
