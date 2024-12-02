@@ -1,4 +1,6 @@
+import { InstanceComponent } from "engine/shared/component/InstanceComponent";
 import { ServerBlockLogic } from "server/blocks/ServerBlockLogic";
+import { ServerPlayers } from "server/ServerPlayers";
 import { SharedRagdoll } from "shared/SharedRagdoll";
 import type { PlayModeController } from "server/modes/PlayModeController";
 import type { BackMountBlockLogic } from "shared/blocks/blocks/BackMountBlock";
@@ -8,8 +10,20 @@ export class BackMountBlockServerLogic extends ServerBlockLogic<typeof BackMount
 	constructor(logic: typeof BackMountBlockLogic, @inject playModeController: PlayModeController) {
 		super(logic, playModeController);
 
+		logic.events.initServer.invoked.Connect((player, data) => {
+			const block = data.block;
+
+			if (!this.isValidBlock(block, player, false, false)) return;
+			if (!block.FindFirstChild("PlayerWeldConstraint")) return;
+
+			const c = new InstanceComponent(block);
+			c.event.subscribe(ServerPlayers.PlayerLoaded, (player) => logic.events.initClient.send(data, player));
+			c.enable();
+		});
+
 		logic.events.weldMountToPlayer.invoked.Connect((player, { block, connectToRootPart }) => {
-			if (!this.isValidBlock(block, player, false)) return;
+			if (!this.isValidBlock(block, player, false, false)) return;
+			if (!block.FindFirstChild("PlayerWeldConstraint")) return;
 
 			const humanoid = player?.Character?.FindFirstChild("Humanoid") as Humanoid | undefined;
 			if (!humanoid) return;
@@ -31,17 +45,23 @@ export class BackMountBlockServerLogic extends ServerBlockLogic<typeof BackMount
 			if (!torso) return;
 
 			SharedRagdoll.setPlayerRagdoll(humanoid, false);
-			block.PlayerWeldConstraint.C1 = new CFrame(0, 0, torso.Size.Z / 2 + 0.3);
-			block.PlayerWeldConstraint.Part1 = torso;
+			humanoid.Sit = false;
 			humanoid.RootPart?.PivotTo(block.GetPivot());
+			block.PlayerWeldConstraint.C0 = new CFrame(0, 0, -torso.Size.Z + 0.15);
+			block.PlayerWeldConstraint.Enabled = true;
+			block.PlayerWeldConstraint.Part1 = torso;
 		});
 
-		logic.events.unweldMountFromPlayer.invoked.Connect((player, { block }) => {
-			if (!this.isValidBlock(block, player)) return;
+		logic.events.unweldMountFromPlayer.invoked.Connect((player, { block, owner }) => {
+			if (!this.isValidBlock(block, player, false, false)) return;
+			if (!block.FindFirstChild("PlayerWeldConstraint")) return;
 
-			if (block.PlayerWeldConstraint.Part1 && player?.Character?.IsAncestorOf(block.PlayerWeldConstraint.Part1)) {
-				block.PlayerWeldConstraint.Part1 = undefined;
-			}
+			if (!block.PlayerWeldConstraint.Part1 || !player?.Character?.IsAncestorOf(block.PlayerWeldConstraint.Part1))
+				return;
+
+			block.PlayerWeldConstraint.Enabled = false;
+			block.PlayerWeldConstraint.Part1 = block.WaitForChild("mainPart") as BasePart;
+			block.PrimaryPart!.SetNetworkOwner(owner);
 		});
 	}
 }

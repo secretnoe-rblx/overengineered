@@ -84,6 +84,10 @@ export class ImpactController extends Component {
 			return;
 		}
 
+		if (part.HasTag("ImpactProof")) {
+			return;
+		}
+
 		let partPower: number;
 		if ((part.IsA("Part") && part.Shape === Enum.PartType.Cylinder) || part.HasTag("ImpactStrong")) {
 			const extentsSize = part.ExtentsSize;

@@ -91,6 +91,7 @@ export type TutorialControlDefinition = Frame & {
 		readonly Cancel: TextButton;
 		readonly Next: TextButton;
 		readonly Skip: TextButton;
+		readonly SkipAll: TextButton;
 	};
 	readonly TextLabel: TextLabel;
 };
@@ -103,6 +104,9 @@ export class TutorialControl extends Control<TutorialControlDefinition> {
 
 	private readonly _skipPressed = new ArgsSignal();
 	readonly skipPressed = this._skipPressed.asReadonly();
+
+	private readonly _skipAllPressed = new ArgsSignal();
+	readonly skipAllPressed = this._skipAllPressed.asReadonly();
 
 	constructor(title: string) {
 		super(Interface.getGameUI<{ Tutorial: TutorialControlDefinition }>().Tutorial.Clone());
@@ -124,6 +128,18 @@ export class TutorialControl extends Control<TutorialControlDefinition> {
 					"This way you will learn this lesson worse!",
 					() => {
 						this._skipPressed.Fire();
+					},
+					() => {},
+				);
+			}),
+		);
+		this.add(
+			new ButtonControl(this.gui.Header.SkipAll, () => {
+				ConfirmPopup.showPopup(
+					"Are you sure you want to skip the tutorial?",
+					"This way you will learn this lesson worse!",
+					() => {
+						this._skipAllPressed.Fire();
 					},
 					() => {},
 				);
@@ -903,9 +919,11 @@ export class TutorialController extends Component {
 		};
 	}
 
+	private skipAll = false;
+
 	/** Wait for the provided parts, starting all simultaneously. Supports skipping and cancelling. */
 	waitPart(...regs: readonly TutorialPartRegistration[]): void | "canceled" {
-		let skipped = false;
+		let skipped = this.skipAll;
 		let completed = false;
 		let canceled = false;
 
@@ -915,6 +933,7 @@ export class TutorialController extends Component {
 			reg.connection,
 			Signal.connection(() => (completed = true)),
 			this.ui.skipPressed.Connect(() => (skipped = true)),
+			this.ui.skipAllPressed.Connect(() => (skipped = this.skipAll = true)),
 			this.ui.onCancel.Connect(() => (canceled = true)),
 		);
 

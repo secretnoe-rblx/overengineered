@@ -255,11 +255,13 @@ export class ConfigTool extends ToolBase {
 			}
 
 			const newBlocks = new Set<BlockModel>();
+			const getIdentifier = (block: BlockModel) =>
+				blockList.blocks[BlockManager.manager.id.get(block)]?.logic?.definition;
+
 			for (const block of blocks) {
-				const id = BlockManager.manager.id.get(block);
+				const id = getIdentifier(block);
 				const differentId =
-					selected.find((s) => BlockManager.manager.id.get(s) !== id) ??
-					blocks.find((s) => BlockManager.manager.id.get(s) !== id);
+					selected.find((s) => getIdentifier(s) !== id) ?? blocks.find((s) => getIdentifier(s) !== id);
 
 				if (differentId === undefined) {
 					newBlocks.add(block);

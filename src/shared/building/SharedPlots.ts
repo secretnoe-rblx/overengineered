@@ -55,6 +55,16 @@ export class SharedPlots {
 
 		return undefined;
 	}
+	/** Returns the player owned plot, if exists */
+	static staticTryGetPlotByOwnerID(ownerID: number): PlotModel | undefined {
+		for (const plot of Workspace.Plots.GetChildren() as unknown as PlotModel[]) {
+			if ((plot.GetAttribute("ownerid") as number) === ownerID) {
+				return plot;
+			}
+		}
+
+		return undefined;
+	}
 
 	/** Returns the plot component by the plot model */
 	getPlotComponent(plot: PlotModel): SharedPlot {

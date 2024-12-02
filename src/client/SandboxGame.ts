@@ -130,6 +130,6 @@ export namespace SandboxGame {
 			});
 		}
 
-		LoadingController.show("Initializing something");
+		LoadingController.show("Initializing services");
 	}
 }

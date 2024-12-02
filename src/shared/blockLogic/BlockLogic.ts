@@ -523,7 +523,10 @@ export abstract class BlockLogic<TDef extends BlockLogicBothDefinitions> extends
 			result.push("!DISABLED!");
 		}
 
-		for (const [k, input] of pairs(this.input)) {
+		const forInput = (
+			k: keyof TDef["input"],
+			input: ReadonlyBlockLogicValues<TDef["input"]>[keyof TDef["input"]] & defined,
+		) => {
 			const value = input.get(ctx);
 
 			if (isCustomBlockLogicValueResult(value)) {
@@ -531,13 +534,36 @@ export abstract class BlockLogic<TDef extends BlockLogicBothDefinitions> extends
 			} else {
 				result.push(`[${tostring(k)}] ${value.value}`);
 			}
-		}
+		};
 
-		for (const [k, output] of pairs(this.output)) {
+		const forOutput = (
+			k: keyof TDef["output"],
+			output: OutputBlockLogicValues<TDef["output"]>[keyof TDef["output"]] & defined,
+		) => {
 			const value = output.tryJustGet();
 
 			if (value !== undefined) {
 				result.push(`[${tostring(k)}] ${value.value}`);
+			}
+		};
+
+		if (this.definition.inputOrder) {
+			for (const k of this.definition.inputOrder) {
+				forInput(k, this.input[k]);
+			}
+		} else {
+			for (const [k, input] of pairs(this.input)) {
+				forInput(k, input);
+			}
+		}
+
+		if (this.definition.outputOrder) {
+			for (const k of this.definition.outputOrder) {
+				forOutput(k, this.output[k]);
+			}
+		} else {
+			for (const [k, output] of pairs(this.output)) {
+				forOutput(k, output);
 			}
 		}
 
