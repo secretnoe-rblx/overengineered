@@ -153,19 +153,13 @@ namespace Scene {
 				new Control(this.instance.Bottom.DeleteButton).withButtonAction(() => tool.deleteSelectedBlocks()),
 			);
 			const mirx = this.buttons.add(
-				new Control(this.instance.Bottom2.MirrorXButton).withButtonAction(() =>
-					tool.mirrorSelectedBlocks("x"),
-				),
+				new Control(this.instance.Bottom2.MirrorXButton).withButtonAction(() => tool.mirrorSelectedBlocks("x")),
 			);
 			const miry = this.buttons.add(
-				new Control(this.instance.Bottom2.MirrorYButton).withButtonAction(() =>
-					tool.mirrorSelectedBlocks("y"),
-				),
+				new Control(this.instance.Bottom2.MirrorYButton).withButtonAction(() => tool.mirrorSelectedBlocks("y")),
 			);
 			const mirz = this.buttons.add(
-				new Control(this.instance.Bottom2.MirrorZButton).withButtonAction(() =>
-					tool.mirrorSelectedBlocks("z"),
-				),
+				new Control(this.instance.Bottom2.MirrorZButton).withButtonAction(() => tool.mirrorSelectedBlocks("z")),
 			);
 			const scale = this.buttons.add(
 				new Control(this.instance.Bottom.ScaleButton).withButtonAction(() => tool.toggleMode("Scale")),

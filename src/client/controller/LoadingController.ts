@@ -3,7 +3,6 @@ import { Interface } from "client/gui/Interface";
 import { Control } from "engine/client/gui/Control";
 import { InstanceComponent } from "engine/shared/component/InstanceComponent";
 import { Transforms } from "engine/shared/component/Transforms";
-import { TransformService } from "engine/shared/component/TransformService";
 import { ObservableValue } from "engine/shared/event/ObservableValue";
 
 class LoadingImage extends Control {
@@ -22,10 +21,9 @@ class LoadingImage extends Control {
 					})
 					.then()
 					.func(startanim)
-					.run(this.instance);
+					.run(this.instance, true);
 			};
 
-			TransformService.cancel(this.instance);
 			Transforms.create()
 				.then()
 				.transform(this.instance, "Rotation", () => this.instance.Rotation + 270, {
@@ -35,18 +33,17 @@ class LoadingImage extends Control {
 				})
 				.then()
 				.func(startanim)
-				.run(this.instance);
+				.run(this.instance, true);
 		});
 
 		this.onDisable(() => {
-			TransformService.cancel(this.instance);
 			Transforms.create()
 				.transform(this.instance, "Rotation", () => this.instance.Rotation - 270, {
 					duration: 0.3,
 					style: "Quad",
 					direction: "In",
 				})
-				.run(this.instance);
+				.run(this.instance, true);
 		});
 	}
 }
