@@ -38,16 +38,14 @@ export class SettingsPopup extends Popup<SettingsPopupDefinition> {
 	constructor(gui: SettingsPopupDefinition, @inject playerData: PlayerDataStorage, @inject di: DIContainer) {
 		super(gui);
 
-		this.config = this.add(
-			new MultiPlayerConfigControl<PlayerConfigDefinition>(this.gui.Content.ScrollingFrame, di),
-		);
+		this.config = this.parent(new MultiPlayerConfigControl<PlayerConfigDefinition>(gui.Content.ScrollingFrame, di));
 
 		this.event.subscribe(this.config.configUpdated, async (key, value) => {
 			await playerData.sendPlayerConfigValue(key, value as PlayerConfig[keyof PlayerConfig]);
 		});
 
-		this.add(new ButtonControl(this.gui.Buttons.CancelButton, () => this.hide()));
-		this.add(new ButtonControl(this.gui.Head.CloseButton, () => this.hide()));
+		this.parent(new ButtonControl(gui.Buttons.CancelButton, () => this.hide()));
+		this.parent(new ButtonControl(gui.Head.CloseButton, () => this.hide()));
 
 		this.event.subscribeObservable(
 			playerData.config,

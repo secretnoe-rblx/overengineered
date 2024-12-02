@@ -9,7 +9,7 @@ import { Tooltip } from "client/gui/controls/Tooltip";
 import { Interface } from "client/gui/Interface";
 import { MultiKeyNumberControl } from "client/gui/MultiKeyNumberControl";
 import { MemoryEditorPopup } from "client/gui/popup/MemoryEditorPopup";
-import { Control, Control2 } from "engine/client/gui/Control";
+import { Control } from "engine/client/gui/Control";
 import { TextBoxControl } from "engine/client/gui/TextBoxControl";
 import { ComponentChild } from "engine/shared/component/ComponentChild";
 import { ComponentChildren } from "engine/shared/component/ComponentChildren";
@@ -195,8 +195,8 @@ namespace Controls {
 			parentTo?: Control,
 		) => {
 			const wrapper = new ConfigValueWrapper(template.Clone());
-			wrapper.dropdown.disableHide();
-			wrapper.controls.disableHide();
+			wrapper.dropdown.hide_();
+			wrapper.controls.hide_();
 			wrapper.content.set(control);
 
 			wrapper.instance.Parent = parent.control;
@@ -255,7 +255,7 @@ namespace Controls {
 			) {
 				super(templates.Redirect());
 
-				const btn = this.parent(new Control2(this.gui.Control)).withButtonAction(() =>
+				const btn = this.parent(new Control(this.gui.Control)).withButtonAction(() =>
 					args.travelTo(firstValue(config)!.blockUuid),
 				);
 
@@ -381,7 +381,7 @@ namespace Controls {
 						return true;
 					});
 
-				const control = this.parent(new Control2(this.control)).withButtonAction(() => {
+				const control = this.parent(new Control(this.control)).withButtonAction(() => {
 					MemoryEditorPopup.showPopup(definition.lengthLimit, [...(value() ?? [])], (v) =>
 						this.submitted.Fire((config = map(config, (_) => v))),
 					);
@@ -1012,13 +1012,13 @@ class ConfigAutoValueWrapper extends Control<ConfigValueWrapperDefinition> {
 			// if any of the configs is a wire connection
 
 			selectedType.set("wire");
-			control.dropdown.disableHide();
+			control.dropdown.hide_();
 		} else if (asMap(definition.types).size() === 1) {
 			// if there is only one definition type
 
 			const key = firstKey(definition.types)!;
 			selectedType.set(key);
-			control.dropdown.disableHide();
+			control.dropdown.hide_();
 		} else {
 			// if there is multiple definition types
 
@@ -1059,7 +1059,7 @@ class ConfigAutoValueWrapper extends Control<ConfigValueWrapperDefinition> {
 
 			// initializing the top `Controllable` bar
 			const initControls = () => {
-				control.controls.disableHide();
+				control.controls.hide_();
 
 				const def = definition.types[stype];
 				if (!def) return;
@@ -1068,7 +1068,7 @@ class ConfigAutoValueWrapper extends Control<ConfigValueWrapperDefinition> {
 					return;
 				}
 
-				control.controls.enableShow();
+				control.controls.show_();
 
 				// controlConfig should never be null if `control` is present in the definition, BlockConfig handles that.
 				const controlConfigs = map(configs, (c) => c.controlConfig!);

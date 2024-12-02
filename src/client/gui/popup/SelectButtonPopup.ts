@@ -2,7 +2,7 @@ import { GuiService } from "@rbxts/services";
 import { Interface } from "client/gui/Interface";
 import { Popup } from "client/gui/Popup";
 import { TextButtonControl } from "engine/client/gui/Button";
-import { Control, Control2 } from "engine/client/gui/Control";
+import { Control } from "engine/client/gui/Control";
 import { TextBoxControl } from "engine/client/gui/TextBoxControl";
 import { Signal } from "engine/shared/event/Signal";
 import type { ButtonDefinition, TextButtonDefinition } from "engine/client/gui/Button";
@@ -51,11 +51,11 @@ export class SelectButtonPopup<const TAllowCustomString extends boolean> extends
 		cancelFunc: () => void,
 	) {
 		super(gui);
-		this.cancelButton = this.add(new Control2(gui.Buttons.CancelButton));
-		this.closeButton = this.add(new Control2(gui.Head.CloseButton));
+		this.cancelButton = this.parent(new Control(gui.Buttons.CancelButton));
+		this.closeButton = this.parent(new Control(gui.Head.CloseButton));
 
-		const customTextBox = this.add(new TextBoxControl(gui.Content.CustomTextBox));
-		const acceptButton = this.add(new Control2(gui.Content.AcceptButton));
+		const customTextBox = this.parent(new TextBoxControl(gui.Content.CustomTextBox));
+		const acceptButton = this.parent(new Control(gui.Content.AcceptButton));
 		if (allowCustomString) {
 			acceptButton.addButtonAction(() => {
 				this.hide();
@@ -67,9 +67,9 @@ export class SelectButtonPopup<const TAllowCustomString extends boolean> extends
 		}
 
 		const list = new Control(gui.Content.ScrollingFrame);
-		this.add(list);
+		this.parent(list);
 
-		const template = this.asTemplate(this.gui.Content.ScrollingFrame.ButtonTemplate);
+		const template = this.asTemplate(gui.Content.ScrollingFrame.ButtonTemplate);
 
 		const keys = Enum.KeyCode.GetEnumItems().filter((value) => {
 			// numbers

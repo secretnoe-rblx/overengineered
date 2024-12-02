@@ -70,9 +70,9 @@ export class NewSettingsPopup extends Popup<NewSettingsPopupDefinition> {
 	) {
 		super(gui);
 
-		this.sceneChildren = this.parent(new ComponentChildren().withParentInstance(this.gui));
+		this.sceneChildren = this.parent(new ComponentChildren().withParentInstance(gui));
 
-		this.add(new ButtonControl(this.gui.Heading.CloseButton, () => this.hide()));
+		this.parent(new ButtonControl(gui.Heading.CloseButton, () => this.hide()));
 		this.setScene("Main");
 	}
 
@@ -87,10 +87,10 @@ export class NewSettingsPopup extends Popup<NewSettingsPopupDefinition> {
 		if (scene === "Permissions") {
 			const blacklistedPlayers = this.plot.blacklistedPlayers.get() ?? [];
 			const blacklist = new PlayerSelectorColumnControl(
-				this.gui.Content.Permissions.Blacklist,
+				this.instance.Content.Permissions.Blacklist,
 				blacklistedPlayers,
 			);
-			const isolationMode = new ToggleControl(this.gui.Content.Permissions.IsolationMode.Toggle);
+			const isolationMode = new ToggleControl(this.instance.Content.Permissions.IsolationMode.Toggle);
 			isolationMode.value.set(this.plot.isolationMode.get() ?? false);
 
 			blacklist.submitted.Connect((players) => {
@@ -98,7 +98,7 @@ export class NewSettingsPopup extends Popup<NewSettingsPopupDefinition> {
 			});
 
 			isolationMode.value.subscribe((value) => {
-				blacklist.setEnabledAndVisible(!value);
+				blacklist.setVisibleAndEnabled(!value);
 				CustomRemotes.gui.settings.permissions.isolationMode.send(value);
 			}, true);
 
@@ -114,13 +114,13 @@ export class NewSettingsPopup extends Popup<NewSettingsPopupDefinition> {
 	}
 
 	setScene(scene: Scenes) {
-		this.gui.Heading.TitleLabel.Text = scene.upper();
+		this.instance.Heading.TitleLabel.Text = scene.upper();
 
-		for (const scene of this.gui.Content.GetChildren()) {
+		for (const scene of this.instance.Content.GetChildren()) {
 			(scene as GuiObject).Visible = false;
 		}
 
-		this.gui.Content[scene].Visible = true;
+		this.instance.Content[scene].Visible = true;
 
 		this.loadScene(scene);
 	}

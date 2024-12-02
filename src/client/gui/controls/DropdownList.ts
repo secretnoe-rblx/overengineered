@@ -1,4 +1,4 @@
-import { Control, Control2 } from "engine/client/gui/Control";
+import { Control } from "engine/client/gui/Control";
 import { ComponentChildren } from "engine/shared/component/ComponentChildren";
 import { Transforms } from "engine/shared/component/Transforms";
 import { TransformService } from "engine/shared/component/TransformService";
@@ -29,8 +29,8 @@ export class DropdownList<TValue extends string = string> extends Control<Dropdo
 
 		this.itemTemplate = this.asTemplate(this.gui.Content.Template);
 
-		this.button = this.add(new Control2(this.gui.Button)).withButtonAction(() => this.toggle());
-		this.contents = this.parent(new ComponentChildren<Control2>().withParentInstance(this.gui.Content));
+		this.button = this.add(new Control(this.gui.Button)).withButtonAction(() => this.toggle());
+		this.contents = this.parent(new ComponentChildren<Control>().withParentInstance(this.gui.Content));
 
 		this.event.subscribeObservable(
 			this.selectedItem,
@@ -69,8 +69,8 @@ export class DropdownList<TValue extends string = string> extends Control<Dropdo
 		}
 	}
 
-	addItem(name: TValue, text?: string): Control2 {
-		const btn = new Control2(this.itemTemplate());
+	addItem(name: TValue, text?: string): Control {
+		const btn = new Control(this.itemTemplate());
 
 		btn.addButtonAction(() => {
 			this._submitted.Fire(name);

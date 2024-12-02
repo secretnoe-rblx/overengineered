@@ -34,7 +34,7 @@ export class ControlsPopup extends Popup<ControlsPopupDefinition> {
 		super(gui);
 
 		this.template = this.asTemplate(gui.Content.Template, true);
-		this.add(new ButtonControl(gui.Heading.CloseButton, () => this.hide()));
+		this.parent(new ButtonControl(gui.Heading.CloseButton, () => this.hide()));
 
 		const children = this.parent(new ComponentKeyedChildren<string, Control>().withParentInstance(gui.Content));
 		this.event.subscribeMap(

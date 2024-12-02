@@ -8,7 +8,7 @@ import { MoveGrid, ScaleGrid } from "client/tools/additional/Grid";
 import { RotateGrid } from "client/tools/additional/Grid";
 import { ToolBase } from "client/tools/ToolBase";
 import { ButtonControl } from "engine/client/gui/Button";
-import { Control, Control2 } from "engine/client/gui/Control";
+import { Control } from "engine/client/gui/Control";
 import { InputController } from "engine/client/InputController";
 import { Component } from "engine/shared/component/Component";
 import { ComponentChild } from "engine/shared/component/ComponentChild";
@@ -641,9 +641,9 @@ class BlockEditorBottomControl extends Control<BlockEditorControlBottomDefinitio
 	) {
 		super(gui);
 
-		const move = this.parent(new Control2(gui.MoveButton)).withButtonAction(() => set("move"));
-		const rotate = this.parent(new Control2(gui.RotateButton)).withButtonAction(() => set("rotate"));
-		const scale = this.parent(new Control2(gui.ScaleButton)).withButtonAction(() => set("scale"));
+		const move = this.parent(new Control(gui.MoveButton)).withButtonAction(() => set("move"));
+		const rotate = this.parent(new Control(gui.RotateButton)).withButtonAction(() => set("rotate"));
+		const scale = this.parent(new Control(gui.ScaleButton)).withButtonAction(() => set("scale"));
 
 		this.add(new ButtonControl(gui.CompleteButton, commit));
 
@@ -696,8 +696,8 @@ class BlockEditorTopControl extends Control<BlockEditorTopControlDefinition> {
 		this.template = this.asTemplate(gui.Template, true);
 	}
 
-	create(text: string, activated?: () => void): Control2<BlockEditorTopControlDefinition["Template"]> {
-		const btn = this.add(new Control2(this.template()));
+	create(text: string, activated?: () => void): Control<BlockEditorTopControlDefinition["Template"]> {
+		const btn = this.add(new Control(this.template()));
 
 		if (activated) {
 			btn.withButtonAction(activated);

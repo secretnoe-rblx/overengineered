@@ -8,7 +8,7 @@ import { ProgressBarControl } from "client/gui/controls/ProgressBarControl";
 import { ConfirmPopup } from "client/gui/popup/ConfirmPopup";
 import { TouchModeButtonControl } from "client/gui/ridemode/TouchModeButtonControl";
 import { requestMode } from "client/modes/PlayModeRequest";
-import { Control, Control2 } from "engine/client/gui/Control";
+import { Control } from "engine/client/gui/Control";
 import { InputController } from "engine/client/InputController";
 import { LocalPlayer } from "engine/client/LocalPlayer";
 import { Component } from "engine/shared/component/Component";
@@ -42,7 +42,7 @@ type RideModeControlsDefinition = GuiObject & {
 	readonly Overlay: GuiObject;
 	readonly Button: TextButtonDefinition;
 };
-export class RideModeControls extends Control2<RideModeControlsDefinition> {
+export class RideModeControls extends Control<RideModeControlsDefinition> {
 	readonly onEnterSettingsMode = new Signal<() => void>();
 	readonly onQuitSettingsMode = new Signal<() => void>();
 
@@ -332,12 +332,12 @@ export class RideModeScene extends Control<RideModeSceneDefinition> {
 		);
 
 		const stopButton = this.parent(mainScreen.registerTopCenterButton("Stop"));
-		this.parent(new Control2(stopButton.instance).withButtonAction(() => requestMode("build")));
+		this.parent(new Control(stopButton.instance).withButtonAction(() => requestMode("build")));
 
 		const sitButton = this.parent(mainScreen.registerTopCenterButton("Sit"));
 		this.event.subscribeObservable(this.canSit, (canSit) => sitButton.isVisible.set("ride_main", canSit), true);
 		this.parent(
-			new Control2(sitButton.instance).withButtonAction(() => CustomRemotes.modes.ride.teleportOnSeat.send()),
+			new Control(sitButton.instance).withButtonAction(() => CustomRemotes.modes.ride.teleportOnSeat.send()),
 		);
 
 		//
@@ -345,12 +345,12 @@ export class RideModeScene extends Control<RideModeSceneDefinition> {
 		const editControlsButton = this.parent(mainScreen.registerTopRightButton("EditControls"));
 		this.event.onPrepare((input) => editControlsButton.isVisible.set("onlyTouch", input === "Touch"));
 		this.parent(
-			new Control2(editControlsButton.instance).withButtonAction(() => this.controls.toggleSettingsMode()),
+			new Control(editControlsButton.instance).withButtonAction(() => this.controls.toggleSettingsMode()),
 		);
 
 		const resetControlsButton = this.parent(mainScreen.registerTopRightButton("ResetControls"));
 		this.parent(
-			new Control2(resetControlsButton.instance).withButtonAction(() =>
+			new Control(resetControlsButton.instance).withButtonAction(() =>
 				ConfirmPopup.showPopup("Reset the controls?", "It will be impossible to undo this action", () =>
 					this.controls.resetControls(),
 				),
@@ -358,7 +358,7 @@ export class RideModeScene extends Control<RideModeSceneDefinition> {
 		);
 
 		const logicButton = this.parent(mainScreen.registerTopRightButton("Logic"));
-		this.logicButton = this.parent(new Control2(logicButton.instance));
+		this.logicButton = this.parent(new Control(logicButton.instance));
 
 		this.onEnabledStateChange((enabled) => this.canSit.set("ride_enabled", enabled), true);
 
@@ -512,7 +512,7 @@ export class RideModeScene extends Control<RideModeSceneDefinition> {
 
 		this.gui.LogicDebug.Visible = false;
 
-		const logicDebug = component.parent(new Control2(this.gui.LogicDebug.Clone(), { showOnEnable: true }));
+		const logicDebug = component.parent(new Control(this.gui.LogicDebug.Clone(), { showOnEnable: true }));
 		logicDebug.instance.Parent = this.gui.LogicDebug.Parent;
 
 		// TODO:::
@@ -525,7 +525,7 @@ export class RideModeScene extends Control<RideModeSceneDefinition> {
 
 		const visualizer = component.parent(new ComponentChild(true));
 		logicDebug.add(
-			new Control2(logicDebug.instance.Content.Buttons.Visualizer).withButtonAction(() => {
+			new Control(logicDebug.instance.Content.Buttons.Visualizer).withButtonAction(() => {
 				if (visualizer.get()) {
 					visualizer.clear();
 				} else {
@@ -535,12 +535,12 @@ export class RideModeScene extends Control<RideModeSceneDefinition> {
 		);
 
 		logicDebug.add(
-			new Control2(logicDebug.instance.Content.Buttons.Step).withButtonAction(() => machine.runner.tick()),
+			new Control(logicDebug.instance.Content.Buttons.Step).withButtonAction(() => machine.runner.tick()),
 		);
 
-		const pauseButton = logicDebug.add(new Control2(logicDebug.instance.Content.Buttons.Pause));
+		const pauseButton = logicDebug.add(new Control(logicDebug.instance.Content.Buttons.Pause));
 		pauseButton.parent(
-			new Control2(pauseButton.instance).withButtonAction(() => {
+			new Control(pauseButton.instance).withButtonAction(() => {
 				if (machine.runner.isRunning.get()) {
 					machine.runner.stopTicking();
 					machine.logicInputs.setEnabled(false);

@@ -4,7 +4,7 @@ import { SoundController } from "client/controller/SoundController";
 import { Interface } from "client/gui/Interface";
 import { Popup } from "client/gui/Popup";
 import { ButtonControl } from "engine/client/gui/Button";
-import { Control2 } from "engine/client/gui/Control";
+import { Control } from "engine/client/gui/Control";
 import { JSON } from "engine/shared/fixes/Json";
 import { GameDefinitions } from "shared/data/GameDefinitions";
 import type { PlayerDataStorage } from "client/PlayerDataStorage";
@@ -96,18 +96,18 @@ class ReportSubmitPopup extends Popup<ReportSubmitPopupDefinition> {
 	constructor(gui: ReportSubmitPopupDefinition, data: unknown, text?: string, okFunc?: () => void) {
 		super(gui);
 
-		this.okButton = this.add(new Control2(gui.Content.Buttons.OkButton));
+		this.okButton = this.parent(new Control(gui.Content.Buttons.OkButton));
 
 		SoundController.getSounds().Warning.Play();
 
-		this.gui.Content.Text.Text =
+		gui.Content.Text.Text =
 			text ??
 			`
 			An error has happened.\nPlease copy the text below and submit a bug report in our community server.
 			`.trim();
 
 		try {
-			this.gui.Content.TextBox.Text = serialize({
+			gui.Content.TextBox.Text = serialize({
 				uid: Players.LocalPlayer.UserId,
 				uname: Players.LocalPlayer.Name,
 				udname: Players.LocalPlayer.DisplayName,
@@ -118,17 +118,17 @@ class ReportSubmitPopup extends Popup<ReportSubmitPopupDefinition> {
 			});
 		} catch {
 			try {
-				this.gui.Content.TextBox.Text = serialize({
+				gui.Content.TextBox.Text = serialize({
 					env: GameDefinitions.getEnvironmentInfo(),
 					data: processDataForJsonSerializationForSubmit(data),
 				});
 			} catch {
 				try {
-					this.gui.Content.TextBox.Text = serialize({
+					gui.Content.TextBox.Text = serialize({
 						trace: debug.traceback(undefined, 1)?.split("\n"),
 					});
 				} catch {
-					this.gui.Content.TextBox.Text = serialize("[ERRTOOLONG]");
+					gui.Content.TextBox.Text = serialize("[ERRTOOLONG]");
 				}
 			}
 		}
@@ -137,7 +137,7 @@ class ReportSubmitPopup extends Popup<ReportSubmitPopupDefinition> {
 			okFunc?.();
 			this.hide();
 		});
-		this.add(new ButtonControl(this.gui.Heading.CloseButton, () => this.hide()));
+		this.parent(new ButtonControl(gui.Heading.CloseButton, () => this.hide()));
 
 		this.event.onPrepareGamepad(() => (GuiService.SelectedObject = this.okButton.instance));
 	}

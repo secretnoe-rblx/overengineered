@@ -224,31 +224,30 @@ export class MemoryEditorPopup extends Popup<MemoryEditorPopupDefinition> {
 			return;
 		}
 
-		const rows = this.add(new MemoryEditorRows(this.gui.Content, this));
+		const rows = this.parent(new MemoryEditorRows(gui.Content, this));
 
 		// Update AddressTextBox on scroll
-		this.gui.Content.GetPropertyChangedSignal("CanvasPosition").Connect(() => {
+		gui.Content.GetPropertyChangedSignal("CanvasPosition").Connect(() => {
 			const currentRow =
 				rows.rowCursor +
 				math.round(
-					this.gui.Content.CanvasPosition.Y /
-						(this.gui.Content.Template.Size.Y.Offset * this.parentScreen.getScale()),
+					gui.Content.CanvasPosition.Y / (gui.Content.Template.Size.Y.Offset * this.parentScreen.getScale()),
 				);
 
-			this.gui.AddressTextBox.Text = this.numberToHex(currentRow * 16);
+			gui.AddressTextBox.Text = this.numberToHex(currentRow * 16);
 		});
 
 		// Close button
-		this.add(
-			new ButtonControl(this.gui.Heading.CloseButton, () => {
+		this.parent(
+			new ButtonControl(gui.Heading.CloseButton, () => {
 				this.hide();
 				callback(data);
 			}),
 		);
 
 		// Clear data button
-		this.add(
-			new ButtonControl(this.gui.ClearButton, () => {
+		this.parent(
+			new ButtonControl(gui.ClearButton, () => {
 				ConfirmPopup.showPopup(
 					"Clear memory store?",
 					"It will be impossible to undo this action",
@@ -262,8 +261,8 @@ export class MemoryEditorPopup extends Popup<MemoryEditorPopupDefinition> {
 		);
 
 		// Import hex button
-		this.add(
-			new ButtonControl(this.gui.ImportButton, () => {
+		this.parent(
+			new ButtonControl(gui.ImportButton, () => {
 				TextPopup.showPopup(
 					"IMPORT",
 					"00 01 02 03 04 ...",
@@ -294,7 +293,7 @@ export class MemoryEditorPopup extends Popup<MemoryEditorPopupDefinition> {
 			}),
 		);
 
-		const addressTextBox = new TextBoxControl(this.gui.AddressTextBox);
+		const addressTextBox = new TextBoxControl(gui.AddressTextBox);
 		addressTextBox.text.set(this.numberToHex(0));
 		addressTextBox.submitted.Connect((value) => {
 			if (value === "") {
@@ -318,9 +317,9 @@ export class MemoryEditorPopup extends Popup<MemoryEditorPopupDefinition> {
 
 				// Scroll
 				const scale = this.parentScreen.getScale();
-				this.gui.Content.CanvasPosition = new Vector2(
+				gui.Content.CanvasPosition = new Vector2(
 					0,
-					this.gui.Content.Template.Size.Y.Offset * math.abs(cursorRow - row) * scale,
+					gui.Content.Template.Size.Y.Offset * math.abs(cursorRow - row) * scale,
 				);
 
 				return;
@@ -328,7 +327,7 @@ export class MemoryEditorPopup extends Popup<MemoryEditorPopupDefinition> {
 
 			LogControl.instance.addLine("Invalid address format!", Colors.red);
 		});
-		this.add(addressTextBox);
+		this.parent(addressTextBox);
 	}
 
 	getScale() {

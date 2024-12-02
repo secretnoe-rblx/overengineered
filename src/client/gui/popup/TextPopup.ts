@@ -38,13 +38,13 @@ export class TextPopup extends Popup<TextPopupDefinition> {
 	) {
 		super(gui);
 
-		this.doneButton = this.add(new ButtonControl(gui.DoneButton));
-		this.closeButton = this.add(new ButtonControl(gui.Heading.CloseButton));
+		this.doneButton = this.parent(new ButtonControl(gui.DoneButton));
+		this.closeButton = this.parent(new ButtonControl(gui.Heading.CloseButton));
 
-		this.gui.Heading.TitleLabel.Text = text;
-		this.gui.ScrollingFrame.TextBox.PlaceholderText = ps;
+		gui.Heading.TitleLabel.Text = text;
+		gui.ScrollingFrame.TextBox.PlaceholderText = ps;
 		this.event.subscribe(this.doneButton.activated, () => {
-			okFunc(this.gui.ScrollingFrame.TextBox.Text);
+			okFunc(gui.ScrollingFrame.TextBox.Text);
 			this.hide();
 		});
 		this.event.subscribe(this.closeButton.activated, () => {
@@ -52,6 +52,6 @@ export class TextPopup extends Popup<TextPopupDefinition> {
 			this.hide();
 		});
 
-		this.event.onPrepareGamepad(() => (GuiService.SelectedObject = this.gui.ScrollingFrame.TextBox));
+		this.event.onPrepareGamepad(() => (GuiService.SelectedObject = gui.ScrollingFrame.TextBox));
 	}
 }

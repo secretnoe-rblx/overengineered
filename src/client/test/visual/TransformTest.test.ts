@@ -1,4 +1,4 @@
-import { Control, Control2 } from "engine/client/gui/Control";
+import { Control } from "engine/client/gui/Control";
 import { Transforms } from "engine/shared/component/Transforms";
 import { Element } from "engine/shared/Element";
 import { Colors } from "shared/Colors";
@@ -28,8 +28,8 @@ namespace TransformTests {
 
 		{
 			const tweenable = newbtn("instant transparency", 0);
-			const component = list.add(new Control2(tweenable));
-			const btn = component.add(new Control2(component.instance));
+			const component = list.add(new Control(tweenable));
+			const btn = component.add(new Control(component.instance));
 			component.enable();
 			btn.addButtonAction(() =>
 				transform(component, (t, i) =>
@@ -40,8 +40,8 @@ namespace TransformTests {
 
 		{
 			const tweenable = newbtn("transparency over 1sec", 1);
-			const component = list.add(new Control2(tweenable));
-			const btn = component.add(new Control2(component.instance));
+			const component = list.add(new Control(tweenable));
+			const btn = component.add(new Control(component.instance));
 			component.enable();
 			btn.addButtonAction(() =>
 				transform(component, (t, i) =>
@@ -60,8 +60,8 @@ namespace TransformTests {
 
 		{
 			const tweenable = newbtn("transparency over 1sec after 1sec", 2);
-			const component = list.add(new Control2(tweenable));
-			const btn = component.add(new Control2(component.instance));
+			const component = list.add(new Control(tweenable));
+			const btn = component.add(new Control(component.instance));
 			component.enable();
 			btn.addButtonAction(() =>
 				transform(component, (t, i) =>
@@ -85,8 +85,8 @@ namespace TransformTests {
 			);
 			tweenable.AnchorPoint = new Vector2(0.5, 0.5);
 
-			const component = list.add(new Control2(tweenable));
-			const btn = component.add(new Control2(component.instance));
+			const component = list.add(new Control(tweenable));
+			const btn = component.add(new Control(component.instance));
 			component.enable();
 
 			btn.addButtonAction(() => {
@@ -158,16 +158,16 @@ namespace TransformTests {
 
 		{
 			const tweenable = newbtn("flash color", 4);
-			const component = list.add(new Control2(tweenable));
-			const btn = component.add(new Control2(component.instance));
+			const component = list.add(new Control(tweenable));
+			const btn = component.add(new Control(component.instance));
 			component.enable();
 			btn.addButtonAction(() => transform(component, (t, i) => t.flashColor(i, Colors.red)));
 		}
 
 		{
 			const tweenable = newbtn("flash position", 5);
-			const component = list.add(new Control2(tweenable));
-			const btn = component.add(new Control2(component.instance));
+			const component = list.add(new Control(tweenable));
+			const btn = component.add(new Control(component.instance));
 			component.enable();
 			btn.addButtonAction(() =>
 				transform(component, (t, i) => t.flash(i, new UDim2(0, 200, 0, 200), "Position")),
@@ -180,12 +180,12 @@ namespace TransformTests {
 			const binteractable = newbtn("Interactable", 8 + 1);
 			const bnotinteractable = newbtn("Not interactable", 9 + 1);
 			// const visual = list.add(new Control2(newbtn("Button", 10 + 1)));
-			const visual = list.add(new Control2(newbtn("Button", 10 + 1)));
+			const visual = list.add(new Control(newbtn("Button", 10 + 1)));
 
-			list.add(new Control2(bvisible).withButtonAction(() => visual.setVisibilityAndState(true)));
-			list.add(new Control2(bnotvisible).withButtonAction(() => visual.setVisibilityAndState(false)));
-			list.add(new Control2(binteractable).withButtonAction(() => visual.setButtonInteractable(true)));
-			list.add(new Control2(bnotinteractable).withButtonAction(() => visual.setButtonInteractable(false)));
+			list.add(new Control(bvisible).withButtonAction(() => visual.setVisibleAndEnabled(true)));
+			list.add(new Control(bnotvisible).withButtonAction(() => visual.setVisibleAndEnabled(false)));
+			list.add(new Control(binteractable).withButtonAction(() => visual.setButtonInteractable(true)));
+			list.add(new Control(bnotinteractable).withButtonAction(() => visual.setButtonInteractable(false)));
 		}
 
 		return list;

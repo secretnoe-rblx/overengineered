@@ -16,7 +16,7 @@ import { FloatingText } from "client/tools/additional/FloatingText";
 import { ToolBase } from "client/tools/ToolBase";
 import { ClientComponentChild } from "engine/client/component/ClientComponentChild";
 import { ButtonControl } from "engine/client/gui/Button";
-import { Control, Control2 } from "engine/client/gui/Control";
+import { Control } from "engine/client/gui/Control";
 import { InputController } from "engine/client/InputController";
 import { Component } from "engine/shared/component/Component";
 import { ComponentChild } from "engine/shared/component/ComponentChild";
@@ -317,12 +317,12 @@ namespace Scene {
 			this.parent(new ScaleEditorControl(scaleEditorGui.Content, tool.blockScale));
 
 			const scaleEditorBtn = this.parent(
-				new Control2(
+				new Control(
 					Interface.getGameUI<{ BuildingMode: { Action: { Scale: GuiButton } } }>().BuildingMode.Action.Scale,
 				),
 			).withButtonAction(() => (scaleEditorGui.Visible = !scaleEditorGui.Visible));
 
-			this.onEnabledStateChange((enabled) => scaleEditorBtn.setVisibilityAndState(enabled), true);
+			this.onEnabledStateChange((enabled) => scaleEditorBtn.setVisibleAndEnabled(enabled), true);
 			this.onDisable(() => (scaleEditorGui.Visible = false));
 
 			const inventory = this.parent(mainScreen.registerLeft<BlockSelectionControlDefinition>("Inventory"));
@@ -421,8 +421,8 @@ namespace Scene {
 				);
 
 				this.onEnabledStateChange((enabled) => {
-					this.blockInfo.setEnabledAndVisible(enabled);
-					this.touchButtons.setEnabledAndVisible(enabled);
+					this.blockInfo.setVisibleAndEnabled(enabled);
+					this.touchButtons.setVisibleAndEnabled(enabled);
 					visibilityStateMachine(enabled);
 				});
 			};

@@ -73,10 +73,10 @@ export class WikiPopup extends Popup<WikiPopupDefinition> {
 	constructor(gui: WikiPopupDefinition, @inject blockList: BlockList, @inject di: DIContainer) {
 		super(gui);
 
-		this.add(new ButtonControl(gui.Heading.CloseButton, () => this.hide()));
+		this.parent(new ButtonControl(gui.Heading.CloseButton, () => this.hide()));
 
-		const sidebar = this.add(new WikiCategoriesControl(gui.Content.Categories));
-		const content = this.add(new WikiContentControl(gui.Content.Content, blockList));
+		const sidebar = this.parent(new WikiCategoriesControl(gui.Content.Categories));
+		const content = this.parent(new WikiContentControl(gui.Content.Content, blockList));
 		content.requestedTeleport.Connect((id) => sidebar.select(id));
 		content.set({ id: "", title: "", tags: new ReadonlySet(), content: [] });
 

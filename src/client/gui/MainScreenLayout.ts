@@ -1,7 +1,7 @@
 import { LoadingController } from "client/controller/LoadingController";
 import { HotbarControl } from "client/gui/buildmode/HotbarControl";
 import { Interface } from "client/gui/Interface";
-import { Control2 } from "engine/client/gui/Control";
+import { Control } from "engine/client/gui/Control";
 import { Component } from "engine/shared/component/Component";
 import { ComponentInstance } from "engine/shared/component/ComponentInstance";
 import { Transforms } from "engine/shared/component/Transforms";
@@ -64,16 +64,16 @@ export class MainScreenLayout extends Component {
 		forEachChild(this.instance.Left, (child) => (child.Visible = false));
 	}
 
-	registerTopCenterButton<T extends GuiButton>(name: string): Control2<T> {
-		const control = new Control2(this.instance.Top.Center.Main.WaitForChild(name) as T);
+	registerTopCenterButton<T extends GuiButton>(name: string): Control<T> {
+		const control = new Control(this.instance.Top.Center.Main.WaitForChild(name) as T);
 		control.isVisible.subscribe((visible) => {
 			control.instance.Visible = visible;
 		});
 
 		return control;
 	}
-	registerTopRightButton<T extends GuiButton>(name: string): Control2<T> {
-		const control = new Control2(this.instance.Top.Right.WaitForChild(name) as T);
+	registerTopRightButton<T extends GuiButton>(name: string): Control<T> {
+		const control = new Control(this.instance.Top.Right.WaitForChild(name) as T);
 		control.isVisible.subscribe((visible) => {
 			control.instance.Visible = visible;
 		});
@@ -81,8 +81,8 @@ export class MainScreenLayout extends Component {
 		return control;
 	}
 
-	registerLeft<T extends GuiObject>(name: string): Control2<T> {
-		const control = new Control2(this.instance.Left.WaitForChild(name) as T);
+	registerLeft<T extends GuiObject>(name: string): Control<T> {
+		const control = new Control(this.instance.Left.WaitForChild(name) as T);
 		control.isVisible.subscribe((visible) => {
 			control.instance.Visible = visible;
 		});

@@ -1,12 +1,12 @@
 import { Lighting, TweenService } from "@rbxts/services";
 import { Interface } from "client/gui/Interface";
 import { ScaledScreenGui } from "client/gui/ScaledScreenGui";
-import { Control } from "engine/client/gui/Control";
+import { InstanceComponent } from "engine/shared/component/InstanceComponent";
 import { Element } from "engine/shared/Element";
 import { Signal } from "engine/shared/event/Signal";
 import { Colors } from "shared/Colors";
 
-export class Popup<T extends GuiObject = GuiObject> extends Control<T> {
+export class Popup<T extends GuiObject = GuiObject> extends InstanceComponent<T> {
 	static readonly onAnyShow = new Signal<() => void>();
 	static readonly onAnyHide = new Signal<() => void>();
 	static readonly onAllHide = new Signal<() => void>();
@@ -38,8 +38,6 @@ export class Popup<T extends GuiObject = GuiObject> extends Control<T> {
 			),
 		);
 
-		this.setupShowOnEnable();
-
 		this.onEnable(() => {
 			this.parentScreen.enable();
 			Popup.onAnyShow.Fire();
@@ -62,9 +60,9 @@ export class Popup<T extends GuiObject = GuiObject> extends Control<T> {
 	}
 
 	show() {
-		this.enable();
+		this.setVisibleAndEnabled(true);
 	}
 	hide() {
-		this.disable();
+		this.setVisibleAndEnabled(false);
 	}
 }

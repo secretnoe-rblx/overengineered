@@ -3,7 +3,7 @@ import { Interface } from "client/gui/Interface";
 import { Popup } from "client/gui/Popup";
 import { ConfirmPopup } from "client/gui/popup/ConfirmPopup";
 import { ButtonControl } from "engine/client/gui/Button";
-import { Control, Control2 } from "engine/client/gui/Control";
+import { Control } from "engine/client/gui/Control";
 import { TextBoxControl } from "engine/client/gui/TextBoxControl";
 import { ComponentChildren } from "engine/shared/component/ComponentChildren";
 import { Transforms } from "engine/shared/component/Transforms";
@@ -83,8 +83,8 @@ class SaveItem extends Control<SlotRecordDefinition> {
 			}
 		};
 
-		const saveButton = this.add(new Control2(this.gui.Content.SaveButton).withButtonAction(save));
-		const loadButton = this.add(new Control2(this.gui.Content.LoadButton).withButtonAction(load));
+		const saveButton = this.add(new Control(this.gui.Content.SaveButton).withButtonAction(save));
+		const loadButton = this.add(new Control(this.gui.Content.LoadButton).withButtonAction(load));
 		const nametb = this.add(new TextBoxControl(this.gui.Content.SlotName.SlotNameTextBox));
 		nametb.submitted.Connect(() => send({ name: nametb.text.get() }));
 
@@ -92,12 +92,12 @@ class SaveItem extends Control<SlotRecordDefinition> {
 			await playerData.sendPlayerSlot({ ...slotData, index: meta.index, save: false });
 		};
 
-		const buttons: Control2[] = [];
+		const buttons: Control[] = [];
 		for (const child of this.gui.Deep.ColorSelection.GetChildren()) {
 			if (!child.IsA("GuiButton")) continue;
 
 			const button = this.add(
-				new Control2(child).withButtonAction(() =>
+				new Control(child).withButtonAction(() =>
 					send({ color: Serializer.Color3Serializer.serialize(child.BackgroundColor3) }),
 				),
 			);
@@ -272,11 +272,11 @@ export class SavePopup extends Popup<SlotsPopupDefinition> {
 	constructor(gui: SlotsPopupDefinition, @inject playerData: PlayerDataStorage) {
 		super(gui);
 
-		const slots = this.add(new SaveSlots(this.gui.Content, playerData));
+		const slots = this.parent(new SaveSlots(gui.Content, playerData));
 		this.event.subscribe(slots.onLoad, () => this.hide());
-		this.add(new ButtonControl(this.gui.Heading.CloseButton, () => this.hide()));
+		this.parent(new ButtonControl(gui.Heading.CloseButton, () => this.hide()));
 
-		const search = this.add(new TextBoxControl(gui.Search));
+		const search = this.parent(new TextBoxControl(gui.Search));
 		this.event.subscribeObservable(search.text, (text) => slots.search.set(text), true);
 	}
 }
