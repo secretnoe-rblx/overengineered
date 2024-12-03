@@ -164,13 +164,36 @@ const v10: UpdatablePlayerConfigVersion<PlayerConfigV10, PlayerConfigV9> = {
 	},
 };
 
-const versions = [v1, v2, v3, v4, v5, v6, v7, v8, v9, v10] as const;
+// Set terrain to snow for the winter
+const v11: UpdatablePlayerConfigVersion<PlayerConfigV10, PlayerConfigV10> = {
+	version: 11,
+
+	update(prev: Partial<PlayerConfigV10>): Partial<PlayerConfigV10> {
+		return {
+			version: this.version,
+			...prev,
+			terrain: {
+				...PlayerConfigDefinition.terrain.config,
+				...(prev.terrain ?? {}),
+				snowOnly: true,
+			},
+		};
+	},
+};
+
+const versions = [v1, v2, v3, v4, v5, v6, v7, v8, v9, v10, v11] as const;
 const current = versions[versions.size() - 1] as typeof versions extends readonly [...unknown[], infer T] ? T : never;
 
 export namespace PlayerConfigUpdater {
 	export function update(config: object | { readonly version: number }) {
-		const version = "version" in config ? config.version : versions[versions.size() - 1].version;
+		if (!("version" in config)) {
+			config = {
+				...config,
+				version: v10.version,
+			};
+		}
 
+		const version = "version" in config ? config.version : v10.version;
 		for (let i = version + 1; i <= current.version; i++) {
 			const newver = versions.find((v) => v.version === i);
 			if (!newver || !("update" in newver)) continue;

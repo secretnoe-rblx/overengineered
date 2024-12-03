@@ -222,6 +222,7 @@ export abstract class BlockLogic<TDef extends BlockLogicBothDefinitions> extends
 		initFunc: (
 			keys: readonly K[],
 			func: (inputs: AllInputKeysToObject<TDef["input"], K>, ctx: BlockLogicTickContext) => void,
+			elseFunc?: (result: BlockLogicValueResults) => void,
 		) => SignalConnection,
 	) {
 		type ttypes = keyof TDef["input"][K]["types"] & PrimitiveKeys;
@@ -230,10 +231,17 @@ export abstract class BlockLogic<TDef extends BlockLogicBothDefinitions> extends
 		let value: unknown;
 		let valueType: unknown;
 
-		initFunc([key], (ctx) => {
-			value = ctx[key];
-			valueType = ctx[`${tostring(key)}Type` as never];
-		});
+		initFunc(
+			[key],
+			(ctx) => {
+				value = ctx[key];
+				valueType = ctx[`${tostring(key)}Type` as never];
+			},
+			(result) => {
+				if (result !== BlockLogicValueResults.availableLater) return;
+				value = valueType = undefined;
+			},
+		);
 
 		return {
 			get: () => value as tvalue,
@@ -414,6 +422,7 @@ export abstract class BlockLogic<TDef extends BlockLogicBothDefinitions> extends
 		keys: readonly TKeys[],
 		func: (inputs: AllInputKeysToObject<TDef["input"], TKeys>, ctx: BlockLogicTickContext) => void,
 		skipIfUnchanged: boolean,
+		elseFunc?: (result: BlockLogicValueResults) => void,
 	) {
 		const inputs = inputValuesToFullObject(
 			ctx,
@@ -424,7 +433,14 @@ export abstract class BlockLogic<TDef extends BlockLogicBothDefinitions> extends
 			ctx.tick % 2 === 0 ? this.inputCache2 : this.inputCache1,
 			skipIfUnchanged,
 		);
-		if (!inputs || isCustomBlockLogicValueResult(inputs)) {
+
+		if (!inputs) return;
+
+		if (isCustomBlockLogicValueResult(inputs)) {
+			asMap(this.inputCache1).clear();
+			asMap(this.inputCache2).clear();
+			elseFunc?.(inputs);
+
 			return;
 		}
 
@@ -474,21 +490,23 @@ export abstract class BlockLogic<TDef extends BlockLogicBothDefinitions> extends
 	/** Runs the provided function when another block requests a value from this one, but no more than once per tick, if all of the input values are available and only when any input value changes. */
 	protected onRecalcInputs(
 		func: (inputs: AllInputKeysToObject<TDef["input"]>, ctx: BlockLogicTickContext) => void,
+		elseFunc?: (result: BlockLogicValueResults) => void,
 	): SignalConnection {
-		return this.onkRecalcInputs(Objects.keys(this.input), func);
+		return this.onkRecalcInputs(Objects.keys(this.input), func, elseFunc);
 	}
 
 	/** Runs the provided function when another block requests a value from this one, but no more than once per tick, if all of the provided sinput values are available and only when any input value changes. */
 	protected onkRecalcInputs<const TKeys extends keyof TDef["input"]>(
 		keys: readonly TKeys[],
 		func: (inputs: AllInputKeysToObject<TDef["input"], TKeys>, ctx: BlockLogicTickContext) => void,
+		elseFunc?: (result: BlockLogicValueResults) => void,
 	): SignalConnection {
 		const empty = {} as AllInputKeysToObject<TDef["input"], TKeys>;
 		if (!asMap(this.input).any()) {
 			return this.onRecalc((ctx) => func(empty, ctx));
 		}
 
-		return this.onRecalc((ctx) => this.executeFuncWithValues(ctx, keys, func, true));
+		return this.onRecalc((ctx) => this.executeFuncWithValues(ctx, keys, func, true, elseFunc));
 	}
 
 	/** Runs the provided function on every tick, but only if all of the input values are available. */
@@ -505,7 +523,10 @@ export abstract class BlockLogic<TDef extends BlockLogicBothDefinitions> extends
 			result.push("!DISABLED!");
 		}
 
-		for (const [k, input] of pairs(this.input)) {
+		const forInput = (
+			k: keyof TDef["input"],
+			input: ReadonlyBlockLogicValues<TDef["input"]>[keyof TDef["input"]] & defined,
+		) => {
 			const value = input.get(ctx);
 
 			if (isCustomBlockLogicValueResult(value)) {
@@ -513,13 +534,36 @@ export abstract class BlockLogic<TDef extends BlockLogicBothDefinitions> extends
 			} else {
 				result.push(`[${tostring(k)}] ${value.value}`);
 			}
-		}
+		};
 
-		for (const [k, output] of pairs(this.output)) {
+		const forOutput = (
+			k: keyof TDef["output"],
+			output: OutputBlockLogicValues<TDef["output"]>[keyof TDef["output"]] & defined,
+		) => {
 			const value = output.tryJustGet();
 
 			if (value !== undefined) {
 				result.push(`[${tostring(k)}] ${value.value}`);
+			}
+		};
+
+		if (this.definition.inputOrder) {
+			for (const k of this.definition.inputOrder) {
+				forInput(k, this.input[k]);
+			}
+		} else {
+			for (const [k, input] of pairs(this.input)) {
+				forInput(k, input);
+			}
+		}
+
+		if (this.definition.outputOrder) {
+			for (const k of this.definition.outputOrder) {
+				forOutput(k, this.output[k]);
+			}
+		} else {
+			for (const [k, output] of pairs(this.output)) {
+				forOutput(k, output);
 			}
 		}
 
@@ -557,19 +601,22 @@ export abstract class CalculatableBlockLogic<TDef extends BlockLogicBothDefiniti
 	constructor(definition: TDef, args: BlockLogicArgs) {
 		super(definition, args);
 
+		const unset = (results: BlockLogicValueResults) => {
+			this.currentCustomResult = results;
+
+			if (results === BlockLogicValueResults.garbage) {
+				this.disableAndBurn();
+			}
+
+			for (const [, v] of pairs(this.output)) {
+				v.unset();
+			}
+		};
+
 		this.onRecalcInputs((inputs, ctx) => {
 			const results = this.calculate(inputs, ctx);
 			if (isCustomBlockLogicValueResult(results)) {
-				this.currentCustomResult = results;
-
-				if (results === BlockLogicValueResults.garbage) {
-					this.disableAndBurn();
-				}
-
-				for (const [, v] of pairs(this.output)) {
-					v.unset();
-				}
-
+				unset(results);
 				return;
 			}
 
@@ -577,7 +624,7 @@ export abstract class CalculatableBlockLogic<TDef extends BlockLogicBothDefiniti
 			for (const [k, v] of pairs(results)) {
 				this.output[k].set(v.type, v.value);
 			}
-		});
+		}, unset);
 	}
 
 	override getOutputValue(

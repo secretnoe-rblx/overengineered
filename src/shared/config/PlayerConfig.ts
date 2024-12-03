@@ -107,6 +107,11 @@ declare global {
 }
 
 export const PlayerConfigDefinition = {
+	autoLoad: {
+		displayName: "Automatically load last slot",
+		type: "bool",
+		config: true as boolean,
+	},
 	sprintSpeed: {
 		displayName: "Sprint speed",
 		type: "clampedNumber",
@@ -178,7 +183,7 @@ export const PlayerConfigDefinition = {
 			foliage: true as boolean,
 			loadDistance: 24 as number,
 			water: false as boolean,
-			snowOnly: false as boolean,
+			snowOnly: true as boolean,
 			triangleAddSandBelowSeaLevel: false as boolean,
 		},
 	},

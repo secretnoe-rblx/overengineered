@@ -10,7 +10,7 @@ export class BoxSelector extends ClientComponent implements BlockSelector {
 	private readonly _submit = new ArgsSignal<[blocks: readonly BlockModel[]]>();
 	readonly submit = this._submit.asReadonly();
 
-	constructor(plot: SharedPlot, filter = (block: BlockModel) => true) {
+	constructor(plot: SharedPlot, filter?: (blocks: readonly BlockModel[]) => readonly BlockModel[]) {
 		super();
 
 		const camera = Workspace.CurrentCamera!;
@@ -31,10 +31,10 @@ export class BoxSelector extends ClientComponent implements BlockSelector {
 			};
 
 			const swap = (a1: Vector2, a2: Vector2) => {
-				return [
+				return $tuple(
 					new Vector2(math.min(a1.X, a2.X), math.min(a1.Y, a2.Y)),
 					new Vector2(math.max(a1.X, a2.X), math.max(a1.Y, a2.Y)),
-				] as const;
+				);
 			};
 
 			const overlaps = (cf: CFrame, a1: Vector2, a2: Vector2) => {
@@ -75,12 +75,15 @@ export class BoxSelector extends ClientComponent implements BlockSelector {
 			selection.Visible = true;
 			selection.Size = new UDim2(0, 0, 0, 0);
 
-			const searchBlocks = () =>
-				search(
+			const searchBlocks = (): readonly BlockModel[] => {
+				const blocks: readonly BlockModel[] = search(
 					plot.getBlocks(),
 					new Vector2(startpos.Width.Offset, startpos.Height.Offset),
 					new Vector2(mouse.X, mouse.Y),
-				).filter(filter);
+				);
+
+				return filter?.(blocks) ?? blocks;
+			};
 
 			this.event.subscribe(mouse.Move, () => {
 				selection!.Size = new UDim2(0, mouse.X, 0, mouse.Y).sub(startpos);

@@ -34,10 +34,6 @@ const blocks: BlockBuildersWithoutIdAndDefaults = {
 		displayName: "Bearing Shaft",
 		description: "A shaft that bears",
 	},
-	smallhingeblock: {
-		displayName: "Small hinge",
-		description: "Smaller hinge. La rotación compacta",
-	},
 
 	smallgear: {
 		displayName: "Small Gear",

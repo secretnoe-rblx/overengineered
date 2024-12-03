@@ -7,6 +7,7 @@ import { LocalPlayer } from "engine/client/LocalPlayer";
 import { HostedService } from "engine/shared/di/HostedService";
 import { ObservableValue } from "engine/shared/event/ObservableValue";
 import { CustomRemotes } from "shared/Remotes";
+import type { PlayerDataStorage } from "client/PlayerDataStorage";
 import type { GameHostBuilder } from "engine/shared/GameHostBuilder";
 
 @injectable
@@ -19,7 +20,7 @@ export class PlayModeController extends HostedService {
 		host.services.registerSingletonClass(RideMode);
 		host.services.registerService(PlayModeController);
 	}
-	constructor(@inject build: BuildingMode, @inject ride: RideMode) {
+	constructor(@inject build: BuildingMode, @inject ride: RideMode, @inject playerData: PlayerDataStorage) {
 		super();
 
 		GuiService.SetGameplayPausedNotificationEnabled(false);

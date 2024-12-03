@@ -2,6 +2,7 @@ import { RunService } from "@rbxts/services";
 import { BlockListBuilder } from "shared/blocks/BlockListBuilder";
 import { AltimeterBlock } from "shared/blocks/blocks/AltimeterBlock";
 import { AngleSensorBlock } from "shared/blocks/blocks/AngleSensorBlock";
+import { BackMountBlock } from "shared/blocks/blocks/BackMountBlock";
 import { BallastBlock } from "shared/blocks/blocks/BallastBlock";
 import { BeaconBlock } from "shared/blocks/blocks/BeaconBlock";
 import { BracedShaftBlock } from "shared/blocks/blocks/BracedShaftBlock";
@@ -10,12 +11,14 @@ import { ControllerBlock } from "shared/blocks/blocks/ControllerBlock";
 import { CounterBlock } from "shared/blocks/blocks/CounterBlock";
 import { DelayBlock } from "shared/blocks/blocks/DelayBlock";
 import { DisconnectBlock } from "shared/blocks/blocks/DisconnectBlock";
+import { FallbackBlock } from "shared/blocks/blocks/FallbackBlock";
 import { FireSensorBlock } from "shared/blocks/blocks/FireSensorBlock";
 import { GPSSensorBlock } from "shared/blocks/blocks/GPSSensorBlock";
 import { GravitySensorBlock } from "shared/blocks/blocks/GravitySensorBlock";
 import { BasicLogicGateBlocks } from "shared/blocks/blocks/grouped/BasicLogicGateBlocks";
 import { BasicOperationBlocks } from "shared/blocks/blocks/grouped/BasicOperationBlocks";
 import { BuildingBlocks } from "shared/blocks/blocks/grouped/BuildingBlocks";
+import { HingeBlocks } from "shared/blocks/blocks/grouped/HingeBlocks";
 import { LampBlocks } from "shared/blocks/blocks/grouped/LampBlocks";
 import { MechanicalBlocks } from "shared/blocks/blocks/grouped/MechanicalBlocks";
 import { ServoMotorBlocks } from "shared/blocks/blocks/grouped/ServoMotorBlocks";
@@ -24,7 +27,7 @@ import { TNTBlocks } from "shared/blocks/blocks/grouped/TNTBlocks";
 import { WheelBlocks } from "shared/blocks/blocks/grouped/WheelBlocks";
 import { WingBlocks } from "shared/blocks/blocks/grouped/WingsBlocks";
 import { HeliumBlock } from "shared/blocks/blocks/HeliumBlock";
-import { HingeBlock } from "shared/blocks/blocks/HingeBlock";
+import { ImpulseExtenderBlock } from "shared/blocks/blocks/ImpulseExtenderBlock";
 import { ImpulseGeneratorBlock } from "shared/blocks/blocks/ImpulseGeneratorBlock";
 import { KeySensorBlock } from "shared/blocks/blocks/KeySensorBlock";
 import { LaserBlock } from "shared/blocks/blocks/LaserBlock";
@@ -70,10 +73,10 @@ export const CreateSandboxBlocks = (di: DIContainer): BlockList => {
 		...RocketBlocks,
 		...ServoMotorBlocks,
 		...TNTBlocks,
+		...HingeBlocks,
 
 		PistonBlock,
 		MotorBlock,
-		HingeBlock,
 		RCSEngineBlock,
 		DisconnectBlock,
 		RopeBlock,
@@ -91,10 +94,13 @@ export const CreateSandboxBlocks = (di: DIContainer): BlockList => {
 
 		VehicleSeatBlock,
 		PassengerSeatBlock,
+		BackMountBlock,
 
 		DelayBlock,
+		FallbackBlock,
 		SingleImpulseBlock,
 		ImpulseGeneratorBlock,
+		ImpulseExtenderBlock,
 		CounterBlock,
 		TpsCounterBlock,
 		LogicMemoryBlock,

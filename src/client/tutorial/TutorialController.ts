@@ -90,6 +90,7 @@ export type TutorialControlDefinition = Frame & {
 		readonly Cancel: TextButton;
 		readonly Next: TextButton;
 		readonly Skip: TextButton;
+		readonly SkipAll: TextButton;
 	};
 	readonly TextLabel: TextLabel;
 };
@@ -102,6 +103,9 @@ export class TutorialControl extends Control<TutorialControlDefinition> {
 
 	private readonly _skipPressed = new ArgsSignal();
 	readonly skipPressed = this._skipPressed.asReadonly();
+
+	private readonly _skipAllPressed = new ArgsSignal();
+	readonly skipAllPressed = this._skipAllPressed.asReadonly();
 
 	constructor(title: string) {
 		super(Gui.getGameUI<{ Tutorial: TutorialControlDefinition }>().Tutorial.Clone());
@@ -123,6 +127,18 @@ export class TutorialControl extends Control<TutorialControlDefinition> {
 					"This way you will learn this lesson worse!",
 					() => {
 						this._skipPressed.Fire();
+					},
+					() => {},
+				);
+			}),
+		);
+		this.add(
+			new ButtonControl(this.gui.Header.SkipAll, () => {
+				ConfirmPopup.showPopup(
+					"Are you sure you want to skip the tutorial?",
+					"This way you will learn this lesson worse!",
+					() => {
+						this._skipAllPressed.Fire();
 					},
 					() => {},
 				);
@@ -484,17 +500,15 @@ namespace Steps {
 						.map((uuid, blocks): ClientBuilding.UpdateConfigArgs["configs"][number] => ({
 							block: plot.getBlock(uuid),
 							cfg: (() => {
-								const config = BlockManager.manager.config.get(plot.getBlock(uuid)) ?? {};
+								const config = BlockConfig.addDefaults(
+									BlockManager.manager.config.get(plot.getBlock(uuid)) ?? {},
+									blockList.blocks[BlockManager.manager.id.get(plot.getBlock(uuid))]!.logic!
+										.definition.input,
+								);
+
 								return asObject(
 									blocks.mapToMap(({ key, value }) =>
-										$tuple(
-											key,
-											BlockConfig.addDefaults(
-												Objects.deepCombine(config, { [key]: value }) as PlacedBlockConfig,
-												blockList.blocks[BlockManager.manager.id.get(plot.getBlock(uuid))]!
-													.logic!.definition.input,
-											)[key],
-										),
+										$tuple(key, Objects.deepCombine(config[key], value as never)),
 									),
 								);
 							})(),
@@ -909,9 +923,11 @@ export class TutorialController extends Component {
 		};
 	}
 
+	private skipAll = false;
+
 	/** Wait for the provided parts, starting all simultaneously. Supports skipping and cancelling. */
 	waitPart(...regs: readonly TutorialPartRegistration[]): void | "canceled" {
-		let skipped = false;
+		let skipped = this.skipAll;
 		let completed = false;
 		let canceled = false;
 
@@ -921,6 +937,7 @@ export class TutorialController extends Component {
 			reg.connection,
 			Signal.connection(() => (completed = true)),
 			this.ui.skipPressed.Connect(() => (skipped = true)),
+			this.ui.skipAllPressed.Connect(() => (skipped = this.skipAll = true)),
 			this.ui.onCancel.Connect(() => (canceled = true)),
 		);
 

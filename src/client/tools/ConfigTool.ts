@@ -20,7 +20,6 @@ import { VectorUtils } from "shared/utils/VectorUtils";
 import type { ReportSubmitController } from "client/gui/popup/ReportSubmitPopup";
 import type { ActionController } from "client/modes/build/ActionController";
 import type { BuildingMode } from "client/modes/build/BuildingMode";
-import type { MultiBlockSelectorConfiguration } from "client/tools/highlighters/MultiBlockSelector";
 //import type { TutorialConfigBlockHighlight } from "client/tutorial/TutorialConfigTool";
 import type { PlacedBlockConfig } from "shared/blockLogic/BlockConfig";
 import type { BlockLogicBothDefinitions } from "shared/blockLogic/BlockLogic";
@@ -254,49 +253,32 @@ export class ConfigTool extends ToolBase {
 
 			return true;
 		};
-		const canBeSelectedConsideringCurrentSelection = (block: BlockModel): boolean => {
-			if (!canBeSelected(block)) {
-				return false;
+		const filter = (blocks: readonly BlockModel[]): readonly BlockModel[] => {
+			blocks = blocks.filter(canBeSelected);
+
+			let selected = this.selected.get();
+			if (!InputController.isShiftPressed() && InputController.inputType.get() === "Desktop") {
+				selected = new Set();
 			}
 
-			if (this.selected.size() === 0) {
-				return true;
+			const newBlocks = new Set<BlockModel>();
+			const getIdentifier = (block: BlockModel) =>
+				blockList.blocks[BlockManager.manager.id.get(block)]?.logic?.definition;
+
+			for (const block of blocks) {
+				const id = getIdentifier(block);
+				const differentId =
+					selected.find((s) => getIdentifier(s) !== id) ?? blocks.find((s) => getIdentifier(s) !== id);
+
+				if (differentId === undefined) {
+					newBlocks.add(block);
+				}
 			}
 
-			if (InputController.isShiftPressed() || InputController.inputType.get() === "Touch") {
-				const differentId = this.selected
-					.get()
-					.find((s) => BlockManager.manager.id.get(s) !== BlockManager.manager.id.get(block));
-				return differentId === undefined;
-			}
-
-			return true;
+			return [...newBlocks];
 		};
 
-		const config: MultiBlockSelectorConfiguration = {
-			filter: canBeSelectedConsideringCurrentSelection,
-			enabled: ["single"],
-			/*modeSetMiddleware: (mode, prev) => {
-				if (!InputController.isShiftPressed()) {
-					if (mode === "assembly" || mode === "machine" || mode === "box") {
-						return prev;
-					}
-				}
-
-				return mode;
-			},*/
-		};
-		this.parent(new MultiBlockHighlightedSelector(mode.targetPlot, this.selected, undefined, config));
-
-		// TODO: remove false later, deselects everything after any change
-		if (false as boolean)
-			this.subscribeToCurrentPlot((plot) => {
-				if (!this.selected.get().find((s) => s.IsDescendantOf(plot.instance))) {
-					return;
-				}
-
-				this.selected.clear();
-			});
+		this.parent(new MultiBlockHighlightedSelector(mode.targetPlot, this.selected, undefined, { filter }));
 	}
 
 	selectBlockByUuid(uuid: BlockUuid) {

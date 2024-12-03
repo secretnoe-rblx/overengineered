@@ -1,5 +1,7 @@
+import { BlockPipetteButton } from "client/gui/controls/BlockPipetteButton";
 import { NumberTextBoxControl } from "client/gui/controls/NumberTextBoxControl";
 import { SliderControl } from "client/gui/controls/SliderControl";
+import { ButtonControl } from "engine/client/gui/Button";
 import { Control } from "engine/client/gui/Control";
 import { TextBoxControl } from "engine/client/gui/TextBoxControl";
 import { ArgsSignal } from "engine/shared/event/Signal";
@@ -11,6 +13,10 @@ import type { ReadonlyArgsSignal } from "engine/shared/event/Signal";
 export type ColorChooserDefinition = GuiObject & {
 	readonly Preview: GuiObject;
 	readonly Sliders: GuiObject & {
+		readonly QuickAction?: GuiObject & {
+			readonly ResetButton: GuiButton;
+			readonly SelectButton: GuiButton;
+		};
 		readonly Hue: SliderControlDefinition & {
 			readonly UIGradient: UIGradient;
 		};
@@ -140,6 +146,22 @@ export class ColorChooser extends Control<ColorChooserDefinition> {
 
 		value ??= SubmittableValue.from<Color3>(Color3.fromRGB(255, 255, 255));
 		this.value = value.asHalfReadonly();
+
+		if (Control.exists(gui.Sliders, "QuickAction")) {
+			this.add(
+				new ButtonControl(gui.Sliders.QuickAction.ResetButton, () => {
+					value.set(Colors.black);
+					value.submit(Colors.black);
+				}),
+			);
+
+			this.add(
+				BlockPipetteButton.forColor(gui.Sliders.QuickAction.SelectButton, (color) => {
+					value.set(color);
+					value.submit(color);
+				}),
+			);
+		}
 
 		const sliders = this.add(new ColorChooserSliders(gui.Sliders));
 		sliders.moved.Connect((v) => {

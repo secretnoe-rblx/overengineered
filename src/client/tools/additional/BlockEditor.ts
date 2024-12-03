@@ -607,7 +607,7 @@ class ScaleComponent extends ClientComponent implements EditComponent {
 			const [_1, _2, _3, m00, m01, m02, m10, m11, m12, m20, m21, m22] = rotationDifference.GetComponents();
 
 			const is90DegreeMultiple = (value: number): boolean => {
-				const degrees = math.deg(math.acos(value));
+				const degrees = math.deg(math.acos(math.clamp(value, 0, 1)));
 				return math.abs(degrees % 90) < 0.1 || math.abs((degrees % 90) - 90) < 0.1;
 			};
 			return is90DegreeMultiple(m00) && is90DegreeMultiple(m11) && is90DegreeMultiple(m22);

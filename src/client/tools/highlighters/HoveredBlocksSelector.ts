@@ -21,7 +21,7 @@ export class HoveredBlocksSelector extends ClientComponent implements BlockSelec
 	private readonly _submit = new ArgsSignal<[blocks: readonly BlockModel[]]>();
 	readonly submit = this._submit.asReadonly();
 
-	constructor(getTargets: (block: BlockModel) => readonly BlockModel[]) {
+	constructor(getTargets: (block: BlockModel, highlighted: ReadonlySet<BlockModel>) => readonly BlockModel[]) {
 		super();
 
 		const highlighter = this.parent(new MultiModelHighlighter(this.highlighted));
@@ -48,8 +48,8 @@ export class HoveredBlocksSelector extends ClientComponent implements BlockSelec
 			}
 			prevTarget = target;
 
-			const targets = getTargets(target);
-			this._highlighted.set(add ? [...new Set([...this._highlighted.get(), ...targets])] : targets);
+			const targets = getTargets(target, pressing ? new Set([...this.highlighted.get()]) : new Set([target]));
+			this._highlighted.set(add ? [...new Set([...this._highlighted.get(), ...targets])] : [...new Set(targets)]);
 		};
 		const submit = () => {
 			if (!pressing) return;

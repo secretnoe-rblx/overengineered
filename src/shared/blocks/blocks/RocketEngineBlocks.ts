@@ -116,7 +116,7 @@ class Logic extends InstanceBlockLogic<typeof definition, RocketModel> {
 		this.particleEmitter = this.instance.EffectEmitter.Fire;
 
 		// Math
-		let multiplier = (colbox.Size.X * colbox.Size.Y * colbox.Size.Z) / 16;
+		let multiplier = (colbox.Size.X * colbox.Size.Y * colbox.Size.Z) / 8;
 		this.multipler = multiplier;
 
 		// The strength depends on the material
@@ -130,6 +130,22 @@ class Logic extends InstanceBlockLogic<typeof definition, RocketModel> {
 		this.onAlwaysInputs(({ thrust, strength }) => {
 			this.cachedThrust = thrust;
 			this.update(thrust, strength);
+		});
+
+		this.onEnable(() => {
+			const scale = math.sqrt(BlockManager.manager.scale.get(this.instance)?.findMin() ?? 1);
+			this.particleEmitter.Size = new NumberSequence(
+				this.particleEmitter.Size.Keypoints.map(
+					(k) => new NumberSequenceKeypoint(k.Time, k.Value * scale, k.Envelope),
+				),
+			);
+
+			this.particleEffect.send(this.instance.PrimaryPart!, {
+				particle: this.particleEmitter,
+				isEnabled: false,
+				acceleration: this.particleEmitter.Acceleration,
+				scale,
+			});
 		});
 
 		this.onDisable(() => this.update(0, 0));

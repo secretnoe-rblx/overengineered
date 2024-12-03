@@ -88,6 +88,7 @@ class Logic extends InstanceBlockLogic<typeof definition, SuspensionModel> {
 			| undefined;
 		if (spring) {
 			spring.Radius *= blockScale.findMin();
+			spring.Thickness *= blockScale.findMin();
 		}
 
 		this.on(({ max_force, damping, stiffness, free_length }) => {

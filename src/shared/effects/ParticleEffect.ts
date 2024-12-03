@@ -5,6 +5,7 @@ type Args = {
 	readonly particle: ParticleEmitter;
 	readonly isEnabled: boolean;
 	readonly acceleration: Vector3;
+	readonly scale?: number;
 	readonly color?: Color3;
 };
 export class ParticleEffect extends EffectBase<Args> {
@@ -12,11 +13,17 @@ export class ParticleEffect extends EffectBase<Args> {
 		super("particle_effect");
 	}
 
-	justRun({ particle, isEnabled, acceleration, color }: Args): void {
+	justRun({ particle, isEnabled, acceleration, color, scale }: Args): void {
 		if (!particle || !particle.Parent) return;
 
 		const part = particle.Parent;
 		if (!BlockManager.isActiveBlockPart(part)) return;
+
+		if (scale) {
+			particle.Size = new NumberSequence(
+				particle.Size.Keypoints.map((k) => new NumberSequenceKeypoint(k.Time, k.Value * scale, k.Envelope)),
+			);
+		}
 
 		particle.Enabled = isEnabled;
 		particle.Acceleration = acceleration;

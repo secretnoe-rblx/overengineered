@@ -49,6 +49,7 @@ class Logic extends BlockLogic<typeof definition> {
 			if (!wasImpulsedLastTick) return;
 			this.output.value.set("bool", false);
 		});
+		this.output.value.set("bool", false);
 
 		this.on(({ impulse, type: trig_side, impulseChanged }) => {
 			if (!impulseChanged) return;

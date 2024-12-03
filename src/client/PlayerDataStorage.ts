@@ -46,7 +46,9 @@ export namespace PlayerDataInitializer {
 			data: d.data ?? {},
 		};
 
-		$log("Configuration loaded: " + HttpService.JSONEncode(data.settings));
+		$log(
+			`Configuration loaded (v${data.settings["version" as never] ?? "?"}): ${HttpService.JSONEncode(data.settings)}`,
+		);
 		return data;
 	}
 }
@@ -124,9 +126,9 @@ export class PlayerDataStorage {
 		}
 	}
 
-	async loadPlayerSlot(index: number, isImported: boolean) {
+	async loadPlayerSlot(index: number, isImported: boolean, message?: string) {
 		$log("Loading slot " + index);
-		LoadingController.show("Loading a slot");
+		LoadingController.show(message ?? "Loading a slot");
 
 		try {
 			const response = CustomRemotes.slots[isImported ? "loadImported" : "load"].send({ index });

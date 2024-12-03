@@ -14,7 +14,9 @@ import { Colors } from "shared/Colors";
 import { gameInfo } from "shared/GameInfo";
 import { RemoteEvents } from "shared/RemoteEvents";
 import { CustomRemotes } from "shared/Remotes";
+import { SlotsMeta } from "shared/SlotsMeta";
 import { LaserProjectile } from "shared/weapons/LaserProjectileLogic";
+import type { PlayerDataStorage } from "client/PlayerDataStorage";
 
 LoadingController.show("Initializing");
 Gui.getGameUI<{ VERSION: TextLabel }>().VERSION.Text = `v${RunService.IsStudio() ? "studio" : game.PlaceVersion}`;
@@ -64,6 +66,13 @@ LoadingController.hide();
 CustomRemotes.player.loaded.send();
 $log("Client loaded.");
 
+{
+	const playerData = host.services.resolve<PlayerDataStorage>();
+	if (playerData.config.get().autoLoad) {
+		Objects.awaitThrow(playerData.loadPlayerSlot(SlotsMeta.quitSlotIndex, false, "Loading the autosave"));
+	}
+}
+
 //host.services.resolveForeignClass(CenterOfMassController).enable();
 
 //testing
@@ -71,7 +80,7 @@ if (RunService.IsStudio() && Players.LocalPlayer.Name === "samlovebutter") {
 	//&& (false as boolean)
 	/*
 	while (true as boolean) {
-		BulletProjectile.spawn.send({
+		PlasmaProjectile.spawn.send({
 			startPosition: new Vector3(359, -16360, 330),
 			baseVelocity: new Vector3(
 				0 + (math.random() - 0.5) * 10,

@@ -1,5 +1,7 @@
+import { Colors } from "engine/shared/Colors";
 import { AutoC2SRemoteEvent } from "engine/shared/event/C2SRemoteEvent";
 import { InstanceBlockLogic } from "shared/blockLogic/BlockLogic";
+import { inferEnumLogicType } from "shared/blockLogic/BlockLogicTypes";
 import { BlockConfigDefinitions } from "shared/blocks/BlockConfigDefinitions";
 import { BlockCreation } from "shared/blocks/BlockCreation";
 import { BlockManager } from "shared/building/BlockManager";
@@ -26,6 +28,14 @@ const definition = {
 				},
 			},
 		},
+		color: {
+			displayName: "Color",
+			types: {
+				color: {
+					config: Colors.white,
+				},
+			},
+		},
 		lightRange: {
 			displayName: "Range",
 			types: {
@@ -39,6 +49,22 @@ const definition = {
 					config: 20,
 				},
 			},
+		},
+		colorMixing: {
+			displayName: "Color Priority",
+			types: {
+				enum: inferEnumLogicType({
+					config: "paint",
+					elementOrder: ["config", "paint", "mixed", "mul"],
+					elements: {
+						config: { displayName: "Config", tooltip: "Prioritize configured color over paint color" },
+						paint: { displayName: "Paint", tooltip: "Prioritize paint color over configured color" },
+						mixed: { displayName: "Mixed", tooltip: "Mix configured and paint colors evenly" },
+						mul: { displayName: "Multiplication", tooltip: "Multiply configured and paint colors" },
+					},
+				}),
+			},
+			connectorHidden: true,
 		},
 	},
 	output: {},
@@ -61,16 +87,39 @@ class Logic extends InstanceBlockLogic<typeof definition> {
 	constructor(args: InstanceBlockLogicArgs) {
 		super(definition, args);
 
-		const color = BlockManager.manager.color.get(args.instance);
+		const blockColor = BlockManager.manager.color.get(args.instance);
 
-		this.on(({ enabled, brightness, lightRange, enabledChanged }) => {
+		const colorFunctions: Record<
+			keyof (typeof definition)["input"]["colorMixing"]["types"]["enum"]["elements"],
+			(configColor: Color3, blockColor: Color3) => Color3
+		> = {
+			config: (configColor, _) => configColor,
+			paint: (_, blockColor) => blockColor,
+			mixed: (configColor, blockColor) => configColor.Lerp(blockColor, 0.5),
+			mul: (configColor, blockColor) => {
+				const redSum = configColor.R * blockColor.R;
+				const greenSum = configColor.G * blockColor.G;
+				const blueSum = configColor.B * blockColor.B;
+
+				const combinedColorValue = (redSum + greenSum + blueSum) / 255;
+
+				return Color3.fromRGB(
+					redSum / combinedColorValue,
+					greenSum / combinedColorValue,
+					blueSum / combinedColorValue,
+				);
+			},
+		};
+
+		this.on(({ enabled, brightness, lightRange, color, enabledChanged, colorMixing }) => {
 			// Send the request only if enabled or enabling
 			if (!enabled && !enabledChanged) return;
+			const finalColor = colorFunctions[colorMixing](color, blockColor);
 
 			const data: UpdateData = {
 				block: this.instance,
 				state: enabled,
-				color: color,
+				color: finalColor,
 				brightness: brightness * 0.2, // a.k.a. / 100 * 40 and 30% off
 				range: lightRange * 0.6, // a.k.a. / 100 * 60
 			};

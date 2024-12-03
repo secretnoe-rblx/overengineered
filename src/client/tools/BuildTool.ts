@@ -546,6 +546,7 @@ namespace SinglePlaceController {
 				},
 			]);
 			this.mainGhost.PivotTo(this.blockRotation.get().add(mainPosition));
+			SharedBuilding.scale(this.mainGhost, this.selectedBlock.get()!.model, this.blockScale.get());
 
 			const plot = this.plot.get();
 			const getAreAllGhostsInsidePlot = () =>

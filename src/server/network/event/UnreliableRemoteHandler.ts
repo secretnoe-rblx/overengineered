@@ -1,11 +1,13 @@
 import { Players, RunService, Workspace } from "@rbxts/services";
 import { HostedService } from "engine/shared/di/HostedService";
+import { ServerBlockLogic } from "server/blocks/ServerBlockLogic";
 import { ServerPartUtils } from "server/plots/ServerPartUtils";
 import { ServerPlayers } from "server/ServerPlayers";
 import { BlockManager } from "shared/building/BlockManager";
 import { RemoteEvents } from "shared/RemoteEvents";
 import { CustomRemotes } from "shared/Remotes";
 import { PartUtils } from "shared/utils/PartUtils";
+import type { PlayModeController } from "server/modes/PlayModeController";
 import type { SpreadingFireController } from "server/SpreadingFireController";
 import type { ExplosionEffect } from "shared/effects/ExplosionEffect";
 import type { ImpactSoundEffect } from "shared/effects/ImpactSoundEffect";
@@ -17,6 +19,7 @@ export class UnreliableRemoteController extends HostedService {
 		@inject impactSoundEffect: ImpactSoundEffect,
 		@inject spreadingFire: SpreadingFireController,
 		@inject explosionEffect: ExplosionEffect,
+		@inject playModeController: PlayModeController,
 	) {
 		super();
 
@@ -85,19 +88,7 @@ export class UnreliableRemoteController extends HostedService {
 
 		// TODO: Change this for some offensive update
 		const explode = (player: Player | undefined, { part, isFlammable, pressure, radius }: ExplodeArgs) => {
-			function isValidBlock(part: BasePart, player: Player | undefined): boolean {
-				if (!part) return false;
-				if (!part.IsDescendantOf(Workspace)) return false;
-
-				if (player) {
-					if (!part.Anchored && !part.AssemblyRootPart?.Anchored && part.GetNetworkOwner() !== player) {
-						return false;
-					}
-				}
-
-				return true;
-			}
-			if (!isValidBlock(part, player)) {
+			if (!ServerBlockLogic.staticIsValidBlock(part, player, playModeController)) {
 				return;
 			}
 
