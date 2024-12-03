@@ -641,8 +641,8 @@ export class EditTool extends ToolBase {
 			this.tooltipHolder.set(mode === undefined ? this.getTooltips() : {}),
 		);
 		this.event.subscribeObservable(this.selectedMode, (mode) => {
-			actionController.canUndo.set("editTool_modeSelected", mode === undefined);
-			actionController.canRedo.set("editTool_modeSelected", mode === undefined);
+			actionController.undoAction.canExecute.set("editTool_modeSelected", mode === undefined);
+			actionController.redoAction.canExecute.set("editTool_modeSelected", mode === undefined);
 		});
 
 		this.onDisable(() => this.selected.clear());

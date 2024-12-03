@@ -183,8 +183,8 @@ export class BuildingMode extends PlayMode {
 	}
 
 	switchTutorialMode(tutorialMode: boolean): void {
-		this.actionController.canUndo.set("build_tutorialMode", !tutorialMode);
-		this.actionController.canRedo.set("build_tutorialMode", !tutorialMode);
+		this.actionController.undoAction.canExecute.set("build_tutorialMode", !tutorialMode);
+		this.actionController.redoAction.canExecute.set("build_tutorialMode", !tutorialMode);
 
 		if (!tutorialMode) {
 			this.toolController.enabledTools.disableAll();

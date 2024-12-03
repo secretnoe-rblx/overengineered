@@ -1,95 +1,65 @@
 import { LoadingController } from "client/controller/LoadingController";
 import { LogControl } from "client/gui/static/LogControl";
-import { ButtonControl } from "engine/client/gui/Button";
+import { Action } from "engine/client/Action";
 import { InputController } from "engine/client/InputController";
 import { Component } from "engine/shared/component/Component";
 import { ObservableCollectionArr } from "engine/shared/event/ObservableCollection";
-import { ObservableSwitch } from "engine/shared/event/ObservableSwitch";
 import { Signal } from "engine/shared/event/Signal";
 import type { MainScreenLayout } from "client/gui/MainScreenLayout";
 
-@injectable
-class ActionControllerGui extends Component {
-	constructor(@inject mainScreen: MainScreenLayout, @inject actionController: ActionController) {
-		super();
-
-		const undov = this.parent(mainScreen.registerTopRightButton("Undo"));
-		const redov = this.parent(mainScreen.registerTopRightButton("Redo"));
-
-		this.parent(new ButtonControl(undov.instance, () => actionController.undo()));
-		this.parent(new ButtonControl(redov.instance, () => actionController.redo()));
-
-		this.event.subscribeObservable(
-			actionController.canUndo,
-			(canUndo) => undov.setVisibleAndEnabled(canUndo, "main"),
-			true,
-		);
-		this.event.subscribeObservable(
-			actionController.canRedo,
-			(canRedo) => redov.setVisibleAndEnabled(canRedo, "main"),
-			true,
-		);
-	}
-}
-
-type Operation = {
+interface Operation {
 	readonly description: string;
 	readonly undo: () => void | Response;
 	readonly redo: () => void | Response;
-};
+}
 
 @injectable
 export class ActionController extends Component {
-	/** @deprecated Use @inject instead */
+	/** @deprecated Use `@inject` instead */
 	static instance: ActionController;
 
-	readonly canUndo = new ObservableSwitch();
-	readonly canRedo = new ObservableSwitch();
+	readonly undoAction = new Action(() => this.undo());
+	readonly redoAction = new Action(() => this.redo());
 
 	readonly onUndo = new Signal<(operation: Operation) => void>();
 	readonly onRedo = new Signal<(operation: Operation) => void>();
 	private readonly history = new ObservableCollectionArr<Operation>();
 	private readonly redoHistory = new ObservableCollectionArr<Operation>();
 
-	constructor(@inject di: DIContainer) {
+	constructor(@inject mainScreen: MainScreenLayout) {
 		super();
-
-		this.parent(di.resolveForeignClass(ActionControllerGui));
 
 		if (ActionController.instance) throw "what";
 		ActionController.instance = this;
 
+		this.undoAction.subCanExecuteFrom({
+			main: this.enabledState,
+			isntLoading: LoadingController.isNotLoading,
+		});
+		this.redoAction.subCanExecuteFrom({
+			main: this.enabledState,
+			isntLoading: LoadingController.isNotLoading,
+		});
+
 		this.event.subscribeImmediately(this.history.collectionChanged, () =>
-			this.canUndo.set("main_history", this.history.size() !== 0),
+			this.undoAction.canExecute.set("main_history", this.history.size() !== 0),
 		);
 		this.event.subscribeImmediately(this.redoHistory.collectionChanged, () =>
-			this.canRedo.set("main_history", this.redoHistory.size() !== 0),
+			this.redoAction.canExecute.set("main_history", this.redoHistory.size() !== 0),
 		);
 
-		this.onEnabledStateChange((enabled) => {
-			this.canUndo.set("main_enabled", enabled);
-			this.canRedo.set("main_enabled", enabled);
-		}, true);
-		this.event.subscribeObservable(
-			LoadingController.isLoading,
-			(loading) => {
-				this.canUndo.set("isLoading", !loading);
-				this.canRedo.set("isLoading", !loading);
-			},
-			true,
-		);
+		this.parent(mainScreen.registerTopRightButton("Undo")) //
+			.subscribeToAction(this.undoAction);
+		this.parent(mainScreen.registerTopRightButton("Redo")) //
+			.subscribeToAction(this.redoAction);
 
 		this.event.onKeyDown("Z", () => {
-			if (!this.canUndo.get()) return;
 			if (!InputController.isCtrlPressed()) return;
-
-			this.undo();
+			this.undoAction.execute();
 		});
 		this.event.onKeyDown("Y", () => {
-			if (!this.canRedo.get()) return;
 			if (!InputController.isCtrlPressed()) return;
-
-			this.redo();
+			this.redoAction.execute();
 		});
 	}
 
@@ -110,39 +80,33 @@ export class ActionController extends Component {
 		this.redoHistory.clear();
 	}
 
-	redo(): boolean {
-		if (!this.canRedo.get()) return false;
-
+	private redo(): void {
 		const operation = this.redoHistory.pop();
-		if (!operation) return false;
+		if (!operation) return;
 
 		this.history.push(operation);
 		const response = operation.redo();
 		if (response && !response.success) {
 			LogControl.instance.addLine(`Error redoing "${operation.description}": ${response.message}`);
-			return true;
+			return;
 		}
 
 		this.onRedo.Fire(operation);
 		LogControl.instance.addLine(`Redone "${operation.description}"`);
-		return true;
 	}
 
-	undo(): boolean {
-		if (!this.canUndo.get()) return false;
-
+	private undo(): void {
 		const operation = this.history.pop();
-		if (!operation) return false;
+		if (!operation) return;
 
 		this.redoHistory.push(operation);
 		const response = operation.undo();
 		if (response && !response.success) {
 			LogControl.instance.addLine(`Error undoing "${operation.description}": ${response.message}`);
-			return true;
+			return;
 		}
 
 		this.onUndo.Fire(operation);
 		LogControl.instance.addLine(`Undone "${operation.description}"`);
-		return true;
 	}
 }
