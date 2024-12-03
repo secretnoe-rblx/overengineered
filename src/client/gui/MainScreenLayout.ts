@@ -27,14 +27,14 @@ export class MainScreenLayout extends Component {
 	constructor(@inject di: DIContainer) {
 		super();
 
-		this.instance = Interface.getInterface2();
+		this.instance = Interface.getInterface();
 		ComponentInstance.init(this, this.instance);
 		this.onEnabledStateChange((enabled) => (this.instance.Enabled = enabled));
 
 		const initHotbar = () => {
 			const hotbar = this.parent(
 				di.resolveForeignClass(HotbarControl, [
-					Interface.getInterface2<{ Hotbar: HotbarControlDefinition }>().Hotbar,
+					Interface.getInterface<{ Hotbar: HotbarControlDefinition }>().Hotbar,
 				]),
 			);
 
@@ -84,18 +84,24 @@ export class MainScreenLayout extends Component {
 	}
 	registerTopRightButton<T extends GuiButton>(name: string): Control<T> {
 		const control = new Control(this.instance.Top.Right.WaitForChild(name) as T);
-		control.isVisible.subscribe((visible) => {
-			control.instance.Visible = visible;
-		});
 
 		return control;
 	}
 
 	registerLeft<T extends GuiObject>(name: string): Control<T> {
 		const control = new Control(this.instance.Left.WaitForChild(name) as T);
-		control.isVisible.subscribe((visible) => {
-			control.instance.Visible = visible;
-		});
+		control
+			.visibilityComponent()
+			.addTransformFunc((enabling, tr) =>
+				tr
+					.transform(
+						control.instance as GuiObject,
+						"AnchorPoint",
+						new Vector2(enabling ? 0 : 1, 0),
+						Transforms.quadOut02,
+					)
+					.moveX(control.instance, new UDim(0, enabling ? 0 : -10), Transforms.quadOut02),
+			);
 
 		return control;
 	}

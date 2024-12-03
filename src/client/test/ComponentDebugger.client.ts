@@ -58,7 +58,7 @@ class TreeControl extends Control<TreeControlDefinition> {
 
 		this.main.parent(
 			new Control(this.main.instance).addButtonAction(() => {
-				if (this.childContainer.isVisible.get()) {
+				if (this.childContainer.isInstanceVisible()) {
 					this.main.instance.BackgroundColor3 = Colors.accentDark;
 					this.childContainer.hide_();
 				} else {

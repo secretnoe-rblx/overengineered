@@ -21,12 +21,12 @@ class ActionControllerGui extends Component {
 
 		this.event.subscribeObservable(
 			actionController.canUndo,
-			(canUndo) => undov.isVisible.set("main", canUndo),
+			(canUndo) => undov.setVisibleAndEnabled(canUndo, "main"),
 			true,
 		);
 		this.event.subscribeObservable(
 			actionController.canRedo,
-			(canRedo) => redov.isVisible.set("main", canRedo),
+			(canRedo) => redov.setVisibleAndEnabled(canRedo, "main"),
 			true,
 		);
 	}

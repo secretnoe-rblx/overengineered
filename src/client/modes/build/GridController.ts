@@ -30,7 +30,7 @@ export class GridController extends Component {
 			),
 		);
 
-		const floatingGui = Interface.getInterface2<{
+		const floatingGui = Interface.getInterface<{
 			Floating: { Grid: FloatingWindowDefinition & { Content: GridEditorControlDefinition } };
 		}>().Floating.Grid;
 
@@ -49,7 +49,7 @@ export class GridController extends Component {
 				const visible = mode === undefined;
 
 				controlOverlay.get(0).Visible = visible;
-				gridButton.isVisible.set("editTool_active", visible);
+				gridButton.setVisibleAndEnabled(visible, "editTool_active");
 			},
 			true,
 		);

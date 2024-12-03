@@ -207,7 +207,7 @@ export class RideModeControls extends Control<RideModeControlsDefinition> {
 		this.keyedChildren.clear();
 		machine.onDestroy(() => this.keyedChildren.clear());
 		machine.occupiedByLocalPlayer.subscribe((occupied) => {
-			this.isVisible.set("machineSeatOccupiedByPlayer", occupied);
+			this.setVisibleAndEnabled(occupied, "machineSeatOccupiedByPlayer");
 		}, true);
 
 		const inputType = InputController.inputType.get();

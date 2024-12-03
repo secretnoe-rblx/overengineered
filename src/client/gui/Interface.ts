@@ -11,11 +11,6 @@ export namespace Interface {
 		return getPlayerGui().WaitForChild("Interface") as T;
 	}
 
-	/** Receives Interface from the PlayerGui */
-	export function getInterface2<T = ScreenGui>() {
-		return getPlayerGui().WaitForChild("Interface2_i3ym_test") as T;
-	}
-
 	/** Receives Unscaled from the PlayerGui */
 	export function getUnscaledGameUI<T = ScreenGui>() {
 		return getPlayerGui().WaitForChild("Unscaled") as T;

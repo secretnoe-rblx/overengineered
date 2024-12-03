@@ -12,6 +12,7 @@ export class GuiAutoScaleController extends HostedService {
 		ScaledScreenGui.initializeGlobalScale(scale);
 
 		this.parent(new ScaledScreenGui(Interface.getGameUI()));
+		this.parent(new ScaledScreenGui(Interface.getInterface()));
 		this.parent(new ScaledScreenGui(Interface.getPopupUI()));
 	}
 }

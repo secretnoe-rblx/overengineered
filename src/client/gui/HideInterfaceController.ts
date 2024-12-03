@@ -10,7 +10,7 @@ import type { MainScreenLayout } from "client/gui/MainScreenLayout";
 export class HideInterfaceController extends HostedService {
 	private readonly visible = new ObservableValue(true);
 
-	private readonly guis = [Interface.getGameUI(), Interface.getUnscaledGameUI(), Interface.getInterface2()] as const;
+	private readonly guis = [Interface.getGameUI(), Interface.getUnscaledGameUI(), Interface.getInterface()] as const;
 	private currentUnhideScreen?: ScreenGui;
 
 	constructor(@inject mainScreen: MainScreenLayout) {
