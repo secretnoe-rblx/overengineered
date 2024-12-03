@@ -66,9 +66,19 @@ export class MainScreenLayout extends Component {
 
 	registerTopCenterButton<T extends GuiButton>(name: string): Control<T> {
 		const control = new Control(this.instance.Top.Center.Main.WaitForChild(name) as T);
-		control.isVisible.subscribe((visible) => {
-			control.instance.Visible = visible;
-		});
+
+		const origSize = control.instance.Size;
+		control
+			.visibilityComponent()
+			.addTransformFunc((enabling, tr) =>
+				tr
+					.func(() => control.setButtonInteractable(enabling))
+					.resize(
+						control.instance,
+						new UDim2(enabling ? origSize.X : new UDim(), origSize.Y),
+						Transforms.quadOut02,
+					),
+			);
 
 		return control;
 	}

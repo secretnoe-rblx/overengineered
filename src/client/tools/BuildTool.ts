@@ -325,7 +325,7 @@ namespace Scene {
 			this.onEnabledStateChange((enabled) => scaleEditorBtn.setVisibleAndEnabled(enabled), true);
 			this.onDisable(() => (scaleEditorGui.Visible = false));
 
-			const inventory = this.parent(mainScreen.registerLeft<BlockSelectionControlDefinition>("Inventory"));
+			const inventory = this.parentGui(mainScreen.registerLeft<BlockSelectionControlDefinition>("Inventory"));
 			this.blockSelector = this.parent(tool.di.resolveForeignClass(BlockSelectionControl, [inventory.instance]));
 
 			this.blockInfo = this.parent(new BlockInfo(gui.Info, this.blockSelector.selectedBlock));

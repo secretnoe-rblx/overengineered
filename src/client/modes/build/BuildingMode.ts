@@ -5,6 +5,7 @@ import { ActionController } from "client/modes/build/ActionController";
 import { CenterOfMassController } from "client/modes/build/CenterOfMassController";
 import { GridController } from "client/modes/build/GridController";
 import { PlayMode } from "client/modes/PlayMode";
+import { requestMode } from "client/modes/PlayModeRequest";
 import { BuildTool } from "client/tools/BuildTool";
 import { ConfigTool } from "client/tools/ConfigTool";
 import { DeleteTool } from "client/tools/DeleteTool";
@@ -12,12 +13,14 @@ import { EditTool } from "client/tools/EditTool";
 import { BlockSelect } from "client/tools/highlighters/BlockSelect";
 import { PaintTool } from "client/tools/PaintTool";
 import { WireTool } from "client/tools/WireTool";
+import { Action } from "engine/client/Action";
 import { LocalPlayer } from "engine/client/LocalPlayer";
 import { NumberObservableValue } from "engine/shared/event/NumberObservableValue";
-import { ObservableSwitch } from "engine/shared/event/ObservableSwitch";
 import { ObservableValue } from "engine/shared/event/ObservableValue";
 import { Objects } from "engine/shared/fixes/Objects";
 import { SharedRagdoll } from "shared/SharedRagdoll";
+import type { MainScene } from "client/gui/MainScene";
+import type { SavePopup } from "client/gui/popup/SavePopup";
 import type { ToolBase } from "client/tools/ToolBase";
 import type { ToolController } from "client/tools/ToolController";
 import type { SharedPlot } from "shared/building/SharedPlot";
@@ -34,13 +37,13 @@ export type EditMode = "global" | "local";
 
 @injectable
 export class BuildingMode extends PlayMode {
-	readonly canSaveOrLoad = new ObservableSwitch();
-	readonly canRun = new ObservableSwitch();
+	readonly openSavePopupAction = new Action();
+	readonly runAction = new Action(() => requestMode("ride"));
+	readonly teleportToPlotAction = new Action(() => this.teleportToPlot());
 
 	readonly mirrorMode = new ObservableValue<MirrorMode>({});
 	readonly targetPlot;
 	readonly mirrorVisualizer;
-	readonly gui;
 	readonly gridEnabled = new ObservableValue(true);
 	readonly moveGrid = new NumberObservableValue<number>(1, 0, 256, 0.001);
 	readonly rotateGrid = new NumberObservableValue<number>(90, 0, 360, 0.001);
@@ -52,9 +55,20 @@ export class BuildingMode extends PlayMode {
 	constructor(
 		@inject plot: SharedPlot,
 		@inject private readonly toolController: ToolController,
+		@inject mainScene: MainScene,
+		@injectFunc createSavePopup: () => SavePopup,
 		@inject di: DIContainer,
 	) {
 		super();
+
+		mainScene.openSettingsAction.subCanExecuteFrom({
+			buildMode: this.enabledState,
+		});
+		this.teleportToPlotAction.subCanExecuteFrom({
+			buildMode: this.enabledState,
+		});
+
+		this.openSavePopupAction.subscribe(() => createSavePopup().show());
 
 		di = di.beginScope((di) => {
 			di.registerSingletonValue(this);
@@ -95,14 +109,14 @@ export class BuildingMode extends PlayMode {
 			});
 		});
 
-		this.event.subscribeObservable(
-			LoadingController.isLoading,
-			(loading) => {
-				this.canRun.set("isNotLoading", !loading);
-				this.canSaveOrLoad.set("isNotLoading", !loading);
-			},
-			true,
-		);
+		this.runAction.subCanExecuteFrom({
+			main: this.enabledState,
+			notLoading: LoadingController.isNotLoading,
+		});
+		this.openSavePopupAction.subCanExecuteFrom({
+			main: this.enabledState,
+			notLoading: LoadingController.isNotLoading,
+		});
 
 		this.targetPlot = new ObservableValue<SharedPlot>(plot);
 		this.targetPlot.subscribe((plot, prev) => {
@@ -115,7 +129,7 @@ export class BuildingMode extends PlayMode {
 		}, true);
 		this.mirrorVisualizer = this.parent(new MirrorVisualizer(this.targetPlot, this.mirrorMode));
 
-		this.gui = this.parent(di.resolveForeignClass(BuildingModeScene));
+		this.parent(di.resolveForeignClass(BuildingModeScene));
 
 		this.actionController = this.parent(di.resolve<ActionController>());
 		this.parent(di.resolve<GridController>());
@@ -176,8 +190,8 @@ export class BuildingMode extends PlayMode {
 			this.toolController.enabledTools.disableAll();
 		}
 
-		this.canSaveOrLoad.set("this_tutorialMode", !tutorialMode);
-		this.canRun.set("this_tutorialMode", !tutorialMode);
+		this.openSavePopupAction.canExecute.set("this_tutorialMode", !tutorialMode);
+		this.runAction.canExecute.set("this_tutorialMode", !tutorialMode);
 	}
 
 	onSwitchToNext(mode: PlayModes | undefined) {}

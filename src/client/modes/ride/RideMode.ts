@@ -5,7 +5,6 @@ import { RideModeScene } from "client/gui/ridemode/RideModeScene";
 import { PlayMode } from "client/modes/PlayMode";
 import { ObservableValue } from "engine/shared/event/ObservableValue";
 import { CustomRemotes } from "shared/Remotes";
-import type { MainScene } from "client/gui/MainScene";
 import type { RideModeSceneDefinition } from "client/gui/ridemode/RideModeScene";
 import type { SharedPlot } from "shared/building/SharedPlot";
 
@@ -16,13 +15,10 @@ export class RideMode extends PlayMode {
 	readonly pauseOnStart = new ObservableValue(false);
 
 	constructor(
-		@inject mainScene: MainScene,
 		@inject private readonly plot: SharedPlot,
 		@inject private readonly di: DIContainer,
 	) {
 		super();
-
-		this.onEnabledStateChange((enabled) => mainScene.canOpenSettings.set("riding", !enabled), true);
 
 		this.di = di = di.beginScope((builder) => {
 			builder.registerSingletonValue(this);

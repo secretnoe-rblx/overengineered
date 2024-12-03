@@ -1,22 +1,21 @@
 import { Scene } from "client/gui/Scene";
-import { ButtonControl } from "engine/client/gui/Button";
-import { ObservableSwitch } from "engine/shared/event/ObservableSwitch";
+import { Action } from "engine/client/Action";
 import type { MainScreenLayout } from "client/gui/MainScreenLayout";
 import type { SettingsPopup } from "client/gui/popup/SettingsPopup";
 
 @injectable
 export class MainScene extends Scene {
-	readonly canOpenSettings = new ObservableSwitch();
+	readonly openSettingsAction = new Action();
 
 	constructor(@inject mainScreen: MainScreenLayout, @injectFunc createSettingsPopup: () => SettingsPopup) {
 		super();
 
-		const menuButton = this.parent(mainScreen.registerTopCenterButton("Menu"));
-		this.event.subscribeObservable(
-			this.canOpenSettings,
-			(canOpenSettings) => menuButton.isVisible.set("main", canOpenSettings),
-			true,
-		);
-		this.parent(new ButtonControl(menuButton.instance, () => createSettingsPopup().show()));
+		this.openSettingsAction.subscribe(() => createSettingsPopup().show());
+		this.openSettingsAction.subCanExecuteFrom({
+			main: this.enabledState,
+		});
+
+		this.parent(mainScreen.registerTopCenterButton("Menu")) //
+			.subscribeToAction(this.openSettingsAction);
 	}
 }

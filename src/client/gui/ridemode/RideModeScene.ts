@@ -310,7 +310,7 @@ export class RideModeScene extends Control<RideModeSceneDefinition> {
 		const notControlsEditMode = controlsEditMode.not();
 
 		this.stopAction = new Action(() => requestMode("build"));
-		this.stopAction.subCanExecuteFrom(this.event, {
+		this.stopAction.subCanExecuteFrom({
 			ride_editcontrols: notControlsEditMode,
 			ride_isntloading: LoadingController.isNotLoading,
 			ride_enabled: this.enabledState,
@@ -319,7 +319,7 @@ export class RideModeScene extends Control<RideModeSceneDefinition> {
 			.subscribeToAction(this.stopAction);
 
 		this.sitAction = new Action(() => CustomRemotes.modes.ride.teleportOnSeat.send());
-		this.sitAction.subCanExecuteFrom(this.event, {
+		this.sitAction.subCanExecuteFrom({
 			ride_editcontrols: notControlsEditMode,
 			ride_isntloading: LoadingController.isNotLoading,
 			ride_enabled: this.enabledState,
