@@ -255,7 +255,7 @@ namespace Controls {
 			) {
 				super(templates.Redirect());
 
-				const btn = this.parent(new Control(this.gui.Control)).withButtonAction(() =>
+				const btn = this.parent(new Control(this.gui.Control)).addButtonAction(() =>
 					args.travelTo(firstValue(config)!.blockUuid),
 				);
 
@@ -381,7 +381,7 @@ namespace Controls {
 						return true;
 					});
 
-				const control = this.parent(new Control(this.control)).withButtonAction(() => {
+				const control = this.parent(new Control(this.control)).addButtonAction(() => {
 					MemoryEditorPopup.showPopup(definition.lengthLimit, [...(value() ?? [])], (v) =>
 						this.submitted.Fire((config = map(config, (_) => v))),
 					);

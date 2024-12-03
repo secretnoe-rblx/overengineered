@@ -29,7 +29,7 @@ export class DropdownList<TValue extends string = string> extends Control<Dropdo
 
 		this.itemTemplate = this.asTemplate(this.gui.Content.Template);
 
-		this.button = this.add(new Control(this.gui.Button)).withButtonAction(() => this.toggle());
+		this.button = this.add(new Control(this.gui.Button)).addButtonAction(() => this.toggle());
 		this.contents = this.parent(new ComponentChildren<Control>().withParentInstance(this.gui.Content));
 
 		this.event.subscribeObservable(

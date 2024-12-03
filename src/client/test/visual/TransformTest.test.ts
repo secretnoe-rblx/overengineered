@@ -182,10 +182,10 @@ namespace TransformTests {
 			// const visual = list.add(new Control2(newbtn("Button", 10 + 1)));
 			const visual = list.add(new Control(newbtn("Button", 10 + 1)));
 
-			list.add(new Control(bvisible).withButtonAction(() => visual.setVisibleAndEnabled(true)));
-			list.add(new Control(bnotvisible).withButtonAction(() => visual.setVisibleAndEnabled(false)));
-			list.add(new Control(binteractable).withButtonAction(() => visual.setButtonInteractable(true)));
-			list.add(new Control(bnotinteractable).withButtonAction(() => visual.setButtonInteractable(false)));
+			list.add(new Control(bvisible).addButtonAction(() => visual.setVisibleAndEnabled(true)));
+			list.add(new Control(bnotvisible).addButtonAction(() => visual.setVisibleAndEnabled(false)));
+			list.add(new Control(binteractable).addButtonAction(() => visual.setButtonInteractable(true)));
+			list.add(new Control(bnotinteractable).addButtonAction(() => visual.setButtonInteractable(false)));
 		}
 
 		return list;

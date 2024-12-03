@@ -46,10 +46,10 @@ namespace Scene {
 			super();
 
 			const animationProps = Transforms.commonProps.quadOut02;
-			const selectPlot = this.parent(new Control(gui.Top.SelectAllButton)).withButtonAction(() =>
+			const selectPlot = this.parent(new Control(gui.Top.SelectAllButton)).addButtonAction(() =>
 				tool.selectPlot(),
 			);
-			const deselectAll = this.parent(new Control(gui.Top.DeselectAllButton)).withButtonAction(() =>
+			const deselectAll = this.parent(new Control(gui.Top.DeselectAllButton)).addButtonAction(() =>
 				tool.deselectAll(),
 			);
 
@@ -113,7 +113,7 @@ namespace Scene {
 			{
 				const cancel = this.buttons
 					.add(new Control(this.instance.CancelButton))
-					.withButtonAction(() => tool.cancelCurrentMode());
+					.addButtonAction(() => tool.cancelCurrentMode());
 
 				const animateCancelButton = Transforms.boolStateMachine(
 					cancel.instance,
@@ -132,37 +132,37 @@ namespace Scene {
 			}
 
 			const move = this.buttons.add(
-				new Control(this.instance.Bottom.MoveButton).withButtonAction(() => tool.toggleMode("Move")),
+				new Control(this.instance.Bottom.MoveButton).addButtonAction(() => tool.toggleMode("Move")),
 			);
 			const rotate = this.buttons.add(
-				new Control(this.instance.Bottom.RotateButton).withButtonAction(() => tool.toggleMode("Rotate")),
+				new Control(this.instance.Bottom.RotateButton).addButtonAction(() => tool.toggleMode("Rotate")),
 			);
 			const copy = this.buttons.add(
-				new Control(this.instance.Bottom2.CopyButton).withButtonAction(() => {
+				new Control(this.instance.Bottom2.CopyButton).addButtonAction(() => {
 					tool.copySelectedBlocks();
 					paste.setButtonInteractable(true);
 				}),
 			);
 			const paste = this.buttons.add(
-				new Control(this.instance.Bottom.PasteButton).withButtonAction(() => tool.toggleMode("Paste")),
+				new Control(this.instance.Bottom.PasteButton).addButtonAction(() => tool.toggleMode("Paste")),
 			);
 			const paint = this.buttons.add(
-				new Control(this.instance.Bottom.PaintButton).withButtonAction(() => tool.toggleMode("Paint")),
+				new Control(this.instance.Bottom.PaintButton).addButtonAction(() => tool.toggleMode("Paint")),
 			);
 			const del = this.buttons.add(
-				new Control(this.instance.Bottom.DeleteButton).withButtonAction(() => tool.deleteSelectedBlocks()),
+				new Control(this.instance.Bottom.DeleteButton).addButtonAction(() => tool.deleteSelectedBlocks()),
 			);
 			const mirx = this.buttons.add(
-				new Control(this.instance.Bottom2.MirrorXButton).withButtonAction(() => tool.mirrorSelectedBlocks("x")),
+				new Control(this.instance.Bottom2.MirrorXButton).addButtonAction(() => tool.mirrorSelectedBlocks("x")),
 			);
 			const miry = this.buttons.add(
-				new Control(this.instance.Bottom2.MirrorYButton).withButtonAction(() => tool.mirrorSelectedBlocks("y")),
+				new Control(this.instance.Bottom2.MirrorYButton).addButtonAction(() => tool.mirrorSelectedBlocks("y")),
 			);
 			const mirz = this.buttons.add(
-				new Control(this.instance.Bottom2.MirrorZButton).withButtonAction(() => tool.mirrorSelectedBlocks("z")),
+				new Control(this.instance.Bottom2.MirrorZButton).addButtonAction(() => tool.mirrorSelectedBlocks("z")),
 			);
 			const scale = this.buttons.add(
-				new Control(this.instance.Bottom.ScaleButton).withButtonAction(() => tool.toggleMode("Scale")),
+				new Control(this.instance.Bottom.ScaleButton).addButtonAction(() => tool.toggleMode("Scale")),
 			);
 
 			const multiValueSetter = <T>(instance: T, func: (value: boolean) => void) => {

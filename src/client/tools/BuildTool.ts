@@ -320,7 +320,7 @@ namespace Scene {
 				new Control(
 					Interface.getGameUI<{ BuildingMode: { Action: { Scale: GuiButton } } }>().BuildingMode.Action.Scale,
 				),
-			).withButtonAction(() => (scaleEditorGui.Visible = !scaleEditorGui.Visible));
+			).addButtonAction(() => (scaleEditorGui.Visible = !scaleEditorGui.Visible));
 
 			this.onEnabledStateChange((enabled) => scaleEditorBtn.setVisibleAndEnabled(enabled), true);
 			this.onDisable(() => (scaleEditorGui.Visible = false));

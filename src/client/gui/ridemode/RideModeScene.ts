@@ -8,6 +8,7 @@ import { ProgressBarControl } from "client/gui/controls/ProgressBarControl";
 import { ConfirmPopup } from "client/gui/popup/ConfirmPopup";
 import { TouchModeButtonControl } from "client/gui/ridemode/TouchModeButtonControl";
 import { requestMode } from "client/modes/PlayModeRequest";
+import { Action } from "engine/client/Action";
 import { Control } from "engine/client/gui/Control";
 import { InputController } from "engine/client/InputController";
 import { LocalPlayer } from "engine/client/LocalPlayer";
@@ -16,7 +17,6 @@ import { ComponentChild } from "engine/shared/component/ComponentChild";
 import { ComponentChildren } from "engine/shared/component/ComponentChildren";
 import { ComponentKeyedChildren } from "engine/shared/component/ComponentKeyedChildren";
 import { EventHandler } from "engine/shared/event/EventHandler";
-import { ObservableSwitch } from "engine/shared/event/ObservableSwitch";
 import { ObservableValue } from "engine/shared/event/ObservableValue";
 import { Signal } from "engine/shared/event/Signal";
 import { RobloxUnit } from "engine/shared/RobloxUnit";
@@ -289,9 +289,9 @@ export type RideModeSceneDefinition = GuiObject & {
 
 @injectable
 export class RideModeScene extends Control<RideModeSceneDefinition> {
-	readonly canSit = new ObservableSwitch();
+	private readonly stopAction;
+	private readonly sitAction;
 
-	private readonly logicButton;
 	private readonly controls;
 	private readonly info;
 
@@ -307,66 +307,57 @@ export class RideModeScene extends Control<RideModeSceneDefinition> {
 		super(gui);
 
 		const controlsEditMode = new ObservableValue(false);
+		const notControlsEditMode = controlsEditMode.not();
 
-		this.event.subscribeObservable(
-			controlsEditMode,
-			(editMode) => {
-				this.canSit.set("ride_editControls", !editMode);
-				stopButton.isVisible.set("ride_editControls", !editMode);
-				logicButton.isVisible.set("ride_editControls", !editMode);
+		this.stopAction = new Action(() => requestMode("build"));
+		this.stopAction.subCanExecuteFrom(this.event, {
+			ride_editcontrols: notControlsEditMode,
+			ride_isntloading: LoadingController.isNotLoading,
+			ride_enabled: this.enabledState,
+		});
+		this.parent(mainScreen.registerTopCenterButton("Stop")) //
+			.subscribeToAction(this.stopAction);
 
-				editControlsButton.isVisible.set("ride_editControls", editMode);
-				resetControlsButton.isVisible.set("ride_editControls", editMode);
-			},
-			true,
-		);
-		this.event.subscribeObservable(
-			LoadingController.isLoading,
-			(isLoading) => {
-				this.canSit.set("ride_isNotLoading", !isLoading);
-				stopButton.isVisible.set("ride_isNotLoading", !isLoading);
-				editControlsButton.isVisible.set("ride_isNotLoading", !isLoading);
-				resetControlsButton.isVisible.set("ride_isNotLoading", !isLoading);
-			},
-			true,
-		);
+		this.sitAction = new Action(() => CustomRemotes.modes.ride.teleportOnSeat.send());
+		this.sitAction.subCanExecuteFrom(this.event, {
+			ride_editcontrols: notControlsEditMode,
+			ride_isntloading: LoadingController.isNotLoading,
+			ride_enabled: this.enabledState,
+		});
+		this.parent(mainScreen.registerTopCenterButton("Sit")) //
+			.subscribeToAction(this.sitAction);
 
-		const stopButton = this.parent(mainScreen.registerTopCenterButton("Stop"));
-		this.parent(new Control(stopButton.instance).withButtonAction(() => requestMode("build")));
+		this.parent(mainScreen.registerTopRightButton("EditControls"))
+			.addButtonAction(() => this.controls.toggleSettingsMode())
+			.subscribeVisibilityFrom({
+				ride_touchOnly: InputController.isTouch,
+				ride_editcontrols: notControlsEditMode,
+				ride_isntloading: LoadingController.isNotLoading,
+				ride_enabled: this.enabledState,
+			});
 
-		const sitButton = this.parent(mainScreen.registerTopCenterButton("Sit"));
-		this.event.subscribeObservable(this.canSit, (canSit) => sitButton.isVisible.set("ride_main", canSit), true);
-		this.parent(
-			new Control(sitButton.instance).withButtonAction(() => CustomRemotes.modes.ride.teleportOnSeat.send()),
-		);
-
-		//
-
-		const editControlsButton = this.parent(mainScreen.registerTopRightButton("EditControls"));
-		this.event.onPrepare((input) => editControlsButton.isVisible.set("onlyTouch", input === "Touch"));
-		this.parent(
-			new Control(editControlsButton.instance).withButtonAction(() => this.controls.toggleSettingsMode()),
-		);
-
-		const resetControlsButton = this.parent(mainScreen.registerTopRightButton("ResetControls"));
-		this.parent(
-			new Control(resetControlsButton.instance).withButtonAction(() =>
+		this.parent(mainScreen.registerTopRightButton("ResetControls"))
+			.addButtonAction(() =>
 				ConfirmPopup.showPopup("Reset the controls?", "It will be impossible to undo this action", () =>
 					this.controls.resetControls(),
 				),
-			),
-		);
+			)
+			.subscribeVisibilityFrom({
+				ride_editcontrols: controlsEditMode,
+				ride_isntloading: LoadingController.isNotLoading,
+				ride_enabled: this.enabledState,
+			});
 
-		const logicButton = this.parent(mainScreen.registerTopRightButton("Logic"));
-		this.logicButton = this.parent(new Control(logicButton.instance));
-
-		this.onEnabledStateChange((enabled) => this.canSit.set("ride_enabled", enabled), true);
+		this.parent(mainScreen.registerTopRightButton("Logic")) //
+			.subscribeVisibilityFrom({
+				ride_editcontrols: notControlsEditMode,
+				ride_isntloading: LoadingController.isNotLoading,
+				ride_enabled: this.enabledState,
+			});
 
 		//
 
-		this.controls = new RideModeControls(this.gui.Controls, playerData);
-		this.add(this.controls);
-
+		this.controls = this.parent(new RideModeControls(this.gui.Controls, playerData));
 		this.controls.onEnterSettingsMode.Connect(() => controlsEditMode.set(true));
 		this.controls.onQuitSettingsMode.Connect(() => controlsEditMode.set(false));
 
@@ -380,10 +371,6 @@ export class RideModeScene extends Control<RideModeSceneDefinition> {
 
 	private addMeters(machine: Component & { readonly blocks: ReadonlyComponentChildren<GenericBlockLogic> }) {
 		this.info.clear();
-		this.canSit.set(
-			"canNotSitIfNoSeat",
-			machine.blocks.getAll().any((b) => b instanceof VehicleSeatBlock.logic.ctor),
-		);
 
 		const init = (
 			title: string,
@@ -525,7 +512,7 @@ export class RideModeScene extends Control<RideModeSceneDefinition> {
 
 		const visualizer = component.parent(new ComponentChild(true));
 		logicDebug.add(
-			new Control(logicDebug.instance.Content.Buttons.Visualizer).withButtonAction(() => {
+			new Control(logicDebug.instance.Content.Buttons.Visualizer).addButtonAction(() => {
 				if (visualizer.get()) {
 					visualizer.clear();
 				} else {
@@ -535,12 +522,12 @@ export class RideModeScene extends Control<RideModeSceneDefinition> {
 		);
 
 		logicDebug.add(
-			new Control(logicDebug.instance.Content.Buttons.Step).withButtonAction(() => machine.runner.tick()),
+			new Control(logicDebug.instance.Content.Buttons.Step).addButtonAction(() => machine.runner.tick()),
 		);
 
 		const pauseButton = logicDebug.add(new Control(logicDebug.instance.Content.Buttons.Pause));
 		pauseButton.parent(
-			new Control(pauseButton.instance).withButtonAction(() => {
+			new Control(pauseButton.instance).addButtonAction(() => {
 				if (machine.runner.isRunning.get()) {
 					machine.runner.stopTicking();
 					machine.logicInputs.setEnabled(false);
@@ -568,6 +555,11 @@ export class RideModeScene extends Control<RideModeSceneDefinition> {
 		if (InputController.inputType.get() === "Touch") {
 			this.controls.start(machine);
 		}
+
+		this.sitAction.canExecute.set(
+			"canNotSitIfNoSeat",
+			machine.blocks.getAll().any((b) => b instanceof VehicleSeatBlock.logic.ctor),
+		);
 
 		this.addMeters(machine);
 		this.initLogicController(machine);

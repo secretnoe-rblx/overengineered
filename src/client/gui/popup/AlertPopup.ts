@@ -45,7 +45,7 @@ export class AlertPopup extends Popup<AlertPopupDefinition> {
 			this.hide();
 		});
 
-		const closeButton = this.parent(new Control(gui.Heading.CloseButton).withButtonAction(() => this.hide()));
+		const closeButton = this.parent(new Control(gui.Heading.CloseButton).addButtonAction(() => this.hide()));
 
 		this.okButton.setButtonInteractable(false);
 		closeButton.setButtonInteractable(false);

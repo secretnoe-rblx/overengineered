@@ -83,8 +83,8 @@ class SaveItem extends Control<SlotRecordDefinition> {
 			}
 		};
 
-		const saveButton = this.add(new Control(this.gui.Content.SaveButton).withButtonAction(save));
-		const loadButton = this.add(new Control(this.gui.Content.LoadButton).withButtonAction(load));
+		const saveButton = this.add(new Control(this.gui.Content.SaveButton).addButtonAction(save));
+		const loadButton = this.add(new Control(this.gui.Content.LoadButton).addButtonAction(load));
 		const nametb = this.add(new TextBoxControl(this.gui.Content.SlotName.SlotNameTextBox));
 		nametb.submitted.Connect(() => send({ name: nametb.text.get() }));
 
@@ -97,7 +97,7 @@ class SaveItem extends Control<SlotRecordDefinition> {
 			if (!child.IsA("GuiButton")) continue;
 
 			const button = this.add(
-				new Control(child).withButtonAction(() =>
+				new Control(child).addButtonAction(() =>
 					send({ color: Serializer.Color3Serializer.serialize(child.BackgroundColor3) }),
 				),
 			);

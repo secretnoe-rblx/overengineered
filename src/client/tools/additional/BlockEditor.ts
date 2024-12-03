@@ -641,9 +641,9 @@ class BlockEditorBottomControl extends Control<BlockEditorControlBottomDefinitio
 	) {
 		super(gui);
 
-		const move = this.parent(new Control(gui.MoveButton)).withButtonAction(() => set("move"));
-		const rotate = this.parent(new Control(gui.RotateButton)).withButtonAction(() => set("rotate"));
-		const scale = this.parent(new Control(gui.ScaleButton)).withButtonAction(() => set("scale"));
+		const move = this.parent(new Control(gui.MoveButton)).addButtonAction(() => set("move"));
+		const rotate = this.parent(new Control(gui.RotateButton)).addButtonAction(() => set("rotate"));
+		const scale = this.parent(new Control(gui.ScaleButton)).addButtonAction(() => set("scale"));
 
 		this.add(new ButtonControl(gui.CompleteButton, commit));
 
@@ -700,7 +700,7 @@ class BlockEditorTopControl extends Control<BlockEditorTopControlDefinition> {
 		const btn = this.add(new Control(this.template()));
 
 		if (activated) {
-			btn.withButtonAction(activated);
+			btn.addButtonAction(activated);
 		}
 
 		btn.setButtonText(text);

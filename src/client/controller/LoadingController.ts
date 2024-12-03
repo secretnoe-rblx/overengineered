@@ -98,6 +98,7 @@ const control = new LoadingPopup(Interface.getGameUI<{ Loading: LoadingPopupDefi
 const state = new ObservableValue<boolean>(false);
 export namespace LoadingController {
 	export const isLoading = state.asReadonly();
+	export const isNotLoading = isLoading.not();
 
 	export function show(text: string) {
 		$log(text);
