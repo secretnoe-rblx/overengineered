@@ -27,8 +27,7 @@ namespace ClientBlockControlsNamespace {
 			const set = (newValue: boolean) => value.set("bool", (val = newValue));
 			set(config.reversed);
 
-			const isKeyCode = (key: string): key is KeyCode => key in Keys;
-			if (isKeyCode(config.key)) {
+			if (Keys.isKey(config.key)) {
 				if (definition.canBeSwitch && config.switch) {
 					this.event.onKeyDown(config.key, () => set(!get()));
 				} else {

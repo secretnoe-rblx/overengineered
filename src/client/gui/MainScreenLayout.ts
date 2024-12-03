@@ -8,9 +8,7 @@ import { Transforms } from "engine/shared/component/Transforms";
 import { TransformService } from "engine/shared/component/TransformService";
 import type { HotbarControlDefinition } from "client/gui/buildmode/HotbarControl";
 
-//
-
-type MainScreenLayoutDefinition = ScreenGui & {
+type MainScreenLayoutDefinition = GuiObject & {
 	readonly Top: GuiObject & {
 		readonly Center: GuiObject & {
 			readonly Main: GuiObject;
@@ -19,6 +17,7 @@ type MainScreenLayoutDefinition = ScreenGui & {
 		readonly Right: GuiObject;
 	};
 	readonly Left: GuiObject;
+	readonly Bottom: GuiObject;
 };
 @injectable
 export class MainScreenLayout extends Component {
@@ -27,9 +26,8 @@ export class MainScreenLayout extends Component {
 	constructor(@inject di: DIContainer) {
 		super();
 
-		this.instance = Interface.getInterface();
+		this.instance = Interface.getInterface<{ Main: MainScreenLayoutDefinition }>().Main;
 		ComponentInstance.init(this, this.instance);
-		this.onEnabledStateChange((enabled) => (this.instance.Enabled = enabled));
 
 		const initHotbar = () => {
 			const hotbar = this.parent(
@@ -62,6 +60,7 @@ export class MainScreenLayout extends Component {
 		forEachChild(this.instance.Top.Center.Main, (child) => (child.Visible = false));
 		forEachChild(this.instance.Top.Right, (child) => (child.Visible = false));
 		forEachChild(this.instance.Left, (child) => (child.Visible = false));
+		forEachChild(this.instance.Bottom, (child) => (child.Visible = false));
 	}
 
 	registerTopCenterButton<T extends GuiButton>(name: string): Control<T> {
@@ -103,6 +102,14 @@ export class MainScreenLayout extends Component {
 					.moveX(control.instance, new UDim(0, enabling ? 0 : -10), Transforms.quadOut02),
 			);
 
+		return control;
+	}
+
+	registerBottom<T extends GuiObject>(name: string): Control<T> {
+		const gui = (this.instance.Bottom.WaitForChild(name) as T).Clone();
+		gui.Parent = this.instance.Bottom;
+
+		const control = new Control(gui);
 		return control;
 	}
 }

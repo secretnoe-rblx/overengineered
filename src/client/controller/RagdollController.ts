@@ -127,7 +127,7 @@ function initRagdollKey(
 				return Enum.ContextActionResult.Pass;
 			},
 			InputController.inputType.get() === "Touch",
-			Keys[key],
+			Keys.Keys[key],
 		);
 
 		ContextActionService.SetDescription(actionName, "funny falling");

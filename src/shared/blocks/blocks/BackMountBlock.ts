@@ -2,7 +2,7 @@ import { Players, RunService, UserInputService } from "@rbxts/services";
 import { AutoC2SRemoteEvent } from "engine/shared/event/C2SRemoteEvent";
 import { EventHandler } from "engine/shared/event/EventHandler";
 import { C2CRemoteEvent } from "engine/shared/event/PERemoteEvent";
-import { isKey, Keys } from "engine/shared/fixes/Keys";
+import { Keys } from "engine/shared/fixes/Keys";
 import { InstanceBlockLogic } from "shared/blockLogic/BlockLogic";
 import { BlockCreation } from "shared/blocks/BlockCreation";
 import { BuildingManager } from "shared/building/BuildingManager";
@@ -103,7 +103,7 @@ const init = ({
 	blocks.set(block, eh);
 
 	const pp = block.ProximityPrompt;
-	pp.KeyboardKeyCode = Keys[key];
+	pp.KeyboardKeyCode = Keys.Keys[key];
 	pp.Triggered.Connect(() => {
 		// fix teleporting to 000; todo make a better fix later
 		for (const b of BuildingManager.getMachineBlocks(block)) {
@@ -185,9 +185,9 @@ class Logic extends InstanceBlockLogic<typeof definition, BackMountModel> {
 		);
 
 		this.onk(["detachKey", "connectToRootPart", "shared"], ({ detachKey, connectToRootPart, shared }) => {
-			if (!isKey(detachKey)) {
+			if (!Keys.isKey(detachKey)) {
 				detachKey = this.definition.input.detachKey.types.key.config;
-				if (!isKey(detachKey)) return;
+				if (!Keys.isKey(detachKey)) return;
 			}
 
 			if (shared) {

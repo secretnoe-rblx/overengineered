@@ -7,13 +7,14 @@ import { FloatingText } from "client/tools/additional/FloatingText";
 import { MoveGrid, ScaleGrid } from "client/tools/additional/Grid";
 import { RotateGrid } from "client/tools/additional/Grid";
 import { ToolBase } from "client/tools/ToolBase";
-import { ButtonControl } from "engine/client/gui/Button";
+import { Action } from "engine/client/Action";
 import { Control } from "engine/client/gui/Control";
 import { InputController } from "engine/client/InputController";
 import { Component } from "engine/shared/component/Component";
 import { ComponentChild } from "engine/shared/component/ComponentChild";
 import { ComponentInstance } from "engine/shared/component/ComponentInstance";
 import { InstanceComponent } from "engine/shared/component/InstanceComponent";
+import { InstanceValueStorage } from "engine/shared/component/InstanceValueStorage";
 import { TransformService } from "engine/shared/component/TransformService";
 import { Element } from "engine/shared/Element";
 import { ObservableCollectionSet } from "engine/shared/event/ObservableCollection";
@@ -26,6 +27,8 @@ import { Strings } from "engine/shared/fixes/String.propmacro";
 import { BlockManager } from "shared/building/BlockManager";
 import { SharedBuilding } from "shared/building/SharedBuilding";
 import { Colors } from "shared/Colors";
+import type { MainScreenLayout } from "client/gui/MainScreenLayout";
+import type { KeybindDefinition } from "client/Keybinds";
 import type { ClientBuilding } from "client/modes/build/ClientBuilding";
 import type { PlayerDataStorage } from "client/PlayerDataStorage";
 import type { TextButtonDefinition } from "engine/client/gui/Button";
@@ -196,17 +199,17 @@ interface EditComponent extends Component {
 const centerBasedKb = Keybinds.registerDefinition(
 	"edit_scale_centerBased",
 	["Edit Tool", "Scale", "Scale from the center"],
-	["LeftAlt"],
+	[["LeftAlt"]],
 );
 const sameSizeKb = Keybinds.registerDefinition(
 	"edit_scale_sameSize",
 	["Edit Tool", "Scale", "Uniform scaling"],
-	["LeftShift"],
+	[["LeftShift"]],
 );
 const sidewaysKb = Keybinds.registerDefinition(
 	"edit_move_sideways",
 	["Edit Tool", "Move", "Sideways movement"],
-	["LeftAlt"],
+	[["LeftAlt"]],
 );
 
 const formatVecForFloatingText = (vec: Vector3): string => {
@@ -270,7 +273,7 @@ class MoveComponent extends Component implements EditComponent {
 
 		// #region Keyboard controls initialization
 		const tooltips = this.parent(TooltipsHolder.createComponent("Edit Tool > Move"));
-		tooltips.setFromKeybinds(keybinds, sidewaysKb);
+		tooltips.setFromKeybinds(keybinds.fromDefinition(sidewaysKb));
 
 		this.event.subscribeObservable(keybinds.fromDefinition(sidewaysKb).isPressed, (value) => {
 			sideways.set("kb", value);
@@ -553,7 +556,7 @@ class ScaleComponent extends Component implements EditComponent {
 
 		// #region Keyboard controls initialization
 		const tooltips = this.parent(TooltipsHolder.createComponent("Edit Tool > Scale"));
-		tooltips.setFromKeybinds(keybinds, centerBasedKb, sameSizeKb);
+		tooltips.setFromKeybinds(keybinds.fromDefinition(centerBasedKb), keybinds.fromDefinition(sameSizeKb));
 
 		this.event.subscribeObservable(keybinds.fromDefinition(centerBasedKb).isPressed, (value) => {
 			centerBased.set("kb", value);
@@ -626,40 +629,6 @@ class ScaleComponent extends Component implements EditComponent {
 
 //
 
-type BlockEditorControlBottomDefinition = GuiObject & {
-	readonly MoveButton: GuiButton;
-	readonly RotateButton: GuiButton;
-	readonly ScaleButton: GuiButton;
-	readonly CompleteButton: GuiButton;
-};
-class BlockEditorBottomControl extends Control<BlockEditorControlBottomDefinition> {
-	constructor(
-		gui: BlockEditorControlBottomDefinition,
-		currentMode: ReadonlyObservableValue<EditMode>,
-		set: (type: EditMode) => void,
-		commit: () => void,
-	) {
-		super(gui);
-
-		const move = this.parent(new Control(gui.MoveButton)).addButtonAction(() => set("move"));
-		const rotate = this.parent(new Control(gui.RotateButton)).addButtonAction(() => set("rotate"));
-		const scale = this.parent(new Control(gui.ScaleButton)).addButtonAction(() => set("scale"));
-
-		this.add(new ButtonControl(gui.CompleteButton, commit));
-
-		const buttons = { move, rotate, scale };
-		this.event.subscribeObservable(
-			currentMode,
-			(mode) => {
-				for (const [name, button] of pairs(buttons)) {
-					button.instance.BackgroundColor3 = mode === name ? Colors.accentDark : Colors.staticBackground;
-				}
-			},
-			true,
-		);
-	}
-}
-
 type ControlWithErrorDefinition = GuiObject & {
 	readonly WarningImage: ImageLabel;
 };
@@ -726,6 +695,12 @@ class CompoundObservableSet<T extends defined> {
 
 @injectable
 export class BlockEditor extends Component {
+	static readonly keybinds = {
+		move: Keybinds.registerDefinition("edit_move", ["Edit tool", "Move"], [["F"], ["ButtonX"]]),
+		rotate: Keybinds.registerDefinition("edit_rotate", ["Edit tool", "Rotate"], [["R"]]),
+		scale: Keybinds.registerDefinition("edit_scale", ["Edit tool", "Scale"], [["B"]]),
+	} as const satisfies { readonly [k in string]: KeybindDefinition };
+
 	private readonly _completed = new ArgsSignal();
 	readonly completed = this._completed.asReadonly();
 
@@ -746,10 +721,75 @@ export class BlockEditor extends Component {
 		@inject keybinds: Keybinds,
 		@inject blockList: BlockList,
 		@inject playerData: PlayerDataStorage,
+		@inject mainScreen: MainScreenLayout,
 		@inject di: DIContainer,
 	) {
 		super();
 		this.currentMode = new ObservableValue<EditMode>(startMode);
+
+		const actions = {
+			move: this.parent(new Action(() => setModeByKey("move"))),
+			rotate: this.parent(new Action(() => setModeByKey("rotate"))),
+			scale: this.parent(new Action(() => setModeByKey("scale"))),
+
+			cancel: this.parent(
+				new Action(() => {
+					this.cancel();
+					this._completed.Fire();
+				}),
+			),
+			finish: this.parent(new Action(() => this._completed.Fire())),
+		} as const;
+
+		actions.move.initKeybind(keybinds.fromDefinition(BlockEditor.keybinds.move), -1);
+		actions.rotate.initKeybind(keybinds.fromDefinition(BlockEditor.keybinds.rotate), -1);
+		actions.scale.initKeybind(keybinds.fromDefinition(BlockEditor.keybinds.scale), -1);
+
+		actions.move.subCanExecuteFrom({ main: new ObservableValue(true) });
+		actions.rotate.subCanExecuteFrom({ main: new ObservableValue(true) });
+		actions.scale.subCanExecuteFrom({ main: new ObservableValue(true) });
+
+		actions.cancel.subCanExecuteFrom({ main: new ObservableValue(true) });
+		actions.finish.subCanExecuteFrom({ main: new ObservableValue(true) });
+
+		//
+
+		(() => {
+			type Bottom = GuiObject & {
+				readonly Line1: GuiObject & {
+					readonly Move: GuiButton;
+					readonly Rotate: GuiButton;
+					readonly Scale: GuiButton;
+				};
+				readonly Line2: GuiObject & {
+					readonly Cancel: GuiButton;
+					readonly Finish: GuiButton;
+				};
+			};
+			const bottom = this.parentGui(mainScreen.registerBottom<Bottom>("Editing"));
+			const gui = bottom.instance;
+
+			const move = bottom.parent(new Control(gui.Line1.Move).subscribeToAction(actions.move, "transparency"));
+			const rotate = bottom.parent(
+				new Control(gui.Line1.Rotate).subscribeToAction(actions.rotate, "transparency"),
+			);
+			const scale = bottom.parent(new Control(gui.Line1.Scale).subscribeToAction(actions.scale, "transparency"));
+
+			bottom.parent(new Control(gui.Line2.Cancel).subscribeToAction(actions.cancel, "transparency"));
+			bottom.parent(new Control(gui.Line2.Finish).subscribeToAction(actions.finish, "transparency"));
+
+			const btns = { move, rotate, scale };
+			this.event.subscribeObservable(
+				this.currentMode,
+				(mode) => {
+					for (const [name, button] of pairs(btns)) {
+						const v = InstanceValueStorage.get(button.instance, "BackgroundColor3");
+						v.overlay(0, mode === name ? Colors.accentDark : Colors.staticBackground);
+					}
+				},
+				true,
+			);
+		})();
 
 		this.editBlocks = blocks.map((b): EditingBlock => {
 			const origModel = blockList.blocks[BlockManager.manager.id.get(b)]!.model;
@@ -888,16 +928,9 @@ export class BlockEditor extends Component {
 		const gui = ToolBase.getToolGui<
 			"Edit2",
 			GuiObject & {
-				readonly EditBottom: BlockEditorControlBottomDefinition;
 				readonly EditTop: BlockEditorTopControlDefinition;
 			}
 		>().Edit2;
-		const bottomControl = this.parentGui(
-			new BlockEditorBottomControl(gui.EditBottom.Clone(), this.currentMode, setModeByKey, () =>
-				this._completed.Fire(),
-			),
-		);
-		bottomControl.instance.Parent = gui;
 
 		const topControl = this.parentGui(new BlockEditorTopControl(gui.EditTop.Clone()));
 		topControl.instance.Parent = gui;
@@ -922,17 +955,6 @@ export class BlockEditor extends Component {
 			this._errors.addSource(child.error);
 		});
 		this.event.subscribeObservable(this.currentMode, (mode) => container.set(modes[mode]()), true);
-
-		//
-
-		const move = keybinds.get("edit_move");
-		this.event.subscribeRegistration(() => move.onDown(() => setModeByKey("move"), -1));
-
-		const rotate = keybinds.get("edit_rotate");
-		this.event.subscribeRegistration(() => rotate.onDown(() => setModeByKey("rotate"), -1));
-
-		const scale = keybinds.get("edit_scale");
-		this.event.subscribeRegistration(() => scale.onDown(() => setModeByKey("scale"), -1));
 	}
 
 	initializeGrids(grids: {

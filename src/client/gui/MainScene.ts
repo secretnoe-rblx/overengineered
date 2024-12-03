@@ -5,16 +5,12 @@ import type { SettingsPopup } from "client/gui/popup/SettingsPopup";
 
 @injectable
 export class MainScene extends Scene {
-	readonly openSettingsAction = new Action();
+	readonly openSettingsAction: Action;
 
 	constructor(@inject mainScreen: MainScreenLayout, @injectFunc createSettingsPopup: () => SettingsPopup) {
 		super();
 
-		this.openSettingsAction.subscribe(() => createSettingsPopup().show());
-		this.openSettingsAction.subCanExecuteFrom({
-			main: this.enabledState,
-		});
-
+		this.openSettingsAction = this.parent(new Action(() => createSettingsPopup().show()));
 		this.parent(mainScreen.registerTopCenterButton("Menu")) //
 			.subscribeToAction(this.openSettingsAction);
 	}

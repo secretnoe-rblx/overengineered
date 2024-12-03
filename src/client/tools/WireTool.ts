@@ -809,12 +809,12 @@ export class WireTool extends ToolBase {
 
 	protected getTooltips(): InputTooltips {
 		return {
-			Desktop: [{ keys: ["F"], text: "Hide connected markers" }],
+			Desktop: [{ keys: [["F"]], text: "Hide connected markers" }],
 			Gamepad: [
-				{ keys: ["ButtonY"], text: "Marker selection mode" },
-				{ keys: ["ButtonA"], text: "Click on marker" },
-				{ keys: ["ButtonX"], text: "Cancel selection" },
-				{ keys: ["ButtonB"], text: "Unequip" },
+				{ keys: [["ButtonY"]], text: "Marker selection mode" },
+				{ keys: [["ButtonA"]], text: "Click on marker" },
+				{ keys: [["ButtonX"]], text: "Cancel selection" },
+				{ keys: [["ButtonB"]], text: "Unequip" },
 			],
 		};
 	}

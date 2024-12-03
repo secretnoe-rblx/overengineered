@@ -18,8 +18,8 @@ export class ActionController extends Component {
 	/** @deprecated Use `@inject` instead */
 	static instance: ActionController;
 
-	readonly undoAction = new Action(() => this.undo());
-	readonly redoAction = new Action(() => this.redo());
+	readonly undoAction = this.parent(new Action(() => this.undo()));
+	readonly redoAction = this.parent(new Action(() => this.redo()));
 
 	readonly onUndo = new Signal<(operation: Operation) => void>();
 	readonly onRedo = new Signal<(operation: Operation) => void>();
@@ -33,11 +33,9 @@ export class ActionController extends Component {
 		ActionController.instance = this;
 
 		this.undoAction.subCanExecuteFrom({
-			main: this.enabledState,
 			isntLoading: LoadingController.isNotLoading,
 		});
 		this.redoAction.subCanExecuteFrom({
-			main: this.enabledState,
 			isntLoading: LoadingController.isNotLoading,
 		});
 

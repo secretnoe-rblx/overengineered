@@ -1232,18 +1232,18 @@ export class BuildTool extends ToolBase {
 	protected getTooltips(): InputTooltips {
 		return {
 			Desktop: [
-				{ keys: ["R"], text: "Rotate by Y" },
-				{ keys: ["T"], text: "Rotate by X" },
-				{ keys: ["Y"], text: "Rotate by Z" },
-				{ keys: ["LeftControl"], text: "Disable grid" },
+				{ keys: [["R"]], text: "Rotate by Y" },
+				{ keys: [["T"]], text: "Rotate by X" },
+				{ keys: [["Y"]], text: "Rotate by Z" },
+				{ keys: [["LeftControl"]], text: "Disable grid" },
 			],
 			Gamepad: [
-				{ keys: ["ButtonX"], text: "Place" },
-				{ keys: ["ButtonB"], text: "Unequip" },
-				{ keys: ["ButtonSelect"], text: "Select block" },
-				{ keys: ["DPadLeft"], text: "Rotate by X" },
-				{ keys: ["DPadUp"], text: "Rotate by Y" },
-				{ keys: ["DPadRight"], text: "Rotate by Z" },
+				{ keys: [["ButtonX"]], text: "Place" },
+				{ keys: [["ButtonB"]], text: "Unequip" },
+				{ keys: [["ButtonSelect"]], text: "Select block" },
+				{ keys: [["DPadLeft"]], text: "Rotate by X" },
+				{ keys: [["DPadUp"]], text: "Rotate by Y" },
+				{ keys: [["DPadRight"]], text: "Rotate by Z" },
 			],
 		};
 	}

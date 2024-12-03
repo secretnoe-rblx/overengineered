@@ -37,9 +37,9 @@ export type EditMode = "global" | "local";
 
 @injectable
 export class BuildingMode extends PlayMode {
-	readonly openSavePopupAction = new Action();
-	readonly runAction = new Action(() => requestMode("ride"));
-	readonly teleportToPlotAction = new Action(() => this.teleportToPlot());
+	readonly openSavePopupAction = this.parent(new Action());
+	readonly runAction = this.parent(new Action(() => requestMode("ride")));
+	readonly teleportToPlotAction = this.parent(new Action(() => this.teleportToPlot()));
 
 	readonly mirrorMode = new ObservableValue<MirrorMode>({});
 	readonly targetPlot;
@@ -62,9 +62,6 @@ export class BuildingMode extends PlayMode {
 		super();
 
 		mainScene.openSettingsAction.subCanExecuteFrom({
-			buildMode: this.enabledState,
-		});
-		this.teleportToPlotAction.subCanExecuteFrom({
 			buildMode: this.enabledState,
 		});
 
@@ -110,11 +107,9 @@ export class BuildingMode extends PlayMode {
 		});
 
 		this.runAction.subCanExecuteFrom({
-			main: this.enabledState,
 			notLoading: LoadingController.isNotLoading,
 		});
 		this.openSavePopupAction.subCanExecuteFrom({
-			main: this.enabledState,
 			notLoading: LoadingController.isNotLoading,
 		});
 

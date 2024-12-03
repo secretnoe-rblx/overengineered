@@ -1,11 +1,10 @@
-import { KeyChooserControl } from "client/gui/controls/KeyChooserControl";
 import { Interface } from "client/gui/Interface";
 import { Popup } from "client/gui/Popup";
 import { ButtonControl } from "engine/client/gui/Button";
-import { Control } from "engine/client/gui/Control";
 import { ComponentKeyedChildren } from "engine/shared/component/ComponentKeyedChildren";
 import type { KeyChooserControlDefinition } from "client/gui/controls/KeyChooserControl";
 import type { Keybinds } from "client/Keybinds";
+import type { Control } from "engine/client/gui/Control";
 import type { GameHostBuilder } from "engine/shared/GameHostBuilder";
 
 export type ControlsPopupDefinition = GuiObject & {
@@ -48,12 +47,13 @@ export class ControlsPopup extends Popup<ControlsPopupDefinition> {
 				const gui = this.template();
 				gui.HeadingLabel.Text = value.displayPath[value.displayPath.size() - 1];
 
-				const control = new Control(gui);
-				const keyChooser = control.add(new KeyChooserControl(gui.Control));
-				keyChooser.value.set([...value.getKeys()][0]);
-				keyChooser.value.changed.Connect((key) => value.setKeys([key]));
+				// TODO:::
+				// const control = new Control(gui);
+				// const keyChooser = control.add(new KeyChooserControl(gui.Control));
+				// keyChooser.value.set([...value.getKeys()][0]);
+				// keyChooser.value.changed.Connect((key) => value.setKeys([key]));
 
-				children.add(key, control);
+				// children.add(key, control);
 			},
 			true,
 		);

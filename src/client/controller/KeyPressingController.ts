@@ -1,6 +1,6 @@
 import { Component } from "engine/shared/component/Component";
 import { Signal } from "engine/shared/event/Signal";
-import { isKey } from "engine/shared/fixes/Keys";
+import { Keys } from "engine/shared/fixes/Keys";
 
 /*
 	When a key is pressed, invoke keyDown()
@@ -124,7 +124,7 @@ export class KeyPressingDefinitionsController<T extends KeyDefinitions<string>> 
 		this.event.subscribe(this.controller.onKeyUp, (key) => definitions[key]?.keyUp?.());
 
 		for (const [key, def] of pairs(definitions)) {
-			if (!isKey(def.key)) continue;
+			if (!Keys.isKey(def.key)) continue;
 
 			this.event.onKeyDown(def.key, () => this.controller.keyDown(key as keyof T & string));
 			this.event.onKeyUp(def.key, () => this.controller.keyUp(key as keyof T & string));

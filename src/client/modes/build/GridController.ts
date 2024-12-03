@@ -9,7 +9,6 @@ import type { FloatingWindowDefinition } from "client/gui/FloatingWindow";
 import type { GridEditorControlDefinition } from "client/gui/GridEditor";
 import type { MainScreenLayout } from "client/gui/MainScreenLayout";
 import type { EditMode } from "client/modes/build/BuildingMode";
-import type { EditTool } from "client/tools/EditTool";
 
 @injectable
 export class GridController extends Component {
@@ -17,7 +16,6 @@ export class GridController extends Component {
 		moveGrid: ObservableValue<number>,
 		rotateGrid: ObservableValue<number>,
 		editMode: ObservableValue<EditMode>,
-		@inject editTool: EditTool,
 		@inject mainScreen: MainScreenLayout,
 	) {
 		super();
@@ -41,17 +39,6 @@ export class GridController extends Component {
 			floatingGui,
 			{ Visible: false },
 			Transforms.commonProps.quadOut02,
-		);
-
-		this.event.subscribeObservable(
-			editTool.selectedMode,
-			(mode) => {
-				const visible = mode === undefined;
-
-				controlOverlay.get(0).Visible = visible;
-				gridButton.setVisibleAndEnabled(visible, "editTool_active");
-			},
-			true,
 		);
 	}
 }

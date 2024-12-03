@@ -309,20 +309,18 @@ export class RideModeScene extends Control<RideModeSceneDefinition> {
 		const controlsEditMode = new ObservableValue(false);
 		const notControlsEditMode = controlsEditMode.not();
 
-		this.stopAction = new Action(() => requestMode("build"));
+		this.stopAction = this.parent(new Action(() => requestMode("build")));
 		this.stopAction.subCanExecuteFrom({
 			ride_editcontrols: notControlsEditMode,
 			ride_isntloading: LoadingController.isNotLoading,
-			ride_enabled: this.enabledState,
 		});
 		this.parent(mainScreen.registerTopCenterButton("Stop")) //
 			.subscribeToAction(this.stopAction);
 
-		this.sitAction = new Action(() => CustomRemotes.modes.ride.teleportOnSeat.send());
+		this.sitAction = this.parent(new Action(() => CustomRemotes.modes.ride.teleportOnSeat.send()));
 		this.sitAction.subCanExecuteFrom({
 			ride_editcontrols: notControlsEditMode,
 			ride_isntloading: LoadingController.isNotLoading,
-			ride_enabled: this.enabledState,
 		});
 		this.parent(mainScreen.registerTopCenterButton("Sit")) //
 			.subscribeToAction(this.sitAction);

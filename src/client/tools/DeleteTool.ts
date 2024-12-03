@@ -149,9 +149,9 @@ export class DeleteTool extends ToolBase {
 	protected getTooltips(): InputTooltips {
 		return {
 			Gamepad: [
-				{ keys: ["ButtonY"], text: "Clear all" },
-				{ keys: ["ButtonX"], text: "Delete" },
-				{ keys: ["ButtonB"], text: "Unequip" },
+				{ keys: [["ButtonY"]], text: "Clear all" },
+				{ keys: [["ButtonX"]], text: "Delete" },
+				{ keys: [["ButtonB"]], text: "Unequip" },
 			],
 		};
 	}
