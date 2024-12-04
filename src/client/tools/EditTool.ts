@@ -1,5 +1,6 @@
 import { HttpService, Workspace } from "@rbxts/services";
 import { LogControl } from "client/gui/static/LogControl";
+import { Keybinds } from "client/Keybinds";
 import { ClientBuilding } from "client/modes/build/ClientBuilding";
 import { BlockEditor } from "client/tools/additional/BlockEditor";
 import { BlockGhoster } from "client/tools/additional/BlockGhoster";
@@ -11,7 +12,6 @@ import { Control } from "engine/client/gui/Control";
 import { Component } from "engine/shared/component/Component";
 import { ComponentChild } from "engine/shared/component/ComponentChild";
 import { ComponentDisabler } from "engine/shared/component/ComponentDisabler";
-import { InstanceComponent } from "engine/shared/component/InstanceComponent";
 import { Element } from "engine/shared/Element";
 import { ObservableCollectionSet } from "engine/shared/event/ObservableCollection";
 import { ObservableValue } from "engine/shared/event/ObservableValue";
@@ -21,9 +21,7 @@ import { BuildingManager } from "shared/building/BuildingManager";
 import { SharedBuilding } from "shared/building/SharedBuilding";
 import { Colors } from "shared/Colors";
 import { PartUtils } from "shared/utils/PartUtils";
-import type { MaterialColorEditControlDefinition } from "client/gui/buildmode/MaterialColorEditControl";
 import type { MainScreenLayout } from "client/gui/MainScreenLayout";
-import type { Keybinds } from "client/Keybinds";
 import type { ActionController } from "client/modes/build/ActionController";
 import type { BuildingMode } from "client/modes/build/BuildingMode";
 import type { BlockSelectorModeGuiDefinition } from "client/tools/highlighters/BlockSelectorModeGui";
@@ -75,156 +73,6 @@ namespace Scene {
 			// this.event.subscribeObservable(tool.selectedMode, animate);
 			// this.onEnable(animate);
 			// this.onDisable(animate);
-		}
-	}
-
-	export interface EditToolSceneDefinition extends GuiObject, MultiBlockSelectorGuiDefinition {
-		readonly CancelButton: GuiButton;
-		readonly Paint: MaterialColorEditControlDefinition;
-		readonly Bottom: GuiObject & {
-			readonly MoveButton: GuiButton;
-			readonly RotateButton: GuiButton;
-			readonly ScaleButton: GuiButton;
-			readonly PasteButton: GuiButton;
-			readonly DeleteButton: GuiButton;
-			readonly PaintButton: GuiButton;
-		};
-		readonly Bottom2: GuiObject & {
-			readonly CopyButton: GuiButton;
-			readonly MirrorXButton: GuiButton;
-			readonly MirrorYButton: GuiButton;
-			readonly MirrorZButton: GuiButton;
-		};
-	}
-
-	export class EditToolScene extends InstanceComponent<EditToolSceneDefinition> {
-		readonly tool;
-		// private readonly buttons;
-
-		constructor(gui: EditToolSceneDefinition, tool: EditTool) {
-			super(gui);
-			this.tool = tool;
-
-			// this.buttons = this.parent(new ComponentChildren().withParentInstance(gui));
-
-			// {
-			// 	const cancel = this.buttons
-			// 		.add(new Control(this.instance.CancelButton))
-			// 		.addButtonAction(() => tool.cancelCurrentMode());
-
-			// 	const animateCancelButton = Transforms.boolStateMachine(
-			// 		cancel.instance,
-			// 		Transforms.commonProps.quadOut02,
-			// 		{ Position: cancel.instance.Position, Transparency: 0 },
-			// 		{ Position: cancel.instance.Position.add(new UDim2(0, 0, 0, 20)), Transparency: 1 },
-			// 		(tr) => tr.func(() => (cancel.instance.Interactable = false)),
-			// 		(tr) => tr.func(() => (cancel.instance.Interactable = true)),
-			// 	);
-
-			// 	this.event.subscribeObservable(
-			// 		tool.selectedMode,
-			// 		(mode) => animateCancelButton(mode !== undefined),
-			// 		true,
-			// 	);
-			// }
-
-			// const move = this.buttons.add(
-			// 	new Control(this.instance.Bottom.MoveButton).addButtonAction(() => tool.toggleMode("Move")),
-			// );
-			// const rotate = this.buttons.add(
-			// 	new Control(this.instance.Bottom.RotateButton).addButtonAction(() => tool.toggleMode("Rotate")),
-			// );
-			// const copy = this.buttons.add(
-			// 	new Control(this.instance.Bottom2.CopyButton).addButtonAction(() => {
-			// 		tool.copySelectedBlocks();
-			// 		paste.setButtonInteractable(true);
-			// 	}),
-			// );
-			// const paste = this.buttons.add(
-			// 	new Control(this.instance.Bottom.PasteButton).addButtonAction(() => tool.toggleMode("Paste")),
-			// );
-			// const paint = this.buttons.add(
-			// 	new Control(this.instance.Bottom.PaintButton).addButtonAction(() => tool.toggleMode("Paint")),
-			// );
-			// const del = this.buttons.add(
-			// 	new Control(this.instance.Bottom.DeleteButton).addButtonAction(() => tool.deleteSelectedBlocks()),
-			// );
-			// const mirx = this.buttons.add(
-			// 	new Control(this.instance.Bottom2.MirrorXButton).addButtonAction(() => tool.mirrorSelectedBlocks("x")),
-			// );
-			// const miry = this.buttons.add(
-			// 	new Control(this.instance.Bottom2.MirrorYButton).addButtonAction(() => tool.mirrorSelectedBlocks("y")),
-			// );
-			// const mirz = this.buttons.add(
-			// 	new Control(this.instance.Bottom2.MirrorZButton).addButtonAction(() => tool.mirrorSelectedBlocks("z")),
-			// );
-			// const scale = this.buttons.add(
-			// 	new Control(this.instance.Bottom.ScaleButton).addButtonAction(() => tool.toggleMode("Scale")),
-			// );
-
-			// const multiValueSetter = <T>(instance: T, func: (value: boolean) => void) => {
-			// 	const values: boolean[] = [];
-
-			// 	return {
-			// 		instance,
-			// 		set: (index: number, value: boolean) => {
-			// 			values[index] = value;
-			// 			func(values.all((v) => v));
-			// 		},
-			// 	} as const;
-			// };
-			// type mvs = ReturnType<typeof multiValueSetter<InstanceComponent<GuiObject>>>;
-
-			// const buttons: Readonly<Record<EditToolButtons, mvs>> = {
-			// 	// edit tool modes
-			// 	Move: multiValueSetter(move, (v) => move.setButtonInteractable(v)),
-			// 	Rotate: multiValueSetter(rotate, (v) => rotate.setButtonInteractable(v)),
-			// 	Paste: multiValueSetter(paste, (v) => paste.setButtonInteractable(v)),
-			// 	Paint: multiValueSetter(paint, (v) => paint.setButtonInteractable(v)),
-			// 	Scale: multiValueSetter(scale, (v) => scale.setButtonInteractable(v)),
-
-			// 	// other buttons
-			// 	Copy: multiValueSetter(copy, (v) => copy.setButtonInteractable(v)),
-			// 	Delete: multiValueSetter(del, (v) => del.setButtonInteractable(v)),
-			// 	MirrorX: multiValueSetter(mirx, (v) => mirx.setButtonInteractable(v)),
-			// 	MirrorY: multiValueSetter(miry, (v) => miry.setButtonInteractable(v)),
-			// 	MirrorZ: multiValueSetter(mirz, (v) => mirz.setButtonInteractable(v)),
-			// };
-			// this.event.subscribeImmediately(
-			// 	tool.enabledModes.updated,
-			// 	() => {
-			// 		for (const [name, button] of pairs(buttons)) {
-			// 			button.set(2, tool.enabledModes.isEnabled(name));
-			// 		}
-			// 	},
-			// 	true,
-			// );
-
-			// const updateButtonInteractability = () => {
-			// 	for (const [name, button] of pairs(buttons)) {
-			// 		button.set(0, canBeSelected(tool, name));
-			// 	}
-			// };
-			// this.event.subscribeCollection(tool.selected, updateButtonInteractability, true);
-			// this.event.subscribeObservable(tool.copied, updateButtonInteractability, true);
-
-			// this.event.subscribeObservable(
-			// 	tool.selectedMode,
-			// 	(mode) => {
-			// 		const visible = mode !== "Move" && mode !== "Rotate" && mode !== "Scale";
-			// 		this.instance.Bottom.Visible = visible;
-			// 		this.instance.Bottom2.Visible = visible;
-
-			// 		for (const [name, button] of pairs(buttons)) {
-			// 			button.instance.instance.BackgroundColor3 =
-			// 				mode === name ? Colors.accentDark : Colors.staticBackground;
-
-			// 			const enabled = mode === undefined || mode === name;
-			// 			button.set(1, enabled);
-			// 		}
-			// 	},
-			// 	true,
-			// );
 		}
 	}
 }
@@ -410,6 +258,7 @@ namespace Controllers {
 			private readonly plot: SharedPlot,
 			selected: readonly BlockModel[],
 			@inject blockList: BlockList,
+			@inject keybinds: Keybinds,
 			@inject di: DIContainer,
 		) {
 			super();
@@ -437,6 +286,14 @@ namespace Controllers {
 				return b;
 			});
 
+			const commitAction = this.parent(
+				new Action(() => {
+					this.submit();
+					this.destroy();
+				}),
+			);
+			commitAction.initKeybind(keybinds.fromDefinition(editKeybinds.paste));
+
 			this.editor = this.parent(
 				di.resolveForeignClass(BlockEditor, [this.blocks, "move", plot.boundingBox, tool.mode.editMode.get()]),
 			);
@@ -446,7 +303,13 @@ namespace Controllers {
 				scaleGrid: tool.mode.moveGrid,
 			});
 
-			this.event.subscribe(this.editor.completed, () => {
+			this.event.subscribe(this.editor.completed, (state) => {
+				if (state === "cancelled") {
+					this.cancel();
+					this.destroy();
+					return;
+				}
+
 				this.submit();
 				this.destroy();
 			});
@@ -580,16 +443,16 @@ namespace Controllers {
 	}
 }
 
-const canBeSelected = (tool: EditTool, mode: EditToolButtons): boolean => {
-	if (mode === "Paste") {
-		return tool.copied.get().size() !== 0;
-	}
-
-	return tool.selected.get().size() !== 0;
-};
-
 export type EditToolMode = "Move" | "Paste" | "Scale" | "Rotate" | "Paint";
 export type EditToolButtons = EditToolMode | "Copy" | "Delete" | "MirrorX" | "MirrorY" | "MirrorZ";
+
+const editKeybinds = {
+	...BlockEditor.keybinds,
+	delete: Keybinds.registerDefinition("edit_delete", ["Edit tool", "Delete"], [["T"]]),
+	paint: Keybinds.registerDefinition("edit_paint", ["Edit tool", "Paint"], [["G"]]),
+	copy: Keybinds.registerDefinition("edit_copy", ["Edit tool", "Copy"], [["C"]]),
+	paste: Keybinds.registerDefinition("edit_paste", ["Edit tool", "Paste"], [["V"]]),
+} as const;
 
 @injectable
 export class EditTool extends ToolBase {
@@ -628,11 +491,15 @@ export class EditTool extends ToolBase {
 
 			copy: this.parent(new Action(() => this.copySelectedBlocks())),
 			paste: this.parent(new Action(() => this.paste())),
+			paint: this.parent(new Action(() => {})),
 			delete: this.parent(new Action(() => this.deleteSelectedBlocks())),
 		} as const;
 
+		for (const [k, action] of pairs(actions)) {
+			action.initKeybind(keybinds.fromDefinition(editKeybinds[k]));
+		}
+
 		const someBlocksSelected = this.selected.createBased((blocks) => blocks.size() !== 0);
-		const noBlocksSelected = someBlocksSelected.not();
 		const hasCopiedBlocks = this.copied.createBased((blocks) => blocks.size() !== 0);
 		const noControler = new ObservableValue(true);
 		this.controller.childSet.Connect((child) => noControler.set(!child));
@@ -643,55 +510,43 @@ export class EditTool extends ToolBase {
 
 		actions.copy.subCanExecuteFrom({ noControler, someBlocksSelected });
 		actions.paste.subCanExecuteFrom({ noControler, hasCopiedBlocks });
+		actions.paint.subCanExecuteFrom({ noControler, someBlocksSelected });
 		actions.delete.subCanExecuteFrom({ noControler, someBlocksSelected });
 
-		//
-
-		actions.move.initKeybind(keybinds.fromDefinition(BlockEditor.keybinds.move));
-		actions.rotate.initKeybind(keybinds.fromDefinition(BlockEditor.keybinds.rotate));
-		actions.scale.initKeybind(keybinds.fromDefinition(BlockEditor.keybinds.scale));
-
-		const del = keybinds.register("edit_delete", ["Edit tool", "Delete"], [["T"]]);
-		this.event.subscribeRegistration(() => del.onDown(() => actions.delete.execute()));
-
-		// const paint = keybinds.register("edit_paint", ["Edit tool", "Paint"], ["G"]);
-		// this.event.subscribeRegistration(() => paint.onDown(() => this.toggleMode("Paint")));
-
-		const copy = keybinds.register("edit_copy", ["Edit tool", "Copy"], [["C"]]);
-		this.event.subscribeRegistration(() => copy.onDown(() => actions.copy.execute()));
-
-		const paste = keybinds.register("edit_paste", ["Edit tool", "Paste"], [["V"]]);
-		this.event.subscribeRegistration(() => paste.onDown(() => actions.paste.execute()));
-
-		//
-
-		(() => {
-			type Bottom = GuiObject & {
-				readonly Line1: GuiObject & {
-					readonly Move: GuiButton;
-					readonly Rotate: GuiButton;
-					readonly Scale: GuiButton;
-				};
-				readonly Line2: GuiObject & {
-					readonly Mirror: GuiButton;
-					readonly Paint: GuiButton;
-					readonly Copy: GuiButton;
-					readonly Paste: GuiButton;
-					readonly Delete: GuiButton;
-				};
+		{
+			type Line = GuiObject & {
+				readonly Move: GuiButton;
+				readonly Rotate: GuiButton;
+				readonly Scale: GuiButton;
 			};
-			const bottom = this.parentGui(mainScreen.registerBottom<Bottom>("Edit"));
-			noControler.subscribe((nc) => bottom.setVisibleAndEnabled(nc));
-			const gui = bottom.instance;
 
-			bottom.parent(new Control(gui.Line1.Move).subscribeToAction(actions.move, "transparency"));
-			bottom.parent(new Control(gui.Line1.Rotate).subscribeToAction(actions.rotate, "transparency"));
-			bottom.parent(new Control(gui.Line1.Scale).subscribeToAction(actions.scale, "transparency"));
+			const line = this.parentGui(mainScreen.registerBottomCenter<Line>("MoveRotateScale"));
+			noControler.subscribe((nc) => line.setVisibleAndEnabled(nc));
+			const gui = line.instance;
 
-			bottom.parent(new Control(gui.Line2.Copy).subscribeToAction(actions.copy, "transparency"));
-			bottom.parent(new Control(gui.Line2.Paste).subscribeToAction(actions.paste, "transparency"));
-			bottom.parent(new Control(gui.Line2.Delete).subscribeToAction(actions.delete, "transparency"));
-		})();
+			line.parent(new Control(gui.Move).subscribeToAction(actions.move, "transparency"));
+			line.parent(new Control(gui.Rotate).subscribeToAction(actions.rotate, "transparency"));
+			line.parent(new Control(gui.Scale).subscribeToAction(actions.scale, "transparency"));
+		}
+
+		{
+			type Line = GuiObject & {
+				readonly Mirror: GuiButton;
+				readonly Paint: GuiButton;
+				readonly Copy: GuiButton;
+				readonly Paste: GuiButton;
+				readonly Delete: GuiButton;
+			};
+
+			const line = this.parentGui(mainScreen.registerBottomBottom<Line>("Edit"));
+			noControler.subscribe((nc) => line.setVisibleAndEnabled(nc));
+			const gui = line.instance;
+
+			line.parent(new Control(gui.Copy).subscribeToAction(actions.copy, "transparency"));
+			line.parent(new Control(gui.Paste).subscribeToAction(actions.paste, "transparency"));
+			line.parent(new Control(gui.Paint).subscribeToAction(actions.paint, "transparency"));
+			line.parent(new Control(gui.Delete).subscribeToAction(actions.delete, "transparency"));
+		}
 
 		this.controller.childSet.Connect((child) => {
 			this.tooltipHolder.set(child ? {} : this.getTooltips());
@@ -701,20 +556,6 @@ export class EditTool extends ToolBase {
 		});
 
 		/*
-		this.gui = this.parent(
-			new Scene.EditToolScene(ToolBase.getToolGui<"Edit2", Scene.EditToolSceneDefinition>().Edit2, this),
-		);
-		this.parent(di.resolveForeignClass(SelectedBlocksHighlighter, [this.selected]));
-
-		this.onDisable(() => this.selected.clear());
-		this.onDisable(() => this._selectedMode.set(undefined));
-		this.event.subscribeObservable(this.targetPlot, () => this._selectedMode.set(undefined), true);
-
-		this.controller.childSet.Connect((child) => {
-			if (!child) {
-				this._selectedMode.set(undefined);
-			}
-		});
 		this.event.subscribeObservable(this.selectedMode, (mode) => {
 			if (!mode) {
 				const controller = this.controller.get();
@@ -788,19 +629,4 @@ export class EditTool extends ToolBase {
 	getImageID(): string {
 		return "rbxassetid://12539306575";
 	}
-
-	// protected getTooltips(): InputTooltips {
-	// 	return {
-	// 		Desktop: [
-	// 			{ keys: ["F"], text: "Move" },
-	// 			{ keys: ["R"], text: "Rotate" },
-	// 			{ keys: ["B"], text: "Scale" },
-	// 			{ keys: ["T"], text: "Delete" },
-	// 			{ keys: ["G"], text: "Paint" },
-	// 			{ keys: ["LeftControl", "C"], text: "Copy" },
-	// 			{ keys: ["LeftControl", "V"], text: "Paste" },
-	// 		],
-	// 		Gamepad: [{ keys: ["ButtonX"], text: "Move" }],
-	// 	};
-	// }
 }

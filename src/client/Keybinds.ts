@@ -3,9 +3,10 @@ import { ObservableMap } from "engine/shared/event/ObservableMap";
 import { ObservableValue } from "engine/shared/event/ObservableValue";
 import { Signal } from "engine/shared/event/Signal";
 import { Keys } from "engine/shared/fixes/Keys";
+import { Strings } from "engine/shared/fixes/String.propmacro";
 
 type KeybindSubscription = {
-	readonly func: (input: InputObject) => void | Enum.ContextActionResult;
+	readonly func: (input: InputObject) => Enum.ContextActionResult | Enum.ContextActionResult["Name"];
 	readonly connection: SignalConnection;
 };
 
@@ -26,8 +27,14 @@ class KeybindRegistration {
 		this.keys = defaultKeys;
 		this.register();
 
-		this.onDown(() => this._isPressed.set(true));
-		this.onUp(() => this._isPressed.set(false));
+		this.onDown(() => {
+			this._isPressed.set(true);
+			return "Pass";
+		});
+		this.onUp(() => {
+			this._isPressed.set(false);
+			return "Pass";
+		});
 	}
 
 	private register() {
@@ -41,10 +48,15 @@ class KeybindRegistration {
 				if (!anyPressed) return Enum.ContextActionResult.Pass;
 
 				for (const k of [...this.indices]) {
-					for (const { func } of [...(this.subscriptions[k] ?? new Set())]) {
+					if (!this.subscriptions[k]) continue;
+
+					for (const { func } of [...this.subscriptions[k]]) {
 						const result = func(input);
-						if (result === Enum.ContextActionResult.Sink) {
-							return result;
+						if (result === undefined) {
+							print("returning udefined", Strings.pretty(this.subscriptions), Strings.pretty(this.keys));
+						}
+						if (result === Enum.ContextActionResult.Sink || result === "Sink") {
+							return Enum.ContextActionResult.Sink;
 						}
 					}
 				}
@@ -66,13 +78,19 @@ class KeybindRegistration {
 
 	onDown(func: KeybindSubscription["func"], priority?: number): SignalConnection {
 		return this.on((input) => {
-			if (input.UserInputState !== Enum.UserInputState.Begin) return;
+			if (input.UserInputState !== Enum.UserInputState.Begin) {
+				return "Pass";
+			}
+
 			return func(input);
 		}, priority);
 	}
 	onUp(func: KeybindSubscription["func"], priority?: number): SignalConnection {
 		return this.on((input) => {
-			if (input.UserInputState !== Enum.UserInputState.End) return;
+			if (input.UserInputState !== Enum.UserInputState.End) {
+				return "Pass";
+			}
+
 			return func(input);
 		}, priority);
 	}

@@ -17,7 +17,11 @@ type MainScreenLayoutDefinition = GuiObject & {
 		readonly Right: GuiObject;
 	};
 	readonly Left: GuiObject;
-	readonly Bottom: GuiObject;
+	readonly Bottom: GuiObject & {
+		readonly Top: GuiObject;
+		readonly Center: GuiObject;
+		readonly Bottom: GuiObject;
+	};
 };
 @injectable
 export class MainScreenLayout extends Component {
@@ -60,7 +64,9 @@ export class MainScreenLayout extends Component {
 		forEachChild(this.instance.Top.Center.Main, (child) => (child.Visible = false));
 		forEachChild(this.instance.Top.Right, (child) => (child.Visible = false));
 		forEachChild(this.instance.Left, (child) => (child.Visible = false));
-		forEachChild(this.instance.Bottom, (child) => (child.Visible = false));
+		forEachChild(this.instance.Bottom.Top, (child) => (child.Visible = false));
+		forEachChild(this.instance.Bottom.Center, (child) => (child.Visible = false));
+		forEachChild(this.instance.Bottom.Bottom, (child) => (child.Visible = false));
 	}
 
 	registerTopCenterButton<T extends GuiButton>(name: string): Control<T> {
@@ -105,9 +111,23 @@ export class MainScreenLayout extends Component {
 		return control;
 	}
 
-	registerBottom<T extends GuiObject>(name: string): Control<T> {
-		const gui = (this.instance.Bottom.WaitForChild(name) as T).Clone();
-		gui.Parent = this.instance.Bottom;
+	registerBottomTop<T extends GuiObject>(name: string): Control<T> {
+		const gui = (this.instance.Bottom.Top.WaitForChild(name) as T).Clone();
+		gui.Parent = this.instance.Bottom.Top;
+
+		const control = new Control(gui);
+		return control;
+	}
+	registerBottomCenter<T extends GuiObject>(name: string): Control<T> {
+		const gui = (this.instance.Bottom.Center.WaitForChild(name) as T).Clone();
+		gui.Parent = this.instance.Bottom.Center;
+
+		const control = new Control(gui);
+		return control;
+	}
+	registerBottomBottom<T extends GuiObject>(name: string): Control<T> {
+		const gui = (this.instance.Bottom.Bottom.WaitForChild(name) as T).Clone();
+		gui.Parent = this.instance.Bottom.Bottom;
 
 		const control = new Control(gui);
 		return control;

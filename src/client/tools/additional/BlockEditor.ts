@@ -555,6 +555,12 @@ class ScaleComponent extends Component implements EditComponent {
 		this.event.subscribeObservable(grid, updateFromCurrentMovement);
 
 		// #region Keyboard controls initialization
+		const centerBasedAction = this.parent(
+			new Action(() => {
+				//
+			}),
+		);
+
 		const tooltips = this.parent(TooltipsHolder.createComponent("Edit Tool > Scale"));
 		tooltips.setFromKeybinds(keybinds.fromDefinition(centerBasedKb), keybinds.fromDefinition(sameSizeKb));
 
@@ -701,7 +707,7 @@ export class BlockEditor extends Component {
 		scale: Keybinds.registerDefinition("edit_scale", ["Edit tool", "Scale"], [["B"]]),
 	} as const satisfies { readonly [k in string]: KeybindDefinition };
 
-	private readonly _completed = new ArgsSignal();
+	private readonly _completed = new ArgsSignal<[state: "completed" | "cancelled"]>();
 	readonly completed = this._completed.asReadonly();
 
 	private readonly editBlocks: readonly EditingBlock[];
@@ -735,15 +741,15 @@ export class BlockEditor extends Component {
 			cancel: this.parent(
 				new Action(() => {
 					this.cancel();
-					this._completed.Fire();
+					this._completed.Fire("cancelled");
 				}),
 			),
-			finish: this.parent(new Action(() => this._completed.Fire())),
+			finish: this.parent(new Action(() => this._completed.Fire("completed"))),
 		} as const;
 
-		actions.move.initKeybind(keybinds.fromDefinition(BlockEditor.keybinds.move), -1);
-		actions.rotate.initKeybind(keybinds.fromDefinition(BlockEditor.keybinds.rotate), -1);
-		actions.scale.initKeybind(keybinds.fromDefinition(BlockEditor.keybinds.scale), -1);
+		actions.move.initKeybind(keybinds.fromDefinition(BlockEditor.keybinds.move), { priority: -1 });
+		actions.rotate.initKeybind(keybinds.fromDefinition(BlockEditor.keybinds.rotate), { priority: -1 });
+		actions.scale.initKeybind(keybinds.fromDefinition(BlockEditor.keybinds.scale), { priority: -1 });
 
 		actions.move.subCanExecuteFrom({ main: new ObservableValue(true) });
 		actions.rotate.subCanExecuteFrom({ main: new ObservableValue(true) });
@@ -752,31 +758,19 @@ export class BlockEditor extends Component {
 		actions.cancel.subCanExecuteFrom({ main: new ObservableValue(true) });
 		actions.finish.subCanExecuteFrom({ main: new ObservableValue(true) });
 
-		//
-
-		(() => {
-			type Bottom = GuiObject & {
-				readonly Line1: GuiObject & {
-					readonly Move: GuiButton;
-					readonly Rotate: GuiButton;
-					readonly Scale: GuiButton;
-				};
-				readonly Line2: GuiObject & {
-					readonly Cancel: GuiButton;
-					readonly Finish: GuiButton;
-				};
+		{
+			type Line = GuiObject & {
+				readonly Move: GuiButton;
+				readonly Rotate: GuiButton;
+				readonly Scale: GuiButton;
 			};
-			const bottom = this.parentGui(mainScreen.registerBottom<Bottom>("Editing"));
+
+			const bottom = this.parentGui(mainScreen.registerBottomCenter<Line>("MoveRotateScale"));
 			const gui = bottom.instance;
 
-			const move = bottom.parent(new Control(gui.Line1.Move).subscribeToAction(actions.move, "transparency"));
-			const rotate = bottom.parent(
-				new Control(gui.Line1.Rotate).subscribeToAction(actions.rotate, "transparency"),
-			);
-			const scale = bottom.parent(new Control(gui.Line1.Scale).subscribeToAction(actions.scale, "transparency"));
-
-			bottom.parent(new Control(gui.Line2.Cancel).subscribeToAction(actions.cancel, "transparency"));
-			bottom.parent(new Control(gui.Line2.Finish).subscribeToAction(actions.finish, "transparency"));
+			const move = bottom.parent(new Control(gui.Move).subscribeToAction(actions.move, "transparency"));
+			const rotate = bottom.parent(new Control(gui.Rotate).subscribeToAction(actions.rotate, "transparency"));
+			const scale = bottom.parent(new Control(gui.Scale).subscribeToAction(actions.scale, "transparency"));
 
 			const btns = { move, rotate, scale };
 			this.event.subscribeObservable(
@@ -789,7 +783,19 @@ export class BlockEditor extends Component {
 				},
 				true,
 			);
-		})();
+		}
+
+		{
+			type Line = GuiObject & {
+				readonly Cancel: GuiButton;
+				readonly Finish: GuiButton;
+			};
+			const bottom = this.parentGui(mainScreen.registerBottomBottom<Line>("CancelFinish"));
+			const gui = bottom.instance;
+
+			bottom.parent(new Control(gui.Cancel).subscribeToAction(actions.cancel, "transparency"));
+			bottom.parent(new Control(gui.Finish).subscribeToAction(actions.finish, "transparency"));
+		}
 
 		this.editBlocks = blocks.map((b): EditingBlock => {
 			const origModel = blockList.blocks[BlockManager.manager.id.get(b)]!.model;
@@ -916,7 +922,7 @@ export class BlockEditor extends Component {
 
 		const setModeByKey = (mode: EditMode) => {
 			if (this.currentMode.get() === mode) {
-				this._completed.Fire();
+				this._completed.Fire("completed");
 				return Enum.ContextActionResult.Sink;
 			}
 
