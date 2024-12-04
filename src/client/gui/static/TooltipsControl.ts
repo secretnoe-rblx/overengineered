@@ -3,8 +3,6 @@ import { Interface } from "client/gui/Interface";
 import { Control } from "engine/client/gui/Control";
 import { InputController } from "engine/client/InputController";
 import { InstanceComponent } from "engine/shared/component/InstanceComponent";
-import { Transforms } from "engine/shared/component/Transforms";
-import { TransformService } from "engine/shared/component/TransformService";
 import { Element } from "engine/shared/Element";
 import { Keys } from "engine/shared/fixes/Keys";
 import type { KeybindRegistration, KeyCombination } from "client/Keybinds";
@@ -95,26 +93,11 @@ export class TooltipsHolder extends InstanceComponent<GuiObject> {
 			}
 		}
 
-		if (this.isEnabled()) {
-			TransformService.run(button, (tr) =>
-				tr
-					.transform(button, "Size", new UDim2(1, 0, 0, 0))
-					.then()
-					.transform(button, "Size", new UDim2(1, 0, 0, 50), Transforms.commonProps.quadOut02),
-			);
-		} else {
+		if (!this.isEnabled()) {
 			button.Visible = false;
 		}
 
 		return button;
-	}
-
-	private destroyTooltip(tooltip: GuiObject) {
-		TransformService.run(tooltip, (tr) => {
-			tr.transform(tooltip, "Size", new UDim2(1, 0, 0, 0), Transforms.commonProps.quadOut02)
-				.then()
-				.destroy(tooltip);
-		});
 	}
 
 	setFromKeybinds(...keybinds: readonly KeybindRegistration[]) {
@@ -134,7 +117,7 @@ export class TooltipsHolder extends InstanceComponent<GuiObject> {
 	}
 	private justSet(tooltips: InputTooltips) {
 		for (const tooltip of this.instances) {
-			this.destroyTooltip(tooltip);
+			tooltip.Destroy();
 		}
 		this.instances.clear();
 

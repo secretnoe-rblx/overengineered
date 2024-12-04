@@ -14,7 +14,6 @@ import { Component } from "engine/shared/component/Component";
 import { ComponentChild } from "engine/shared/component/ComponentChild";
 import { ComponentInstance } from "engine/shared/component/ComponentInstance";
 import { InstanceComponent } from "engine/shared/component/InstanceComponent";
-import { InstanceValueStorage } from "engine/shared/component/InstanceValueStorage";
 import { Transforms } from "engine/shared/component/Transforms";
 import { TransformService } from "engine/shared/component/TransformService";
 import { Element } from "engine/shared/Element";
@@ -32,6 +31,7 @@ import type { MainScreenLayout } from "client/gui/MainScreenLayout";
 import type { KeybindDefinition } from "client/Keybinds";
 import type { ClientBuilding } from "client/modes/build/ClientBuilding";
 import type { PlayerDataStorage } from "client/PlayerDataStorage";
+import type { Theme } from "client/Theme";
 import type { TextButtonDefinition } from "engine/client/gui/Button";
 
 type EditHandles = BasePart & {
@@ -729,6 +729,7 @@ export class BlockEditor extends Component {
 		@inject blockList: BlockList,
 		@inject playerData: PlayerDataStorage,
 		@inject mainScreen: MainScreenLayout,
+		@inject theme: Theme,
 		@inject di: DIContainer,
 	) {
 		super();
@@ -774,12 +775,7 @@ export class BlockEditor extends Component {
 					.then()
 					.hide(bottom.instance),
 			);
-			this.onDestroy(() => {
-				Transforms.create()
-					.push(bottom.visibilityComponent().waitForTransform())
-					.then()
-					.func(() => bottom.destroy());
-			});
+			this.onDestroy(() => bottom.visibilityComponent().waitForTransformThenDestroy());
 
 			const gui = bottom.instance;
 
@@ -789,7 +785,7 @@ export class BlockEditor extends Component {
 
 			const btns = { move, rotate, scale };
 			for (const [, btn] of pairs(btns)) {
-				const v = InstanceValueStorage.get(btn.instance, "BackgroundColor3");
+				const v = btn.valuesComponent().get("BackgroundColor3");
 				v.transforms.addTransform((value) =>
 					Transforms.create().transform(btn.instance, "BackgroundColor3", value, Transforms.quadOut02),
 				);
@@ -799,8 +795,8 @@ export class BlockEditor extends Component {
 				this.currentMode,
 				(mode) => {
 					for (const [name, button] of pairs(btns)) {
-						const v = InstanceValueStorage.get(button.instance, "BackgroundColor3");
-						v.overlay(0, mode === name ? Colors.accentDark : Colors.staticBackground);
+						const v = button.valuesComponent().get("BackgroundColor3");
+						v.overlay(0, theme.getColor(mode === name ? "buttonActive" : "buttonNormal"));
 					}
 				},
 				true,
