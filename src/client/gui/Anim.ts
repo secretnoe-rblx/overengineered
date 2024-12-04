@@ -1,4 +1,5 @@
 import { Interface } from "client/gui/Interface";
+import { ScaledScreenGui } from "client/gui/ScaledScreenGui";
 import { Transforms } from "engine/shared/component/Transforms";
 import { Element } from "engine/shared/Element";
 import type { TransformProps } from "engine/shared/component/Transform";
@@ -88,10 +89,15 @@ export namespace Anim {
 		}
 	}
 
-	function cloneWithAbsolutePosition<T extends GuiObject>(instance: T): T {
+	function cloneWithAbsolutePosition<T extends GuiObject>(instance: T, scale: number, offset: Vector2): T {
 		const clone = instance.Clone();
-		clone.Position = new UDim2(0, instance.AbsolutePosition.X, 0, instance.AbsolutePosition.Y);
-		clone.Size = new UDim2(0, instance.AbsoluteSize.X, 0, instance.AbsoluteSize.Y);
+		clone.Position = new UDim2(
+			0,
+			(instance.AbsolutePosition.X + offset.X) / scale,
+			0,
+			(instance.AbsolutePosition.Y + offset.Y) / scale,
+		);
+		clone.Size = new UDim2(0, instance.AbsoluteSize.X / scale, 0, instance.AbsoluteSize.Y / scale);
 		clone.AnchorPoint = Vector2.zero;
 
 		return clone;
@@ -103,28 +109,33 @@ export namespace Anim {
 	): LuaTuple<[ScreenGui, ...TChildren]> {
 		const findScreen = (instance: Instance): ScreenGui | undefined => {
 			let parent = instance;
-			if (parent.IsA("ScreenGui")) {
-				return parent;
-			}
+			while (true as boolean) {
+				if (parent.IsA("ScreenGui")) {
+					return parent;
+				}
 
-			if (!parent.Parent) return;
-			parent = parent.Parent;
+				if (!parent.Parent) return;
+				parent = parent.Parent;
+			}
 		};
 
 		const childScreen = children[0] && findScreen(children[0]);
 
-		const clones = children.map(cloneWithAbsolutePosition) as unknown as TChildren;
-		const screen = Element.create(
-			"ScreenGui",
-			{
-				IgnoreGuiInset: childScreen?.IgnoreGuiInset,
-				ClipToDeviceSafeArea: childScreen?.ClipToDeviceSafeArea,
-				SafeAreaCompatibility: childScreen?.SafeAreaCompatibility,
-				ScreenInsets: childScreen?.ScreenInsets,
-				Parent: Interface.getPlayerGui(),
-			},
-			asObject(clones.mapToMap((child) => $tuple(child.Name, child))),
-		);
+		const screen = Element.create("ScreenGui", {
+			ClipToDeviceSafeArea: childScreen?.ClipToDeviceSafeArea,
+			SafeAreaCompatibility: childScreen?.SafeAreaCompatibility,
+			ScreenInsets: childScreen?.ScreenInsets,
+			Parent: Interface.getPlayerGui(),
+		});
+		const ssg = new ScaledScreenGui(screen);
+		ssg.enable();
+
+		const scale = ssg.getScale();
+		const offset = screen.AbsolutePosition.mul(-1);
+		const clones = children.map((c) => cloneWithAbsolutePosition(c, scale, offset)) as unknown as TChildren;
+		for (const clone of clones) {
+			clone.Parent = screen;
+		}
 
 		return $tuple(screen, ...clones);
 	}
