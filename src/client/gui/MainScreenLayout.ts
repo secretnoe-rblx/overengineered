@@ -73,17 +73,15 @@ export class MainScreenLayout extends Component {
 		const control = new Control(this.instance.Top.Center.Main.WaitForChild(name) as T);
 
 		const origSize = control.instance.Size;
-		control
-			.visibilityComponent()
-			.addTransformFunc((enabling, tr) =>
-				tr
-					.func(() => control.setButtonInteractable(enabling))
-					.resize(
-						control.instance,
-						new UDim2(enabling ? origSize.X : new UDim(), origSize.Y),
-						Transforms.quadOut02,
-					),
-			);
+		control.visibilityComponent().addTransformFunc((enabling) =>
+			Transforms.create()
+				.func(() => control.setButtonInteractable(enabling))
+				.resize(
+					control.instance,
+					new UDim2(enabling ? origSize.X : new UDim(), origSize.Y),
+					Transforms.quadOut02,
+				),
+		);
 
 		return control;
 	}
@@ -95,18 +93,16 @@ export class MainScreenLayout extends Component {
 
 	registerLeft<T extends GuiObject>(name: string): Control<T> {
 		const control = new Control(this.instance.Left.WaitForChild(name) as T);
-		control
-			.visibilityComponent()
-			.addTransformFunc((enabling, tr) =>
-				tr
-					.transform(
-						control.instance as GuiObject,
-						"AnchorPoint",
-						new Vector2(enabling ? 0 : 1, 0),
-						Transforms.quadOut02,
-					)
-					.moveX(control.instance, new UDim(0, enabling ? 0 : -10), Transforms.quadOut02),
-			);
+		control.visibilityComponent().addTransformFunc((enabling) =>
+			Transforms.create()
+				.transform(
+					control.instance as GuiObject,
+					"AnchorPoint",
+					new Vector2(enabling ? 0 : 1, 0),
+					Transforms.quadOut02,
+				)
+				.moveX(control.instance, new UDim(0, enabling ? 0 : -10), Transforms.quadOut02),
+		);
 
 		return control;
 	}

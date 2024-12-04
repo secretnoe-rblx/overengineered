@@ -15,6 +15,7 @@ import { ComponentChild } from "engine/shared/component/ComponentChild";
 import { ComponentInstance } from "engine/shared/component/ComponentInstance";
 import { InstanceComponent } from "engine/shared/component/InstanceComponent";
 import { InstanceValueStorage } from "engine/shared/component/InstanceValueStorage";
+import { Transforms } from "engine/shared/component/Transforms";
 import { TransformService } from "engine/shared/component/TransformService";
 import { Element } from "engine/shared/Element";
 import { ObservableCollectionSet } from "engine/shared/event/ObservableCollection";
@@ -765,7 +766,21 @@ export class BlockEditor extends Component {
 				readonly Scale: GuiButton;
 			};
 
-			const bottom = this.parentGui(mainScreen.registerBottomCenter<Line>("MoveRotateScale"));
+			const bottom = this.parentGui(mainScreen.registerBottomCenter<Line>("MoveRotateScale"), { destroy: false });
+			bottom.visibilityComponent().addTransform(
+				false,
+				Transforms.create() //
+					.fullFadeOut(bottom.instance, Transforms.quadOut02)
+					.then()
+					.hide(bottom.instance),
+			);
+			this.onDestroy(() => {
+				Transforms.create()
+					.push(bottom.visibilityComponent().waitForTransform())
+					.then()
+					.func(() => bottom.destroy());
+			});
+
 			const gui = bottom.instance;
 
 			const move = bottom.parent(new Control(gui.Move).subscribeToAction(actions.move, "transparency"));
@@ -773,6 +788,13 @@ export class BlockEditor extends Component {
 			const scale = bottom.parent(new Control(gui.Scale).subscribeToAction(actions.scale, "transparency"));
 
 			const btns = { move, rotate, scale };
+			for (const [, btn] of pairs(btns)) {
+				const v = InstanceValueStorage.get(btn.instance, "BackgroundColor3");
+				v.transforms.addTransform((value) =>
+					Transforms.create().transform(btn.instance, "BackgroundColor3", value, Transforms.quadOut02),
+				);
+			}
+
 			this.event.subscribeObservable(
 				this.currentMode,
 				(mode) => {
