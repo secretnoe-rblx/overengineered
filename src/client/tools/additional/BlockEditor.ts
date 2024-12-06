@@ -224,6 +224,41 @@ const formatVecForFloatingText = (vec: Vector3): string => {
 	return `${format(vec.X)}, ${format(vec.Y)}, ${format(vec.Z)}`;
 };
 
+const createButtonList = (
+	parent: Component,
+	mainScreen: MainScreenLayout,
+	theme: Theme,
+	buttons: { readonly [k in string]: ObservableSwitch },
+) => {
+	type t = GuiObject & {
+		readonly Template: TextButtonDefinition;
+	};
+	const editing = parent.parentGui(mainScreen.registerBottomTop<t>("Editing"));
+	const template = editing.asTemplate(editing.instance.Template, true);
+
+	for (const [k, swc] of pairs(buttons)) {
+		const btn = editing
+			.parent(new Control(template()))
+			.setButtonText(k.upper())
+			.addButtonAction(() => swc.set("kb", !swc.get()));
+
+		btn.valuesComponent()
+			.get("BackgroundColor3")
+			.transforms.addTransform((value) =>
+				Transforms.create().transform(btn.instance, "BackgroundColor3", value, Transforms.quadOut02),
+			);
+		parent.event.subscribeObservable(
+			swc,
+			(value) =>
+				btn
+					.valuesComponent()
+					.get("BackgroundColor3")
+					.overlay(0, theme.getObservable(value ? "buttonActive" : "buttonNormal")),
+			true,
+		);
+	}
+};
+
 // #region Move
 // #endregion
 @injectable
@@ -235,6 +270,8 @@ class MoveComponent extends Component implements EditComponent {
 		grid: ReadonlyObservableValue<MoveGrid>,
 		topControl: BlockEditorTopControl,
 		@inject keybinds: Keybinds,
+		@inject theme: Theme,
+		@inject mainScreen: MainScreenLayout,
 	) {
 		super();
 
@@ -280,6 +317,7 @@ class MoveComponent extends Component implements EditComponent {
 			sideways.set("kb", value);
 			updateFromCurrentMovement();
 		});
+		createButtonList(this, mainScreen, theme, { sideways });
 		// #endregion
 
 		const createVisualizer = () => {
@@ -356,14 +394,6 @@ class MoveComponent extends Component implements EditComponent {
 				),
 			);
 		});
-
-		const sidewaysBtn = topControl.create("SIDEWAYS", () => sideways.set("kb", !sideways.get()));
-		ComponentInstance.init(this, sidewaysBtn.instance);
-		this.event.subscribeObservable(
-			sideways,
-			(sideways) => (sidewaysBtn.instance.Transparency = sideways ? 0 : 0.5),
-			true,
-		);
 	}
 }
 
@@ -556,12 +586,6 @@ class ScaleComponent extends Component implements EditComponent {
 		this.event.subscribeObservable(grid, updateFromCurrentMovement);
 
 		// #region Keyboard controls initialization
-		const centerBasedAction = this.parent(
-			new Action(() => {
-				//
-			}),
-		);
-
 		const tooltips = this.parent(TooltipsHolder.createComponent("Edit Tool > Scale"));
 		tooltips.setFromKeybinds(keybinds.fromDefinition(centerBasedKb), keybinds.fromDefinition(sameSizeKb));
 

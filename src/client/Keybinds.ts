@@ -3,7 +3,6 @@ import { ObservableMap } from "engine/shared/event/ObservableMap";
 import { ObservableValue } from "engine/shared/event/ObservableValue";
 import { Signal } from "engine/shared/event/Signal";
 import { Keys } from "engine/shared/fixes/Keys";
-import { Strings } from "engine/shared/fixes/String.propmacro";
 
 type KeybindSubscription = {
 	readonly func: (input: InputObject) => Enum.ContextActionResult | Enum.ContextActionResult["Name"];
@@ -13,7 +12,9 @@ type KeybindSubscription = {
 export type { KeybindRegistration };
 class KeybindRegistration {
 	private readonly indices: number[] = [];
-	private readonly subscriptions: { [k in number]?: Set<KeybindSubscription> } = {};
+	private readonly subscriptions: {
+		[k in Enum.UserInputState["Name"]]?: { [k in number]?: Set<KeybindSubscription> };
+	} = {};
 	private keys: readonly KeyCombination[];
 
 	private readonly _isPressed = new ObservableValue(false);
@@ -44,22 +45,31 @@ class KeybindRegistration {
 			(name, state, input) => {
 				if (name !== this.action) return;
 
-				const anyPressed = this.keys.any((comb) => comb.all((k) => UserInputService.IsKeyDown(k)));
-				if (!anyPressed) return Enum.ContextActionResult.Pass;
+				const process = (subs: { [x: number]: Set<KeybindSubscription> | undefined }) => {
+					for (const k of [...this.indices]) {
+						if (!subs[k]) continue;
 
-				for (const k of [...this.indices]) {
-					if (!this.subscriptions[k]) continue;
-
-					for (const { func } of [...this.subscriptions[k]]) {
-						const result = func(input);
-						if (result === undefined) {
-							print("returning udefined", Strings.pretty(this.subscriptions), Strings.pretty(this.keys));
-						}
-						if (result === Enum.ContextActionResult.Sink || result === "Sink") {
-							return Enum.ContextActionResult.Sink;
+						for (const { func } of [...subs[k]]) {
+							const result = func(input);
+							if (result === Enum.ContextActionResult.Sink || result === "Sink") {
+								return Enum.ContextActionResult.Sink;
+							}
 						}
 					}
+				};
+
+				const anyPressed = this.keys.any((comb) => comb.all((k) => UserInputService.IsKeyDown(k)));
+				if (!anyPressed) {
+					if (input.UserInputState === Enum.UserInputState.End) {
+						const result = process(this.subscriptions[input.UserInputState.Name] ?? []);
+						if (result) return result;
+					}
+
+					return Enum.ContextActionResult.Pass;
 				}
+
+				const result = process(this.subscriptions[input.UserInputState.Name] ?? {});
+				if (result) return result;
 
 				return Enum.ContextActionResult.Pass;
 			},
@@ -77,34 +87,24 @@ class KeybindRegistration {
 	}
 
 	onDown(func: KeybindSubscription["func"], priority?: number): SignalConnection {
-		return this.on((input) => {
-			if (input.UserInputState !== Enum.UserInputState.Begin) {
-				return "Pass";
-			}
-
-			return func(input);
-		}, priority);
+		return this.on(Enum.UserInputState.Begin, func, priority);
 	}
 	onUp(func: KeybindSubscription["func"], priority?: number): SignalConnection {
-		return this.on((input) => {
-			if (input.UserInputState !== Enum.UserInputState.End) {
-				return "Pass";
-			}
-
-			return func(input);
-		}, priority);
+		return this.on(Enum.UserInputState.End, func, priority);
 	}
-	private on(func: KeybindSubscription["func"], priority?: number): SignalConnection {
+	private on(state: Enum.UserInputState, func: KeybindSubscription["func"], priority?: number): SignalConnection {
 		priority ??= 0;
 
-		const connection = Signal.connection(() => this.subscriptions[priority]?.delete(sub));
+		const subs = (this.subscriptions[state.Name] ??= {});
+
+		const connection = Signal.connection(() => subs[priority]?.delete(sub));
 		const sub = { func, connection };
 
-		if (!this.subscriptions[priority]) {
+		if (!subs[priority]) {
 			this.indices.push(priority);
 			this.indices.sort();
 		}
-		(this.subscriptions[priority] ??= new Set()).add(sub);
+		(subs[priority] ??= new Set()).add(sub);
 
 		return connection;
 	}

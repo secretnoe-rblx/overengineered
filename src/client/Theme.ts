@@ -5,9 +5,9 @@ const defaultColors = {
 	accent: Color3.fromRGB(18, 68, 144),
 
 	buttonNormal: Color3.fromRGB(1, 4, 9),
-	buttonActive: Color3.fromRGB(8, 33, 71),
-	buttonNegative: Color3.fromRGB(52, 17, 17),
-	buttonPositive: Color3.fromRGB(26, 109, 23),
+	buttonActive: Color3.fromRGB(16, 68, 145), // should be the same as accent probably?
+	buttonNegative: Color3.fromRGB(103, 34, 34),
+	buttonPositive: Color3.fromRGB(27, 106, 22),
 } as const;
 export type ThemeKeys = keyof typeof defaultColors;
 

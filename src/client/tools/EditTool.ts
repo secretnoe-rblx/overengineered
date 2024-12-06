@@ -475,7 +475,8 @@ export class EditTool extends ToolBase {
 		super(mode);
 
 		this.parent(di.resolveForeignClass(SelectedBlocksHighlighter, [this.selected]));
-		this.parent(new MultiBlockHighlightedSelector(this.targetPlot, this.selected));
+		const selector = this.parent(new MultiBlockHighlightedSelector(this.targetPlot, this.selected));
+		this.controller.childSet.Connect((child) => selector.setEnabled(!child));
 		this.onDisable(() => this.selected.clear());
 
 		const startEdit = (mode: "move" | "rotate" | "scale") => {
