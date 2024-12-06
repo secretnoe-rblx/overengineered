@@ -178,15 +178,15 @@ export class BuildingMode extends PlayMode {
 	}
 
 	switchTutorialMode(tutorialMode: boolean): void {
-		this.actionController.undoAction.canExecute.set("build_tutorialMode", !tutorialMode);
-		this.actionController.redoAction.canExecute.set("build_tutorialMode", !tutorialMode);
+		this.actionController.undoAction.canExecute.and("build_tutorialMode", !tutorialMode);
+		this.actionController.redoAction.canExecute.and("build_tutorialMode", !tutorialMode);
 
 		if (!tutorialMode) {
 			this.toolController.enabledTools.disableAll();
 		}
 
-		this.openSavePopupAction.canExecute.set("this_tutorialMode", !tutorialMode);
-		this.runAction.canExecute.set("this_tutorialMode", !tutorialMode);
+		this.openSavePopupAction.canExecute.and("this_tutorialMode", !tutorialMode);
+		this.runAction.canExecute.and("this_tutorialMode", !tutorialMode);
 	}
 
 	onSwitchToNext(mode: PlayModes | undefined) {}

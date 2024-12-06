@@ -34,17 +34,12 @@ export class ActionController extends Component {
 
 		this.undoAction.subCanExecuteFrom({
 			isntLoading: LoadingController.isNotLoading,
+			historyNotEmpty: this.history.createBased((ops) => ops.size() !== 0),
 		});
 		this.redoAction.subCanExecuteFrom({
 			isntLoading: LoadingController.isNotLoading,
+			historyNotEmpty: this.redoHistory.createBased((ops) => ops.size() !== 0),
 		});
-
-		this.event.subscribeImmediately(this.history.collectionChanged, () =>
-			this.undoAction.canExecute.set("main_history", this.history.size() !== 0),
-		);
-		this.event.subscribeImmediately(this.redoHistory.collectionChanged, () =>
-			this.redoAction.canExecute.set("main_history", this.redoHistory.size() !== 0),
-		);
 
 		this.parent(mainScreen.registerTopRightButton("Undo")) //
 			.subscribeToAction(this.undoAction);

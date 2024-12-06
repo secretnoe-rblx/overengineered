@@ -552,8 +552,8 @@ export class EditTool extends ToolBase {
 		this.controller.childSet.Connect((child) => {
 			this.tooltipHolder.set(child ? {} : this.getTooltips());
 
-			actionController.undoAction.canExecute.set("editTool_modeSelected", !child);
-			actionController.redoAction.canExecute.set("editTool_modeSelected", !child);
+			actionController.undoAction.canExecute.and("editTool_modeSelected", !child);
+			actionController.redoAction.canExecute.and("editTool_modeSelected", !child);
 		});
 
 		/*

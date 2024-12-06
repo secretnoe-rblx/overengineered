@@ -554,7 +554,7 @@ export class RideModeScene extends Control<RideModeSceneDefinition> {
 			this.controls.start(machine);
 		}
 
-		this.sitAction.canExecute.set(
+		this.sitAction.canExecute.and(
 			"canNotSitIfNoSeat",
 			machine.blocks.getAll().any((b) => b instanceof VehicleSeatBlock.logic.ctor),
 		);
