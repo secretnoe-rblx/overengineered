@@ -1,12 +1,11 @@
 import { ReplicatedStorage, Workspace } from "@rbxts/services";
 import { Interface } from "client/gui/Interface";
-import { ButtonControl } from "engine/client/gui/Button";
-import { Control } from "engine/client/gui/Control";
 import { Component } from "engine/shared/component/Component";
 import { ComponentInstance } from "engine/shared/component/ComponentInstance";
 import { ComponentStateContainer } from "engine/shared/component/ComponentStateContainer";
 import { Transforms } from "engine/shared/component/Transforms";
 import { Element } from "engine/shared/Element";
+import { ObservableValue } from "engine/shared/event/ObservableValue";
 import { BuildingManager } from "shared/building/BuildingManager";
 import { SharedPlot } from "shared/building/SharedPlot";
 import { Colors } from "shared/Colors";
@@ -172,17 +171,17 @@ export class CenterOfMassController extends Component {
 			new CenterOfMassVisualizer(plot.instance.Blocks, actionController),
 		);
 
-		const button = this.parent(mainScreen.registerTopRightButton("CenterOfMass"));
-		visualizerState.set("button", false);
-		const comButton = button.parent(new Control(button.instance));
-		comButton.parent(new ButtonControl(comButton.instance, () => visualizerState.switch("button")));
+		const enabledByButton = new ObservableValue(false);
+		visualizerState.subscribeFrom({ enabledByButton });
+		const button = this.parent(mainScreen.registerTopRightButton("CenterOfMass")) //
+			.addButtonAction(() => enabledByButton.set(!enabledByButton.get()));
 
 		this.event.subscribeObservable(
 			visualizerState,
 			(enabled) =>
 				Transforms.create()
-					.transform(comButton.instance, "Transparency", enabled ? 0 : 0.5, Transforms.commonProps.quadOut02)
-					.run(comButton.instance),
+					.transform(button.instance, "Transparency", enabled ? 0 : 0.5, Transforms.commonProps.quadOut02)
+					.run(button.instance),
 			true,
 		);
 	}

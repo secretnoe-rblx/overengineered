@@ -14,11 +14,11 @@ import { Component } from "engine/shared/component/Component";
 import { ComponentChild } from "engine/shared/component/ComponentChild";
 import { ComponentInstance } from "engine/shared/component/ComponentInstance";
 import { InstanceComponent } from "engine/shared/component/InstanceComponent";
+import { OverlayValueStorage } from "engine/shared/component/OverlayValueStorage";
 import { Transforms } from "engine/shared/component/Transforms";
 import { TransformService } from "engine/shared/component/TransformService";
 import { Element } from "engine/shared/Element";
 import { ObservableCollectionSet } from "engine/shared/event/ObservableCollection";
-import { ObservableSwitch } from "engine/shared/event/ObservableSwitch";
 import { ObservableValue } from "engine/shared/event/ObservableValue";
 import { ArgsSignal } from "engine/shared/event/Signal";
 import { BB } from "engine/shared/fixes/BB";
@@ -228,7 +228,7 @@ const createButtonList = (
 	parent: Component,
 	mainScreen: MainScreenLayout,
 	theme: Theme,
-	buttons: { readonly [k in string]: ObservableSwitch },
+	buttons: { readonly [k in string]: OverlayValueStorage<boolean> },
 ) => {
 	type t = GuiObject & {
 		readonly Template: TextButtonDefinition;
@@ -240,7 +240,7 @@ const createButtonList = (
 		const btn = editing
 			.parent(new Control(template()))
 			.setButtonText(k.upper())
-			.addButtonAction(() => swc.set("kb", !swc.get()));
+			.addButtonAction(() => swc.and("kb", !swc.getKeyed("kb")));
 
 		btn.valuesComponent()
 			.get("BackgroundColor3")
@@ -283,7 +283,7 @@ class MoveComponent extends Component implements EditComponent {
 
 		this.onEnabledStateChange((enabled) => forEachHandle((handle) => (handle.Visible = enabled)));
 
-		const sideways = new ObservableSwitch(false);
+		const sideways = OverlayValueStorage.bool();
 		let bb = BB.fromPart(handles);
 
 		const floatingText = this.parent(FloatingText.create(handles));
@@ -314,7 +314,7 @@ class MoveComponent extends Component implements EditComponent {
 		tooltips.setFromKeybinds(keybinds.fromDefinition(sidewaysKb));
 
 		this.event.subscribeObservable(keybinds.fromDefinition(sidewaysKb).isPressed, (value) => {
-			sideways.set("kb", value);
+			sideways.and("kb", value);
 			updateFromCurrentMovement();
 		});
 		createButtonList(this, mainScreen, theme, { sideways });
@@ -491,8 +491,8 @@ class ScaleComponent extends Component implements EditComponent {
 
 		let bb = BB.fromPart(handles);
 
-		const centerBased = new ObservableSwitch(false);
-		const sameSize = new ObservableSwitch(false);
+		const centerBased = OverlayValueStorage.bool();
+		const sameSize = OverlayValueStorage.bool();
 
 		const pivot = Element.create(
 			"Part",
@@ -590,11 +590,11 @@ class ScaleComponent extends Component implements EditComponent {
 		tooltips.setFromKeybinds(keybinds.fromDefinition(centerBasedKb), keybinds.fromDefinition(sameSizeKb));
 
 		this.event.subscribeObservable(keybinds.fromDefinition(centerBasedKb).isPressed, (value) => {
-			centerBased.set("kb", value);
+			centerBased.and("kb", value);
 			updateFromCurrentMovement();
 		});
 		this.event.subscribeObservable(keybinds.fromDefinition(sameSizeKb).isPressed, (value) => {
-			sameSize.set("kb", value);
+			sameSize.and("kb", value);
 			updateFromCurrentMovement();
 		});
 		// #endregion
@@ -619,7 +619,7 @@ class ScaleComponent extends Component implements EditComponent {
 			});
 		});
 
-		const centerBasedBtn = topControl.create("CENTERED", () => centerBased.set("kb", !centerBased.get()));
+		const centerBasedBtn = topControl.create("CENTERED", () => centerBased.and("kb", !centerBased.getKeyed("kb")));
 		ComponentInstance.init(this, centerBasedBtn.instance);
 		this.event.subscribeObservable(
 			centerBased,
@@ -627,7 +627,7 @@ class ScaleComponent extends Component implements EditComponent {
 			true,
 		);
 
-		const sameSizeBtn = topControl.create("UNIFORM", () => sameSize.set("kb", !sameSize.get()));
+		const sameSizeBtn = topControl.create("UNIFORM", () => sameSize.and("kb", !sameSize.getKeyed("kb")));
 		ComponentInstance.init(this, sameSizeBtn.instance);
 		this.event.subscribeObservable(
 			sameSize,
@@ -649,7 +649,7 @@ class ScaleComponent extends Component implements EditComponent {
 		};
 
 		if (blocks.any((b) => !areRotations90DegreesApart(bb.center, b.block.GetPivot()))) {
-			sameSize.set("multipleBlocks", true);
+			sameSize.and("multipleBlocks", true);
 			sameSizeErr.setError(
 				"Uniform scaling is forced because the selection has blocks with non-aligned rotations.",
 			);
