@@ -5,8 +5,7 @@ import { Control } from "engine/client/gui/Control";
 import { ComponentKeyedChildren } from "engine/shared/component/ComponentKeyedChildren";
 import { InstanceComponent } from "engine/shared/component/InstanceComponent";
 import { Transforms } from "engine/shared/component/Transforms";
-import { TransformService } from "engine/shared/component/TransformService";
-import { Colors } from "shared/Colors";
+import type { Theme } from "client/Theme";
 import type { ToolBase } from "client/tools/ToolBase";
 import type { ToolController } from "client/tools/ToolController";
 
@@ -15,8 +14,15 @@ export type HotbarToolButtonControlDefinition = TextButton & {
 	readonly NumLabel: TextLabel;
 };
 
+@injectable
 export class HotbarButtonControl extends Control<HotbarToolButtonControlDefinition> {
-	constructor(gui: HotbarToolButtonControlDefinition, tools: ToolController, tool: ToolBase, index: number) {
+	constructor(
+		gui: HotbarToolButtonControlDefinition,
+		tools: ToolController,
+		tool: ToolBase,
+		index: number,
+		@inject theme: Theme,
+	) {
 		super(gui);
 
 		this.instance.Name = tool.getDisplayName();
@@ -28,15 +34,15 @@ export class HotbarButtonControl extends Control<HotbarToolButtonControlDefiniti
 			tools.selectedTool.set(tool === tools.selectedTool.get() ? undefined : tool);
 		});
 
-		const selectedToolStateMachine = Transforms.boolStateMachine(
-			this.instance,
-			TransformService.commonProps.quadOut02,
-			{ BackgroundColor3: Colors.newGui.blue },
-			{ BackgroundColor3: Colors.newGui.staticBackground },
-		);
+		this.initializeSimpleTransform("BackgroundColor3");
 		this.event.subscribeObservable(
 			tools.selectedTool,
-			(newtool) => selectedToolStateMachine(newtool === tool),
+			(newTool) =>
+				this.overlayValue(
+					"BackgroundColor3",
+					"selectedTool",
+					theme.get(newTool === tool ? "buttonActive" : "buttonNormal"),
+				),
 			true,
 		);
 	}
@@ -55,7 +61,7 @@ export type HotbarControlDefinition = GuiObject & {
 export class HotbarControl extends InstanceComponent<HotbarControlDefinition> {
 	private readonly nameLabel;
 
-	constructor(gui: HotbarControlDefinition, @inject toolController: ToolController) {
+	constructor(gui: HotbarControlDefinition, @inject toolController: ToolController, @inject di: DIContainer) {
 		super(gui);
 
 		// Disable roblox native backpack
@@ -75,7 +81,12 @@ export class HotbarControl extends InstanceComponent<HotbarControlDefinition> {
 
 				let index = 0;
 				for (const tool of tools) {
-					const button = new HotbarButtonControl(template(), toolController, tool, ++index);
+					const button = di.resolveForeignClass(HotbarButtonControl, [
+						template(),
+						toolController,
+						tool,
+						++index,
+					]);
 					toolButtons.add(tool, button);
 				}
 			},

@@ -80,6 +80,7 @@ export namespace TutorialServiceInitializer {
 
 		if (config.tutorialToRunWhenNoSlots) {
 			reg.onInit((service, di) => {
+				// di.resolve<PlayModeController>().mo
 				const playerData = di.resolve<PlayerDataStorage>();
 
 				service.onEnable(() => {

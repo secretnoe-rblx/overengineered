@@ -243,18 +243,10 @@ const createButtonList = (
 			.setButtonText(k.upper())
 			.addButtonAction(() => swc.and("kb", !swc.getKeyed("kb")));
 
-		btn.valuesComponent()
-			.get("BackgroundColor3")
-			.transforms.addTransform((value) =>
-				Transforms.create().transform(btn.instance, "BackgroundColor3", value, Transforms.quadOut02),
-			);
+		btn.initializeSimpleTransform("BackgroundColor3");
 		parent.event.subscribeObservable(
 			swc,
-			(value) =>
-				btn
-					.valuesComponent()
-					.get("BackgroundColor3")
-					.overlay(0, theme.getObservable(value ? "buttonActive" : "buttonNormal")),
+			(value) => btn.overlayValue("BackgroundColor3", 0, theme.get(value ? "buttonActive" : "buttonNormal")),
 			true,
 		);
 	}
@@ -804,30 +796,29 @@ export class BlockEditor extends Component {
 
 			const gui = bottom.instance;
 
-			const move = bottom.parent(
-				new Control(gui.Move).subscribeToAction(actions.move, GuiButtonActionIndicator.interactability),
-			);
-			const rotate = bottom.parent(
-				new Control(gui.Rotate).subscribeToAction(actions.rotate, GuiButtonActionIndicator.interactability),
-			);
-			const scale = bottom.parent(
-				new Control(gui.Scale).subscribeToAction(actions.scale, GuiButtonActionIndicator.interactability),
-			);
+			const move = bottom
+				.parent(new Control(gui.Move))
+				.subscribeToAction(actions.move, GuiButtonActionIndicator.interactability)
+				.initializeSimpleTransform("BackgroundColor3");
+			const rotate = bottom
+				.parent(new Control(gui.Rotate))
+				.subscribeToAction(actions.rotate, GuiButtonActionIndicator.interactability)
+				.initializeSimpleTransform("BackgroundColor3");
+			const scale = bottom
+				.parent(new Control(gui.Scale))
+				.subscribeToAction(actions.scale, GuiButtonActionIndicator.interactability)
+				.initializeSimpleTransform("BackgroundColor3");
 
 			const btns = { move, rotate, scale };
-			for (const [, btn] of pairs(btns)) {
-				const v = btn.valuesComponent().get("BackgroundColor3");
-				v.transforms.addTransform((value) =>
-					Transforms.create().transform(btn.instance, "BackgroundColor3", value, Transforms.quadOut02),
-				);
-			}
-
 			this.event.subscribeObservable(
 				this.currentMode,
 				(mode) => {
 					for (const [name, button] of pairs(btns)) {
-						const v = button.valuesComponent().get("BackgroundColor3");
-						v.overlay(0, theme.getColor(mode === name ? "buttonActive" : "buttonNormal"));
+						button.overlayValue(
+							"BackgroundColor3",
+							0,
+							theme.get(mode === name ? "buttonActive" : "buttonNormal"),
+						);
 					}
 				},
 				true,

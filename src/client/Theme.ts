@@ -18,10 +18,7 @@ export class Theme {
 		this.colors = Objects.mapValues(defaultColors, (k, v) => new ObservableValue(v));
 	}
 
-	getColor(key: ThemeKeys): Color3 {
-		return this.colors[key].get();
-	}
-	getObservable(key: ThemeKeys): ObservableValue<Color3> {
+	get(key: ThemeKeys): ObservableValue<Color3> {
 		return this.colors[key];
 	}
 }

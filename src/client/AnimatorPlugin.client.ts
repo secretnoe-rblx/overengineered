@@ -41,7 +41,6 @@ import { ObservableValue } from "engine/shared/event/ObservableValue";
 import { ArgsSignal } from "engine/shared/event/Signal";
 import type { TextButtonDefinition } from "engine/client/gui/Button";
 import type { ComponentEvents } from "engine/shared/component/ComponentEvents";
-import type { Easable } from "engine/shared/component/Easing";
 
 TS.import = previmport;
 
@@ -55,8 +54,8 @@ type Anim = WrittenAnim & {
 };
 type WrittenAnim = {
 	readonly key: string;
-	readonly from: Easable;
-	readonly to: Easable;
+	readonly from: unknown;
+	readonly to: unknown;
 
 	readonly timeFrom: number;
 	readonly timeTo: number;
@@ -282,7 +281,7 @@ namespace AnimationController {
 
 	export function processFrame(anim: Anim, time: number) {
 		for (const instance of anim.instances) {
-			(instance as Instance & Record<string, Easable>)[anim.key] = Easing.easeValue(
+			(instance as Instance & Record<string, unknown>)[anim.key] = Easing.easeValue(
 				(time - anim.timeFrom) / (anim.timeTo - anim.timeFrom),
 				anim.from,
 				anim.to,
@@ -402,8 +401,7 @@ namespace ScriptIO {
 		*/
 	}
 
-	type Saveable = undefined | number | boolean | string | UDim2 | UDim | Vector2 | Vector3 | Color3;
-	function objectToLuaString(object: Saveable): string {
+	function objectToLuaString(object: unknown): string {
 		if (object === undefined) return "nil";
 		if (typeIs(object, "boolean")) return tostring(object);
 		if (typeIs(object, "number")) return tostring(object);
@@ -534,7 +532,7 @@ class AnimControls extends Control<AnimControlsDefinition> {
 
 				animation.set({
 					...prevanim,
-					from: (prevanim.instances[0] as Instance & Record<string, Easable>)[prevanim.key],
+					from: (prevanim.instances[0] as Instance & Record<string, unknown>)[prevanim.key],
 				});
 			}),
 		);
@@ -546,7 +544,7 @@ class AnimControls extends Control<AnimControlsDefinition> {
 
 				animation.set({
 					...prevanim,
-					to: (prevanim.instances[0] as Instance & Record<string, Easable>)[prevanim.key],
+					to: (prevanim.instances[0] as Instance & Record<string, unknown>)[prevanim.key],
 				});
 			}),
 		);

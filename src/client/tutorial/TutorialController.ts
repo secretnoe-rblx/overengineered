@@ -701,7 +701,6 @@ export class TutorialController extends Component {
 		@inject private readonly plot: ReadonlyPlot,
 		@inject readonly buildingMode: BuildingMode,
 		@inject private readonly blockList: BlockList,
-		@inject private readonly buildTool: BuildTool,
 		@inject di: DIContainer,
 	) {
 		super();
