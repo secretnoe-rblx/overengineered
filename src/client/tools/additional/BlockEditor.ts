@@ -237,17 +237,15 @@ const createButtonList = (
 	const template = editing.asTemplate(editing.instance.Template, true);
 
 	for (const [k, swc] of pairs(buttons)) {
-		const btn = editing
+		editing
 			.parent(new Control(template()))
 			.setButtonText(k.upper())
-			.addButtonAction(() => swc.and("kb", !swc.getKeyed("kb")));
-
-		btn.initializeSimpleTransform("BackgroundColor3");
-		parent.event.subscribeObservable(
-			swc,
-			(value) => btn.themeButton(theme, value ? "buttonActive" : "buttonNormal"),
-			true,
-		);
+			.addButtonAction(() => swc.and("kb", !swc.getKeyed("kb")))
+			.initializeSimpleTransform("BackgroundColor3")
+			.themeButton(
+				theme,
+				parent.event.createBasedObservable(swc, (enabled) => (enabled ? "buttonActive" : "buttonNormal")),
+			);
 	}
 };
 
