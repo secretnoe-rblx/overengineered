@@ -125,7 +125,7 @@ export class HotbarControl extends InstanceComponent<HotbarControlDefinition> {
 			);
 		});
 
-		this.event.subscribeObservable(toolController.selectedTool, (tool, prev) => this.toolChanged(tool, prev));
+		this.event.subscribeObservable(toolController.selectedTool, (tool, prev) => this.toolChanged(tool, prev), true);
 		this.resetLabels();
 	}
 

@@ -102,7 +102,10 @@ export class ToolController extends Component {
 					prevTool = this.selectedTool.get();
 					this.selectedTool.set(undefined);
 				} else if (wasSetByLoading) {
-					this.selectedTool.set(prevTool);
+					if (prevTool && this.tools.has(prevTool)) {
+						this.selectedTool.set(prevTool);
+					}
+
 					prevTool = undefined;
 				}
 
