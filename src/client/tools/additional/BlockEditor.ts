@@ -245,7 +245,7 @@ const createButtonList = (
 		btn.initializeSimpleTransform("BackgroundColor3");
 		parent.event.subscribeObservable(
 			swc,
-			(value) => btn.overlayValue("BackgroundColor3", 0, theme.get(value ? "buttonActive" : "buttonNormal")),
+			(value) => btn.themeButton(theme, value ? "buttonActive" : "buttonNormal"),
 			true,
 		);
 	}
@@ -815,7 +815,6 @@ export class BlockEditor extends Component {
 					for (const [name, button] of pairs(btns)) {
 						button.overlayValue(
 							"BackgroundColor3",
-							0,
 							theme.get(mode === name ? "buttonActive" : "buttonNormal"),
 						);
 					}

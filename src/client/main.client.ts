@@ -181,19 +181,36 @@ task.spawn(() => {
 
 //
 
-// rainbow buttonActive theme
+// rainbow theme
 {
 	const theme = host.services.resolve<Theme>();
-	const colors = [theme.get("buttonActive"), theme.get("accent")];
 
-	let h = 0;
 	task.spawn(() => {
+		const colors = [theme.get("buttonActive"), theme.get("accent")];
+		let h = 0;
+
 		while (true as boolean) {
 			h += 1 / 360;
 			h %= 1;
 
 			for (const color of colors) {
 				color.set(Color3.fromHSV(h, 1, 1));
+			}
+
+			task.wait();
+		}
+	});
+
+	task.spawn(() => {
+		const colors = [theme.get("buttonNormal")];
+		let h = 0;
+
+		while (true as boolean) {
+			h += 1 / 360;
+			h %= 1;
+
+			for (const color of colors) {
+				color.set(Color3.fromHSV(h, 1, 0.1));
 			}
 
 			task.wait();

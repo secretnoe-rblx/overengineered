@@ -31,6 +31,7 @@ import type { ProgressBarControlDefinition } from "client/gui/controls/ProgressB
 import type { MainScreenLayout } from "client/gui/MainScreenLayout";
 import type { RideMode } from "client/modes/ride/RideMode";
 import type { PlayerDataStorage } from "client/PlayerDataStorage";
+import type { Theme } from "client/Theme";
 import type { TextButtonDefinition } from "engine/client/gui/Button";
 import type { ReadonlyComponentChildren } from "engine/shared/component/ComponentChildren";
 import type { InstanceComponent } from "engine/shared/component/InstanceComponent";
@@ -303,6 +304,7 @@ export class RideModeScene extends Control<RideModeSceneDefinition> {
 		@inject readonly mode: RideMode,
 		@inject playerData: PlayerDataStorage,
 		@inject mainScreen: MainScreenLayout,
+		@inject theme: Theme,
 	) {
 		super(gui);
 
@@ -315,6 +317,7 @@ export class RideModeScene extends Control<RideModeSceneDefinition> {
 			ride_isntloading: LoadingController.isNotLoading,
 		});
 		this.parent(mainScreen.registerTopCenterButton("Stop")) //
+			.themeButton(theme, "accent")
 			.subscribeToAction(this.stopAction)
 			.subscribeVisibilityFrom({ main_enabled: this.enabledState });
 

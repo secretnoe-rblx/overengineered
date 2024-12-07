@@ -37,12 +37,7 @@ export class HotbarButtonControl extends Control<HotbarToolButtonControlDefiniti
 		this.initializeSimpleTransform("BackgroundColor3");
 		this.event.subscribeObservable(
 			tools.selectedTool,
-			(newTool) =>
-				this.overlayValue(
-					"BackgroundColor3",
-					"selectedTool",
-					theme.get(newTool === tool ? "buttonActive" : "buttonNormal"),
-				),
+			(newTool) => this.themeButton(theme, newTool === tool ? "buttonActive" : "buttonNormal"),
 			true,
 		);
 	}
