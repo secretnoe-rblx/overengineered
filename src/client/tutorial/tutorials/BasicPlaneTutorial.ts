@@ -27,7 +27,7 @@ export class BasicPlaneTutorial implements TutorialDescriber {
 					t.onDestroy(() => {
 						toolController.enabledTools.enableAll();
 						editTool.enabledModes.enableAll();
-						this.buildingMode.switchTutorialMode(true);
+						this.buildingMode.switchTutorialMode(false);
 					});
 				}),
 				t.partNextButton(),

@@ -181,8 +181,10 @@ export class BuildingMode extends PlayMode {
 		this.actionController.undoAction.canExecute.and("build_tutorialMode", !tutorialMode);
 		this.actionController.redoAction.canExecute.and("build_tutorialMode", !tutorialMode);
 
-		if (!tutorialMode) {
+		if (tutorialMode) {
 			this.toolController.enabledTools.disableAll();
+		} else {
+			this.toolController.enabledTools.enableAll();
 		}
 
 		this.openSavePopupAction.canExecute.and("this_tutorialMode", !tutorialMode);
