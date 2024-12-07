@@ -1,5 +1,4 @@
 import { Scene } from "client/gui/Scene";
-import { GuiButtonActionIndicator } from "engine/client/component/Component.propmacro";
 import type { MainScreenLayout } from "client/gui/MainScreenLayout";
 import type { BuildingMode } from "client/modes/build/BuildingMode";
 
@@ -12,15 +11,15 @@ export class BuildingModeScene extends Scene {
 		super();
 
 		this.parent(mainScreen.registerTopCenterButton("Run"))
-			.subscribeToAction(mode.runAction, GuiButtonActionIndicator.interactability)
+			.subscribeToAction(mode.runAction)
 			.subscribeVisibilityFrom({ main_enabled: this.enabledState });
 
 		this.parent(mainScreen.registerTopCenterButton("Saves"))
-			.subscribeToAction(mode.openSavePopupAction, GuiButtonActionIndicator.interactability)
+			.subscribeToAction(mode.openSavePopupAction)
 			.subscribeVisibilityFrom({ main_enabled: this.enabledState });
 
 		this.parent(mainScreen.registerTopCenterButton("TeleportToPlot"))
-			.subscribeToAction(mode.teleportToPlotAction, GuiButtonActionIndicator.interactability)
+			.subscribeToAction(mode.teleportToPlotAction)
 			.subscribeVisibilityFrom({ main_enabled: this.enabledState });
 	}
 }
