@@ -42,9 +42,11 @@ export class ActionController extends Component {
 		});
 
 		this.parent(mainScreen.registerTopRightButton("Undo")) //
-			.subscribeToAction(this.undoAction);
+			.subscribeToAction(this.undoAction)
+			.subscribeVisibilityFrom({ main_enabled: this.enabledState });
 		this.parent(mainScreen.registerTopRightButton("Redo")) //
-			.subscribeToAction(this.redoAction);
+			.subscribeToAction(this.redoAction)
+			.subscribeVisibilityFrom({ main_enabled: this.enabledState });
 
 		this.event.onKeyDown("Z", () => {
 			if (!InputController.isCtrlPressed()) return;

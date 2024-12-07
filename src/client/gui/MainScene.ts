@@ -12,6 +12,7 @@ export class MainScene extends Scene {
 
 		this.openSettingsAction = this.parent(new Action(() => createSettingsPopup().show()));
 		this.parent(mainScreen.registerTopCenterButton("Menu")) //
-			.subscribeToAction(this.openSettingsAction);
+			.subscribeToAction(this.openSettingsAction)
+			.subscribeVisibilityFrom({ main_enabled: this.enabledState });
 	}
 }

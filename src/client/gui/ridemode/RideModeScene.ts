@@ -315,7 +315,8 @@ export class RideModeScene extends Control<RideModeSceneDefinition> {
 			ride_isntloading: LoadingController.isNotLoading,
 		});
 		this.parent(mainScreen.registerTopCenterButton("Stop")) //
-			.subscribeToAction(this.stopAction);
+			.subscribeToAction(this.stopAction)
+			.subscribeVisibilityFrom({ main_enabled: this.enabledState });
 
 		this.sitAction = this.parent(new Action(() => CustomRemotes.modes.ride.teleportOnSeat.send()));
 		this.sitAction.subCanExecuteFrom({
@@ -323,7 +324,8 @@ export class RideModeScene extends Control<RideModeSceneDefinition> {
 			ride_isntloading: LoadingController.isNotLoading,
 		});
 		this.parent(mainScreen.registerTopCenterButton("Sit")) //
-			.subscribeToAction(this.sitAction);
+			.subscribeToAction(this.sitAction)
+			.subscribeVisibilityFrom({ main_enabled: this.enabledState });
 
 		this.parent(mainScreen.registerTopRightButton("EditControls"))
 			.addButtonAction(() => this.controls.toggleSettingsMode())
