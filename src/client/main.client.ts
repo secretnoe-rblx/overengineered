@@ -68,7 +68,10 @@ $log("Client loaded.");
 
 {
 	const playerData = host.services.resolve<PlayerDataStorage>();
-	if (playerData.config.get().autoLoad) {
+	if (
+		playerData.config.get().autoLoad &&
+		SlotsMeta.get(playerData.slots.get(), SlotsMeta.quitSlotIndex).blocks !== 0
+	) {
 		Objects.awaitThrow(playerData.loadPlayerSlot(SlotsMeta.quitSlotIndex, false, "Loading the autosave"));
 	}
 }
