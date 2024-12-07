@@ -8,6 +8,7 @@ import { MultiBlockHighlightedSelector } from "client/tools/highlighters/MultiBl
 import { SelectedBlocksHighlighter } from "client/tools/highlighters/SelectedBlocksHighlighter";
 import { ToolBase } from "client/tools/ToolBase";
 import { Action } from "engine/client/Action";
+import { GuiButtonActionIndicator } from "engine/client/component/Component.propmacro";
 import { Control } from "engine/client/gui/Control";
 import { Component } from "engine/shared/component/Component";
 import { ComponentChild } from "engine/shared/component/ComponentChild";
@@ -525,9 +526,15 @@ export class EditTool extends ToolBase {
 			noControler.subscribe((nc) => line.setVisibleAndEnabled(nc));
 			const gui = line.instance;
 
-			line.parent(new Control(gui.Move).subscribeToAction(actions.move, "transparency"));
-			line.parent(new Control(gui.Rotate).subscribeToAction(actions.rotate, "transparency"));
-			line.parent(new Control(gui.Scale).subscribeToAction(actions.scale, "transparency"));
+			line.parent(
+				new Control(gui.Move).subscribeToAction(actions.move, GuiButtonActionIndicator.interactability),
+			);
+			line.parent(
+				new Control(gui.Rotate).subscribeToAction(actions.rotate, GuiButtonActionIndicator.interactability),
+			);
+			line.parent(
+				new Control(gui.Scale).subscribeToAction(actions.scale, GuiButtonActionIndicator.interactability),
+			);
 		}
 
 		{
@@ -543,10 +550,18 @@ export class EditTool extends ToolBase {
 			noControler.subscribe((nc) => line.setVisibleAndEnabled(nc));
 			const gui = line.instance;
 
-			line.parent(new Control(gui.Copy).subscribeToAction(actions.copy, "transparency"));
-			line.parent(new Control(gui.Paste).subscribeToAction(actions.paste, "transparency"));
-			line.parent(new Control(gui.Paint).subscribeToAction(actions.paint, "transparency"));
-			line.parent(new Control(gui.Delete).subscribeToAction(actions.delete, "transparency"));
+			line.parent(
+				new Control(gui.Copy).subscribeToAction(actions.copy, GuiButtonActionIndicator.interactability),
+			);
+			line.parent(
+				new Control(gui.Paste).subscribeToAction(actions.paste, GuiButtonActionIndicator.interactability),
+			);
+			line.parent(
+				new Control(gui.Paint).subscribeToAction(actions.paint, GuiButtonActionIndicator.interactability),
+			);
+			line.parent(
+				new Control(gui.Delete).subscribeToAction(actions.delete, GuiButtonActionIndicator.interactability),
+			);
 		}
 
 		this.controller.childSet.Connect((child) => {

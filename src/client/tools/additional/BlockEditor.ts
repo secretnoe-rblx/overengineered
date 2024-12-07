@@ -8,6 +8,7 @@ import { MoveGrid, ScaleGrid } from "client/tools/additional/Grid";
 import { RotateGrid } from "client/tools/additional/Grid";
 import { ToolBase } from "client/tools/ToolBase";
 import { Action } from "engine/client/Action";
+import { GuiButtonActionIndicator } from "engine/client/component/Component.propmacro";
 import { Control } from "engine/client/gui/Control";
 import { InputController } from "engine/client/InputController";
 import { Component } from "engine/shared/component/Component";
@@ -803,9 +804,15 @@ export class BlockEditor extends Component {
 
 			const gui = bottom.instance;
 
-			const move = bottom.parent(new Control(gui.Move).subscribeToAction(actions.move, "transparency"));
-			const rotate = bottom.parent(new Control(gui.Rotate).subscribeToAction(actions.rotate, "transparency"));
-			const scale = bottom.parent(new Control(gui.Scale).subscribeToAction(actions.scale, "transparency"));
+			const move = bottom.parent(
+				new Control(gui.Move).subscribeToAction(actions.move, GuiButtonActionIndicator.interactability),
+			);
+			const rotate = bottom.parent(
+				new Control(gui.Rotate).subscribeToAction(actions.rotate, GuiButtonActionIndicator.interactability),
+			);
+			const scale = bottom.parent(
+				new Control(gui.Scale).subscribeToAction(actions.scale, GuiButtonActionIndicator.interactability),
+			);
 
 			const btns = { move, rotate, scale };
 			for (const [, btn] of pairs(btns)) {
@@ -835,8 +842,12 @@ export class BlockEditor extends Component {
 			const bottom = this.parentGui(mainScreen.registerBottomBottom<Line>("CancelFinish"));
 			const gui = bottom.instance;
 
-			bottom.parent(new Control(gui.Cancel).subscribeToAction(actions.cancel, "transparency"));
-			bottom.parent(new Control(gui.Finish).subscribeToAction(actions.finish, "transparency"));
+			bottom.parent(
+				new Control(gui.Cancel).subscribeToAction(actions.cancel, GuiButtonActionIndicator.interactability),
+			);
+			bottom.parent(
+				new Control(gui.Finish).subscribeToAction(actions.finish, GuiButtonActionIndicator.interactability),
+			);
 		}
 
 		this.editBlocks = blocks.map((b): EditingBlock => {
