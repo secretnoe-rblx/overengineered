@@ -8,6 +8,7 @@ import { HostedService } from "engine/shared/di/HostedService";
 import { Element } from "engine/shared/Element";
 import type { Interfacec } from "client/gui/Interface";
 import type { Control } from "engine/client/gui/Control";
+import type { ReadonlyObservableValue } from "engine/shared/event/ObservableValue";
 
 @injectable
 export class PopupService extends HostedService {

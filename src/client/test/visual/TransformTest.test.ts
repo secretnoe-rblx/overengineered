@@ -3,6 +3,7 @@ import { Transforms } from "engine/shared/component/Transforms";
 import { Element } from "engine/shared/Element";
 import { Colors } from "shared/Colors";
 import type { InstanceComponent } from "engine/shared/component/InstanceComponent";
+import type { ITransformBuilder } from "engine/shared/component/Transform";
 import type { UnitTests } from "engine/shared/TestFramework";
 
 namespace TransformTests {

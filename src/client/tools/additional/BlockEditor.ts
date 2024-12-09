@@ -33,6 +33,7 @@ import type { PlayerDataStorage } from "client/PlayerDataStorage";
 import type { Theme } from "client/Theme";
 import type { TextButtonDefinition } from "engine/client/gui/Button";
 import type { KeybindDefinition } from "engine/client/Keybinds";
+import type { ReadonlyObservableValue } from "engine/shared/event/ObservableValue";
 
 type EditHandles = BasePart & {
 	readonly SelectionBox: SelectionBox;

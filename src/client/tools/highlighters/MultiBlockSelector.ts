@@ -6,6 +6,7 @@ import { ComponentChild } from "engine/shared/component/ComponentChild";
 import { ObservableValue } from "engine/shared/event/ObservableValue";
 import { ArgsSignal } from "engine/shared/event/Signal";
 import type { HoveredBlocksSelectorMode } from "client/tools/highlighters/HoveredBlocksSelector";
+import type { ReadonlyObservableValue } from "engine/shared/event/ObservableValue";
 import type { ReadonlyArgsSignal } from "engine/shared/event/Signal";
 import type { SharedPlot } from "shared/building/SharedPlot";
 

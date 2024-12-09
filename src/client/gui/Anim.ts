@@ -2,7 +2,7 @@ import { Interface } from "client/gui/Interface";
 import { ScaledScreenGui } from "client/gui/ScaledScreenGui";
 import { Transforms } from "engine/shared/component/Transforms";
 import { Element } from "engine/shared/Element";
-import type { TransformProps } from "engine/shared/component/Transform";
+import type { ITransformBuilder, TransformProps } from "engine/shared/component/Transform";
 
 export namespace Anim {
 	export namespace UIListLayout {

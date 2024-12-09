@@ -1,6 +1,7 @@
 import { Component } from "engine/shared/component/Component";
 import { InstanceComponent } from "engine/shared/component/InstanceComponent";
 import { ObservableValue } from "engine/shared/event/ObservableValue";
+import type { ReadonlyObservableValue } from "engine/shared/event/ObservableValue";
 
 const globalScale = new ObservableValue<number>(1);
 export class AutoUIScaledControl extends InstanceComponent<GuiObject | ScreenGui> {

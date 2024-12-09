@@ -3,8 +3,8 @@ import { Popup } from "client/gui/Popup";
 import { ButtonControl } from "engine/client/gui/Button";
 import { ComponentKeyedChildren } from "engine/shared/component/ComponentKeyedChildren";
 import type { KeyChooserControlDefinition } from "client/gui/controls/KeyChooserControl";
-import type { Keybinds } from "engine/client/Keybinds";
 import type { Control } from "engine/client/gui/Control";
+import type { Keybinds } from "engine/client/Keybinds";
 import type { GameHostBuilder } from "engine/shared/GameHostBuilder";
 
 export type ControlsPopupDefinition = GuiObject & {

@@ -7,6 +7,7 @@ import { HostedService } from "engine/shared/di/HostedService";
 import { Keys } from "engine/shared/fixes/Keys";
 import { SharedRagdoll } from "shared/SharedRagdoll";
 import type { PlayerDataStorage } from "client/PlayerDataStorage";
+import type { ReadonlyObservableValue } from "engine/shared/event/ObservableValue";
 
 const { isPlayerRagdolling } = SharedRagdoll;
 function initAutoRagdoll(event: ComponentEvents, humanoid: Humanoid, enabled: ReadonlyObservableValue<boolean>) {

@@ -42,6 +42,7 @@ import type { MainScreenLayout } from "client/gui/MainScreenLayout";
 import type { ScaleEditorControlDefinition } from "client/gui/ScaleEditor";
 import type { InputTooltips } from "client/gui/static/TooltipsControl";
 import type { BuildingMode } from "client/modes/build/BuildingMode";
+import type { ReadonlyObservableValue } from "engine/shared/event/ObservableValue";
 import type { SharedPlot } from "shared/building/SharedPlot";
 
 const allowedColor = Colors.blue;

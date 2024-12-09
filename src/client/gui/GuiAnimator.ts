@@ -1,6 +1,7 @@
 import { TweenService } from "@rbxts/services";
 import { Objects } from "engine/shared/fixes/Objects";
 import type { ComponentEvents } from "engine/shared/component/ComponentEvents";
+import type { ReadonlyObservableValue } from "engine/shared/event/ObservableValue";
 
 /** A class created for animating interfaces
  * @deprecated Use new gui animation module instead

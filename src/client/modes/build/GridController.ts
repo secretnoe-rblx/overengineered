@@ -9,6 +9,7 @@ import type { FloatingWindowDefinition } from "client/gui/FloatingWindow";
 import type { GridEditorControlDefinition } from "client/gui/GridEditor";
 import type { MainScreenLayout } from "client/gui/MainScreenLayout";
 import type { EditMode } from "client/modes/build/BuildingMode";
+import type { ObservableValue } from "engine/shared/event/ObservableValue";
 
 @injectable
 export class GridController extends Component {
