@@ -17,6 +17,7 @@ import { UpdatePopupController } from "client/controller/UpdatePopupController";
 import { AdminGui } from "client/gui/AdminGui";
 import { GuiAutoScaleController } from "client/gui/GuiAutoScaleController";
 import { HideInterfaceController } from "client/gui/HideInterfaceController";
+import { Interfacec } from "client/gui/Interface";
 import { MainScene } from "client/gui/MainScene";
 import { MainScreenLayout } from "client/gui/MainScreenLayout";
 import { ControlsPopup } from "client/gui/popup/ControlsPopup";
@@ -108,6 +109,8 @@ export namespace SandboxGame {
 		if (!RunService.IsStudio()) {
 			builder.services.registerService(UpdatePopupController);
 		}
+
+		builder.services.registerSingletonClass(Interfacec);
 
 		ChatController.initializeAdminPrefix();
 		builder.services.registerService(PopupService);

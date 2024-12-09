@@ -1,4 +1,5 @@
 import { UserInputService } from "@rbxts/services";
+import { TooltipsHolder } from "client/gui/static/TooltipsControl";
 import { BoxSelector } from "client/tools/highlighters/BoxSelector";
 import { HoveredBlocksSelector } from "client/tools/highlighters/HoveredBlocksSelector";
 import { Component } from "engine/shared/component/Component";
@@ -26,6 +27,15 @@ export class MultiBlockSelector extends Component {
 
 	constructor(plot: ReadonlyObservableValue<SharedPlot>, config?: MultiBlockSelectorConfiguration) {
 		super();
+
+		const tooltips = this.parent(TooltipsHolder.createComponent("Selecting"));
+		tooltips.set({
+			Desktop: [
+				{ keys: [["LeftControl"]], text: "Assembly selection" },
+				{ keys: [["LeftAlt"]], text: "Machine selection" },
+				{ keys: [["E"]], text: "Box selection" },
+			],
+		});
 
 		const buttons: Readonly<Record<BlockSelectorMode, KeyCode | undefined>> = {
 			single: undefined,
