@@ -10,7 +10,7 @@ const _ = () => [ActionMacros];
 //
 
 declare module "engine/client/Action" {
-	interface Action extends Component {
+	interface Action<TArgs extends unknown[]> extends Component {
 		initKeybind(keybind: KeybindRegistration, config?: ActionKeybindConfig): void;
 	}
 }
