@@ -164,6 +164,11 @@ export class DeleteTool extends ToolBase {
 
 	protected getTooltips(): InputTooltips {
 		return {
+			Desktop: [
+				{ keys: [["LeftControl"]], text: "Assembly selection" },
+				{ keys: [["LeftAlt"]], text: "Machine selection" },
+				{ keys: [["E"]], text: "Box selection" },
+			],
 			Gamepad: [
 				{ keys: [["ButtonY"]], text: "Clear all" },
 				{ keys: [["ButtonX"]], text: "Delete" },
