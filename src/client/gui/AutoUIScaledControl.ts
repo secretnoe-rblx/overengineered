@@ -1,3 +1,4 @@
+import { Component } from "engine/shared/component/Component";
 import { InstanceComponent } from "engine/shared/component/InstanceComponent";
 import { ObservableValue } from "engine/shared/event/ObservableValue";
 
@@ -8,11 +9,25 @@ export class AutoUIScaledControl extends InstanceComponent<GuiObject | ScreenGui
 		globalScale.subscribe((scale) => $trace("GUI scaling set to", scale));
 	}
 
-	private readonly uiscale: UIScale;
+	private readonly scale;
 
 	constructor(instance: GuiObject | ScreenGui) {
 		super(instance);
+		this.scale = this.getComponent(AutoUIScaledComponent);
+	}
 
+	getScale() {
+		return this.scale.getScale();
+	}
+}
+
+export class AutoUIScaledComponent extends Component {
+	private readonly uiscale: UIScale;
+
+	constructor(parent: InstanceComponent<GuiObject | ScreenGui>) {
+		super();
+
+		const instance = parent.instance;
 		let uiscale = instance.FindFirstChild("UIScale") as UIScale | undefined;
 		if (!uiscale) {
 			uiscale = new Instance("UIScale");
@@ -38,7 +53,8 @@ export class AutoUIScaledControl extends InstanceComponent<GuiObject | ScreenGui
 		};
 
 		this.event.subscribeObservable(this.event.readonlyObservableFromInstanceParam(screen, "AbsoluteSize"), update);
-		this.event.subscribeObservable(globalScale, update, true);
+		this.event.subscribeObservable(globalScale, update);
+		this.onEnable(update);
 	}
 
 	getScale() {
