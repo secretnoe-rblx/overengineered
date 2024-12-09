@@ -6,11 +6,11 @@ import { ClientBuilding } from "client/modes/build/ClientBuilding";
 import { MultiBlockSelector } from "client/tools/highlighters/MultiBlockSelector";
 import { SelectedBlocksHighlighter } from "client/tools/highlighters/SelectedBlocksHighlighter";
 import { ToolBase } from "client/tools/ToolBase";
+import { Action } from "engine/client/Action";
 import { ButtonControl } from "engine/client/gui/Button";
 import { Control } from "engine/client/gui/Control";
 import { InputController } from "engine/client/InputController";
 import { ObservableCollectionSet } from "engine/shared/event/ObservableCollection";
-import { Signal } from "engine/shared/event/Signal";
 import type { MirrorEditorControlDefinition } from "client/gui/buildmode/MirrorEditorControl";
 import type { InputTooltips } from "client/gui/static/TooltipsControl";
 import type { BuildingMode } from "client/modes/build/BuildingMode";
@@ -55,18 +55,12 @@ namespace Scene {
 				this.gui.Bottom.DeleteAllButton.Visible = inputType !== "Gamepad";
 			});
 
-			const suggestClearAll = () => {
-				ConfirmPopup.showPopup(
-					"Are you sure you want to delete all blocks?",
-					"It will be impossible to undo this action",
-					() => this.tool.deleteBlocks("all"),
-					() => {},
-				);
-			};
+			this.parent(new Control(this.gui.Bottom.DeleteAllButton)) //
+				.subscribeToAction(tool.clearPlotAction);
 
-			this.event.subscribe(this.tool.onClearAllRequested, suggestClearAll);
-			this.add(new ButtonControl(this.gui.Bottom.DeleteAllButton, suggestClearAll));
-			this.add(new ButtonControl(this.gui.TouchControls.DeleteButton, () => this.tool.deleteHighlightedBlocks()));
+			this.parent(
+				new ButtonControl(this.gui.TouchControls.DeleteButton, () => this.tool.deleteHighlightedBlocks()),
+			);
 
 			this.event.subscribeCollection(this.tool.highlightedBlocks, () => {
 				if (this.tool.highlightedBlocks.size() !== 0) {
@@ -82,11 +76,33 @@ namespace Scene {
 
 @injectable
 export class DeleteTool extends ToolBase {
-	readonly onClearAllRequested = new Signal<() => void>();
 	readonly highlightedBlocks = new ObservableCollectionSet<BlockModel>();
+	readonly clearPlotAction: Action;
 
 	constructor(@inject mode: BuildingMode, @inject di: DIContainer) {
 		super(mode);
+
+		this.clearPlotAction = this.parent(
+			new Action(() => {
+				ConfirmPopup.showPopup(
+					"Are you sure you want to delete all blocks?",
+					"It will be impossible to undo this action",
+					() => this.deleteBlocks("all"),
+				);
+			}),
+		);
+		this.event.subscribeObservable(
+			mode.targetPlot,
+			(plot) => {
+				plot.instance.Blocks.ChildAdded.Connect(() =>
+					this.clearPlotAction.canExecute.and("plotIsEmpty", false),
+				);
+				plot.instance.Blocks.ChildRemoved.Connect(() =>
+					this.clearPlotAction.canExecute.and("plotIsEmpty", plot.instance.Blocks.GetChildren().size() === 0),
+				);
+			},
+			true,
+		);
 
 		this.parentGui(
 			new Scene.DeleteToolScene(ToolBase.getToolGui<"Delete", Scene.DeleteToolSceneDefinition>().Delete, this),
@@ -108,7 +124,7 @@ export class DeleteTool extends ToolBase {
 		stuff.submit.Connect(fireSelected);
 
 		this.event.onPrepareGamepad((eh, ih) => {
-			ih.onKeyDown("ButtonY", () => this.onClearAllRequested.Fire());
+			ih.onKeyDown("ButtonY", () => this.clearPlotAction.execute());
 		});
 	}
 
@@ -154,19 +170,5 @@ export class DeleteTool extends ToolBase {
 				{ keys: [["ButtonB"]], text: "Unequip" },
 			],
 		};
-	}
-
-	getGamepadTooltips(): { key: Enum.KeyCode; text: string }[] {
-		const keys: { key: Enum.KeyCode; text: string }[] = [];
-
-		keys.push({ key: Enum.KeyCode.ButtonY, text: "Clear all" });
-		keys.push({ key: Enum.KeyCode.ButtonX, text: "Delete" });
-		keys.push({ key: Enum.KeyCode.ButtonB, text: "Unequip" });
-
-		return keys;
-	}
-
-	getKeyboardTooltips() {
-		return [];
 	}
 }
