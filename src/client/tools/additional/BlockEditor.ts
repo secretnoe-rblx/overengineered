@@ -2,7 +2,6 @@ import { RunService, UserInputService, Workspace } from "@rbxts/services";
 import { Tooltip } from "client/gui/controls/Tooltip";
 import { Interface } from "client/gui/Interface";
 import { TooltipsHolder } from "client/gui/static/TooltipsControl";
-import { Keybinds } from "client/Keybinds";
 import { FloatingText } from "client/tools/additional/FloatingText";
 import { MoveGrid, ScaleGrid } from "client/tools/additional/Grid";
 import { RotateGrid } from "client/tools/additional/Grid";
@@ -10,6 +9,7 @@ import { ToolBase } from "client/tools/ToolBase";
 import { Action } from "engine/client/Action";
 import { Control } from "engine/client/gui/Control";
 import { InputController } from "engine/client/InputController";
+import { Keybinds } from "engine/client/Keybinds";
 import { Component } from "engine/shared/component/Component";
 import { ComponentChild } from "engine/shared/component/ComponentChild";
 import { ComponentInstance } from "engine/shared/component/ComponentInstance";
@@ -28,11 +28,11 @@ import { BlockManager } from "shared/building/BlockManager";
 import { SharedBuilding } from "shared/building/SharedBuilding";
 import { Colors } from "shared/Colors";
 import type { MainScreenLayout } from "client/gui/MainScreenLayout";
-import type { KeybindDefinition } from "client/Keybinds";
 import type { ClientBuilding } from "client/modes/build/ClientBuilding";
 import type { PlayerDataStorage } from "client/PlayerDataStorage";
 import type { Theme } from "client/Theme";
 import type { TextButtonDefinition } from "engine/client/gui/Button";
+import type { KeybindDefinition } from "engine/client/Keybinds";
 
 type EditHandles = BasePart & {
 	readonly SelectionBox: SelectionBox;

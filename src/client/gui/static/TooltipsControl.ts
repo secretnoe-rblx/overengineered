@@ -5,7 +5,7 @@ import { InputController } from "engine/client/InputController";
 import { InstanceComponent } from "engine/shared/component/InstanceComponent";
 import { Element } from "engine/shared/Element";
 import { Keys } from "engine/shared/fixes/Keys";
-import type { KeybindRegistration, KeyCombination } from "client/Keybinds";
+import type { KeybindRegistration, KeyCombination } from "engine/client/Keybinds";
 
 const tooltipsGui = Interface.getGameUI<{ Help: { Controls: TooltipsControlDefinition } }>().Help.Controls;
 tooltipsGui.Visible = true;

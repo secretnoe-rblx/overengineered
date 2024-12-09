@@ -25,7 +25,7 @@ import { ReportSubmitController } from "client/gui/popup/ReportSubmitPopup";
 import { SavePopup } from "client/gui/popup/SavePopup";
 import { SettingsPopup } from "client/gui/popup/SettingsPopup";
 import { WikiPopup } from "client/gui/popup/WikiPopup";
-import { Keybinds } from "client/Keybinds";
+import { Keybinds } from "engine/client/Keybinds";
 import { ActionController } from "client/modes/build/ActionController";
 import { ClientBuildingValidationController } from "client/modes/build/ClientBuildingValidationController";
 import { PlayModeController } from "client/modes/PlayModeController";

@@ -1,6 +1,5 @@
 import { HttpService, Workspace } from "@rbxts/services";
 import { LogControl } from "client/gui/static/LogControl";
-import { Keybinds } from "client/Keybinds";
 import { ClientBuilding } from "client/modes/build/ClientBuilding";
 import { BlockEditor } from "client/tools/additional/BlockEditor";
 import { BlockGhoster } from "client/tools/additional/BlockGhoster";
@@ -9,6 +8,7 @@ import { SelectedBlocksHighlighter } from "client/tools/highlighters/SelectedBlo
 import { ToolBase } from "client/tools/ToolBase";
 import { Action } from "engine/client/Action";
 import { Control } from "engine/client/gui/Control";
+import { Keybinds } from "engine/client/Keybinds";
 import { Component } from "engine/shared/component/Component";
 import { ComponentChild } from "engine/shared/component/ComponentChild";
 import { ComponentDisabler } from "engine/shared/component/ComponentDisabler";
