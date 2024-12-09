@@ -25,7 +25,7 @@ import { ReportSubmitController } from "client/gui/popup/ReportSubmitPopup";
 import { SavePopup } from "client/gui/popup/SavePopup";
 import { SettingsPopup } from "client/gui/popup/SettingsPopup";
 import { WikiPopup } from "client/gui/popup/WikiPopup";
-import { Keybinds } from "engine/client/Keybinds";
+import { PopupService } from "client/gui/PopupService";
 import { ActionController } from "client/modes/build/ActionController";
 import { ClientBuildingValidationController } from "client/modes/build/ClientBuildingValidationController";
 import { PlayModeController } from "client/modes/PlayModeController";
@@ -38,6 +38,7 @@ import { BasicPlaneTutorial } from "client/tutorial/tutorials/BasicPlaneTutorial
 import { NewBasicPlaneTutorial } from "client/tutorial/tutorials/NewBasicPlaneTutorial";
 import { TestTutorial } from "client/tutorial/tutorials/TestTutorial";
 import { TutorialServiceInitializer } from "client/tutorial/TutorialService";
+import { Keybinds } from "engine/client/Keybinds";
 import { ReadonlyPlot } from "shared/building/ReadonlyPlot";
 import { SharedPlots } from "shared/building/SharedPlots";
 import { GameDefinitions } from "shared/data/GameDefinitions";
@@ -109,6 +110,7 @@ export namespace SandboxGame {
 		}
 
 		ChatController.initializeAdminPrefix();
+		builder.services.registerService(PopupService);
 		SettingsPopup.addAsService(builder);
 		NewSettingsPopup.addAsService(builder);
 		SavePopup.addAsService(builder);
