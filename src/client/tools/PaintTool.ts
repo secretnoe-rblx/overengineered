@@ -18,6 +18,7 @@ import type { MaterialColorEditControlDefinition } from "client/gui/buildmode/Ma
 import type { ToggleControlDefinition } from "client/gui/controls/ToggleControl";
 import type { BuildingMode } from "client/modes/build/BuildingMode";
 import type { ButtonDefinition } from "engine/client/gui/Button";
+import type { Keybinds } from "engine/client/Keybinds";
 
 namespace Scene {
 	export type PaintToolSceneDefinition = GuiObject & {
@@ -98,7 +99,7 @@ namespace Scene {
 }
 
 class Controller extends Component {
-	constructor(tool: PaintTool) {
+	constructor(tool: PaintTool, keybinds: Keybinds) {
 		super();
 
 		const fireSelected = (blocks: readonly BlockModel[]) => {
@@ -106,7 +107,7 @@ class Controller extends Component {
 
 			tool.paint(blocks);
 		};
-		const stuff = this.parent(new MultiBlockSelector(tool.mode.targetPlot));
+		const stuff = this.parent(new MultiBlockSelector(tool.mode.targetPlot, undefined, keybinds));
 		stuff.submit.Connect(fireSelected);
 
 		this.event.subInput((ih) => {
@@ -150,13 +151,13 @@ export class PaintTool extends ToolBase {
 	readonly enableColor = new ObservableValue(true);
 	readonly controller;
 
-	constructor(@inject mode: BuildingMode) {
+	constructor(@inject mode: BuildingMode, @inject keybinds: Keybinds) {
 		super(mode);
 
 		this.parent(
 			new Scene.PaintToolScene(ToolBase.getToolGui<"Paint", Scene.PaintToolSceneDefinition>().Paint, this),
 		);
-		this.controller = this.parent(new Controller(this));
+		this.controller = this.parent(new Controller(this, keybinds));
 	}
 
 	paintEverything(enableColor?: boolean, enableMaterial?: boolean) {

@@ -21,6 +21,7 @@ import type { ReportSubmitController } from "client/gui/popup/ReportSubmitPopup"
 import type { ActionController } from "client/modes/build/ActionController";
 import type { BuildingMode } from "client/modes/build/BuildingMode";
 //import type { TutorialConfigBlockHighlight } from "client/tutorial/TutorialConfigTool";
+import type { Keybinds } from "engine/client/Keybinds";
 import type { PlacedBlockConfig } from "shared/blockLogic/BlockConfig";
 import type { BlockLogicBothDefinitions } from "shared/blockLogic/BlockLogic";
 
@@ -208,6 +209,7 @@ export class ConfigTool extends ToolBase {
 	constructor(
 		@inject mode: BuildingMode,
 		@inject readonly blockList: BlockList,
+		@inject keybinds: Keybinds,
 		@inject di: DIContainer,
 	) {
 		super(mode);
@@ -271,7 +273,7 @@ export class ConfigTool extends ToolBase {
 			return [...newBlocks];
 		};
 
-		this.parent(new MultiBlockHighlightedSelector(mode.targetPlot, this.selected, undefined, { filter }));
+		this.parent(new MultiBlockHighlightedSelector(mode.targetPlot, this.selected, undefined, { filter }, keybinds));
 		this.onDisable(() => this.unselectAll());
 	}
 

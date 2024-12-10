@@ -40,7 +40,7 @@ import type { MaterialColorEditControlDefinition } from "client/gui/buildmode/Ma
 import type { MirrorEditorControlDefinition } from "client/gui/buildmode/MirrorEditorControl";
 import type { MainScreenLayout } from "client/gui/MainScreenLayout";
 import type { ScaleEditorControlDefinition } from "client/gui/ScaleEditor";
-import type { InputTooltips } from "client/gui/static/TooltipsControl";
+import type { Tooltip } from "client/gui/static/TooltipsControl";
 import type { BuildingMode } from "client/modes/build/BuildingMode";
 import type { ReadonlyObservableValue } from "engine/shared/event/ObservableValue";
 import type { SharedPlot } from "shared/building/SharedPlot";
@@ -1230,22 +1230,16 @@ export class BuildTool extends ToolBase {
 		return "rbxassetid://12539295858";
 	}
 
-	protected getTooltips(): InputTooltips {
-		return {
-			Desktop: [
-				{ keys: [["R"]], text: "Rotate by Y" },
-				{ keys: [["T"]], text: "Rotate by X" },
-				{ keys: [["Y"]], text: "Rotate by Z" },
-				{ keys: [["LeftControl"]], text: "Disable grid" },
-			],
-			Gamepad: [
-				{ keys: [["ButtonX"]], text: "Place" },
-				{ keys: [["ButtonB"]], text: "Unequip" },
-				{ keys: [["ButtonSelect"]], text: "Select block" },
-				{ keys: [["DPadLeft"]], text: "Rotate by X" },
-				{ keys: [["DPadUp"]], text: "Rotate by Y" },
-				{ keys: [["DPadRight"]], text: "Rotate by Z" },
-			],
-		};
+	protected getTooltips(): readonly Tooltip[] {
+		return [
+			{ keys: [["R"], ["DPadLeft"]], text: "Rotate by Y" },
+			{ keys: [["T"], ["DPadUp"]], text: "Rotate by X" },
+			{ keys: [["Y"], ["DPadRight"]], text: "Rotate by Z" },
+			{ keys: [["LeftControl"]], text: "Disable grid" },
+
+			{ keys: [["ButtonX"]], text: "Place" },
+			{ keys: [["ButtonB"]], text: "Unequip" },
+			{ keys: [["ButtonSelect"]], text: "Select block" },
+		];
 	}
 }

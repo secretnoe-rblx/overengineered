@@ -16,7 +16,7 @@ import { Instances } from "engine/shared/fixes/Instances";
 import { BlockWireManager } from "shared/blockLogic/BlockWireManager";
 import { BlockManager } from "shared/building/BlockManager";
 import { Colors } from "shared/Colors";
-import type { InputTooltips } from "client/gui/static/TooltipsControl";
+import type { Tooltip } from "client/gui/static/TooltipsControl";
 import type { ActionController } from "client/modes/build/ActionController";
 import type { BuildingMode } from "client/modes/build/BuildingMode";
 import type { ReadonlyObservableValue } from "engine/shared/event/ObservableValue";
@@ -808,15 +808,13 @@ export class WireTool extends ToolBase {
 		return "http://www.roblox.com/asset/?id=15895880948";
 	}
 
-	protected getTooltips(): InputTooltips {
-		return {
-			Desktop: [{ keys: [["F"]], text: "Hide connected markers" }],
-			Gamepad: [
-				{ keys: [["ButtonY"]], text: "Marker selection mode" },
-				{ keys: [["ButtonA"]], text: "Click on marker" },
-				{ keys: [["ButtonX"]], text: "Cancel selection" },
-				{ keys: [["ButtonB"]], text: "Unequip" },
-			],
-		};
+	protected getTooltips(): readonly Tooltip[] {
+		return [
+			{ keys: [["F"]], text: "Hide connected markers" },
+			{ keys: [["ButtonY"]], text: "Marker selection mode" },
+			{ keys: [["ButtonA"]], text: "Click on marker" },
+			{ keys: [["ButtonX"]], text: "Cancel selection" },
+			{ keys: [["ButtonB"]], text: "Unequip" },
+		];
 	}
 }

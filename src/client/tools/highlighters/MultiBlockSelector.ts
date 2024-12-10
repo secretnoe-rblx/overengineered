@@ -1,7 +1,7 @@
-import { UserInputService } from "@rbxts/services";
-import { TooltipsHolder } from "client/gui/static/TooltipsControl";
 import { BoxSelector } from "client/tools/highlighters/BoxSelector";
 import { HoveredBlocksSelector } from "client/tools/highlighters/HoveredBlocksSelector";
+import { HoldAction } from "engine/client/HoldAction";
+import { Keybinds } from "engine/client/Keybinds";
 import { Component } from "engine/shared/component/Component";
 import { ComponentChild } from "engine/shared/component/ComponentChild";
 import { ObservableValue } from "engine/shared/event/ObservableValue";
@@ -15,56 +15,45 @@ export interface BlockSelector extends Component {
 	readonly submit: ReadonlyArgsSignal<[blocks: readonly BlockModel[]]>;
 }
 
+const selectionKeybinds = {
+	assembly: Keybinds.registerDefinition("selection_assembly", ["Assembly selection"], [["LeftControl"]]),
+	machine: Keybinds.registerDefinition("selection_machine", ["Machine selection"], [["LeftAlt"]]),
+	box: Keybinds.registerDefinition("selection_box", ["Box selection"], [["E"]]),
+} as const;
+
 export type BlockSelectorMode = HoveredBlocksSelectorMode | "box";
 export type MultiBlockSelectorConfiguration = {
 	readonly enabled?: readonly BlockSelectorMode[];
 	readonly filter?: (blocks: readonly BlockModel[]) => readonly BlockModel[];
 };
+@injectable
 export class MultiBlockSelector extends Component {
 	private readonly _submit = new ArgsSignal<[blocks: readonly BlockModel[]]>();
 	readonly submit = this._submit.asReadonly();
 	readonly mode = new ObservableValue<BlockSelectorMode>("single");
 
-	constructor(plot: ReadonlyObservableValue<SharedPlot>, config?: MultiBlockSelectorConfiguration) {
+	constructor(
+		plot: ReadonlyObservableValue<SharedPlot>,
+		config: MultiBlockSelectorConfiguration | undefined,
+		@inject keybinds: Keybinds,
+	) {
 		super();
 
-		const tooltips = this.parent(TooltipsHolder.createComponent("Selecting"));
-		tooltips.set({
-			Desktop: [
-				{ keys: [["LeftControl"]], text: "Assembly selection" },
-				{ keys: [["LeftAlt"]], text: "Machine selection" },
-				{ keys: [["E"]], text: "Box selection" },
-			],
-		});
+		for (const [mode, keybindsDef] of pairs(selectionKeybinds)) {
+			if (config?.enabled?.includes(mode) === false) continue;
 
-		const buttons: Readonly<Record<BlockSelectorMode, KeyCode | undefined>> = {
-			single: undefined,
-			assembly: config?.enabled?.includes("assembly") === false ? undefined : "LeftControl",
-			machine: config?.enabled?.includes("machine") === false ? undefined : "LeftAlt",
-			box: config?.enabled?.includes("box") === false ? undefined : "E",
-		};
-		this.event.subInput((ih) => {
-			for (const [bmode, button] of pairs(buttons)) {
-				ih.onKeyDown(button, () => this.mode.set(bmode));
-				ih.onKeyUp(button, () => {
-					if (this.mode.get() === bmode) {
+			const action = this.parent(new HoldAction());
+			action.initKeybind(keybinds.fromDefinition(keybindsDef), { sink: false });
+			action.subscribe((enabled) => {
+				if (enabled) {
+					this.mode.set(mode);
+				} else {
+					if (this.mode.get() === mode) {
 						this.mode.set("single");
 					}
-				});
-			}
-		});
-
-		const setBasedOnCurrentInput = () => {
-			for (const [bmode, button] of pairs(buttons)) {
-				if (!UserInputService.IsKeyDown(button)) continue;
-
-				this.mode.set(bmode);
-				return;
-			}
-
-			this.mode.set("single");
-		};
-		this.onEnable(setBasedOnCurrentInput);
+				}
+			});
+		}
 
 		const origModeFuncs = HoveredBlocksSelector.Modes;
 		const filter = (blocks: readonly BlockModel[]): readonly BlockModel[] => {
@@ -94,25 +83,7 @@ export class MultiBlockSelector extends Component {
 			machine: () => new HoveredBlocksSelector(functions.machine),
 			box: () => new BoxSelector(plot.get(), filter),
 		};
-
-		const selectorParent = this.parent(new ComponentChild<BlockSelector>());
-		selectorParent.childSet.Connect((child) => {
-			if (child) {
-				child.submit.Connect((blocks) => this._submit.Fire(blocks));
-				return;
-			}
-
-			if (!this.isEnabled()) return;
-
-			setBasedOnCurrentInput();
-			if (!selectorParent.get()) {
-				selectorParent.set(modes[this.mode.get()]());
-			}
-		});
-
-		const updateSelector = () => selectorParent.set(modes[this.mode.get()]());
-		this.event.subscribeObservable(this.mode, updateSelector);
-		this.event.subscribeObservable(plot, updateSelector);
-		this.onEnable(updateSelector);
+		const selector = this.parent(ComponentChild.fromObservable(this.mode, (mode) => modes[mode]()));
+		selector.childSet.Connect((child) => child?.submit.Connect((blocks) => this._submit.Fire(blocks)));
 	}
 }

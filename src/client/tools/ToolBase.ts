@@ -2,7 +2,8 @@ import { Players } from "@rbxts/services";
 import { Interface } from "client/gui/Interface";
 import { TooltipsHolder } from "client/gui/static/TooltipsControl";
 import { Component } from "engine/shared/component/Component";
-import type { InputTooltips } from "client/gui/static/TooltipsControl";
+import { Objects } from "engine/shared/fixes/Objects";
+import type { Tooltip } from "client/gui/static/TooltipsControl";
 import type { BuildingMode } from "client/modes/build/BuildingMode";
 import type { ComponentEvents } from "engine/shared/component/ComponentEvents";
 import type { SharedPlot } from "shared/building/SharedPlot";
@@ -61,7 +62,7 @@ export abstract class ToolBase extends Component {
 	/** Image of the tool*/
 	abstract getImageID(): string;
 
-	protected getTooltips(): InputTooltips {
-		return {};
+	protected getTooltips(): readonly Tooltip[] {
+		return Objects.empty;
 	}
 }

@@ -475,7 +475,9 @@ export class EditTool extends ToolBase {
 		super(mode);
 
 		this.parent(di.resolveForeignClass(SelectedBlocksHighlighter, [this.selected]));
-		const selector = this.parent(new MultiBlockHighlightedSelector(this.targetPlot, this.selected));
+		const selector = this.parent(
+			new MultiBlockHighlightedSelector(this.targetPlot, this.selected, undefined, undefined, keybinds),
+		);
 		this.controller.childSet.Connect((child) => selector.setEnabled(!child));
 		this.onDisable(() => this.selected.clear());
 
@@ -550,8 +552,6 @@ export class EditTool extends ToolBase {
 		}
 
 		this.controller.childSet.Connect((child) => {
-			this.tooltipHolder.set(child ? {} : this.getTooltips());
-
 			actionController.undoAction.canExecute.and("editTool_modeSelected", !child);
 			actionController.redoAction.canExecute.and("editTool_modeSelected", !child);
 		});

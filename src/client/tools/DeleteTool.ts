@@ -10,9 +10,10 @@ import { Action } from "engine/client/Action";
 import { ButtonControl } from "engine/client/gui/Button";
 import { Control } from "engine/client/gui/Control";
 import { InputController } from "engine/client/InputController";
+import { Keybinds } from "engine/client/Keybinds";
 import { ObservableCollectionSet } from "engine/shared/event/ObservableCollection";
 import type { MirrorEditorControlDefinition } from "client/gui/buildmode/MirrorEditorControl";
-import type { InputTooltips } from "client/gui/static/TooltipsControl";
+import type { Tooltip } from "client/gui/static/TooltipsControl";
 import type { BuildingMode } from "client/modes/build/BuildingMode";
 
 namespace Scene {
@@ -74,12 +75,14 @@ namespace Scene {
 	}
 }
 
+const clearPlotKey = Keybinds.registerDefinition("delete_clearPlot", ["Delete Tool", "Clear Plot"], [["ButtonY"]]);
+
 @injectable
 export class DeleteTool extends ToolBase {
 	readonly highlightedBlocks = new ObservableCollectionSet<BlockModel>();
 	readonly clearPlotAction: Action;
 
-	constructor(@inject mode: BuildingMode, @inject di: DIContainer) {
+	constructor(@inject mode: BuildingMode, @inject keybinds: Keybinds, @inject di: DIContainer) {
 		super(mode);
 
 		this.clearPlotAction = this.parent(
@@ -91,6 +94,7 @@ export class DeleteTool extends ToolBase {
 				);
 			}),
 		);
+		this.clearPlotAction.initKeybind(keybinds.fromDefinition(clearPlotKey));
 		this.event.subscribeObservable(
 			mode.targetPlot,
 			(plot) => {
@@ -120,7 +124,7 @@ export class DeleteTool extends ToolBase {
 
 			await this.deleteBlocks(blocks);
 		};
-		const stuff = this.parent(new MultiBlockSelector(mode.targetPlot));
+		const stuff = this.parent(new MultiBlockSelector(mode.targetPlot, undefined, keybinds));
 		stuff.submit.Connect(fireSelected);
 
 		this.event.onPrepareGamepad((eh, ih) => {
@@ -162,13 +166,10 @@ export class DeleteTool extends ToolBase {
 		return "rbxassetid://12539349041";
 	}
 
-	protected getTooltips(): InputTooltips {
-		return {
-			Gamepad: [
-				{ keys: [["ButtonY"]], text: "Clear all" },
-				{ keys: [["ButtonX"]], text: "Delete" },
-				{ keys: [["ButtonB"]], text: "Unequip" },
-			],
-		};
+	protected getTooltips(): readonly Tooltip[] {
+		return [
+			{ keys: [["ButtonX"]], text: "Delete" },
+			{ keys: [["ButtonB"]], text: "Unequip" },
+		];
 	}
 }

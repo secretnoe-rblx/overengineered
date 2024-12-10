@@ -7,17 +7,15 @@ import { Element } from "engine/shared/Element";
 import { Keys } from "engine/shared/fixes/Keys";
 import type { KeybindRegistration, KeyCombination } from "engine/client/Keybinds";
 
-const tooltipsGui = Interface.getGameUI<{ Help: { Controls: TooltipsControlDefinition } }>().Help.Controls;
+const tooltipsGui = Interface.getInterface<{ Help: { Controls: TooltipsControlDefinition } }>().Help.Controls;
 tooltipsGui.Visible = true;
 
 const keyboardTooltipTemplate = Control.asTemplateWithMemoryLeak(tooltipsGui.KeyboardTemplate);
 const gamepadTooltipTemplate = Control.asTemplateWithMemoryLeak(tooltipsGui.GamepadTemplate);
 
-export type Tooltip = { readonly keys: readonly KeyCombination[]; readonly text: string };
-export type Tooltips = readonly Tooltip[];
-export interface InputTooltips {
-	readonly Desktop?: Tooltips;
-	readonly Gamepad?: Tooltips;
+export interface Tooltip {
+	readonly keys: readonly KeyCombination[];
+	readonly text: string;
 }
 
 type TooltipsControlDefinition = GuiObject & {
@@ -59,11 +57,11 @@ export class TooltipsHolder extends InstanceComponent<GuiObject> {
 	}
 
 	private readonly instances: GuiObject[] = [];
-	private tooltips: InputTooltips = {};
+	private tooltips: readonly Tooltip[] = [];
 	constructor(instance: GuiObject) {
 		super(instance);
 		this.event.onPrepare(() => this.set(this.tooltips));
-		this.onDisable(() => this.justSet({}));
+		this.onDisable(() => this.clear());
 	}
 
 	private createTooltip(tooltip: Tooltip) {
@@ -101,27 +99,31 @@ export class TooltipsHolder extends InstanceComponent<GuiObject> {
 	}
 
 	setFromKeybinds(...keybinds: readonly KeybindRegistration[]) {
-		this.set({
-			Desktop: keybinds.map(
+		this.set(
+			keybinds.map(
 				(kb): Tooltip => ({
 					text: kb.displayPath[kb.displayPath.size() - 1],
 					keys: kb.getKeys(),
 				}),
 			),
-		});
+		);
 	}
 
-	set(tooltips: InputTooltips) {
+	set(tooltips: readonly Tooltip[]) {
 		this.tooltips = tooltips;
 		this.justSet(tooltips);
 	}
-	private justSet(tooltips: InputTooltips) {
+
+	private clear(): void {
 		for (const tooltip of this.instances) {
 			tooltip.Destroy();
 		}
 		this.instances.clear();
+	}
+	private justSet(tooltips: readonly Tooltip[]) {
+		this.clear();
 
-		const set = (tooltips: Tooltips) => {
+		const set = (tooltips: readonly Tooltip[]) => {
 			for (const tooltip of tooltips) {
 				const instance = this.createTooltip(tooltip);
 				instance.Parent = this.instance;
@@ -129,14 +131,14 @@ export class TooltipsHolder extends InstanceComponent<GuiObject> {
 			}
 		};
 
-		if (InputController.inputType.get() === "Desktop" && tooltips.Desktop) {
-			set(tooltips.Desktop);
-		} else if (InputController.inputType.get() === "Gamepad" && tooltips.Gamepad) {
-			set(tooltips.Gamepad);
-		}
-	}
+		const filterTooltipsBy = (tooltips: readonly Tooltip[], func: (key: KeyCode) => boolean): Tooltip[] =>
+			tooltips.map((t): Tooltip => ({ ...t, keys: t.keys.filter((k) => k.any(func)) }));
 
-	destroy(): void {
-		task.delay(0.2, () => super.destroy());
+		const inputType = InputController.inputType.get();
+		if (inputType === "Desktop") {
+			set(filterTooltipsBy(tooltips, (k) => !Keys.isKeyGamepad(k)));
+		} else if (inputType === "Gamepad") {
+			set(filterTooltipsBy(tooltips, (k) => Keys.isKeyGamepad(k)));
+		}
 	}
 }
