@@ -34,13 +34,27 @@ class Logic extends BlockLogic<typeof definition> {
 		super(definition, block);
 
 		let valueSet = false;
+		let cfallbackValue: string | number | boolean | Vector3 | Color3 | undefined;
+		let cfallbackType: "string" | "number" | "bool" | "vector3" | "color" | "byte" | undefined;
 
-		this.onk(["value"], ({ value, valueType }) => {
-			valueSet = true;
-			this.output.result.set(valueType, value);
-		});
-		this.onk(["fallback"], ({ fallback, fallbackType }) => {
+		this.onkRecalcInputs(
+			["value"],
+			({ value, valueType }) => {
+				valueSet = true;
+				this.output.result.set(valueType, value);
+			},
+			() => {
+				valueSet = false;
+				if (cfallbackType !== undefined && cfallbackValue !== undefined) {
+					this.output.result.set(cfallbackType, cfallbackValue);
+				}
+			},
+		);
+
+		this.onkRecalcInputs(["fallback"], ({ fallback, fallbackType }) => {
 			if (valueSet) return;
+
+			[cfallbackValue, cfallbackType] = [fallback, fallbackType];
 			this.output.result.set(fallbackType, fallback);
 		});
 	}
