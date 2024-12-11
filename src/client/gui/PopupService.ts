@@ -7,7 +7,6 @@ import { Transforms } from "engine/shared/component/Transforms";
 import { HostedService } from "engine/shared/di/HostedService";
 import { Element } from "engine/shared/Element";
 import type { Interfacec } from "client/gui/Interface";
-import type { Control } from "engine/client/gui/Control";
 import type { ReadonlyObservableValue } from "engine/shared/event/ObservableValue";
 
 @injectable
@@ -34,7 +33,7 @@ export class PopupService extends HostedService {
 		});
 	}
 
-	showPopup(control: Control): void {
+	showPopup(control: InstanceComponent<GuiObject>): void {
 		const parentScreen = new InstanceComponent(
 			Element.create(
 				"ScreenGui",

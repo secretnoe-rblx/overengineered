@@ -7,6 +7,7 @@ import { PlayerConfigDefinition } from "shared/config/PlayerConfig";
 import type { NewSettingsPopup } from "client/gui/popup/NewSettingsPopup";
 import type { PlayerDataStorage } from "client/PlayerDataStorage";
 import type { TextButtonDefinition } from "engine/client/gui/Button";
+import type { Component } from "engine/shared/component/Component";
 import type { GameHostBuilder } from "engine/shared/GameHostBuilder";
 
 export type ConfigPartDefinition<T extends GuiObject> = GuiObject & {
@@ -47,10 +48,13 @@ export class SettingsPopup extends Popup<SettingsPopupDefinition> {
 		this.parent(new ButtonControl(gui.Buttons.CancelButton, () => this.hide()));
 		this.parent(new ButtonControl(gui.Head.CloseButton, () => this.hide()));
 
+		let permbtn: Component | undefined;
+
 		this.event.subscribeObservable(
 			playerData.config,
 			(config) => {
 				this.config.set(config, PlayerConfigDefinition);
+				permbtn?.destroy();
 
 				const btn = this.config.add(
 					new TextButtonControl(
@@ -63,6 +67,7 @@ export class SettingsPopup extends Popup<SettingsPopupDefinition> {
 						},
 					),
 				);
+				permbtn = btn;
 				btn.instance.LayoutOrder = 0;
 				btn.instance.BackgroundColor3 = Colors.accentDark;
 				btn.instance.Size = new UDim2(new UDim(1, 0), btn.instance.Size.Y);

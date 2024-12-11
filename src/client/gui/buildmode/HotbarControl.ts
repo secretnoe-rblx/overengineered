@@ -120,40 +120,34 @@ export class HotbarControl extends InstanceComponent<HotbarControlDefinition> {
 			);
 		});
 
-		this.event.subscribeObservable(toolController.selectedTool, (tool, prev) => this.toolChanged(tool, prev), true);
-		this.resetLabels();
-	}
+		const toolChanged = (tool: ToolBase | undefined, prev: ToolBase | undefined) => {
+			const duration = tool && prev ? 0.07 : 0.15;
 
-	private toolChanged(tool: ToolBase | undefined, prev: ToolBase | undefined) {
-		const duration = tool && prev ? 0.07 : 0.15;
-
-		const transform = Transforms.create();
-		if (prev) {
-			transform
-				.moveY(this.nameLabel.instance, new UDim(0, 0), { duration })
-				.transform(this.nameLabel.instance, "TextTransparency", 1, { duration: duration * 0.8 });
-		}
-
-		transform //
-			.then()
-			.func(() => (this.instance.NameLabel.Text = tool?.getDisplayName() ?? ""));
-
-		if (tool) {
-			transform
+			Transforms.create()
+				.if(prev !== undefined, (tr) =>
+					tr
+						.moveRelative(this.nameLabel.instance, new UDim2(0, 0, 0, -20), { duration })
+						.transform(this.nameLabel.instance, "TextTransparency", 1, { duration: duration * 0.8 })
+						.then()
+						.moveRelative(this.nameLabel.instance, new UDim2(0, 0, 0, 20)),
+				)
 				.then()
-				.moveY(this.nameLabel.instance, new UDim(1, 0))
-				.transform(this.nameLabel.instance, "TextTransparency", 1)
-				.moveY(this.nameLabel.instance, new UDim(0.05, 0), { duration })
-				.transform(this.nameLabel.instance, "TextTransparency", 0, { duration: duration * 0.8 })
-				.then();
-		}
-		transform.run(this.nameLabel.instance);
+				.func(() => (this.instance.NameLabel.Text = tool?.getDisplayName() ?? ""))
+				.if(tool !== undefined, (tr) =>
+					tr
+						.then()
+						.moveRelative(this.nameLabel.instance, new UDim2(0, 0, 0, 20))
+						.transform(this.nameLabel.instance, "TextTransparency", 1)
+						.moveRelative(this.nameLabel.instance, new UDim2(0, 0, 0, -20), { duration })
+						.transform(this.nameLabel.instance, "TextTransparency", 0, { duration: duration * 0.8 })
+						.then(),
+				)
+				.run(this.nameLabel.instance);
 
-		// Play sound
-		SoundController.getSounds().Click.Play();
-	}
-
-	private resetLabels() {
+			// Play sound
+			SoundController.getSounds().Click.Play();
+		};
+		this.event.subscribeObservable(toolController.selectedTool, toolChanged, true);
 		this.instance.NameLabel.Text = "";
 	}
 }

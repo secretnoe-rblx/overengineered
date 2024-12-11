@@ -1,6 +1,6 @@
 import { LoadingController } from "client/controller/LoadingController";
 import { MirrorVisualizer } from "client/controller/MirrorVisualizer";
-import { BuildingModeScene } from "client/gui/buildmode/BuildingModeScene";
+import { Scene } from "client/gui/Scene";
 import { ActionController } from "client/modes/build/ActionController";
 import { CenterOfMassController } from "client/modes/build/CenterOfMassController";
 import { GridController } from "client/modes/build/GridController";
@@ -20,7 +20,9 @@ import { ObservableValue } from "engine/shared/event/ObservableValue";
 import { Objects } from "engine/shared/fixes/Objects";
 import { SharedRagdoll } from "shared/SharedRagdoll";
 import type { MainScene } from "client/gui/MainScene";
+import type { MainScreenLayout } from "client/gui/MainScreenLayout";
 import type { SavePopup } from "client/gui/popup/SavePopup";
+import type { Theme } from "client/Theme";
 import type { ToolBase } from "client/tools/ToolBase";
 import type { ToolController } from "client/tools/ToolController";
 import type { SharedPlot } from "shared/building/SharedPlot";
@@ -31,6 +33,32 @@ declare global {
 		readonly y?: number;
 		readonly z?: number;
 	};
+}
+
+@injectable
+export class BuildingModeScene extends Scene {
+	constructor(
+		@inject readonly mode: BuildingMode,
+		@inject mainScreen: MainScreenLayout,
+		@inject theme: Theme,
+	) {
+		super();
+
+		this.parent(mainScreen.registerTopCenterButton("Run"))
+			.themeButton(theme, "accent")
+			.subscribeToAction(mode.runAction)
+			.subscribeVisibilityFrom({ main_enabled: this.enabledState });
+
+		this.parent(mainScreen.registerTopCenterButton("Saves"))
+			.themeButton(theme, "buttonNormal")
+			.subscribeToAction(mode.openSavePopupAction)
+			.subscribeVisibilityFrom({ main_enabled: this.enabledState });
+
+		this.parent(mainScreen.registerTopCenterButton("TeleportToPlot"))
+			.themeButton(theme, "buttonNormal")
+			.subscribeToAction(mode.teleportToPlotAction)
+			.subscribeVisibilityFrom({ main_enabled: this.enabledState });
+	}
 }
 
 export type EditMode = "global" | "local";
