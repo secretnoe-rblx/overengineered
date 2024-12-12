@@ -11,6 +11,7 @@ const definition = {
 			//не переименовывал чтоб совметимость была
 			displayName: "High Level Length",
 			unit: "Tick",
+			tooltip: `The amount of ticks that signal will be in high (true) state.`,
 			types: {
 				number: {
 					config: 1,
@@ -20,6 +21,7 @@ const definition = {
 		delay_low: {
 			displayName: "Low Level Length",
 			unit: "Tick",
+			tooltip: `The amount of ticks that signal will be in low (false) state.`,
 			types: {
 				number: {
 					config: 1,
@@ -28,6 +30,7 @@ const definition = {
 		},
 		isInverted: {
 			displayName: "Invert",
+			tooltip: `Make signal inverted. True will be false and false will be true. Basically, switchable "NOT" gate.`,
 			types: {
 				bool: {
 					config: false,
@@ -37,7 +40,7 @@ const definition = {
 		},
 		isSinglePulse: {
 			displayName: "Single Pulse",
-			tooltip: "",
+			tooltip: `Make the impulse generator output single tick impulses.`,
 			types: {
 				bool: {
 					config: false,
@@ -56,11 +59,10 @@ const definition = {
 
 export type { Logic as ImpulseGeneratorBlockLogic };
 class Logic extends BlockLogic<typeof definition> {
-	private impulseProgress = -1;
-
 	constructor(block: BlockLogicArgs) {
 		super(definition, block);
 
+		let impulseProgress = -1;
 		this.onAlwaysInputs(({ delay, delay_low, isSinglePulse, isInverted }) => {
 			if (delay < 0 || delay_low < 0)
 				if (this.instance) {
@@ -71,9 +73,9 @@ class Logic extends BlockLogic<typeof definition> {
 			if (delay + delay_low <= 0) return;
 
 			const len = delay + delay_low;
-			this.impulseProgress = ++this.impulseProgress % len;
+			impulseProgress = ++impulseProgress % len;
 
-			const res = this.impulseProgress < (isSinglePulse ? 1 : delay);
+			const res = impulseProgress < (isSinglePulse ? 1 : delay);
 			this.output.value.set("bool", !res !== !isInverted); //xor (a.k.a. управляемая инверсия)
 		});
 	}
