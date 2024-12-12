@@ -1,11 +1,7 @@
 import { BlockLogic } from "shared/blockLogic/BlockLogic";
 import { BlockCreation } from "shared/blocks/BlockCreation";
 import { RemoteEvents } from "shared/RemoteEvents";
-import type {
-	BlockLogicArgs,
-	BlockLogicFullBothDefinitions,
-	BlockLogicTickContext,
-} from "shared/blockLogic/BlockLogic";
+import type { BlockLogicArgs, BlockLogicFullBothDefinitions } from "shared/blockLogic/BlockLogic";
 import type { BlockBuilder } from "shared/blocks/Block";
 
 const definition = {
@@ -61,14 +57,11 @@ const definition = {
 export type { Logic as ImpulseGeneratorBlockLogic };
 class Logic extends BlockLogic<typeof definition> {
 	private impulseProgress = -1;
-	private impulseDelay = 0;
 
 	constructor(block: BlockLogicArgs) {
 		super(definition, block);
 
 		this.onAlwaysInputs(({ delay, delay_low, isSinglePulse, isInverted }) => {
-			this.impulseDelay = delay; //for debugging or sum sh$t
-
 			if (delay < 0 || delay_low < 0)
 				if (this.instance) {
 					RemoteEvents.Burn.send([this.instance.PrimaryPart as BasePart]);
@@ -83,10 +76,6 @@ class Logic extends BlockLogic<typeof definition> {
 			const res = this.impulseProgress < (isSinglePulse ? 1 : delay);
 			this.output.value.set("bool", !res !== !isInverted); //xor (a.k.a. управляемая инверсия)
 		});
-	}
-
-	getDebugInfo(ctx: BlockLogicTickContext): readonly string[] {
-		return [...super.getDebugInfo(ctx), `Progress: ${this.impulseProgress}/${this.impulseDelay}`];
 	}
 }
 
