@@ -1,5 +1,6 @@
 import { BlockLogic } from "shared/blockLogic/BlockLogic";
 import { BlockCreation } from "shared/blocks/BlockCreation";
+import { RemoteEvents } from "shared/RemoteEvents";
 import type {
 	BlockLogicArgs,
 	BlockLogicFullBothDefinitions,
@@ -65,21 +66,22 @@ class Logic extends BlockLogic<typeof definition> {
 	constructor(block: BlockLogicArgs) {
 		super(definition, block);
 
-		const set = (value: boolean) => this.output.value.set("bool", value);
-
-		this.onk(["isInverted"], ({ isInverted }) => set(!isInverted));
-
 		this.onAlwaysInputs(({ delay, delay_low, isSinglePulse, isInverted }) => {
 			this.impulseDelay = delay; //for debugging or sum sh$t
 
-			delay = math.max(delay, 1);
-			delay_low = math.max(delay_low, 1);
+			if (delay < 0 || delay_low < 0)
+				if (this.instance) {
+					RemoteEvents.Burn.send([this.instance.PrimaryPart as BasePart]);
+					return;
+				}
+
+			if (delay + delay_low <= 0) return;
 
 			const len = delay + delay_low;
 			this.impulseProgress = ++this.impulseProgress % len;
 
 			const res = this.impulseProgress < (isSinglePulse ? 1 : delay);
-			set(!res !== !isInverted); //xor (a.k.a. управляемая инверсия)
+			this.output.value.set("bool", !res !== !isInverted); //xor (a.k.a. управляемая инверсия)
 		});
 	}
 
