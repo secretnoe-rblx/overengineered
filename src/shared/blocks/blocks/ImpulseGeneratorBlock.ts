@@ -36,7 +36,6 @@ const definition = {
 					config: false,
 				},
 			},
-			connectorHidden: true,
 		},
 		isSinglePulse: {
 			displayName: "Single Pulse",
@@ -46,7 +45,6 @@ const definition = {
 					config: false,
 				},
 			},
-			connectorHidden: true,
 		},
 	},
 	output: {
