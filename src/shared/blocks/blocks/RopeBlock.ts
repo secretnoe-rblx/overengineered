@@ -43,7 +43,7 @@ export const RopeBlock = {
 	id: "rope",
 	displayName: "Rope",
 	description: "A very VERY robust rope",
-	limit: 20,
+	limit: 40,
 
 	logic: { definition, ctor: Logic },
 } as const satisfies BlockBuilder;
