@@ -1,23 +1,20 @@
-import { DataStoreService, Players } from "@rbxts/services";
+import { Players } from "@rbxts/services";
 import { Db } from "engine/server/Database";
 import { BlocksSerializer } from "shared/building/BlocksSerializer";
 import { GameDefinitions } from "shared/data/GameDefinitions";
 import { SlotsMeta } from "shared/SlotsMeta";
+import type { DatabaseBackend } from "engine/server/backend/DatabaseBackend";
 import type { PlayerDatabase } from "server/database/PlayerDatabase";
 import type { BuildingPlot } from "shared/building/BuildingPlot";
 
 @injectable
 export class SlotDatabase {
 	private readonly onlinePlayers = new Set<number>();
-	private readonly datastore;
+	private readonly datastore: DatabaseBackend;
 	private readonly blocksdb;
 
 	constructor(@inject private readonly players: PlayerDatabase) {
-		try {
-			this.datastore = DataStoreService.GetDataStore("slots");
-		} catch {
-			warn("Place datastore is not available. All requests will be dropped.");
-		}
+		this.datastore = Db.createStore("slots");
 
 		this.blocksdb = new Db<string | undefined>(
 			this.datastore,
