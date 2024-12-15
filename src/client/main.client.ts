@@ -19,7 +19,6 @@ import { CustomRemotes } from "shared/Remotes";
 import { SlotsMeta } from "shared/SlotsMeta";
 import { LaserProjectile } from "shared/weapons/LaserProjectileLogic";
 import type { PlayerDataStorage } from "client/PlayerDataStorage";
-import type { Theme } from "client/Theme";
 import type { TransformProps } from "engine/shared/component/Transform";
 
 LoadingController.show("Initializing");
@@ -178,42 +177,3 @@ task.spawn(() => {
 	//task.spawn(() => e(gui.WaitForChild("Redo") as GuiObject));
 	//task.spawn(() => e(gui.WaitForChild("CenterOfMass") as GuiObject));
 });
-
-//
-
-// rainbow theme
-{
-	const theme = host.services.resolve<Theme>();
-
-	task.spawn(() => {
-		const colors = [theme.get("buttonActive"), theme.get("accent")];
-		let h = 0;
-
-		while (true as boolean) {
-			h += 1 / 360;
-			h %= 1;
-
-			for (const color of colors) {
-				color.set(Color3.fromHSV(h, 1, 1));
-			}
-
-			task.wait();
-		}
-	});
-
-	task.spawn(() => {
-		const colors = [theme.get("buttonNormal")];
-		let h = 0;
-
-		while (true as boolean) {
-			h += 1 / 360;
-			h %= 1;
-
-			for (const color of colors) {
-				color.set(Color3.fromHSV(h, 1, 0.1));
-			}
-
-			task.wait();
-		}
-	});
-}

@@ -27,6 +27,7 @@ import { SavePopup } from "client/gui/popup/SavePopup";
 import { SettingsPopup } from "client/gui/popup/SettingsPopup";
 import { WikiPopup } from "client/gui/popup/WikiPopup";
 import { PopupService } from "client/gui/PopupService";
+import { RainbowGuiController } from "client/gui/RainbowGuiController";
 import { ActionController } from "client/modes/build/ActionController";
 import { ClientBuildingValidationController } from "client/modes/build/ClientBuildingValidationController";
 import { PlayModeController } from "client/modes/PlayModeController";
@@ -100,6 +101,7 @@ export namespace SandboxGame {
 		builder.services.registerService(MusicController);
 		builder.services.registerService(GuiAutoScaleController);
 		builder.services.registerService(HideInterfaceController);
+		builder.services.registerService(RainbowGuiController);
 		builder.services
 			.registerSingletonClass(MainScreenLayout)
 			.autoInit()
