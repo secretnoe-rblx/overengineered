@@ -1,7 +1,8 @@
-import { DataStoreService, Players } from "@rbxts/services";
+import { Players } from "@rbxts/services";
 import { Db } from "engine/server/Database";
 import { JSON } from "engine/shared/fixes/Json";
 import { PlayerConfigUpdater } from "server/PlayerConfigVersioning";
+import type { DatabaseBackend } from "engine/server/backend/DatabaseBackend";
 
 export type PlayerDatabaseData = {
 	readonly purchasedSlots?: number;
@@ -12,15 +13,11 @@ export type PlayerDatabaseData = {
 
 export class PlayerDatabase {
 	private readonly onlinePlayers = new Set<number>();
-	private readonly datastore;
+	private readonly datastore: DatabaseBackend;
 	private readonly db;
 
 	constructor() {
-		try {
-			this.datastore = DataStoreService.GetDataStore("players");
-		} catch {
-			warn("Place datastore is not available. All requests will be dropped.");
-		}
+		this.datastore = Db.createStore("players");
 
 		this.db = new Db<PlayerDatabaseData>(
 			this.datastore,
