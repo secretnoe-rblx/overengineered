@@ -2,10 +2,9 @@ import { MessagingService, Players, RunService, Workspace } from "@rbxts/service
 import { HostedService } from "engine/shared/di/HostedService";
 import { Instances } from "engine/shared/fixes/Instances";
 import { isNotAdmin_AutoBanned } from "server/BanAdminExploiter";
-import { registerOnRemoteEvent } from "server/network/event/RemoteHandler";
 import { ServerPartUtils } from "server/plots/ServerPartUtils";
 import { BlockManager } from "shared/building/BlockManager";
-import { Remotes } from "shared/Remotes";
+import { CustomRemotes } from "shared/Remotes";
 import { PartUtils } from "shared/utils/PartUtils";
 import type { SpreadingFireController } from "server/SpreadingFireController";
 import type { ExplosionEffect } from "shared/effects/ExplosionEffect";
@@ -27,7 +26,7 @@ export class ServerRestartController extends HostedService {
 				);
 			});
 
-			registerOnRemoteEvent("Admin", "Restart", (player, restart) => {
+			CustomRemotes.admin.restart.invoked.Connect((player, restart) => {
 				if (isNotAdmin_AutoBanned(player, "restart")) {
 					return;
 				}
@@ -83,7 +82,7 @@ export class ServerRestartController extends HostedService {
 		RunService.Heartbeat.Connect((dt) => {
 			timePassed += dt;
 			progress = timePassed / maxTime;
-			Remotes.Server.Get("ServerRestartProgress").SendToAllPlayers(progress);
+			CustomRemotes.restartProgress.send("everyone", { atmosphereColor: progress });
 			const pl = Players.GetPlayers();
 			pl.forEach((p) => {
 				const pos = p.Character?.GetPivot();

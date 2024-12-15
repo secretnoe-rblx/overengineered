@@ -1,5 +1,5 @@
 import { ReplicatedFirst } from "@rbxts/services";
-import { Remotes } from "shared/Remotes";
+import { CustomRemotes } from "shared/Remotes";
 
 type t = {
 	["3D Atmosphere"]: {
@@ -14,9 +14,9 @@ const atmo = (ReplicatedFirst as unknown as t)["3D Atmosphere"];
 const atmoStartColor = atmo.Customize.AtmosphereColor.Value;
 const atmoEndColor = Color3.fromRGB(200, 25, 25);
 
-Remotes.Client.Get("ServerRestartProgress").Connect((progress) => {
-	atmo.Customize.AtmosphereColor.Value = atmoStartColor.Lerp(atmoEndColor, progress);
-	atmo.Customize.AtmosphereTransparency.Value = 1 - progress;
+CustomRemotes.restartProgress.invoked.Connect(({ atmosphereColor }) => {
+	atmo.Customize.AtmosphereColor.Value = atmoStartColor.Lerp(atmoEndColor, atmosphereColor);
+	atmo.Customize.AtmosphereTransparency.Value = 1 - atmosphereColor;
 });
 
 export namespace ServerRestartController {
@@ -24,6 +24,6 @@ export namespace ServerRestartController {
 	export function initialize() {}
 
 	export function sendToServer(restart = true) {
-		Remotes.Client.GetNamespace("Admin").Get("Restart").SendToServer(restart);
+		CustomRemotes.admin.restart.send(restart);
 	}
 }

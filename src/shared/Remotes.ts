@@ -1,5 +1,5 @@
-import { Definitions } from "@rbxts/net";
 import {
+	BidirectionalRemoteEvent,
 	C2S2CRemoteFunction,
 	C2SRemoteEvent,
 	PERemoteEventMiddlewares,
@@ -98,6 +98,17 @@ declare global {
 	};
 }
 
+export namespace Remotes {
+	export interface AdminSendMessageArgs {
+		readonly text: string;
+		readonly color?: Color3;
+		readonly duration?: number;
+	}
+	export interface ServerRestartProgressArgs {
+		readonly atmosphereColor: number;
+	}
+}
+
 export const CustomRemotes = {
 	building: {
 		placeBlocks: new C2S2CRemoteFunction<PlaceBlocksRequest, MultiBuildResponse>("rb_place"),
@@ -139,14 +150,9 @@ export const CustomRemotes = {
 			teleportOnSeat: new C2SRemoteEvent("mdr_seat"),
 		},
 	},
+	admin: {
+		sendMessage: new BidirectionalRemoteEvent<Remotes.AdminSendMessageArgs>("adm_sendmessage"),
+		restart: new C2SRemoteEvent<boolean>("adm_restart"),
+	},
+	restartProgress: new S2CRemoteEvent<Remotes.ServerRestartProgressArgs>("restartprogress"),
 } as const;
-export const Remotes = Definitions.Create({
-	Admin: Definitions.Namespace({
-		SendMessage: Definitions.BidirectionalEvent<
-			[text: string, color?: Color3, duration?: number],
-			[text: string, color?: Color3, duration?: number]
-		>(),
-		Restart: Definitions.ClientToServerEvent<[restart: boolean]>(),
-	}),
-	ServerRestartProgress: Definitions.ServerToClientEvent<[atmosphereColor: number]>(),
-});
