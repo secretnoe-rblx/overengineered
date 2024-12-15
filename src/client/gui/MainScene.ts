@@ -12,7 +12,7 @@ export class MainScene extends Scene {
 	constructor(
 		@inject mainScreen: MainScreenLayout,
 		@inject theme: Theme,
-		@injectFunc popupService: PopupService,
+		@inject popupService: PopupService,
 		@injectFunc createSettingsPopup: () => SettingsPopup,
 	) {
 		super();
