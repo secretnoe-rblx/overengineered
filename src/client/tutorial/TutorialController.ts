@@ -28,7 +28,7 @@ import type { ReadonlyPlot } from "shared/building/ReadonlyPlot";
 import type { SharedPlot } from "shared/building/SharedPlot";
 
 @injectable
-class TutorialPlot extends Component {
+export class TutorialPlot extends Component {
 	private readonly instance: Folder;
 	private readonly plot: BuildingPlot;
 	private readonly actualPlot: ReadonlyPlot;

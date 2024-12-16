@@ -2,7 +2,6 @@ import { BSOD } from "client/gui/BSOD";
 import { NotificationPopup } from "client/gui/popup/NotificationPopup";
 import { TutorialController } from "client/tutorial/TutorialController";
 import { HostedService } from "engine/shared/di/HostedService";
-import type { PlayerDataStorage } from "client/PlayerDataStorage";
 import type { TutorialDescriber } from "client/tutorial/TutorialController";
 import type { GameHostBuilder } from "engine/shared/GameHostBuilder";
 
@@ -80,13 +79,12 @@ export namespace TutorialServiceInitializer {
 
 		if (config.tutorialToRunWhenNoSlots) {
 			reg.onInit((service, di) => {
-				// di.resolve<PlayModeController>().mo
-				const playerData = di.resolve<PlayerDataStorage>();
-
-				service.onEnable(() => {
-					if (playerData.slots.get().any((t) => t.blocks !== 0)) return;
-					service.run(di.resolveForeignClass(config.tutorialToRunWhenNoSlots!), { allowClosing: false });
-				});
+				// // di.resolve<PlayModeController>().mo
+				// const playerData = di.resolve<PlayerDataStorage>();
+				// service.onEnable(() => {
+				// 	if (playerData.slots.get().any((t) => t.blocks !== 0)) return;
+				// 	service.run(di.resolveForeignClass(config.tutorialToRunWhenNoSlots!), { allowClosing: false });
+				// });
 			});
 		}
 	}

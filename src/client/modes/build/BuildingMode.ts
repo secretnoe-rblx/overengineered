@@ -177,6 +177,10 @@ export class BuildingMode extends PlayMode {
 
 		this.onEnable(() => toolController.tools.add(...toolsArr));
 		this.onDisable(() => toolController.tools.remove(...toolsArr));
+
+		// this.onEnable(() => {
+		// 	di.resolveForeignClass(TestTutorial2).enable();
+		// });
 	}
 
 	getName(): PlayModes {
