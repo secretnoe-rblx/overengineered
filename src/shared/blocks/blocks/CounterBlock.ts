@@ -55,20 +55,11 @@ class Logic extends BlockLogic<typeof definition> {
 	constructor(block: BlockLogicArgs) {
 		super(definition, block);
 
-		const get = () => this.output.value.justGet().value;
-		const set = (value: number) => this.output.value.set("number", value);
-
-		this.onkFirstInputs(["newvalue"], ({ newvalue }) => set(newvalue));
-		this.onk(
-			["triggerValue", "newvalue"],
-			({ triggerValue: rewrite, triggerValueChanged: rewriteChanged, newvalue }) => {
-				if (!rewrite || !rewriteChanged) return;
-				set(newvalue);
-			},
-		);
-		this.onk(["step", "triggerStep"], ({ triggerStep, triggerStepChanged, step }) => {
-			if (!triggerStep || !triggerStepChanged) return;
-			set(get() + step);
+		let currentValue = 0;
+		this.onAlwaysInputs(({ triggerStep, step, triggerValue, newvalue }) => {
+			if (triggerStep) currentValue += step;
+			if (triggerValue) currentValue = newvalue;
+			this.output.value.set("number", currentValue);
 		});
 	}
 }

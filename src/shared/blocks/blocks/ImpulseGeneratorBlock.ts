@@ -1,10 +1,7 @@
 import { BlockLogic } from "shared/blockLogic/BlockLogic";
 import { BlockCreation } from "shared/blocks/BlockCreation";
-import type {
-	BlockLogicArgs,
-	BlockLogicFullBothDefinitions,
-	BlockLogicTickContext,
-} from "shared/blockLogic/BlockLogic";
+import { RemoteEvents } from "shared/RemoteEvents";
+import type { BlockLogicArgs, BlockLogicFullBothDefinitions } from "shared/blockLogic/BlockLogic";
 import type { BlockBuilder } from "shared/blocks/Block";
 
 const definition = {
@@ -14,6 +11,7 @@ const definition = {
 			//не переименовывал чтоб совметимость была
 			displayName: "High Level Length",
 			unit: "Tick",
+			tooltip: `The amount of ticks that signal will be in high (true) state.`,
 			types: {
 				number: {
 					config: 1,
@@ -23,6 +21,7 @@ const definition = {
 		delay_low: {
 			displayName: "Low Level Length",
 			unit: "Tick",
+			tooltip: `The amount of ticks that signal will be in low (false) state.`,
 			types: {
 				number: {
 					config: 1,
@@ -31,22 +30,21 @@ const definition = {
 		},
 		isInverted: {
 			displayName: "Invert",
+			tooltip: `Make signal inverted. True will be false and false will be true. Basically, switchable "NOT" gate.`,
 			types: {
 				bool: {
 					config: false,
 				},
 			},
-			connectorHidden: true,
 		},
 		isSinglePulse: {
 			displayName: "Single Pulse",
-			tooltip: "",
+			tooltip: `Make the impulse generator output single tick impulses.`,
 			types: {
 				bool: {
 					config: false,
 				},
 			},
-			connectorHidden: true,
 		},
 	},
 	output: {
@@ -59,32 +57,25 @@ const definition = {
 
 export type { Logic as ImpulseGeneratorBlockLogic };
 class Logic extends BlockLogic<typeof definition> {
-	private impulseProgress = -1;
-	private impulseDelay = 0;
-
 	constructor(block: BlockLogicArgs) {
 		super(definition, block);
 
-		const set = (value: boolean) => this.output.value.set("bool", value);
-
-		this.onk(["isInverted"], ({ isInverted }) => set(!isInverted));
-
+		let impulseProgress = -1;
 		this.onAlwaysInputs(({ delay, delay_low, isSinglePulse, isInverted }) => {
-			this.impulseDelay = delay; //for debugging or sum sh$t
+			if (delay < 0 || delay_low < 0)
+				if (this.instance) {
+					RemoteEvents.Burn.send([this.instance.PrimaryPart as BasePart]);
+					return;
+				}
 
-			delay = math.max(delay, 1);
-			delay_low = math.max(delay_low, 1);
+			if (delay + delay_low <= 0) return;
 
 			const len = delay + delay_low;
-			this.impulseProgress = ++this.impulseProgress % len;
+			impulseProgress = ++impulseProgress % len;
 
-			const res = this.impulseProgress < (isSinglePulse ? 1 : delay);
-			set(!res !== !isInverted); //xor (a.k.a. управляемая инверсия)
+			const res = impulseProgress < (isSinglePulse ? 1 : delay);
+			this.output.value.set("bool", !res !== !isInverted); //xor (a.k.a. управляемая инверсия)
 		});
-	}
-
-	getDebugInfo(ctx: BlockLogicTickContext): readonly string[] {
-		return [...super.getDebugInfo(ctx), `Progress: ${this.impulseProgress}/${this.impulseDelay}`];
 	}
 }
 
