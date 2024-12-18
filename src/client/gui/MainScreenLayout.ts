@@ -90,7 +90,7 @@ export class MainScreenLayout extends Component {
 		this.instance = Interface.getInterface<{ Main: MainScreenLayoutDefinition }>().Main;
 		ComponentInstance.init(this, this.instance);
 
-		this.bottom = di.resolveForeignClass(MainScreenBottom, [this.instance.Bottom]);
+		this.bottom = this.parentGui(di.resolveForeignClass(MainScreenBottom, [this.instance.Bottom]));
 
 		const initHotbar = () => {
 			const hotbar = this.parent(
