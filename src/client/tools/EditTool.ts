@@ -519,6 +519,18 @@ export class EditTool extends ToolBase {
 			const layer = this.parentGui(mainScreen.bottom.push());
 			noControler.subscribe((nc) => layer.setVisibleAndEnabled(nc));
 
+			// layer.addButton("mirror", "16686412951").subscribeToAction(actions.mirror);
+			// layer.addButton("paint", "15895846447").subscribeToAction(actions.paint);
+			layer.addButton("paint", "18369417777").subscribeToAction(actions.paint);
+			layer.addButton("copy", "18369509575").subscribeToAction(actions.copy);
+			layer.addButton("paste", "18369509575").subscribeToAction(actions.paste);
+			layer.addButton("delete", "12539349041", "buttonNegative").subscribeToAction(actions.delete);
+		}
+
+		{
+			const layer = this.parentGui(mainScreen.bottom.push());
+			noControler.subscribe((nc) => layer.setVisibleAndEnabled(nc));
+
 			layer
 				.addButton("move", "18369400240")
 				.initializeSimpleTransform("BackgroundColor3")
@@ -531,18 +543,6 @@ export class EditTool extends ToolBase {
 				.addButton("scale", "89349384867990")
 				.initializeSimpleTransform("BackgroundColor3")
 				.subscribeToAction(actions.scale);
-		}
-
-		{
-			const layer = this.parentGui(mainScreen.bottom.push());
-			noControler.subscribe((nc) => layer.setVisibleAndEnabled(nc));
-
-			// layer.addButton("mirror", "16686412951").subscribeToAction(actions.mirror);
-			// layer.addButton("paint", "15895846447").subscribeToAction(actions.paint);
-			layer.addButton("paint", "18369417777").subscribeToAction(actions.paint);
-			layer.addButton("copy", "18369509575").subscribeToAction(actions.copy);
-			layer.addButton("paste", "18369509575").subscribeToAction(actions.paste);
-			layer.addButton("delete", "12539349041", "buttonNegative").subscribeToAction(actions.delete);
 		}
 
 		this.controller.childSet.Connect((child) => {
