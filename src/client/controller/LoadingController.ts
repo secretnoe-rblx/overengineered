@@ -58,16 +58,13 @@ class LoadingPopup extends Control<LoadingPopupDefinition> {
 
 		this.parent(new LoadingImage(gui.LoadingImage));
 
-		this.visibilityComponent().addTransform(
-			true,
+		this.visibilityComponent().addTransform(true, () =>
 			Transforms.create()
-				.func(() => print("showing"))
 				.show(this.instance)
 				.fadeIn(this.instance, { duration: 0.3, style: "Quad", direction: "Out" })
 				.moveY(this.instance, new UDim(0, 80), { duration: 0.3, style: "Quad", direction: "Out" }),
 		);
-		this.visibilityComponent().addTransform(
-			false,
+		this.visibilityComponent().addTransform(false, () =>
 			Transforms.create()
 				.moveY(this.instance, new UDim(0, 40), { duration: 0.4, style: "Quad", direction: "In" })
 				.fadeOut(this.instance, { duration: 0.3, style: "Quad", direction: "In" })

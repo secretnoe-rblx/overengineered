@@ -783,8 +783,7 @@ export class BlockEditor extends Component {
 			};
 
 			const bottom = this.parentGui(mainScreen.registerBottomCenter<Line>("MoveRotateScale"), { destroy: false });
-			bottom.visibilityComponent().addTransform(
-				false,
+			bottom.visibilityComponent().addTransform(false, () =>
 				Transforms.create() //
 					.fullFadeOut(bottom.instance, Transforms.quadOut02)
 					.then()
