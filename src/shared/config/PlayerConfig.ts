@@ -117,7 +117,7 @@ export const PlayerConfigDefinition = {
 		type: "clampedNumber",
 		min: 20,
 		max: 200,
-		config: 60,
+		config: 60 as number,
 		step: 0.01,
 	},
 	betterCamera: {
@@ -198,10 +198,10 @@ export const PlayerConfigDefinition = {
 		displayName: "Ragdoll",
 		type: "ragdoll",
 		config: {
-			autoFall: true,
-			triggerByKey: false,
-			triggerKey: "X",
-			autoRecovery: true,
+			autoFall: true as boolean,
+			triggerByKey: false as boolean,
+			triggerKey: "X" as KeyCode,
+			autoRecovery: true as boolean,
 		},
 	},
 	visuals: {
