@@ -13,7 +13,6 @@ import { Keybinds } from "engine/client/Keybinds";
 import { Component } from "engine/shared/component/Component";
 import { ComponentChild } from "engine/shared/component/ComponentChild";
 import { ComponentInstance } from "engine/shared/component/ComponentInstance";
-import { InstanceComponent } from "engine/shared/component/InstanceComponent";
 import { OverlayValueStorage } from "engine/shared/component/OverlayValueStorage";
 import { Transforms } from "engine/shared/component/Transforms";
 import { TransformService } from "engine/shared/component/TransformService";
@@ -230,15 +229,17 @@ interface b {
 	readonly background?: ThemeColorKey;
 	readonly state: OverlayValueStorage<boolean>;
 }
-const createButtonList = (
+const createButtonList = <K extends string>(
 	parent: Component,
 	mainScreen: MainScreenLayout,
 	theme: Theme,
-	buttons: { readonly [k in string]: b },
-) => {
+	buttons: { readonly [k in K]: b },
+): { readonly [k in K]: Control } => {
 	const layer = parent.parentGui(mainScreen.bottom.push());
+
+	const ret: { [k in K]?: Control } = {};
 	for (const [k, { iconId, background, state }] of pairs(buttons)) {
-		layer
+		const btn = layer
 			.addButton(k.upper(), iconId, background)
 			.addButtonAction(() => state.and("kb", !state.getKeyed("kb")))
 			.initializeSimpleTransform("BackgroundColor3")
@@ -246,7 +247,11 @@ const createButtonList = (
 				theme,
 				parent.event.createBasedObservable(state, (enabled) => (enabled ? "buttonActive" : "buttonNormal")),
 			);
+
+		ret[k] = btn;
 	}
+
+	return ret as { [k in K]: Control };
 };
 
 // #region Move
@@ -468,6 +473,8 @@ class ScaleComponent extends Component implements EditComponent {
 		grid: ReadonlyObservableValue<ScaleGrid>,
 		topControl: BlockEditorTopControl,
 		@inject keybinds: Keybinds,
+		@inject mainScreen: MainScreenLayout,
+		@inject theme: Theme,
 	) {
 		super();
 
@@ -609,22 +616,11 @@ class ScaleComponent extends Component implements EditComponent {
 			});
 		});
 
-		const centerBasedBtn = topControl.create("CENTERED", () => centerBased.and("kb", !centerBased.getKeyed("kb")));
-		ComponentInstance.init(this, centerBasedBtn.instance);
-		this.event.subscribeObservable(
-			centerBased,
-			(centerBased) => (centerBasedBtn.instance.Transparency = centerBased ? 0 : 0.5),
-			true,
-		);
-
-		const sameSizeBtn = topControl.create("UNIFORM", () => sameSize.and("kb", !sameSize.getKeyed("kb")));
-		ComponentInstance.init(this, sameSizeBtn.instance);
-		this.event.subscribeObservable(
-			sameSize,
-			(sameSize) => (sameSizeBtn.instance.Transparency = sameSize ? 0 : 0.5),
-			true,
-		);
-		const sameSizeErr = this.parent(new ControlWithError(sameSizeBtn.instance));
+		const { centered, uniform } = createButtonList(this, mainScreen, theme, {
+			centered: { state: centerBased },
+			uniform: { state: sameSize },
+		});
+		const sameSizeErr = (uniform as Control<ControlWithErrorDefinition>).getComponent(ControlWithError);
 
 		// #region Block rotation check
 		const areRotations90DegreesApart = (cframeA: CFrame, cframeB: CFrame): boolean => {
@@ -653,22 +649,22 @@ class ScaleComponent extends Component implements EditComponent {
 type ControlWithErrorDefinition = GuiObject & {
 	readonly WarningImage: ImageLabel;
 };
-class ControlWithError extends InstanceComponent<ControlWithErrorDefinition> {
+class ControlWithError extends Component {
 	private tooltip?: SignalConnection;
 
-	constructor(gui: ControlWithErrorDefinition) {
-		super(gui);
+	constructor(private readonly component: Control<ControlWithErrorDefinition>) {
+		super();
 
-		gui.WarningImage.Visible = false;
+		component.instance.WarningImage.Visible = false;
 		this.onDisable(() => this.tooltip?.Disconnect());
 	}
 
 	setError(err: string | undefined) {
-		this.instance.WarningImage.Visible = err !== undefined;
+		this.component.instance.WarningImage.Visible = err !== undefined;
 		this.tooltip?.Disconnect();
 
 		if (err) {
-			this.tooltip = Tooltip.init(this, err);
+			this.tooltip = Tooltip.init(this.component, err);
 		}
 	}
 }

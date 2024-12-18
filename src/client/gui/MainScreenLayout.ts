@@ -11,7 +11,9 @@ import type { Theme, ThemeColorKey } from "client/Theme";
 import type { TextButtonDefinition } from "engine/client/gui/Button";
 
 type BottomButtonDefinition = TextButtonDefinition & {
-	readonly ImageLabel: ImageLabel;
+	readonly Frame: GuiObject & {
+		readonly ImageLabel: ImageLabel;
+	};
 };
 
 interface BottomButtonConfig {
@@ -41,8 +43,8 @@ class MainScreenBottomLayer extends Control<MainScreenBottomLayerDefinition> {
 		const control = new Control(this.template());
 		control.setButtonText(text.upper());
 		control.themeButton(this.theme, background ?? "buttonNormal");
-		control.instance.ImageLabel.Visible = iconId !== undefined;
-		control.instance.ImageLabel.Image = iconId ? `rbxassetid://${iconId}` : "";
+		control.instance.Frame.ImageLabel.Visible = iconId !== undefined;
+		control.instance.Frame.ImageLabel.Image = iconId ? `rbxassetid://${iconId}` : "";
 		if (config?.width) {
 			control.instance.Size = new UDim2(new UDim(0, config.width), control.instance.Size.Y);
 		}
