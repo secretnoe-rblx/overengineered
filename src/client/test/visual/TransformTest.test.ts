@@ -3,7 +3,7 @@ import { Transforms } from "engine/shared/component/Transforms";
 import { Element } from "engine/shared/Element";
 import { Colors } from "shared/Colors";
 import type { InstanceComponent } from "engine/shared/component/InstanceComponent";
-import type { ITransformBuilder } from "engine/shared/component/Transform";
+import type { TransformBuilder } from "engine/shared/component/Transform";
 import type { UnitTests } from "engine/shared/TestFramework";
 
 namespace TransformTests {
@@ -20,7 +20,7 @@ namespace TransformTests {
 
 		const transform = <T extends Instance>(
 			component: InstanceComponent<T>,
-			setup: (tr: ITransformBuilder, instance: T) => void,
+			setup: (tr: TransformBuilder, instance: T) => void,
 		) => {
 			Transforms.create()
 				.setup((t) => setup(t, component.instance))

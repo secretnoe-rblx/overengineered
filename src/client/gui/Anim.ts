@@ -2,7 +2,7 @@ import { Interface } from "client/gui/Interface";
 import { ScaledScreenGui } from "client/gui/ScaledScreenGui";
 import { Transforms } from "engine/shared/component/Transforms";
 import { Element } from "engine/shared/Element";
-import type { ITransformBuilder, TransformProps } from "engine/shared/component/Transform";
+import type { TransformBuilder, TransformProps } from "engine/shared/component/Transform";
 
 export namespace Anim {
 	export namespace UIListLayout {
@@ -12,7 +12,7 @@ export namespace Anim {
 			child: GuiObject,
 			props: TransformProps,
 			childAction: "none" | "hide" | "destroy" | "unparent" = "none",
-		): ITransformBuilder {
+		): TransformBuilder {
 			if (child.Parent !== parent) {
 				throw `${child} is not a child of ${parent}`;
 			}
@@ -59,7 +59,7 @@ export namespace Anim {
 			child: GuiObject,
 			props: TransformProps,
 			layoutIndex?: number,
-		): ITransformBuilder {
+		): TransformBuilder {
 			const listLayout = parent.FindFirstChildWhichIsA("UIListLayout");
 			if (!listLayout) {
 				throw `${parent} does not have a UIListLayout`;
