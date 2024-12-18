@@ -41,6 +41,7 @@ class MainScreenBottomLayer extends Control<MainScreenBottomLayerDefinition> {
 		config?: BottomButtonConfig,
 	): Control<BottomButtonDefinition> {
 		const control = new Control(this.template());
+		control.instance.Name = text;
 		control.setButtonText(text.upper());
 		control.themeButton(this.theme, background ?? "buttonNormal");
 		control.instance.Frame.ImageLabel.Visible = iconId !== undefined;
