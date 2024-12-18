@@ -125,6 +125,8 @@ export class TooltipsHolder extends InstanceComponent<GuiObject> {
 
 		const set = (tooltips: readonly Tooltip[]) => {
 			for (const tooltip of tooltips) {
+				if (tooltip.keys.size() === 0) continue;
+
 				const instance = this.createTooltip(tooltip);
 				instance.Parent = this.instance;
 				this.instances.push(instance);
