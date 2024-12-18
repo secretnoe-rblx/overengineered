@@ -13,6 +13,7 @@ import { InputController } from "engine/client/InputController";
 import { Keybinds } from "engine/client/Keybinds";
 import { ObservableCollectionSet } from "engine/shared/event/ObservableCollection";
 import type { MirrorEditorControlDefinition } from "client/gui/buildmode/MirrorEditorControl";
+import type { MainScreenLayout } from "client/gui/MainScreenLayout";
 import type { Tooltip } from "client/gui/static/TooltipsControl";
 import type { BuildingMode } from "client/modes/build/BuildingMode";
 
@@ -82,7 +83,12 @@ export class DeleteTool extends ToolBase {
 	readonly highlightedBlocks = new ObservableCollectionSet<BlockModel>();
 	readonly clearPlotAction: Action;
 
-	constructor(@inject mode: BuildingMode, @inject keybinds: Keybinds, @inject di: DIContainer) {
+	constructor(
+		@inject mode: BuildingMode,
+		@inject keybinds: Keybinds,
+		@inject mainScreen: MainScreenLayout,
+		@inject di: DIContainer,
+	) {
 		super(mode);
 
 		this.clearPlotAction = this.parent(
@@ -98,15 +104,19 @@ export class DeleteTool extends ToolBase {
 		this.event.subscribeObservable(
 			mode.targetPlot,
 			(plot) => {
-				plot.instance.Blocks.ChildAdded.Connect(() =>
-					this.clearPlotAction.canExecute.and("plotIsEmpty", false),
-				);
+				plot.instance.Blocks.ChildAdded.Connect(() => this.clearPlotAction.canExecute.and("plotIsEmpty", true));
 				plot.instance.Blocks.ChildRemoved.Connect(() =>
-					this.clearPlotAction.canExecute.and("plotIsEmpty", plot.instance.Blocks.GetChildren().size() === 0),
+					this.clearPlotAction.canExecute.and("plotIsEmpty", plot.instance.Blocks.GetChildren().size() !== 0),
 				);
 			},
 			true,
 		);
+
+		{
+			const line = this.parentGui(mainScreen.bottom.push());
+			line.addButton("clear plot", "12539349041", "buttonNegative", { width: 150 }) //
+				.subscribeToAction(this.clearPlotAction);
+		}
 
 		this.parentGui(
 			new Scene.DeleteToolScene(ToolBase.getToolGui<"Delete", Scene.DeleteToolSceneDefinition>().Delete, this),

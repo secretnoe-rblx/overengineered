@@ -14,6 +14,9 @@ type BottomButtonDefinition = TextButtonDefinition & {
 	readonly ImageLabel: ImageLabel;
 };
 
+interface BottomButtonConfig {
+	readonly width?: number;
+}
 type MainScreenBottomLayerDefinition = GuiObject & {
 	readonly Template: BottomButtonDefinition;
 };
@@ -29,12 +32,20 @@ class MainScreenBottomLayer extends Control<MainScreenBottomLayerDefinition> {
 		this.template = this.asTemplate(gui.Template);
 	}
 
-	addButton(text: string, iconId?: string, background?: ThemeColorKey): Control<BottomButtonDefinition> {
+	addButton(
+		text: string,
+		iconId?: number | string,
+		background?: ThemeColorKey,
+		config?: BottomButtonConfig,
+	): Control<BottomButtonDefinition> {
 		const control = new Control(this.template());
 		control.setButtonText(text.upper());
 		control.themeButton(this.theme, background ?? "buttonNormal");
 		control.instance.ImageLabel.Visible = iconId !== undefined;
 		control.instance.ImageLabel.Image = iconId ? `rbxassetid://${iconId}` : "";
+		if (config?.width) {
+			control.instance.Size = new UDim2(new UDim(0, config.width), control.instance.Size.Y);
+		}
 
 		this.parent(control);
 		control.instance.Parent = this.gui;
