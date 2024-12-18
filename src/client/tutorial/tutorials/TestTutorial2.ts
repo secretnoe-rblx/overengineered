@@ -1,10 +1,10 @@
+import { Interface } from "client/gui/Interface";
 import { Control } from "engine/client/gui/Control";
 import { Component } from "engine/shared/component/Component";
 import { ComponentChild } from "engine/shared/component/ComponentChild";
 import { OverlayValueStorage } from "engine/shared/component/OverlayValueStorage";
 import { ObservableValue } from "engine/shared/event/ObservableValue";
 import { Signal } from "engine/shared/event/Signal";
-import type { Interfacec } from "client/gui/Interface";
 import type { BuildTool } from "client/tools/BuildTool";
 import type { ToolController } from "client/tools/ToolController";
 import type { ReadonlyObservableValue } from "engine/shared/event/ObservableValue";
@@ -45,7 +45,6 @@ type SingleKey<T> = IsUnion<keyof T> extends true ? never : {} extends T ? never
 @injectable
 export class TestTutorial2 extends Component {
 	constructor(
-		@inject gui: Interfacec,
 		// @inject tutorial: TutorialController2,
 		@inject plot: ReadonlyPlot,
 		@inject toolController: ToolController,
@@ -59,9 +58,9 @@ export class TestTutorial2 extends Component {
 		};
 
 		print("whate");
-		const screen = gui.getPlayerGui<{ Tutorial: t }>().Tutorial.Clone();
+		const screen = Interface.getPlayerGui<{ Tutorial: t }>().Tutorial.Clone();
 		screen.Enabled = true;
-		screen.Parent = gui.getPlayerGui();
+		screen.Parent = Interface.getPlayerGui();
 		let tbt = this.asTemplate(screen.TextButton, true);
 		const ttbt = tbt;
 		tbt = () => {

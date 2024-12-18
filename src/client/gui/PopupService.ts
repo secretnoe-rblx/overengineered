@@ -1,12 +1,12 @@
 import { Lighting } from "@rbxts/services";
 import { AutoUIScaledComponent } from "client/gui/AutoUIScaledControl";
+import { Interface } from "client/gui/Interface";
 import { Colors } from "engine/shared/Colors";
 import { ComponentChildren } from "engine/shared/component/ComponentChildren";
 import { InstanceComponent } from "engine/shared/component/InstanceComponent";
 import { Transforms } from "engine/shared/component/Transforms";
 import { HostedService } from "engine/shared/di/HostedService";
 import { Element } from "engine/shared/Element";
-import type { Interfacec } from "client/gui/Interface";
 import type { ReadonlyObservableValue } from "engine/shared/event/ObservableValue";
 
 @injectable
@@ -15,9 +15,9 @@ export class PopupService extends HostedService {
 	private readonly children;
 	private readonly screen: ScreenGui;
 
-	constructor(@inject gui: Interfacec) {
+	constructor() {
 		super();
-		this.screen = gui.getPopupUI();
+		this.screen = Interface.getPopupUI();
 
 		this.children = this.parent(new ComponentChildren<InstanceComponent<ScreenGui>>()) //
 			.withParentInstance(this.screen);
