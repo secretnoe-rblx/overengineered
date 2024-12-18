@@ -60,10 +60,10 @@ class TreeControl extends Control<TreeControlDefinition> {
 			new Control(this.main.instance).addButtonAction(() => {
 				if (this.childContainer.isInstanceVisible()) {
 					this.main.instance.BackgroundColor3 = Colors.accentDark;
-					this.childContainer.hide_();
+					this.childContainer.hide();
 				} else {
 					this.main.instance.BackgroundColor3 = Colors.accent;
-					this.childContainer.show_();
+					this.childContainer.show();
 				}
 			}),
 		);
@@ -144,7 +144,7 @@ const toggle = (root: DebuggableComponent) => {
 	if (!tree) {
 		tree = create();
 		update(root);
-		tree.show_();
+		tree.show();
 		return;
 	} else {
 		tree.destroy();

@@ -195,8 +195,8 @@ namespace Controls {
 			parentTo?: Control,
 		) => {
 			const wrapper = new ConfigValueWrapper(template.Clone());
-			wrapper.dropdown.hide_();
-			wrapper.controls.hide_();
+			wrapper.dropdown.hide();
+			wrapper.controls.hide();
 			wrapper.content.set(control);
 
 			wrapper.instance.Parent = parent.control;
@@ -1012,13 +1012,13 @@ class ConfigAutoValueWrapper extends Control<ConfigValueWrapperDefinition> {
 			// if any of the configs is a wire connection
 
 			selectedType.set("wire");
-			control.dropdown.hide_();
+			control.dropdown.hide();
 		} else if (asMap(definition.types).size() === 1) {
 			// if there is only one definition type
 
 			const key = firstKey(definition.types)!;
 			selectedType.set(key);
-			control.dropdown.hide_();
+			control.dropdown.hide();
 		} else {
 			// if there is multiple definition types
 
@@ -1059,7 +1059,7 @@ class ConfigAutoValueWrapper extends Control<ConfigValueWrapperDefinition> {
 
 			// initializing the top `Controllable` bar
 			const initControls = () => {
-				control.controls.hide_();
+				control.controls.hide();
 
 				const def = definition.types[stype];
 				if (!def) return;
@@ -1068,7 +1068,7 @@ class ConfigAutoValueWrapper extends Control<ConfigValueWrapperDefinition> {
 					return;
 				}
 
-				control.controls.show_();
+				control.controls.show();
 
 				// controlConfig should never be null if `control` is present in the definition, BlockConfig handles that.
 				const controlConfigs = map(configs, (c) => c.controlConfig!);
