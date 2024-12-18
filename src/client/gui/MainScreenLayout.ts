@@ -7,6 +7,66 @@ import { ComponentInstance } from "engine/shared/component/ComponentInstance";
 import { Transforms } from "engine/shared/component/Transforms";
 import { TransformService } from "engine/shared/component/TransformService";
 import type { HotbarControlDefinition } from "client/gui/buildmode/HotbarControl";
+import type { Theme, ThemeColorKey } from "client/Theme";
+import type { TextButtonDefinition } from "engine/client/gui/Button";
+
+type BottomButtonDefinition = TextButtonDefinition & {
+	readonly ImageLabel: ImageLabel;
+};
+
+type MainScreenBottomLayerDefinition = GuiObject & {
+	readonly Template: BottomButtonDefinition;
+};
+@injectable
+class MainScreenBottomLayer extends Control<MainScreenBottomLayerDefinition> {
+	private readonly template;
+
+	constructor(
+		gui: MainScreenBottomLayerDefinition,
+		@inject private readonly theme: Theme,
+	) {
+		super(gui);
+		this.template = this.asTemplate(gui.Template);
+	}
+
+	addButton(text: string, iconId?: string, background?: ThemeColorKey): Control<BottomButtonDefinition> {
+		const control = new Control(this.template());
+		control.setButtonText(text.upper());
+		control.themeButton(this.theme, background ?? "buttonNormal");
+		control.instance.ImageLabel.Visible = iconId !== undefined;
+		control.instance.ImageLabel.Image = iconId ? `rbxassetid://${iconId}` : "";
+
+		this.parent(control);
+		control.instance.Parent = this.gui;
+
+		return control;
+	}
+}
+
+type MainScreenBottomDefinition = GuiObject & {
+	readonly Template: MainScreenBottomLayerDefinition;
+};
+@injectable
+class MainScreenBottom extends Control<MainScreenBottomDefinition> {
+	private readonly template;
+
+	constructor(
+		gui: MainScreenBottomDefinition,
+		@inject private readonly di: DIContainer,
+	) {
+		super(gui);
+		gui.Template.Visible = false;
+		this.template = this.asTemplate(gui.Template);
+	}
+
+	push(): MainScreenBottomLayer {
+		const control = this.di.resolveForeignClass(MainScreenBottomLayer, [this.template()]);
+		control.instance.LayoutOrder = -this.gui.GetChildren().size();
+		control.instance.Parent = this.gui;
+
+		return control;
+	}
+}
 
 type MainScreenLayoutDefinition = GuiObject & {
 	readonly Top: GuiObject & {
@@ -17,21 +77,20 @@ type MainScreenLayoutDefinition = GuiObject & {
 		readonly Right: GuiObject;
 	};
 	readonly Left: GuiObject;
-	readonly Bottom: GuiObject & {
-		readonly Top: GuiObject;
-		readonly Center: GuiObject;
-		readonly Bottom: GuiObject;
-	};
+	readonly Bottom: MainScreenBottomDefinition;
 };
 @injectable
 export class MainScreenLayout extends Component {
 	private readonly instance: MainScreenLayoutDefinition;
+	readonly bottom: MainScreenBottom;
 
 	constructor(@inject di: DIContainer) {
 		super();
 
 		this.instance = Interface.getInterface<{ Main: MainScreenLayoutDefinition }>().Main;
 		ComponentInstance.init(this, this.instance);
+
+		this.bottom = di.resolveForeignClass(MainScreenBottom, [this.instance.Bottom]);
 
 		const initHotbar = () => {
 			const hotbar = this.parent(
@@ -64,9 +123,6 @@ export class MainScreenLayout extends Component {
 		forEachChild(this.instance.Top.Center.Main, (child) => (child.Visible = false));
 		forEachChild(this.instance.Top.Right, (child) => (child.Visible = false));
 		forEachChild(this.instance.Left, (child) => (child.Visible = false));
-		forEachChild(this.instance.Bottom.Top, (child) => (child.Visible = false));
-		forEachChild(this.instance.Bottom.Center, (child) => (child.Visible = false));
-		forEachChild(this.instance.Bottom.Bottom, (child) => (child.Visible = false));
 	}
 
 	registerTopCenterButton<T extends GuiButton>(name: string): Control<T> {
@@ -104,28 +160,6 @@ export class MainScreenLayout extends Component {
 				.moveX(control.instance, new UDim(0, enabling ? 0 : -10), Transforms.quadOut02),
 		);
 
-		return control;
-	}
-
-	registerBottomTop<T extends GuiObject>(name: string): Control<T> {
-		const gui = (this.instance.Bottom.Top.WaitForChild(name) as T).Clone();
-		gui.Parent = this.instance.Bottom.Top;
-
-		const control = new Control(gui);
-		return control;
-	}
-	registerBottomCenter<T extends GuiObject>(name: string): Control<T> {
-		const gui = (this.instance.Bottom.Center.WaitForChild(name) as T).Clone();
-		gui.Parent = this.instance.Bottom.Center;
-
-		const control = new Control(gui);
-		return control;
-	}
-	registerBottomBottom<T extends GuiObject>(name: string): Control<T> {
-		const gui = (this.instance.Bottom.Bottom.WaitForChild(name) as T).Clone();
-		gui.Parent = this.instance.Bottom.Bottom;
-
-		const control = new Control(gui);
 		return control;
 	}
 }

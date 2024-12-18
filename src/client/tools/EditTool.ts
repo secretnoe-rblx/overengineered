@@ -7,7 +7,6 @@ import { MultiBlockHighlightedSelector } from "client/tools/highlighters/MultiBl
 import { SelectedBlocksHighlighter } from "client/tools/highlighters/SelectedBlocksHighlighter";
 import { ToolBase } from "client/tools/ToolBase";
 import { Action } from "engine/client/Action";
-import { Control } from "engine/client/gui/Control";
 import { Keybinds } from "engine/client/Keybinds";
 import { Component } from "engine/shared/component/Component";
 import { ComponentChild } from "engine/shared/component/ComponentChild";
@@ -517,38 +516,33 @@ export class EditTool extends ToolBase {
 		actions.delete.subCanExecuteFrom({ noControler, someBlocksSelected });
 
 		{
-			type Line = GuiObject & {
-				readonly Move: GuiButton;
-				readonly Rotate: GuiButton;
-				readonly Scale: GuiButton;
-			};
+			const layer = this.parentGui(mainScreen.bottom.push());
+			noControler.subscribe((nc) => layer.setVisibleAndEnabled(nc));
 
-			const line = this.parentGui(mainScreen.registerBottomCenter<Line>("MoveRotateScale"));
-			noControler.subscribe((nc) => line.setVisibleAndEnabled(nc));
-			const gui = line.instance;
-
-			line.parent(new Control(gui.Move).subscribeToAction(actions.move));
-			line.parent(new Control(gui.Rotate).subscribeToAction(actions.rotate));
-			line.parent(new Control(gui.Scale).subscribeToAction(actions.scale));
+			layer
+				.addButton("move", "18369400240")
+				.initializeSimpleTransform("BackgroundColor3")
+				.subscribeToAction(actions.move);
+			layer
+				.addButton("rotate", "18369417777")
+				.initializeSimpleTransform("BackgroundColor3")
+				.subscribeToAction(actions.rotate);
+			layer
+				.addButton("scale", "89349384867990")
+				.initializeSimpleTransform("BackgroundColor3")
+				.subscribeToAction(actions.scale);
 		}
 
 		{
-			type Line = GuiObject & {
-				readonly Mirror: GuiButton;
-				readonly Paint: GuiButton;
-				readonly Copy: GuiButton;
-				readonly Paste: GuiButton;
-				readonly Delete: GuiButton;
-			};
+			const layer = this.parentGui(mainScreen.bottom.push());
+			noControler.subscribe((nc) => layer.setVisibleAndEnabled(nc));
 
-			const line = this.parentGui(mainScreen.registerBottomBottom<Line>("Edit"));
-			noControler.subscribe((nc) => line.setVisibleAndEnabled(nc));
-			const gui = line.instance;
-
-			line.parent(new Control(gui.Copy).subscribeToAction(actions.copy));
-			line.parent(new Control(gui.Paste).subscribeToAction(actions.paste));
-			line.parent(new Control(gui.Paint).subscribeToAction(actions.paint));
-			line.parent(new Control(gui.Delete).subscribeToAction(actions.delete));
+			// layer.addButton("mirror", "16686412951").subscribeToAction(actions.mirror);
+			// layer.addButton("paint", "15895846447").subscribeToAction(actions.paint);
+			layer.addButton("paint", "18369417777").subscribeToAction(actions.paint);
+			layer.addButton("copy", "18369509575").subscribeToAction(actions.copy);
+			layer.addButton("paste", "18369509575").subscribeToAction(actions.paste);
+			layer.addButton("delete", "12539349041", "buttonNegative").subscribeToAction(actions.delete);
 		}
 
 		this.controller.childSet.Connect((child) => {

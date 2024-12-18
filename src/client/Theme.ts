@@ -9,16 +9,16 @@ const defaultColors = {
 	buttonNegative: Color3.fromRGB(103, 34, 34),
 	buttonPositive: Color3.fromRGB(27, 106, 22),
 } as const;
-export type ThemeKeys = keyof typeof defaultColors;
+export type ThemeColorKey = keyof typeof defaultColors;
 
 export class Theme {
-	private readonly colors: { readonly [k in ThemeKeys]: ObservableValue<Color3> };
+	private readonly colors: { readonly [k in ThemeColorKey]: ObservableValue<Color3> };
 
 	constructor() {
 		this.colors = Objects.mapValues(defaultColors, (k, v) => new ObservableValue(v));
 	}
 
-	get(key: ThemeKeys): ObservableValue<Color3> {
+	get(key: ThemeColorKey): ObservableValue<Color3> {
 		return this.colors[key];
 	}
 }

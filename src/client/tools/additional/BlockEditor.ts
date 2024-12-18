@@ -30,7 +30,7 @@ import { Colors } from "shared/Colors";
 import type { MainScreenLayout } from "client/gui/MainScreenLayout";
 import type { ClientBuilding } from "client/modes/build/ClientBuilding";
 import type { PlayerDataStorage } from "client/PlayerDataStorage";
-import type { Theme } from "client/Theme";
+import type { Theme, ThemeColorKey } from "client/Theme";
 import type { TextButtonDefinition } from "engine/client/gui/Button";
 import type { KeybindDefinition } from "engine/client/Keybinds";
 import type { ReadonlyObservableValue } from "engine/shared/event/ObservableValue";
@@ -225,27 +225,26 @@ const formatVecForFloatingText = (vec: Vector3): string => {
 	return `${format(vec.X)}, ${format(vec.Y)}, ${format(vec.Z)}`;
 };
 
+interface b {
+	readonly iconId?: string;
+	readonly background?: ThemeColorKey;
+	readonly state: OverlayValueStorage<boolean>;
+}
 const createButtonList = (
 	parent: Component,
 	mainScreen: MainScreenLayout,
 	theme: Theme,
-	buttons: { readonly [k in string]: OverlayValueStorage<boolean> },
+	buttons: { readonly [k in string]: b },
 ) => {
-	type t = GuiObject & {
-		readonly Template: TextButtonDefinition;
-	};
-	const editing = parent.parentGui(mainScreen.registerBottomTop<t>("Editing"));
-	const template = editing.asTemplate(editing.instance.Template, true);
-
-	for (const [k, swc] of pairs(buttons)) {
-		editing
-			.parent(new Control(template()))
-			.setButtonText(k.upper())
-			.addButtonAction(() => swc.and("kb", !swc.getKeyed("kb")))
+	const layer = parent.parentGui(mainScreen.bottom.push());
+	for (const [k, { iconId, background, state }] of pairs(buttons)) {
+		layer
+			.addButton(k.upper(), iconId, background)
+			.addButtonAction(() => state.and("kb", !state.getKeyed("kb")))
 			.initializeSimpleTransform("BackgroundColor3")
 			.themeButton(
 				theme,
-				parent.event.createBasedObservable(swc, (enabled) => (enabled ? "buttonActive" : "buttonNormal")),
+				parent.event.createBasedObservable(state, (enabled) => (enabled ? "buttonActive" : "buttonNormal")),
 			);
 	}
 };
@@ -308,7 +307,7 @@ class MoveComponent extends Component implements EditComponent {
 			sideways.and("kb", value);
 			updateFromCurrentMovement();
 		});
-		createButtonList(this, mainScreen, theme, { sideways });
+		createButtonList(this, mainScreen, theme, { sideways: { state: sideways } });
 		// #endregion
 
 		const createVisualizer = () => {
@@ -776,35 +775,34 @@ export class BlockEditor extends Component {
 		actions.finish.subCanExecuteFrom({ main: new ObservableValue(true) });
 
 		{
-			type Line = GuiObject & {
-				readonly Move: GuiButton;
-				readonly Rotate: GuiButton;
-				readonly Scale: GuiButton;
-			};
+			const layer = this.parentGui(mainScreen.bottom.push());
 
-			const bottom = this.parentGui(mainScreen.registerBottomCenter<Line>("MoveRotateScale"), { destroy: false });
-			bottom.visibilityComponent().addTransform(false, () =>
+			layer.addButton("cancel", "15429854809", "buttonNegative").subscribeToAction(actions.cancel);
+			layer.addButton("finish", "15429854809", "buttonPositive").subscribeToAction(actions.finish);
+		}
+
+		{
+			const layer = this.parentGui(mainScreen.bottom.push());
+			layer.visibilityComponent().addTransform(false, () =>
 				Transforms.create() //
-					.fullFadeOut(bottom.instance, Transforms.quadOut02)
+					.fullFadeOut(layer.instance, Transforms.quadOut02)
 					.then()
-					.hide(bottom.instance),
+					.hide(layer.instance),
 			);
-			this.onDestroy(() => bottom.visibilityComponent().waitForTransformThenDestroy());
+			this.onDestroy(() => layer.visibilityComponent().waitForTransformThenDestroy());
 
-			const gui = bottom.instance;
-
-			const move = bottom
-				.parent(new Control(gui.Move))
-				.subscribeToAction(actions.move)
-				.initializeSimpleTransform("BackgroundColor3");
-			const rotate = bottom
-				.parent(new Control(gui.Rotate))
-				.subscribeToAction(actions.rotate)
-				.initializeSimpleTransform("BackgroundColor3");
-			const scale = bottom
-				.parent(new Control(gui.Scale))
-				.subscribeToAction(actions.scale)
-				.initializeSimpleTransform("BackgroundColor3");
+			const move = layer
+				.addButton("move", "18369400240")
+				.initializeSimpleTransform("BackgroundColor3")
+				.subscribeToAction(actions.move);
+			const rotate = layer
+				.addButton("rotate", "18369417777")
+				.initializeSimpleTransform("BackgroundColor3")
+				.subscribeToAction(actions.rotate);
+			const scale = layer
+				.addButton("scale", "89349384867990")
+				.initializeSimpleTransform("BackgroundColor3")
+				.subscribeToAction(actions.scale);
 
 			const btns = { move, rotate, scale };
 			this.event.subscribeObservable(
@@ -819,18 +817,6 @@ export class BlockEditor extends Component {
 				},
 				true,
 			);
-		}
-
-		{
-			type Line = GuiObject & {
-				readonly Cancel: GuiButton;
-				readonly Finish: GuiButton;
-			};
-			const bottom = this.parentGui(mainScreen.registerBottomBottom<Line>("CancelFinish"));
-			const gui = bottom.instance;
-
-			bottom.parent(new Control(gui.Cancel).subscribeToAction(actions.cancel));
-			bottom.parent(new Control(gui.Finish).subscribeToAction(actions.finish));
 		}
 
 		this.editBlocks = blocks.map((b): EditingBlock => {

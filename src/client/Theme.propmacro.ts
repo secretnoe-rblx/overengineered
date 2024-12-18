@@ -1,4 +1,4 @@
-import type { Theme, ThemeKeys } from "client/Theme";
+import type { Theme, ThemeColorKey } from "client/Theme";
 import type { InstanceComponent } from "engine/shared/component/InstanceComponent";
 import type { ReadonlyObservableValue } from "engine/shared/event/ObservableValue";
 
@@ -13,7 +13,7 @@ declare module "engine/shared/component/InstanceComponent" {
 		themeButton(
 			this: InstanceComponent<GuiButton>,
 			theme: Theme,
-			key: ThemeKeys | ReadonlyObservableValue<ThemeKeys>,
+			key: ThemeColorKey | ReadonlyObservableValue<ThemeColorKey>,
 		): this;
 	}
 }
