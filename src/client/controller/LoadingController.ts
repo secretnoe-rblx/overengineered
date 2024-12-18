@@ -1,9 +1,9 @@
 import { Workspace } from "@rbxts/services";
 import { Interface } from "client/gui/Interface";
 import { Control } from "engine/client/gui/Control";
-import { InstanceComponent } from "engine/shared/component/InstanceComponent";
 import { Transforms } from "engine/shared/component/Transforms";
-import { ObservableValue } from "engine/shared/event/ObservableValue";
+import { ObservableCollectionArr } from "engine/shared/event/ObservableCollection";
+import type { ReadonlyObservableValue } from "engine/shared/event/ObservableValue";
 
 class LoadingImage extends Control {
 	constructor(gui: GuiObject) {
@@ -52,27 +52,30 @@ type LoadingPopupDefinition = GuiObject & {
 	readonly LoadingImage: GuiObject;
 	readonly TextLabel: TextLabel;
 };
-class LoadingPopup extends InstanceComponent<LoadingPopupDefinition> {
+class LoadingPopup extends Control<LoadingPopupDefinition> {
 	constructor(gui: LoadingPopupDefinition) {
 		super(gui);
 
 		this.parent(new LoadingImage(gui.LoadingImage));
 
-		this.onEnable(() => {
-			Transforms.create() //
-				.show(this.instance)
-				.moveY(this.instance, new UDim(0, 80), { duration: 0.3, style: "Quad", direction: "Out" })
-				.run(this.instance, true);
-		});
-		this.onDisable(() => {
+		this.visibilityComponent().addTransform(
+			true,
 			Transforms.create()
-				.moveY(this.instance, new UDim(0, -200), { duration: 0.4, style: "Quad", direction: "In" })
+				.func(() => print("showing"))
+				.show(this.instance)
+				.fadeIn(this.instance, { duration: 0.3, style: "Quad", direction: "Out" })
+				.moveY(this.instance, new UDim(0, 80), { duration: 0.3, style: "Quad", direction: "Out" }),
+		);
+		this.visibilityComponent().addTransform(
+			false,
+			Transforms.create()
+				.moveY(this.instance, new UDim(0, 40), { duration: 0.4, style: "Quad", direction: "In" })
+				.fadeOut(this.instance, { duration: 0.3, style: "Quad", direction: "In" })
 				.then()
-				.hide(this.instance)
-				.run(this.instance, true);
-		});
+				.hide(this.instance),
+		);
 
-		this.instance.Visible = false;
+		this.hide();
 	}
 
 	setText(text: string) {
@@ -93,38 +96,30 @@ spawn(() => {
 	task.delay(60, () => loading.disable());
 });
 
-const control = new LoadingPopup(Interface.getGameUI<{ Loading: LoadingPopupDefinition }>().Loading);
-
-const state = new ObservableValue<boolean>(false);
 export namespace LoadingController {
-	export const isLoading = state.asReadonly();
-	export const isNotLoading = isLoading.not();
+	const state = new ObservableCollectionArr<{ readonly text: string }>();
+	export const isLoading: ReadonlyObservableValue<boolean> = state.createBased((c) => !c.isEmpty());
+	export const isNotLoading: ReadonlyObservableValue<boolean> = isLoading.not();
 
-	export function show(text: string) {
-		$log(text);
-		control.setText(`${text}...`);
-		control.enable();
-		state.set(true);
-	}
-	export function hide() {
-		control.disable();
-		state.set(false);
-	}
+	const control = new LoadingPopup(Interface.getGameUI<{ Loading: LoadingPopupDefinition }>().Loading);
+	state.subscribe((state) => {
+		if (state.isEmpty()) {
+			control.hide();
+			return;
+		}
 
-	export function run<T>(text: string, func: () => T) {
+		control.setText(`${state[state.size() - 1].text}...`);
+		control.show();
+	});
+
+	export function run<T>(text: string, func: () => T): T {
+		const key = { text };
+
 		try {
-			LoadingController.show(text);
+			state.add(key);
 			return func();
 		} finally {
-			LoadingController.hide();
-		}
-	}
-	export async function runAsync<T>(text: string, func: () => T | Promise<T>) {
-		try {
-			LoadingController.show(text);
-			return await func();
-		} finally {
-			LoadingController.hide();
+			state.remove(key);
 		}
 	}
 }

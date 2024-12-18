@@ -719,14 +719,12 @@ export class TutorialController extends Component {
 
 		this.onEnable(() => {
 			try {
-				LoadingController.show(`Starting tutorial...`);
-				CustomRemotes.modes.set.send("build");
+				LoadingController.run(`Starting tutorial...`, () => CustomRemotes.modes.set.send("build"));
 			} catch {
 				// empty
 			}
 
 			ClientBuilding.deleteOperation.execute({ plot: sharedPlot, blocks: "all" });
-			LoadingController.hide();
 		});
 	}
 

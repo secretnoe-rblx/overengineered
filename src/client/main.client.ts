@@ -21,63 +21,65 @@ import { LaserProjectile } from "shared/weapons/LaserProjectileLogic";
 import type { PlayerDataStorage } from "client/PlayerDataStorage";
 import type { TransformProps } from "engine/shared/component/Transform";
 
-LoadingController.show("Initializing");
-Interface.getGameUI<{ VERSION: TextLabel }>().VERSION.Text = `v${RunService.IsStudio() ? "studio" : game.PlaceVersion}`;
+const host = LoadingController.run("Initializing", () => {
+	Interface.getGameUI<{ VERSION: TextLabel }>().VERSION.Text =
+		`v${RunService.IsStudio() ? "studio" : game.PlaceVersion}`;
 
-const builder = new GameHostBuilder(gameInfo);
-try {
-	SandboxGame.initialize(builder);
-} catch (err) {
-	BSOD.showWithDefaultText(err, "The game has failed to load.");
-	throw err;
-}
-
-const host = builder.build();
-
-host.run();
-
-LoadingController.show("Loading sounds");
-
-const allSoundIDs = ReplicatedStorage.Assets.GetDescendants().filter((value) => value.IsA("Sound"));
-
-Objects.awaitThrow(
-	new Promise<undefined>((resolve) => {
-		let i = 0;
-		ContentProvider.PreloadAsync(allSoundIDs, (contentId, status) => {
-			i++;
-
-			if (i === allSoundIDs.size() - 1) {
-				resolve(undefined);
-			}
-		});
-	}),
-);
-
-LoadingController.show("Loading the rest");
-
-host.parent(LogControl.instance);
-
-InputController.inputType.subscribe((newInputType) =>
-	LogControl.instance.addLine("New input type set to " + newInputType, Colors.yellow),
-);
-RemoteEvents.initialize();
-AdminMessageController.initialize();
-ServerRestartController.initialize();
-// Atmosphere.initialize();
-
-LoadingController.hide();
-CustomRemotes.player.loaded.send();
-$log("Client loaded.");
-
-{
-	const playerData = host.services.resolve<PlayerDataStorage>();
-	if (
-		playerData.config.get().autoLoad &&
-		SlotsMeta.get(playerData.slots.get(), SlotsMeta.quitSlotIndex).blocks !== 0
-	) {
-		Objects.awaitThrow(playerData.loadPlayerSlot(SlotsMeta.quitSlotIndex, false, "Loading the autosave"));
+	const builder = new GameHostBuilder(gameInfo);
+	try {
+		SandboxGame.initialize(builder);
+	} catch (err) {
+		BSOD.showWithDefaultText(err, "The game has failed to load.");
+		throw err;
 	}
-}
+
+	const host = LoadingController.run("Initializing services", () => builder.build());
+	LoadingController.run("Starting services", () => host.run());
+
+	LoadingController.run("Loading sounds", () => {
+		const allSoundIDs = ReplicatedStorage.Assets.GetDescendants().filter((value) => value.IsA("Sound"));
+
+		Objects.awaitThrow(
+			new Promise<undefined>((resolve) => {
+				let i = 0;
+				ContentProvider.PreloadAsync(allSoundIDs, (contentId, status) => {
+					i++;
+
+					if (i === allSoundIDs.size() - 1) {
+						resolve(undefined);
+					}
+				});
+			}),
+		);
+	});
+
+	LoadingController.run("Loading the rest", () => {
+		host.parent(LogControl.instance);
+
+		InputController.inputType.subscribe((newInputType) =>
+			LogControl.instance.addLine("New input type set to " + newInputType, Colors.yellow),
+		);
+		RemoteEvents.initialize();
+		AdminMessageController.initialize();
+		ServerRestartController.initialize();
+		// Atmosphere.initialize();
+
+		CustomRemotes.player.loaded.send();
+		$log("Client loaded.");
+	});
+
+	{
+		const playerData = host.services.resolve<PlayerDataStorage>();
+		if (
+			playerData.config.get().autoLoad &&
+			SlotsMeta.get(playerData.slots.get(), SlotsMeta.quitSlotIndex).blocks !== 0
+		) {
+			Objects.awaitThrow(playerData.loadPlayerSlot(SlotsMeta.quitSlotIndex, false, "Loading the autosave"));
+		}
+	}
+
+	return host;
+});
 
 //host.services.resolveForeignClass(CenterOfMassController).enable();
 

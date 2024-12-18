@@ -17,7 +17,6 @@ import { UpdatePopupController } from "client/controller/UpdatePopupController";
 import { AdminGui } from "client/gui/AdminGui";
 import { GuiAutoScaleController } from "client/gui/GuiAutoScaleController";
 import { HideInterfaceController } from "client/gui/HideInterfaceController";
-import { Interfacec } from "client/gui/Interface";
 import { MainScene } from "client/gui/MainScene";
 import { MainScreenLayout } from "client/gui/MainScreenLayout";
 import { ControlsPopup } from "client/gui/popup/ControlsPopup";
@@ -52,29 +51,31 @@ import type { SharedPlot } from "shared/building/SharedPlot";
 
 export namespace SandboxGame {
 	export function initialize(builder: GameHostBuilder) {
-		PlayerDataInitializer.initialize(builder);
+		LoadingController.run("Pre-init", () => {
+			PlayerDataInitializer.initialize(builder);
 
-		LoadingController.show("Pre-init");
-		LocalPlayerController.initializeDisablingFluidForces(builder);
-		LocalPlayerController.initializeSprintLogic(builder);
-		LocalPlayerController.initializeCameraMaxZoomDistance(builder, 512);
-		OtherPlayersController.initializeMassless(builder);
-		builder.services.registerService(RagdollController);
-		RemoteEvents.initializeVisualEffects(builder);
-		builder.services.registerSingletonValue(ActionController.instance);
+			LocalPlayerController.initializeDisablingFluidForces(builder);
+			LocalPlayerController.initializeSprintLogic(builder);
+			LocalPlayerController.initializeCameraMaxZoomDistance(builder, 512);
+			OtherPlayersController.initializeMassless(builder);
+			builder.services.registerService(RagdollController);
+			RemoteEvents.initializeVisualEffects(builder);
+			builder.services.registerSingletonValue(ActionController.instance);
+		});
 
-		LoadingController.show("Waiting for server");
-		while (!(Workspace.HasTag("GameLoaded") as boolean | undefined)) {
-			task.wait();
-		}
+		LoadingController.run("Waiting for server", () => {
+			while (!(Workspace.HasTag("GameLoaded") as boolean | undefined)) {
+				task.wait();
+			}
+		});
 
 		builder.services.registerSingletonClass(Keybinds);
 		builder.services.registerSingletonFunc(() => SharedPlots.initialize());
 
-		LoadingController.show("Waiting for plot");
 		builder.services.registerSingletonFunc((ctx) =>
 			ctx.resolve<SharedPlots>().waitForPlot(Players.LocalPlayer.UserId),
 		);
+
 		builder.services.registerSingletonFunc((ctx): ReadonlyPlot => {
 			const plot = ctx.resolve<SharedPlot>();
 			return new ReadonlyPlot(plot.instance.Blocks, plot.getCenter(), plot.bounds);
@@ -112,8 +113,6 @@ export namespace SandboxGame {
 			builder.services.registerService(UpdatePopupController);
 		}
 
-		builder.services.registerSingletonClass(Interfacec);
-
 		ChatController.initializeAdminPrefix();
 		builder.services.registerService(PopupService);
 		SettingsPopup.addAsService(builder);
@@ -138,7 +137,5 @@ export namespace SandboxGame {
 				tutorialToRunWhenNoSlots: NewBasicPlaneTutorial,
 			});
 		}
-
-		LoadingController.show("Initializing services");
 	}
 }
