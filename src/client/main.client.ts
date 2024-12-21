@@ -4,7 +4,7 @@ import { LoadingController } from "client/controller/LoadingController";
 import { Anim } from "client/gui/Anim";
 import { BSOD } from "client/gui/BSOD";
 import { Interface } from "client/gui/Interface";
-import { NotificationPopup } from "client/gui/popup/NotificationPopup";
+import { SettingsPopup2 } from "client/gui/popup/SettingsPopup2";
 import { LogControl } from "client/gui/static/LogControl";
 import { SandboxGame } from "client/SandboxGame";
 import { ServerRestartController } from "client/ServerRestartController";
@@ -170,6 +170,4 @@ task.spawn(() => {
 	//task.spawn(() => e(gui.WaitForChild("CenterOfMass") as GuiObject));
 });
 
-host.services
-	.resolve<PopupController>()
-	.createAndShow(NotificationPopup, "There was an error existing.", "You have been canceled.");
+host.services.resolve<PopupController>().createAndShow(SettingsPopup2);
