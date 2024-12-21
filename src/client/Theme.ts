@@ -8,17 +8,30 @@ const defaultColors = {
 	buttonActive: Color3.fromRGB(16, 68, 145), // should be the same as accent probably?
 	buttonNegative: Color3.fromRGB(103, 34, 34),
 	buttonPositive: Color3.fromRGB(27, 106, 22),
-} as const;
+};
 export type ThemeColorKey = keyof typeof defaultColors;
 
+const defaultStrings = {
+	//
+};
+
+const defaultValues = {
+	...defaultColors,
+	...defaultStrings,
+};
+export type ThemeValues = typeof defaultValues;
+export type ThemeKey = keyof ThemeValues;
+
 export class Theme {
-	private readonly colors: { readonly [k in ThemeColorKey]: ObservableValue<Color3> };
+	private readonly values: {
+		readonly [k in ThemeKey]: ObservableValue<ThemeValues[k]>;
+	};
 
 	constructor() {
-		this.colors = Objects.mapValues(defaultColors, (k, v) => new ObservableValue(v));
+		this.values = Objects.mapValues(defaultValues, (k, v) => new ObservableValue(v)) as typeof this.values;
 	}
 
-	get(key: ThemeColorKey): ObservableValue<Color3> {
-		return this.colors[key];
+	get<K extends ThemeKey>(key: K): ObservableValue<ThemeValues[K]> {
+		return this.values[key];
 	}
 }

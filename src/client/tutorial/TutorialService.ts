@@ -2,6 +2,7 @@ import { BSOD } from "client/gui/BSOD";
 import { NotificationPopup } from "client/gui/popup/NotificationPopup";
 import { TutorialController } from "client/tutorial/TutorialController";
 import { HostedService } from "engine/shared/di/HostedService";
+import type { PopupController } from "client/gui/PopupController";
 import type { TutorialDescriber } from "client/tutorial/TutorialController";
 import type { GameHostBuilder } from "engine/shared/GameHostBuilder";
 
@@ -12,6 +13,7 @@ class TutorialsService extends HostedService {
 
 	constructor(
 		readonly allTutorials: readonly TutorialDescriber[],
+		@inject private readonly popupController: PopupController,
 		@inject private readonly di: DIContainer,
 	) {
 		super();
@@ -45,7 +47,11 @@ class TutorialsService extends HostedService {
 					}
 				} catch (err) {
 					$warn(`Exception while running the tutorial "${tutorial.name}":`, err, "\n", debug.traceback());
-					NotificationPopup.showPopup("There was an error running the tutorial.", "It has been canceled.");
+					this.popupController.createAndShow(
+						NotificationPopup,
+						"There was an error running the tutorial.",
+						"It has been canceled.",
+					);
 
 					controller.destroy();
 					break;

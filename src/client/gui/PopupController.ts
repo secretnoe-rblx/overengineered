@@ -10,12 +10,12 @@ import { Element } from "engine/shared/Element";
 import type { ReadonlyObservableValue } from "engine/shared/event/ObservableValue";
 
 @injectable
-export class PopupService extends HostedService {
+export class PopupController extends HostedService {
 	readonly isShown: ReadonlyObservableValue<boolean>;
 	private readonly children;
 	private readonly screen: ScreenGui;
 
-	constructor() {
+	constructor(@inject private readonly di: DIContainer) {
 		super();
 		this.screen = Interface.getPopupUI();
 
@@ -33,6 +33,13 @@ export class PopupService extends HostedService {
 		});
 	}
 
+	createAndShow<TArgs extends unknown[]>(
+		clazz: ConstructorOf<InstanceComponent<GuiObject>, TArgs>,
+		...args: Partial<TArgs>
+	): void {
+		this.showPopup(this.di.resolveForeignClass(clazz, args));
+	}
+
 	showPopup(control: InstanceComponent<GuiObject>): void {
 		const parentScreen = new InstanceComponent(
 			Element.create(
@@ -44,11 +51,13 @@ export class PopupService extends HostedService {
 						Size: new UDim2(1, 0, 1, 0),
 						BackgroundColor3: Colors.black,
 						BackgroundTransparency: 0.5,
+						ZIndex: -9999,
 					}),
 					popup: control.instance,
 				},
 			),
 		);
+		parentScreen.parentGui(control);
 		this.children.add(parentScreen);
 		parentScreen.getComponent(AutoUIScaledComponent);
 

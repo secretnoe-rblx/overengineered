@@ -6,6 +6,7 @@ import { Element } from "engine/shared/Element";
 import { Signal } from "engine/shared/event/Signal";
 import { Colors } from "shared/Colors";
 
+/** @deprecated Use PopupService instead */
 export class Popup<T extends GuiObject = GuiObject> extends InstanceComponent<T> {
 	static readonly onAnyShow = new Signal<() => void>();
 	static readonly onAnyHide = new Signal<() => void>();

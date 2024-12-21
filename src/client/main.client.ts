@@ -36,21 +36,9 @@ const host = LoadingController.run("Initializing", () => {
 	const host = LoadingController.run("Initializing services", () => builder.build());
 	LoadingController.run("Starting services", () => host.run());
 
-	LoadingController.run("Loading sounds", () => {
+	task.spawn(() => {
 		const allSoundIDs = ReplicatedStorage.Assets.GetDescendants().filter((value) => value.IsA("Sound"));
-
-		Objects.awaitThrow(
-			new Promise<undefined>((resolve) => {
-				let i = 0;
-				ContentProvider.PreloadAsync(allSoundIDs, (contentId, status) => {
-					i++;
-
-					if (i === allSoundIDs.size() - 1) {
-						resolve(undefined);
-					}
-				});
-			}),
-		);
+		ContentProvider.PreloadAsync(allSoundIDs);
 	});
 
 	LoadingController.run("Loading the rest", () => {
@@ -179,3 +167,7 @@ task.spawn(() => {
 	//task.spawn(() => e(gui.WaitForChild("Redo") as GuiObject));
 	//task.spawn(() => e(gui.WaitForChild("CenterOfMass") as GuiObject));
 });
+
+// host.services
+// 	.resolve<PopupController>()
+// 	.createAndShow(NotificationPopup, "There was an error existing.", "You have been canceled.");

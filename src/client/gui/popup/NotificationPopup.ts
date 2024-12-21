@@ -1,7 +1,6 @@
 import { GuiService } from "@rbxts/services";
 import { SoundController } from "client/controller/SoundController";
 import { Interface } from "client/gui/Interface";
-import { Popup } from "client/gui/Popup";
 import { Control } from "engine/client/gui/Control";
 import type { ButtonDefinition } from "engine/client/gui/Button";
 
@@ -18,32 +17,19 @@ export type NotificationPopupDefinition = GuiObject & {
 	};
 };
 
-export class NotificationPopup extends Popup<NotificationPopupDefinition> {
-	private readonly okButton;
-	private readonly closeButton;
+export class NotificationPopup extends Control<NotificationPopupDefinition> {
+	constructor(text: string, ps: string = "") {
+		super(Interface.getGameUI<{ Popup: { Notification: NotificationPopupDefinition } }>().Popup.Notification);
 
-	static showPopup(text: string, ps: string = "") {
-		const popup = new NotificationPopup(
-			Interface.getGameUI<{ Popup: { Notification: NotificationPopupDefinition } }>().Popup.Notification.Clone(),
-			text,
-			ps,
-		);
+		this.instance.Content.TextLabel1.Text = text;
+		this.instance.Content.TextLabel2.Text = ps;
+		this.onEnable(() => SoundController.getSounds().Warning.Play());
 
-		popup.show();
-	}
-	constructor(gui: NotificationPopupDefinition, text: string, ps: string = "") {
-		super(gui);
+		const okButton = this.parent(new Control(this.instance.Buttons.OkButton)) //
+			.addButtonAction(() => this.hide());
+		this.event.onPrepareGamepad(() => (GuiService.SelectedObject = okButton.instance));
 
-		this.okButton = this.parent(new Control(gui.Buttons.OkButton));
-		this.closeButton = this.parent(new Control(gui.Head.CloseButton));
-
-		SoundController.getSounds().Warning.Play();
-
-		gui.Content.TextLabel1.Text = text;
-		gui.Content.TextLabel2.Text = ps;
-		this.okButton.addButtonAction(() => this.hide());
-		this.closeButton.addButtonAction(() => this.hide());
-
-		this.event.onPrepareGamepad(() => (GuiService.SelectedObject = this.okButton.instance));
+		this.parent(new Control(this.instance.Head.CloseButton)) //
+			.addButtonAction(() => this.hide());
 	}
 }

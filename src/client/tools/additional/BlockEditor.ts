@@ -239,9 +239,11 @@ const createButtonList = <K extends string>(
 
 	const ret: { [k in K]?: Control } = {};
 	for (const [k, { iconId, background, state }] of pairs(buttons)) {
+		const kb = new ObservableValue(state.get());
+
 		const btn = layer
 			.addButton(k.upper(), iconId, background)
-			.addButtonAction(() => state.and("kb", !state.getKeyed("kb")))
+			.addButtonAction(() => state.and("kb", kb.toggle()))
 			.initializeSimpleTransform("BackgroundColor3")
 			.themeButton(
 				theme,

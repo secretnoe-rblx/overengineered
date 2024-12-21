@@ -1,5 +1,4 @@
 import { GuiService, StarterGui } from "@rbxts/services";
-import { Popup } from "client/gui/Popup";
 import { BuildingMode } from "client/modes/build/BuildingMode";
 import { requestMode } from "client/modes/PlayModeRequest";
 import { RideMode } from "client/modes/ride/RideMode";
@@ -7,7 +6,7 @@ import { LocalPlayer } from "engine/client/LocalPlayer";
 import { HostedService } from "engine/shared/di/HostedService";
 import { ObservableValue } from "engine/shared/event/ObservableValue";
 import { CustomRemotes } from "shared/Remotes";
-import type { PlayerDataStorage } from "client/PlayerDataStorage";
+import type { PopupController } from "client/gui/PopupController";
 import type { GameHostBuilder } from "engine/shared/GameHostBuilder";
 
 @injectable
@@ -20,7 +19,7 @@ export class PlayModeController extends HostedService {
 		host.services.registerSingletonClass(RideMode);
 		host.services.registerService(PlayModeController);
 	}
-	constructor(@inject build: BuildingMode, @inject ride: RideMode, @inject playerData: PlayerDataStorage) {
+	constructor(@inject build: BuildingMode, @inject ride: RideMode, @inject popupController: PopupController) {
 		super();
 
 		GuiService.SetGameplayPausedNotificationEnabled(false);
@@ -41,17 +40,15 @@ export class PlayModeController extends HostedService {
 		}
 
 		const controls = LocalPlayer.getPlayerModule().GetControls();
-		this.event.subscribe(Popup.onAnyShow, () => {
-			controls.Disable();
+		this.event.subscribeObservable(popupController.isShown, (shown) => {
+			if (shown) {
+				controls.Disable();
+			} else {
+				controls.Enable();
+			}
 
 			const active = this.playmode.get();
-			if (active) this.modes[active].disable();
-		});
-		this.event.subscribe(Popup.onAllHide, () => {
-			controls.Enable();
-
-			const active = this.playmode.get();
-			if (active) this.modes[active].enable();
+			if (active) this.modes[active].setEnabled(shown);
 		});
 
 		this.event.subscribeObservable(this.playmode, (mode, prev) => {

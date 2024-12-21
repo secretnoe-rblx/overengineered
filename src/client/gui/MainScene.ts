@@ -2,7 +2,7 @@ import { Scene } from "client/gui/Scene";
 import { Action } from "engine/client/Action";
 import type { MainScreenLayout } from "client/gui/MainScreenLayout";
 import type { SettingsPopup } from "client/gui/popup/SettingsPopup";
-import type { PopupService } from "client/gui/PopupService";
+import type { PopupController } from "client/gui/PopupController";
 import type { Theme } from "client/Theme";
 
 @injectable
@@ -12,7 +12,7 @@ export class MainScene extends Scene {
 	constructor(
 		@inject mainScreen: MainScreenLayout,
 		@inject theme: Theme,
-		@inject popupService: PopupService,
+		@inject popupService: PopupController,
 		@injectFunc createSettingsPopup: () => SettingsPopup,
 	) {
 		super();
