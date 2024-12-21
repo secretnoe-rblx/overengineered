@@ -39,16 +39,9 @@ export class PlayModeController extends HostedService {
 			mode.disable();
 		}
 
-		const controls = LocalPlayer.getPlayerModule().GetControls();
 		this.event.subscribeObservable(popupController.isShown, (shown) => {
-			if (shown) {
-				controls.Disable();
-			} else {
-				controls.Enable();
-			}
-
 			const active = this.playmode.get();
-			if (active) this.modes[active].setEnabled(shown);
+			if (active) this.modes[active].setEnabled(!shown);
 		});
 
 		this.event.subscribeObservable(this.playmode, (mode, prev) => {

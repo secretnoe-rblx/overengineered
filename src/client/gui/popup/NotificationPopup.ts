@@ -2,6 +2,7 @@ import { GuiService } from "@rbxts/services";
 import { SoundController } from "client/controller/SoundController";
 import { Interface } from "client/gui/Interface";
 import { Control } from "engine/client/gui/Control";
+import type { Theme } from "client/Theme";
 import type { ButtonDefinition } from "engine/client/gui/Button";
 
 export type NotificationPopupDefinition = GuiObject & {
@@ -17,8 +18,9 @@ export type NotificationPopupDefinition = GuiObject & {
 	};
 };
 
+@injectable
 export class NotificationPopup extends Control<NotificationPopupDefinition> {
-	constructor(text: string, ps: string = "") {
+	constructor(text: string, ps: string, @inject theme: Theme) {
 		super(Interface.getGameUI<{ Popup: { Notification: NotificationPopupDefinition } }>().Popup.Notification);
 
 		this.instance.Content.TextLabel1.Text = text;
@@ -26,10 +28,12 @@ export class NotificationPopup extends Control<NotificationPopupDefinition> {
 		this.onEnable(() => SoundController.getSounds().Warning.Play());
 
 		const okButton = this.parent(new Control(this.instance.Buttons.OkButton)) //
-			.addButtonAction(() => this.hide());
+			.themeButton(theme, "buttonActive")
+			.addButtonAction(() => this.destroy());
 		this.event.onPrepareGamepad(() => (GuiService.SelectedObject = okButton.instance));
 
 		this.parent(new Control(this.instance.Head.CloseButton)) //
-			.addButtonAction(() => this.hide());
+			.themeButton(theme, "buttonClose")
+			.addButtonAction(() => this.destroy());
 	}
 }

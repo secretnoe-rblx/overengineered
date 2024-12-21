@@ -4,6 +4,7 @@ import { LoadingController } from "client/controller/LoadingController";
 import { Anim } from "client/gui/Anim";
 import { BSOD } from "client/gui/BSOD";
 import { Interface } from "client/gui/Interface";
+import { NotificationPopup } from "client/gui/popup/NotificationPopup";
 import { LogControl } from "client/gui/static/LogControl";
 import { SandboxGame } from "client/SandboxGame";
 import { ServerRestartController } from "client/ServerRestartController";
@@ -18,6 +19,7 @@ import { RemoteEvents } from "shared/RemoteEvents";
 import { CustomRemotes } from "shared/Remotes";
 import { SlotsMeta } from "shared/SlotsMeta";
 import { LaserProjectile } from "shared/weapons/LaserProjectileLogic";
+import type { PopupController } from "client/gui/PopupController";
 import type { PlayerDataStorage } from "client/PlayerDataStorage";
 import type { TransformProps } from "engine/shared/component/Transform";
 
@@ -168,6 +170,6 @@ task.spawn(() => {
 	//task.spawn(() => e(gui.WaitForChild("CenterOfMass") as GuiObject));
 });
 
-// host.services
-// 	.resolve<PopupController>()
-// 	.createAndShow(NotificationPopup, "There was an error existing.", "You have been canceled.");
+host.services
+	.resolve<PopupController>()
+	.createAndShow(NotificationPopup, "There was an error existing.", "You have been canceled.");

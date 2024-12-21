@@ -1,6 +1,7 @@
 import { Lighting } from "@rbxts/services";
 import { AutoUIScaledComponent } from "client/gui/AutoUIScaledControl";
 import { Interface } from "client/gui/Interface";
+import { LocalPlayer } from "engine/client/LocalPlayer";
 import { Colors } from "engine/shared/Colors";
 import { ComponentChildren } from "engine/shared/component/ComponentChildren";
 import { InstanceComponent } from "engine/shared/component/InstanceComponent";
@@ -31,6 +32,16 @@ export class PopupController extends HostedService {
 				.transform(blur, "Size", size, Transforms.quadOut02)
 				.run(blur, true);
 		});
+
+		const controls = LocalPlayer.getPlayerModule().GetControls();
+		this.event.subscribeObservable(
+			this.isShown,
+			(shown) => {
+				if (shown) controls.Disable();
+				else controls.Enable();
+			},
+			true,
+		);
 	}
 
 	createAndShow<TArgs extends unknown[]>(

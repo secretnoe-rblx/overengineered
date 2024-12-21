@@ -8,6 +8,7 @@ const defaultColors = {
 	buttonActive: Color3.fromRGB(16, 68, 145), // should be the same as accent probably?
 	buttonNegative: Color3.fromRGB(103, 34, 34),
 	buttonPositive: Color3.fromRGB(27, 106, 22),
+	buttonClose: Color3.fromRGB(255, 84, 84),
 };
 export type ThemeColorKey = keyof typeof defaultColors;
 
