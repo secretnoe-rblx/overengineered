@@ -5,6 +5,7 @@ import { PartialControl } from "engine/client/gui/PartialControl";
 import { EventHandler } from "engine/shared/event/EventHandler";
 import { NumberObservableValue } from "engine/shared/event/NumberObservableValue";
 import { Signal } from "engine/shared/event/Signal";
+import { MathUtils } from "engine/shared/fixes/MathUtils";
 import type {
 	ProgressBarControlDefinition,
 	ProgressBarControlDefinitionParts,
@@ -16,6 +17,13 @@ export type SliderControlDefinitionParts = ProgressBarControlDefinitionParts & {
 	readonly TextBox?: TextBox;
 	readonly Hitbox?: GuiObject;
 };
+
+export interface SliderControlConfig {
+	readonly min: number;
+	readonly max: number;
+	readonly step?: number;
+	readonly inputStep?: number;
+}
 
 /** Control that represents a number via a slider. */
 export class SliderControl<TAllowNull extends boolean = false> extends PartialControl<
@@ -30,19 +38,17 @@ export class SliderControl<TAllowNull extends boolean = false> extends PartialCo
 	readonly value;
 
 	private readonly progressBar;
+	private readonly inputStep;
 
-	constructor(
-		gui: SliderControlDefinition,
-		min: number,
-		max: number,
-		step?: number,
-		parts?: SliderControlDefinitionParts,
-	) {
+	constructor(gui: SliderControlDefinition, config: SliderControlConfig, parts?: SliderControlDefinitionParts) {
 		if (!parts?.Hitbox) {
 			parts = { ...parts, Hitbox: gui };
 		}
 
 		super(gui, parts);
+
+		const { min, max, step, inputStep } = config;
+		this.inputStep = inputStep ?? 0.01;
 
 		this.progressBar = new ProgressBarControl(this.gui, min, max, step, this.parts);
 		this.progressBar.instance.Active = true;
@@ -70,17 +76,19 @@ export class SliderControl<TAllowNull extends boolean = false> extends PartialCo
 			if (this.progressBar.vertical) {
 				const y = this.parts.Hitbox.AbsoluteSize.Y - Players.LocalPlayer.GetMouse().Y;
 
-				const value =
-					((y - startpos) / this.parts.Hitbox.AbsoluteSize.Y) * this.value.getRange() +
-					this.value.min +
-					(this.value.step ? this.value.step / 2 : 0);
+				let value =
+					((y - startpos) / this.parts.Hitbox.AbsoluteSize.Y) * this.value.getRange() + this.value.min;
+				value = MathUtils.round(value, this.inputStep);
+
 				this.value.set(value);
 				this._moved.Fire(value);
 			} else {
 				const x = Players.LocalPlayer.GetMouse().X;
 
-				const value =
+				let value =
 					((x - startpos) / this.parts.Hitbox.AbsoluteSize.X) * this.value.getRange() + this.value.min;
+				value = MathUtils.round(value, this.inputStep);
+
 				this.value.set(value);
 				this._moved.Fire(value);
 			}
@@ -133,7 +141,7 @@ export class SliderControl<TAllowNull extends boolean = false> extends PartialCo
 		}
 
 		const moveGamepad = (posx: boolean) => {
-			const step = this.value.step ?? this.value.getRange() / 10;
+			const step = this.inputStep;
 			const value = (this.value.get() ?? 0) + (posx ? step : -step);
 			this.value.set(value);
 			this._moved.Fire(value);

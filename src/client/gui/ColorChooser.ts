@@ -62,7 +62,7 @@ class ColorChooserSliders extends Control<ColorChooserDefinition["Sliders"]> {
 
 		const getColorFromSliders = () => Color3.fromHSV(hue.value.get(), sat.value.get(), bri.value.get());
 		const createSlider = <T extends SliderControlDefinition>(gui: T) => {
-			const slider = new SliderControl(gui, 0, 1, 1 / 255);
+			const slider = new SliderControl(gui, { min: 0, max: 1, step: 1 / 255 });
 			slider.submitted.Connect(() => {
 				this.setBySelf = true;
 				this._value.submit(getColorFromSliders());

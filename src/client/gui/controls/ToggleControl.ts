@@ -10,7 +10,8 @@ export type ToggleControlDefinition = TextButton & {
 
 /** Control that represents a boolean */
 export class ToggleControl extends Control<ToggleControlDefinition> {
-	readonly submitted = new Signal<(value: boolean) => void>();
+	private readonly _submitted = new Signal<(value: boolean) => void>();
+	readonly submitted = this._submitted.asReadonly();
 	readonly value = new ObservableValue(false);
 
 	private readonly color = Colors.accentDark;
@@ -21,9 +22,10 @@ export class ToggleControl extends Control<ToggleControlDefinition> {
 
 		const clicked = () => {
 			this.value.set(!this.value.get());
-			this.submitted.Fire(this.value.get());
+			this._submitted.Fire(this.value.get());
 		};
 
+		gui.Circle.AutoButtonColor = false;
 		this.event.subscribe(gui.MouseButton1Click, clicked);
 		this.event.subscribe(gui.Circle.MouseButton1Click, clicked);
 

@@ -1,4 +1,4 @@
-import { AutoUIScaledControl } from "client/gui/AutoUIScaledControl";
+import { AutoUIScaledControl } from "engine/client/gui/AutoUIScaledControl";
 import type { ReadonlyObservableValue } from "engine/shared/event/ObservableValue";
 
 export class ScaledScreenGui<T extends ScreenGui> extends AutoUIScaledControl {

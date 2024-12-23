@@ -186,9 +186,7 @@ namespace ControlsSource {
 		) {
 			super(templates.slider(), definition.displayName);
 
-			const control = this.parent(
-				new SliderControl(this.gui.Control, definition.min, definition.max, definition.step),
-			);
+			const control = this.parent(new SliderControl(this.gui.Control, definition));
 			control.value.set(config);
 
 			this.event.subscribe(control.submitted, (value) => this.submitted.Fire(value));

@@ -5,7 +5,6 @@ import { DropdownList } from "client/gui/controls/DropdownList";
 import { KeyOrStringChooserControl } from "client/gui/controls/KeyOrStringChooserControl";
 import { NumberTextBoxControl } from "client/gui/controls/NumberTextBoxControl";
 import { SliderControl } from "client/gui/controls/SliderControl";
-import { Tooltip } from "client/gui/controls/Tooltip";
 import { Interface } from "client/gui/Interface";
 import { MultiKeyNumberControl } from "client/gui/MultiKeyNumberControl";
 import { MemoryEditorPopup } from "client/gui/popup/MemoryEditorPopup";
@@ -130,7 +129,7 @@ const initTooltip = (
 	let tooltip = definition.tooltip;
 	if (definition.unit) tooltip += ` (${definition.unit})`;
 
-	Tooltip.init(control.parent(new Control(control.instance.HeadingLabel)), tooltip);
+	control.parent(new Control(control.instance.HeadingLabel)).setTooltipText(tooltip);
 };
 
 namespace Controls {
@@ -309,7 +308,7 @@ namespace Controls {
 				const clamp = definition.clamp;
 
 				const control = this.parent(
-					new SliderControl<true>(gui, clamp.min, clamp.max, clamp.step, {
+					new SliderControl<true>(gui, clamp, {
 						Knob: gui.Control.Knob,
 						Filled: gui.Control.Filled,
 						Hitbox: gui.Control,
@@ -458,7 +457,7 @@ namespace Controls {
 
 					const item = control.addItem(value, displayName);
 					if (tooltip) {
-						Tooltip.init(item, tooltip);
+						item.setTooltipText(tooltip);
 					}
 				}
 

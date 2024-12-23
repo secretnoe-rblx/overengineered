@@ -1,6 +1,5 @@
 import { KeyOrStringChooserControl } from "client/gui/controls/KeyOrStringChooserControl";
 import { NumberTextBoxControl } from "client/gui/controls/NumberTextBoxControl";
-import { Tooltip } from "client/gui/controls/Tooltip";
 import { ButtonControl } from "engine/client/gui/Button";
 import { Control } from "engine/client/gui/Control";
 import { ComponentChildren } from "engine/shared/component/ComponentChildren";
@@ -69,7 +68,7 @@ class MultiKeyPartControl extends Control<MultiKeyPartControlDefinition> {
 
 		const delButton = this.parent(new Control(gui.DeleteButton));
 		this.parent(new ButtonControl(delButton.instance, () => this._deleted.Fire()));
-		Tooltip.init(delButton, "Remove the key from the list");
+		delButton.setTooltipText("Remove the key from the list");
 	}
 }
 

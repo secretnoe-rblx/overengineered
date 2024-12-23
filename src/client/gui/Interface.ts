@@ -1,5 +1,6 @@
 import { Players } from "@rbxts/services";
 
+/** @deprecated Use engine interface namespace instead */
 export namespace Interface {
 	/** Receives GameUI from the PlayerGui */
 	export function getGameUI<T = ScreenGui>() {

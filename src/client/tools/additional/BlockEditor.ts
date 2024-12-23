@@ -1,5 +1,4 @@
 import { RunService, UserInputService, Workspace } from "@rbxts/services";
-import { Tooltip } from "client/gui/controls/Tooltip";
 import { Interface } from "client/gui/Interface";
 import { TooltipsHolder } from "client/gui/static/TooltipsControl";
 import { FloatingText } from "client/tools/additional/FloatingText";
@@ -652,22 +651,16 @@ type ControlWithErrorDefinition = GuiObject & {
 	readonly WarningImage: ImageLabel;
 };
 class ControlWithError extends Component {
-	private tooltip?: SignalConnection;
-
 	constructor(private readonly component: Control<ControlWithErrorDefinition>) {
 		super();
 
 		component.instance.WarningImage.Visible = false;
-		this.onDisable(() => this.tooltip?.Disconnect());
+		this.onDisable(() => component.setTooltipText(undefined));
 	}
 
 	setError(err: string | undefined) {
 		this.component.instance.WarningImage.Visible = err !== undefined;
-		this.tooltip?.Disconnect();
-
-		if (err) {
-			this.tooltip = Tooltip.init(this.component, err);
-		}
+		this.component.setTooltipText(err);
 	}
 }
 

@@ -1,5 +1,5 @@
 import { Lighting } from "@rbxts/services";
-import { AutoUIScaledComponent } from "client/gui/AutoUIScaledControl";
+import { AutoUIScaledComponent } from "engine/client/gui/AutoUIScaledControl";
 import { Interface } from "client/gui/Interface";
 import { LocalPlayer } from "engine/client/LocalPlayer";
 import { Colors } from "engine/shared/Colors";
