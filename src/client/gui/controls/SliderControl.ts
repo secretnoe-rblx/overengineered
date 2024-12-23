@@ -1,7 +1,7 @@
 import { Players, UserInputService } from "@rbxts/services";
 import { NumberTextBoxControl } from "client/gui/controls/NumberTextBoxControl";
 import { ProgressBarControl } from "client/gui/controls/ProgressBarControl";
-import { Control } from "engine/client/gui/Control";
+import { PartialControl } from "engine/client/gui/PartialControl";
 import { EventHandler } from "engine/shared/event/EventHandler";
 import { NumberObservableValue } from "engine/shared/event/NumberObservableValue";
 import { Signal } from "engine/shared/event/Signal";
@@ -18,7 +18,11 @@ export type SliderControlDefinitionParts = ProgressBarControlDefinitionParts & {
 };
 
 /** Control that represents a number via a slider. */
-export class SliderControl<TAllowNull extends boolean = false> extends Control<SliderControlDefinition> {
+export class SliderControl<TAllowNull extends boolean = false> extends PartialControl<
+	SliderControlDefinitionParts,
+	GuiObject,
+	SliderControlDefinitionParts & { readonly Hitbox: GuiObject }
+> {
 	private readonly _submitted = new Signal<(value: number) => void>();
 	readonly submitted = this._submitted.asReadonly();
 	private readonly _moved = new Signal<(value: number) => void>();
@@ -26,7 +30,6 @@ export class SliderControl<TAllowNull extends boolean = false> extends Control<S
 	readonly value;
 
 	private readonly progressBar;
-	private readonly parts: MakeRequired<SliderControlDefinitionParts, "Hitbox">;
 
 	constructor(
 		gui: SliderControlDefinition,
@@ -35,15 +38,11 @@ export class SliderControl<TAllowNull extends boolean = false> extends Control<S
 		step?: number,
 		parts?: SliderControlDefinitionParts,
 	) {
-		super(gui);
+		if (!parts?.Hitbox) {
+			parts = { ...parts, Hitbox: gui };
+		}
 
-		this.parts = {
-			Filled: parts?.Filled ?? Control.findFirstChild(gui, "Filled"),
-			Knob: parts?.Knob ?? Control.findFirstChild(gui, "Knob"),
-			Text: parts?.Text ?? Control.findFirstChild(gui, "Text"),
-			TextBox: parts?.TextBox ?? Control.findFirstChild(gui, "TextBox"),
-			Hitbox: parts?.Hitbox ?? this.gui,
-		};
+		super(gui, parts);
 
 		this.progressBar = new ProgressBarControl(this.gui, min, max, step, this.parts);
 		this.progressBar.instance.Active = true;
