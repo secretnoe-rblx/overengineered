@@ -1,8 +1,9 @@
-import { GuiAnimator } from "client/gui/GuiAnimator";
 import { Control } from "engine/client/gui/Control";
+import { Transforms } from "engine/shared/component/Transforms";
 import { ObservableValue } from "engine/shared/event/ObservableValue";
 import { Signal } from "engine/shared/event/Signal";
 import { Colors } from "shared/Colors";
+import type { TransformProps } from "engine/shared/component/Transform";
 
 export type ToggleControlDefinition = TextButton & {
 	readonly Circle: TextButton;
@@ -29,27 +30,13 @@ export class ToggleControl extends Control<ToggleControlDefinition> {
 		this.event.subscribe(gui.MouseButton1Click, clicked);
 		this.event.subscribe(gui.Circle.MouseButton1Click, clicked);
 
-		GuiAnimator.value(
-			this.event,
-			this.gui.Circle,
-			this.value,
-			(value) => {
-				return {
-					Position: new UDim2(value ? 0.5 : 0, 0, 0, 0),
-				};
-			},
-			new TweenInfo(0.2, Enum.EasingStyle.Quad, Enum.EasingDirection.Out),
-		);
-		GuiAnimator.value(
-			this.event,
-			this.gui,
-			this.value,
-			(value) => {
-				return {
-					BackgroundColor3: value ? this.activeColor : this.color,
-				};
-			},
-			new TweenInfo(0.15, Enum.EasingStyle.Quad, Enum.EasingDirection.Out),
-		);
+		const animate = (enabled: boolean, props: TransformProps | undefined) => {
+			Transforms.create()
+				.move(this.instance.Circle, new UDim2(enabled ? 0.5 : 0, 0, 0, 0), props)
+				.transform(this.instance, "BackgroundColor3", enabled ? this.activeColor : this.color, props)
+				.run(this.value, true);
+		};
+		this.event.subscribeObservable(this.value, (enabled) => animate(enabled, Transforms.quadOut02));
+		this.onEnable(() => animate(this.value.get(), undefined));
 	}
 }
