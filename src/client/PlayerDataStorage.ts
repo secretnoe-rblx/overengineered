@@ -67,7 +67,9 @@ export class PlayerDataStorage {
 		this._data = new ObservableValue(data);
 		this.data = this._data.asReadonly();
 
-		this.config = this.data.createBased((x) => x.settings);
+		this.config = new ObservableValue(data.settings);
+		this.data.subscribe((d) => this.config.set(d.settings));
+
 		this.slots = this.data.createBased((x) => x.slots);
 		this.imported_slots = this.data.createBased((x) => x.imported_slots);
 	}

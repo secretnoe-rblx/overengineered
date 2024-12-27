@@ -5,6 +5,7 @@ import { Control } from "engine/client/gui/Control";
 import { ComponentChild } from "engine/shared/component/ComponentChild";
 import { ObservableValue } from "engine/shared/event/ObservableValue";
 import type { PlayerSettingsTemplateList } from "client/gui/playerSettings/PlayerSettingsList";
+import type { PlayerDataStorage } from "client/PlayerDataStorage";
 import type { Component } from "engine/shared/component/Component";
 
 type SidebarButton = GuiButton & {
@@ -39,11 +40,10 @@ class Sidebar extends Control<SidebarDefinition> {
 type ContentDefinition = GuiObject & {
 	readonly ScrollingFrame: ScrollingFrame & PlayerSettingsTemplateList;
 };
-@injectable
 class Content extends Control<ContentDefinition> {
 	private readonly content;
 
-	constructor(gui: ContentDefinition, @inject di: DIContainer) {
+	constructor(gui: ContentDefinition, config: ObservableValue<PlayerConfig>) {
 		super(gui);
 
 		const contentParent = this.parent(new ComponentChild(true)) //
@@ -60,13 +60,15 @@ class Content extends Control<ContentDefinition> {
 		this.onDisable(() => content.set(undefined));
 		this.content = content;
 
-		content.subscribe((clazz) => {
-			if (!clazz) {
-				contentParent.clear();
-				return;
-			}
+		this.onInject((di) => {
+			content.subscribe((clazz) => {
+				if (!clazz) {
+					contentParent.clear();
+					return;
+				}
 
-			contentParent.set(di.resolveForeignClass(clazz, [contentScrollTemplate()]));
+				contentParent.set(di.resolveForeignClass(clazz, [contentScrollTemplate(), config]));
+			});
 		});
 	}
 
@@ -94,14 +96,18 @@ type SettingsPopup2Definition = GuiObject & {
 };
 @injectable
 export class SettingsPopup2 extends Control<SettingsPopup2Definition> {
-	constructor(@inject di: DIContainer) {
+	constructor(@inject playerData: PlayerDataStorage) {
 		const gui = template.Clone();
 		super(gui);
 
-		const content = this.parent(di.resolveForeignClass(Content, [gui.Content.Content]));
+		const original = playerData.config.get();
+
+		const content = this.parent(new Content(gui.Content.Content, playerData.config));
 		const sidebar = this.parent(new Sidebar(gui.Content.Sidebar.ScrollingFrame));
 
 		sidebar.addButton("environment", 18626647702, () => content.set(PlayerSettingsInterface));
 		sidebar.addButton("permissions", 18626826844, () => content.set(undefined));
+
+		this.parent(new Control(gui.Heading.CloseButton)).addButtonAction(() => this.destroy());
 	}
 }
