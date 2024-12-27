@@ -13,7 +13,8 @@ export class PlayerSettingsInterface extends PlayerSettingsList {
 		this.addToggle("Improved");
 		this.addToggle("Strict Follow") //
 			.setTooltipText("Strictly follow the player");
-		this.addToggle("Player Centered") //
+		const t = this.addToggle("Player Centered") //
 			.setTooltipText("Center camera at the player instead of the vehicle");
+		t.value.set(true);
 	}
 }

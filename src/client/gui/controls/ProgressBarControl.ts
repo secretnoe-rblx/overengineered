@@ -1,4 +1,4 @@
-import { GuiAnimator } from "client/gui/GuiAnimator";
+import { Control } from "engine/client/gui/Control";
 import { PartialControl } from "engine/client/gui/PartialControl";
 import { NumberObservableValue } from "engine/shared/event/NumberObservableValue";
 
@@ -30,33 +30,30 @@ export class ProgressBarControl extends PartialControl<ProgressBarControlDefinit
 		}
 
 		if (this.parts.Knob) {
-			GuiAnimator.value(
-				this.event,
-				this.parts.Knob,
-				this.value,
-				(value) => {
-					const pos = (value - this.value.min) / this.value.getRange();
-					return {
-						Position: new UDim2(this.vertical ? 0.5 : pos, 0, this.vertical ? pos : 0.5, 0),
-					};
-				},
-				new TweenInfo(0.1, Enum.EasingStyle.Quad, Enum.EasingDirection.Out),
-			);
+			const knob = this.parent(new Control(this.parts.Knob));
+			knob.valuesComponent()
+				.get("Position")
+				.addChildOverlay(
+					this.value.createBased((value) => {
+						const pos = (value - this.value.min) / this.value.getRange();
+						return new UDim2(this.vertical ? 0.5 : pos, 0, this.vertical ? pos : 0.5, 0);
+					}),
+				)
+				.addBasicTransform({ duration: 0.1 });
 		}
 
 		if (this.parts.Filled) {
-			GuiAnimator.value(
-				this.event,
-				this.parts.Filled,
-				this.value,
-				(value) => {
-					const pos = (value - this.value.min) / this.value.getRange();
-					return {
-						Size: new UDim2(this.vertical ? 1 : pos, 0, this.vertical ? pos : 1, 0),
-					};
-				},
-				new TweenInfo(0.1, Enum.EasingStyle.Quad, Enum.EasingDirection.Out),
-			);
+			const filled = this.parent(new Control(this.parts.Filled));
+			filled
+				.valuesComponent()
+				.get("Size")
+				.addChildOverlay(
+					this.value.createBased((value) => {
+						const pos = (value - this.value.min) / this.value.getRange();
+						return new UDim2(this.vertical ? 1 : pos, 0, this.vertical ? pos : 1, 0);
+					}),
+				)
+				.addBasicTransform({ duration: 0.1 });
 		}
 	}
 }

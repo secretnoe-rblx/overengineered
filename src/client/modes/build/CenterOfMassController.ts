@@ -172,7 +172,7 @@ export class CenterOfMassController extends Component {
 		);
 
 		const enabledByButton = new ObservableValue(false);
-		visualizerState.subscribeFrom({ enabledByButton });
+		visualizerState.subscribeAndFrom({ enabledByButton });
 		const button = this.parent(mainScreen.registerTopRightButton("CenterOfMass")) //
 			.addButtonAction(() => enabledByButton.set(!enabledByButton.get()));
 

@@ -17,7 +17,7 @@ export class PlayerSettingToggle extends PlayerSettingBase<PlayerSettingToggleDe
 		super(gui, name, false);
 
 		const toggle = this.parent(new ToggleControl(gui.ToggleControl));
+		this.value.connect(toggle.value);
 		this.event.subscribe(toggle.submitted, (value) => this._submitted.Fire(value));
-		this.event.subscribeRegistration(() => this.value.connect(toggle.value));
 	}
 }

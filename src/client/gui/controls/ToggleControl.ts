@@ -3,7 +3,7 @@ import { Transforms } from "engine/shared/component/Transforms";
 import { ObservableValue } from "engine/shared/event/ObservableValue";
 import { Signal } from "engine/shared/event/Signal";
 import { Colors } from "shared/Colors";
-import type { TransformProps } from "engine/shared/component/Transform";
+import type { Theme } from "client/Theme";
 
 export type ToggleControlDefinition = TextButton & {
 	readonly Circle: TextButton;
@@ -14,9 +14,6 @@ export class ToggleControl extends Control<ToggleControlDefinition> {
 	private readonly _submitted = new Signal<(value: boolean) => void>();
 	readonly submitted = this._submitted.asReadonly();
 	readonly value = new ObservableValue(false);
-
-	private readonly color = Colors.accentDark;
-	private readonly activeColor = Colors.accent;
 
 	constructor(gui: ToggleControlDefinition) {
 		super(gui);
@@ -30,13 +27,25 @@ export class ToggleControl extends Control<ToggleControlDefinition> {
 		this.event.subscribe(gui.MouseButton1Click, clicked);
 		this.event.subscribe(gui.Circle.MouseButton1Click, clicked);
 
-		const animate = (enabled: boolean, props: TransformProps | undefined) => {
-			Transforms.create()
-				.move(this.instance.Circle, new UDim2(enabled ? 0.5 : 0, 0, 0, 0), props)
-				.transform(this.instance, "BackgroundColor3", enabled ? this.activeColor : this.color, props)
-				.run(this.value, true);
-		};
-		this.event.subscribeObservable(this.value, (enabled) => animate(enabled, Transforms.quadOut02));
-		this.onEnable(() => animate(this.value.get(), undefined));
+		const colorTrue = new ObservableValue(Colors.accent);
+		const colorFalse = new ObservableValue(Colors.accentDark);
+
+		this.onInject((di) => {
+			const theme = di.resolve<Theme>();
+			this.event.subscribeObservable(theme.get("buttonActive"), (c) => colorTrue.set(c), true);
+			this.event.subscribeObservable(theme.get("buttonNegative"), (c) => colorFalse.set(c), true);
+		});
+
+		const circle = this.parent(new Control(gui.Circle));
+
+		this.valuesComponent() //
+			.get("BackgroundColor3")
+			.addTransitionBetweenBoolObservables(this.event, this.value, colorTrue, colorFalse, Transforms.quadOut02);
+
+		circle
+			.valuesComponent()
+			.get("Position")
+			.addChildOverlay(this.value.createBased((enabled) => new UDim2(enabled ? 0.5 : 0, 0, 0, 0)))
+			.addBasicTransform(Transforms.quadOut02);
 	}
 }

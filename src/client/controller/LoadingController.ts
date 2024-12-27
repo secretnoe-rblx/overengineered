@@ -26,11 +26,16 @@ class LoadingImage extends Control {
 
 			Transforms.create()
 				.then()
-				.transform(this.instance, "Rotation", () => this.instance.Rotation + 270, {
-					duration: 0.3,
-					style: "Quad",
-					direction: "Out",
-				})
+				.transform(
+					this.instance,
+					"Rotation",
+					{ run: "once", func: () => this.instance.Rotation + 270 },
+					{
+						duration: 0.3,
+						style: "Quad",
+						direction: "Out",
+					},
+				)
 				.then()
 				.func(startanim)
 				.run(this.instance, true);
@@ -38,11 +43,16 @@ class LoadingImage extends Control {
 
 		this.onDisable(() => {
 			Transforms.create()
-				.transform(this.instance, "Rotation", () => this.instance.Rotation - 270, {
-					duration: 0.3,
-					style: "Quad",
-					direction: "In",
-				})
+				.transform(
+					this.instance,
+					"Rotation",
+					{ run: "once", func: () => this.instance.Rotation - 270 },
+					{
+						duration: 0.3,
+						style: "Quad",
+						direction: "In",
+					},
+				)
 				.run(this.instance, true);
 		});
 	}

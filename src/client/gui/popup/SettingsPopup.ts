@@ -28,6 +28,7 @@ export type SettingsPopupDefinition = GuiObject & {
 };
 
 @injectable
+/** @deprecated */
 export class SettingsPopup extends Popup<SettingsPopupDefinition> {
 	static addAsService(host: GameHostBuilder) {
 		const gui = Interface.getGameUI<{ Popup: { Settings: SettingsPopupDefinition } }>().Popup.Settings;
