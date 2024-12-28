@@ -40,7 +40,11 @@ export class SliderControl<TAllowNull extends boolean = false> extends PartialCo
 	private readonly progressBar;
 	private readonly inputStep;
 
-	constructor(gui: SliderControlDefinition, config: SliderControlConfig, parts?: SliderControlDefinitionParts) {
+	constructor(
+		gui: SliderControlDefinition,
+		private readonly config: SliderControlConfig,
+		parts?: SliderControlDefinitionParts,
+	) {
 		if (!parts?.Hitbox) {
 			parts = { ...parts, Hitbox: gui };
 		}
@@ -48,7 +52,7 @@ export class SliderControl<TAllowNull extends boolean = false> extends PartialCo
 		super(gui, parts);
 
 		const { min, max, step, inputStep } = config;
-		this.inputStep = inputStep ?? 0.01;
+		this.inputStep = inputStep ?? step ?? 0.01;
 
 		this.progressBar = new ProgressBarControl(this.gui, min, max, step, this.parts);
 		this.progressBar.instance.Active = true;
@@ -81,7 +85,7 @@ export class SliderControl<TAllowNull extends boolean = false> extends PartialCo
 				value = MathUtils.round(value, this.inputStep);
 
 				this.value.set(value);
-				this._moved.Fire(value);
+				this._moved.Fire(math.clamp(value, this.config.min, this.config.max));
 			} else {
 				const x = Players.LocalPlayer.GetMouse().X;
 
@@ -90,7 +94,7 @@ export class SliderControl<TAllowNull extends boolean = false> extends PartialCo
 				value = MathUtils.round(value, this.inputStep);
 
 				this.value.set(value);
-				this._moved.Fire(value);
+				this._moved.Fire(math.clamp(value, this.config.min, this.config.max));
 			}
 		};
 
