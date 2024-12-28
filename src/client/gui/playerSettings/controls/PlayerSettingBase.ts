@@ -1,9 +1,16 @@
 import { Control } from "engine/client/gui/Control";
+import { InstanceComponent } from "engine/shared/component/InstanceComponent";
 import { ObservableValue } from "engine/shared/event/ObservableValue";
-import { ArgsSignal } from "engine/shared/event/Signal";
+import { SubmittableValue } from "engine/shared/event/SubmittableValue";
+import { Objects } from "engine/shared/fixes/Objects";
+import type { SignalReadonlySubmittableValue } from "engine/shared/event/SubmittableValue";
 
-type Path<T> = T extends object ? { [K in keyof T]: [K, ...Path<T[K]>] }[keyof T] : [];
-const getValueByPath = (obj: unknown, path: Path<PlayerConfig>) => {
+// Returns full paths of the object T, but only for values assignable to V
+type FilteredPath<T, V> = T extends object
+	? { [K in keyof T]: T[K] extends V ? [K] : T[K] extends object ? [K, ...FilteredPath<T[K], V>] : never }[keyof T]
+	: [];
+
+const getValueByPath = (obj: unknown, path: readonly string[]) => {
 	let v = obj;
 	for (const p of path) {
 		v = (v as { [k in string]: unknown })[p];
@@ -11,8 +18,7 @@ const getValueByPath = (obj: unknown, path: Path<PlayerConfig>) => {
 
 	return v;
 };
-
-const createObjectWithValueByPath = <V, TPath extends Path<PlayerConfig>>(value: V, path: TPath) => {
+const createObjectWithValueByPath = <V>(value: V, path: readonly string[]) => {
 	const obj: { [k in string]: unknown } = {};
 	let part = obj;
 	for (const [i, p] of ipairs(path)) {
@@ -28,31 +34,56 @@ const createObjectWithValueByPath = <V, TPath extends Path<PlayerConfig>>(value:
 
 export type PlayerSettingBaseDefinition = GuiObject & {
 	readonly TitleLabel: TextLabel;
+	readonly DescriptionLabel?: TextLabel;
 };
 export class PlayerSettingBase<T extends PlayerSettingBaseDefinition, V> extends Control<T> {
-	protected readonly _submitted = new ArgsSignal<[value: V]>();
-	readonly submitted: ReadonlyArgsSignal<[value: V]> = this._submitted;
-	readonly value: ObservableValue<V>;
+	protected readonly value: ObservableValue<V>;
+	protected readonly v;
 
 	constructor(gui: T, name: string, defaultValue: V) {
 		super(gui);
 
 		gui.TitleLabel.Text = name;
 		this.value = new ObservableValue<V>(defaultValue);
+		this.v = new SubmittableValue(this.value);
+
+		this.setDescription(undefined);
 	}
+
+	setDescription(text: string | undefined): this {
+		if (InstanceComponent.exists(this.instance, "DescriptionLabel")) {
+			this.instance.DescriptionLabel.Text = text ?? "";
+			this.instance.DescriptionLabel.Visible = text !== undefined;
+		}
+
+		return this;
+	}
+
 	/** Set the value and initialize the subscription */
-	init<TPath extends Path<PlayerConfig>>(
-		config: Partial<PlayerConfig>,
-		submitFunc: (obj: { [k in string]?: unknown }) => void,
-		path: TPath,
+	init(value: ObservableValue<PlayerConfig>, path: FilteredPath<PlayerConfig, V>, subtype?: "submit" | "value"): this;
+	init<V>(
+		value: ObservableValue<PlayerConfig>,
+		path: FilteredPath<PlayerConfig, V>,
+		subtype: "submit" | "value" | undefined,
+		resultFunc: (selv: this) => SignalReadonlySubmittableValue<V>,
+	): this;
+	init<V>(
+		value: ObservableValue<PlayerConfig>,
+		path: readonly string[],
 		subtype: "submit" | "value" = "submit",
+		resultFunc?: (selv: this) => SignalReadonlySubmittableValue<V>,
 	): this {
-		this.value.set(getValueByPath(config, path) as V);
+		const result = resultFunc?.(this) ?? (this.v as unknown as SignalReadonlySubmittableValue<V>);
+		result.set(getValueByPath(value.get(), path) as V);
+		const update = (v: V): void => {
+			const config = Objects.deepCombine(value.get(), createObjectWithValueByPath(v, path));
+			value.set(config);
+		};
 
 		if (subtype === "submit") {
-			this.submitted.Connect((v) => submitFunc(createObjectWithValueByPath(v, path)));
+			result.submitted.Connect(update);
 		} else if (subtype === "value") {
-			this.value.subscribe((v) => submitFunc(createObjectWithValueByPath(v, path)));
+			result.value.subscribe(update);
 		} else subtype satisfies never;
 
 		return this;

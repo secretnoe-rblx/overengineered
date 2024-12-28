@@ -46,7 +46,7 @@ declare global {
 	type RagdollConfiguration = {
 		readonly autoFall: boolean;
 		readonly triggerByKey: boolean;
-		readonly triggerKey: KeyCode;
+		readonly triggerKey: KeyCode | undefined;
 		readonly autoRecovery: boolean;
 	};
 	type PhysicsConfiguration = {
@@ -200,7 +200,7 @@ export const PlayerConfigDefinition = {
 		config: {
 			autoFall: true as boolean,
 			triggerByKey: false as boolean,
-			triggerKey: "X" as KeyCode,
+			triggerKey: "X" as KeyCode | undefined,
 			autoRecovery: true as boolean,
 		},
 	},

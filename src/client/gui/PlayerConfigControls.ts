@@ -540,7 +540,7 @@ namespace ControlsSource {
 				triggerKey: {
 					displayName: "Trigger key",
 					type: "key",
-					config: definition.config.triggerKey,
+					config: definition.config.triggerKey ?? "X",
 				},
 				autoRecovery: {
 					displayName: "Automatic recovery",
@@ -548,10 +548,10 @@ namespace ControlsSource {
 					config: definition.config.autoRecovery,
 				},
 			} as const satisfies PlayerConfigTypes.Definitions;
-			const _compilecheck: ConfigDefinitionsToConfig<keyof typeof def, typeof def> = config;
+			// const _compilecheck: ConfigDefinitionsToConfig<keyof typeof def, typeof def> = config;
 
 			const control = this.parent(new MultiPlayerConfigControl<typeof def>(this.gui.Control, di));
-			control.set(config, def);
+			control.set(config as never, def);
 			this.event.subscribe(control.configUpdated, (key, value) => {
 				this.submitted.Fire((config = { ...config, [key]: value }));
 			});

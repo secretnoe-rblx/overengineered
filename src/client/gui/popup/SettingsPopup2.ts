@@ -1,4 +1,6 @@
 import { Interface } from "client/gui/Interface";
+import { PlayerSettingsControls } from "client/gui/playerSettings/PlayerSettingsControls";
+import { PlayerSettingsEnvironment } from "client/gui/playerSettings/PlayerSettingsEnvironment";
 import { PlayerSettingsInterface } from "client/gui/playerSettings/PlayerSettingsInterface";
 import { ButtonAnimatedClickComponent } from "engine/client/gui/ButtonAnimatedClickComponent";
 import { Control } from "engine/client/gui/Control";
@@ -56,7 +58,9 @@ class Content extends Control<ContentDefinition> {
 		}
 		const contentScrollTemplate = this.asTemplate(gui.ScrollingFrame);
 
-		const content = new ObservableValue<ConstructorOf<Component> | undefined>(undefined);
+		const content = new ObservableValue<
+			ConstructorOf<Component, [PlayerSettingsTemplateList, ObservableValue<PlayerConfig>]> | undefined
+		>(undefined);
 		this.onDisable(() => content.set(undefined));
 		this.content = content;
 
@@ -72,14 +76,15 @@ class Content extends Control<ContentDefinition> {
 		});
 	}
 
-	set(clazz: ConstructorOf<Component> | undefined): void {
-		this.content.set(clazz);
+	set<T extends GuiObject>(
+		clazz: ConstructorOf<Component, [T & PlayerSettingsTemplateList, ObservableValue<PlayerConfig>]> | undefined,
+	): void {
+		this.content.set(clazz as never);
 	}
 }
 
-const template = Interface.getInterface<{
-	Popups: { Crossplatform: { Settings_side_test: SettingsPopup2Definition } };
-}>().Popups.Crossplatform.Settings_side_test;
+const template = Interface.getInterface<{ Popups: { Crossplatform: { Settings: SettingsPopup2Definition } } }>().Popups
+	.Crossplatform.Settings;
 template.Visible = false;
 
 type SettingsPopup2Definition = GuiObject & {
@@ -105,8 +110,11 @@ export class SettingsPopup2 extends Control<SettingsPopup2Definition> {
 		const content = this.parent(new Content(gui.Content.Content, playerData.config));
 		const sidebar = this.parent(new Sidebar(gui.Content.Sidebar.ScrollingFrame));
 
-		sidebar.addButton("environment", 18626647702, () => content.set(PlayerSettingsInterface));
-		sidebar.addButton("permissions", 18626826844, () => content.set(undefined));
+		sidebar.addButton("interface", 18627409276, () => content.set(PlayerSettingsInterface));
+		// sidebar.addButton("graphics", 18626628666, () => content.set(PlayerSettingsGraphics));
+		sidebar.addButton("environment", 18626647702, () => content.set(PlayerSettingsEnvironment));
+		sidebar.addButton("controls", 18626685039, () => content.set(PlayerSettingsControls));
+		sidebar.addButton("blacklist", 18626826844, () => content.set(undefined));
 
 		this.parent(new Control(gui.Heading.CloseButton)).addButtonAction(() => this.destroy());
 	}

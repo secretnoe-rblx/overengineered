@@ -82,7 +82,7 @@ class MainScreenBottom extends Control<MainScreenBottomDefinition> {
 	}
 }
 
-type MainScreenLayoutDefinition = GuiObject & {
+type MainScreenLayoutDefinition = Folder & {
 	readonly Top: GuiObject & {
 		readonly Center: GuiObject & {
 			readonly Main: GuiObject;

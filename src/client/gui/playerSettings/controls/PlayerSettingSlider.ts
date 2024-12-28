@@ -10,15 +10,15 @@ declare module "client/gui/playerSettings/PlayerSettingsList" {
 }
 
 export type PlayerSettingSliderDefinition = PlayerSettingBaseDefinition & {
-	readonly SliderControl: SliderControlDefinition;
+	readonly Control: SliderControlDefinition;
 	readonly ManualControl: TextBox;
 };
 export class PlayerSettingSlider extends PlayerSettingBase<PlayerSettingSliderDefinition, number> {
 	constructor(gui: PlayerSettingSliderDefinition, name: string, config: SliderControlConfig) {
 		super(gui, name, 0);
 
-		const slider = this.parent(new SliderControl(gui.SliderControl, config, { TextBox: gui.ManualControl }));
-		this.event.subscribe(slider.submitted, (value) => this._submitted.Fire(value));
-		this.event.subscribeRegistration(() => this.value.connect(slider.value));
+		const control = this.parent(new SliderControl(gui.Control, config, { TextBox: gui.ManualControl }));
+		this.event.subscribe(control.submitted, (value) => this.v.submit(value));
+		this.value.connect(control.value);
 	}
 }

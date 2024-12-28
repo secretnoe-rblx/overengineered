@@ -111,10 +111,7 @@ function initRagdollUp(event: ComponentEvents, humanoid: Humanoid, autoRecovery:
 		}),
 	);
 }
-function initRagdollKey(
-	event: ComponentEvents,
-	key: ReadonlyObservableValue<{ triggerByKey: boolean; triggerKey: KeyCode }>,
-) {
+function initRagdollKey(event: ComponentEvents, key: ReadonlyObservableValue<{ triggerKey: KeyCode | undefined }>) {
 	const actionName = "ragdoll";
 
 	function bind(key: KeyCode, func: () => void) {
@@ -141,11 +138,11 @@ function initRagdollKey(
 
 	let can = true;
 	const rebind = () => {
-		const { triggerKey, triggerByKey } = key.get();
+		const { triggerKey } = key.get();
 		can = true;
 
 		unbind();
-		if (!triggerByKey) return;
+		if (!triggerKey) return;
 
 		bind(triggerKey, () => {
 			if (!can) return;
