@@ -1,7 +1,11 @@
 import { Interface } from "client/gui/Interface";
+import { PlayerSettingsBlacklist } from "client/gui/playerSettings/PlayerSettingsBlacklist";
 import { PlayerSettingsControls } from "client/gui/playerSettings/PlayerSettingsControls";
 import { PlayerSettingsEnvironment } from "client/gui/playerSettings/PlayerSettingsEnvironment";
+import { PlayerSettingsGeneral } from "client/gui/playerSettings/PlayerSettingsGeneral";
+import { PlayerSettingsGraphics } from "client/gui/playerSettings/PlayerSettingsGraphics";
 import { PlayerSettingsInterface } from "client/gui/playerSettings/PlayerSettingsInterface";
+import { PlayerSettingsPhysics } from "client/gui/playerSettings/PlayerSettingsPhysics";
 import { ButtonAnimatedClickComponent } from "engine/client/gui/ButtonAnimatedClickComponent";
 import { Control } from "engine/client/gui/Control";
 import { ComponentChild } from "engine/shared/component/ComponentChild";
@@ -59,7 +63,8 @@ class Content extends Control<ContentDefinition> {
 		const contentScrollTemplate = this.asTemplate(gui.ScrollingFrame);
 
 		const content = new ObservableValue<
-			ConstructorOf<Component, [PlayerSettingsTemplateList, ObservableValue<PlayerConfig>]> | undefined
+			| ConstructorOf<Component, [PlayerSettingsTemplateList, ObservableValue<PlayerConfig>, ...args: never[]]>
+			| undefined
 		>(undefined);
 		this.onDisable(() => content.set(undefined));
 		this.content = content;
@@ -77,7 +82,12 @@ class Content extends Control<ContentDefinition> {
 	}
 
 	set<T extends GuiObject>(
-		clazz: ConstructorOf<Component, [T & PlayerSettingsTemplateList, ObservableValue<PlayerConfig>]> | undefined,
+		clazz:
+			| ConstructorOf<
+					Component,
+					[T & PlayerSettingsTemplateList, ObservableValue<PlayerConfig>, ...args: never[]]
+			  >
+			| undefined,
 	): void {
 		this.content.set(clazz as never);
 	}
@@ -105,16 +115,16 @@ export class SettingsPopup2 extends Control<SettingsPopup2Definition> {
 		const gui = template.Clone();
 		super(gui);
 
-		const original = playerData.config.get();
-
 		const content = this.parent(new Content(gui.Content.Content, playerData.config));
 		const sidebar = this.parent(new Sidebar(gui.Content.Sidebar.ScrollingFrame));
 
+		sidebar.addButton("general", 18627409276, () => content.set(PlayerSettingsGeneral));
 		sidebar.addButton("interface", 18627409276, () => content.set(PlayerSettingsInterface));
-		// sidebar.addButton("graphics", 18626628666, () => content.set(PlayerSettingsGraphics));
+		sidebar.addButton("graphics", 18626628666, () => content.set(PlayerSettingsGraphics));
 		sidebar.addButton("environment", 18626647702, () => content.set(PlayerSettingsEnvironment));
 		sidebar.addButton("controls", 18626685039, () => content.set(PlayerSettingsControls));
-		sidebar.addButton("blacklist", 18626826844, () => content.set(undefined));
+		sidebar.addButton("physics", 18626685039, () => content.set(PlayerSettingsPhysics));
+		sidebar.addButton("blacklist", 18626826844, () => content.set(PlayerSettingsBlacklist));
 
 		this.parent(new Control(gui.Heading.CloseButton)).addButtonAction(() => this.destroy());
 	}

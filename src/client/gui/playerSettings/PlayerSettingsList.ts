@@ -3,6 +3,7 @@ import { PlayerSettingDivider } from "client/gui/playerSettings/controls/PlayerS
 import { PlayerSettingDropdown } from "client/gui/playerSettings/controls/PlayerSettingDropdown";
 import { PlayerSettingKey } from "client/gui/playerSettings/controls/PlayerSettingKey";
 import { PlayerSettingSlider } from "client/gui/playerSettings/controls/PlayerSettingSlider";
+import { PlayerSettingSwitch } from "client/gui/playerSettings/controls/PlayerSettingSwitch";
 import { PlayerSettingToggle } from "client/gui/playerSettings/controls/PlayerSettingToggle";
 import { Control } from "engine/client/gui/Control";
 import type { Component } from "engine/shared/component/Component";
@@ -25,6 +26,10 @@ type ArgsOfSkip1<T extends ConstructorOf<Component>> =
 		: never;
 
 export class PlayerSettingsList extends Control<ScrollingFrame & PlayerSettingsTemplateList> {
+	protected clone<T extends GuiObject>(instance: T): T {
+		return clone(instance);
+	}
+
 	protected addCategory(...args: ArgsOfSkip1<typeof PlayerSettingDivider>) {
 		return this.parent(new PlayerSettingDivider(clone(this.gui.Divider), ...args));
 	}
@@ -39,6 +44,9 @@ export class PlayerSettingsList extends Control<ScrollingFrame & PlayerSettingsT
 	}
 	protected addDropdown<T extends string>(...args: ArgsOfSkip1<typeof PlayerSettingDropdown<T>>) {
 		return this.parent(new PlayerSettingDropdown(clone(this.gui.Dropdown), ...args));
+	}
+	protected addSwitch<T extends string>(...args: ArgsOfSkip1<typeof PlayerSettingSwitch<T>>) {
+		return this.parent(new PlayerSettingSwitch(clone(this.gui.Switch), ...args));
 	}
 	protected addColor(...args: ArgsOfSkip1<typeof PlayerSettingColor>) {
 		return this.parent(new PlayerSettingColor(clone(this.gui.Color), ...args));

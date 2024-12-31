@@ -13,11 +13,11 @@ export class PlayerSettingsEnvironment extends PlayerSettingsList {
 		{
 			this.addToggle("Automatic") //
 				.setDescription("Automatic time, synced with all players. 20 minutes per in-game day.")
-				.init(value, ["dayCycle", "automatic"]);
+				.initToObjectPart(value, ["dayCycle", "automatic"]);
 
 			const manual = this.addSlider("Manual", { min: 0, max: 24, inputStep: 0.1 }) //
 				.setDescription("Manual time, hours.")
-				.init(value, ["dayCycle", "manual"]);
+				.initToObjectPart(value, ["dayCycle", "manual"]);
 
 			this.event
 				.createBasedObservable(value, (c) => c.dayCycle)
@@ -26,30 +26,30 @@ export class PlayerSettingsEnvironment extends PlayerSettingsList {
 
 		this.addCategory("Terrain");
 		{
-			this.addDropdown("Type", {
-				Classic: {},
-				Triangle: {},
-				Flat: {},
-				Water: {},
-				Lava: {},
-			}) //
-				.init(value, ["terrain", "kind"]);
+			this.addSwitch("Type", [
+				["Classic", { description: "Default Roblox terrain" }],
+				["Triangle", { description: "Custom triangle part terrain" }],
+				["Flat", { description: "Flat terrain" }],
+				["Water", { description: "Water only terrain" }],
+				["Lava", { description: "Flat terrain with lava" }],
+			]) //
+				.initToObjectPart(value, ["terrain", "kind"]);
 
 			this.addSlider("Load distance", { min: 1, max: 96, step: 1 }) //
-				.init(value, ["terrain", "loadDistance"]);
+				.initToObjectPart(value, ["terrain", "loadDistance"]);
 
 			const triangleResolution = this.addSlider("Resolution", { min: 1, max: 16, step: 1 }) //
-				.init(value, ["terrain", "resolution"]);
+				.initToObjectPart(value, ["terrain", "resolution"]);
 			const triangleWater = this.addToggle("Water") //
-				.init(value, ["terrain", "water"]);
+				.initToObjectPart(value, ["terrain", "water"]);
 			const triangleSandBelowSeaLevel = this.addToggle("Sand below sea level") //
-				.init(value, ["terrain", "triangleAddSandBelowSeaLevel"]);
+				.initToObjectPart(value, ["terrain", "triangleAddSandBelowSeaLevel"]);
 
 			const classicFoliage = this.addToggle("Foliage") //
-				.init(value, ["terrain", "foliage"]);
+				.initToObjectPart(value, ["terrain", "foliage"]);
 
 			const terrainSnowOnly = this.addToggle("Snow only") //
-				.init(value, ["terrain", "snowOnly"]);
+				.initToObjectPart(value, ["terrain", "snowOnly"]);
 
 			this.event
 				.createBasedObservable(value, (c) => c.terrain)

@@ -18,7 +18,7 @@ export class PlayerSettingSlider extends PlayerSettingBase<PlayerSettingSliderDe
 		super(gui, name, 0);
 
 		const control = this.parent(new SliderControl(gui.Control, config, { TextBox: gui.ManualControl }));
-		this.event.subscribe(control.submitted, (value) => this.v.submit(value));
-		this.value.connect(control.value);
+		this.event.subscribe(control.submitted, (value) => this._v.submit(value));
+		this._value.connect(control.value);
 	}
 }

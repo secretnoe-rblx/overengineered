@@ -32,10 +32,6 @@ declare global {
 		readonly blocks: readonly EditBlockRequest[];
 	};
 
-	type GuiSettingsPermissionsGetBlacklist = {
-		readonly players: readonly number[];
-	};
-
 	type LogicConnectRequest = {
 		readonly plot: PlotModel;
 		readonly outputBlock: BlockModel;

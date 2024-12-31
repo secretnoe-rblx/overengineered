@@ -228,8 +228,8 @@ export const PlayerConfigDefinition = {
 		displayName: "Physics",
 		type: "physics",
 		config: {
-			advanced_aerodynamics: false,
-			simplified_aerodynamics: true,
+			advanced_aerodynamics: false as boolean,
+			simplified_aerodynamics: true as boolean,
 		},
 	},
 } as const satisfies ConfigTypesToDefinition<keyof PlayerConfigTypes.Types, PlayerConfigTypes.Types>;

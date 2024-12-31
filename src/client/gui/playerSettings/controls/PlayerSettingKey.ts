@@ -19,9 +19,9 @@ export class PlayerSettingKey extends PlayerSettingBase<PlayerSettingKeyDefiniti
 		super(gui, name, undefined);
 
 		const control = this.parent(new KeyChooserControl(gui.Control));
-		this.value.connect(control.value);
-		this.event.subscribe(control.submitted, (value) => this.v.submit(value));
+		this._value.connect(control.value);
+		this.event.subscribe(control.submitted, (value) => this._v.submit(value));
 
-		this.parent(new Control(gui.UnsetControl)).addButtonAction(() => this.value.set(undefined));
+		this.parent(new Control(gui.UnsetControl)).addButtonAction(() => this._value.set(undefined));
 	}
 }

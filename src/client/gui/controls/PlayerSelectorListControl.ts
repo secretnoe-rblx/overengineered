@@ -45,7 +45,6 @@ class PlayerContainer extends Control<PlayerContainerDefinition> {
 }
 
 export type PlayerSelectorColumnControlDefinition = Frame & {
-	readonly TextLabel: TextLabel;
 	readonly Left: Frame & {
 		readonly Container: PlayerContainerDefinition;
 	};

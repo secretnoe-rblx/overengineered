@@ -24,9 +24,9 @@ export class PlayerSettingColor extends PlayerSettingBase<PlayerSettingColorDefi
 		this.alpha = new SubmittableValue(new ObservableValue(1));
 
 		const control = this.parent(new ColorChooser(gui.Control, undefined, Alpha));
-		this.value.connect(control.value.value);
+		this._value.connect(control.value.value);
 		this.alpha.value.connect(control.alpha.value);
-		this.event.subscribe(control.value.submitted, (value) => this.v.submit(value));
+		this.event.subscribe(control.value.submitted, (value) => this._v.submit(value));
 		this.event.subscribe(control.alpha.submitted, (value) => this.alpha.submit(value));
 	}
 }

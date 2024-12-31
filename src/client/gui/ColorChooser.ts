@@ -45,11 +45,7 @@ export type ColorChooserDefinition = GuiObject & {
 class ColorChooserSliders extends Control<ColorChooserDefinition["Sliders"]> {
 	private readonly _value = SubmittableValue.from<Color3>(Color3.fromRGB(255, 255, 255));
 	readonly value = this._value.asHalfReadonly();
-	private readonly _alpha = SubmittableValue.from(1);
-	readonly alpha = this._alpha.asHalfReadonly();
-
 	readonly moved: ReadonlyArgsSignal<[color: Color3]>;
-	readonly alphaMoved: ReadonlyArgsSignal<[alpha: number]>;
 
 	private readonly sliders;
 	private setBySelf = false;
@@ -59,9 +55,6 @@ class ColorChooserSliders extends Control<ColorChooserDefinition["Sliders"]> {
 
 		const moved = new ArgsSignal<[color: Color3]>();
 		this.moved = moved;
-
-		const alphaMoved = new ArgsSignal<[alpha: number]>();
-		this.alphaMoved = alphaMoved;
 
 		const updateSliderColors = () => {
 			const [h, s, v] = [hue.value.get(), sat.value.get(), bri.value.get()];
@@ -110,23 +103,11 @@ class ColorChooserSliders extends Control<ColorChooserDefinition["Sliders"]> {
 			this.sliders.sat.value.set(s);
 			this.sliders.bri.value.set(v);
 		}, true);
-
-		if (Control.exists(gui, "Alpha")) {
-			const alpha = this.parent(new SliderControl(gui.Alpha, { min: 0, max: 1, step: 0.01 }));
-			this.alpha.value.subscribe((v) => alpha.value.set(v), true);
-			alpha.submitted.Connect((v) => this._alpha.submit(v));
-			alpha.moved.Connect((v) => {
-				alphaMoved.Fire(v);
-				this._alpha.set(v);
-			});
-		}
 	}
 }
 class ColorChooserInputs extends Control<ColorChooserDefinition["Inputs"]> {
 	private readonly _value = SubmittableValue.from<Color3>(Color3.fromRGB(255, 255, 255));
 	readonly value = this._value.asHalfReadonly();
-	private readonly _alpha = SubmittableValue.from(1);
-	readonly alpha = this._alpha.asHalfReadonly();
 
 	constructor(gui: ColorChooserDefinition["Inputs"]) {
 		super(gui);
@@ -160,12 +141,6 @@ class ColorChooserInputs extends Control<ColorChooserDefinition["Inputs"]> {
 			btext.value.set(math.floor(value.B * 255));
 			hextext.text.set("#" + value.ToHex().upper());
 		}, true);
-
-		if (Control.exists(gui, "ManualAlpha")) {
-			const alphatext = this.parent(new NumberTextBoxControl(gui.ManualAlpha, 0, 1));
-			this.event.subscribe(alphatext.submitted, (v) => this._alpha.submit(v));
-			this.alpha.value.subscribe((alpha) => alphatext.value.set(alpha), true);
-		}
 	}
 }
 
@@ -217,26 +192,12 @@ export class ColorChooser extends Control<ColorChooserDefinition> {
 			inputs.value.set(v);
 			value.submit(v);
 		});
-		sliders.alphaMoved.Connect((v) => {
-			alpha.set(v);
-			inputs.alpha.set(v);
-		});
-		sliders.alpha.submitted.Connect((v) => {
-			alpha.set(v);
-			inputs.alpha.set(v);
-			alpha.submit(v);
-		});
 
 		const inputs = this.parent(new ColorChooserInputs(gui.Inputs));
 		inputs.value.submitted.Connect((v) => {
 			value.set(v);
 			sliders.value.set(v);
 			value.submit(v);
-		});
-		inputs.alpha.submitted.Connect((v) => {
-			alpha.set(v);
-			sliders.alpha.set(v);
-			alpha.submit(v);
 		});
 
 		value.value.subscribe((color) => {
@@ -245,10 +206,19 @@ export class ColorChooser extends Control<ColorChooserDefinition> {
 			inputs.value.set(color);
 			sliders.value.set(color);
 		}, true);
-		alpha.value.subscribe((v) => {
-			inputs.alpha.set(v);
-			sliders.alpha.set(v);
-		}, true);
+
+		if (Control.exists(this.gui.Inputs, "ManualAlpha") && Control.exists(this.gui.Sliders, "Alpha")) {
+			const alphaSlider = this.parent(
+				new SliderControl(
+					this.gui.Sliders.Alpha,
+					{ min: 0, max: 1, inputStep: 0.01 },
+					{ TextBox: this.gui.Inputs.ManualAlpha },
+				),
+			);
+			alpha.value.connect(alphaSlider.value);
+			alphaSlider.submitted.Connect((v) => alpha.submit(v));
+			alphaSlider.moved.Connect((v) => alpha.set(v));
+		}
 
 		if (Control.exists(this.gui.Preview, "UIGradient")) {
 			const gradient = this.gui.Preview.UIGradient;

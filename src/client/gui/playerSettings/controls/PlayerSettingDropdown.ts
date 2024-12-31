@@ -31,7 +31,7 @@ export class PlayerSettingDropdown<T extends string> extends PlayerSettingBase<P
 			}
 		}
 
-		this.event.subscribe(control.submitted, (value) => this.v.submit(value));
-		this.value.connect(control.selectedItem as ObservableValue<T>);
+		this.event.subscribe(control.submitted, (value) => this._v.submit(value));
+		this._value.connect(control.selectedItem as ObservableValue<T>);
 	}
 }
