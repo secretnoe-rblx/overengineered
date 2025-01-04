@@ -7,6 +7,8 @@ export class RainbowGuiController extends HostedService {
 	constructor(@inject theme: Theme) {
 		super();
 
+		return;
+
 		this.event.subscribeRegistration(() =>
 			Signal.connectionFromTask(
 				task.spawn(() => {
