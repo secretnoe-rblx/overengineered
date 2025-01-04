@@ -23,7 +23,7 @@ import type { BuildingMode } from "client/modes/build/BuildingMode";
 import type { BuildTool } from "client/tools/BuildTool";
 import type { PlacedBlockConfig } from "shared/blockLogic/BlockConfig";
 import type { LatestSerializedBlock, LatestSerializedBlocks } from "shared/building/BlocksSerializer";
-import type { BuildingDiffChange, DiffBlock, PartialThrough } from "shared/building/BuildingDiffer";
+import type { BuildingDiffChange, DiffBlock } from "shared/building/BuildingDiffer";
 import type { ReadonlyPlot } from "shared/building/ReadonlyPlot";
 import type { SharedPlot } from "shared/building/SharedPlot";
 

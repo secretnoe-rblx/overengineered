@@ -1,5 +1,6 @@
 import { Workspace } from "@rbxts/services";
 import { HostedService } from "engine/shared/di/HostedService";
+import { Objects } from "engine/shared/fixes/Objects";
 import { GameDefinitions } from "shared/data/GameDefinitions";
 import { CustomRemotes } from "shared/Remotes";
 import type { PlayerDatabase } from "server/database/PlayerDatabase";
@@ -17,15 +18,12 @@ export class PlayerDataController extends HostedService {
 		Workspace.AddTag("data_loadable");
 	}
 
-	private updateSetting(player: Player, { key, value }: PlayerUpdateSettingsRequest): Response {
+	private updateSetting(player: Player, config: PlayerUpdateSettingsRequest): Response {
 		const playerData = this.players.get(player.UserId);
 
 		const newPlayerData: PlayerDatabaseData = {
 			...playerData,
-			settings: {
-				...(playerData.settings ?? {}),
-				[key]: value,
-			},
+			settings: Objects.deepCombine(playerData.settings ?? {}, config),
 		};
 
 		this.players.set(player.UserId, newPlayerData);

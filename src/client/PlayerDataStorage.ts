@@ -4,6 +4,7 @@ import { LogControl } from "client/gui/static/LogControl";
 import { ObservableValue } from "engine/shared/event/ObservableValue";
 import { JSON } from "engine/shared/fixes/Json";
 import { Objects } from "engine/shared/fixes/Objects";
+import { Strings } from "engine/shared/fixes/String.propmacro";
 import { Colors } from "shared/Colors";
 import { Config } from "shared/config/Config";
 import { PlayerConfigDefinition } from "shared/config/PlayerConfig";
@@ -74,16 +75,13 @@ export class PlayerDataStorage {
 		this.imported_slots = this.data.createBased((x) => x.imported_slots);
 	}
 
-	async sendPlayerConfigValue<TKey extends keyof PlayerConfig>(key: TKey, value: PlayerConfig[TKey] & defined) {
-		$log(`Setting player config value ${key} to ${JSON.serialize(value)}`);
-		CustomRemotes.player.updateSettings.send({ key, value });
+	async sendPlayerConfig(config: PartialThrough<PlayerConfig>) {
+		$log(`Updating player config: ${Strings.pretty(config)}`);
+		CustomRemotes.player.updateSettings.send(config);
 
 		this._data.set({
 			...this.data.get(),
-			settings: {
-				...this.data.get().settings,
-				[key]: value,
-			},
+			settings: Objects.deepCombine(this.data.get().settings, config),
 		});
 	}
 	async sendPlayerDataValue<TKey extends keyof PlayerData>(key: TKey, value: PlayerData[TKey] & defined) {

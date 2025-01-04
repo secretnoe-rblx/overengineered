@@ -126,6 +126,10 @@ export class SettingsPopup extends Control<SettingsPopup2Definition> {
 		sidebar.addButton("physics", 18626685039, () => content.set(PlayerSettingsPhysics));
 		sidebar.addButton("blacklist", 18626826844, () => content.set(PlayerSettingsBlacklist));
 
+		this.onDestroy(() => {
+			task.spawn(() => playerData.sendPlayerConfig(playerData.config.get()));
+		});
+
 		this.parent(new Control(gui.Heading.CloseButton)).addButtonAction(() => this.destroy());
 	}
 }

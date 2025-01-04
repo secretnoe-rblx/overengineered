@@ -16,7 +16,6 @@ type AddedChange = {
 	};
 };
 
-export type PartialThrough<T> = T extends object ? { [k in keyof T]?: PartialThrough<T[k]> } : T;
 type ConfigChangedChange = {
 	readonly type: "configChanged";
 	readonly uuid: DiffBlock["uuid"];

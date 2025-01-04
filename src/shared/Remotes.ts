@@ -70,10 +70,7 @@ declare global {
 		readonly blocks: readonly BlockModel[];
 	};
 
-	type PlayerUpdateSettingsRequest = {
-		readonly key: keyof PlayerConfig;
-		readonly value: PlayerConfig[keyof PlayerConfig];
-	};
+	type PlayerUpdateSettingsRequest = PartialThrough<PlayerConfig>;
 	type PlayerUpdateDataRequest = {
 		readonly key: keyof PlayerData;
 		readonly value: PlayerData[keyof PlayerData];
