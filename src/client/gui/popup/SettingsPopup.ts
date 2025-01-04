@@ -1,80 +1,131 @@
 import { Interface } from "client/gui/Interface";
-import { MultiPlayerConfigControl } from "client/gui/PlayerConfigControls";
-import { Popup } from "client/gui/Popup";
-import { ButtonControl, TextButtonControl } from "engine/client/gui/Button";
-import { Colors } from "shared/Colors";
-import { PlayerConfigDefinition } from "shared/config/PlayerConfig";
-import type { NewSettingsPopup } from "client/gui/popup/NewSettingsPopup";
+import { PlayerSettingsBlacklist } from "client/gui/playerSettings/PlayerSettingsBlacklist";
+import { PlayerSettingsControls } from "client/gui/playerSettings/PlayerSettingsControls";
+import { PlayerSettingsEnvironment } from "client/gui/playerSettings/PlayerSettingsEnvironment";
+import { PlayerSettingsGeneral } from "client/gui/playerSettings/PlayerSettingsGeneral";
+import { PlayerSettingsGraphics } from "client/gui/playerSettings/PlayerSettingsGraphics";
+import { PlayerSettingsInterface } from "client/gui/playerSettings/PlayerSettingsInterface";
+import { PlayerSettingsPhysics } from "client/gui/playerSettings/PlayerSettingsPhysics";
+import { ButtonAnimatedClickComponent } from "engine/client/gui/ButtonAnimatedClickComponent";
+import { Control } from "engine/client/gui/Control";
+import { ComponentChild } from "engine/shared/component/ComponentChild";
+import { ObservableValue } from "engine/shared/event/ObservableValue";
+import type { PlayerSettingsTemplateList } from "client/gui/playerSettings/PlayerSettingsList";
 import type { PlayerDataStorage } from "client/PlayerDataStorage";
-import type { TextButtonDefinition } from "engine/client/gui/Button";
 import type { Component } from "engine/shared/component/Component";
-import type { GameHostBuilder } from "engine/shared/GameHostBuilder";
 
-export type ConfigPartDefinition<T extends GuiObject> = GuiObject & {
-	readonly HeadingLabel: TextLabel;
-	readonly Control: T;
+type SidebarButton = GuiButton & {
+	readonly ImageLabel: ImageLabel;
+	readonly TextLabel: TextLabel;
 };
 
-export type SettingsPopupDefinition = GuiObject & {
-	readonly Content: {
-		readonly ScrollingFrame: ScrollingFrame;
-	};
-	readonly Buttons: {
-		readonly CancelButton: GuiButton;
-	};
-	readonly Head: {
-		readonly CloseButton: GuiButton;
-	};
+type SidebarDefinition = ScrollingFrame & {
+	readonly Template: SidebarButton;
 };
+class Sidebar extends Control<SidebarDefinition> {
+	private readonly buttonTemplate;
 
-@injectable
-/** @deprecated */
-export class SettingsPopup extends Popup<SettingsPopupDefinition> {
-	static addAsService(host: GameHostBuilder) {
-		const gui = Interface.getGameUI<{ Popup: { Settings: SettingsPopupDefinition } }>().Popup.Settings;
-		host.services.registerTransientFunc((ctx) => ctx.resolveForeignClass(this, [gui.Clone()]));
+	constructor(gui: SidebarDefinition) {
+		super(gui);
+		this.buttonTemplate = this.asTemplate(gui.Template);
 	}
 
-	private readonly config;
+	addButton(text: string, image: number, action: () => void) {
+		const btn = this.parent(new Control(this.buttonTemplate()));
+		btn.instance.Name = text;
+		btn.addButtonAction(action);
+		btn.getComponent(ButtonAnimatedClickComponent);
 
-	constructor(gui: SettingsPopupDefinition, @inject playerData: PlayerDataStorage, @inject di: DIContainer) {
+		btn.setButtonText(text.upper());
+		btn.instance.ImageLabel.Image = `rbxassetid://${image}`;
+
+		return btn;
+	}
+}
+
+type ContentDefinition = GuiObject & {
+	readonly ScrollingFrame: ScrollingFrame & PlayerSettingsTemplateList;
+};
+class Content extends Control<ContentDefinition> {
+	private readonly content;
+
+	constructor(gui: ContentDefinition, config: ObservableValue<PlayerConfig>) {
 		super(gui);
 
-		this.config = this.parent(new MultiPlayerConfigControl<PlayerConfigDefinition>(gui.Content.ScrollingFrame, di));
+		const contentParent = this.parent(new ComponentChild(true)) //
+			.withParentInstance(gui);
 
-		this.event.subscribe(this.config.configUpdated, async (key, value) => {
-			await playerData.sendPlayerConfigValue(key, value as PlayerConfig[keyof PlayerConfig]);
+		for (const child of gui.ScrollingFrame.GetChildren()) {
+			if (child.IsA("GuiObject")) {
+				child.Visible = false;
+			}
+		}
+		const contentScrollTemplate = this.asTemplate(gui.ScrollingFrame);
+
+		const content = new ObservableValue<
+			| ConstructorOf<Component, [PlayerSettingsTemplateList, ObservableValue<PlayerConfig>, ...args: never[]]>
+			| undefined
+		>(undefined);
+		this.onDisable(() => content.set(undefined));
+		this.content = content;
+
+		this.onInject((di) => {
+			content.subscribe((clazz) => {
+				if (!clazz) {
+					contentParent.clear();
+					return;
+				}
+
+				contentParent.set(di.resolveForeignClass(clazz, [contentScrollTemplate(), config]));
+			});
 		});
+	}
 
-		this.parent(new ButtonControl(gui.Buttons.CancelButton, () => this.hide()));
-		this.parent(new ButtonControl(gui.Head.CloseButton, () => this.hide()));
+	set<T extends GuiObject>(
+		clazz:
+			| ConstructorOf<
+					Component,
+					[T & PlayerSettingsTemplateList, ObservableValue<PlayerConfig>, ...args: never[]]
+			  >
+			| undefined,
+	): void {
+		this.content.set(clazz as never);
+	}
+}
 
-		let permbtn: Component | undefined;
+const template = Interface.getInterface<{ Popups: { Crossplatform: { Settings: SettingsPopup2Definition } } }>().Popups
+	.Crossplatform.Settings;
+template.Visible = false;
 
-		this.event.subscribeObservable(
-			playerData.config,
-			(config) => {
-				this.config.set(config, PlayerConfigDefinition);
-				permbtn?.destroy();
+type SettingsPopup2Definition = GuiObject & {
+	readonly Content: GuiObject & {
+		readonly Sidebar: GuiObject & {
+			readonly ScrollingFrame: SidebarDefinition;
+		};
+		readonly Content: ContentDefinition;
+	};
+	readonly Heading: GuiObject & {
+		readonly CloseButton: GuiButton;
+		readonly TitleLabel: TextLabel;
+	};
+};
+@injectable
+export class SettingsPopup extends Control<SettingsPopup2Definition> {
+	constructor(@inject playerData: PlayerDataStorage) {
+		const gui = template.Clone();
+		super(gui);
 
-				const btn = this.config.add(
-					new TextButtonControl(
-						Interface.getGameUI<{ Templates: { Button: TextButtonDefinition } }>().Templates.Button.Clone(),
-						() => {
-							const popup = di.resolve<NewSettingsPopup>();
-							popup.setScene("Permissions");
-							popup.show();
-							this.hide();
-						},
-					),
-				);
-				permbtn = btn;
-				btn.instance.LayoutOrder = 0;
-				btn.instance.BackgroundColor3 = Colors.accentDark;
-				btn.instance.Size = new UDim2(new UDim(1, 0), btn.instance.Size.Y);
-				btn.text.set("Permissions");
-			},
-			true,
-		);
+		const content = this.parent(new Content(gui.Content.Content, playerData.config));
+		const sidebar = this.parent(new Sidebar(gui.Content.Sidebar.ScrollingFrame));
+
+		sidebar.addButton("general", 18627409276, () => content.set(PlayerSettingsGeneral));
+		sidebar.addButton("interface", 18627409276, () => content.set(PlayerSettingsInterface));
+		sidebar.addButton("graphics", 18626628666, () => content.set(PlayerSettingsGraphics));
+		sidebar.addButton("environment", 18626647702, () => content.set(PlayerSettingsEnvironment));
+		sidebar.addButton("controls", 18626685039, () => content.set(PlayerSettingsControls));
+		sidebar.addButton("physics", 18626685039, () => content.set(PlayerSettingsPhysics));
+		sidebar.addButton("blacklist", 18626826844, () => content.set(PlayerSettingsBlacklist));
+
+		this.parent(new Control(gui.Heading.CloseButton)).addButtonAction(() => this.destroy());
 	}
 }

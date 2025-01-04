@@ -1,4 +1,4 @@
-import { SettingsPopup2 } from "client/gui/popup/SettingsPopup2";
+import { SettingsPopup } from "client/gui/popup/SettingsPopup";
 import { Scene } from "client/gui/Scene";
 import { Action } from "engine/client/Action";
 import type { MainScreenLayout } from "client/gui/MainScreenLayout";
@@ -12,7 +12,7 @@ export class MainScene extends Scene {
 	constructor(@inject mainScreen: MainScreenLayout, @inject theme: Theme, @inject popupController: PopupController) {
 		super();
 
-		this.openSettingsAction = this.parent(new Action(() => popupController.createAndShow(SettingsPopup2)));
+		this.openSettingsAction = this.parent(new Action(() => popupController.createAndShow(SettingsPopup)));
 		this.parent(mainScreen.registerTopCenterButton("Menu")) //
 			.themeButton(theme, "buttonNormal")
 			.subscribeToAction(this.openSettingsAction)

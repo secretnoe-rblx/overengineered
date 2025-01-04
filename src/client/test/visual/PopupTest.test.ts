@@ -5,10 +5,8 @@ import { TextButtonControl } from "engine/client/gui/Button";
 import { Control } from "engine/client/gui/Control";
 import { Element } from "engine/shared/Element";
 import type { ControlsPopup } from "client/gui/popup/ControlsPopup";
-import type { NewSettingsPopup } from "client/gui/popup/NewSettingsPopup";
 import type { ReportSubmitController } from "client/gui/popup/ReportSubmitPopup";
 import type { SavePopup } from "client/gui/popup/SavePopup";
-import type { SettingsPopup } from "client/gui/popup/SettingsPopup";
 import type { WikiPopup } from "client/gui/popup/WikiPopup";
 import type { UnitTests } from "engine/shared/TestFramework";
 
@@ -74,12 +72,6 @@ namespace PopupTests {
 							),
 						)
 						.with((b) => b.enable()).instance,
-					b4: TextButtonControl.create({
-						Text: "Settings",
-						Size: new UDim2(0, 200, 0, 30),
-					})
-						.with((b) => b.activated.Connect(() => di.resolve<SettingsPopup>().show()))
-						.with((b) => b.enable()).instance,
 					b5: TextButtonControl.create({
 						Text: "Saves",
 						Size: new UDim2(0, 200, 0, 30),
@@ -97,18 +89,6 @@ namespace PopupTests {
 						Size: new UDim2(0, 200, 0, 30),
 					})
 						.with((b) => b.activated.Connect(() => di.resolve<ControlsPopup>().show()))
-						.with((b) => b.enable()).instance,
-					b8: TextButtonControl.create({
-						Text: "New Settings",
-						Size: new UDim2(0, 200, 0, 30),
-					})
-						.with((b) =>
-							b.activated.Connect(() => {
-								const popup = di.resolve<NewSettingsPopup>();
-								popup.setScene("Permissions");
-								popup.show();
-							}),
-						)
 						.with((b) => b.enable()).instance,
 					b9: TextButtonControl.create({
 						Text: "Alert",
