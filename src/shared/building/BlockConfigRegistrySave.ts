@@ -146,80 +146,7 @@ namespace BlockConfigTypes {
 }
 
 const connectors = {
-	boolOrNumberOrVector(
-		name: string,
-		group?: string,
-		additional?: Partial<
-			ConfigTypeToDefinition<
-				BlockConfigTypes.Or<[BlockConfigTypes.Bool, BlockConfigTypes.Number, BlockConfigTypes.Vec3]>
-			>
-		>,
-	): ConfigTypeToDefinition<
-		BlockConfigTypes.Or<[BlockConfigTypes.Bool, BlockConfigTypes.Number, BlockConfigTypes.Vec3]>
-	> {
-		return {
-			displayName: name,
-			type: "or",
-			default: 0 as number,
-			config: {
-				type: "unset",
-				value: 0,
-			},
-			group,
-			types: {
-				bool: {
-					displayName: "Boolean",
-					type: "bool",
-					config: false as boolean,
-					default: false as boolean,
-				},
-				number: {
-					displayName: "Number",
-					type: "number",
-					default: 0 as number,
-					config: 0 as number,
-				},
-				vector3: {
-					displayName: "Vector3",
-					type: "vector3",
-					default: Vector3.zero as Vector3,
-					config: Vector3.zero as Vector3,
-				},
-			},
-			...(additional ?? {}),
-		};
-	},
-	boolOrNumber(
-		name: string,
-		group?: string,
-	): ConfigTypeToDefinition<BlockConfigTypes.Or<[BlockConfigTypes.Bool, BlockConfigTypes.Number]>> {
-		return {
-			displayName: name,
-			type: "or",
-			default: 0 as number,
-			config: {
-				type: "unset",
-				value: 0,
-			},
-			group,
-			types: {
-				bool: {
-					displayName: "Boolean",
-					type: "bool",
-					config: false as boolean,
-					default: false as boolean,
-				},
-				number: {
-					displayName: "Number",
-					type: "number",
-					default: 0 as number,
-					config: 0 as number,
-				},
-			},
-		};
-	},
 	any(
-		name: string,
 		group?: string,
 		additional?: Partial<
 			ConfigTypeToDefinition<
@@ -246,7 +173,6 @@ const connectors = {
 		>
 	> {
 		return {
-			displayName: name,
 			type: "or",
 			default: "" as string,
 			config: {
@@ -256,31 +182,26 @@ const connectors = {
 			group,
 			types: {
 				bool: {
-					displayName: "Boolean",
 					type: "bool",
 					config: false as boolean,
 					default: false as boolean,
 				},
 				number: {
-					displayName: "Number",
 					type: "number",
 					default: 0 as number,
 					config: 0 as number,
 				},
 				vector3: {
-					displayName: "Vector",
 					type: "vector3",
 					default: Vector3.zero,
 					config: Vector3.zero,
 				},
 				string: {
-					displayName: "String",
 					type: "string",
 					default: "" as string,
 					config: "" as string,
 				},
 				byte: {
-					displayName: "Byte",
 					type: "byte",
 					default: 0 as number,
 					config: 0 as number,
@@ -294,7 +215,6 @@ const connectors = {
 const disconnectblock = {
 	input: {
 		disconnect: {
-			displayName: "Disconnect key",
 			type: "keybool",
 			default: false as boolean,
 			config: {
@@ -312,7 +232,6 @@ const disconnectblock = {
 const motorblock = {
 	input: {
 		rotationSpeed: {
-			displayName: "Rotation speed",
 			type: "motorRotationSpeed",
 			default: 0 as number,
 			config: {
@@ -326,7 +245,6 @@ const motorblock = {
 			maxSpeed: 150 as number,
 		},
 		max_torque: {
-			displayName: "Max Torque",
 			type: "clampedNumber",
 			default: 200 as number,
 			config: 200 as number,
@@ -341,7 +259,6 @@ const motorblock = {
 const wheelblock = {
 	input: {
 		friction: {
-			displayName: "Tire friction",
 			type: "clampedNumber",
 			default: 50 as number,
 			config: 50 as number,
@@ -350,7 +267,6 @@ const wheelblock = {
 			step: 0.1,
 		},
 		elasticity: {
-			displayName: "Tire elasticity",
 			type: "clampedNumber",
 			default: 50 as number,
 			config: 50 as number,
@@ -365,7 +281,6 @@ const wheelblock = {
 const bracedshaft = {
 	input: {
 		angle: {
-			displayName: "Braces Angle",
 			type: "clampedNumber",
 			min: -180,
 			max: 180,
@@ -381,7 +296,6 @@ const bracedshaft = {
 const bytesplitter = {
 	input: {
 		value: {
-			displayName: "Byte",
 			type: "byte",
 			default: 0 as number,
 			config: 0 as number,
@@ -389,49 +303,41 @@ const bytesplitter = {
 	},
 	output: {
 		"1": {
-			displayName: "1",
 			type: "bool",
 			default: false as boolean,
 			config: false as boolean,
 		},
 		"2": {
-			displayName: "2",
 			type: "bool",
 			default: false as boolean,
 			config: false as boolean,
 		},
 		"4": {
-			displayName: "4",
 			type: "bool",
 			default: false as boolean,
 			config: false as boolean,
 		},
 		"8": {
-			displayName: "8",
 			type: "bool",
 			default: false as boolean,
 			config: false as boolean,
 		},
 		"16": {
-			displayName: "16",
 			type: "bool",
 			default: false as boolean,
 			config: false as boolean,
 		},
 		"32": {
-			displayName: "32",
 			type: "bool",
 			default: false as boolean,
 			config: false as boolean,
 		},
 		"64": {
-			displayName: "64",
 			type: "bool",
 			default: false as boolean,
 			config: false as boolean,
 		},
 		"128": {
-			displayName: "128",
 			type: "bool",
 			default: false as boolean,
 			config: false as boolean,
@@ -442,49 +348,41 @@ const bytesplitter = {
 const bytemaker = {
 	input: {
 		"1": {
-			displayName: "1",
 			type: "bool",
 			default: false as boolean,
 			config: false as boolean,
 		},
 		"2": {
-			displayName: "2",
 			type: "bool",
 			default: false as boolean,
 			config: false as boolean,
 		},
 		"4": {
-			displayName: "4",
 			type: "bool",
 			default: false as boolean,
 			config: false as boolean,
 		},
 		"8": {
-			displayName: "8",
 			type: "bool",
 			default: false as boolean,
 			config: false as boolean,
 		},
 		"16": {
-			displayName: "16",
 			type: "bool",
 			default: false as boolean,
 			config: false as boolean,
 		},
 		"32": {
-			displayName: "32",
 			type: "bool",
 			default: false as boolean,
 			config: false as boolean,
 		},
 		"64": {
-			displayName: "64",
 			type: "bool",
 			default: false as boolean,
 			config: false as boolean,
 		},
 		"128": {
-			displayName: "128",
 			type: "bool",
 			default: false as boolean,
 			config: false as boolean,
@@ -492,7 +390,6 @@ const bytemaker = {
 	},
 	output: {
 		value: {
-			displayName: "Byte",
 			type: "byte",
 			default: 0 as number,
 			config: 0 as number,
@@ -503,25 +400,21 @@ const bytemaker = {
 const vec3objectworldtransformer = {
 	input: {
 		toobject: {
-			displayName: "To object?",
 			type: "bool",
 			config: true as boolean,
 			default: true as boolean,
 		},
 		originpos: {
-			displayName: "Origin position",
 			type: "vector3",
 			config: Vector3.zero,
 			default: Vector3.zero,
 		},
 		originrot: {
-			displayName: "Origin rotation",
 			type: "vector3",
 			config: Vector3.zero,
 			default: Vector3.zero,
 		},
 		position: {
-			displayName: "Position",
 			type: "vector3",
 			config: Vector3.zero,
 			default: Vector3.zero,
@@ -529,7 +422,6 @@ const vec3objectworldtransformer = {
 	},
 	output: {
 		position: {
-			displayName: "Result",
 			type: "vector3",
 			default: Vector3.zero,
 			config: Vector3.zero,
@@ -540,7 +432,6 @@ const vec3objectworldtransformer = {
 const rocketengine = {
 	input: {
 		thrust: {
-			displayName: "Thrust (%)",
 			type: "thrust",
 			default: 0 as number,
 			config: {
@@ -553,7 +444,6 @@ const rocketengine = {
 			canBeSwitch: true as boolean,
 		},
 		strength: {
-			displayName: "Strength (%)",
 			type: "clampedNumber",
 			min: 0,
 			max: 100,
@@ -564,7 +454,6 @@ const rocketengine = {
 	},
 	output: {
 		maxpower: {
-			displayName: "Max Power (Newtons)",
 			type: "number",
 			default: 0 as number,
 			config: 0 as number,
@@ -575,13 +464,11 @@ const rocketengine = {
 const rcsengine = {
 	input: {
 		direction: {
-			displayName: "Direction (%)",
 			type: "vector3",
 			default: Vector3.zero,
 			config: Vector3.zero,
 		},
 		trailLength: {
-			displayName: "Trail length",
 			type: "clampedNumber",
 			min: 1,
 			max: 5,
@@ -590,7 +477,6 @@ const rcsengine = {
 			config: 1,
 		},
 		trailColor: {
-			displayName: "Trail color",
 			type: "color",
 			default: Color3.fromRGB(255, 255, 255),
 			config: Color3.fromRGB(255, 255, 255),
@@ -599,7 +485,6 @@ const rcsengine = {
 	},
 	output: {
 		maxpower: {
-			displayName: "Max Power (Newtons)",
 			type: "number",
 			default: 0 as number,
 			config: 0 as number,
@@ -610,7 +495,6 @@ const rcsengine = {
 const piston = {
 	input: {
 		extend: {
-			displayName: "Extend",
 			type: "thrust",
 			default: 0 as number,
 			config: {
@@ -624,7 +508,6 @@ const piston = {
 		},
 
 		speed: {
-			displayName: "Speed",
 			type: "clampedNumber",
 			min: 0,
 			max: 10,
@@ -635,7 +518,6 @@ const piston = {
 		},
 
 		maxforce: {
-			displayName: "Max Force",
 			type: "clampedNumber",
 			min: 0,
 			max: 2000,
@@ -646,7 +528,6 @@ const piston = {
 		},
 
 		distance: {
-			displayName: "Distance",
 			type: "clampedNumber",
 			min: 0,
 			max: 8,
@@ -661,7 +542,6 @@ const piston = {
 const ballast = {
 	input: {
 		density: {
-			displayName: "Density",
 			type: "controllableNumber",
 			min: 0.15,
 			max: 10,
@@ -682,7 +562,6 @@ const ballast = {
 const heliumblock = {
 	input: {
 		density: {
-			displayName: "Density",
 			type: "clampedNumber",
 			default: 0.17 as number,
 			config: 0.17 as number,
@@ -697,7 +576,6 @@ const heliumblock = {
 const rope = {
 	input: {
 		length: {
-			displayName: "Length",
 			type: "clampedNumber",
 			min: 1,
 			max: 50,
@@ -712,7 +590,6 @@ const rope = {
 const servomotorblock = {
 	input: {
 		speed: {
-			displayName: "Speed",
 			type: "clampedNumber",
 			min: 0,
 			max: 50,
@@ -721,7 +598,6 @@ const servomotorblock = {
 			config: 15 as number,
 		},
 		angle: {
-			displayName: "Target angle",
 			type: "servoMotorAngle",
 			default: 0 as number,
 			config: {
@@ -736,7 +612,6 @@ const servomotorblock = {
 			maxAngle: 180,
 		},
 		stiffness: {
-			displayName: "Stiffness",
 			type: "clampedNumber",
 			min: 0,
 			max: 100,
@@ -746,7 +621,6 @@ const servomotorblock = {
 			connectorHidden: true,
 		},
 		max_torque: {
-			displayName: "Max Torque",
 			type: "clampedNumber",
 			default: 200 as number,
 			config: 200 as number,
@@ -772,7 +646,6 @@ const sidewaysservo = {
 const magnet = {
 	input: {
 		strength: {
-			displayName: "Strength",
 			type: "clampedNumber",
 			min: 0,
 			max: 100,
@@ -781,7 +654,6 @@ const magnet = {
 			config: 100 as number,
 		},
 		invertPolarity: {
-			displayName: "Invert polarity",
 			type: "keybool",
 			default: false as boolean,
 			config: {
@@ -799,7 +671,6 @@ const magnet = {
 const tnt = {
 	input: {
 		explode: {
-			displayName: "Explode",
 			type: "keybool",
 			default: false as boolean,
 			config: {
@@ -811,7 +682,6 @@ const tnt = {
 			canBeReversed: false,
 		},
 		radius: {
-			displayName: "Explosion radius",
 			type: "clampedNumber",
 			default: 12 as number,
 			min: 1,
@@ -820,7 +690,6 @@ const tnt = {
 			config: 12 as number,
 		},
 		pressure: {
-			displayName: "Explosion pressure",
 			type: "clampedNumber",
 			default: 2500 as number,
 			min: 0,
@@ -829,13 +698,11 @@ const tnt = {
 			config: 2500 as number,
 		},
 		flammable: {
-			displayName: "Flammable",
 			type: "bool",
 			default: true as boolean,
 			config: true as boolean,
 		},
 		impact: {
-			displayName: "Impact",
 			type: "bool",
 			default: true as boolean,
 			config: true as boolean,
@@ -847,19 +714,16 @@ const tnt = {
 const lamp = {
 	input: {
 		enabled: {
-			displayName: "Enabled",
 			type: "bool",
 			default: false as boolean,
 			config: false as boolean,
 		},
 		brightness: {
-			displayName: "Brightness",
 			type: "number",
 			config: 20,
 			default: 20,
 		},
 		lightRrange: {
-			displayName: "Range",
 			type: "number",
 			config: 20,
 			default: 20,
@@ -871,7 +735,6 @@ const lamp = {
 const singleimpulse = {
 	input: {
 		impulse: {
-			displayName: "Impulse",
 			type: "bool",
 			default: false as boolean,
 			config: false as boolean,
@@ -879,7 +742,6 @@ const singleimpulse = {
 	},
 	output: {
 		value: {
-			displayName: "Output",
 			type: "bool",
 			default: false as boolean,
 			config: false as boolean,
@@ -890,7 +752,6 @@ const singleimpulse = {
 const leddisplay = {
 	input: {
 		posx: {
-			displayName: "Pos X",
 			type: "clampedNumber",
 			default: 0 as number,
 			config: 0 as number,
@@ -900,7 +761,6 @@ const leddisplay = {
 			step: 1,
 		},
 		posy: {
-			displayName: "Pos Y",
 			type: "clampedNumber",
 			default: 0 as number,
 			config: 0 as number,
@@ -910,14 +770,12 @@ const leddisplay = {
 			step: 1,
 		},
 		color: {
-			displayName: "Color",
 			type: "vector3",
 			default: new Vector3(0, 0, 1),
 			config: new Vector3(0, 0, 1),
 			configHidden: true,
 		},
 		update: {
-			displayName: "Update",
 			type: "bool",
 			default: false as boolean,
 			config: false as boolean,
@@ -930,7 +788,6 @@ const leddisplay = {
 const sevensegmentdisplay = {
 	input: {
 		value: {
-			displayName: "Value",
 			type: "byte",
 			default: 0 as number,
 			config: 0 as number,
@@ -942,7 +799,6 @@ const sevensegmentdisplay = {
 const suspensionblock = {
 	input: {
 		damping: {
-			displayName: "Damping",
 			type: "clampedNumber",
 			default: 250 as number,
 			min: 0,
@@ -952,7 +808,6 @@ const suspensionblock = {
 			connectorHidden: true,
 		},
 		stiffness: {
-			displayName: "Stiffness",
 			type: "clampedNumber",
 			default: 75_000 as number,
 			min: 0,
@@ -962,7 +817,6 @@ const suspensionblock = {
 			connectorHidden: true,
 		},
 		free_length: {
-			displayName: "Free Length",
 			type: "clampedNumber",
 			default: 4.5 as number,
 			min: 1,
@@ -971,7 +825,6 @@ const suspensionblock = {
 			config: 4.5 as number,
 		},
 		max_force: {
-			displayName: "Force",
 			type: "clampedNumber",
 			min: 1,
 			max: 800000,
@@ -987,7 +840,6 @@ const vehicleseat = {
 	input: {},
 	output: {
 		occupied: {
-			displayName: "Occupied",
 			type: "bool",
 			default: false as boolean,
 			config: false as boolean,
@@ -999,13 +851,11 @@ const speedometer = {
 	input: {},
 	output: {
 		linear: {
-			displayName: "Linear",
 			type: "vector3",
 			default: Vector3.zero,
 			config: Vector3.zero,
 		},
 		angular: {
-			displayName: "Angular",
 			type: "vector3",
 			default: Vector3.zero,
 			config: Vector3.zero,
@@ -1016,7 +866,6 @@ const speedometer = {
 const masssensor = {
 	input: {
 		assemblyonly: {
-			displayName: "Assembly Only",
 			type: "bool",
 			connectorHidden: true,
 			default: false as boolean,
@@ -1025,7 +874,6 @@ const masssensor = {
 	},
 	output: {
 		result: {
-			displayName: "Mass (kg)",
 			type: "number",
 			default: 0 as number,
 			config: 0 as number,
@@ -1037,7 +885,6 @@ const gravitysensor = {
 	input: {},
 	output: {
 		result: {
-			displayName: "Acceleration (m/s²)",
 			type: "number",
 			default: 0 as number,
 			config: 0 as number,
@@ -1048,7 +895,6 @@ const gravitysensor = {
 const keysensor = {
 	input: {
 		key: {
-			displayName: "Key",
 			type: "keybool",
 			connectorHidden: true,
 			default: false as boolean,
@@ -1063,7 +909,6 @@ const keysensor = {
 	},
 	output: {
 		result: {
-			displayName: "Pressed",
 			type: "bool",
 			default: false as boolean,
 			config: false as boolean,
@@ -1075,25 +920,21 @@ const mousesensor = {
 	input: {},
 	output: {
 		position: {
-			displayName: "Position",
 			type: "vector3",
 			default: Vector3.zero,
 			config: Vector3.zero,
 		},
 		angle: {
-			displayName: "Angle around the center",
 			type: "number",
 			default: 0 as number,
 			config: 0 as number,
 		},
 		direction: {
-			displayName: "3D Direction",
 			type: "vector3",
 			default: Vector3.zero,
 			config: Vector3.zero,
 		},
 		angle3d: {
-			displayName: "3D Angle of direction",
 			type: "vector3",
 			default: Vector3.zero,
 			config: Vector3.zero,
@@ -1105,7 +946,6 @@ const tpscounter = {
 	input: {},
 	output: {
 		fps: {
-			displayName: "TPS",
 			type: "number",
 			default: 60 as number,
 			config: 60 as number,
@@ -1116,7 +956,6 @@ const tpscounter = {
 const wing = {
 	input: {
 		enabled: {
-			displayName: "Enabled",
 			type: "bool",
 			default: true as boolean,
 			config: true as boolean,
@@ -1126,33 +965,18 @@ const wing = {
 	output: {},
 } as const satisfies BlockConfigBothDefinitions;
 
-const twoNumbersOrBooleansInputBooleanOutput = {
-	input: {
-		value1: connectors.boolOrNumber("Value 1", "1"),
-		value2: connectors.boolOrNumber("Value 2", "1"),
-	},
-	output: {
-		result: {
-			displayName: "Result",
-			type: "bool",
-			config: false as boolean,
-			default: false as boolean,
-		},
-	},
-} as const satisfies BlockConfigBothDefinitions;
-
 const anyProcessing = {
 	input: {
-		value: connectors.any("Value", "1"),
+		value: connectors.any("1"),
 	},
 	output: {
-		result: connectors.any("Result", "1"),
+		result: connectors.any("1"),
 	},
 } as const satisfies BlockConfigBothDefinitions;
 
 const screen = {
 	input: {
-		data: connectors.any("Data", "1"),
+		data: connectors.any("1"),
 	},
 	output: {},
 } as const satisfies BlockConfigBothDefinitions;
@@ -1160,13 +984,11 @@ const screen = {
 const laser = {
 	input: {
 		alwaysEnabled: {
-			displayName: "Laser always enabled",
 			type: "bool",
 			config: false as boolean,
 			default: false as boolean,
 		},
 		maxDistance: {
-			displayName: "Max distance",
 			type: "clampedNumber",
 			config: 200 as number,
 			default: 200 as number,
@@ -1175,7 +997,6 @@ const laser = {
 			step: 0.1,
 		},
 		rayTransparency: {
-			displayName: "Transparency",
 			type: "clampedNumber",
 			config: 0 as number,
 			default: 0 as number,
@@ -1184,14 +1005,12 @@ const laser = {
 			step: 0.01,
 		},
 		rayColor: {
-			displayName: "Ray color",
 			type: "color",
 			config: Color3.fromRGB(255, 0, 0),
 			default: Color3.fromRGB(255, 0, 0),
 			connectorHidden: true,
 		},
 		dotColor: {
-			displayName: "Dot color",
 			type: "color",
 			config: Color3.fromRGB(255, 255, 0),
 			default: Color3.fromRGB(255, 255, 0),
@@ -1200,7 +1019,6 @@ const laser = {
 	},
 	output: {
 		distance: {
-			displayName: "Distance",
 			type: "number",
 			default: 0 as number,
 			config: 0 as number,
@@ -1211,13 +1029,11 @@ const laser = {
 const twoNumbersInputBooleanOutput = {
 	input: {
 		value1: {
-			displayName: "Value 1",
 			type: "number",
 			default: 0 as number,
 			config: 0 as number,
 		},
 		value2: {
-			displayName: "Value 2",
 			type: "number",
 			default: 0 as number,
 			config: 0 as number,
@@ -1225,7 +1041,6 @@ const twoNumbersInputBooleanOutput = {
 	},
 	output: {
 		result: {
-			displayName: "Result",
 			type: "bool",
 			default: false as boolean,
 			config: false as boolean,
@@ -1236,19 +1051,16 @@ const twoNumbersInputBooleanOutput = {
 const vec3combiner = {
 	input: {
 		value_x: {
-			displayName: "X",
 			type: "number",
 			default: 0 as number,
 			config: 0 as number,
 		},
 		value_y: {
-			displayName: "Y",
 			type: "number",
 			default: 0 as number,
 			config: 0 as number,
 		},
 		value_z: {
-			displayName: "Z",
 			type: "number",
 			default: 0 as number,
 			config: 0 as number,
@@ -1256,7 +1068,6 @@ const vec3combiner = {
 	},
 	output: {
 		result: {
-			displayName: "Vector",
 			type: "vector3",
 			default: Vector3.zero,
 			config: Vector3.zero,
@@ -1267,7 +1078,6 @@ const vec3combiner = {
 const vec3splitter = {
 	input: {
 		value: {
-			displayName: "Vector",
 			type: "vector3",
 			default: Vector3.zero,
 			config: Vector3.zero,
@@ -1275,19 +1085,16 @@ const vec3splitter = {
 	},
 	output: {
 		result_x: {
-			displayName: "X",
 			type: "number",
 			default: 0 as number,
 			config: 0 as number,
 		},
 		result_y: {
-			displayName: "Y",
 			type: "number",
 			default: 0 as number,
 			config: 0 as number,
 		},
 		result_z: {
-			displayName: "Z",
 			type: "number",
 			default: 0 as number,
 			config: 0 as number,
@@ -1299,7 +1106,6 @@ const anglesensor = {
 	input: {},
 	output: {
 		result: {
-			displayName: "Angle",
 			type: "vector3",
 			default: Vector3.zero,
 			config: Vector3.zero,
@@ -1311,13 +1117,11 @@ const ownerlocator = {
 	input: {},
 	output: {
 		linear: {
-			displayName: "Offset",
 			type: "vector3",
 			default: Vector3.zero,
 			config: Vector3.zero,
 		},
 		angular: {
-			displayName: "Angular offset",
 			type: "vector3",
 			default: Vector3.zero,
 			config: Vector3.zero,
@@ -1329,19 +1133,16 @@ const ownercameralocator = {
 	input: {},
 	output: {
 		position: {
-			displayName: "Position",
 			type: "vector3",
 			default: Vector3.zero,
 			config: Vector3.zero,
 		},
 		direction: {
-			displayName: "Direction",
 			type: "vector3",
 			default: Vector3.zero,
 			config: Vector3.zero,
 		},
 		up: {
-			displayName: "Up vector",
 			type: "vector3",
 			default: Vector3.zero,
 			config: Vector3.zero,
@@ -1353,7 +1154,6 @@ const altimeter = {
 	input: {},
 	output: {
 		result: {
-			displayName: "Altitude",
 			type: "number",
 			default: 0 as number,
 			config: 0 as number,
@@ -1364,100 +1164,89 @@ const altimeter = {
 const logicmemory = {
 	input: {
 		set: {
-			displayName: "Set",
 			type: "bool",
 			default: false as boolean,
 			config: false as boolean,
 			configHidden: true,
 		},
-		value: connectors.any("Value", "1"),
+		value: connectors.any("1"),
 	},
 	output: {
-		result: connectors.any("Result", "1"),
+		result: connectors.any("1"),
 	},
 } as const satisfies BlockConfigBothDefinitions;
 
 const stackmemory = {
 	input: {
 		push: {
-			displayName: "Push",
 			type: "bool",
 			default: false as boolean,
 			config: false as boolean,
 			configHidden: true,
 		},
 		pop: {
-			displayName: "Pop",
 			type: "bool",
 			default: false as boolean,
 			config: false as boolean,
 			configHidden: true,
 		},
-		value: connectors.any("Input", "1"),
+		value: connectors.any("1"),
 	},
 	output: {
 		size: {
-			displayName: "Size",
 			type: "number",
 			default: 0 as number,
 			config: 0 as number,
 		},
-		result: connectors.any("Output", "1"),
+		result: connectors.any("1"),
 	},
 } as const satisfies BlockConfigBothDefinitions;
 
 const randomaccessmemory = {
 	input: {
 		read: {
-			displayName: "Read",
 			type: "bool",
 			default: false as boolean,
 			config: false as boolean,
 			configHidden: true,
 		},
 		write: {
-			displayName: "Write",
 			type: "bool",
 			default: false as boolean,
 			config: false as boolean,
 			configHidden: true,
 		},
 		address: {
-			displayName: "Address",
 			type: "number",
 			default: 0 as number,
 			config: 0 as number,
 		},
-		value: connectors.any("Input", "1"),
+		value: connectors.any("1"),
 	},
 	output: {
 		size: {
-			displayName: "Size",
 			type: "number",
 			default: 0 as number,
 			config: 0 as number,
 		},
-		result: connectors.any("Output", "1"),
+		result: connectors.any("1"),
 	},
 } as const satisfies BlockConfigBothDefinitions;
 
 const readonlymemory = {
 	input: {
 		read: {
-			displayName: "Read",
 			type: "bool",
 			default: false as boolean,
 			config: false as boolean,
 			configHidden: true,
 		},
 		address: {
-			displayName: "Address",
 			type: "number",
 			default: 0 as number,
 			config: 0 as number,
 		},
 		data: {
-			displayName: "Byte Array",
 			type: "bytearray",
 			config: [],
 			default: [],
@@ -1467,31 +1256,26 @@ const readonlymemory = {
 	},
 	output: {
 		size: {
-			displayName: "Size",
 			type: "number",
 			default: 0 as number,
 			config: 0 as number,
 		},
 		output1: {
-			displayName: "Output 1",
 			type: "byte",
 			default: 0 as number,
 			config: 0 as number,
 		},
 		output2: {
-			displayName: "Output 2",
 			type: "byte",
 			default: 0 as number,
 			config: 0 as number,
 		},
 		output3: {
-			displayName: "Output 3",
 			type: "byte",
 			default: 0 as number,
 			config: 0 as number,
 		},
 		output4: {
-			displayName: "Output 4",
 			type: "byte",
 			default: 0 as number,
 			config: 0 as number,
@@ -1502,19 +1286,16 @@ const readonlymemory = {
 const counter = {
 	input: {
 		value: {
-			displayName: "New value",
 			type: "number",
 			default: 0 as number,
 			config: 0 as number,
 		},
 		step: {
-			displayName: "Step value",
 			type: "number",
 			default: 1 as number,
 			config: 1 as number,
 		},
 		triggerStep: {
-			displayName: "Step",
 			type: "bool",
 			default: false as boolean,
 			config: false as boolean,
@@ -1522,7 +1303,6 @@ const counter = {
 		},
 		triggerValue: {
 			//a.k.a. rewrite value
-			displayName: "Rewrite",
 			type: "bool",
 			default: false as boolean,
 			config: false as boolean,
@@ -1531,7 +1311,6 @@ const counter = {
 	},
 	output: {
 		value: {
-			displayName: "Output",
 			type: "number",
 			default: 0 as number,
 			config: 0 as number,
@@ -1542,19 +1321,16 @@ const counter = {
 const impulsegenerator = {
 	input: {
 		delay: {
-			displayName: "Delay (ticks)",
 			type: "number",
 			default: 0 as number,
 			config: 0 as number,
 		},
 		isInverted: {
-			displayName: "Invert",
 			type: "bool",
 			default: false as boolean,
 			config: false as boolean,
 		},
 		isSinglePulse: {
-			displayName: "Single Pulse",
 			type: "bool",
 			default: false as boolean,
 			config: false as boolean,
@@ -1562,7 +1338,6 @@ const impulsegenerator = {
 	},
 	output: {
 		value: {
-			displayName: "Output",
 			type: "bool",
 			default: false as boolean,
 			config: false as boolean,
@@ -1572,9 +1347,8 @@ const impulsegenerator = {
 
 const radiotransmitter = {
 	input: {
-		value: connectors.any("Input", "1"),
+		value: connectors.any("1"),
 		frequency: {
-			displayName: "Frequency",
 			type: "clampedNumber",
 			default: 868 as number,
 			config: 868 as number,
@@ -1589,7 +1363,6 @@ const radiotransmitter = {
 const radioreciever = {
 	input: {
 		frequency: {
-			displayName: "Frequency",
 			type: "clampedNumber",
 			default: 868 as number,
 			config: 868 as number,
@@ -1599,14 +1372,13 @@ const radioreciever = {
 		},
 	},
 	output: {
-		value: connectors.any("Output", "1"),
+		value: connectors.any("1"),
 	},
 } as const satisfies BlockConfigBothDefinitions;
 
 const radarsection = {
 	input: {
 		maxDistance: {
-			displayName: "Max distance",
 			type: "clampedNumber",
 			default: 100 as number,
 			config: 100 as number,
@@ -1615,7 +1387,6 @@ const radarsection = {
 			step: 1,
 		},
 		detectionSize: {
-			displayName: "Detection Size",
 			type: "clampedNumber",
 			default: 1 as number,
 			config: 1 as number,
@@ -1624,19 +1395,16 @@ const radarsection = {
 			step: 0.1,
 		},
 		visibility: {
-			displayName: "Area Visibility",
 			type: "bool",
 			default: false as boolean,
 			config: false as boolean,
 		},
 		//angleOffset: {
-		//	displayName: "Angle Offset",
-		//	type: "vector3",
+		//	//	type: "vector3",
 		//	default: Vector3.zero,
 		//	config: Vector3.zero,
 		//},
 		minimalDistance: {
-			displayName: "Minimal Detection Distance",
 			type: "clampedNumber",
 			default: 0 as number,
 			config: 0 as number,
@@ -1647,7 +1415,6 @@ const radarsection = {
 	},
 	output: {
 		distance: {
-			displayName: "Offset",
 			type: "vector3",
 			default: Vector3.zero,
 			config: Vector3.zero,
@@ -1658,7 +1425,6 @@ const radarsection = {
 const firesensor = {
 	input: {
 		detectionradius: {
-			displayName: "Detection Radius",
 			type: "clampedNumber",
 			default: 20 as number,
 			config: 20 as number,
@@ -1669,7 +1435,6 @@ const firesensor = {
 	},
 	output: {
 		detected: {
-			displayName: "Detected",
 			type: "bool",
 			default: false as boolean,
 			config: false as boolean,
@@ -1679,26 +1444,23 @@ const firesensor = {
 
 const delayBlock = {
 	input: {
-		value: connectors.any("Value", "1"),
+		value: connectors.any("1"),
 		duration: {
-			displayName: "Duration",
 			type: "number",
 			default: 0 as number,
 			config: 0 as number,
 		},
 	},
 	output: {
-		result: connectors.any("Result", "1"),
+		result: connectors.any("1"),
 	},
 } as const satisfies BlockConfigBothDefinitions;
 
 const defcs = {
 	bool(
-		name: string,
 		additional?: Partial<ConfigTypeToDefinition<BlockConfigTypes.Bool>>,
 	): ConfigTypeToDefinition<BlockConfigTypes.Bool> {
 		return {
-			displayName: name,
 			type: "bool",
 			default: false as boolean,
 			config: false as boolean,
@@ -1706,11 +1468,9 @@ const defcs = {
 		};
 	},
 	vector3(
-		name: string,
 		additional?: Partial<ConfigTypeToDefinition<BlockConfigTypes.Vec3>>,
 	): ConfigTypeToDefinition<BlockConfigTypes.Vec3> {
 		return {
-			displayName: name,
 			type: "vector3",
 			default: Vector3.zero,
 			config: Vector3.zero,
@@ -1718,52 +1478,16 @@ const defcs = {
 		};
 	},
 	number(
-		name: string,
 		additional?: Partial<ConfigTypeToDefinition<BlockConfigTypes.Number>>,
 	): ConfigTypeToDefinition<BlockConfigTypes.Number> {
 		return {
-			displayName: name,
 			type: "number",
 			default: 0 as number,
 			config: 0 as number,
 			...(additional ?? {}),
 		};
 	},
-	numberOrBool(
-		name: string,
-		group?: string,
-		additional?: Partial<
-			ConfigTypeToDefinition<BlockConfigTypes.Or<[BlockConfigTypes.Number, BlockConfigTypes.Bool]>>
-		>,
-	): ConfigTypeToDefinition<BlockConfigTypes.Or<[BlockConfigTypes.Number, BlockConfigTypes.Bool]>> {
-		return {
-			displayName: name,
-			type: "or",
-			default: 0 as number,
-			config: {
-				type: "unset",
-				value: 0,
-			},
-			group,
-			types: {
-				number: {
-					displayName: "Number",
-					type: "number",
-					default: 0 as number,
-					config: 0 as number,
-				},
-				bool: {
-					displayName: "Bool",
-					type: "bool",
-					default: false as boolean,
-					config: false as boolean,
-				},
-			},
-			...(additional ?? {}),
-		};
-	},
 	numberOrByteOrBool(
-		name: string,
 		group?: string,
 		additional?: Partial<
 			ConfigTypeToDefinition<
@@ -1774,7 +1498,6 @@ const defcs = {
 		BlockConfigTypes.Or<[BlockConfigTypes.Number, BlockConfigTypes.Bool, BlockConfigTypes.Byte]>
 	> {
 		return {
-			displayName: name,
 			type: "or",
 			default: 0 as number,
 			config: {
@@ -1784,19 +1507,16 @@ const defcs = {
 			group,
 			types: {
 				number: {
-					displayName: "Number",
 					type: "number",
 					default: 0 as number,
 					config: 0 as number,
 				},
 				bool: {
-					displayName: "Bool",
 					type: "bool",
 					default: false as boolean,
 					config: false as boolean,
 				},
 				byte: {
-					displayName: "Byte",
 					type: "byte",
 					default: 0 as number,
 					config: 0 as number,
@@ -1806,14 +1526,12 @@ const defcs = {
 		};
 	},
 	numberOrVector(
-		name: string,
 		group?: string,
 		additional?: Partial<
 			ConfigTypeToDefinition<BlockConfigTypes.Or<[BlockConfigTypes.Number, BlockConfigTypes.Vec3]>>
 		>,
 	): ConfigTypeToDefinition<BlockConfigTypes.Or<[BlockConfigTypes.Number, BlockConfigTypes.Vec3]>> {
 		return {
-			displayName: name,
 			type: "or",
 			default: 0 as number,
 			config: {
@@ -1823,13 +1541,11 @@ const defcs = {
 			group,
 			types: {
 				number: {
-					displayName: "Number",
 					type: "number",
 					default: 0 as number,
 					config: 0 as number,
 				},
 				vector3: {
-					displayName: "Vector3",
 					type: "vector3",
 					default: Vector3.zero as Vector3,
 					config: Vector3.zero as Vector3,
@@ -1839,11 +1555,9 @@ const defcs = {
 		};
 	},
 	byte(
-		name: string,
 		additional?: Partial<ConfigTypeToDefinition<BlockConfigTypes.Byte>>,
 	): ConfigTypeToDefinition<BlockConfigTypes.Byte> {
 		return {
-			displayName: name,
 			type: "byte",
 			default: 0 as number,
 			config: 0 as number,
@@ -1854,180 +1568,180 @@ const defcs = {
 
 const autos = {
 	constant: {
-		input: { value: connectors.any("Value", "1", { connectorHidden: true }) },
-		output: { result: connectors.any("Value", "1") },
+		input: { value: connectors.any("1", { connectorHidden: true }) },
+		output: { result: connectors.any("1") },
 	},
-	pi: { input: {}, output: { value: defcs.number("Value") } },
-	e: { input: {}, output: { value: defcs.number("Value") } },
-	sqrt: { input: { value: defcs.number("Value") }, output: { result: defcs.number("Result") } },
-	tan: { input: { value: defcs.number("Value") }, output: { result: defcs.number("Result") } },
-	atan: { input: { value: defcs.number("Value") }, output: { result: defcs.number("Result") } },
-	sin: { input: { value: defcs.number("Value") }, output: { result: defcs.number("Result") } },
-	asin: { input: { value: defcs.number("Value") }, output: { result: defcs.number("Result") } },
-	cos: { input: { value: defcs.number("Value") }, output: { result: defcs.number("Result") } },
-	acos: { input: { value: defcs.number("Value") }, output: { result: defcs.number("Result") } },
-	log: { input: { value: defcs.number("Value") }, output: { result: defcs.number("Result") } },
-	log10: { input: { value: defcs.number("Value") }, output: { result: defcs.number("Result") } },
-	loge: { input: { value: defcs.number("Value") }, output: { result: defcs.number("Result") } },
-	deg: { input: { value: defcs.number("Value") }, output: { result: defcs.number("Result") } },
-	rad: { input: { value: defcs.number("Value") }, output: { result: defcs.number("Result") } },
-	sign: { input: { value: defcs.number("Value") }, output: { result: defcs.number("Result") } },
-	floor: { input: { value: defcs.number("Value") }, output: { result: defcs.number("Result") } },
-	ceil: { input: { value: defcs.number("Value") }, output: { result: defcs.number("Result") } },
-	round: { input: { value: defcs.number("Value") }, output: { result: defcs.number("Result") } },
-	abs: { input: { value: defcs.number("Value") }, output: { result: defcs.number("Result") } },
+	pi: { input: {}, output: { value: defcs.number() } },
+	e: { input: {}, output: { value: defcs.number() } },
+	sqrt: { input: { value: defcs.number() }, output: { result: defcs.number() } },
+	tan: { input: { value: defcs.number() }, output: { result: defcs.number() } },
+	atan: { input: { value: defcs.number() }, output: { result: defcs.number() } },
+	sin: { input: { value: defcs.number() }, output: { result: defcs.number() } },
+	asin: { input: { value: defcs.number() }, output: { result: defcs.number() } },
+	cos: { input: { value: defcs.number() }, output: { result: defcs.number() } },
+	acos: { input: { value: defcs.number() }, output: { result: defcs.number() } },
+	log: { input: { value: defcs.number() }, output: { result: defcs.number() } },
+	log10: { input: { value: defcs.number() }, output: { result: defcs.number() } },
+	loge: { input: { value: defcs.number() }, output: { result: defcs.number() } },
+	deg: { input: { value: defcs.number() }, output: { result: defcs.number() } },
+	rad: { input: { value: defcs.number() }, output: { result: defcs.number() } },
+	sign: { input: { value: defcs.number() }, output: { result: defcs.number() } },
+	floor: { input: { value: defcs.number() }, output: { result: defcs.number() } },
+	ceil: { input: { value: defcs.number() }, output: { result: defcs.number() } },
+	round: { input: { value: defcs.number() }, output: { result: defcs.number() } },
+	abs: { input: { value: defcs.number() }, output: { result: defcs.number() } },
 	rand: {
 		input: {
-			min: defcs.number("Min", { default: 0, config: 0 }),
-			max: defcs.number("Max", { default: 1, config: 1 }),
+			min: defcs.number({ default: 0, config: 0 }),
+			max: defcs.number({ default: 1, config: 1 }),
 		},
-		output: { result: defcs.number("Result") },
+		output: { result: defcs.number() },
 	},
 	nsqrt: {
-		input: { value: defcs.number("Value"), root: defcs.number("Degree") },
-		output: { result: defcs.number("Result") },
+		input: { value: defcs.number(), root: defcs.number() },
+		output: { result: defcs.number() },
 	},
 	pow: {
-		input: { value: defcs.number("Value"), power: defcs.number("Power") },
-		output: { result: defcs.number("Result") },
+		input: { value: defcs.number(), power: defcs.number() },
+		output: { result: defcs.number() },
 	},
 	clamp: {
-		input: { value: defcs.number("Value"), min: defcs.number("Min"), max: defcs.number("Max") },
-		output: { result: defcs.number("Result") },
+		input: { value: defcs.number(), min: defcs.number(), max: defcs.number() },
+		output: { result: defcs.number() },
 	},
-	atan2: { input: { y: defcs.number("Y"), x: defcs.number("X") }, output: { result: defcs.number("Result") } },
+	atan2: { input: { y: defcs.number(), x: defcs.number() }, output: { result: defcs.number() } },
 	mod: {
-		input: { value1: defcs.number("Value 1"), value2: defcs.number("Value 2") },
-		output: { result: defcs.number("Result") },
+		input: { value1: defcs.number(), value2: defcs.number() },
+		output: { result: defcs.number() },
 	},
 	equals: {
-		input: { value1: defcs.numberOrByteOrBool("Value 1"), value2: defcs.numberOrByteOrBool("Value 2") },
-		output: { result: defcs.bool("Result") },
+		input: { value1: defcs.numberOrByteOrBool(), value2: defcs.numberOrByteOrBool() },
+		output: { result: defcs.bool() },
 	},
 	notequals: {
-		input: { value1: defcs.numberOrByteOrBool("Value 1"), value2: defcs.numberOrByteOrBool("Value 2") },
-		output: { result: defcs.bool("Result") },
+		input: { value1: defcs.numberOrByteOrBool(), value2: defcs.numberOrByteOrBool() },
+		output: { result: defcs.bool() },
 	},
 	greaterthan: {
-		input: { value1: defcs.number("Value 1"), value2: defcs.number("Value 2") },
-		output: { result: defcs.bool("Result") },
+		input: { value1: defcs.number(), value2: defcs.number() },
+		output: { result: defcs.bool() },
 	},
 	greaterthanorequals: {
-		input: { value1: defcs.number("Value 1"), value2: defcs.number("Value 2") },
-		output: { result: defcs.bool("Result") },
+		input: { value1: defcs.number(), value2: defcs.number() },
+		output: { result: defcs.bool() },
 	},
 	lessthan: {
-		input: { value1: defcs.number("Value 1"), value2: defcs.number("Value 2") },
-		output: { result: defcs.bool("Result") },
+		input: { value1: defcs.number(), value2: defcs.number() },
+		output: { result: defcs.bool() },
 	},
 	lessthanorequals: {
-		input: { value1: defcs.number("Value 1"), value2: defcs.number("Value 2") },
-		output: { result: defcs.bool("Result") },
+		input: { value1: defcs.number(), value2: defcs.number() },
+		output: { result: defcs.bool() },
 	},
 	add: {
-		input: { value1: defcs.numberOrVector("Value 1", "1"), value2: defcs.numberOrVector("Value 2", "1") },
-		output: { result: defcs.numberOrVector("Result", "1") },
+		input: { value1: defcs.numberOrVector("1"), value2: defcs.numberOrVector("1") },
+		output: { result: defcs.numberOrVector("1") },
 	},
 	sub: {
-		input: { value1: defcs.numberOrVector("Value 1", "1"), value2: defcs.numberOrVector("Value 2", "1") },
-		output: { result: defcs.numberOrVector("Result", "1") },
+		input: { value1: defcs.numberOrVector("1"), value2: defcs.numberOrVector("1") },
+		output: { result: defcs.numberOrVector("1") },
 	},
 	mul: {
-		input: { value1: defcs.numberOrVector("Value 1", "1"), value2: defcs.numberOrVector("Value 2", "1") },
-		output: { result: defcs.numberOrVector("Result", "1") },
+		input: { value1: defcs.numberOrVector("1"), value2: defcs.numberOrVector("1") },
+		output: { result: defcs.numberOrVector("1") },
 	},
 	div: {
-		input: { value1: defcs.numberOrVector("Value 1", "1"), value2: defcs.numberOrVector("Value 2", "1") },
-		output: { result: defcs.numberOrVector("Result", "1") },
+		input: { value1: defcs.numberOrVector("1"), value2: defcs.numberOrVector("1") },
+		output: { result: defcs.numberOrVector("1") },
 	},
-	bytenot: { input: { value: defcs.byte("Value") }, output: { result: defcs.byte("Result") } },
-	byteneg: { input: { value: defcs.byte("Value") }, output: { result: defcs.byte("Result") } },
+	bytenot: { input: { value: defcs.byte() }, output: { result: defcs.byte() } },
+	byteneg: { input: { value: defcs.byte() }, output: { result: defcs.byte() } },
 	bytexor: {
-		input: { value1: defcs.byte("Value 1"), value2: defcs.byte("Value 2") },
-		output: { result: defcs.byte("Result") },
+		input: { value1: defcs.byte(), value2: defcs.byte() },
+		output: { result: defcs.byte() },
 	},
 	bytexnor: {
-		input: { value1: defcs.byte("Value 1"), value2: defcs.byte("Value 2") },
-		output: { result: defcs.byte("Result") },
+		input: { value1: defcs.byte(), value2: defcs.byte() },
+		output: { result: defcs.byte() },
 	},
 	byteand: {
-		input: { value1: defcs.byte("Value 1"), value2: defcs.byte("Value 2") },
-		output: { result: defcs.byte("Result") },
+		input: { value1: defcs.byte(), value2: defcs.byte() },
+		output: { result: defcs.byte() },
 	},
 	bytenand: {
-		input: { value1: defcs.byte("Value 1"), value2: defcs.byte("Value 2") },
-		output: { result: defcs.byte("Result") },
+		input: { value1: defcs.byte(), value2: defcs.byte() },
+		output: { result: defcs.byte() },
 	},
 	byteor: {
-		input: { value1: defcs.byte("Value 1"), value2: defcs.byte("Value 2") },
-		output: { result: defcs.byte("Result") },
+		input: { value1: defcs.byte(), value2: defcs.byte() },
+		output: { result: defcs.byte() },
 	},
 	bytenor: {
-		input: { value1: defcs.byte("Value 1"), value2: defcs.byte("Value 2") },
-		output: { result: defcs.byte("Result") },
+		input: { value1: defcs.byte(), value2: defcs.byte() },
+		output: { result: defcs.byte() },
 	},
 	byterotateright: {
-		input: { value1: defcs.byte("Value 1"), value2: defcs.byte("Value 2") },
-		output: { result: defcs.byte("Result") },
+		input: { value1: defcs.byte(), value2: defcs.byte() },
+		output: { result: defcs.byte() },
 	},
 	byterotateleft: {
-		input: { value1: defcs.byte("Value 1"), value2: defcs.byte("Value 2") },
-		output: { result: defcs.byte("Result") },
+		input: { value1: defcs.byte(), value2: defcs.byte() },
+		output: { result: defcs.byte() },
 	},
 	byteshiftright: {
-		input: { value1: defcs.byte("Value 1"), value2: defcs.byte("Value 2") },
-		output: { result: defcs.byte("Result") },
+		input: { value1: defcs.byte(), value2: defcs.byte() },
+		output: { result: defcs.byte() },
 	},
 	byteshiftleft: {
-		input: { value1: defcs.byte("Value 1"), value2: defcs.byte("Value 2") },
-		output: { result: defcs.byte("Result") },
+		input: { value1: defcs.byte(), value2: defcs.byte() },
+		output: { result: defcs.byte() },
 	},
 	bytearithmeticshiftright: {
-		input: { value1: defcs.byte("Value 1"), value2: defcs.byte("Value 2") },
-		output: { result: defcs.byte("Result") },
+		input: { value1: defcs.byte(), value2: defcs.byte() },
+		output: { result: defcs.byte() },
 	},
 	xor: {
-		input: { value1: defcs.bool("Value 1"), value2: defcs.bool("Value 2") },
-		output: { result: defcs.bool("Result") },
+		input: { value1: defcs.bool(), value2: defcs.bool() },
+		output: { result: defcs.bool() },
 	},
 	xnor: {
-		input: { value1: defcs.bool("Value 1"), value2: defcs.bool("Value 2") },
-		output: { result: defcs.bool("Result") },
+		input: { value1: defcs.bool(), value2: defcs.bool() },
+		output: { result: defcs.bool() },
 	},
 	and: {
-		input: { value1: defcs.bool("Value 1"), value2: defcs.bool("Value 2") },
-		output: { result: defcs.bool("Result") },
+		input: { value1: defcs.bool(), value2: defcs.bool() },
+		output: { result: defcs.bool() },
 	},
 	nand: {
-		input: { value1: defcs.bool("Value 1"), value2: defcs.bool("Value 2") },
-		output: { result: defcs.bool("Result") },
+		input: { value1: defcs.bool(), value2: defcs.bool() },
+		output: { result: defcs.bool() },
 	},
 	or: {
-		input: { value1: defcs.bool("Value 1"), value2: defcs.bool("Value 2") },
-		output: { result: defcs.bool("Result") },
+		input: { value1: defcs.bool(), value2: defcs.bool() },
+		output: { result: defcs.bool() },
 	},
 	nor: {
-		input: { value1: defcs.bool("Value 1"), value2: defcs.bool("Value 2") },
-		output: { result: defcs.bool("Result") },
+		input: { value1: defcs.bool(), value2: defcs.bool() },
+		output: { result: defcs.bool() },
 	},
-	not: { input: { value: defcs.bool("Value") }, output: { result: defcs.bool("Result") } },
-	numbertobyte: { input: { value: defcs.number("Value") }, output: { result: defcs.byte("Result") } },
-	bytetonumber: { input: { value: defcs.byte("Value") }, output: { result: defcs.number("Result") } },
+	not: { input: { value: defcs.bool() }, output: { result: defcs.bool() } },
+	numbertobyte: { input: { value: defcs.number() }, output: { result: defcs.byte() } },
+	bytetonumber: { input: { value: defcs.byte() }, output: { result: defcs.number() } },
 	vec3combiner: {
-		input: { value_x: defcs.number("X"), value_y: defcs.number("Y"), value_z: defcs.number("Z") },
-		output: { result: defcs.vector3("Result") },
+		input: { value_x: defcs.number(), value_y: defcs.number(), value_z: defcs.number() },
+		output: { result: defcs.vector3() },
 	},
 	vec3splitter: {
-		input: { value: defcs.vector3("Value") },
-		output: { result_x: defcs.number("X"), result_y: defcs.number("Y"), result_z: defcs.number("Z") },
+		input: { value: defcs.vector3() },
+		output: { result_x: defcs.number(), result_y: defcs.number(), result_z: defcs.number() },
 	},
 	multiplexer: {
 		input: {
-			value: defcs.bool("State"),
-			truevalue: connectors.any("True value", "1"),
-			falsevalue: connectors.any("False value", "1"),
+			value: defcs.bool(),
+			truevalue: connectors.any("1"),
+			falsevalue: connectors.any("1"),
 		},
-		output: { result: connectors.any("Result", "1") },
+		output: { result: connectors.any("1") },
 	},
 };
 

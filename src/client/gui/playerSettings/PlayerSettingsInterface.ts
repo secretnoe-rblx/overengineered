@@ -44,7 +44,13 @@ export class PlayerSettingsInterface extends PlayerSettingsList {
 		this.addCategory("Selection");
 		{
 			this.addColor("Surface color", true) //
-				.initToObjectPart(value, ["visuals", "selection", "surfaceColor"]);
+				.initToObjectPart(value, ["visuals", "selection", "surfaceColor"])
+				.initToObjectPart<number>(value, ["visuals", "selection", "surfaceTransparency"], undefined, (s) =>
+					s.alpha.createBothWayBased(
+						(c) => 1 - c,
+						(c) => 1 - c,
+					),
+				);
 
 			this.addColor("Border color", true) //
 				.initToObjectPart(value, ["visuals", "selection", "borderColor"])
@@ -62,7 +68,13 @@ export class PlayerSettingsInterface extends PlayerSettingsList {
 		this.addCategory("Active selection");
 		{
 			this.addColor("Surface color", true) //
-				.initToObjectPart(value, ["visuals", "multiSelection", "surfaceColor"]);
+				.initToObjectPart(value, ["visuals", "multiSelection", "surfaceColor"])
+				.initToObjectPart<number>(value, ["visuals", "multiSelection", "surfaceTransparency"], undefined, (s) =>
+					s.alpha.createBothWayBased(
+						(c) => 1 - c,
+						(c) => 1 - c,
+					),
+				);
 
 			this.addColor("Border color", true) //
 				.initToObjectPart(value, ["visuals", "multiSelection", "borderColor"])
