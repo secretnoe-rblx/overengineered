@@ -1,11 +1,13 @@
 import { Interface } from "client/gui/Interface";
 import { PlayerSettingsBlacklist } from "client/gui/playerSettings/PlayerSettingsBlacklist";
+import { PlayerSettingsCamera } from "client/gui/playerSettings/PlayerSettingsCamera";
 import { PlayerSettingsControls } from "client/gui/playerSettings/PlayerSettingsControls";
 import { PlayerSettingsEnvironment } from "client/gui/playerSettings/PlayerSettingsEnvironment";
 import { PlayerSettingsGeneral } from "client/gui/playerSettings/PlayerSettingsGeneral";
 import { PlayerSettingsGraphics } from "client/gui/playerSettings/PlayerSettingsGraphics";
 import { PlayerSettingsInterface } from "client/gui/playerSettings/PlayerSettingsInterface";
 import { PlayerSettingsPhysics } from "client/gui/playerSettings/PlayerSettingsPhysics";
+import { PlayerSettingsTheme } from "client/gui/playerSettings/PlayerSettingsTheme";
 import { ButtonAnimatedClickComponent } from "engine/client/gui/ButtonAnimatedClickComponent";
 import { Control } from "engine/client/gui/Control";
 import { ComponentChild } from "engine/shared/component/ComponentChild";
@@ -120,6 +122,8 @@ export class SettingsPopup extends Control<SettingsPopup2Definition> {
 
 		sidebar.addButton("general", 18627409276, () => content.set(PlayerSettingsGeneral));
 		sidebar.addButton("interface", 18627409276, () => content.set(PlayerSettingsInterface));
+		sidebar.addButton("camera", 18627409276, () => content.set(PlayerSettingsCamera));
+		sidebar.addButton("colors", 18627409276, () => content.set(PlayerSettingsTheme));
 		sidebar.addButton("graphics", 18626628666, () => content.set(PlayerSettingsGraphics));
 		sidebar.addButton("environment", 18626647702, () => content.set(PlayerSettingsEnvironment));
 		sidebar.addButton("controls", 18626685039, () => content.set(PlayerSettingsControls));
