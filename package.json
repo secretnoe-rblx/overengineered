@@ -7,7 +7,7 @@
 		"build": "rbxtsc",
 		"watch": "rbxtsc -w"
 	},
-	"keywords": [ ],
+	"keywords": [],
 	"author": "anywaymachines",
 	"license": "ISC",
 	"workspaces": [
@@ -25,8 +25,8 @@
 		"eslint-plugin-prettier": "^5.2.1",
 		"eslint-plugin-roblox-ts": "^0.0.36",
 		"eslint-plugin-unused-imports": "^3.2.0",
-		"prettier": "^3.3.3",
-		"roblox-ts": "file:///home/i3ym/workspace/Projects/rbts/roblox-ts-pe/",
+		"prettier": "^3.4.2",
+		"roblox-ts": "github:anywaymachines/roblox-ts-awm",
 		"typescript": "=5.5.3"
 	},
 	"dependencies": {
