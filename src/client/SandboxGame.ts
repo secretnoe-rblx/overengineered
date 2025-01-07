@@ -15,6 +15,7 @@ import { MusicController } from "client/controller/sound/MusicController";
 import { SoundController } from "client/controller/SoundController";
 import { UpdatePopupController } from "client/controller/UpdatePopupController";
 import { AdminGui } from "client/gui/AdminGui";
+import { FpsCounterController } from "client/gui/FpsCounterController";
 import { GuiAutoScaleController } from "client/gui/GuiAutoScaleController";
 import { HideInterfaceController } from "client/gui/HideInterfaceController";
 import { MainScene } from "client/gui/MainScene";
@@ -100,6 +101,7 @@ export namespace SandboxGame {
 		builder.services.registerService(MusicController);
 		builder.services.registerService(GuiAutoScaleController);
 		builder.services.registerService(HideInterfaceController);
+		builder.services.registerService(FpsCounterController);
 		builder.services.registerService(RainbowGuiController);
 		builder.services
 			.registerSingletonClass(MainScreenLayout)
