@@ -9,6 +9,7 @@ import { GameEnvironmentController } from "client/controller/GameEnvironmentCont
 import { GraphicsSettingsController } from "client/controller/GraphicsSettingsController";
 import { LoadingController } from "client/controller/LoadingController";
 import { LocalPlayerController } from "client/controller/LocalPlayerController";
+import { ObstaclesController } from "client/controller/ObstaclesController";
 import { OtherPlayersController } from "client/controller/OtherPlayersController";
 import { RagdollController } from "client/controller/RagdollController";
 import { MusicController } from "client/controller/sound/MusicController";
@@ -91,6 +92,7 @@ export namespace SandboxGame {
 		builder.services.registerService(EnvBlacklistsController);
 		SoundController.initializeAll(builder);
 		builder.services.registerService(DistanceHideController);
+		builder.services.registerService(ObstaclesController);
 		AdminGui.initializeIfAdminOrStudio(builder);
 
 		builder.services.registerService(DayCycleController);
