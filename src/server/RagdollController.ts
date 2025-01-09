@@ -1,7 +1,7 @@
 import { Debris } from "@rbxts/services";
 import { HostedService } from "engine/shared/di/HostedService";
-import { Instances } from "engine/shared/fixes/Instances";
 import { PlayerWatcher } from "engine/shared/PlayerWatcher";
+import { ReplicatedAssets } from "shared/ReplicatedAssets";
 import { SharedRagdoll } from "shared/SharedRagdoll";
 
 namespace RagdollModule {
@@ -210,7 +210,7 @@ namespace RagdollModule {
 const { isPlayerRagdolling, setPlayerRagdoll } = SharedRagdoll;
 
 function initSounds(): RBXScriptConnection {
-	const impacts = Instances.assets.WaitForChild("Effects").WaitForChild("RagdollImpact");
+	const impacts = ReplicatedAssets.waitForAsset("Effects", "RagdollImpact");
 
 	function init(humanoid: Humanoid, character: Model) {
 		function canHit(part: BasePart, hit: BasePart) {

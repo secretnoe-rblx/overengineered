@@ -12,10 +12,10 @@ import { ComponentChildren } from "engine/shared/component/ComponentChildren";
 import { InstanceComponent } from "engine/shared/component/InstanceComponent";
 import { Element } from "engine/shared/Element";
 import { ObservableValue } from "engine/shared/event/ObservableValue";
-import { Instances } from "engine/shared/fixes/Instances";
 import { BlockWireManager } from "shared/blockLogic/BlockWireManager";
 import { BlockManager } from "shared/building/BlockManager";
 import { Colors } from "shared/Colors";
+import { ReplicatedAssets } from "shared/ReplicatedAssets";
 import type { Tooltip } from "client/gui/static/TooltipsControl";
 import type { ActionController } from "client/modes/build/ActionController";
 import type { BuildingMode } from "client/modes/build/BuildingMode";
@@ -149,7 +149,7 @@ namespace Markers {
 				new ComponentChild<Control<GuiObject & { WireInfoLabel: TextLabel; TypeTextLabel: TextLabel }>>(true),
 			);
 			const createTooltip = () => {
-				const wireInfoSource = Instances.getAssets<{
+				const wireInfoSource = ReplicatedAssets.get<{
 					Wires: { WireInfo: GuiObject & { WireInfoLabel: TextLabel; TypeTextLabel: TextLabel } };
 				}>().Wires.WireInfo;
 				const control = new Control(wireInfoSource.Clone());

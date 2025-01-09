@@ -1,8 +1,8 @@
 import { RunService, Workspace } from "@rbxts/services";
 import { InstanceComponent } from "engine/shared/component/InstanceComponent";
 import { AutoC2SRemoteEvent } from "engine/shared/event/C2SRemoteEvent";
-import { Instances } from "engine/shared/fixes/Instances";
 import { RemoteEvents } from "shared/RemoteEvents";
+import { ReplicatedAssets } from "shared/ReplicatedAssets";
 
 export type modifierValue = {
 	isRelative?: boolean;
@@ -22,15 +22,9 @@ export type baseWeaponProjectile = {
 	Projectile: BasePart;
 } & Model;
 
-const PLASMA_BALL = Instances.assets
-	.WaitForChild("WeaponProjectiles")
-	.WaitForChild("PlasmaProjectile") as baseWeaponProjectile;
-const BULLET = Instances.assets
-	.WaitForChild("WeaponProjectiles")
-	.WaitForChild("BulletProjectile") as baseWeaponProjectile;
-const LASER = Instances.assets
-	.WaitForChild("WeaponProjectiles")
-	.WaitForChild("LaserProjectile") as baseWeaponProjectile;
+const PLASMA_BALL = ReplicatedAssets.waitForAsset<baseWeaponProjectile>("WeaponProjectiles", "PlasmaProjectile");
+const BULLET = ReplicatedAssets.waitForAsset<baseWeaponProjectile>("WeaponProjectiles", "BulletProjectile");
+const LASER = ReplicatedAssets.waitForAsset<baseWeaponProjectile>("WeaponProjectiles", "LaserProjectile");
 
 const projectileFolder = new Instance("Folder", Workspace);
 projectileFolder.Name = "Projectiles";

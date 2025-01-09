@@ -1,7 +1,7 @@
 import { Workspace } from "@rbxts/services";
 import { Component } from "engine/shared/component/Component";
 import { ComponentInstance } from "engine/shared/component/ComponentInstance";
-import { Instances } from "engine/shared/fixes/Instances";
+import { ReplicatedAssets } from "shared/ReplicatedAssets";
 import type { BlockLogicTickContext, GenericBlockLogic } from "shared/blockLogic/BlockLogic";
 import type { BlockLogicRunner } from "shared/blockLogic/BlockLogicRunner";
 
@@ -16,10 +16,7 @@ export class LogicVisualizer extends Component {
 		type label = BillboardGui & { readonly Label: TextLabel };
 		const labelMap = new Map<GenericBlockLogic, label>();
 
-		const labelTemplate = this.asTemplate(
-			Instances.assets.WaitForChild("Wires").WaitForChild("MarkerValue") as label,
-			false,
-		);
+		const labelTemplate = this.asTemplate(ReplicatedAssets.waitForAsset<label>("Wires", "MarkerValue"), false);
 
 		const setLabelsEnabled = (enabled: boolean) => {
 			for (const [, label] of labelMap) {

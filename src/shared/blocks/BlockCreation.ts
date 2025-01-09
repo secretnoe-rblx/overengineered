@@ -3,6 +3,7 @@ import { Element } from "engine/shared/Element";
 import { Instances } from "engine/shared/fixes/Instances";
 import { Lazy } from "engine/shared/Lazy";
 import { BlockWeldInitializer } from "shared/blocks/BlockWeldInitializer";
+import { ReplicatedAssets } from "shared/ReplicatedAssets";
 import type {
 	BlockBuilder,
 	BlockBuilderWithoutIdAndDefaults,
@@ -47,7 +48,7 @@ export namespace BlockCreation {
 				}
 			}
 		};
-		search(Instances.assets.WaitForChild("Placeable"), []);
+		search(ReplicatedAssets.waitForAsset("Placeable"), []);
 
 		return models.mapToMap((model) => $tuple(model.id, model)).asReadonly();
 	});
@@ -55,10 +56,10 @@ export namespace BlockCreation {
 	/** Create a folder on a server, and get it on the client. */
 	function createServerFolder(name: string) {
 		if (RunService.IsServer()) {
-			Element.create("Folder", { Name: name, Parent: Instances.assets });
+			Element.create("Folder", { Name: name, Parent: ReplicatedAssets.assets });
 		}
 
-		return Instances.waitForChild<Folder & { readonly [k in string]: BlockModel }>(Instances.assets, name);
+		return Instances.waitForChild<Folder & { readonly [k in string]: BlockModel }>(ReplicatedAssets.assets, name);
 	}
 
 	export namespace Model {
@@ -105,7 +106,7 @@ export namespace BlockCreation {
 			| "ByteLogicBlockPrefab"
 			| "DoubleByteLogicBlockPrefab";
 		const blockPrefabs = Instances.waitForChild<{ readonly [k in string]: BlockModel }>(
-			Instances.assets,
+			ReplicatedAssets.assets,
 			"Prefabs",
 		);
 		export function fAutoCreated(prefab: PrefabName, text: string): BlockBuilder["modelSource"]["model"] {

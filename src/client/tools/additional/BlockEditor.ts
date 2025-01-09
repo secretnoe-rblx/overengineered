@@ -20,11 +20,11 @@ import { ObservableCollectionSet } from "engine/shared/event/ObservableCollectio
 import { ObservableValue } from "engine/shared/event/ObservableValue";
 import { ArgsSignal } from "engine/shared/event/Signal";
 import { BB } from "engine/shared/fixes/BB";
-import { Instances } from "engine/shared/fixes/Instances";
 import { Strings } from "engine/shared/fixes/String.propmacro";
 import { BlockManager } from "shared/building/BlockManager";
 import { SharedBuilding } from "shared/building/SharedBuilding";
 import { Colors } from "shared/Colors";
+import { ReplicatedAssets } from "shared/ReplicatedAssets";
 import type { MainScreenLayout } from "client/gui/MainScreenLayout";
 import type { ClientBuilding } from "client/modes/build/ClientBuilding";
 import type { PlayerDataStorage } from "client/PlayerDataStorage";
@@ -317,7 +317,7 @@ class MoveComponent extends Component implements EditComponent {
 		// #endregion
 
 		const createVisualizer = () => {
-			const instance = Instances.getAssets<{
+			const instance = ReplicatedAssets.get<{
 				MovementVisualizer: BasePart & { Decal: Decal };
 			}>().MovementVisualizer.Clone();
 			instance.Decal.Transparency = 1;
@@ -822,7 +822,7 @@ export class BlockEditor extends Component {
 			};
 		});
 
-		const handles = Instances.getAssets<{ EditHandles: EditHandles }>().EditHandles.Clone();
+		const handles = ReplicatedAssets.get<{ EditHandles: EditHandles }>().EditHandles.Clone();
 		handles.Parent = Interface.getPlayerGui();
 		ComponentInstance.init(this, handles);
 
