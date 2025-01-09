@@ -1,3 +1,6 @@
+/// <reference types="../../node_modules/@rbxts/types/include/generated/PluginSecurity.d.ts" />
+declare const plugin: Plugin;
+
 if (game.GetService("RunService").IsRunning()) {
 	new Instance("BindableEvent").Event.Wait();
 }
@@ -45,8 +48,8 @@ import type { ReadonlyObservableValue } from "engine/shared/event/ObservableValu
 
 TS.import = previmport;
 
-const selectionService = game.GetService("Selection" as keyof Services) as unknown as SelectionService;
-const historyService = game.GetService("ChangeHistoryService" as keyof Services) as Instance as ChangeHistoryService;
+const selectionService = game.GetService("Selection");
+const historyService = game.GetService("ChangeHistoryService");
 
 //
 
@@ -587,7 +590,7 @@ class AnimationGroupControls extends Control<AnimationGroupControlsDefinition> {
 			new ButtonControl(gui.CreateScript, () => {
 				const selection = selectionService.Get();
 
-				const historyIdentifier = historyService.TryBeginRecording("Create animator scripts");
+				const historyIdentifier = historyService.TryBeginRecording("Create animator scripts", undefined);
 
 				for (const selected of selection) {
 					const mscript = new Instance("ModuleScript") as ModuleScript & { Source: string };
@@ -599,7 +602,7 @@ class AnimationGroupControls extends Control<AnimationGroupControlsDefinition> {
 				}
 
 				if (historyIdentifier !== undefined) {
-					historyService.FinishRecording(historyIdentifier, Enum.FinishRecordingOperation.Commit);
+					historyService.FinishRecording(historyIdentifier, Enum.FinishRecordingOperation.Commit, undefined);
 				}
 			}),
 		);
