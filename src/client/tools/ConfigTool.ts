@@ -8,6 +8,7 @@ import { SelectedBlocksHighlighter } from "client/tools/highlighters/SelectedBlo
 import { ToolBase } from "client/tools/ToolBase";
 import { Control } from "engine/client/gui/Control";
 import { InputController } from "engine/client/InputController";
+import { ComponentChild } from "engine/shared/component/ComponentChild";
 import { ObservableCollectionSet } from "engine/shared/event/ObservableCollection";
 import { JSON } from "engine/shared/fixes/Json";
 import { Objects } from "engine/shared/fixes/Objects";
@@ -17,6 +18,7 @@ import { BlockWireManager } from "shared/blockLogic/BlockWireManager";
 import { BlockManager } from "shared/building/BlockManager";
 import { Colors } from "shared/Colors";
 import { VectorUtils } from "shared/utils/VectorUtils";
+import type { MainScreenLayout } from "client/gui/MainScreenLayout";
 import type { ReportSubmitController } from "client/gui/popup/ReportSubmitPopup";
 import type { ActionController } from "client/modes/build/ActionController";
 import type { BuildingMode } from "client/modes/build/BuildingMode";
@@ -43,15 +45,23 @@ namespace Scene {
 	};
 	@injectable
 	export class ConfigToolScene extends Control<ConfigToolSceneDefinition> {
+		private readonly configContainer;
+		private readonly configParent;
+
 		constructor(
 			gui: ConfigToolSceneDefinition,
 			@inject private readonly tool: ConfigTool,
 			@inject private readonly blockList: BlockList,
 			@inject private readonly di: DIContainer,
 			@inject private readonly reportSubmitter: ReportSubmitController,
+			@inject private readonly mainScreen: MainScreenLayout,
 			@inject actionController: ActionController,
 		) {
 			super(gui);
+
+			type cc = GuiObject & { Content: GuiObject & { ScrollingFrame: ScrollingFrame } };
+			this.configContainer = this.parentGui(this.mainScreen.registerLeft<cc>("Config"));
+			this.configParent = this.configContainer.parent(new ComponentChild(true));
 
 			const selected = tool.selected;
 			this.event.subscribeCollection(selected, () => {
@@ -84,19 +94,13 @@ namespace Scene {
 			});
 
 			this.onEnable(() => this.updateConfigs([]));
-			this.onDisable(() => {
-				this.currentConfigControl?.destroy();
-				this.currentConfigControl = undefined;
-			});
 			this.event.onPrepare((inputType) => {
 				this.gui.Bottom.DeselectButton.Visible = inputType !== "Gamepad";
 			});
 		}
 
-		private currentConfigControl?: MultiBlockConfigControl;
 		private updateConfigs(selected: readonly BlockModel[]) {
-			this.currentConfigControl?.destroy();
-			this.currentConfigControl = undefined;
+			this.configParent.clear();
 
 			const wasVisible = this.gui.Visible;
 
@@ -150,12 +154,13 @@ namespace Scene {
 				selected.map(BlockManager.manager.uuid.get),
 			);
 
-			const gui = this.gui.ParamsSelection.Content.ScrollingFrame.Clone();
+			this.configContainer.instance.Content.ScrollingFrame.Visible = false;
+			const gui = this.configContainer.instance.Content.ScrollingFrame.Clone();
 			gui.Visible = true;
-			gui.Parent = this.gui.ParamsSelection.Content;
+			gui.Parent = this.configContainer.instance.Content;
 
 			try {
-				const configControl = this.add(
+				const configControl = this.configParent.set(
 					this.di.resolveForeignClass(MultiBlockConfigControl, [
 						gui,
 						onedef,
@@ -164,7 +169,6 @@ namespace Scene {
 						markered,
 					]),
 				);
-				this.currentConfigControl = configControl;
 
 				configControl.travelledTo.Connect((uuid) => {
 					this.tool.unselectAll();
