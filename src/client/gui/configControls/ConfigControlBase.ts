@@ -9,15 +9,15 @@ type FilteredPath<T, V> = T extends object
 	? { [K in keyof T]: T[K] extends V ? [K] : T[K] extends object ? [K, ...FilteredPath<T[K], V>] : never }[keyof T]
 	: [];
 
-export type PlayerSettingBaseDefinition = GuiObject & PlayerSettingBaseDefinitionParts;
-export type PlayerSettingBaseDefinitionParts = {
+export type ConfigControlBaseDefinition = GuiObject & ConfigControlBaseDefinitionParts;
+export type ConfigControlBaseDefinitionParts = {
 	readonly TitleLabel: TextLabel;
 	readonly DescriptionLabel?: TextLabel;
 };
-export class PlayerSettingBase<
-	T extends PlayerSettingBaseDefinitionParts,
+export class ConfigControlBase<
+	T extends ConfigControlBaseDefinitionParts,
 	V,
-	TParts extends PlayerSettingBaseDefinitionParts = T,
+	TParts extends ConfigControlBaseDefinitionParts = T,
 > extends PartialControl<TParts> {
 	protected readonly _value: ObservableValue<V>;
 	protected readonly _v;

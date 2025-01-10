@@ -1,13 +1,13 @@
-import { PlayerSettingsList } from "client/gui/playerSettings/PlayerSettingsList";
+import { ConfigControlList } from "client/gui/configControls/ConfigControlsList";
 import { Observables } from "engine/shared/event/Observables";
 import type {
-	PlayerSettingsListDefinition,
-	PlayerSettingsTemplateList,
-} from "client/gui/playerSettings/PlayerSettingsList";
+	ConfigControlListDefinition,
+	ConfigControlTemplateList,
+} from "client/gui/configControls/ConfigControlsList";
 import type { ObservableValue } from "engine/shared/event/ObservableValue";
 
-export class PlayerSettingsPhysics extends PlayerSettingsList {
-	constructor(gui: PlayerSettingsListDefinition & PlayerSettingsTemplateList, value: ObservableValue<PlayerConfig>) {
+export class PlayerSettingsPhysics extends ConfigControlList {
+	constructor(gui: ConfigControlListDefinition & ConfigControlTemplateList, value: ObservableValue<PlayerConfig>) {
 		super(gui);
 
 		this.addCategory("General");

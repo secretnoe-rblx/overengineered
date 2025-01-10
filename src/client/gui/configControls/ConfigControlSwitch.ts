@@ -1,29 +1,29 @@
+import { ConfigControlBase } from "client/gui/configControls/ConfigControlBase";
 import { SwitchControl } from "client/gui/controls/SwitchControl";
-import { PlayerSettingBase } from "client/gui/playerSettings/controls/PlayerSettingBase";
 import { Objects } from "engine/shared/fixes/Objects";
+import type { ConfigControlBaseDefinitionParts } from "client/gui/configControls/ConfigControlBase";
 import type { SwitchControlDefinition, SwitchControlItem } from "client/gui/controls/SwitchControl";
-import type { PlayerSettingBaseDefinitionParts } from "client/gui/playerSettings/controls/PlayerSettingBase";
 
-declare module "client/gui/playerSettings/PlayerSettingsList" {
-	export interface PlayerSettingsTemplateList {
-		readonly Switch: PlayerSettingSwitchDefinition;
+declare module "client/gui/configControls/ConfigControlsList" {
+	export interface ConfigControlTemplateList {
+		readonly Switch: ConfigControlSwitchDefinition;
 	}
 }
 
-export type PlayerSettingSwitchDefinition = GuiObject &
-	PlayerSettingSwitchDefinitionParts & {
+export type ConfigControlSwitchDefinition = GuiObject &
+	ConfigControlSwitchDefinitionParts & {
 		readonly Control: SwitchControlDefinition;
 	};
-export type PlayerSettingSwitchDefinitionParts = PlayerSettingBaseDefinitionParts & {
+export type ConfigControlSwitchDefinitionParts = ConfigControlBaseDefinitionParts & {
 	readonly ChosenItemDescriptionLabel: TextLabel;
 };
 
-export class PlayerSettingSwitch<T extends string> extends PlayerSettingBase<
-	PlayerSettingSwitchDefinition,
+export class ConfigControlSwitch<T extends string> extends ConfigControlBase<
+	ConfigControlSwitchDefinition,
 	T,
-	PlayerSettingSwitchDefinitionParts
+	ConfigControlSwitchDefinitionParts
 > {
-	constructor(gui: PlayerSettingSwitchDefinition, name: string, items: readonly [key: T, item: SwitchControlItem][]) {
+	constructor(gui: ConfigControlSwitchDefinition, name: string, items: readonly [key: T, item: SwitchControlItem][]) {
 		super(gui, name, items[0][0]);
 
 		const control = this.parent(new SwitchControl<T>(gui.Control, items));

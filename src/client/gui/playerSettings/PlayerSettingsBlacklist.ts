@@ -1,18 +1,18 @@
-import { PlayerSettingBlacklist } from "client/gui/playerSettings/controls/PlayerSettingBlacklist";
-import { PlayerSettingsList } from "client/gui/playerSettings/PlayerSettingsList";
+import { ConfigControlBlacklist } from "client/gui/configControls/ConfigControlBlacklist";
+import { ConfigControlList } from "client/gui/configControls/ConfigControlsList";
 import { Objects } from "engine/shared/fixes/Objects";
 import { CustomRemotes } from "shared/Remotes";
 import type {
-	PlayerSettingsListDefinition,
-	PlayerSettingsTemplateList,
-} from "client/gui/playerSettings/PlayerSettingsList";
+	ConfigControlListDefinition,
+	ConfigControlTemplateList,
+} from "client/gui/configControls/ConfigControlsList";
 import type { ObservableValue } from "engine/shared/event/ObservableValue";
 import type { SharedPlot } from "shared/building/SharedPlot";
 
 @injectable
-export class PlayerSettingsBlacklist extends PlayerSettingsList {
+export class PlayerSettingsBlacklist extends ConfigControlList {
 	constructor(
-		gui: PlayerSettingsListDefinition & PlayerSettingsTemplateList,
+		gui: ConfigControlListDefinition & ConfigControlTemplateList,
 		value: ObservableValue<PlayerConfig>,
 		@inject plot: SharedPlot,
 	) {
@@ -27,7 +27,7 @@ export class PlayerSettingsBlacklist extends PlayerSettingsList {
 			CustomRemotes.gui.settings.permissions.isolationMode.send(value),
 		);
 
-		const blacklist = this.parent(new PlayerSettingBlacklist(this.clone(gui.Blacklist), "Blacklist")) //
+		const blacklist = this.parent(new ConfigControlBlacklist(this.clone(gui.Blacklist), "Blacklist")) //
 			.initToObservable(blacklistedPlayers);
 		this.event.subscribe(blacklist.v.submitted, (players) =>
 			CustomRemotes.gui.settings.permissions.updateBlacklist.send(players),

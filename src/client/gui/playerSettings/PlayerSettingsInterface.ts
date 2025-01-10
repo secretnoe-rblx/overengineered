@@ -1,12 +1,12 @@
-import { PlayerSettingsList } from "client/gui/playerSettings/PlayerSettingsList";
+import { ConfigControlList } from "client/gui/configControls/ConfigControlsList";
 import type {
-	PlayerSettingsListDefinition,
-	PlayerSettingsTemplateList,
-} from "client/gui/playerSettings/PlayerSettingsList";
+	ConfigControlListDefinition,
+	ConfigControlTemplateList,
+} from "client/gui/configControls/ConfigControlsList";
 import type { ObservableValue } from "engine/shared/event/ObservableValue";
 
-export class PlayerSettingsInterface extends PlayerSettingsList {
-	constructor(gui: PlayerSettingsListDefinition & PlayerSettingsTemplateList, value: ObservableValue<PlayerConfig>) {
+export class PlayerSettingsInterface extends ConfigControlList {
+	constructor(gui: ConfigControlListDefinition & ConfigControlTemplateList, value: ObservableValue<PlayerConfig>) {
 		super(gui);
 
 		this.addCategory("Interface");

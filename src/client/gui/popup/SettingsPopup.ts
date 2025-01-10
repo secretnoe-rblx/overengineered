@@ -12,7 +12,7 @@ import { ButtonAnimatedClickComponent } from "engine/client/gui/ButtonAnimatedCl
 import { Control } from "engine/client/gui/Control";
 import { ComponentChild } from "engine/shared/component/ComponentChild";
 import { ObservableValue } from "engine/shared/event/ObservableValue";
-import type { PlayerSettingsTemplateList } from "client/gui/playerSettings/PlayerSettingsList";
+import type { ConfigControlTemplateList } from "client/gui/configControls/ConfigControlsList";
 import type { PlayerDataStorage } from "client/PlayerDataStorage";
 import type { Component } from "engine/shared/component/Component";
 
@@ -46,7 +46,7 @@ class Sidebar extends Control<SidebarDefinition> {
 }
 
 type ContentDefinition = GuiObject & {
-	readonly ScrollingFrame: ScrollingFrame & PlayerSettingsTemplateList;
+	readonly ScrollingFrame: ScrollingFrame & ConfigControlTemplateList;
 };
 class Content extends Control<ContentDefinition> {
 	private readonly content;
@@ -65,7 +65,7 @@ class Content extends Control<ContentDefinition> {
 		const contentScrollTemplate = this.asTemplate(gui.ScrollingFrame);
 
 		const content = new ObservableValue<
-			| ConstructorOf<Component, [PlayerSettingsTemplateList, ObservableValue<PlayerConfig>, ...args: never[]]>
+			| ConstructorOf<Component, [ConfigControlTemplateList, ObservableValue<PlayerConfig>, ...args: never[]]>
 			| undefined
 		>(undefined);
 		this.onDisable(() => content.set(undefined));
@@ -85,10 +85,7 @@ class Content extends Control<ContentDefinition> {
 
 	set<T extends GuiObject>(
 		clazz:
-			| ConstructorOf<
-					Component,
-					[T & PlayerSettingsTemplateList, ObservableValue<PlayerConfig>, ...args: never[]]
-			  >
+			| ConstructorOf<Component, [T & ConfigControlTemplateList, ObservableValue<PlayerConfig>, ...args: never[]]>
 			| undefined,
 	): void {
 		this.content.set(clazz as never);

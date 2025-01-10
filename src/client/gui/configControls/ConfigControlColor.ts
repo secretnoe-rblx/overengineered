@@ -1,24 +1,24 @@
 import { ColorChooser } from "client/gui/ColorChooser";
-import { PlayerSettingBase } from "client/gui/playerSettings/controls/PlayerSettingBase";
+import { ConfigControlBase } from "client/gui/configControls/ConfigControlBase";
 import { ObservableValue } from "engine/shared/event/ObservableValue";
 import { SubmittableValue } from "engine/shared/event/SubmittableValue";
 import { Colors } from "shared/Colors";
 import type { ColorChooserDefinition } from "client/gui/ColorChooser";
-import type { PlayerSettingBaseDefinition } from "client/gui/playerSettings/controls/PlayerSettingBase";
+import type { ConfigControlBaseDefinition } from "client/gui/configControls/ConfigControlBase";
 
-declare module "client/gui/playerSettings/PlayerSettingsList" {
-	export interface PlayerSettingsTemplateList {
-		readonly Color: PlayerSettingColorDefinition;
+declare module "client/gui/configControls/ConfigControlsList" {
+	export interface ConfigControlTemplateList {
+		readonly Color: ConfigControlColorDefinition;
 	}
 }
 
-export type PlayerSettingColorDefinition = PlayerSettingBaseDefinition & {
+export type ConfigControlColorDefinition = ConfigControlBaseDefinition & {
 	readonly Control: ColorChooserDefinition;
 };
-export class PlayerSettingColor extends PlayerSettingBase<PlayerSettingColorDefinition, Color3> {
+export class ConfigControlColor extends ConfigControlBase<ConfigControlColorDefinition, Color3> {
 	readonly alpha;
 
-	constructor(gui: PlayerSettingColorDefinition, name: string, Alpha = false) {
+	constructor(gui: ConfigControlColorDefinition, name: string, Alpha = false) {
 		super(gui, name, Colors.white);
 
 		this.alpha = new SubmittableValue(new ObservableValue(1));
