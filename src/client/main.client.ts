@@ -94,7 +94,6 @@ if (RunService.IsStudio() && Players.LocalPlayer.Name === "samlovebutter") {
 		});
 		task.wait(0.1);
 	}
-	*/
 	LaserProjectile.spawn.send({
 		startPosition: new Vector3(359, -16360, 330),
 		baseVelocity: new Vector3(
@@ -104,6 +103,7 @@ if (RunService.IsStudio() && Players.LocalPlayer.Name === "samlovebutter") {
 		),
 		baseDamage: 160.5,
 	});
+	*/
 }
 if (RunService.IsStudio() && Players.LocalPlayer.Name === "i3ymm") {
 	const testsName = "BlockTests";

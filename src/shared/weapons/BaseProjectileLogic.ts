@@ -45,6 +45,7 @@ export class WeaponProjectile extends InstanceComponent<BasePart> {
 		readonly baseVelocity: Vector3;
 		readonly baseDamage: number;
 		readonly lifetime?: number; //<--- seconds
+		readonly modifiers?: projectileModifier[]; // <------ calculate it yourself!
 	}>("projectile_spawn", "RemoteEvent");
 
 	static readonly sync_hit = new AutoC2SRemoteEvent<{

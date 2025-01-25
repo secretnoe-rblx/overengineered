@@ -110,6 +110,10 @@ export const CreateSandboxBlocks = (di: DIContainer): BlockList => {
 		ReadonlyMemoryBlock,
 		RandomBlock,
 
+		// PlasmaCoilAcceleratorUpgradeBlock,
+		// PlasmaCoilAcceleratorBlock,
+		// PlasmaEmitterBlock,
+
 		AltimeterBlock,
 		KeySensorBlock,
 		ControllerBlock,
