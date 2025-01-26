@@ -92,7 +92,7 @@ export namespace SandboxGame {
 		builder.services.registerService(MusicController);
 		builder.services.registerService(GuiAutoScaleController);
 		builder.services.registerService(HideInterfaceController);
-		//builder.services.registerService(WeaponModuleSystem); //weapons test
+		// builder.services.registerService(WeaponModuleSystem); //weapons test
 		ActionsGui.initialize(builder);
 
 		if (!RunService.IsStudio()) {

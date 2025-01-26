@@ -2,7 +2,7 @@ import { Workspace } from "@rbxts/services";
 import { HostedService } from "engine/shared/di/HostedService";
 import { BlockManager } from "shared/building/BlockManager";
 import type { SharedPlots } from "shared/building/SharedPlots";
-import type { projectileModifier } from "shared/weapons/BaseProjectileLogic";
+import type { modifierValue, projectileModifier } from "shared/weapons/BaseProjectileLogic";
 
 type weaponMarker = {
 	markerInstance: BasePart;
@@ -17,10 +17,7 @@ type uuid = string;
 type recalcOut = {
 	module: WeaponModule;
 	extraModifier?: projectileModifier;
-	activeOutputs: {
-		marker: weaponMarker;
-		output: Vector3;
-	}[];
+	activeOutputs: weaponMarker[];
 };
 
 export class WeaponModule {
@@ -120,11 +117,8 @@ export class ModuleCollection {
 	readonly emitters: Set<WeaponModule> = new Set();
 	readonly calculatedOutputs: {
 		module: WeaponModule;
-		outputs: {
-			marker: weaponMarker;
-			output: Vector3;
-		}[];
-		modifiers: projectileModifier[];
+		outputs: weaponMarker[];
+		modifier: projectileModifier;
 	}[] = [];
 
 	constructor(readonly mainModule: WeaponModule) {
@@ -167,18 +161,12 @@ export class ModuleCollection {
 		path: recalcOut[] = [],
 	): recalcOut[] | undefined {
 		const connectedModules: WeaponModule[] = [];
-		const activeOutputs: {
-			marker: weaponMarker;
-			output: Vector3;
-		}[] = [];
+		const activeOutputs: weaponMarker[] = [];
 
 		//get all markers
 		for (const [n, e] of pairs(nextModule.allMarkers)) {
 			if (!e.occupiedWith.block) {
-				activeOutputs.push({
-					marker: e,
-					output: e.markerInstance.Position.sub(nextModule.instance.GetPivot().Position),
-				});
+				activeOutputs.push(e);
 			}
 
 			if (e.occupiedWith.module) {
@@ -191,16 +179,17 @@ export class ModuleCollection {
 			activeOutputs,
 		};
 
-		// if (el.size() > 0) {
-		// 	const baseModifierValue: modifierValue = { value: 1 / activeOutputs.size(), isRelative: true };
-		// 	obj.extraModifier = {
-		// 		speedModifier: baseModifierValue,
-		// 		lifetimeModifier: baseModifierValue,
-		// 		heatDamage: baseModifierValue,
-		// 		impactDamage: baseModifierValue,
-		// 		explosiveDamage: baseModifierValue,
-		// 	};
-		// }
+		// add modifier because outputs split, i.e. divide output between modules
+		if (connectedModules.size() > 0) {
+			const baseModifierValue: modifierValue = { value: 1 / activeOutputs.size(), isRelative: true };
+			obj.extraModifier = {
+				speedModifier: baseModifierValue,
+				lifetimeModifier: baseModifierValue,
+				heatDamage: baseModifierValue,
+				impactDamage: baseModifierValue,
+				explosiveDamage: baseModifierValue,
+			};
+		}
 
 		//if size === then there's only one block
 		// therefore just stop iterations on it
@@ -223,39 +212,18 @@ export class ModuleCollection {
 		return;
 	}
 
-	private static calculateTotalModifier(modifiers: projectileModifier[]): projectileModifier {
-		const result: projectileModifier = {
-			speedModifier: { value: 0 },
-			heatDamage: { value: 0 },
-			impactDamage: { value: 0 },
-			explosiveDamage: { value: 0 },
-			lifetimeModifier: { value: 0 },
-		};
+	static calculateTotalModifier(modifiers: projectileModifier[]): projectileModifier | undefined {
+		if (modifiers.size() === 0) return;
+		const result: projectileModifier = {};
+
 		for (const m of modifiers) {
 			for (const [k, v] of pairs(m)) {
-				if (v.isRelative) {
-					result[k]!.value *= v.value;
+				result[k] ??= { value: 0, isRelative: v.isRelative ?? false };
+				if ((v.isRelative ?? false) !== result[k].isRelative) {
+					result[k].value *= v.value;
 					continue;
 				}
-				result[k]!.value += v.value;
-			}
-		}
-
-		return result;
-	}
-
-	private static addModifiers(modifiers: projectileModifier[]): projectileModifier {
-		const result: projectileModifier = {
-			speedModifier: { value: 0 },
-			heatDamage: { value: 0 },
-			impactDamage: { value: 0 },
-			explosiveDamage: { value: 0 },
-			lifetimeModifier: { value: 0 },
-		};
-
-		for (const m of modifiers) {
-			for (const [k, v] of pairs(m)) {
-				result[k]!.value += v.value;
+				result[k].value += v.value;
 			}
 		}
 
@@ -265,54 +233,60 @@ export class ModuleCollection {
 	recalc() {
 		const paths: recalcOut[][] = [];
 		for (const e of this.emitters) this.recursivePath(paths, e);
-		print(paths.map((v) => v.map((e) => e.module.instance)));
+		//print(paths.map((v) => v.map((e) => e.module.instance)));
 		this.calculatedOutputs.clear();
 
-		const getUpgrades = (a: recalcOut): projectileModifier => {
-			const markers = a.module.getModuleMarkers();
-			const result = {
-				speedModifier: { value: 0 },
-				heatDamage: { value: 0 },
-				impactDamage: { value: 0 },
-				explosiveDamage: { value: 0 },
-				lifetimeModifier: { value: 0 },
-			};
+		const getUpgrades = (a: WeaponModule): projectileModifier[] => {
+			const result: projectileModifier[] = [];
+			const upgradePaths: recalcOut[][] = [];
+			this.recursivePath(upgradePaths, a);
 
-			//todo: finish <--------------------------------------------------------
+			for (const upgradePath of upgradePaths) {
+				const buf: projectileModifier[] = [];
+				for (const m of upgradePath) {
+					if (m.module.block.weaponConfig?.type !== "UPGRADE") continue;
+					buf.push(m.module.block.weaponConfig!.modifier);
+					if (m.extraModifier) buf.push(m.extraModifier);
+				}
+				//print([a.instance, ...buf]);
+				const mod = ModuleCollection.calculateTotalModifier(buf);
+				//print(upgradePath.map((v) => v.module.block.weaponConfig!.modifier));
+				//print(mod);
+				if (!mod) continue;
+				result.push(mod);
+			}
 
-			// for(const [name, marker] of pairs(a.module.allMarkers)){
-			// 	const mod = marker.occupiedWith.module;
-			// 	if(mod && mod.block.weaponConfig?.type === "UPGRADE"){
-			// 		const ps:recalcOut[][] = [];
-			// 		this.recursivePath(ps, mod);
-			// 		const mfs: projectileModifier[] = [];
-			// 		for(const p of ps){
-
-			// 			mfs.push(p .module!.block.weaponConfig!.modifier);
-			// 		}
-			// 	}
-			// }
-
-			return {} as projectileModifier;
+			return result;
 		};
 
 		for (const path of paths) {
 			const buf: projectileModifier[] = [];
 			for (const p of path) {
+				//if upgrade then do not iterate trough it
+				if (p.module.block!.weaponConfig!.type === "UPGRADE") continue;
+
+				// add effect from the block itself
 				buf.push(p.module.block.weaponConfig!.modifier);
 
+				// add effects from connected upgrades
+				for (const u of getUpgrades(p.module)) buf.push(u);
+
+				//if there are no holes to shoot from then skip
 				if (p.activeOutputs.size() === 0) continue;
 
+				//otherwise add modifier
 				buf.push(p.extraModifier!);
+
+				// add the block to the list of outputs
 				this.calculatedOutputs.push({
 					module: p.module,
-					modifiers: buf,
+					modifier: ModuleCollection.calculateTotalModifier(buf) ?? {},
 					outputs: p.activeOutputs,
 				});
 			}
+			//print(buf);
 		}
-
-		print(this.calculatedOutputs.map((v) => v.module.instance));
+		//print(this.calculatedOutputs.map((v) => v.modifiers));
 
 		// print(
 		// 	"res:",
@@ -354,7 +328,9 @@ export class WeaponModuleSystem extends HostedService {
 				if (folder === undefined) continue;
 
 				this.event.subscribe(folder.ChildAdded, (block) => {
-					new WeaponModule(BlockManager.getBlockDataByBlockModel(block as BlockModel), blockList);
+					const blockInfo = BlockManager.getBlockDataByBlockModel(block as BlockModel);
+					if (!blockList.blocks[blockInfo.id]?.weaponConfig) return;
+					new WeaponModule(blockInfo, blockList);
 					updateAll();
 				});
 

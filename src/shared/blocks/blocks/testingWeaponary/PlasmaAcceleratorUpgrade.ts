@@ -25,7 +25,7 @@ export const PlasmaCoilAcceleratorUpgradeBlock = {
 		type: "UPGRADE",
 		modifier: {
 			speedModifier: {
-				value: 10,
+				value: 1.05,
 				isRelative: true,
 			},
 		},

@@ -40,13 +40,13 @@ class Logic extends InstanceBlockLogic<typeof definition> {
 			const outs = module.parentCollection.calculatedOutputs;
 			for (const e of outs) {
 				for (const o of e.outputs) {
-					print();
+					const direction = o.markerInstance.Position.sub(e.module.instance.GetPivot().Position);
 					PlasmaProjectile.spawn.send({
-						startPosition: o.marker.markerInstance.Position.add(o.output),
-						baseVelocity: o.output,
+						startPosition: o.markerInstance.Position.add(direction), //todo replace with block pos of something else
+						baseVelocity: direction,
 						baseDamage: 0,
+						modifier: e.modifier,
 					});
-					print("Spawned!");
 				}
 			}
 		});
@@ -63,7 +63,7 @@ export const PlasmaEmitterBlock = {
 		type: "CORE",
 		modifier: {
 			speedModifier: {
-				value: 1,
+				value: 10,
 			},
 		},
 		markers: {

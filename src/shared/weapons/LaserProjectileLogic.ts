@@ -1,7 +1,7 @@
 import { Workspace } from "@rbxts/services";
 import { AutoC2SRemoteEvent } from "engine/shared/event/C2SRemoteEvent";
 import { WeaponProjectile } from "shared/weapons/BaseProjectileLogic";
-import type { baseWeaponProjectile } from "shared/weapons/BaseProjectileLogic";
+import type { baseWeaponProjectile, projectileModifier } from "shared/weapons/BaseProjectileLogic";
 
 type laserVisualsAmountConstant = 1 | 2 | 3 | 4 | 5;
 type laser = baseWeaponProjectile & Record<`LaserProjectileVisual${laserVisualsAmountConstant}`, BasePart>;
@@ -11,14 +11,16 @@ export class LaserProjectile extends WeaponProjectile {
 		readonly startPosition: Vector3;
 		readonly baseVelocity: Vector3;
 		readonly baseDamage: number;
+		readonly modifier: projectileModifier;
 	}>("laser_spawn", "RemoteEvent");
 
 	private forwardVector = this.projectilePart.GetPivot().LookVector;
 	private detectionlessSize = new Vector3(1024, this.projectilePart.Size.Y, this.projectilePart.Size.Z);
 	private laserModel: BasePart[] = [];
 	private damage;
-	constructor(startPosition: Vector3, baseVelocity: Vector3, baseDamage: number) {
-		super(startPosition, "ENERGY", WeaponProjectile.LASER_PROJECTILE, baseVelocity.Unit, baseDamage);
+
+	constructor(startPosition: Vector3, baseVelocity: Vector3, baseDamage: number, modifier: projectileModifier) {
+		super(startPosition, "ENERGY", WeaponProjectile.LASER_PROJECTILE, baseVelocity.Unit, baseDamage, modifier);
 		this.projectilePart.Transparency = 1;
 		this.projectilePart.Size = Vector3.one;
 		this.damage = this.baseDamage;
@@ -66,7 +68,7 @@ export class LaserProjectile extends WeaponProjectile {
 	}
 }
 
-LaserProjectile.spawn.invoked.Connect((player, { startPosition, baseVelocity, baseDamage }) => {
+LaserProjectile.spawn.invoked.Connect((player, { startPosition, baseVelocity, baseDamage, modifier }) => {
 	print("Laser spawned");
-	new LaserProjectile(startPosition, baseVelocity, baseDamage);
+	new LaserProjectile(startPosition, baseVelocity, baseDamage, modifier);
 });

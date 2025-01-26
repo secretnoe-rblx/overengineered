@@ -15,7 +15,6 @@ import { gameInfo } from "shared/GameInfo";
 import { RemoteEvents } from "shared/RemoteEvents";
 import { CustomRemotes } from "shared/Remotes";
 import { SlotsMeta } from "shared/SlotsMeta";
-import { LaserProjectile } from "shared/weapons/LaserProjectileLogic";
 import type { PlayerDataStorage } from "client/PlayerDataStorage";
 
 LoadingController.show("Initializing");
@@ -79,30 +78,50 @@ $log("Client loaded.");
 //host.services.resolveForeignClass(CenterOfMassController).enable();
 
 //testing
-if (RunService.IsStudio() && Players.LocalPlayer.Name === "samlovebutter") {
+//RunService.IsStudio() &&
+if (Players.LocalPlayer.Name === "samlovebutter") {
 	//&& (false as boolean)
 	/*
-	while (true as boolean) {
-		PlasmaProjectile.spawn.send({
-			startPosition: new Vector3(359, -16360, 330),
-			baseVelocity: new Vector3(
-				0 + (math.random() - 0.5) * 10,
-				20 + (math.random() - 0.5) * 10,
-				-(500 + (math.random() - 0.5) * 10),
-			),
-			baseDamage: 1,
-		});
-		task.wait(0.1);
-	}
+	task.spawn(() => {
+		while (true as boolean) {
+			PlasmaProjectile.spawn.send({
+				startPosition: new Vector3(369, -16377, 330),
+				baseVelocity: new Vector3(
+					0 + (math.random() - 0.5) * 10,
+					20 + (math.random() - 0.5) * 10,
+					-(500 + (math.random() - 0.5) * 10),
+				),
+				baseDamage: 1,
+			});
+			task.wait(0.1);
+		}
+	});
+
+	task.spawn(() => {
+		while (true as boolean) {
+			BulletProjectile.spawn.send({
+				startPosition: new Vector3(379, -16377, 330),
+				baseVelocity: new Vector3(
+					0 + (math.random() - 0.5) * 10,
+					20 + (math.random() - 0.5) * 10,
+					-(500 + (math.random() - 0.5) * 10),
+				),
+				baseDamage: 1,
+			});
+			task.wait(0.1);
+		}
+	});
+
 	LaserProjectile.spawn.send({
-		startPosition: new Vector3(359, -16360, 330),
+		startPosition: new Vector3(359, -16377, 330),
 		baseVelocity: new Vector3(
 			0 + (math.random() - 0.5) * 10,
 			20 + (math.random() - 0.5) * 10,
 			-(500 + (math.random() - 0.5) * 10),
 		),
-		baseDamage: 160.5,
+		baseDamage: 1,
 	});
+	
 	*/
 }
 if (RunService.IsStudio() && Players.LocalPlayer.Name === "i3ymm") {

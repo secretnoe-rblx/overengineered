@@ -2,19 +2,20 @@ import { Workspace } from "@rbxts/services";
 import { Easing } from "engine/shared/component/Easing";
 import { AutoC2SRemoteEvent } from "engine/shared/event/C2SRemoteEvent";
 import { WeaponProjectile } from "shared/weapons/BaseProjectileLogic";
-import type { modifierValue } from "shared/weapons/BaseProjectileLogic";
+import type { modifierValue, projectileModifier } from "shared/weapons/BaseProjectileLogic";
 
 export class PlasmaProjectile extends WeaponProjectile {
 	private startSize = this.projectilePart.Size;
 	private readonly vectorForce: VectorForce;
-	private currentlyExploding: boolean = false;
 	static readonly spawn = new AutoC2SRemoteEvent<{
 		readonly startPosition: Vector3;
 		readonly baseVelocity: Vector3;
 		readonly baseDamage: number;
+		readonly modifier: projectileModifier;
 	}>("plasma_spawn", "RemoteEvent");
-	constructor(startPosition: Vector3, baseVelocity: Vector3, baseDamage: number) {
-		super(startPosition, "ENERGY", WeaponProjectile.PLASMA_PROJECTILE, baseVelocity, baseDamage, 5);
+
+	constructor(startPosition: Vector3, baseVelocity: Vector3, baseDamage: number, modifier: projectileModifier) {
+		super(startPosition, "ENERGY", WeaponProjectile.PLASMA_PROJECTILE, baseVelocity, baseDamage, modifier, 5);
 		this.vectorForce = this.projectilePart.WaitForChild("VectorForce") as VectorForce;
 		this.updateLifetimeModifier(1);
 	}
@@ -65,7 +66,7 @@ export class PlasmaProjectile extends WeaponProjectile {
 
 	onTick(dt: number, percentage: number, reversePercentage: number): void {
 		super.onTick(dt, percentage, reversePercentage);
-		this.projectilePart.AssemblyLinearVelocity = this.baseVelocity;
+		//this.projectilePart.AssemblyLinearVelocity = this.baseVelocity;
 		this.projectilePart.Transparency = percentage;
 		this.updateLifetimeModifier(reversePercentage);
 		this.projectilePart.Size = this.startSize.mul(new Vector3(1, 1 + this.baseVelocity.Magnitude / 100, 1));
@@ -73,7 +74,7 @@ export class PlasmaProjectile extends WeaponProjectile {
 	}
 }
 
-PlasmaProjectile.spawn.invoked.Connect((player, { startPosition, baseVelocity, baseDamage }) => {
+PlasmaProjectile.spawn.invoked.Connect((player, { startPosition, baseVelocity, baseDamage, modifier }) => {
 	// print("Plasma ball spawned");
-	new PlasmaProjectile(startPosition, baseVelocity, baseDamage);
+	new PlasmaProjectile(startPosition, baseVelocity, baseDamage, modifier);
 });

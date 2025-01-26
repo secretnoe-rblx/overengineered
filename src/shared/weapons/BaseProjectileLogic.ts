@@ -3,6 +3,7 @@ import { InstanceComponent } from "engine/shared/component/InstanceComponent";
 import { AutoC2SRemoteEvent } from "engine/shared/event/C2SRemoteEvent";
 import { Instances } from "engine/shared/fixes/Instances";
 import { RemoteEvents } from "shared/RemoteEvents";
+import { ModuleCollection } from "shared/weapons/WeaponModuleSystem";
 
 export type modifierValue = {
 	isRelative?: boolean;
@@ -45,10 +46,11 @@ export class WeaponProjectile extends InstanceComponent<BasePart> {
 		readonly baseVelocity: Vector3;
 		readonly baseDamage: number;
 		readonly lifetime?: number; //<--- seconds
-		readonly modifiers?: projectileModifier[]; // <------ calculate it yourself!
+		readonly modifier: projectileModifier; // <------ calculate it yourself!
 	}>("projectile_spawn", "RemoteEvent");
 
 	static readonly sync_hit = new AutoC2SRemoteEvent<{
+		//todo: finish sync
 		readonly startPosition: Vector3;
 		readonly projectileType: ProjectileType;
 		readonly projectilePart: BasePart;
@@ -58,6 +60,7 @@ export class WeaponProjectile extends InstanceComponent<BasePart> {
 	}>("projectile_sync_hit", "RemoteEvent");
 
 	static readonly sync_position = new AutoC2SRemoteEvent<{
+		//todo: finish sync
 		readonly projectile: WeaponProjectile;
 	}>("projectile_sync_position", "RemoteEvent");
 
@@ -81,6 +84,7 @@ export class WeaponProjectile extends InstanceComponent<BasePart> {
 		originalProjectileModel: baseWeaponProjectile,
 		public baseVelocity: Vector3,
 		public baseDamage: number,
+		readonly baseModifier: projectileModifier,
 		lifetime?: number, //<--- seconds
 		public color?: Color3,
 	) {
@@ -115,6 +119,16 @@ export class WeaponProjectile extends InstanceComponent<BasePart> {
 		});
 
 		this.enable();
+		this.recalculateEffects();
+
+		if (this.totalEffect.speedModifier) {
+			if (this.totalEffect.speedModifier.isRelative)
+				newModel.AssemblyLinearVelocity = baseVelocity.mul(this.totalEffect.speedModifier.value);
+			else
+				newModel.AssemblyLinearVelocity = baseVelocity.add(
+					baseVelocity.Unit.mul(this.totalEffect.speedModifier!.value),
+				);
+		}
 	}
 
 	readonly checkIfCanBeUnwelded = (damage: number, partHealth: number) => damage > partHealth / 4;
@@ -133,7 +147,7 @@ export class WeaponProjectile extends InstanceComponent<BasePart> {
 		const tryYourLuck = (num: number): boolean => math.random() < num;
 		function createExplosion(part: BasePart, diameter: number, force: number, enableEffect?: boolean) {
 			//affect blocks in radius/diameter somehow
-			//there probably is a mothod
+			//there probably is a method
 
 			if (enableEffect ?? false) {
 				//do explosion effect
@@ -148,7 +162,6 @@ export class WeaponProjectile extends InstanceComponent<BasePart> {
 				isFlammable: false,
 			});
 
-		const properties = this.projectilePart.CurrentPhysicalProperties;
 		const explosiveDamage = this.totalEffect?.explosiveDamage?.value ?? 0;
 		const impactDamage = (this.totalEffect?.impactDamage?.value ?? 0) + this.baseDamage;
 		const totalDamage =
@@ -157,13 +170,13 @@ export class WeaponProjectile extends InstanceComponent<BasePart> {
 		const ignitionChance = //
 			//basically density == chance, because density can't be bigger than 100, right? right..?
 			// (1 - (density[0.01...100] / 100)) * fireChance
-			(1 - properties.Density / 100) * math.clamp(this.totalEffect?.heatDamage?.value ?? 0, 0, 1);
+			(1 - this.projectilePart.CurrentPhysicalProperties.Density / 100) *
+			math.clamp(this.totalEffect?.heatDamage?.value ?? 0, 0, 1);
 
 		(!WeaponProjectile.unweldedParts.has(part)
 			? WeaponProjectile.damagedParts
 			: WeaponProjectile.unweldedParts
 		).set(part, inflictedDamage);
-		//print(WeaponProjectile.damagedParts.get(part), partHealth);
 
 		if (!WeaponProjectile.damagedParts.has(part))
 			part.Destroying.Connect(() => WeaponProjectile.damagedParts.delete(part)); //damage here
@@ -177,15 +190,6 @@ export class WeaponProjectile extends InstanceComponent<BasePart> {
 			}
 		}
 
-		//print(WeaponProjectile.damagedParts.has(part), WeaponProjectile.unweldedParts.has(part));
-		/*
-		print(
-			WeaponProjectile.damagedParts.get(part) ?? 0,
-			WeaponProjectile.unweldedParts.get(part) ?? 0,
-			partHealth / 4,
-			partHealth,
-		);
-*/
 		// if can be destroyed then destroy ig
 		if (
 			this.checkIfCanBeDestroyed(
@@ -200,17 +204,7 @@ export class WeaponProjectile extends InstanceComponent<BasePart> {
 	}
 
 	private recalculateEffects() {
-		this.totalEffect = {};
-
-		for (const mod of this.rawModifiers) {
-			for (const [name, modifierValue] of pairs(mod)) {
-				this.totalEffect[name] ??= { value: 0, isRelative: false };
-				const oldValue = this.totalEffect[name]!.value;
-				if (modifierValue.isRelative && modifierValue.isRelative !== undefined)
-					this.totalEffect[name] = { value: oldValue * (1 + modifierValue.value), isRelative: false };
-				else this.totalEffect[name] = { value: oldValue + modifierValue.value, isRelative: false };
-			}
-		}
+		this.totalEffect = ModuleCollection.calculateTotalModifier([this.baseModifier, ...this.rawModifiers]) ?? {};
 
 		if (this.originalLifetime !== undefined)
 			this.modifiedLifetime = this.originalLifetime * (this.totalEffect.lifetimeModifier?.value ?? 1);
@@ -228,7 +222,7 @@ export class WeaponProjectile extends InstanceComponent<BasePart> {
 	onTick(dt: number, percentage: number, reversePercentage: number): void {
 		if (this.isDestroyed()) return;
 		this.currentLifetime += dt;
-		/*
+		/* :thinking:
 		this.projectilePart.CFrame = this.projectilePart.CFrame.add(
 			this.modifiedVelocity.mul(new Vector3(dt, dt, dt)),
 		);*/
