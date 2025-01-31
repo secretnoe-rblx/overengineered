@@ -2,6 +2,7 @@ import { Players } from "@rbxts/services";
 import { HostedService } from "engine/shared/di/HostedService";
 import { Element } from "engine/shared/Element";
 import { ObservableCollectionSet } from "engine/shared/event/ObservableCollection";
+import { JSON } from "engine/shared/fixes/Json";
 import { PlayerWatcher } from "engine/shared/PlayerWatcher";
 import { PlotsFloatingImageController } from "server/plots/PlotsFloatingImageController";
 import { BuildingPlot } from "shared/building/BuildingPlot";
@@ -33,6 +34,7 @@ class ServerPlotController extends HostedService {
 
 		const plot = tryGetFreePlot();
 		if (!plot) {
+			$warn("Plot checkeq: ", JSON.serialize(plots.plots.map((p) => `${p.instance.Name}: ${p.ownerId.get()}`)));
 			player.Kick("No free plot found, try again later");
 			return;
 		}
