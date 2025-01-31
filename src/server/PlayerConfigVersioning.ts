@@ -164,7 +164,7 @@ const v10: UpdatablePlayerConfigVersion<PlayerConfigV10, PlayerConfigV9> = {
 	},
 };
 
-// Set terrain to snow for the winter
+// [DISABLED] Set terrain to snow for the winter
 const v11: UpdatablePlayerConfigVersion<PlayerConfigV10, PlayerConfigV10> = {
 	version: 11,
 
@@ -172,11 +172,6 @@ const v11: UpdatablePlayerConfigVersion<PlayerConfigV10, PlayerConfigV10> = {
 		return {
 			version: this.version,
 			...prev,
-			terrain: {
-				...PlayerConfigDefinition.terrain.config,
-				...(prev.terrain ?? {}),
-				snowOnly: true,
-			},
 		};
 	},
 };
