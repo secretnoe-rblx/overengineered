@@ -165,7 +165,7 @@ export class ModuleCollection {
 
 		//get all markers
 		for (const [n, e] of pairs(nextModule.allMarkers)) {
-			if (!e.occupiedWith.block) {
+			if (!e.occupiedWith.block && nextModule.block.weaponConfig!.markers[n].emitsProjectiles) {
 				activeOutputs.push(e);
 			}
 

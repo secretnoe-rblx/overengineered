@@ -57,6 +57,9 @@ import { SingleImpulseBlock } from "shared/blocks/blocks/SingleImpulseBlock";
 import { SpeedometerBlock } from "shared/blocks/blocks/SpeedometerBlock";
 import { StackMemoryBlock } from "shared/blocks/blocks/StackMemoryBlock";
 import { SuspensionBlock } from "shared/blocks/blocks/SuspensionBlock";
+import { PlasmaCoilAcceleratorBlock } from "shared/blocks/blocks/testingWeaponary/PlasmaAccelerator";
+import { PlasmaCoilAcceleratorUpgradeBlock } from "shared/blocks/blocks/testingWeaponary/PlasmaAcceleratorUpgrade";
+import { PlasmaEmitterBlock } from "shared/blocks/blocks/testingWeaponary/PlasmaEmitter";
 import { TpsCounterBlock } from "shared/blocks/blocks/TpsCounterBlock";
 import { VehicleSeatBlock } from "shared/blocks/blocks/VehicleSeatBlock";
 import type { BlockBuilder } from "shared/blocks/Block";
@@ -110,9 +113,9 @@ export const CreateSandboxBlocks = (di: DIContainer): BlockList => {
 		ReadonlyMemoryBlock,
 		RandomBlock,
 
-		// PlasmaCoilAcceleratorUpgradeBlock,
-		// PlasmaCoilAcceleratorBlock,
-		// PlasmaEmitterBlock,
+		PlasmaCoilAcceleratorUpgradeBlock,
+		PlasmaCoilAcceleratorBlock,
+		PlasmaEmitterBlock,
 
 		AltimeterBlock,
 		KeySensorBlock,

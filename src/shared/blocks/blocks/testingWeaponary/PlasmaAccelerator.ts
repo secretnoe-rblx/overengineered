@@ -25,14 +25,19 @@ export const PlasmaCoilAcceleratorBlock = {
 		type: "PROCESSOR",
 		modifier: {
 			speedModifier: {
-				value: 1.1,
+				value: 1.4,
 				isRelative: true,
 			},
 		},
 		markers: {
 			marker1: {
 				emitsProjectiles: true,
-				allowedBlockIds: ["plasmacoilaccelerator", "plasmaupgrade"],
+				allowedBlockIds: ["plasmacoilaccelerator"],
+				//allowedTypes: ["PROCESSOR", "UPGRADE"],
+			},
+			marker2: {
+				emitsProjectiles: false, // never did that before
+				allowedBlockIds: ["plasmaupgrade"],
 				//allowedTypes: ["PROCESSOR", "UPGRADE"],
 			},
 		},
