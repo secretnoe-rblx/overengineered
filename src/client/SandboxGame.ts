@@ -30,17 +30,11 @@ import { ClientBuildingValidationController } from "client/modes/build/ClientBui
 import { PlayModeController } from "client/modes/PlayModeController";
 import { PlayerDataInitializer } from "client/PlayerDataStorage";
 import { TerrainController } from "client/terrain/TerrainController";
-import { BasicCarTutorial } from "client/tutorial/tutorials/BasicCarTutorial";
-import { BasicPlaneTutorial } from "client/tutorial/tutorials/BasicPlaneTutorial";
-import { NewBasicPlaneTutorial } from "client/tutorial/tutorials/NewBasicPlaneTutorial";
-import { TestTutorial } from "client/tutorial/tutorials/TestTutorial";
-import { TutorialServiceInitializer } from "client/tutorial/TutorialService";
 import { ReadonlyPlot } from "shared/building/ReadonlyPlot";
 import { SharedPlots } from "shared/building/SharedPlots";
-import { GameDefinitions } from "shared/data/GameDefinitions";
 import { RemoteEvents } from "shared/RemoteEvents";
 import { CreateSandboxBlocks } from "shared/SandboxBlocks";
-import type { TutorialDescriber } from "client/tutorial/TutorialController";
+import { WeaponModuleSystem } from "shared/weapons/WeaponModuleSystem";
 import type { GameHostBuilder } from "engine/shared/GameHostBuilder";
 import type { SharedPlot } from "shared/building/SharedPlot";
 
@@ -92,7 +86,7 @@ export namespace SandboxGame {
 		builder.services.registerService(MusicController);
 		builder.services.registerService(GuiAutoScaleController);
 		builder.services.registerService(HideInterfaceController);
-		// builder.services.registerService(WeaponModuleSystem); //weapons test
+		builder.services.registerService(WeaponModuleSystem); //weapons test
 		ActionsGui.initialize(builder);
 
 		if (!RunService.IsStudio()) {
@@ -107,21 +101,21 @@ export namespace SandboxGame {
 		WikiPopup.addAsService(builder);
 		builder.services.registerSingletonClass(ReportSubmitController);
 
-		{
-			const tutorials: (new (...args: any[]) => TutorialDescriber)[] = [
-				BasicCarTutorial,
-				NewBasicPlaneTutorial,
-				BasicPlaneTutorial,
-			];
-			if (GameDefinitions.isAdmin(Players.LocalPlayer)) {
-				tutorials.push(TestTutorial);
-			}
+		// {
+		// 	const tutorials: (new (...args: any[]) => TutorialDescriber)[] = [
+		// 		BasicCarTutorial,
+		// 		NewBasicPlaneTutorial,
+		// 		BasicPlaneTutorial,
+		// 	];
+		// 	if (GameDefinitions.isAdmin(Players.LocalPlayer)) {
+		// 		tutorials.push(TestTutorial);
+		// 	}
 
-			TutorialServiceInitializer.initialize(builder, {
-				tutorials,
-				tutorialToRunWhenNoSlots: NewBasicPlaneTutorial,
-			});
-		}
+		// 	TutorialServiceInitializer.initialize(builder, {
+		// 		tutorials,
+		// 		tutorialToRunWhenNoSlots: NewBasicPlaneTutorial,
+		// 	});
+		// }
 
 		LoadingController.show("Initializing services");
 	}
