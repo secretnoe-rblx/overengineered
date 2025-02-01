@@ -320,25 +320,21 @@ export class WeaponModuleSystem extends HostedService {
 			for (const c of arr) c.recalc();
 		}
 
-		//todo: find out why "Blocks" folder disappear and re-appear again
-		task.delay(1, () => {
-			print("iniiiiiiiiiiiiiiiiit <--------------------------------");
-			for (const p of plots.plots) {
-				const folder = p.instance.FindFirstChild("Blocks");
-				if (folder === undefined) continue;
+		for (const p of plots.plots) {
+			const folder = p.instance.FindFirstChild("Blocks");
+			if (folder === undefined) continue;
 
-				this.event.subscribe(folder.ChildAdded, (block) => {
-					const blockInfo = BlockManager.getBlockDataByBlockModel(block as BlockModel);
-					if (!blockList.blocks[blockInfo.id]?.weaponConfig) return;
-					new WeaponModule(blockInfo, blockList);
-					updateAll();
-				});
+			this.event.subscribe(folder.ChildAdded, (block) => {
+				const blockInfo = BlockManager.getBlockDataByBlockModel(block as BlockModel);
+				if (!blockList.blocks[blockInfo.id]?.weaponConfig) return;
+				new WeaponModule(blockInfo, blockList);
+				updateAll();
+			});
 
-				this.event.subscribe(folder.ChildRemoved, (block) => {
-					delete WeaponModule.allModules[BlockManager.getBlockDataByBlockModel(block as BlockModel).uuid];
-					updateAll();
-				});
-			}
-		});
+			this.event.subscribe(folder.ChildRemoved, (block) => {
+				delete WeaponModule.allModules[BlockManager.getBlockDataByBlockModel(block as BlockModel).uuid];
+				updateAll();
+			});
+		}
 	}
 }
