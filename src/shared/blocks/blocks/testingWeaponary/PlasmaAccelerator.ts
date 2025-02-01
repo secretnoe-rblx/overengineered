@@ -36,7 +36,7 @@ export const PlasmaCoilAcceleratorBlock = {
 				//allowedTypes: ["PROCESSOR", "UPGRADE"],
 			},
 			marker2: {
-				emitsProjectiles: false, // never did that before
+				emitsProjectiles: false,
 				allowedBlockIds: ["plasmaupgrade"],
 				//allowedTypes: ["PROCESSOR", "UPGRADE"],
 			},

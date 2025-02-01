@@ -1,5 +1,6 @@
 import { InstanceBlockLogic } from "shared/blockLogic/BlockLogic";
 import { BlockCreation } from "shared/blocks/BlockCreation";
+import { Colors } from "shared/Colors";
 import { PlasmaProjectile } from "shared/weapons/PlasmaProjectileLogic";
 import { WeaponModule } from "shared/weapons/WeaponModuleSystem";
 import type { BlockLogicFullBothDefinitions, InstanceBlockLogicArgs } from "shared/blockLogic/BlockLogic";
@@ -7,6 +8,14 @@ import type { BlockBuilder } from "shared/blocks/Block";
 
 const definition = {
 	input: {
+		projectileColor: {
+			displayName: "Projectile Color",
+			types: {
+				color: {
+					config: Colors.pink,
+				},
+			},
+		},
 		fireTrigger: {
 			displayName: "Fire",
 			types: {
@@ -35,7 +44,7 @@ class Logic extends InstanceBlockLogic<typeof definition> {
 		super(definition, block);
 
 		const module = WeaponModule.allModules[this.instance.Name];
-		this.onk(["fireTrigger"], ({ fireTrigger }) => {
+		this.onk(["fireTrigger", "projectileColor"], ({ fireTrigger, projectileColor }) => {
 			if (!fireTrigger) return;
 			const outs = module.parentCollection.calculatedOutputs;
 			for (const e of outs) {
@@ -46,6 +55,7 @@ class Logic extends InstanceBlockLogic<typeof definition> {
 						baseVelocity: direction,
 						baseDamage: 0,
 						modifier: e.modifier,
+						color: projectileColor,
 					});
 				}
 			}

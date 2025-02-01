@@ -12,10 +12,28 @@ export class PlasmaProjectile extends WeaponProjectile {
 		readonly baseVelocity: Vector3;
 		readonly baseDamage: number;
 		readonly modifier: projectileModifier;
+		readonly color?: Color3;
 	}>("plasma_spawn", "RemoteEvent");
 
-	constructor(startPosition: Vector3, baseVelocity: Vector3, baseDamage: number, modifier: projectileModifier) {
-		super(startPosition, "ENERGY", WeaponProjectile.PLASMA_PROJECTILE, baseVelocity, baseDamage, modifier, 5);
+	constructor(
+		startPosition: Vector3,
+		baseVelocity: Vector3,
+		baseDamage: number,
+		modifier: projectileModifier,
+		color?: Color3,
+	) {
+		super(
+			startPosition,
+			"ENERGY",
+			WeaponProjectile.PLASMA_PROJECTILE,
+			baseVelocity,
+			baseDamage,
+			modifier,
+			5,
+			color,
+		);
+		print(this.projectilePart.Color);
+		print(color);
 		this.vectorForce = this.projectilePart.WaitForChild("VectorForce") as VectorForce;
 		this.updateLifetimeModifier(1);
 	}
@@ -74,7 +92,7 @@ export class PlasmaProjectile extends WeaponProjectile {
 	}
 }
 
-PlasmaProjectile.spawn.invoked.Connect((player, { startPosition, baseVelocity, baseDamage, modifier }) => {
+PlasmaProjectile.spawn.invoked.Connect((player, { startPosition, baseVelocity, baseDamage, modifier, color }) => {
 	// print("Plasma ball spawned");
-	new PlasmaProjectile(startPosition, baseVelocity, baseDamage, modifier);
+	new PlasmaProjectile(startPosition, baseVelocity, baseDamage, modifier, color);
 });

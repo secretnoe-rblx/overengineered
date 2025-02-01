@@ -102,9 +102,11 @@ export class WeaponProjectile extends InstanceComponent<BasePart> {
 		super(newModel);
 		this.projectilePart = newModel;
 		this.originalLifetime = this.modifiedLifetime = lifetime;
-		this.modifiedVelocity = baseVelocity;
-		this.projectilePart.PivotTo(CFrame.lookAlong(this.projectilePart.Position, baseVelocity));
+		this.projectilePart.PivotTo(
+			CFrame.lookAlong(this.projectilePart.Position, (this.modifiedVelocity = baseVelocity)),
+		);
 		this.originalProjectileModel = pmodel;
+		if (color) pmodel.PrimaryPart!.Color = color;
 		pmodel.Parent = projectileFolder;
 
 		this.event.subscribe(this.projectilePart.Touched, (part) => {
