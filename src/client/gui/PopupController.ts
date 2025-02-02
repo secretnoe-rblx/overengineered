@@ -1,37 +1,82 @@
-import { Lighting } from "@rbxts/services";
-import { AutoUIScaledComponent } from "engine/client/gui/AutoUIScaledControl";
 import { Interface } from "client/gui/Interface";
+import { AutoUIScaledComponent } from "engine/client/gui/AutoUIScaledControl";
+import { Control } from "engine/client/gui/Control";
 import { LocalPlayer } from "engine/client/LocalPlayer";
 import { Colors } from "engine/shared/Colors";
 import { ComponentChildren } from "engine/shared/component/ComponentChildren";
 import { InstanceComponent } from "engine/shared/component/InstanceComponent";
-import { Transforms } from "engine/shared/component/Transforms";
+import { OverlayValueStorage } from "engine/shared/component/OverlayValueStorage";
 import { HostedService } from "engine/shared/di/HostedService";
 import { Element } from "engine/shared/Element";
+import type { BlurController } from "client/controller/BlurController";
 import type { ReadonlyObservableValue } from "engine/shared/event/ObservableValue";
+
+class Popup extends InstanceComponent<ScreenGui> {
+	constructor(readonly control: InstanceComponent<GuiObject>) {
+		const gui = Element.create("ScreenGui", { Name: `popup_${control.instance.Name}`, IgnoreGuiInset: true });
+		super(gui);
+
+		this.parentGui(control);
+		this.getComponent(AutoUIScaledComponent);
+
+		const bg = this.parent(
+			new Control(
+				Element.create("Frame", {
+					Size: new UDim2(1, 0, 1, 0),
+					BackgroundColor3: Colors.black,
+					ZIndex: -9999,
+				}),
+			),
+		);
+
+		const visible = control.visibilityComponent().visible;
+		bg.valuesComponent()
+			.get("BackgroundTransparency")
+			.addBasicTransform()
+			.addChildOverlay(visible.createBased((enabled) => (enabled ? 0.5 : 1)));
+		bg.valuesComponent() //
+			.get("Active")
+			.addChildOverlay(visible);
+
+		control //
+			.visibilityComponent()
+			.addWaitForTransform(bg.valuesComponent().get("BackgroundTransparency"));
+
+		control.onDisable(() => this.disable());
+		control.onDestroy(() => this.destroy());
+	}
+}
 
 @injectable
 export class PopupController extends HostedService {
+	private readonly _isShown;
 	readonly isShown: ReadonlyObservableValue<boolean>;
 	private readonly children;
 	private readonly screen: ScreenGui;
 
-	constructor(@inject private readonly di: DIContainer) {
+	constructor(
+		@inject blur: BlurController,
+		@inject private readonly di: DIContainer,
+	) {
 		super();
 		this.screen = Interface.getPopupUI();
 
-		this.children = this.parent(new ComponentChildren<InstanceComponent<ScreenGui>>()) //
+		this.children = this.parent(new ComponentChildren<Popup>()) //
 			.withParentInstance(this.screen);
-		this.isShown = this.children.children.createBased((c) => c.size() !== 0);
 
-		const blur = Lighting.WaitForChild("Blur") as BlurEffect;
-		this.event.subscribeObservable(this.isShown, (visible) => {
-			const size = visible ? 12 : 0;
+		this._isShown = OverlayValueStorage.bool();
+		this._isShown.addChildOverlay(
+			this.event.addObservable(
+				this.children.children.createBasedAnyDC((c) => c.control.visibilityComponent().visible),
+			),
+		);
 
-			Transforms.create() //
-				.transform(blur, "Size", size, Transforms.quadOut02)
-				.run(blur, true);
-		});
+		this.isShown = this._isShown;
+		this.updateIsShown();
+
+		this.event.subscribeDestroyable(
+			blur.blur.addChildOverlay(this.isShown.createBased((visible) => (visible ? 12 : undefined))),
+		);
 
 		const controls = LocalPlayer.getPlayerModule().GetControls();
 		this.event.subscribeObservable(
@@ -44,6 +89,14 @@ export class PopupController extends HostedService {
 		);
 	}
 
+	private updateIsShown() {
+		return;
+		this._isShown.and(
+			undefined,
+			this.children.children.createBased((c) => c.any((c) => c.control.visibilityComponent().visible.get())),
+		);
+	}
+
 	createAndShow<TArgs extends unknown[]>(
 		clazz: ConstructorOf<InstanceComponent<GuiObject>, TArgs>,
 		...args: Partial<TArgs>
@@ -52,26 +105,13 @@ export class PopupController extends HostedService {
 	}
 
 	showPopup(control: InstanceComponent<GuiObject>): void {
-		const parentScreen = new InstanceComponent(
-			Element.create(
-				"ScreenGui",
-				{ Name: `popup_${control.instance.Name}`, Parent: this.screen, IgnoreGuiInset: true },
-				{
-					bg: Element.create("Frame", {
-						Active: true,
-						Size: new UDim2(1, 0, 1, 0),
-						BackgroundColor3: Colors.black,
-						BackgroundTransparency: 0.5,
-						ZIndex: -9999,
-					}),
-					popup: control.instance,
-				},
-			),
-		);
-		parentScreen.parentGui(control);
-		this.children.add(parentScreen);
-		parentScreen.getComponent(AutoUIScaledComponent);
+		const p = this.children.add(new Popup(control));
+		// control.visibilityComponent().visible.subscribe(() => this.updateIsShown(), true);
 
-		control.onDestroy(() => parentScreen.destroy());
+		// const ov = p.event.addObservable(
+		// 	this.children.children.createBasedAnyDC((c) => c.control.visibilityComponent().visible),
+		// );
+
+		// this._isShown.and({}, ov);
 	}
 }

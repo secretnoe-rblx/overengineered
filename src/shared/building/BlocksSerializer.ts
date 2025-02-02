@@ -1621,13 +1621,7 @@ export namespace BlocksSerializer {
 		return JSON.serialize({ ...serialized, blocks: serialized.blocks.map(fix) });
 	}
 
-	export function deserializeFromObject(
-		data: SerializedBlocks<SerializedBlockBase>,
-		plot: BuildingPlot,
-		blockList: BlockList,
-	): number {
-		$log(`Loaded a slot using savev${data.version}`);
-
+	export function upgradeSave(data: SerializedBlocks<SerializedBlockBase>, blockList: BlockList) {
 		const version = data.version;
 		for (let i = version + 1; i <= current.version; i++) {
 			const version = getVersion(i);
@@ -1637,7 +1631,15 @@ export namespace BlocksSerializer {
 			data = version.upgradeFrom(data as never, blockList);
 			$log(`Upgrading a slot to savev${version.version}`);
 		}
+	}
+	export function deserializeFromObject(
+		data: SerializedBlocks<SerializedBlockBase>,
+		plot: BuildingPlot,
+		blockList: BlockList,
+	): number {
+		$log(`Loading a slot using savev${data.version}`);
 
+		upgradeSave(data, blockList);
 		place.blocksOnPlot(plot, data.blocks as readonly LatestSerializedBlock[], place.blockOnPlotV3);
 		return data.blocks.size();
 	}

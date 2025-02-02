@@ -12,6 +12,7 @@ import { ButtonAnimatedClickComponent } from "engine/client/gui/ButtonAnimatedCl
 import { Control } from "engine/client/gui/Control";
 import { ComponentChild } from "engine/shared/component/ComponentChild";
 import { ObservableValue } from "engine/shared/event/ObservableValue";
+import { Objects } from "engine/shared/fixes/Objects";
 import type { ConfigControlTemplateList } from "client/gui/configControls/ConfigControlsList";
 import type { PlayerDataStorage } from "client/PlayerDataStorage";
 import type { Component } from "engine/shared/component/Component";
@@ -114,6 +115,8 @@ export class SettingsPopup extends Control<SettingsPopup2Definition> {
 		const gui = template.Clone();
 		super(gui);
 
+		const original = playerData.config.get();
+
 		const content = this.parent(new Content(gui.Content.Content, playerData.config));
 		const sidebar = this.parent(new Sidebar(gui.Content.Sidebar.ScrollingFrame));
 
@@ -128,9 +131,15 @@ export class SettingsPopup extends Control<SettingsPopup2Definition> {
 		sidebar.addButton("blacklist", 18626826844, () => content.set(PlayerSettingsBlacklist));
 
 		this.onDestroy(() => {
-			task.spawn(() => playerData.sendPlayerConfig(playerData.config.get()));
+			const unchanged = Objects.deepEquals(original, playerData.config.get());
+			if (unchanged) return;
+
+			task.spawn(() => {
+				playerData.sendPlayerConfig(playerData.config.get());
+			});
 		});
 
-		this.parent(new Control(gui.Heading.CloseButton)).addButtonAction(() => this.destroy());
+		this.parent(new Control(gui.Heading.CloseButton)) //
+			.addButtonAction(() => this.hideThenDestroy());
 	}
 }

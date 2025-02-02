@@ -8,7 +8,7 @@ export namespace ReplicatedAssets {
 		return assets as T;
 	}
 
-	export function findAsset<T = Instance>(...path: string[]): T {
+	export function findAsset<T = Instance>(...path: string[]): T | undefined {
 		return Instances.findChild(assets, ...path);
 	}
 	export function waitForAsset<T = Instance>(...path: string[]): T {

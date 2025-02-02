@@ -1,5 +1,6 @@
 import { Players, RunService, Workspace } from "@rbxts/services";
 import { BeaconController } from "client/controller/BeaconController";
+import { BlurController } from "client/controller/BlurController";
 import { CameraController } from "client/controller/CameraController";
 import { ChatController } from "client/controller/ChatController";
 import { DayCycleController } from "client/controller/DayCycleController";
@@ -105,6 +106,7 @@ export namespace SandboxGame {
 		builder.services.registerService(HideInterfaceController);
 		builder.services.registerService(FpsCounterController);
 		builder.services.registerService(RainbowGuiController);
+		builder.services.registerService(BlurController);
 		builder.services
 			.registerSingletonClass(MainScreenLayout)
 			.autoInit()
