@@ -8,7 +8,7 @@ import { Control } from "engine/client/gui/Control";
 import { ComponentChildren } from "engine/shared/component/ComponentChildren";
 import { ObservableValue } from "engine/shared/event/ObservableValue";
 import { Localization } from "engine/shared/Localization";
-import { Colors } from "shared/Colors";
+import type { Theme } from "client/Theme";
 import type { InstanceComponent } from "engine/shared/component/InstanceComponent";
 import type { BlockCategoryPath } from "shared/blocks/Block";
 
@@ -195,6 +195,7 @@ export class BlockSelectionControl extends Control<BlockSelectionControlDefiniti
 	constructor(
 		template: BlockSelectionControlDefinition,
 		@inject readonly blockList: BlockList,
+		@inject private readonly theme: Theme,
 	) {
 		super(template);
 
@@ -384,7 +385,10 @@ export class BlockSelectionControl extends Control<BlockSelectionControlDefiniti
 			button.event.subscribeObservable(
 				this.selectedBlock,
 				(newblock) => {
-					button.instance.BackgroundColor3 = newblock === block ? Colors.accentDark : Colors.staticBackground;
+					button.overlayValue(
+						"BackgroundColor3",
+						newblock === block ? this.theme.get("buttonActive") : this.theme.get("buttonNormal"),
+					);
 
 					button.instance.FindFirstChild("Highlight")?.Destroy();
 					const targetBlocks = this.highlightedBlocks.get();

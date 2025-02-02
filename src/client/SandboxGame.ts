@@ -34,6 +34,7 @@ import { PlayModeController } from "client/modes/PlayModeController";
 import { PlayerDataInitializer } from "client/PlayerDataStorage";
 import { TerrainController } from "client/terrain/TerrainController";
 import { Theme } from "client/Theme";
+import { ThemeAutoSetter } from "client/ThemeAutoSetter";
 import { ToolController } from "client/tools/ToolController";
 import { BasicCarTutorial } from "client/tutorial/tutorials/BasicCarTutorial";
 import { BasicPlaneTutorial } from "client/tutorial/tutorials/BasicPlaneTutorial";
@@ -62,6 +63,9 @@ export namespace SandboxGame {
 			builder.services.registerService(RagdollController);
 			RemoteEvents.initializeVisualEffects(builder);
 			builder.services.registerSingletonValue(ActionController.instance);
+
+			builder.services.registerSingletonClass(Theme);
+			builder.services.registerService(ThemeAutoSetter);
 		});
 
 		LoadingController.run("Waiting for server", () => {
@@ -111,7 +115,6 @@ export namespace SandboxGame {
 			.registerSingletonClass(MainScreenLayout)
 			.autoInit()
 			.onInit((c) => c.enable());
-		builder.services.registerSingletonClass(Theme);
 
 		if (!RunService.IsStudio()) {
 			builder.services.registerService(UpdatePopupController);
