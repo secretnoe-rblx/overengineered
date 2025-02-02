@@ -57,26 +57,23 @@ export class PlayerDataController extends HostedService {
 		const slots: SlotMeta[] = [];
 
 		// if (GameDefinitions.isTester(player) || GameDefinitions.isTestPlace()) {
-
-		// disabled for the other place
-		// if (GameDefinitions.isGroupMember(player) || GameDefinitions.isTestPlace()) {
-		// 	try {
-		// 		const externalData = HttpService.JSONDecode(
-		// 			Backend.Datastores.GetEntry(universeId, "players", tostring(player.UserId)) as string,
-		// 		);
-
-		// 		const externalSlots = (externalData as { slots: readonly SlotMeta[] | undefined })?.slots;
-		// 		if (externalSlots) {
-		// 			for (const slot of externalSlots) {
-		// 				if (slot.blocks > 0) {
-		// 					slots.push(slot);
-		// 				}
-		// 			}
-		// 		}
-		// 	} catch (err) {
-		// 		$err("Error while loading the external slots:", err, "skipping...");
-		// 	}
-		// }
+		if (GameDefinitions.isGroupMember(player) || GameDefinitions.isTestPlace()) {
+			try {
+				// const externalData = HttpService.JSONDecode(
+				// 	Backend.Datastores.GetEntry(universeId, "players", tostring(player.UserId)) as string,
+				// );
+				// const externalSlots = (externalData as { slots: readonly SlotMeta[] | undefined })?.slots;
+				// if (externalSlots) {
+				// 	for (const slot of externalSlots) {
+				// 		if (slot.blocks > 0) {
+				// 			slots.push(slot);
+				// 		}
+				// 	}
+				// }
+			} catch (err) {
+				$err("Error while loading the external slots:", err, "skipping...");
+			}
+		}
 
 		return {
 			success: true,

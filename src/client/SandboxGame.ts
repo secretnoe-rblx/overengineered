@@ -108,6 +108,7 @@ export namespace SandboxGame {
 		builder.services.registerService(MusicController);
 		builder.services.registerService(GuiAutoScaleController);
 		builder.services.registerService(HideInterfaceController);
+		// builder.services.registerService(WeaponModuleSystem); //weapons test
 		builder.services.registerService(FpsCounterController);
 		builder.services.registerService(RainbowGuiController);
 		builder.services.registerService(BlurController);

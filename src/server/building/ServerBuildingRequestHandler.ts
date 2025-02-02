@@ -1,7 +1,6 @@
 import { HostedService } from "engine/shared/di/HostedService";
 import { Operation } from "engine/shared/Operation";
 import { PlayerWatcher } from "engine/shared/PlayerWatcher";
-import { Backend } from "server/Backend";
 import { isNotAdmin_AutoBanned } from "server/BanAdminExploiter";
 import { BlockManager } from "shared/building/BlockManager";
 import { BlocksSerializer } from "shared/building/BlocksSerializer";
@@ -258,7 +257,7 @@ export class ServerBuildingRequestHandler extends HostedService {
 			const universeId = GameDefinitions.isTestPlace()
 				? GameDefinitions.PRODUCTION_UNIVERSE_ID
 				: GameDefinitions.INTERNAL_UNIVERSE_ID;
-			blocks = Backend.Datastores.GetEntry(universeId, "slots", `${userid}_${index}`) as string | undefined;
+			// blocks = Backend.Datastores.GetEntry(universeId, "slots", `${userid}_${index}`) as string | undefined;
 		} else {
 			blocks = this.slots.getBlocks(userid, index);
 		}

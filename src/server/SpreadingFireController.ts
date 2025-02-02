@@ -37,9 +37,8 @@ export class SpreadingFireController {
 		if (CustomDebrisService.exists(part)) CustomDebrisService.remove(part);
 
 		// Apply color
-		const rand_rgb = math.random(0, 50);
-		const color = Color3.fromRGB(rand_rgb, rand_rgb, rand_rgb);
-		part.Color = color;
+		const darkness = math.random(0, 50);
+		part.Color = Color3.fromRGB(darkness, darkness, darkness);
 
 		const duration = math.random(15, 30);
 
