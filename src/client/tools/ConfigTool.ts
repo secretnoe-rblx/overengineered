@@ -157,6 +157,7 @@ namespace Scene {
 			this.configContainer.instance.Content.ScrollingFrame.Visible = false;
 			const gui = this.configContainer.instance.Content.ScrollingFrame.Clone();
 			gui.Visible = true;
+			gui.Name = "stuff";
 			gui.Parent = this.configContainer.instance.Content;
 
 			try {

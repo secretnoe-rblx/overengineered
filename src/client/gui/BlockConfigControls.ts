@@ -1203,7 +1203,7 @@ export class MultiBlockConfigControl extends Control implements Controls.Args {
 	) {
 		super(gui);
 
-		this.children = this.parent(new ComponentChildren());
+		this.children = this.parent(new ComponentChildren().withParentInstance(gui));
 
 		if (order) {
 			const nonexistent = asMap(definitions)
