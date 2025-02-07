@@ -9,8 +9,11 @@ import { PlayerSettingsInterface } from "client/gui/playerSettings/PlayerSetting
 import { PlayerSettingsPhysics } from "client/gui/playerSettings/PlayerSettingsPhysics";
 import { PlayerSettingsTheme } from "client/gui/playerSettings/PlayerSettingsTheme";
 import { ButtonAnimatedClickComponent } from "engine/client/gui/ButtonAnimatedClickComponent";
+import { ButtonBackgroundColorComponent } from "engine/client/gui/ButtonBackgroundColorComponent";
 import { Control } from "engine/client/gui/Control";
+import { Colors } from "engine/shared/Colors";
 import { ComponentChild } from "engine/shared/component/ComponentChild";
+import { Transforms } from "engine/shared/component/Transforms";
 import { ObservableValue } from "engine/shared/event/ObservableValue";
 import { Objects } from "engine/shared/fixes/Objects";
 import type { ConfigControlTemplateList } from "client/gui/configControls/ConfigControlsList";
@@ -38,6 +41,20 @@ class Sidebar extends Control<SidebarDefinition> {
 		btn.instance.Name = text;
 		btn.addButtonAction(action);
 		btn.getComponent(ButtonAnimatedClickComponent);
+		btn.getComponent(ButtonBackgroundColorComponent) //
+			.with((c) => c.mouseHoldingColor.set(c.mouseEnterColor.get()));
+		btn.addButtonAction(() => {
+			const bg = new ObservableValue(0.7);
+			bg.subscribe((v) => {
+				btn.valuesComponent() //
+					.get("BackgroundColor3")
+					.effect("click_flash", (c) => c.Lerp(Colors.white, v));
+			}, true);
+
+			Transforms.create() //
+				.transformObservable(bg, 0, { ...Transforms.quadOut02, duration: 0.5 })
+				.run(btn);
+		});
 
 		btn.setButtonText(text.upper());
 		btn.instance.ImageLabel.Image = `rbxassetid://${image}`;
