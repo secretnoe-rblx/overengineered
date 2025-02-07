@@ -1,6 +1,5 @@
 import { SoundController } from "client/controller/SoundController";
 import { MirrorEditorControl } from "client/gui/buildmode/MirrorEditorControl";
-import { GuiAnimator } from "client/gui/GuiAnimator";
 import { ConfirmPopup } from "client/gui/popup/ConfirmPopup";
 import { ClientBuilding } from "client/modes/build/ClientBuilding";
 import { MultiBlockSelector } from "client/tools/highlighters/MultiBlockSelector";
@@ -12,6 +11,7 @@ import { Control } from "engine/client/gui/Control";
 import { InputController } from "engine/client/InputController";
 import { Keybinds } from "engine/client/Keybinds";
 import { ObservableCollectionSet } from "engine/shared/event/ObservableCollection";
+import { ObservableValue } from "engine/shared/event/ObservableValue";
 import type { MirrorEditorControlDefinition } from "client/gui/buildmode/MirrorEditorControl";
 import type { MainScreenLayout } from "client/gui/MainScreenLayout";
 import type { Tooltip } from "client/gui/static/TooltipsControl";
@@ -19,9 +19,6 @@ import type { BuildingMode } from "client/modes/build/BuildingMode";
 
 namespace Scene {
 	export type DeleteToolSceneDefinition = GuiObject & {
-		readonly TouchControls: Frame & {
-			readonly DeleteButton: TextButton;
-		};
 		readonly Bottom: Frame & {
 			readonly DeleteAllButton: GuiButton;
 		};
@@ -35,10 +32,11 @@ namespace Scene {
 		};
 	};
 
+	@injectable
 	export class DeleteToolScene extends Control<DeleteToolSceneDefinition> {
 		private tool: DeleteTool;
 
-		constructor(gui: DeleteToolSceneDefinition, tool: DeleteTool) {
+		constructor(gui: DeleteToolSceneDefinition, tool: DeleteTool, @inject mainScreen: MainScreenLayout) {
 			super(gui);
 			this.tool = tool;
 
@@ -53,25 +51,21 @@ namespace Scene {
 				),
 			);
 			this.event.onPrepare((inputType) => {
-				this.gui.TouchControls.Visible = false;
 				this.gui.Bottom.DeleteAllButton.Visible = inputType !== "Gamepad";
 			});
 
 			this.parent(new Control(this.gui.Bottom.DeleteAllButton)) //
 				.subscribeToAction(tool.clearPlotAction);
 
-			this.parent(
-				new ButtonControl(this.gui.TouchControls.DeleteButton, () => this.tool.deleteHighlightedBlocks()),
-			);
+			const hasSelectedBlocks = tool.highlightedBlocks.createBased((c) => !c.isEmpty());
 
-			this.event.subscribeCollection(this.tool.highlightedBlocks, () => {
-				if (this.tool.highlightedBlocks.size() !== 0) {
-					this.gui.TouchControls.Visible = true;
-					GuiAnimator.transition(this.gui.TouchControls, 0.1, "left");
-				} else {
-					this.gui.TouchControls.Visible = false;
-				}
-			});
+			const isTouch = new ObservableValue(false);
+			this.event.onPrepare((inputType) => isTouch.set(inputType === "Touch"));
+
+			this.parent(mainScreen.right.pushImage("rbxassetid://12539349041")) //
+				.subscribeVisibilityFrom({ main: this.enabledState, isTouch, hasSelectedBlocks })
+				.addButtonAction(() => tool.deleteHighlightedBlocks())
+				.with((c) => (c.instance.BackgroundColor3 = Color3.fromRGB(52, 17, 17)));
 		}
 	}
 }
@@ -119,7 +113,10 @@ export class DeleteTool extends ToolBase {
 		}
 
 		this.parentGui(
-			new Scene.DeleteToolScene(ToolBase.getToolGui<"Delete", Scene.DeleteToolSceneDefinition>().Delete, this),
+			di.resolveForeignClass(Scene.DeleteToolScene, [
+				ToolBase.getToolGui<"Delete", Scene.DeleteToolSceneDefinition>().Delete,
+				this,
+			]),
 		);
 
 		this.parent(di.resolveForeignClass(SelectedBlocksHighlighter, [this.highlightedBlocks]));

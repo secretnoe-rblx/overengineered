@@ -82,6 +82,41 @@ class MainScreenBottom extends Control<MainScreenBottomDefinition> {
 	}
 }
 
+type MainScreenRightDefinition = GuiObject & {
+	readonly Template: TextButtonDefinition & {
+		readonly ImageLabel: ImageLabel;
+	};
+};
+@injectable
+class MainScreenRight extends Control<MainScreenRightDefinition> {
+	private readonly template;
+
+	constructor(
+		gui: MainScreenRightDefinition,
+		@inject private readonly di: DIContainer,
+	) {
+		super(gui);
+		gui.Template.Visible = false;
+		this.template = this.asTemplate(gui.Template);
+	}
+
+	private _push(text: string, imageAsset: string): Control<TextButtonDefinition> {
+		const control = new Control(this.template());
+		control.instance.LayoutOrder = this.gui.GetChildren().size();
+		control.instance.Parent = this.gui;
+		control.setButtonText(text);
+		control.instance.ImageLabel.Image = imageAsset;
+
+		return control;
+	}
+	push(text: string): Control<TextButtonDefinition> {
+		return this._push(text, "");
+	}
+	pushImage(assetId: string): Control<TextButtonDefinition> {
+		return this._push("", assetId);
+	}
+}
+
 type MainScreenLayoutDefinition = Folder & {
 	readonly Top: GuiObject & {
 		readonly Center: GuiObject & {
@@ -92,11 +127,13 @@ type MainScreenLayoutDefinition = Folder & {
 	};
 	readonly Left: GuiObject;
 	readonly Bottom: MainScreenBottomDefinition;
+	readonly Right: MainScreenRightDefinition;
 };
 @injectable
 export class MainScreenLayout extends Component {
 	private readonly instance: MainScreenLayoutDefinition;
 	readonly bottom: MainScreenBottom;
+	readonly right: MainScreenRight;
 
 	constructor(@inject di: DIContainer) {
 		super();
@@ -105,6 +142,7 @@ export class MainScreenLayout extends Component {
 		ComponentInstance.init(this, this.instance);
 
 		this.bottom = this.parentGui(di.resolveForeignClass(MainScreenBottom, [this.instance.Bottom]));
+		this.right = this.parentGui(di.resolveForeignClass(MainScreenRight, [this.instance.Right]));
 
 		const initHotbar = () => {
 			const hotbar = this.parent(

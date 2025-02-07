@@ -23,7 +23,6 @@ import { ComponentChild } from "engine/shared/component/ComponentChild";
 import { InstanceComponent } from "engine/shared/component/InstanceComponent";
 import { ObjectOverlayStorage } from "engine/shared/component/ObjectOverlayStorage";
 import { Transforms } from "engine/shared/component/Transforms";
-import { TransformService } from "engine/shared/component/TransformService";
 import { ObservableValue } from "engine/shared/event/ObservableValue";
 import { AABB } from "engine/shared/fixes/AABB";
 import { BB } from "engine/shared/fixes/BB";
@@ -247,37 +246,39 @@ namespace Scene {
 		readonly RotateTButton: GuiButton;
 		readonly RotateYButton: GuiButton;
 	};
+	@injectable
 	class TouchButtons extends Control<TouchButtonsDefinition> {
 		private readonly visibilityOverlay = new ObjectOverlayStorage({ visible: false });
 
-		constructor(gui: TouchButtonsDefinition, selectedBlock: ReadonlyObservableValue<Block | undefined>) {
+		constructor(
+			gui: TouchButtonsDefinition,
+			selectedBlock: ReadonlyObservableValue<Block | undefined>,
+			@inject tool: BuildTool,
+			@inject mainScreen: MainScreenLayout,
+		) {
 			super(gui);
 
-			const visibilityState = Transforms.boolStateMachine(
-				this.gui,
-				Transforms.commonProps.quadOut02,
-				{ AnchorPoint: this.gui.AnchorPoint, Position: this.gui.Position },
-				{
-					AnchorPoint: new Vector2(0, this.gui.AnchorPoint.Y),
-					Position: new UDim2(new UDim(1, 0), this.gui.Position.Y),
-				},
-				(tr, enabled) => (enabled ? tr.func(() => (this.gui.Visible = true)) : 0),
-				(tr, enabled) => (enabled ? 0 : tr.func(() => (this.gui.Visible = false))),
-			);
-			this.visibilityOverlay.value.changed.Connect(({ visible }) => visibilityState(visible));
+			const isTouch = new ObservableValue(false);
+			this.event.onPrepare((inputType) => isTouch.set(inputType === "Touch"));
 
-			const updateTouchControls = () => {
-				const visible = InputController.inputType.get() === "Touch" && selectedBlock.get() !== undefined;
-				this.visibilityOverlay.get(-1).visible = visible ? undefined : false;
-			};
-
-			this.event.onPrepare(() => {
-				this.visibilityOverlay.get(-1).visible = false;
-				TransformService.finish(this.gui);
-
-				updateTouchControls();
-			});
-			this.event.subscribeObservable(selectedBlock, updateTouchControls);
+			this.parent(mainScreen.right.push("+")) //
+				.subscribeVisibilityFrom({ main: this.enabledState, isTouch })
+				.addButtonAction(() => tool.placeBlock());
+			this.parent(mainScreen.right.push("X"))
+				.subscribeVisibilityFrom({ main: this.enabledState, isTouch })
+				.addButtonAction(() => tool.rotateBlock("x"))
+				.with((c) => (c.instance.BackgroundColor3 = Color3.fromRGB(52, 17, 17)));
+			this.parent(mainScreen.right.push("Y"))
+				.subscribeVisibilityFrom({ main: this.enabledState, isTouch })
+				.addButtonAction(() => tool.rotateBlock("y"))
+				.with((c) => (c.instance.BackgroundColor3 = Color3.fromRGB(81, 162, 0)));
+			this.parent(mainScreen.right.push("Z"))
+				.subscribeVisibilityFrom({ main: this.enabledState, isTouch })
+				.addButtonAction(() => tool.rotateBlock("z"))
+				.with((c) => (c.instance.BackgroundColor3 = Color3.fromRGB(18, 68, 144)));
+			this.parent(mainScreen.right.push("++")) //
+				.subscribeVisibilityFrom({ main: this.enabledState, isTouch })
+				.addButtonAction(() => tool.multiPlaceBlock());
 		}
 
 		protected setInstanceVisibilityFunction(visible: boolean): void {
@@ -307,7 +308,12 @@ namespace Scene {
 		private readonly blockInfo;
 		private readonly touchButtons;
 
-		constructor(gui: BuildToolSceneDefinition, tool: BuildTool, @inject mainScreen: MainScreenLayout) {
+		constructor(
+			gui: BuildToolSceneDefinition,
+			tool: BuildTool,
+			@inject mainScreen: MainScreenLayout,
+			@inject di: DIContainer,
+		) {
 			super(gui);
 			this.tool = tool;
 
@@ -330,7 +336,9 @@ namespace Scene {
 			this.blockSelector = this.parent(tool.di.resolveForeignClass(BlockSelectionControl, [inventory.instance]));
 
 			this.blockInfo = this.parent(new BlockInfo(gui.Info, this.blockSelector.selectedBlock));
-			this.touchButtons = this.parent(new TouchButtons(gui.Touch, this.blockSelector.selectedBlock));
+			this.touchButtons = this.parent(
+				di.resolveForeignClass(TouchButtons, [gui.Touch, this.blockSelector.selectedBlock]),
+			);
 
 			const mirrorEditor = this.parent(
 				new MirrorEditorControl(this.instance.Mirror.Content, tool.targetPlot.get()),
@@ -428,20 +436,6 @@ namespace Scene {
 				});
 			};
 			initAnimation();
-
-			this.event.onPrepareTouch((eh) => {
-				eh.subscribe(this.instance.Touch.PlaceButton.MouseButton1Click, () => this.tool.placeBlock());
-				eh.subscribe(this.instance.Touch.MultiPlaceButton.MouseButton1Click, () => this.tool.multiPlaceBlock());
-				eh.subscribe(this.instance.Touch.RotateRButton.MouseButton1Click, () =>
-					this.tool.rotateBlock("x", true),
-				);
-				eh.subscribe(this.instance.Touch.RotateTButton.MouseButton1Click, () =>
-					this.tool.rotateBlock("y", true),
-				);
-				eh.subscribe(this.instance.Touch.RotateYButton.MouseButton1Click, () =>
-					this.tool.rotateBlock("z", true),
-				);
-			});
 		}
 	}
 }
