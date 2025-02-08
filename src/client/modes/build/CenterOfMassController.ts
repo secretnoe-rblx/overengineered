@@ -168,7 +168,7 @@ export class CenterOfMassController extends Component {
 
 		const visualizerState = ComponentStateContainer.create(
 			this,
-			new CenterOfMassVisualizer(plot.instance.Blocks, actionController),
+			new CenterOfMassVisualizer(plot.instance.WaitForChild("Blocks"), actionController),
 		);
 
 		const enabledByButton = new ObservableValue(false);

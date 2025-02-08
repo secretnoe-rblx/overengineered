@@ -62,13 +62,13 @@ export class SharedPlot extends InstanceComponent<PlotModel> {
 	}
 	/** @deprecated TOBEDELETED */
 	getBlocks(): readonly BlockModel[] {
-		return this.instance.Blocks.GetChildren(undefined);
+		return this.instance.WaitForChild("Blocks").GetChildren() as BlockModel[];
 	}
 	getBlock(uuid: BlockUuid): BlockModel {
-		return (this.instance.Blocks as unknown as Record<BlockUuid, BlockModel>)[uuid];
+		return (this.instance.WaitForChild("Blocks") as unknown as Record<BlockUuid, BlockModel>)[uuid];
 	}
 	tryGetBlock(uuid: BlockUuid): BlockModel | undefined {
-		return this.instance.Blocks.FindFirstChild(uuid) as BlockModel | undefined;
+		return this.instance.WaitForChild("Blocks").FindFirstChild(uuid) as BlockModel | undefined;
 	}
 	getSpawnCFrame() {
 		return new CFrame(this.getSpawnPosition()).mul(CFrame.Angles(0, math.rad(90), 0));

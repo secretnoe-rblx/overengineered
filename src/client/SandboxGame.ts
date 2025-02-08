@@ -83,7 +83,7 @@ export namespace SandboxGame {
 
 		builder.services.registerSingletonFunc((ctx): ReadonlyPlot => {
 			const plot = ctx.resolve<SharedPlot>();
-			return new ReadonlyPlot(plot.instance.Blocks, plot.getCenter(), plot.bounds);
+			return new ReadonlyPlot(plot.instance.WaitForChild("Blocks"), plot.getCenter(), plot.bounds);
 		});
 
 		builder.services.registerSingletonFunc(CreateSandboxBlocks);
