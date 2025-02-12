@@ -1631,6 +1631,8 @@ export namespace BlocksSerializer {
 			data = version.upgradeFrom(data as never, blockList);
 			$log(`Upgrading a slot to savev${version.version}`);
 		}
+
+		return data;
 	}
 	export function deserializeFromObject(
 		data: SerializedBlocks<SerializedBlockBase>,
@@ -1639,7 +1641,7 @@ export namespace BlocksSerializer {
 	): number {
 		$log(`Loading a slot using savev${data.version}`);
 
-		upgradeSave(data, blockList);
+		data = upgradeSave(data, blockList);
 		place.blocksOnPlot(plot, data.blocks as readonly LatestSerializedBlock[], place.blockOnPlotV3);
 		return data.blocks.size();
 	}
