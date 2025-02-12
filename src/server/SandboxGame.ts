@@ -3,6 +3,7 @@ import { BadgeController } from "server/BadgeController";
 import { BaseGame } from "server/BaseGame";
 import { ServerBlockLogicController } from "server/blocks/ServerBlockLogicController";
 import { ServerBuildingRequestController } from "server/building/ServerBuildingRequestController";
+import { ExternalDatabaseBackendPlayers, ExternalDatabaseBackendSlots } from "server/database/ExternalDatabaseBackend";
 import { PlayerDatabase } from "server/database/PlayerDatabase";
 import { SlotDatabase } from "server/database/SlotDatabase";
 import { PlayModeController as PlayModeController } from "server/modes/PlayModeController";
@@ -35,8 +36,13 @@ export namespace SandboxGame {
 		// 	},
 		// ]);
 
-		builder.services.registerSingletonClass(PlayerDatabase);
-		builder.services.registerSingletonClass(SlotDatabase);
+		builder.services
+			.registerSingletonClass(PlayerDatabase) //
+			.withArgs([new ExternalDatabaseBackendPlayers()]);
+		builder.services
+			.registerSingletonClass(SlotDatabase) //
+			.withArgs([new ExternalDatabaseBackendSlots()]);
+
 		builder.services.registerService(PlayerDataController);
 
 		builder.services.registerSingletonClass(SpreadingFireController);

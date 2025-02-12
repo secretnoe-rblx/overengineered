@@ -10,13 +10,13 @@ import type { BuildingPlot } from "shared/building/BuildingPlot";
 @injectable
 export class SlotDatabase {
 	private readonly onlinePlayers = new Set<number>();
-	private readonly datastore: DatabaseBackend;
 	private readonly blocksdb;
 
-	constructor(@inject private readonly players: PlayerDatabase) {
-		this.datastore = Db.createStore("slots");
-
-		this.blocksdb = new Db<string | undefined>(
+	constructor(
+		private readonly datastore: DatabaseBackend<[ownerId: number, slotId: number]>,
+		@inject private readonly players: PlayerDatabase,
+	) {
+		this.blocksdb = new Db<string | undefined, [ownerId: number, slotId: number]>(
 			this.datastore,
 			() => undefined,
 			(data) => data ?? "",
@@ -32,14 +32,14 @@ export class SlotDatabase {
 
 			const id = tostring(plr.UserId);
 
-			for (const [key] of this.blocksdb.loadedUnsavedEntries()) {
+			for (const [key, { keys }] of this.blocksdb.loadedUnsavedEntries()) {
 				if (key.find(id + "_")[0] === undefined) {
 					continue;
 				}
 
 				$log("Saving " + key);
-				this.blocksdb.save(key);
-				this.blocksdb.free(key);
+				this.blocksdb.save(keys, key);
+				this.blocksdb.free(keys, key);
 			}
 		});
 	}
@@ -68,22 +68,22 @@ export class SlotDatabase {
 		});
 
 		if (!this.onlinePlayers.has(userId)) {
-			this.blocksdb.save(tostring(userId));
-			this.blocksdb.free(tostring(userId));
+			for (const slot of slots) {
+				this.blocksdb.save([userId, slot.index]);
+				this.blocksdb.free([userId, slot.index]);
+			}
+
 			$log("SAVING AFTER QUIT2");
 		}
 	}
 
-	private toKey(userId: number, index: number) {
-		return `${userId}_${index}`;
-	}
 	getBlocks(userId: number, index: number) {
 		this.ensureValidSlotIndex(userId, index);
-		return this.blocksdb.get(this.toKey(userId, index)) as string | undefined;
+		return this.blocksdb.get([userId, index]) as string | undefined;
 	}
 	setBlocks(userId: number, index: number, blocks: string, blockCount: number) {
 		this.ensureValidSlotIndex(userId, index);
-		this.blocksdb.set(this.toKey(userId, index), blocks);
+		this.blocksdb.set([userId, index], blocks);
 
 		const meta = [...this.getMeta(userId)];
 		SlotsMeta.set(meta, {
@@ -98,7 +98,7 @@ export class SlotDatabase {
 	setBlocksFromAnotherSlot(userId: number, index: number, indexfrom: number) {
 		this.ensureValidSlotIndex(userId, index);
 		this.ensureValidSlotIndex(userId, indexfrom);
-		this.blocksdb.set(this.toKey(userId, index), this.getBlocks(userId, indexfrom));
+		this.blocksdb.set([userId, index], this.getBlocks(userId, indexfrom));
 
 		const meta = [...this.getMeta(userId)];
 		SlotsMeta.set(meta, { ...SlotsMeta.get(meta, indexfrom), index });
