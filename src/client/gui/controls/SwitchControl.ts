@@ -16,15 +16,15 @@ export interface SwitchControlItem {
 	readonly description?: string;
 }
 
-/** Control that represents a boolean */
-export class SwitchControl<T extends string = string> extends Control<SwitchControlDefinition> {
+type TAllowNull<T extends string, Allow extends boolean> = Allow extends true ? T | undefined : T;
+class _SwitchControl<T extends string, AllowNull extends boolean> extends Control<SwitchControlDefinition> {
 	private readonly _submitted = new Signal<(value: T) => void>();
 	readonly submitted = this._submitted.asReadonly();
 	readonly value;
 
 	constructor(gui: SwitchControlDefinition, options: readonly [key: T, item: SwitchControlItem][]) {
 		super(gui);
-		this.value = new ObservableValue(options[0][0]);
+		this.value = new ObservableValue<TAllowNull<T, AllowNull>>(options[0][0]);
 
 		const template = this.asTemplate(gui.Template, true);
 
@@ -61,3 +61,9 @@ export class SwitchControl<T extends string = string> extends Control<SwitchCont
 		}
 	}
 }
+
+/** Control that represents a chosable value. */
+export class SwitchControl<T extends string = string> extends _SwitchControl<T, false> {}
+
+/** Control that represents a chosable value, nullable. */
+export class SwitchControlNullable<T extends string = string> extends _SwitchControl<T, true> {}

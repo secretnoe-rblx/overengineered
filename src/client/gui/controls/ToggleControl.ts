@@ -9,18 +9,19 @@ export type ToggleControlDefinition = TextButton & {
 	readonly Circle: TextButton;
 };
 
-/** Control that represents a boolean */
-export class ToggleControl extends Control<ToggleControlDefinition> {
+type TAllowNull<Allow extends boolean> = Allow extends true ? boolean | undefined : boolean;
+class _ToggleControl<AllowNull extends boolean> extends Control<ToggleControlDefinition> {
 	private readonly _submitted = new Signal<(value: boolean) => void>();
 	readonly submitted = this._submitted.asReadonly();
-	readonly value = new ObservableValue(false);
+	readonly value = new ObservableValue<TAllowNull<AllowNull>>(false);
 
 	constructor(gui: ToggleControlDefinition) {
 		super(gui);
 
 		const clicked = () => {
-			this.value.set(!this.value.get());
-			this._submitted.Fire(this.value.get());
+			const val = !this.value.get();
+			this.value.set(val);
+			this._submitted.Fire(val);
 		};
 
 		gui.Circle.AutoButtonColor = false;
@@ -38,9 +39,10 @@ export class ToggleControl extends Control<ToggleControlDefinition> {
 
 		const circle = this.parent(new Control(gui.Circle));
 
+		const val = this.event.addObservable(this.value.fReadonlyWithDefault(false));
 		this.valuesComponent() //
 			.get("BackgroundColor3")
-			.addTransitionBetweenBoolObservables(this.event, this.value, colorTrue, colorFalse, Transforms.quadOut02);
+			.addTransitionBetweenBoolObservables(this.event, val, colorTrue, colorFalse, Transforms.quadOut02);
 
 		circle
 			.valuesComponent()
@@ -49,3 +51,9 @@ export class ToggleControl extends Control<ToggleControlDefinition> {
 			.addBasicTransform(Transforms.quadOut02);
 	}
 }
+
+/** Control that represents a boolean */
+export class ToggleControl extends _ToggleControl<false> {}
+
+/** Control that represents a boolean, with support of undefined state */
+export class ToggleControlNullable extends _ToggleControl<true> {}

@@ -20,16 +20,18 @@ export type ConfigControlKeyDefinitionParts = ConfigControlBaseDefinitionParts &
 };
 export class ConfigControlKey extends ConfigControlBase<
 	ConfigControlBaseDefinition,
-	KeyCode | undefined,
+	KeyCode | "Unknown",
 	ConfigControlKeyDefinitionParts
 > {
 	constructor(gui: ConfigControlBaseDefinition & ConfigControlKeyDefinitionParts, name: string) {
-		super(gui, name, undefined);
+		super(gui, name);
 
 		const control = this.parent(new KeyChooserControl(this.parts.Control));
-		this._value.connect(control.value);
-		this.event.subscribe(control.submitted, (value) => this._v.submit(value));
 
-		this.parent(new Control(this.parts.UnsetControl)).addButtonAction(() => this._value.set(undefined));
+		this.initFromMultiWithDefault(control.value, () => "Unknown");
+		this.event.subscribe(control.submitted, (value) => this.submit(this.multiMap(() => value)));
+
+		this.parent(new Control(this.parts.UnsetControl)) //
+			.addButtonAction(() => this.submit(this.multiMap(() => "Unknown")));
 	}
 }

@@ -17,23 +17,22 @@ export type ConfigControlSwitchDefinition = GuiObject &
 export type ConfigControlSwitchDefinitionParts = ConfigControlBaseDefinitionParts & {
 	readonly ChosenItemDescriptionLabel: TextLabel;
 };
-
 export class ConfigControlSwitch<T extends string> extends ConfigControlBase<
 	ConfigControlSwitchDefinition,
 	T,
 	ConfigControlSwitchDefinitionParts
 > {
 	constructor(gui: ConfigControlSwitchDefinition, name: string, items: readonly [key: T, item: SwitchControlItem][]) {
-		super(gui, name, items[0][0]);
+		super(gui, name);
 
 		const control = this.parent(new SwitchControl<T>(gui.Control, items));
-		this.event.subscribe(control.submitted, (value) => this._v.submit(value));
-		this._value.connect(control.value);
+		this.initFromMultiWithDefault(control.value, () => items[0][0]);
+		this.event.subscribe(control.submitted, (value) => this.submit(this.multiMap(() => value)));
 
 		if (this.parts.ChosenItemDescriptionLabel) {
 			const obj = Objects.fromEntries(items);
 			control.value.subscribe((value) => {
-				if (obj[value].description === undefined) {
+				if (!value || obj[value].description === undefined) {
 					this.parts.ChosenItemDescriptionLabel.Visible = false;
 				} else {
 					this.parts.ChosenItemDescriptionLabel.Visible = true;

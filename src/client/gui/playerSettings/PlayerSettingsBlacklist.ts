@@ -18,19 +18,18 @@ export class PlayerSettingsBlacklist extends ConfigControlList {
 	) {
 		super(gui);
 
-		const blacklistedPlayers = this.event.addObservable(plot.blacklistedPlayers.withDefaultDC(() => Objects.empty));
+		const isolationMode = this.event.addObservable(plot.isolationMode.fWithDefault(false));
+		const blacklistedPlayers = this.event.addObservable(plot.blacklistedPlayers.fWithDefault(Objects.empty));
 
-		const isolationMode = this.addToggle("Isolation mode") //
-			.initToObservable(plot.isolationMode)
+		const isolation = this.addToggle("Isolation mode") //
+			.initToObservable(isolationMode)
 			.setDescription("Blacklist everyone");
-		this.event.subscribe(isolationMode.v.submitted, (value) =>
-			CustomRemotes.gui.settings.permissions.isolationMode.send(value),
-		);
+		isolation.submittedMulti((value) => CustomRemotes.gui.settings.permissions.isolationMode.send(value ?? false));
 
 		const blacklist = this.parent(new ConfigControlBlacklist(this.clone(gui.Blacklist), "Blacklist")) //
 			.initToObservable(blacklistedPlayers);
-		this.event.subscribe(blacklist.v.submitted, (players) =>
-			CustomRemotes.gui.settings.permissions.updateBlacklist.send(players),
+		blacklist.submittedMulti((players) =>
+			CustomRemotes.gui.settings.permissions.updateBlacklist.send(players ?? []),
 		);
 
 		this.event.subscribeObservable(plot.isolationMode, (value) => blacklist.setVisibleAndEnabled(!value), true);

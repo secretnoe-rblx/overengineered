@@ -1,10 +1,10 @@
-import { ColorChooser } from "client/gui/ColorChooser";
+import { Color4Chooser } from "client/gui/Color4Chooser";
 import { ConfigControlBase } from "client/gui/configControls/ConfigControlBase";
-import { ObservableValue } from "engine/shared/event/ObservableValue";
-import { SubmittableValue } from "engine/shared/event/SubmittableValue";
+import { Observables } from "engine/shared/event/Observables";
 import { Colors } from "shared/Colors";
 import type { ColorChooserDefinition } from "client/gui/ColorChooser";
 import type { ConfigControlBaseDefinition } from "client/gui/configControls/ConfigControlBase";
+import type { ObservableValue } from "engine/shared/event/ObservableValue";
 
 declare module "client/gui/configControls/ConfigControlsList" {
 	export interface ConfigControlTemplateList {
@@ -15,18 +15,37 @@ declare module "client/gui/configControls/ConfigControlsList" {
 export type ConfigControlColorDefinition = ConfigControlBaseDefinition & {
 	readonly Control: ColorChooserDefinition;
 };
-export class ConfigControlColor extends ConfigControlBase<ConfigControlColorDefinition, Color3> {
-	readonly alpha;
+export class ConfigControlColor extends ConfigControlBase<ConfigControlColorDefinition, Color4> {
+	constructor(gui: ConfigControlColorDefinition, name: string, alpha = false) {
+		super(gui, name);
 
-	constructor(gui: ConfigControlColorDefinition, name: string, Alpha = false) {
-		super(gui, name, Colors.white);
+		const control = this.parent(new Color4Chooser(gui.Control, undefined, alpha));
 
-		this.alpha = new SubmittableValue(new ObservableValue(1));
+		this.initFromMultiWithDefault(control.value.value, () => ({ alpha: 1, color: Colors.white }));
+		this.event.subscribe(control.value.submitted, (value) => this.submit(this.multiMap(() => value)));
+	}
 
-		const control = this.parent(new ColorChooser(gui.Control, undefined, Alpha));
-		this._value.connect(control.value.value);
-		this.alpha.value.connect(control.alpha.value);
-		this.event.subscribe(control.value.submitted, (value) => this._v.submit(value));
-		this.event.subscribe(control.alpha.submitted, (value) => this.alpha.submit(value));
+	initColor(
+		observable: ObservableValue<object>,
+		colorPath: readonly string[],
+		transparencyPath: readonly string[],
+		updateType: "value" | "submit" = "submit",
+	): this {
+		const color = this.event.addObservable(
+			Observables.createObservableFromObjectProperty<Color3>(observable, colorPath),
+		);
+		let alpha = this.event.addObservable(
+			Observables.createObservableFromObjectProperty<number>(observable, transparencyPath),
+		);
+		alpha = this.event.addObservable(
+			alpha.fCreateBased(
+				(c) => 1 - c,
+				(c) => 1 - c,
+			),
+		);
+
+		const stuff = this.event.addObservable(Observables.createObservableFromMultiple({ color, alpha }));
+
+		return this.initToObservable(stuff, updateType);
 	}
 }

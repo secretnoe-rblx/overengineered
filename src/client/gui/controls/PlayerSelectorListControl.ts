@@ -4,6 +4,7 @@ import { Control } from "engine/client/gui/Control";
 import { ComponentKeyedChildren } from "engine/shared/component/ComponentKeyedChildren";
 import { Transforms } from "engine/shared/component/Transforms";
 import { TransformService } from "engine/shared/component/TransformService";
+import { ObservableCollectionSet } from "engine/shared/event/ObservableCollection";
 import { ArgsSignal } from "engine/shared/event/Signal";
 import { GameDefinitions } from "shared/data/GameDefinitions";
 
@@ -16,8 +17,10 @@ type FakePlayer = {
 type PlayerContainerDefinition = Frame & {
 	readonly TextButton: TextButton & {
 		readonly ImageLabel: ImageLabel;
-		readonly TitleLabel: TextLabel;
-		readonly UsernameLabel: TextLabel;
+		readonly Texts: GuiObject & {
+			readonly TitleLabel: TextLabel;
+			readonly UsernameLabel: TextLabel;
+		};
 	};
 };
 class PlayerContainer extends Control<PlayerContainerDefinition> {
@@ -29,8 +32,8 @@ class PlayerContainer extends Control<PlayerContainerDefinition> {
 	) {
 		super(gui);
 
-		gui.TextButton.TitleLabel.Text = player.DisplayName;
-		gui.TextButton.UsernameLabel.Text = `@${player.Name}`;
+		gui.TextButton.Texts.TitleLabel.Text = player.DisplayName;
+		gui.TextButton.Texts.UsernameLabel.Text = `@${player.Name}`;
 		task.spawn(() => {
 			gui.TextButton.ImageLabel.Image = Players.GetUserThumbnailAsync(
 				player.UserId,
@@ -53,14 +56,14 @@ export type PlayerSelectorColumnControlDefinition = Frame & {
 
 export class PlayerSelectorColumnControl extends Control<PlayerSelectorColumnControlDefinition> {
 	private readonly playerTemplate;
-	private readonly addedPlayers;
 
 	private readonly leftControl;
 	private readonly rightControl;
 
+	readonly value = new ObservableCollectionSet<number>();
 	readonly submitted = new ArgsSignal<[players: readonly number[]]>();
 
-	constructor(gui: PlayerSelectorColumnControlDefinition, addedPlayers: readonly number[]) {
+	constructor(gui: PlayerSelectorColumnControlDefinition) {
 		super(gui);
 
 		this.playerTemplate = this.asTemplate(gui.Left.Container, true);
@@ -70,7 +73,6 @@ export class PlayerSelectorColumnControl extends Control<PlayerSelectorColumnCon
 		this.rightControl = this.parent(
 			new ComponentKeyedChildren<FakePlayer, PlayerContainer>().withParentInstance(gui.Right),
 		);
-		this.addedPlayers = new Set(addedPlayers);
 
 		this.onEnable(() => this.updateOnlinePlayers());
 		this.event.subscribe(Players.PlayerAdded, (player) => this.addPlayer(player));
@@ -84,11 +86,15 @@ export class PlayerSelectorColumnControl extends Control<PlayerSelectorColumnCon
 		for (const player of Players.GetPlayers()) {
 			this.addPlayer(player);
 		}
-		// const pl: FakePlayer[] = [
-		// ];
-		// for (const player of pl) {
-		// 	this.addPlayer(player);
-		// }
+
+		const pl: FakePlayer[] = [
+			{ DisplayName: "Amongus3", Name: "Sus3", UserId: 123 },
+			{ DisplayName: "Amongus4", Name: "Sus4", UserId: 124 },
+			{ DisplayName: "Amongus5", Name: "Sus5", UserId: 125 },
+		];
+		for (const player of pl) {
+			this.addPlayer(player);
+		}
 	}
 	private addPlayer(player: FakePlayer | Player) {
 		if (player === Players.LocalPlayer) return;
@@ -96,7 +102,7 @@ export class PlayerSelectorColumnControl extends Control<PlayerSelectorColumnCon
 
 		const control = new PlayerContainer(this.playerTemplate(), player);
 
-		if (!this.addedPlayers.has(player.UserId)) {
+		if (!this.value.has(player.UserId)) {
 			this.leftControl.add(player, control);
 			TransformService.run(control.instance.TextButton, (tr, instance) =>
 				tr
@@ -111,10 +117,10 @@ export class PlayerSelectorColumnControl extends Control<PlayerSelectorColumnCon
 					.then()
 					.func(() => {
 						control.clicked.Connect(() => {
-							this.addedPlayers.add(player.UserId);
+							this.value.add(player.UserId);
 							this.removePlayer(player);
 							this.addPlayer(player);
-							this.submitted.Fire([...this.addedPlayers]);
+							this.submitted.Fire([...this.value.get()]);
 						});
 					}),
 			);
@@ -133,10 +139,10 @@ export class PlayerSelectorColumnControl extends Control<PlayerSelectorColumnCon
 					.then()
 					.func(() => {
 						control.clicked.Connect(() => {
-							this.addedPlayers.delete(player.UserId);
+							this.value.remove(player.UserId);
 							this.removePlayer(player);
 							this.addPlayer(player);
-							this.submitted.Fire([...this.addedPlayers]);
+							this.submitted.Fire([...this.value.get()]);
 						});
 					}),
 			);
@@ -150,10 +156,10 @@ export class PlayerSelectorColumnControl extends Control<PlayerSelectorColumnCon
 		control.instance.Interactable = false;
 
 		if (this.leftControl.get(player)) {
-			TransformService.run(control.instance.TextButton.TitleLabel, (tr, instance) =>
+			TransformService.run(control.instance.TextButton.Texts.TitleLabel, (tr, instance) =>
 				tr.transform(instance, "TextTransparency", 1, Transforms.commonProps.quadOut02),
 			);
-			TransformService.run(control.instance.TextButton.UsernameLabel, (tr, instance) =>
+			TransformService.run(control.instance.TextButton.Texts.UsernameLabel, (tr, instance) =>
 				tr.transform(instance, "TextTransparency", 1, Transforms.commonProps.quadOut02),
 			);
 			TransformService.run(control.instance.TextButton.ImageLabel, (tr, instance) =>
@@ -167,10 +173,10 @@ export class PlayerSelectorColumnControl extends Control<PlayerSelectorColumnCon
 					.func(() => control.destroy()),
 			);
 		} else {
-			TransformService.run(control.instance.TextButton.TitleLabel, (tr, instance) =>
+			TransformService.run(control.instance.TextButton.Texts.TitleLabel, (tr, instance) =>
 				tr.transform(instance, "TextTransparency", 1, Transforms.commonProps.quadOut02),
 			);
-			TransformService.run(control.instance.TextButton.UsernameLabel, (tr, instance) =>
+			TransformService.run(control.instance.TextButton.Texts.UsernameLabel, (tr, instance) =>
 				tr.transform(instance, "TextTransparency", 1, Transforms.commonProps.quadOut02),
 			);
 			TransformService.run(control.instance.TextButton.ImageLabel, (tr, instance) =>

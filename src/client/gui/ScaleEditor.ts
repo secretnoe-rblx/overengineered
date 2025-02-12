@@ -32,17 +32,19 @@ export class ScaleEditorControl extends Control<ScaleEditorControlDefinition> {
 		super(gui);
 
 		const createVectorNum = (axis: "X" | "Y" | "Z"): ObservableValue<number> => {
-			const value = scale
-				.createBothWayBased<number>(
+			const clamp = (v: number) => math.clamp(v, 1 / 16, 8);
+
+			const value = this.event.addObservable(
+				scale.fCreateBased<number>(
+					(v) => clamp(v[axis]),
 					(v) =>
 						new Vector3(
-							axis === "X" ? v : scale.get().X,
-							axis === "Y" ? v : scale.get().Y,
-							axis === "Z" ? v : scale.get().Z,
+							clamp(axis === "X" ? v : scale.get().X),
+							clamp(axis === "Y" ? v : scale.get().Y),
+							clamp(axis === "Z" ? v : scale.get().Z),
 						),
-					(v) => v[axis],
-				)
-				.withMiddleware((v) => math.clamp(v, 1 / 16, 8));
+				),
+			);
 
 			return value;
 		};

@@ -12,21 +12,17 @@ export class PlayerSettingsTheme extends ConfigControlList {
 		this.addCategory("Selection");
 		{
 			this.addColor("Surface color", true) //
-				.initToObjectPart(value, ["visuals", "selection", "surfaceColor"])
-				.initToObjectPart<number>(value, ["visuals", "selection", "surfaceTransparency"], undefined, (s) =>
-					s.alpha.createBothWayBased(
-						(c) => 1 - c,
-						(c) => 1 - c,
-					),
+				.initColor(
+					value,
+					["visuals", "selection", "surfaceColor"],
+					["visuals", "selection", "surfaceTransparency"],
 				);
 
 			this.addColor("Border color", true) //
-				.initToObjectPart(value, ["visuals", "selection", "borderColor"])
-				.initToObjectPart<number>(value, ["visuals", "selection", "borderTransparency"], undefined, (s) =>
-					s.alpha.createBothWayBased(
-						(c) => 1 - c,
-						(c) => 1 - c,
-					),
+				.initColor(
+					value,
+					["visuals", "selection", "borderColor"],
+					["visuals", "selection", "borderTransparency"],
 				);
 
 			this.addSlider("Border thickness", { min: 0.01, max: 1, inputStep: 0.01 }) //
@@ -36,21 +32,17 @@ export class PlayerSettingsTheme extends ConfigControlList {
 		this.addCategory("Active selection");
 		{
 			this.addColor("Surface color", true) //
-				.initToObjectPart(value, ["visuals", "multiSelection", "surfaceColor"])
-				.initToObjectPart<number>(value, ["visuals", "multiSelection", "surfaceTransparency"], undefined, (s) =>
-					s.alpha.createBothWayBased(
-						(c) => 1 - c,
-						(c) => 1 - c,
-					),
+				.initColor(
+					value,
+					["visuals", "multiSelection", "surfaceColor"],
+					["visuals", "multiSelection", "surfaceTransparency"],
 				);
 
 			this.addColor("Border color", true) //
-				.initToObjectPart(value, ["visuals", "multiSelection", "borderColor"])
-				.initToObjectPart<number>(value, ["visuals", "multiSelection", "borderTransparency"], undefined, (s) =>
-					s.alpha.createBothWayBased(
-						(c) => 1 - c,
-						(c) => 1 - c,
-					),
+				.initColor(
+					value,
+					["visuals", "multiSelection", "borderColor"],
+					["visuals", "multiSelection", "borderTransparency"],
 				);
 
 			this.addSlider("Border thickness", { min: 0.01, max: 1, inputStep: 0.01 }) //

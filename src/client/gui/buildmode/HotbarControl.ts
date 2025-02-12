@@ -147,7 +147,7 @@ export class HotbarControl extends InstanceComponent<HotbarControlDefinition> {
 			// Play sound
 			SoundController.getSounds().Click.Play();
 		};
-		this.event.subscribeObservable(toolController.selectedTool, toolChanged, true);
+		this.event.subscribeObservablePrev(toolController.selectedTool, toolChanged, true);
 		this.instance.NameLabel.Text = "";
 	}
 }

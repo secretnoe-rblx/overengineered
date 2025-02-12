@@ -142,7 +142,7 @@ export class BuildingMode extends PlayMode {
 		});
 
 		this.targetPlot = new ObservableValue<SharedPlot>(plot);
-		this.targetPlot.subscribe((plot, prev) => {
+		this.targetPlot.subscribePrev((plot, prev) => {
 			const index = BlockSelect.blockRaycastParams.FilterDescendantsInstances.indexOf(prev.instance);
 			if (index !== -1) {
 				BlockSelect.blockRaycastParams.FilterDescendantsInstances.remove(index);

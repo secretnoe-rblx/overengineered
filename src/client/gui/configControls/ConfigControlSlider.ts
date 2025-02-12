@@ -1,5 +1,5 @@
 import { ConfigControlBase } from "client/gui/configControls/ConfigControlBase";
-import { SliderControl } from "client/gui/controls/SliderControl";
+import { SliderControlNullable } from "client/gui/controls/SliderControl";
 import type { ConfigControlBaseDefinition } from "client/gui/configControls/ConfigControlBase";
 import type { SliderControlConfig, SliderControlDefinition } from "client/gui/controls/SliderControl";
 
@@ -15,10 +15,11 @@ export type ConfigControlSliderDefinition = ConfigControlBaseDefinition & {
 };
 export class ConfigControlSlider extends ConfigControlBase<ConfigControlSliderDefinition, number> {
 	constructor(gui: ConfigControlSliderDefinition, name: string, config: SliderControlConfig) {
-		super(gui, name, 0);
+		super(gui, name);
 
-		const control = this.parent(new SliderControl(gui.Control, config, { TextBox: gui.ManualControl }));
-		this.event.subscribe(control.submitted, (value) => this._v.submit(value));
-		this._value.connect(control.value);
+		const control = this.parent(new SliderControlNullable(gui.Control, config, { TextBox: gui.ManualControl }));
+
+		this.initFromMulti(control.value);
+		this.event.subscribe(control.submitted, (value) => this.submit(this.multiMap(() => value)));
 	}
 }

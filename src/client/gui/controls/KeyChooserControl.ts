@@ -8,11 +8,10 @@ import { Colors } from "shared/Colors";
 
 export type KeyChooserControlDefinition = TextButton;
 
-type ToStr<TAllowNull extends boolean> = TAllowNull extends false ? KeyCode : KeyCode | undefined;
-/** Control that represents a key */
-export class KeyChooserControl<TAllowNull extends boolean = false> extends Control<KeyChooserControlDefinition> {
-	readonly submitted = new Signal<(value: KeyCode, prev: ToStr<TAllowNull>) => void>();
-	readonly value = new ObservableValue<ToStr<TAllowNull>>("P");
+/** Control that represents a key. */
+export class KeyChooserControl extends Control<KeyChooserControlDefinition> {
+	readonly submitted = new Signal<(value: KeyCode, prev: KeyCode) => void>();
+	readonly value = new ObservableValue<KeyCode>("P");
 
 	private readonly color = Colors.accentDark;
 	private readonly activeColor = Colors.accent;
@@ -20,7 +19,7 @@ export class KeyChooserControl<TAllowNull extends boolean = false> extends Contr
 	constructor(gui: KeyChooserControlDefinition) {
 		super(gui);
 
-		this.value.subscribe((value) => (this.gui.Text = value ?? ""));
+		this.value.subscribe((value) => (this.gui.Text = value === "Unknown" ? "" : value));
 		this.event.onPrepare(() => (this.gui.BackgroundColor3 = this.color));
 
 		this.gui.Activated.Connect(() => {

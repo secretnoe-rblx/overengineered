@@ -79,7 +79,7 @@ export class ToolController extends Component {
 			this.selectedTool.set(undefined);
 		});
 
-		this.selectedTool.subscribe((tool, prev) => {
+		this.selectedTool.subscribePrev((tool, prev) => {
 			prev?.disable();
 			tool?.enable();
 		});

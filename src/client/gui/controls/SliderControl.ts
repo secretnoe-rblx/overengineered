@@ -26,7 +26,7 @@ export interface SliderControlConfig {
 }
 
 /** Control that represents a number via a slider. */
-export class SliderControl<TAllowNull extends boolean = false> extends PartialControl<
+class _SliderControl<TAllowNull extends boolean = false> extends PartialControl<
 	SliderControlDefinitionParts,
 	GuiObject,
 	SliderControlDefinitionParts & { readonly Hitbox: GuiObject }
@@ -194,3 +194,9 @@ export class SliderControl<TAllowNull extends boolean = false> extends PartialCo
 		sub(this.parts.Hitbox.InputBegan);
 	}
 }
+
+/** Control that represents a number via a slider. */
+export class SliderControl extends _SliderControl<false> {}
+
+/** Control that represents a number via a slider, nullable. */
+export class SliderControlNullable extends _SliderControl<true> {}

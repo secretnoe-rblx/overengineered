@@ -24,6 +24,6 @@ export class DayCycleController extends HostedService {
 		};
 
 		this.event.loop(1 / 4, update);
-		this.event.addObservable(playerData.config.createBasedDC((c) => c.dayCycle)).subscribe(update);
+		this.event.addObservable(playerData.config.fReadonlyCreateBased((c) => c.dayCycle)).subscribe(update);
 	}
 }

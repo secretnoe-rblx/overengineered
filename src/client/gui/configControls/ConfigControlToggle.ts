@@ -1,5 +1,5 @@
 import { ConfigControlBase } from "client/gui/configControls/ConfigControlBase";
-import { ToggleControl } from "client/gui/controls/ToggleControl";
+import { ToggleControlNullable } from "client/gui/controls/ToggleControl";
 import type { ConfigControlBaseDefinition } from "client/gui/configControls/ConfigControlBase";
 import type { ToggleControlDefinition } from "client/gui/controls/ToggleControl";
 
@@ -14,10 +14,11 @@ export type ConfigControlToggleDefinition = ConfigControlBaseDefinition & {
 };
 export class ConfigControlToggle extends ConfigControlBase<ConfigControlToggleDefinition, boolean> {
 	constructor(gui: ConfigControlToggleDefinition, name: string) {
-		super(gui, name, false);
+		super(gui, name);
 
-		const control = this.parent(new ToggleControl(gui.Control));
-		this._value.connect(control.value);
-		this.event.subscribe(control.submitted, (value) => this._v.submit(value));
+		const control = this.parent(new ToggleControlNullable(gui.Control));
+
+		this.initFromMulti(control.value);
+		this.event.subscribe(control.submitted, (value) => this.submit(this.multiMap(() => value)));
 	}
 }

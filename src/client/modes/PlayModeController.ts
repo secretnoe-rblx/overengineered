@@ -44,7 +44,7 @@ export class PlayModeController extends HostedService {
 			if (active) this.modes[active].setEnabled(!shown);
 		});
 
-		this.event.subscribeObservable(this.playmode, (mode, prev) => {
+		this.event.subscribeObservablePrev(this.playmode, (mode, prev) => {
 			this.callImmediateSetMode(mode, prev);
 			this.setMode(mode, prev);
 		});

@@ -16,7 +16,7 @@ export class MirrorVisualizer extends Component {
 		this.template = this.asTemplate(ReplicatedStorage.WaitForChild("Assets").WaitForChild("Mirror") as Part);
 
 		this.event.subscribeObservable(this.mirrorMode, () => this.recreate(), true);
-		this.event.subscribeObservable(this.plot, (plot, prev) => {
+		this.event.subscribeObservablePrev(this.plot, (plot, prev) => {
 			prev?.instance.FindFirstChild("Mirrors")?.ClearAllChildren();
 			this.recreate();
 		});

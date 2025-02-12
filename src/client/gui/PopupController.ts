@@ -8,6 +8,7 @@ import { InstanceComponent } from "engine/shared/component/InstanceComponent";
 import { OverlayValueStorage } from "engine/shared/component/OverlayValueStorage";
 import { HostedService } from "engine/shared/di/HostedService";
 import { Element } from "engine/shared/Element";
+import { EventHandler } from "engine/shared/event/EventHandler";
 import type { BlurController } from "client/controller/BlurController";
 import type { ReadonlyObservableValue } from "engine/shared/event/ObservableValue";
 
@@ -44,6 +45,13 @@ class Popup extends InstanceComponent<ScreenGui> {
 
 		control.onDisable(() => this.disable());
 		control.onDestroy(() => this.destroy());
+
+		this.onInject((di) => {
+			const blur = di.resolve<BlurController>();
+			this.event.subscribeDestroyable(
+				blur.blur.addChildOverlay(visible.createBased((visible) => (visible ? 12 : undefined))),
+			);
+		});
 	}
 }
 
@@ -65,11 +73,27 @@ export class PopupController extends HostedService {
 			.withParentInstance(this.screen);
 
 		this._isShown = OverlayValueStorage.bool();
-		this._isShown.addChildOverlay(
-			this.event.addObservable(
-				this.children.children.createBasedAnyDC((c) => c.control.visibilityComponent().visible),
-			),
-		);
+		{
+			const updateVisibility = () => {
+				this._isShown.and(
+					undefined,
+					this.children.children.get().any((c) => c.control.visibilityComponent().visible.get()),
+				);
+			};
+
+			const eh = new EventHandler();
+			this.onDisable(() => eh.unsubscribeAll());
+			this.event.subscribeObservable(this.children.children, (items) => {
+				eh.unsubscribeAll();
+
+				for (const item of items) {
+					const sub = item.control.visibilityComponent().visible.subscribe(updateVisibility);
+					eh.register(sub);
+				}
+
+				updateVisibility();
+			});
+		}
 
 		this.isShown = this._isShown;
 		this.updateIsShown();

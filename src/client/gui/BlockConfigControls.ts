@@ -4,7 +4,7 @@ import { CheckBoxControl } from "client/gui/controls/CheckBoxControl";
 import { DropdownList } from "client/gui/controls/DropdownList";
 import { KeyOrStringChooserControl } from "client/gui/controls/KeyOrStringChooserControl";
 import { NumberTextBoxControl } from "client/gui/controls/NumberTextBoxControl";
-import { SliderControl } from "client/gui/controls/SliderControl";
+import { SliderControlNullable } from "client/gui/controls/SliderControl";
 import { Interface } from "client/gui/Interface";
 import { MultiKeyNumberControl } from "client/gui/MultiKeyNumberControl";
 import { MemoryEditorPopup } from "client/gui/popup/MemoryEditorPopup";
@@ -308,7 +308,7 @@ namespace Controls {
 				const clamp = definition.clamp;
 
 				const control = this.parent(
-					new SliderControl<true>(gui, clamp, {
+					new SliderControlNullable(gui, clamp, {
 						Knob: gui.Control.Knob,
 						Filled: gui.Control.Filled,
 						Hitbox: gui.Control,

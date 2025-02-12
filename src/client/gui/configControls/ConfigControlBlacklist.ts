@@ -13,10 +13,10 @@ declare module "client/gui/configControls/ConfigControlsList" {
 export type ConfigControlBlacklistDefinition = ConfigControlBaseDefinition & PlayerSelectorColumnControlDefinition;
 export class ConfigControlBlacklist extends ConfigControlBase<ConfigControlBlacklistDefinition, readonly number[]> {
 	constructor(gui: ConfigControlBlacklistDefinition, name: string) {
-		super(gui, name, Objects.empty);
+		super(gui, name);
 
-		const control = this.parent(new PlayerSelectorColumnControl(gui, this._value.get()));
-		// this.value.connect(control.value);
-		this.event.subscribe(control.submitted, (value) => this._v.submit(value));
+		const control = this.parent(new PlayerSelectorColumnControl(gui));
+		this.initFromMultiWithDefault(control.value.asArray(), () => Objects.empty);
+		this.event.subscribe(control.submitted, (value) => this.submit(this.multiMap(() => value)));
 	}
 }

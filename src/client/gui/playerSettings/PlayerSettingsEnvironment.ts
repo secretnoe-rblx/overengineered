@@ -17,10 +17,10 @@ export class PlayerSettingsEnvironment extends ConfigControlList {
 
 			const manual = this.addSlider("Manual", { min: 0, max: 24, inputStep: 0.1 }) //
 				.setDescription("Manual time, hours.")
-				.initToObjectPart(value, ["dayCycle", "manual"]);
+				.initToObjectPart(value, ["dayCycle", "manual"], "value");
 
 			this.event
-				.createBasedObservable(value, (c) => c.dayCycle)
+				.addObservable(value.fReadonlyCreateBased((c) => c.dayCycle))
 				.subscribe(({ automatic }) => manual.setVisibleAndEnabled(!automatic), true);
 		}
 
@@ -52,7 +52,7 @@ export class PlayerSettingsEnvironment extends ConfigControlList {
 				.initToObjectPart(value, ["terrain", "snowOnly"]);
 
 			this.event
-				.createBasedObservable(value, (c) => c.terrain)
+				.addObservable(value.fReadonlyCreateBased((c) => c.terrain)) //
 				.subscribe(({ kind, snowOnly }) => {
 					triangleResolution.setVisibleAndEnabled(kind === "Triangle");
 					triangleWater.setVisibleAndEnabled(kind === "Triangle");

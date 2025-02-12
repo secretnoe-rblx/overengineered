@@ -246,7 +246,9 @@ const createButtonList = <K extends string>(
 			.initializeSimpleTransform("BackgroundColor3")
 			.themeButton(
 				theme,
-				parent.event.createBasedObservable(state, (enabled) => (enabled ? "buttonActive" : "buttonNormal")),
+				parent.event.addObservable(
+					state.fReadonlyCreateBased((enabled) => (enabled ? "buttonActive" : "buttonNormal")),
+				),
 			);
 
 		ret[k] = btn;
@@ -695,7 +697,7 @@ class CompoundObservableSet<T extends defined> {
 	readonly set = new ObservableCollectionSet<T>();
 
 	addSource(observable: ReadonlyObservableValue<T | undefined>) {
-		observable.subscribe((value, prev) => {
+		observable.subscribePrev((value, prev) => {
 			if (value !== undefined) {
 				this.set.add(value);
 			} else if (prev !== undefined) {

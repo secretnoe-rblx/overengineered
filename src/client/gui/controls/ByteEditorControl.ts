@@ -55,7 +55,7 @@ export class ByteEditor extends Control<ByteEditorDefinition> {
 		}
 
 		// Value update
-		this.value.subscribe((value, prev) => {
+		this.value.subscribe((value) => {
 			parts.TextBox.Text = `${value}`;
 			this.updateButtons();
 		}, true);

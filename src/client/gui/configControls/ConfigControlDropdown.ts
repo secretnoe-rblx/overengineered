@@ -2,7 +2,6 @@ import { ConfigControlBase } from "client/gui/configControls/ConfigControlBase";
 import { DropdownList } from "client/gui/controls/DropdownList";
 import type { ConfigControlBaseDefinition } from "client/gui/configControls/ConfigControlBase";
 import type { DropdownListDefinition } from "client/gui/controls/DropdownList";
-import type { ObservableValue } from "engine/shared/event/ObservableValue";
 
 declare module "client/gui/configControls/ConfigControlsList" {
 	export interface ConfigControlTemplateList {
@@ -21,7 +20,7 @@ type Item = {
 
 export class ConfigControlDropdown<T extends string> extends ConfigControlBase<ConfigControlDropdownDefinition, T> {
 	constructor(gui: ConfigControlDropdownDefinition, name: string, items: { readonly [k in T]: Item }) {
-		super(gui, name, firstKey(items)!);
+		super(gui, name);
 
 		const control = this.parent(new DropdownList<T>(gui.Control));
 		for (const [k, { name, description }] of pairs(items)) {
@@ -31,7 +30,7 @@ export class ConfigControlDropdown<T extends string> extends ConfigControlBase<C
 			}
 		}
 
-		this.event.subscribe(control.submitted, (value) => this._v.submit(value));
-		this._value.connect(control.selectedItem as ObservableValue<T>);
+		this.initFromMulti(control.selectedItem as never);
+		this.event.subscribe(control.submitted, (value) => this.submit(this.multiMap(() => value)));
 	}
 }
