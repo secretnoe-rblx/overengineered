@@ -1,6 +1,5 @@
 import { Players } from "@rbxts/services";
 import { Db } from "engine/server/Database";
-import { JSON } from "engine/shared/fixes/Json";
 import { PlayerConfigUpdater } from "server/PlayerConfigVersioning";
 import type { DatabaseBackend } from "engine/server/backend/DatabaseBackend";
 
@@ -31,19 +30,8 @@ export class PlayerDatabase {
 	private readonly onlinePlayers = new Set<number>();
 	private readonly db;
 
-	constructor(private readonly datastore: DatabaseBackend<[id: number]>) {
-		this.db = new Db<PlayerDatabaseData, [id: number]>(
-			this.datastore,
-			() => ({}),
-			(data) => JSON.serialize(data),
-			(data) => {
-				const pdata = JSON.deserialize<PlayerDatabaseData>(data);
-				return {
-					...pdata,
-					settings: pdata.settings === undefined ? undefined : PlayerConfigUpdater.update(pdata.settings),
-				};
-			},
-		);
+	constructor(private readonly datastore: DatabaseBackend<PlayerDatabaseData, [id: number]>) {
+		this.db = new Db<PlayerDatabaseData, [id: number]>(this.datastore, () => ({}));
 
 		Players.PlayerAdded.Connect((plr) => this.onlinePlayers.add(plr.UserId));
 		Players.PlayerRemoving.Connect((plr) => {
@@ -63,7 +51,11 @@ export class PlayerDatabase {
 			if (data) return data;
 		}
 
-		return this.db.get([userId]);
+		const data = this.db.get([userId]);
+		return {
+			...data,
+			settings: data.settings === undefined ? undefined : PlayerConfigUpdater.update(data.settings),
+		};
 	}
 
 	set(userId: number, data: PlayerDatabaseData) {

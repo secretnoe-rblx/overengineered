@@ -13,14 +13,15 @@ export class SlotDatabase {
 	private readonly blocksdb;
 
 	constructor(
-		private readonly datastore: DatabaseBackend<[ownerId: number, slotId: number]>,
+		private readonly datastore: DatabaseBackend<
+			BlocksSerializer.JsonSerializedBlocks,
+			[ownerId: number, slotId: number]
+		>,
 		@inject private readonly players: PlayerDatabase,
 	) {
-		this.blocksdb = new Db<string | undefined, [ownerId: number, slotId: number]>(
+		this.blocksdb = new Db<BlocksSerializer.JsonSerializedBlocks | undefined, [ownerId: number, slotId: number]>(
 			this.datastore,
 			() => undefined,
-			(data) => data ?? "",
-			(data) => data,
 		);
 
 		Players.PlayerAdded.Connect((plr) => this.onlinePlayers.add(plr.UserId));
@@ -77,11 +78,11 @@ export class SlotDatabase {
 		}
 	}
 
-	getBlocks(userId: number, index: number) {
+	getBlocks(userId: number, index: number): BlocksSerializer.JsonSerializedBlocks | undefined {
 		this.ensureValidSlotIndex(userId, index);
-		return this.blocksdb.get([userId, index]) as string | undefined;
+		return this.blocksdb.get([userId, index]);
 	}
-	setBlocks(userId: number, index: number, blocks: string, blockCount: number) {
+	setBlocks(userId: number, index: number, blocks: BlocksSerializer.JsonSerializedBlocks, blockCount: number) {
 		this.ensureValidSlotIndex(userId, index);
 		this.blocksdb.set([userId, index], blocks);
 
@@ -89,7 +90,7 @@ export class SlotDatabase {
 		SlotsMeta.set(meta, {
 			...SlotsMeta.get(meta, index),
 			blocks: blockCount,
-			size: blocks.size(),
+			size: 0,
 			saveTime: DateTime.now().UnixTimestampMillis,
 			index,
 		});
@@ -114,11 +115,11 @@ export class SlotDatabase {
 	save(userId: number, index: number, plot: BuildingPlot): ResponseResult<SaveSlotResponse> {
 		this.ensureValidSlotIndex(userId, index);
 
-		const blocks = BlocksSerializer.serialize(plot);
+		const blocks = BlocksSerializer.serializeToJsonObject(plot);
 		const blockCount = plot.getBlocks().size();
 
 		this.setBlocks(userId, index, blocks, blockCount);
-		const size = blocks.size();
+		const size = 0;
 
 		return { blocks: blockCount, size: size };
 	}

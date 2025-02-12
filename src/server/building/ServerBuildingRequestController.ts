@@ -44,7 +44,7 @@ export class ServerBuildingRequestController extends HostedService {
 							slots.setBlocks(
 								player.UserId,
 								SlotsMeta.quitSlotIndex,
-								BlocksSerializer.serialize(blocks),
+								BlocksSerializer.serializeToJsonObject(blocks),
 								blocks.getBlocks().size(),
 							);
 						} else {

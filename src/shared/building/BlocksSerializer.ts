@@ -1581,6 +1581,7 @@ const getVersion = (version: number) => versions.find((v) => v.version === versi
 
 /** Methods to save and load buildings */
 export namespace BlocksSerializer {
+	export type JsonSerializedBlocks = SerializedBlocks<JsonBlock>;
 	type JsonBlock = ReplaceWith<
 		Omit<LatestSerializedBlock, "location" | "color" | "material" | "scale">,
 		{
@@ -1602,7 +1603,7 @@ export namespace BlocksSerializer {
 			blocks: plot.getBlocks().map((block) => serializeBlockToObject(plot, block)),
 		};
 	}
-	export function serialize(plot: ReadonlyPlot): string {
+	export function serializeToJsonObject(plot: ReadonlyPlot): SerializedBlocks<JsonBlock> {
 		const fix = (block: LatestSerializedBlock): JsonBlock => {
 			return {
 				id: block.id,
@@ -1617,8 +1618,10 @@ export namespace BlocksSerializer {
 			};
 		};
 
-		const serialized = serializeToObject(plot);
-		return JSON.serialize({ ...serialized, blocks: serialized.blocks.map(fix) });
+		return {
+			version: current.version,
+			blocks: plot.getBlocks().map((block) => fix(serializeBlockToObject(plot, block))),
+		};
 	}
 
 	export function upgradeSave(data: SerializedBlocks<SerializedBlockBase>, blockList: BlockList) {
@@ -1634,18 +1637,12 @@ export namespace BlocksSerializer {
 
 		return data;
 	}
-	export function deserializeFromObject(
-		data: SerializedBlocks<SerializedBlockBase>,
+
+	export function deserializeFromJsonObject(
+		data: SerializedBlocks<JsonBlock>,
 		plot: BuildingPlot,
 		blockList: BlockList,
 	): number {
-		$log(`Loading a slot using savev${data.version}`);
-
-		data = upgradeSave(data, blockList);
-		place.blocksOnPlot(plot, data.blocks as readonly LatestSerializedBlock[], place.blockOnPlotV3);
-		return data.blocks.size();
-	}
-	export function deserialize(data: string, plot: BuildingPlot, blockList: BlockList): number {
 		const fix = (block: JsonBlock): LatestSerializedBlock => {
 			return {
 				id: block.id,
@@ -1660,15 +1657,25 @@ export namespace BlocksSerializer {
 			};
 		};
 
-		const deserialized = JSON.deserialize(data) as SerializedBlocks<JsonBlock>;
-		if (deserialized.version === undefined) {
+		return deserializeFromObject({ ...data, blocks: data.blocks.map(fix) }, plot, blockList);
+	}
+	export function deserializeFromObject(
+		data: SerializedBlocks<SerializedBlockBase>,
+		plot: BuildingPlot,
+		blockList: BlockList,
+	): number {
+		if (data.version === undefined) {
 			throw "Corrupted slot data";
 		}
-		if (deserialized.version > latestVersion) {
+		if (data.version > latestVersion) {
 			throw "Trying to load a slot with an unknown version (loaded from testing?)";
 		}
 
-		return deserializeFromObject({ ...deserialized, blocks: deserialized.blocks.map(fix) }, plot, blockList);
+		$log(`Loading a slot using savev${data.version}`);
+
+		data = upgradeSave(data, blockList);
+		place.blocksOnPlot(plot, data.blocks as readonly LatestSerializedBlock[], place.blockOnPlotV3);
+		return data.blocks.size();
 	}
 
 	export function serializedBlockToPlaceRequest(

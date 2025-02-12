@@ -101,11 +101,10 @@ export class RideMode implements PlayModeBase {
 		const copy = controller.blocks.cloneBlocks();
 		this.cache.set(player, copy);
 
-		const serialized = BlocksSerializer.serialize(controller.blocks);
 		this.slots.setBlocks(
 			player.UserId,
 			SlotsMeta.autosaveSlotIndex,
-			serialized,
+			BlocksSerializer.serializeToJsonObject(controller.blocks),
 			controller.blocks.getBlocks().size(),
 		);
 
@@ -166,7 +165,7 @@ export class RideMode implements PlayModeBase {
 
 			const blocksToLoad = this.slots.getBlocks(player.UserId, SlotsMeta.autosaveSlotIndex);
 			if (blocksToLoad !== undefined) {
-				BlocksSerializer.deserialize(blocksToLoad, controller.blocks, this.blockList);
+				BlocksSerializer.deserializeFromJsonObject(blocksToLoad, controller.blocks, this.blockList);
 			}
 		}
 

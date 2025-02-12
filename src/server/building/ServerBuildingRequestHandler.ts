@@ -251,7 +251,7 @@ export class ServerBuildingRequestHandler extends HostedService {
 
 	private forceLoadSlot(userid: number, index: number, imported: boolean): LoadSlotResponse {
 		const start = os.clock();
-		let blocks: string | undefined;
+		let blocks: BlocksSerializer.JsonSerializedBlocks | undefined;
 
 		if (imported) {
 			const universeId = GameDefinitions.isTestPlace()
@@ -263,12 +263,12 @@ export class ServerBuildingRequestHandler extends HostedService {
 		}
 
 		this.controller.blocks.deleteOperation.execute("all");
-		if (blocks === undefined || blocks.size() === 0) {
+		if (!blocks || blocks.blocks.size() === 0) {
 			return { success: true, isEmpty: true };
 		}
 
 		$log(`Loading ${userid}'s slot ${index}`);
-		const dblocks = BlocksSerializer.deserialize(blocks, this.controller.blocks, this.blockList);
+		const dblocks = BlocksSerializer.deserializeFromJsonObject(blocks, this.controller.blocks, this.blockList);
 		$log(`Loaded ${userid} slot ${index} in ${os.clock() - start}`);
 
 		return { success: true, isEmpty: dblocks === 0 };
