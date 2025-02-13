@@ -8,6 +8,7 @@ import { PlayerSettingsGraphics } from "client/gui/playerSettings/PlayerSettings
 import { PlayerSettingsInterface } from "client/gui/playerSettings/PlayerSettingsInterface";
 import { PlayerSettingsPhysics } from "client/gui/playerSettings/PlayerSettingsPhysics";
 import { PlayerSettingsTheme } from "client/gui/playerSettings/PlayerSettingsTheme";
+import { PlayerSettingsTutorial } from "client/gui/playerSettings/PlayerSettingsTutorial";
 import { ButtonAnimatedClickComponent } from "engine/client/gui/ButtonAnimatedClickComponent";
 import { ButtonBackgroundColorComponent } from "engine/client/gui/ButtonBackgroundColorComponent";
 import { Control } from "engine/client/gui/Control";
@@ -146,6 +147,7 @@ export class SettingsPopup extends Control<SettingsPopup2Definition> {
 		sidebar.addButton("controls", 18626685039, () => content.set(PlayerSettingsControls));
 		sidebar.addButton("physics", 18626685039, () => content.set(PlayerSettingsPhysics));
 		sidebar.addButton("blacklist", 18626826844, () => content.set(PlayerSettingsBlacklist));
+		sidebar.addButton("tutorial", 18627409276, () => content.set(PlayerSettingsTutorial));
 
 		this.onDestroy(() => {
 			const unchanged = Objects.deepEquals(original, playerData.config.get());

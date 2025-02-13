@@ -1,3 +1,4 @@
+import { ConfigControlButton } from "client/gui/configControls/ConfigControlButton";
 import { ConfigControlColor } from "client/gui/configControls/ConfigControlColor";
 import { ConfigControlDivider } from "client/gui/configControls/ConfigControlDivider";
 import { ConfigControlDropdown } from "client/gui/configControls/ConfigControlDropdown";
@@ -50,5 +51,8 @@ export class ConfigControlList extends Control<ScrollingFrame & ConfigControlTem
 	}
 	protected addColor(...args: ArgsOfSkip1<typeof ConfigControlColor>) {
 		return this.parent(new ConfigControlColor(clone(this.gui.Color), ...args));
+	}
+	protected addButton(...args: ArgsOfSkip1<typeof ConfigControlButton>) {
+		return this.parent(new ConfigControlButton(clone(this.gui.Button), ...args));
 	}
 }
