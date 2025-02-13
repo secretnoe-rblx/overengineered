@@ -1603,7 +1603,8 @@ export namespace BlocksSerializer {
 			blocks: plot.getBlocks().map((block) => serializeBlockToObject(plot, block)),
 		};
 	}
-	export function serializeToJsonObject(plot: ReadonlyPlot): SerializedBlocks<JsonBlock> {
+
+	export function jsonToObject(slot: LatestSerializedBlocks): JsonSerializedBlocks {
 		const fix = (block: LatestSerializedBlock): JsonBlock => {
 			return {
 				id: block.id,
@@ -1619,8 +1620,8 @@ export namespace BlocksSerializer {
 		};
 
 		return {
-			version: current.version,
-			blocks: plot.getBlocks().map((block) => fix(serializeBlockToObject(plot, block))),
+			version: slot.version,
+			blocks: slot.blocks.map(fix),
 		};
 	}
 
@@ -1638,11 +1639,7 @@ export namespace BlocksSerializer {
 		return data;
 	}
 
-	export function deserializeFromJsonObject(
-		data: SerializedBlocks<JsonBlock>,
-		plot: BuildingPlot,
-		blockList: BlockList,
-	): number {
+	export function objectToJson(slot: JsonSerializedBlocks): LatestSerializedBlocks {
 		const fix = (block: JsonBlock): LatestSerializedBlock => {
 			return {
 				id: block.id,
@@ -1657,7 +1654,10 @@ export namespace BlocksSerializer {
 			};
 		};
 
-		return deserializeFromObject({ ...data, blocks: data.blocks.map(fix) }, plot, blockList);
+		return {
+			version: slot.version,
+			blocks: slot.blocks.map(fix),
+		};
 	}
 	export function deserializeFromObject(
 		data: SerializedBlocks<SerializedBlockBase>,

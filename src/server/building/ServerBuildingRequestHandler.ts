@@ -254,7 +254,7 @@ export class ServerBuildingRequestHandler extends HostedService {
 		}
 
 		$log(`Loading ${userid}'s slot ${index}`);
-		const dblocks = BlocksSerializer.deserializeFromJsonObject(blocks, this.controller.blocks, this.blockList);
+		const dblocks = BlocksSerializer.deserializeFromObject(blocks, this.controller.blocks, this.blockList);
 		$log(`Loaded ${userid} slot ${index} in ${os.clock() - start}`);
 
 		return { success: true, isEmpty: dblocks === 0 };

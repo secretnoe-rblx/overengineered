@@ -5,6 +5,7 @@ import { GameDefinitions } from "shared/data/GameDefinitions";
 import { SlotsMeta } from "shared/SlotsMeta";
 import type { DatabaseBackend } from "engine/server/backend/DatabaseBackend";
 import type { PlayerDatabase } from "server/database/PlayerDatabase";
+import type { LatestSerializedBlocks } from "shared/building/BlocksSerializer";
 import type { BuildingPlot } from "shared/building/BuildingPlot";
 
 @injectable
@@ -19,9 +20,15 @@ export class SlotDatabase {
 		>,
 		@inject private readonly players: PlayerDatabase,
 	) {
-		this.blocksdb = new Db<BlocksSerializer.JsonSerializedBlocks | undefined, [ownerId: number, slotId: number]>(
+		this.blocksdb = new Db<
+			LatestSerializedBlocks | undefined,
+			BlocksSerializer.JsonSerializedBlocks | undefined,
+			[ownerId: number, slotId: number]
+		>(
 			this.datastore,
 			() => undefined,
+			(slot) => slot && BlocksSerializer.objectToJson(slot),
+			(slot) => slot && BlocksSerializer.jsonToObject(slot),
 		);
 
 		Players.PlayerAdded.Connect((plr) => this.onlinePlayers.add(plr.UserId));
@@ -78,11 +85,11 @@ export class SlotDatabase {
 		}
 	}
 
-	getBlocks(userId: number, index: number): BlocksSerializer.JsonSerializedBlocks | undefined {
+	getBlocks(userId: number, index: number): LatestSerializedBlocks | undefined {
 		this.ensureValidSlotIndex(userId, index);
 		return this.blocksdb.get([userId, index]);
 	}
-	setBlocks(userId: number, index: number, blocks: BlocksSerializer.JsonSerializedBlocks, blockCount: number) {
+	setBlocks(userId: number, index: number, blocks: LatestSerializedBlocks, blockCount: number) {
 		this.ensureValidSlotIndex(userId, index);
 		this.blocksdb.set([userId, index], blocks);
 
@@ -115,7 +122,7 @@ export class SlotDatabase {
 	save(userId: number, index: number, plot: BuildingPlot): ResponseResult<SaveSlotResponse> {
 		this.ensureValidSlotIndex(userId, index);
 
-		const blocks = BlocksSerializer.serializeToJsonObject(plot);
+		const blocks = BlocksSerializer.serializeToObject(plot);
 		const blockCount = plot.getBlocks().size();
 
 		this.setBlocks(userId, index, blocks, blockCount);

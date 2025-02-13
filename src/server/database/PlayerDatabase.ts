@@ -3,22 +3,6 @@ import { Db } from "engine/server/Database";
 import { PlayerConfigUpdater } from "server/PlayerConfigVersioning";
 import type { DatabaseBackend } from "engine/server/backend/DatabaseBackend";
 
-const localPlayersData: { readonly [k in number]?: PlayerDatabaseData } = {
-	// hyprlandd
-	7667688305: {
-		settings: {
-			uiScale: 0.75,
-			sprintSpeed: 200,
-			ragdoll: {
-				autoFall: true,
-				autoRecovery: true,
-				triggerByKey: true,
-				triggerKey: "X",
-			},
-		},
-	},
-};
-
 export type PlayerDatabaseData = {
 	readonly purchasedSlots?: number;
 	readonly settings?: Partial<PlayerConfig>;
@@ -31,7 +15,15 @@ export class PlayerDatabase {
 	private readonly db;
 
 	constructor(private readonly datastore: DatabaseBackend<PlayerDatabaseData, [id: number]>) {
-		this.db = new Db<PlayerDatabaseData, [id: number]>(this.datastore, () => ({}));
+		this.db = new Db<PlayerDatabaseData, PlayerDatabaseData, [id: number]>(
+			this.datastore,
+			() => ({}),
+			(data) => ({
+				...data,
+				settings: data.settings === undefined ? undefined : PlayerConfigUpdater.update(data.settings),
+			}),
+			(data) => data,
+		);
 
 		Players.PlayerAdded.Connect((plr) => this.onlinePlayers.add(plr.UserId));
 		Players.PlayerRemoving.Connect((plr) => {
@@ -46,16 +38,7 @@ export class PlayerDatabase {
 	}
 
 	get(userId: number) {
-		if (game.PlaceId === 0) {
-			const data = localPlayersData[userId];
-			if (data) return data;
-		}
-
-		const data = this.db.get([userId]);
-		return {
-			...data,
-			settings: data.settings === undefined ? undefined : PlayerConfigUpdater.update(data.settings),
-		};
+		return this.db.get([userId]);
 	}
 
 	set(userId: number, data: PlayerDatabaseData) {
