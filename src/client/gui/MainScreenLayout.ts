@@ -173,6 +173,7 @@ export class MainScreenLayout extends Component {
 		};
 
 		forEachChild(this.instance.Top.Center.Main, (child) => (child.Visible = false));
+		forEachChild(this.instance.Top.Center.Secondary, (child) => (child.Visible = false));
 		forEachChild(this.instance.Top.Right, (child) => (child.Visible = false));
 		forEachChild(this.instance.Left, (child) => (child.Visible = false));
 	}
@@ -197,6 +198,10 @@ export class MainScreenLayout extends Component {
 		const control = new Control(this.instance.Top.Right.WaitForChild(name) as T);
 
 		return control;
+	}
+
+	getTopCenterSecondary<T extends GuiObject>(name: string): T {
+		return this.instance.Top.Center.Secondary.WaitForChild(name) as T;
 	}
 
 	registerLeft<T extends GuiObject>(name: string): Control<T> {

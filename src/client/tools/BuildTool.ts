@@ -2,8 +2,6 @@ import { Players, ReplicatedStorage, RunService, UserInputService, Workspace } f
 import { SoundController } from "client/controller/SoundController";
 import { BlockPreviewControl } from "client/gui/buildmode/BlockPreviewControl";
 import { BlockSelectionControl } from "client/gui/buildmode/BlockSelection";
-import { MaterialColorEditControl } from "client/gui/buildmode/MaterialColorEditControl";
-import { MirrorEditorControl } from "client/gui/buildmode/MirrorEditorControl";
 import { DebugLog } from "client/gui/DebugLog";
 import { Interface } from "client/gui/Interface";
 import { ScaleEditorControl } from "client/gui/ScaleEditor";
@@ -15,12 +13,10 @@ import { BlockMirrorer } from "client/tools/additional/BlockMirrorer";
 import { FloatingText } from "client/tools/additional/FloatingText";
 import { ToolBase } from "client/tools/ToolBase";
 import { ClientComponentChild } from "engine/client/component/ClientComponentChild";
-import { ButtonControl } from "engine/client/gui/Button";
 import { Control } from "engine/client/gui/Control";
 import { InputController } from "engine/client/InputController";
 import { Component } from "engine/shared/component/Component";
 import { ComponentChild } from "engine/shared/component/ComponentChild";
-import { InstanceComponent } from "engine/shared/component/InstanceComponent";
 import { ObjectOverlayStorage } from "engine/shared/component/ObjectOverlayStorage";
 import { Transforms } from "engine/shared/component/Transforms";
 import { ObservableValue } from "engine/shared/event/ObservableValue";
@@ -122,7 +118,7 @@ const getMouseTargetBlockPositionV2 = (
 	const globalMouseHitPos = mouseHit.PointToWorldSpace(Vector3.zero);
 	const normal = target.CFrame.Rotation.VectorToWorldSpace(Vector3.FromNormalId(mouseSurface));
 
-	DebugLog.startCategory("BuildTool");
+	DebugLog.startCategory("BuildTool", true);
 	DebugLog.named("Target", target);
 	DebugLog.named("Hit", mouseHit);
 	DebugLog.named("Normal", `${mouseSurface} ${normal}`);
@@ -159,12 +155,39 @@ const processPlaceResponse = (response: Response) => {
 namespace Scene {
 	type BlockInfoDefinition = GuiObject & {
 		readonly ViewportFrame: ViewportFrame;
-		readonly DescriptionLabel: TextLabel;
-		readonly NameLabel: TextLabel;
+		readonly Frame: GuiObject & {
+			readonly DescriptionLabel: TextLabel;
+			readonly NameLabel: TextLabel;
+		};
 	};
 	class BlockInfo extends Control<BlockInfoDefinition> {
 		constructor(gui: BlockInfoDefinition, selectedBlock: ReadonlyObservableValue<Block | undefined>) {
 			super(gui);
+
+			this.visibilityComponent() //
+				.addTransformFunc((enabling) => {
+					const props = Transforms.quadOut02;
+					const textSize = math.max(
+						gui.Frame.NameLabel.TextBounds.X,
+						gui.Frame.DescriptionLabel.TextBounds.X,
+					);
+
+					if (enabling) {
+						return Transforms.create()
+							.resize(gui.ViewportFrame, new UDim2(0, 50, 1, 0), props)
+							.resize(gui.Frame, new UDim2(0, textSize, 1, 0), props)
+							.then()
+							.transform(gui.Frame, "AutomaticSize", Enum.AutomaticSize.X)
+							.transform(gui.Frame, "Size", new UDim2(0, 0, 1, 0));
+					}
+
+					return Transforms.create()
+						.transform(gui.Frame, "AutomaticSize", Enum.AutomaticSize.None)
+						.transform(gui.Frame, "Size", new UDim2(0, textSize, 1, 0))
+						.then()
+						.resize(gui.ViewportFrame, new UDim2(0, 0, 1, 0), props)
+						.resize(gui.Frame, new UDim2(0, 0, 1, 0), props);
+				});
 
 			const preview = this.add(new BlockPreviewControl(this.gui.ViewportFrame));
 			this.event.subscribeObservable(
@@ -174,68 +197,28 @@ namespace Scene {
 					preview.set(block?.model);
 
 					if (block) {
-						this.gui.NameLabel.Text = block.displayName;
-						this.gui.DescriptionLabel.Text = block.description;
+						this.gui.Frame.NameLabel.Text = block.displayName;
+						this.gui.Frame.DescriptionLabel.Text = block.description;
 					} else {
-						this.gui.NameLabel.Text = "";
-						this.gui.DescriptionLabel.Text = "";
+						this.gui.Frame.NameLabel.Text = "";
+						this.gui.Frame.DescriptionLabel.Text = "";
 					}
-
-					Transforms.create()
-						.moveRelative(this.gui, new UDim2(0, 0, 0, -10), {
-							...Transforms.commonProps.quadOut02,
-							duration: 0.1,
-						})
-						.then()
-						.moveRelative(this.gui, new UDim2(0, 0, 0, 10), {
-							...Transforms.commonProps.quadOut02,
-							duration: 0.1,
-						})
-						.run(this.gui);
 				},
 				true,
 			);
-		}
-
-		private readonly visibilityStateMachine = Transforms.multiStateMachine(
-			Transforms.boolStateMachine(
-				this.gui.NameLabel,
-				Transforms.commonProps.quadOut02,
-				{ AnchorPoint: this.gui.NameLabel.AnchorPoint, Position: this.gui.NameLabel.Position },
-				{
-					AnchorPoint: new Vector2(1, this.gui.NameLabel.AnchorPoint.Y),
-					Position: new UDim2(new UDim(), this.gui.NameLabel.Position.Y),
-				},
-			),
-			Transforms.boolStateMachine(
-				this.gui.DescriptionLabel,
-				Transforms.commonProps.quadOut02,
-				{
-					AnchorPoint: this.gui.DescriptionLabel.AnchorPoint,
-					Position: this.gui.DescriptionLabel.Position,
-				},
-				{
-					AnchorPoint: new Vector2(1, this.gui.DescriptionLabel.AnchorPoint.Y),
-					Position: new UDim2(new UDim(), this.gui.DescriptionLabel.Position.Y),
-				},
-				(tr) => tr.wait(0.05).then(),
-			),
-			Transforms.boolStateMachine(
-				this.gui.ViewportFrame,
-				Transforms.commonProps.quadOut02,
-				{
-					AnchorPoint: this.gui.ViewportFrame.AnchorPoint,
-					Position: this.gui.ViewportFrame.Position,
-				},
-				{
-					AnchorPoint: new Vector2(1, this.gui.ViewportFrame.AnchorPoint.Y),
-					Position: new UDim2(new UDim(), this.gui.ViewportFrame.Position.Y),
-				},
-				(tr) => tr.wait(0.1).then(),
-			),
-		);
-		protected setInstanceVisibilityFunction(visible: boolean): void {
-			this.visibilityStateMachine(visible);
+			this.event.subscribeObservable(selectedBlock, (block) => {
+				Transforms.create()
+					.moveRelative(this.gui, new UDim2(0, 0, 0, -10), {
+						...Transforms.commonProps.quadOut02,
+						duration: 0.1,
+					})
+					.then()
+					.moveRelative(this.gui, new UDim2(0, 0, 0, 10), {
+						...Transforms.commonProps.quadOut02,
+						duration: 0.1,
+					})
+					.run(this.gui);
+			});
 		}
 	}
 
@@ -247,16 +230,15 @@ namespace Scene {
 		readonly RotateYButton: GuiButton;
 	};
 	@injectable
-	class TouchButtons extends Control<TouchButtonsDefinition> {
+	class TouchButtons extends Component {
 		private readonly visibilityOverlay = new ObjectOverlayStorage({ visible: false });
 
 		constructor(
-			gui: TouchButtonsDefinition,
 			selectedBlock: ReadonlyObservableValue<Block | undefined>,
 			@inject tool: BuildTool,
 			@inject mainScreen: MainScreenLayout,
 		) {
-			super(gui);
+			super();
 
 			const isTouch = new ObservableValue(false);
 			this.event.onPrepare((inputType) => isTouch.set(inputType === "Touch"));
@@ -301,20 +283,12 @@ namespace Scene {
 		readonly Touch: TouchButtonsDefinition;
 	};
 	@injectable
-	export class BuildToolScene extends InstanceComponent<BuildToolSceneDefinition> {
+	export class BuildToolScene extends Component {
 		readonly tool;
 		readonly blockSelector;
-		private readonly materialColorSelector;
-		private readonly blockInfo;
-		private readonly touchButtons;
 
-		constructor(
-			gui: BuildToolSceneDefinition,
-			tool: BuildTool,
-			@inject mainScreen: MainScreenLayout,
-			@inject di: DIContainer,
-		) {
-			super(gui);
+		constructor(@inject tool: BuildTool, @inject mainScreen: MainScreenLayout, @inject di: DIContainer) {
+			super();
 			this.tool = tool;
 
 			const scaleEditorGui = Interface.getGameUI<{
@@ -335,24 +309,24 @@ namespace Scene {
 			const inventory = this.parentGui(mainScreen.registerLeft<BlockSelectionControlDefinition>("Inventory"));
 			this.blockSelector = this.parent(tool.di.resolveForeignClass(BlockSelectionControl, [inventory.instance]));
 
-			this.blockInfo = this.parent(new BlockInfo(gui.Info, this.blockSelector.selectedBlock));
-			this.touchButtons = this.parent(
-				di.resolveForeignClass(TouchButtons, [gui.Touch, this.blockSelector.selectedBlock]),
+			this.parentGui(
+				new BlockInfo(mainScreen.getTopCenterSecondary("CurrentBlock"), this.blockSelector.selectedBlock),
 			);
+			this.parent(di.resolveForeignClass(TouchButtons, [this.blockSelector.selectedBlock]));
 
-			const mirrorEditor = this.parent(
-				new MirrorEditorControl(this.instance.Mirror.Content, tool.targetPlot.get()),
-			);
-			this.event.subscribeObservable(tool.mirrorMode, (val) => mirrorEditor.value.set(val), true);
-			this.event.subscribe(mirrorEditor.submitted, (val) => tool.mirrorMode.set(val));
+			// const mirrorEditor = this.parent(
+			// 	new MirrorEditorControl(this.instance.Mirror.Content, tool.targetPlot.get()),
+			// );
+			// this.event.subscribeObservable(tool.mirrorMode, (val) => mirrorEditor.value.set(val), true);
+			// this.event.subscribe(mirrorEditor.submitted, (val) => tool.mirrorMode.set(val));
 
-			this.onEnable(() => (this.instance.Mirror.Visible = false));
-			this.parent(
-				new ButtonControl(
-					this.instance.ActionBar.Buttons.Mirror,
-					() => (this.instance.Mirror.Visible = !this.instance.Mirror.Visible),
-				),
-			);
+			// this.onEnable(() => (this.instance.Mirror.Visible = false));
+			// this.parent(
+			// 	new ButtonControl(
+			// 		this.instance.ActionBar.Buttons.Mirror,
+			// 		() => (this.instance.Mirror.Visible = !this.instance.Mirror.Visible),
+			// 	),
+			// );
 
 			this.event.subscribeObservable(
 				this.blockSelector.selectedBlock,
@@ -374,16 +348,15 @@ namespace Scene {
 				const disable = () => {
 					this.tool.controller.disable();
 				};
-				const materialColorEditor = this.parent(new MaterialColorEditControl(this.instance.Bottom));
-				this.materialColorSelector = materialColorEditor;
-				materialColorEditor.autoSubscribe(tool.selectedMaterial, tool.selectedColor);
+				// const materialColorEditor = this.parent(new MaterialColorEditControl(this.instance.Bottom));
+				// materialColorEditor.autoSubscribe(tool.selectedMaterial, tool.selectedColor);
 
-				materialColorEditor.materialPipette.onStart.Connect(disable);
-				materialColorEditor.materialPipette.onEnd.Connect(enable);
-				materialColorEditor.colorPipette.onStart.Connect(disable);
-				materialColorEditor.colorPipette.onEnd.Connect(enable);
-				this.blockSelector.pipette.onStart.Connect(disable);
-				this.blockSelector.pipette.onEnd.Connect(enable);
+				// materialColorEditor.materialPipette.onStart.Connect(disable);
+				// materialColorEditor.materialPipette.onEnd.Connect(enable);
+				// materialColorEditor.colorPipette.onStart.Connect(disable);
+				// materialColorEditor.colorPipette.onEnd.Connect(enable);
+				// this.blockSelector.pipette.onStart.Connect(disable);
+				// this.blockSelector.pipette.onEnd.Connect(enable);
 			}
 
 			const updateSelectedBlock = () => {
@@ -404,38 +377,6 @@ namespace Scene {
 			};
 
 			this.event.subscribeObservable(tool.selectedBlock, updateSelectedBlock);
-
-			const initAnimation = () => {
-				const visibilityStateMachine = Transforms.multiStateMachine(
-					Transforms.boolStateMachine(
-						this.instance.Inventory,
-						Transforms.commonProps.quadOut02,
-						{
-							AnchorPoint: this.instance.Inventory.AnchorPoint,
-							Position: this.instance.Inventory.Position,
-						},
-						{
-							AnchorPoint: new Vector2(1, this.instance.Inventory.AnchorPoint.Y),
-							Position: new UDim2(new UDim(), this.instance.Inventory.Position.Y),
-						},
-					),
-					Transforms.boolStateMachine(
-						this.instance.ActionBar,
-						Transforms.commonProps.quadOut02,
-						{ AnchorPoint: this.instance.ActionBar.AnchorPoint },
-						{ AnchorPoint: new Vector2(0.5, 1) },
-						(tr, enabled) => (enabled ? tr.show(this.instance) : 0),
-						(tr, enabled) => (enabled ? 0 : tr.hide(this.instance)),
-					),
-				);
-
-				this.onEnabledStateChange((enabled) => {
-					this.blockInfo.setVisibleAndEnabled(enabled);
-					this.touchButtons.setVisibleAndEnabled(enabled);
-					visibilityStateMachine(enabled);
-				});
-			};
-			initAnimation();
 		}
 	}
 }
@@ -1132,12 +1073,7 @@ export class BuildTool extends ToolBase {
 	) {
 		super(mode);
 
-		this.gui = this.parent(
-			di.resolveForeignClass(Scene.BuildToolScene, [
-				ToolBase.getToolGui<"Build", Scene.BuildToolSceneDefinition>().Build,
-				this,
-			]),
-		);
+		this.gui = this.parent(di.resolveForeignClass(Scene.BuildToolScene));
 
 		this.controller = this.parent(new Component());
 		this.controller.onEnable(() => this.currentMode.set(SinglePlaceController.create(this, di)));
