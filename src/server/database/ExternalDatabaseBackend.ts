@@ -14,14 +14,21 @@ export class ExternalDatabaseBackendSlots implements DatabaseBackend<BlocksSeria
 		const url = `${endpoint}/slot?ownerId=${ownerId}&slotIds=${slotId}`;
 		$debug("Fetching", url);
 
-		const data = HttpService.GetAsync(url, true, headers);
-		return (JSON.deserialize(data) as { value: BlocksSerializer.JsonSerializedBlocks }[])[0].value;
+		const response = HttpService.GetAsync(url, true, headers);
+		return (JSON.deserialize(response) as { value: BlocksSerializer.JsonSerializedBlocks }[])[0].value;
 	}
 	SetAsync(value: BlocksSerializer.JsonSerializedBlocks | undefined, [ownerId, slotId]: SlotKeys): void {
-		// this.dataStore.SetAsync(key, value);
+		const url = `${endpoint}/slot?ownerId=${ownerId}&slotIds=${slotId}`;
+		const data = JSON.serialize({ slotId, ownerId, value });
+		$debug("Posting", url);
+
+		const response = HttpService.PostAsync(url, data, "ApplicationJson", false, headers);
+		if (!(JSON.deserialize(response) as { success?: boolean }).success) {
+			throw `Error while saving slot data: ${response}`;
+		}
 	}
 	RemoveAsync([ownerId, slotId]: SlotKeys): void {
-		// this.dataStore.RemoveAsync(key);
+		throw "Nobody uses this anyway yet";
 	}
 }
 
@@ -31,13 +38,20 @@ export class ExternalDatabaseBackendPlayers implements DatabaseBackend<PlayerDat
 		const url = `${endpoint}/player?id=${id}`;
 		$debug("Fetching", url);
 
-		const data = HttpService.GetAsync(url, true, headers);
-		return (JSON.deserialize(data) as { value: PlayerDatabaseData }).value;
+		const response = HttpService.GetAsync(url, true, headers);
+		return (JSON.deserialize(response) as { value: PlayerDatabaseData }).value;
 	}
 	SetAsync(value: PlayerDatabaseData | undefined, [id]: PlayerKeys): void {
-		// this.dataStore.SetAsync(key, value);
+		const url = `${endpoint}/player?id=${id}`;
+		const data = JSON.serialize({ id, value });
+		$debug("Posting", url);
+
+		const response = HttpService.PostAsync(url, data, "ApplicationJson", false, headers);
+		if (!(JSON.deserialize(response) as { success?: boolean }).success) {
+			throw `Error while saving slot data: ${response}`;
+		}
 	}
 	RemoveAsync([id]: PlayerKeys): void {
-		// this.dataStore.RemoveAsync(key);
+		throw "Nobody uses this anyway yet";
 	}
 }
