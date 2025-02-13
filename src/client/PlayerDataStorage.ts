@@ -126,11 +126,11 @@ export class PlayerDataStorage {
 		}
 	}
 
-	async loadPlayerSlot(index: number, isImported: boolean, message?: string) {
+	async loadPlayerSlot(index: number, message?: string) {
 		$log(`Loading slot ${index}`);
 
 		LoadingController.run(message ?? `Loading slot ${index}`, () => {
-			const response = CustomRemotes.slots[isImported ? "loadImported" : "load"].send({ index });
+			const response = CustomRemotes.slots.load.send({ index });
 			if (response.success && !response.isEmpty) {
 				this.loadedSlot.set(index);
 			} else if (!response.success) {

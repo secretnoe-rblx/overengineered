@@ -86,7 +86,6 @@ export class ServerBuildingRequestController extends HostedService {
 
 		const s = CustomRemotes.slots;
 		subFunc(s.load, (c) => c.loadSlot);
-		subFunc(s.loadImported, (c) => c.loadImportedSlot);
 		subFunc(s.loadAsAdmin, (c) => c.loadSlotAsAdmin);
 		subFunc(s.save, (c) => c.saveSlot);
 	}

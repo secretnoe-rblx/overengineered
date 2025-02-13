@@ -61,7 +61,7 @@ const host = LoadingController.run("Initializing", () => {
 			playerData.config.get().autoLoad &&
 			SlotsMeta.get(playerData.slots.get(), SlotsMeta.quitSlotIndex).blocks !== 0
 		) {
-			Objects.awaitThrow(playerData.loadPlayerSlot(SlotsMeta.quitSlotIndex, false, "Loading the autosave"));
+			Objects.awaitThrow(playerData.loadPlayerSlot(SlotsMeta.quitSlotIndex, "Loading the autosave"));
 		}
 	}
 

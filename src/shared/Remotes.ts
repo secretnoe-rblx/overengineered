@@ -118,7 +118,6 @@ export const CustomRemotes = {
 	},
 	slots: {
 		load: new C2S2CRemoteFunction<PlayerLoadSlotRequest, LoadSlotResponse>("rs_load"),
-		loadImported: new C2S2CRemoteFunction<PlayerLoadSlotRequest, LoadSlotResponse>("rs_loadi"),
 		loadAsAdmin: new C2S2CRemoteFunction<PlayerLoadAdminSlotRequest, LoadSlotResponse>("rs_loadadm"),
 		save: new C2S2CRemoteFunction<PlayerSaveSlotRequest, SaveSlotResponse>("rs_save"),
 	},

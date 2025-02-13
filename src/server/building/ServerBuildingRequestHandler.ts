@@ -5,7 +5,6 @@ import { isNotAdmin_AutoBanned } from "server/BanAdminExploiter";
 import { BlockManager } from "shared/building/BlockManager";
 import { BlocksSerializer } from "shared/building/BlocksSerializer";
 import { BuildingManager } from "shared/building/BuildingManager";
-import { GameDefinitions } from "shared/data/GameDefinitions";
 import { SlotsMeta } from "shared/SlotsMeta";
 import type { SlotDatabase } from "server/database/SlotDatabase";
 import type { ServerPlotController, ServerPlots } from "server/plots/ServerPlots";
@@ -39,7 +38,6 @@ export class ServerBuildingRequestHandler extends HostedService {
 		resetConfig: new Operation(this.resetConfig.bind(this)),
 		saveSlot: new Operation(this.saveSlot.bind(this)),
 		loadSlot: new Operation(this.loadSlot.bind(this)),
-		loadImportedSlot: new Operation(this.loadImportedSlot.bind(this)),
 		loadSlotAsAdmin: new Operation(this.loadSlotAsAdmin.bind(this)),
 	} as const;
 
@@ -236,31 +234,19 @@ export class ServerBuildingRequestHandler extends HostedService {
 	}
 
 	private loadSlot({ index }: PlayerLoadSlotRequest): LoadSlotResponse {
-		return this.forceLoadSlot(this.player.UserId, index, false);
-	}
-	private loadImportedSlot({ index }: PlayerLoadSlotRequest): LoadSlotResponse {
-		return this.forceLoadSlot(this.player.UserId, index, true);
+		return this.forceLoadSlot(this.player.UserId, index);
 	}
 	private loadSlotAsAdmin({ userid, index, imported }: PlayerLoadAdminSlotRequest): LoadSlotResponse {
 		if (isNotAdmin_AutoBanned(this.player, "loadSlotAsAdmin")) {
 			return err("Permission denied");
 		}
 
-		return this.forceLoadSlot(userid, index, imported);
+		return this.forceLoadSlot(userid, index);
 	}
 
-	private forceLoadSlot(userid: number, index: number, imported: boolean): LoadSlotResponse {
+	private forceLoadSlot(userid: number, index: number): LoadSlotResponse {
 		const start = os.clock();
-		let blocks: BlocksSerializer.JsonSerializedBlocks | undefined;
-
-		if (imported) {
-			const universeId = GameDefinitions.isTestPlace()
-				? GameDefinitions.PRODUCTION_UNIVERSE_ID
-				: GameDefinitions.INTERNAL_UNIVERSE_ID;
-			// blocks = Backend.Datastores.GetEntry(universeId, "slots", `${userid}_${index}`) as string | undefined;
-		} else {
-			blocks = this.slots.getBlocks(userid, index);
-		}
+		const blocks = this.slots.getBlocks(userid, index);
 
 		this.controller.blocks.deleteOperation.execute("all");
 		if (!blocks || blocks.blocks.size() === 0) {
