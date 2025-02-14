@@ -1023,9 +1023,9 @@ const color = {
 				result: {
 					type: "color",
 					value: Color3.fromRGB(
-						math.clamp(value_r, 0, 1),
-						math.clamp(value_g, 0, 1),
-						math.clamp(value_b, 0, 1),
+						math.clamp(value_r, 0, 255),
+						math.clamp(value_g, 0, 255),
+						math.clamp(value_b, 0, 255),
 					),
 				},
 			}),
@@ -1051,9 +1051,9 @@ const color = {
 				result: {
 					type: "color",
 					value: Color3.fromRGB(
-						math.clamp(input.X, 0, 1),
-						math.clamp(input.Y, 0, 1),
-						math.clamp(input.Z, 0, 1),
+						math.clamp(input.X, 0, 255),
+						math.clamp(input.Y, 0, 255),
+						math.clamp(input.Z, 0, 255),
 					),
 				},
 			}),
