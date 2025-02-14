@@ -1,62 +1,40 @@
 import { SoundController } from "client/controller/SoundController";
-import { MirrorEditorControl } from "client/gui/buildmode/MirrorEditorControl";
 import { ConfirmPopup } from "client/gui/popup/ConfirmPopup";
 import { ClientBuilding } from "client/modes/build/ClientBuilding";
 import { MultiBlockSelector } from "client/tools/highlighters/MultiBlockSelector";
 import { SelectedBlocksHighlighter } from "client/tools/highlighters/SelectedBlocksHighlighter";
 import { ToolBase } from "client/tools/ToolBase";
 import { Action } from "engine/client/Action";
-import { ButtonControl } from "engine/client/gui/Button";
-import { Control } from "engine/client/gui/Control";
 import { InputController } from "engine/client/InputController";
 import { Keybinds } from "engine/client/Keybinds";
+import { Component } from "engine/shared/component/Component";
 import { ObservableCollectionSet } from "engine/shared/event/ObservableCollection";
-import { ObservableValue } from "engine/shared/event/ObservableValue";
-import type { MirrorEditorControlDefinition } from "client/gui/buildmode/MirrorEditorControl";
 import type { MainScreenLayout } from "client/gui/MainScreenLayout";
 import type { Tooltip } from "client/gui/static/TooltipsControl";
 import type { BuildingMode } from "client/modes/build/BuildingMode";
 
 namespace Scene {
-	export type DeleteToolSceneDefinition = GuiObject & {
-		readonly Bottom: Frame & {
-			readonly DeleteAllButton: GuiButton;
-		};
-		readonly ActionBar: GuiObject & {
-			readonly Buttons: GuiObject & {
-				readonly Mirror: GuiButton;
-			};
-		};
-		readonly Mirror: GuiObject & {
-			readonly Content: MirrorEditorControlDefinition;
-		};
-	};
-
 	@injectable
-	export class DeleteToolScene extends Control<DeleteToolSceneDefinition> {
-		constructor(gui: DeleteToolSceneDefinition, tool: DeleteTool, @inject mainScreen: MainScreenLayout) {
-			super(gui);
+	export class DeleteToolScene extends Component {
+		constructor(@inject tool: DeleteTool, @inject mainScreen: MainScreenLayout) {
+			super();
 
-			const mirrorEditor = this.add(new MirrorEditorControl(this.gui.Mirror.Content, tool.targetPlot.get()));
-			this.event.subscribeObservable(tool.mirrorMode, (val) => mirrorEditor.value.set(val), true);
-			this.event.subscribe(mirrorEditor.submitted, (val) => tool.mirrorMode.set(val));
-			this.onEnable(() => (this.gui.Mirror.Visible = false));
-			this.add(
-				new ButtonControl(
-					this.gui.ActionBar.Buttons.Mirror,
-					() => (this.gui.Mirror.Visible = !this.gui.Mirror.Visible),
-				),
-			);
-
-			const hasSelectedBlocks = tool.highlightedBlocks.createBased((c) => !c.isEmpty());
-
-			const isTouch = new ObservableValue(false);
-			this.event.onPrepare((inputType) => isTouch.set(inputType === "Touch"));
+			const line = this.parentGui(mainScreen.bottom.push());
+			line.addButton("clear plot", "12539349041", "buttonNegative", { width: 150 }) //
+				.subscribeToAction(tool.clearPlotAction);
 
 			this.parent(mainScreen.right.pushImage("rbxassetid://12539349041")) //
-				.subscribeVisibilityFrom({ main: this.enabledState, isTouch, hasSelectedBlocks })
+				.with((c) => (c.instance.BackgroundColor3 = Color3.fromRGB(52, 17, 17)))
 				.addButtonAction(() => tool.deleteHighlightedBlocks())
-				.with((c) => (c.instance.BackgroundColor3 = Color3.fromRGB(52, 17, 17)));
+				.subscribeVisibilityFrom({
+					main: this.enabledState,
+					hasSelectedBlocks: this.event.addObservable(
+						tool.highlightedBlocks.fReadonlyCreateBased((c) => !c.isEmpty()),
+					),
+					isTouch: this.event.addObservable(
+						InputController.inputType.fReadonlyCreateBased((c) => c === "Touch"),
+					),
+				});
 		}
 	}
 }
@@ -68,12 +46,7 @@ export class DeleteTool extends ToolBase {
 	readonly highlightedBlocks = new ObservableCollectionSet<BlockModel>();
 	readonly clearPlotAction: Action;
 
-	constructor(
-		@inject mode: BuildingMode,
-		@inject keybinds: Keybinds,
-		@inject mainScreen: MainScreenLayout,
-		@inject di: DIContainer,
-	) {
+	constructor(@inject mode: BuildingMode, @inject keybinds: Keybinds, @inject di: DIContainer) {
 		super(mode);
 
 		this.clearPlotAction = this.parent(
@@ -104,19 +77,7 @@ export class DeleteTool extends ToolBase {
 			true,
 		);
 
-		{
-			const line = this.parentGui(mainScreen.bottom.push());
-			line.addButton("clear plot", "12539349041", "buttonNegative", { width: 150 }) //
-				.subscribeToAction(this.clearPlotAction);
-		}
-
-		this.parentGui(
-			di.resolveForeignClass(Scene.DeleteToolScene, [
-				ToolBase.getToolGui<"Delete", Scene.DeleteToolSceneDefinition>().Delete,
-				this,
-			]),
-		);
-
+		this.parent(di.resolveForeignClass(Scene.DeleteToolScene));
 		this.parent(di.resolveForeignClass(SelectedBlocksHighlighter, [this.highlightedBlocks]));
 
 		const fireSelected = async (blocks: readonly BlockModel[]) => {
