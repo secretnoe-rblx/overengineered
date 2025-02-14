@@ -1020,7 +1020,14 @@ const color = {
 				},
 			},
 			({ value_r, value_g, value_b }) => ({
-				result: { type: "color", value: Color3.fromRGB(value_r, value_g, value_b) },
+				result: {
+					type: "color",
+					value: Color3.fromRGB(
+						math.clamp(value_r, 0, 1),
+						math.clamp(value_g, 0, 1),
+						math.clamp(value_b, 0, 1),
+					),
+				},
 			}),
 		),
 	},
@@ -1041,7 +1048,14 @@ const color = {
 				},
 			},
 			({ input }) => ({
-				result: { type: "color", value: Color3.fromRGB(input.X, input.Y, input.Z) },
+				result: {
+					type: "color",
+					value: Color3.fromRGB(
+						math.clamp(input.X, 0, 1),
+						math.clamp(input.Y, 0, 1),
+						math.clamp(input.Z, 0, 1),
+					),
+				},
 			}),
 		),
 	},
@@ -1164,7 +1178,14 @@ const color = {
 				},
 			},
 			({ input }) => ({
-				result: { type: "color", value: Color3.fromHSV(input.X, input.Y, input.Z) },
+				result: {
+					type: "color",
+					value: Color3.fromHSV(
+						math.clamp(input.X, 0, 1),
+						math.clamp(input.Y, 0, 1),
+						math.clamp(input.Z, 0, 1),
+					),
+				},
 			}),
 		),
 	},

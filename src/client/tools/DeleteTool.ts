@@ -34,11 +34,8 @@ namespace Scene {
 
 	@injectable
 	export class DeleteToolScene extends Control<DeleteToolSceneDefinition> {
-		private tool: DeleteTool;
-
 		constructor(gui: DeleteToolSceneDefinition, tool: DeleteTool, @inject mainScreen: MainScreenLayout) {
 			super(gui);
-			this.tool = tool;
 
 			const mirrorEditor = this.add(new MirrorEditorControl(this.gui.Mirror.Content, tool.targetPlot.get()));
 			this.event.subscribeObservable(tool.mirrorMode, (val) => mirrorEditor.value.set(val), true);
@@ -50,12 +47,6 @@ namespace Scene {
 					() => (this.gui.Mirror.Visible = !this.gui.Mirror.Visible),
 				),
 			);
-			this.event.onPrepare((inputType) => {
-				this.gui.Bottom.DeleteAllButton.Visible = inputType !== "Gamepad";
-			});
-
-			this.parent(new Control(this.gui.Bottom.DeleteAllButton)) //
-				.subscribeToAction(tool.clearPlotAction);
 
 			const hasSelectedBlocks = tool.highlightedBlocks.createBased((c) => !c.isEmpty());
 
