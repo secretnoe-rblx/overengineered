@@ -20,7 +20,7 @@ interface BottomButtonConfig {
 	readonly width?: number;
 }
 type MainScreenBottomLayerDefinition = GuiObject & {
-	readonly Template: BottomButtonDefinition;
+	readonly ButtonTemplate: BottomButtonDefinition;
 };
 @injectable
 class MainScreenBottomLayer extends Control<MainScreenBottomLayerDefinition> {
@@ -31,7 +31,7 @@ class MainScreenBottomLayer extends Control<MainScreenBottomLayerDefinition> {
 		@inject private readonly theme: Theme,
 	) {
 		super(gui);
-		this.template = this.asTemplate(gui.Template);
+		this.template = this.asTemplate(gui.ButtonTemplate);
 	}
 
 	addButton(
@@ -58,7 +58,7 @@ class MainScreenBottomLayer extends Control<MainScreenBottomLayerDefinition> {
 }
 
 type MainScreenBottomDefinition = GuiObject & {
-	readonly Template: MainScreenBottomLayerDefinition;
+	readonly LayerTemplate: MainScreenBottomLayerDefinition;
 };
 @injectable
 class MainScreenBottom extends Control<MainScreenBottomDefinition> {
@@ -69,8 +69,8 @@ class MainScreenBottom extends Control<MainScreenBottomDefinition> {
 		@inject private readonly di: DIContainer,
 	) {
 		super(gui);
-		gui.Template.Visible = false;
-		this.template = this.asTemplate(gui.Template);
+		gui.LayerTemplate.Visible = false;
+		this.template = this.asTemplate(gui.LayerTemplate);
 	}
 
 	push(): MainScreenBottomLayer {
