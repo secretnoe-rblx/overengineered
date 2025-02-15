@@ -1,3 +1,4 @@
+import { ColorVisualizerWithAlpha } from "client/gui/ColorVisualizerWithAlpha";
 import { BlockPipetteButton } from "client/gui/controls/BlockPipetteButton";
 import { NumberTextBoxControl } from "client/gui/controls/NumberTextBoxControl";
 import { SliderControl } from "client/gui/controls/SliderControl";
@@ -198,12 +199,15 @@ export class Color4Chooser extends Control<ColorChooserDefinition> {
 			value.submit({ alpha: value.get().alpha, color: v });
 		});
 
-		value.value.subscribe(({ color }) => {
-			this.gui.Preview.BackgroundColor3 = color;
-
-			inputs.value.set(color);
-			sliders.value.set(color);
-		}, true);
+		this.event.subscribeObservable(
+			value.value,
+			({ color }) => {
+				inputs.value.set(color);
+				sliders.value.set(color);
+			},
+			true,
+			true,
+		);
 
 		if (Control.exists(this.gui.Inputs, "ManualAlpha") && Control.exists(this.gui.Sliders, "Alpha")) {
 			const alphaSlider = this.parent(
@@ -221,16 +225,7 @@ export class Color4Chooser extends Control<ColorChooserDefinition> {
 		}
 
 		if (Control.exists(this.gui.Preview, "UIGradient")) {
-			const gradient = this.gui.Preview.UIGradient;
-			const originalKeypoints = gradient.Transparency.Keypoints;
-
-			value.value.subscribe(({ alpha }) => {
-				gradient.Transparency = new NumberSequence(
-					originalKeypoints.map(
-						(k) => new NumberSequenceKeypoint(k.Time, k.Value === 0 ? 0 : 1 - alpha, k.Envelope),
-					),
-				);
-			}, true);
+			this.parent(new ColorVisualizerWithAlpha(this.gui.Preview, value.value));
 		}
 	}
 }
