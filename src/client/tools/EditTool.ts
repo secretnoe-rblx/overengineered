@@ -1,4 +1,5 @@
 import { HttpService, Workspace } from "@rbxts/services";
+import { MaterialColorEditControl } from "client/gui/buildmode/MaterialColorEditControl";
 import { LogControl } from "client/gui/static/LogControl";
 import { ClientBuilding } from "client/modes/build/ClientBuilding";
 import { BlockEditor } from "client/tools/additional/BlockEditor";
@@ -364,6 +365,7 @@ namespace Controllers {
 		}
 	}
 
+	@injectable
 	export class Paint extends Component {
 		private static readonly material = new ObservableValue<Enum.Material>(Enum.Material.Plastic);
 		private static readonly color = new ObservableValue<Color3>(new Color3(1, 1, 1));
@@ -373,7 +375,12 @@ namespace Controllers {
 		>;
 		private canceled = false;
 
-		constructor(tool: EditTool, plot: SharedPlot, blocks: readonly BlockModel[]) {
+		constructor(
+			tool: EditTool,
+			plot: SharedPlot,
+			blocks: readonly BlockModel[],
+			@inject mainScreen: MainScreenLayout,
+		) {
 			super();
 
 			this.origData = new ReadonlyMap(
@@ -389,10 +396,20 @@ namespace Controllers {
 				),
 			);
 
-			// const ui = tool.gui.instance.Paint.Clone();
-			// ui.Parent = tool.gui.instance.Paint.Parent;
-			// const materialColorEditor = this.parent(new MaterialColorEditControl(ui, true));
-			// materialColorEditor.autoSubscribe(Paint.material, Paint.color);
+			const confirmLayer = this.parentGui(mainScreen.bottom.push());
+			confirmLayer
+				.addButton("Confirm", undefined, "buttonPositive") //
+				.addButtonAction(() => this.destroy());
+			confirmLayer
+				.addButton("Cancel", undefined, "buttonNegative") //
+				.addButtonAction(() => {
+					this.cancel();
+					this.destroy();
+				});
+
+			const layer = this.parentGui(mainScreen.bottom.push());
+			const materialColorEditor = layer.parent(MaterialColorEditControl.autoCreate(true));
+			materialColorEditor.autoSubscribe(Paint.material, Paint.color);
 
 			this.event.subscribeObservable(
 				Paint.material,
@@ -493,7 +510,7 @@ export class EditTool extends ToolBase {
 
 			copy: this.parent(new Action(() => this.copySelectedBlocks())),
 			paste: this.parent(new Action(() => this.paste())),
-			paint: this.parent(new Action(() => {})),
+			paint: this.parent(new Action(() => this.paint())),
 			delete: this.parent(new Action(() => this.deleteSelectedBlocks())),
 		} as const;
 
@@ -568,6 +585,11 @@ export class EditTool extends ToolBase {
 	private paste() {
 		this.controller.set(
 			this.di.resolveForeignClass(Controllers.Paste, [this, this.targetPlot.get(), [...this.selected.get()]]),
+		);
+	}
+	private paint() {
+		this.controller.set(
+			this.di.resolveForeignClass(Controllers.Paint, [this, this.targetPlot.get(), [...this.selected.get()]]),
 		);
 	}
 	private copySelectedBlocks() {
