@@ -12,7 +12,10 @@ import { EventHandler } from "engine/shared/event/EventHandler";
 import type { BlurController } from "client/controller/BlurController";
 import type { ReadonlyObservableValue } from "engine/shared/event/ObservableValue";
 
+export type { Popup };
 class Popup extends InstanceComponent<ScreenGui> {
+	readonly bg;
+
 	constructor(readonly control: InstanceComponent<GuiObject>) {
 		const gui = Element.create("ScreenGui", { Name: `popup_${control.instance.Name}`, IgnoreGuiInset: true });
 		super(gui);
@@ -29,6 +32,7 @@ class Popup extends InstanceComponent<ScreenGui> {
 				}),
 			),
 		);
+		this.bg = bg;
 
 		const visible = control.visibilityComponent().visible;
 		bg.valuesComponent()
@@ -128,7 +132,7 @@ export class PopupController extends HostedService {
 		this.showPopup(this.di.resolveForeignClass(clazz, args));
 	}
 
-	showPopup(control: InstanceComponent<GuiObject>): void {
+	showPopup(control: InstanceComponent<GuiObject>): Popup {
 		const p = this.children.add(new Popup(control));
 		// control.visibilityComponent().visible.subscribe(() => this.updateIsShown(), true);
 
@@ -137,5 +141,7 @@ export class PopupController extends HostedService {
 		// );
 
 		// this._isShown.and({}, ov);
+
+		return p;
 	}
 }

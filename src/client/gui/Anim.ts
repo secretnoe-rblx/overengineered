@@ -103,22 +103,22 @@ export namespace Anim {
 		return clone;
 	}
 
+	export function findScreen(instance: Instance): ScreenGui | undefined {
+		let parent = instance;
+		while (true as boolean) {
+			if (parent.IsA("ScreenGui")) {
+				return parent;
+			}
+
+			if (!parent.Parent) return;
+			parent = parent.Parent;
+		}
+	}
+
 	/** Creates a GuiScreen with all the provided instances being **copied** into it, with adjusted position/size/etc */
 	export function createScreenForAnimating<TChildren extends readonly GuiObject[]>(
 		...children: TChildren
 	): LuaTuple<[ScreenGui, ...TChildren]> {
-		const findScreen = (instance: Instance): ScreenGui | undefined => {
-			let parent = instance;
-			while (true as boolean) {
-				if (parent.IsA("ScreenGui")) {
-					return parent;
-				}
-
-				if (!parent.Parent) return;
-				parent = parent.Parent;
-			}
-		};
-
 		const childScreen = children[0] && findScreen(children[0]);
 
 		const screen = Element.create("ScreenGui", {
