@@ -33,18 +33,16 @@ namespace Scene {
 				this.tool.controller.disable();
 			};
 
-			const layer = this.parentGui(mainScreen.bottom.push());
-
-			layer
-				.addButton("Paint Plot") //
+			const paintLayer = this.parentGui(mainScreen.bottom.push());
+			paintLayer
+				.addButton("Paint Materials", undefined, undefined, { width: 150 }) //
 				.addButtonAction(() => this.paintEverything(true, false));
-
-			const materialColorEditor = layer.parent(MaterialColorEditControl.autoCreate(true));
-
-			layer
-				.addButton("Paint Plot") //
+			paintLayer
+				.addButton("Paint Colors", undefined, undefined, { width: 150 }) //
 				.addButtonAction(() => this.paintEverything(false, true));
 
+			const layer = this.parentGui(mainScreen.bottom.push());
+			const materialColorEditor = layer.parent(MaterialColorEditControl.autoCreate(true));
 			materialColorEditor.autoSubscribe(tool.selectedMaterial, tool.selectedColor);
 
 			materialColorEditor.materialPipette.onStart.Connect(disable);
