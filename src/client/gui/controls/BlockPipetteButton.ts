@@ -1,6 +1,7 @@
 import { Players, UserInputService } from "@rbxts/services";
 import { HoveredPartHighlighter } from "client/tools/highlighters/HoveredPartHighlighter";
 import { ButtonControl } from "engine/client/gui/Button";
+import { Element } from "engine/shared/Element";
 import { EventHandler } from "engine/shared/event/EventHandler";
 import { SlimFilter } from "engine/shared/event/SlimFilter";
 import { SlimSignal } from "engine/shared/event/SlimSignal";
@@ -19,7 +20,6 @@ export class BlockPipetteButton extends ButtonControl {
 	constructor(gui: ButtonDefinition) {
 		super(gui);
 
-		const bg = gui.BackgroundColor3;
 		let stop: (() => void) | undefined;
 
 		const g = (part: BasePart): BasePart | BlockModel | undefined => {
@@ -34,15 +34,25 @@ export class BlockPipetteButton extends ButtonControl {
 				return;
 			}
 
+			const visualFrame = Element.create(
+				"Frame",
+				{
+					Size: new UDim2(1, 0, 1, 0),
+					BackgroundColor3: Colors.accentLight,
+					Parent: gui,
+				},
+				{ corner: Element.create("UICorner", { CornerRadius: new UDim(0, 8) }) },
+			);
+
 			this.onStart.Fire();
-			gui.BackgroundColor3 = Colors.accentLight;
 
 			const visualizer = new HoveredPartHighlighter(g);
 			visualizer.enable();
 
 			const eh = new EventHandler();
 			stop = () => {
-				gui.BackgroundColor3 = bg;
+				visualFrame.Destroy();
+
 				visualizer.destroy();
 				eh.unsubscribeAll();
 				this.onEnd.Fire();

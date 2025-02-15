@@ -2,6 +2,7 @@ import { Players, ReplicatedStorage, RunService, UserInputService, Workspace } f
 import { SoundController } from "client/controller/SoundController";
 import { BlockPreviewControl } from "client/gui/buildmode/BlockPreviewControl";
 import { BlockSelectionControl } from "client/gui/buildmode/BlockSelection";
+import { MaterialColorEditControl } from "client/gui/buildmode/MaterialColorEditControl";
 import { DebugLog } from "client/gui/DebugLog";
 import { Interface } from "client/gui/Interface";
 import { ScaleEditorControl } from "client/gui/ScaleEditor";
@@ -348,15 +349,17 @@ namespace Scene {
 				const disable = () => {
 					this.tool.controller.disable();
 				};
-				// const materialColorEditor = this.parent(new MaterialColorEditControl(this.instance.Bottom));
-				// materialColorEditor.autoSubscribe(tool.selectedMaterial, tool.selectedColor);
 
-				// materialColorEditor.materialPipette.onStart.Connect(disable);
-				// materialColorEditor.materialPipette.onEnd.Connect(enable);
-				// materialColorEditor.colorPipette.onStart.Connect(disable);
-				// materialColorEditor.colorPipette.onEnd.Connect(enable);
-				// this.blockSelector.pipette.onStart.Connect(disable);
-				// this.blockSelector.pipette.onEnd.Connect(enable);
+				const mceLayer = this.parentGui(mainScreen.bottom.push());
+				const materialColorEditor = mceLayer.parent(MaterialColorEditControl.autoCreate());
+				materialColorEditor.autoSubscribe(tool.selectedMaterial, tool.selectedColor);
+
+				materialColorEditor.materialPipette.onStart.Connect(disable);
+				materialColorEditor.materialPipette.onEnd.Connect(enable);
+				materialColorEditor.colorPipette.onStart.Connect(disable);
+				materialColorEditor.colorPipette.onEnd.Connect(enable);
+				this.blockSelector.pipette.onStart.Connect(disable);
+				this.blockSelector.pipette.onEnd.Connect(enable);
 			}
 
 			const updateSelectedBlock = () => {

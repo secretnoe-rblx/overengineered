@@ -8,7 +8,7 @@ import { Interface } from "engine/client/gui/Interface";
 import { Observables } from "engine/shared/event/Observables";
 import { ObservableValue } from "engine/shared/event/ObservableValue";
 import { SubmittableValue } from "engine/shared/event/SubmittableValue";
-import type { ColorChooserDefinition as Color4ChooserDefinition } from "client/gui/Color4Chooser";
+import type { Color4ChooserDefinition as Color4ChooserDefinition } from "client/gui/Color4Chooser";
 import type { ColorVisualizerWithAlphaDefinition } from "client/gui/ColorVisualizerWithAlpha";
 import type { ConfigControlBaseDefinition } from "client/gui/configControls/ConfigControlBase";
 import type { PopupController } from "client/gui/PopupController";

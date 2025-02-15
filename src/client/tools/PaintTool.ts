@@ -1,56 +1,27 @@
 import { Players } from "@rbxts/services";
 import { MaterialColorEditControl } from "client/gui/buildmode/MaterialColorEditControl";
-import { ToggleControl } from "client/gui/controls/ToggleControl";
 import { Interface } from "client/gui/Interface";
 import { ClientBuilding } from "client/modes/build/ClientBuilding";
 import { MultiBlockSelector } from "client/tools/highlighters/MultiBlockSelector";
 import { ToolBase } from "client/tools/ToolBase";
-import { ButtonControl } from "engine/client/gui/Button";
 import { LocalPlayer } from "engine/client/LocalPlayer";
 import { Component } from "engine/shared/component/Component";
-import { InstanceComponent } from "engine/shared/component/InstanceComponent";
-import { Transforms } from "engine/shared/component/Transforms";
 import { ObservableValue } from "engine/shared/event/ObservableValue";
 import { Marketplace } from "engine/shared/Marketplace";
 import { BlockManager } from "shared/building/BlockManager";
 import { GameDefinitions } from "shared/data/GameDefinitions";
-import type { MaterialColorEditControlDefinition } from "client/gui/buildmode/MaterialColorEditControl";
-import type { ToggleControlDefinition } from "client/gui/controls/ToggleControl";
+import type { MainScreenLayout } from "client/gui/MainScreenLayout";
 import type { BuildingMode } from "client/modes/build/BuildingMode";
-import type { ButtonDefinition } from "engine/client/gui/Button";
 import type { Keybinds } from "engine/client/Keybinds";
 
 namespace Scene {
-	export type PaintToolSceneDefinition = GuiObject & {
-		readonly Bottom: MaterialColorEditControlDefinition & {
-			readonly Material: {
-				readonly Header: {
-					readonly EnabledToggle: ToggleControlDefinition;
-				};
-			};
-			readonly Color: {
-				readonly Header: {
-					readonly EnabledToggle: ToggleControlDefinition;
-				};
-			};
-		};
-		readonly Top: GuiObject & {
-			readonly SetMaterialsButton: ButtonDefinition;
-			readonly SetColorsButton: ButtonDefinition;
-		};
-	};
-
-	export class PaintToolScene extends InstanceComponent<PaintToolSceneDefinition> {
+	@injectable
+	export class PaintToolScene extends Component {
 		readonly tool;
 
-		constructor(gui: PaintToolSceneDefinition, tool: PaintTool) {
-			super(gui);
+		constructor(@inject tool: PaintTool, @inject mainScreen: MainScreenLayout) {
+			super();
 			this.tool = tool;
-
-			this.parent(
-				new ButtonControl(this.instance.Top.SetMaterialsButton, () => this.paintEverything(false, true)),
-			);
-			this.parent(new ButtonControl(this.instance.Top.SetColorsButton, () => this.paintEverything(true, false)));
 
 			const enable = () => {
 				// to not paint a block
@@ -62,7 +33,18 @@ namespace Scene {
 				this.tool.controller.disable();
 			};
 
-			const materialColorEditor = this.parent(new MaterialColorEditControl(this.instance.Bottom));
+			const layer = this.parentGui(mainScreen.bottom.push());
+
+			layer
+				.addButton("Paint Plot") //
+				.addButtonAction(() => this.paintEverything(true, false));
+
+			const materialColorEditor = layer.parent(MaterialColorEditControl.autoCreate(true));
+
+			layer
+				.addButton("Paint Plot") //
+				.addButtonAction(() => this.paintEverything(false, true));
+
 			materialColorEditor.autoSubscribe(tool.selectedMaterial, tool.selectedColor);
 
 			materialColorEditor.materialPipette.onStart.Connect(disable);
@@ -70,26 +52,12 @@ namespace Scene {
 			materialColorEditor.colorPipette.onStart.Connect(disable);
 			materialColorEditor.colorPipette.onEnd.Connect(enable);
 
-			const materialEnabler = this.parent(new ToggleControl(this.instance.Bottom.Material.Header.EnabledToggle));
-			materialEnabler.value.set(tool.enableMaterial.get());
-			this.event.subscribeObservable(materialEnabler.value, (value) => tool.enableMaterial.set(value));
-			const colorEnabler = this.parent(new ToggleControl(this.instance.Bottom.Color.Header.EnabledToggle));
-			colorEnabler.value.set(tool.enableColor.get());
-			this.event.subscribeObservable(colorEnabler.value, (value) => tool.enableColor.set(value));
-
-			const initAnimations = () => {
-				const visibilityStateMachine = Transforms.boolStateMachine(
-					this.instance.Top,
-					Transforms.commonProps.quadOut02,
-					{ AnchorPoint: this.instance.Top.AnchorPoint },
-					{ AnchorPoint: new Vector2(0.5, 1) },
-					(tr, enabled) => (enabled ? tr.show(this.instance) : 0),
-					(tr, enabled) => (enabled ? 0 : tr.waitForTransformOfChildren(this).then().hide(this.instance)),
-				);
-
-				this.onEnabledStateChange(visibilityStateMachine);
-			};
-			initAnimations();
+			// const materialEnabler = this.parent(new ToggleControl(this.instance.Bottom.Material.Header.EnabledToggle));
+			// materialEnabler.value.set(tool.enableMaterial.get());
+			// this.event.subscribeObservable(materialEnabler.value, (value) => tool.enableMaterial.set(value));
+			// const colorEnabler = this.parent(new ToggleControl(this.instance.Bottom.Color.Header.EnabledToggle));
+			// colorEnabler.value.set(tool.enableColor.get());
+			// this.event.subscribeObservable(colorEnabler.value, (value) => tool.enableColor.set(value));
 		}
 
 		private paintEverything(enableColor?: boolean, enableMaterial?: boolean) {
@@ -151,12 +119,10 @@ export class PaintTool extends ToolBase {
 	readonly enableColor = new ObservableValue(true);
 	readonly controller;
 
-	constructor(@inject mode: BuildingMode, @inject keybinds: Keybinds) {
+	constructor(@inject mode: BuildingMode, @inject keybinds: Keybinds, @inject di: DIContainer) {
 		super(mode);
 
-		this.parent(
-			new Scene.PaintToolScene(ToolBase.getToolGui<"Paint", Scene.PaintToolSceneDefinition>().Paint, this),
-		);
+		this.parent(di.resolveForeignClass(Scene.PaintToolScene));
 		this.controller = this.parent(new Controller(this, keybinds));
 	}
 

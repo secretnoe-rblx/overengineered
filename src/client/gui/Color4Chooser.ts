@@ -13,7 +13,7 @@ import { SubmittableValue } from "engine/shared/event/SubmittableValue";
 import type { SliderControlDefinition } from "client/gui/controls/SliderControl";
 import type { ReadonlyArgsSignal } from "engine/shared/event/Signal";
 
-export type ColorChooserDefinition = GuiObject & {
+export type Color4ChooserDefinition = GuiObject & {
 	readonly Preview: GuiObject & {
 		readonly UIGradient?: UIGradient;
 	};
@@ -44,7 +44,7 @@ export type ColorChooserDefinition = GuiObject & {
 	};
 };
 
-class ColorChooserSliders extends Control<ColorChooserDefinition["Sliders"]> {
+class ColorChooserSliders extends Control<Color4ChooserDefinition["Sliders"]> {
 	private readonly _value = SubmittableValue.from<Color3>(Color3.fromRGB(255, 255, 255));
 	readonly value = this._value.asHalfReadonly();
 	readonly moved: ReadonlyArgsSignal<[color: Color3]>;
@@ -52,7 +52,7 @@ class ColorChooserSliders extends Control<ColorChooserDefinition["Sliders"]> {
 	private readonly sliders;
 	private setBySelf = false;
 
-	constructor(gui: ColorChooserDefinition["Sliders"]) {
+	constructor(gui: Color4ChooserDefinition["Sliders"]) {
 		super(gui);
 
 		const moved = new ArgsSignal<[color: Color3]>();
@@ -107,11 +107,11 @@ class ColorChooserSliders extends Control<ColorChooserDefinition["Sliders"]> {
 		}, true);
 	}
 }
-class ColorChooserInputs extends Control<ColorChooserDefinition["Inputs"]> {
+class ColorChooserInputs extends Control<Color4ChooserDefinition["Inputs"]> {
 	private readonly _value = SubmittableValue.from<Color3>(Color3.fromRGB(255, 255, 255));
 	readonly value = this._value.asHalfReadonly();
 
-	constructor(gui: ColorChooserDefinition["Inputs"]) {
+	constructor(gui: Color4ChooserDefinition["Inputs"]) {
 		super(gui);
 
 		const getColorFromRgbTextBoxes = () => Color3.fromRGB(rtext.value.get(), gtext.value.get(), btext.value.get());
@@ -146,10 +146,10 @@ class ColorChooserInputs extends Control<ColorChooserDefinition["Inputs"]> {
 	}
 }
 
-export class Color4Chooser extends Control<ColorChooserDefinition> {
+export class Color4Chooser extends Control<Color4ChooserDefinition> {
 	readonly value;
 
-	constructor(gui: ColorChooserDefinition, value?: SubmittableValue<Color4>, allowAlpha = false) {
+	constructor(gui: Color4ChooserDefinition, value?: SubmittableValue<Color4>, allowAlpha = false) {
 		super(gui);
 
 		if (Control.exists(gui.Inputs, "ManualAlpha")) {
