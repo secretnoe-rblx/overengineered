@@ -3,6 +3,7 @@ import { Anim } from "client/gui/Anim";
 import { Color4Chooser } from "client/gui/Color4Chooser";
 import { ColorVisualizerWithAlpha } from "client/gui/ColorVisualizerWithAlpha";
 import { ConfigControlBase } from "client/gui/configControls/ConfigControlBase";
+import { Color4TextBox } from "client/gui/controls/Color4TextBox";
 import { Control } from "engine/client/gui/Control";
 import { Interface } from "engine/client/gui/Interface";
 import { Observables } from "engine/shared/event/Observables";
@@ -22,6 +23,7 @@ class ColorControl extends Control<ConfigControlColorDefinition["Control"]> {
 		const v = new SubmittableValue(new ObservableValue<Color4>(defaultColor));
 		this.value = v.asHalfReadonly();
 
+		this.parent(new Color4TextBox(gui.RGBA, v, allowAlpha));
 		this.parent(new ColorVisualizerWithAlpha(gui.Preview, v.value));
 
 		this.onInject((di) => {

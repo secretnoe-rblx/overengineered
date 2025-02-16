@@ -1,4 +1,6 @@
 import { Control } from "engine/client/gui/Control";
+import { Colors } from "engine/shared/Colors";
+import { Transforms } from "engine/shared/component/Transforms";
 import { ObservableValue } from "engine/shared/event/ObservableValue";
 import { Signal } from "engine/shared/event/Signal";
 import { MathUtils } from "engine/shared/fixes/MathUtils";
@@ -71,6 +73,10 @@ export class NumberTextBoxControl<TAllowNull extends boolean = false> extends Co
 
 		let num = tonumber(text);
 		if (num === undefined) {
+			Transforms.create() //
+				.flashColor(this.instance, Colors.red)
+				.run(this.instance);
+
 			if (byLostFocus) {
 				this.gui.Text = tostring(this.value.get() ?? "");
 				return;

@@ -1,12 +1,11 @@
 import { ColorVisualizerWithAlpha } from "client/gui/ColorVisualizerWithAlpha";
 import { BlockPipetteButton } from "client/gui/controls/BlockPipetteButton";
+import { Color4TextBox } from "client/gui/controls/Color4TextBox";
 import { NumberTextBoxControl } from "client/gui/controls/NumberTextBoxControl";
 import { SliderControl } from "client/gui/controls/SliderControl";
 import { ButtonControl } from "engine/client/gui/Button";
 import { Control } from "engine/client/gui/Control";
-import { TextBoxControl } from "engine/client/gui/TextBoxControl";
 import { Colors } from "engine/shared/Colors";
-import { Transforms } from "engine/shared/component/Transforms";
 import { Observables } from "engine/shared/event/Observables";
 import { ArgsSignal } from "engine/shared/event/Signal";
 import { SubmittableValue } from "engine/shared/event/SubmittableValue";
@@ -108,13 +107,16 @@ class ColorChooserSliders extends Control<Color4ChooserDefinition["Sliders"]> {
 	}
 }
 class ColorChooserInputs extends Control<Color4ChooserDefinition["Inputs"]> {
-	private readonly _value = SubmittableValue.from<Color3>(Color3.fromRGB(255, 255, 255));
+	private readonly _value = SubmittableValue.from<Color4>({ alpha: 1, color: Colors.white });
 	readonly value = this._value.asHalfReadonly();
 
 	constructor(gui: Color4ChooserDefinition["Inputs"]) {
 		super(gui);
 
-		const getColorFromRgbTextBoxes = () => Color3.fromRGB(rtext.value.get(), gtext.value.get(), btext.value.get());
+		const getColorFromRgbTextBoxes = () => ({
+			alpha: this.value.get().alpha,
+			color: Color3.fromRGB(rtext.value.get(), gtext.value.get(), btext.value.get()),
+		});
 		const submitFromRgb = () => this._value.submit(getColorFromRgbTextBoxes());
 
 		const rtext = this.parent(new NumberTextBoxControl(this.gui.ManualRed, 0, 255, 1));
@@ -125,23 +127,12 @@ class ColorChooserInputs extends Control<Color4ChooserDefinition["Inputs"]> {
 		this.event.subscribe(gtext.submitted, submitFromRgb);
 		this.event.subscribe(btext.submitted, submitFromRgb);
 
-		const hextext = this.parent(new TextBoxControl(this.gui.ManualHex));
-		this.event.subscribe(hextext.submitted, (hex) => {
-			try {
-				this._value.submit(Color3.fromHex(hex));
-			} catch {
-				hextext.text.set("#" + getColorFromRgbTextBoxes().ToHex().upper());
-				Transforms.create() //
-					.flashColor(hextext.instance, Colors.red)
-					.run(hextext.instance);
-			}
-		});
+		this.parent(new Color4TextBox(this.gui.ManualHex, this._value));
 
 		this.value.value.subscribe((value) => {
-			rtext.value.set(math.floor(value.R * 255));
-			gtext.value.set(math.floor(value.G * 255));
-			btext.value.set(math.floor(value.B * 255));
-			hextext.text.set("#" + value.ToHex().upper());
+			rtext.value.set(math.floor(value.color.R * 255));
+			gtext.value.set(math.floor(value.color.G * 255));
+			btext.value.set(math.floor(value.color.B * 255));
 		}, true);
 	}
 }
@@ -183,26 +174,28 @@ export class Color4Chooser extends Control<Color4ChooserDefinition> {
 
 		const sliders = this.add(new ColorChooserSliders(gui.Sliders));
 		sliders.moved.Connect((v) => {
-			value.set({ alpha: value.get().alpha, color: v });
-			inputs.value.set(v);
+			const c: Color4 = { alpha: value.get().alpha, color: v };
+			value.set(c);
+			inputs.value.set(c);
 		});
 		sliders.value.submitted.Connect((v) => {
-			value.set({ alpha: value.get().alpha, color: v });
-			inputs.value.set(v);
-			value.submit({ alpha: value.get().alpha, color: v });
+			const c: Color4 = { alpha: value.get().alpha, color: v };
+			value.set(c);
+			inputs.value.set(c);
+			value.submit(c);
 		});
 
 		const inputs = this.parent(new ColorChooserInputs(gui.Inputs));
 		inputs.value.submitted.Connect((v) => {
-			value.set({ alpha: value.get().alpha, color: v });
-			sliders.value.set(v);
-			value.submit({ alpha: value.get().alpha, color: v });
+			value.set(v);
+			sliders.value.set(v.color);
+			value.submit(v);
 		});
 
 		this.event.subscribeObservable(
 			value.value,
 			({ color }) => {
-				inputs.value.set(color);
+				inputs.value.set({ alpha: value.get().alpha, color });
 				sliders.value.set(color);
 			},
 			true,

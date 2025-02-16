@@ -147,7 +147,7 @@ export class SettingsPopup extends Control<SettingsPopup2Definition> {
 		sidebar.addButton("controls", 18626685039, () => content.set(PlayerSettingsControls));
 		sidebar.addButton("physics", 18626685039, () => content.set(PlayerSettingsPhysics));
 		sidebar.addButton("blacklist", 18626826844, () => content.set(PlayerSettingsBlacklist));
-		sidebar.addButton("tutorial", 18627409276, () => content.set(PlayerSettingsTutorial));
+		sidebar.addButton("tutorial", 98943721557973, () => content.set(PlayerSettingsTutorial));
 
 		this.onDestroy(() => {
 			const unchanged = Objects.deepEquals(original, playerData.config.get());
