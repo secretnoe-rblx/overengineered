@@ -85,6 +85,14 @@ export namespace SlotsMeta {
 			ret.push(get(slots, i));
 		}
 
+		for (const slot of [...slots].sort((l, r) => l.index < r.index)) {
+			if (ret.includes(slot)) {
+				continue;
+			}
+
+			ret.push(slot);
+		}
+
 		return ret;
 	}
 }

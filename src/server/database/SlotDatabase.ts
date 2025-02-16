@@ -59,7 +59,13 @@ export class SlotDatabase {
 		const player = Players.GetPlayerByUserId(userId);
 		if (!player) return;
 
-		if (index >= 0 && index < GameDefinitions.getMaxSlots(player, pdata.purchasedSlots ?? 0)) {
+		const maxSlots = GameDefinitions.getMaxSlots(player, pdata.purchasedSlots ?? 0);
+
+		if (index >= 0 && index < maxSlots) {
+			return;
+		}
+
+		if (index >= 1000000 && index < maxSlots + 1000000) {
 			return;
 		}
 
