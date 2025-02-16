@@ -1,7 +1,6 @@
 import { Workspace } from "@rbxts/services";
 import { HostedService } from "engine/shared/di/HostedService";
 import { Objects } from "engine/shared/fixes/Objects";
-import { GameDefinitions } from "shared/data/GameDefinitions";
 import { CustomRemotes } from "shared/Remotes";
 import type { PlayerDatabase } from "server/database/PlayerDatabase";
 import type { PlayerDatabaseData } from "server/database/PlayerDatabase";
@@ -50,37 +49,11 @@ export class PlayerDataController extends HostedService {
 	private fetchSettings(player: Player): Response<PlayerDataResponse> {
 		const data = this.players.get(player.UserId) ?? {};
 
-		const universeId = GameDefinitions.isTestPlace()
-			? GameDefinitions.PRODUCTION_UNIVERSE_ID
-			: GameDefinitions.INTERNAL_UNIVERSE_ID;
-
-		const slots: SlotMeta[] = [];
-
-		// if (GameDefinitions.isTester(player) || GameDefinitions.isTestPlace()) {
-		if (GameDefinitions.isGroupMember(player) || GameDefinitions.isTestPlace()) {
-			try {
-				// const externalData = HttpService.JSONDecode(
-				// 	Backend.Datastores.GetEntry(universeId, "players", tostring(player.UserId)) as string,
-				// );
-				// const externalSlots = (externalData as { slots: readonly SlotMeta[] | undefined })?.slots;
-				// if (externalSlots) {
-				// 	for (const slot of externalSlots) {
-				// 		if (slot.blocks > 0) {
-				// 			slots.push(slot);
-				// 		}
-				// 	}
-				// }
-			} catch (err) {
-				$err("Error while loading the external slots:", err, "skipping...");
-			}
-		}
-
 		return {
 			success: true,
 			purchasedSlots: data.purchasedSlots,
 			settings: data.settings,
 			slots: data.slots,
-			imported_slots: slots,
 			data: data.data,
 		};
 	}

@@ -228,14 +228,6 @@ class SaveSlots extends Control<SaveSlotsDefinition> {
 			};
 
 			addSlots(slots);
-
-			const externalSlots = playerData.imported_slots.get();
-			if (externalSlots && externalSlots.size() > 0) {
-				const comment = this.slots.add(new Control(this.commentTemplate()));
-				comment.instance.Text = "Other slots";
-
-				addSlots(externalSlots);
-			}
 		};
 
 		this.event.subscribeObservable(playerData.slots, recreate);

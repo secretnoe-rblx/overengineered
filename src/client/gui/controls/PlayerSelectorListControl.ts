@@ -87,13 +87,15 @@ export class PlayerSelectorColumnControl extends Control<PlayerSelectorColumnCon
 			this.addPlayer(player);
 		}
 
-		const pl: FakePlayer[] = [
-			{ DisplayName: "Amongus3", Name: "Sus3", UserId: 123 },
-			{ DisplayName: "Amongus4", Name: "Sus4", UserId: 124 },
-			{ DisplayName: "Amongus5", Name: "Sus5", UserId: 125 },
-		];
-		for (const player of pl) {
-			this.addPlayer(player);
+		if (RunService.IsStudio()) {
+			const pl: FakePlayer[] = [
+				{ DisplayName: "Amongus3", Name: "Sus3", UserId: 123 },
+				{ DisplayName: "Amongus4", Name: "Sus4", UserId: 124 },
+				{ DisplayName: "Amongus5", Name: "Sus5", UserId: 125 },
+			];
+			for (const player of pl) {
+				this.addPlayer(player);
+			}
 		}
 	}
 	private addPlayer(player: FakePlayer | Player) {

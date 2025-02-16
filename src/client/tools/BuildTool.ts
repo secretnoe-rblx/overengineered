@@ -24,12 +24,10 @@ import { ObservableValue } from "engine/shared/event/ObservableValue";
 import { AABB } from "engine/shared/fixes/AABB";
 import { BB } from "engine/shared/fixes/BB";
 import { MathUtils } from "engine/shared/fixes/MathUtils";
-import { Marketplace } from "engine/shared/Marketplace";
 import { BlockManager } from "shared/building/BlockManager";
 import { BuildingManager } from "shared/building/BuildingManager";
 import { SharedBuilding } from "shared/building/SharedBuilding";
 import { Colors } from "shared/Colors";
-import { GameDefinitions } from "shared/data/GameDefinitions";
 import { VectorUtils } from "shared/utils/VectorUtils";
 import type { BlockSelectionControlDefinition } from "client/gui/buildmode/BlockSelection";
 import type { MaterialColorEditControlDefinition } from "client/gui/buildmode/MaterialColorEditControl";
@@ -1136,13 +1134,7 @@ export class BuildTool extends ToolBase {
 
 		this.selectedBlock.set(block);
 
-		let material = BlockManager.manager.material.get(model);
-		if (
-			material === Enum.Material.Neon &&
-			!Marketplace.Gamepass.has(Players.LocalPlayer, GameDefinitions.GAMEPASSES.NeonMaterial)
-		) {
-			material = Enum.Material.Plastic;
-		}
+		const material = BlockManager.manager.material.get(model);
 		this.selectedMaterial.set(material);
 
 		this.selectedColor.set(BlockManager.manager.color.get(model));

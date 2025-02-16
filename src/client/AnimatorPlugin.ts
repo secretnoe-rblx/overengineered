@@ -482,7 +482,10 @@ class AnimControls extends Control<AnimControlsDefinition> {
 	constructor(gui: AnimControlsDefinition, animation: ObservableValue<Anim | undefined>) {
 		super(gui);
 
-		const sub = <T extends unknown[]>(signal: ArgsSignal<T>, func: (animation: Anim, ...args: T) => void) => {
+		const sub = <T extends unknown[]>(
+			signal: ReadonlyArgsSignal<T>,
+			func: (animation: Anim, ...args: T) => void,
+		) => {
 			this.event.subscribe(signal, (...args) => {
 				const prevanim = animation.get();
 				if (!prevanim) return;

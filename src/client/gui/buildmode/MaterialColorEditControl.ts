@@ -1,4 +1,4 @@
-import { Players, UserInputService } from "@rbxts/services";
+import { UserInputService } from "@rbxts/services";
 import { Color4Chooser } from "client/gui/Color4Chooser";
 import { BlockPipetteButton } from "client/gui/controls/BlockPipetteButton";
 import { MaterialChooser } from "client/gui/MaterialChooser";
@@ -13,9 +13,7 @@ import { Materials } from "engine/shared/data/Materials";
 import { ObservableValue } from "engine/shared/event/ObservableValue";
 import { ArgsSignal } from "engine/shared/event/Signal";
 import { SubmittableValue } from "engine/shared/event/SubmittableValue";
-import { Marketplace } from "engine/shared/Marketplace";
 import { Colors } from "shared/Colors";
-import { GameDefinitions } from "shared/data/GameDefinitions";
 import type { Color4ChooserDefinition } from "client/gui/Color4Chooser";
 import type { MaterialChooserDefinition } from "client/gui/MaterialChooser";
 import type { TextButtonDefinition } from "engine/client/gui/Button";
@@ -232,13 +230,6 @@ export class MaterialColorEditControl extends InstanceComponent<MaterialColorEdi
 
 		this.materialPipette = this.parent(
 			BlockPipetteButton.forMaterial(this.instance.Material.Pipette, (m) => {
-				if (
-					m === Enum.Material.Neon &&
-					!Marketplace.Gamepass.has(Players.LocalPlayer, GameDefinitions.GAMEPASSES.NeonMaterial)
-				) {
-					m = Enum.Material.Plastic;
-				}
-
 				materialv.submit(m);
 			}),
 		);

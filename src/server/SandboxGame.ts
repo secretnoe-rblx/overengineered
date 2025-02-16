@@ -1,5 +1,5 @@
 import { Workspace } from "@rbxts/services";
-import { BadgeController } from "server/BadgeController";
+// import { BadgeController } from "server/BadgeController";
 import { BaseGame } from "server/BaseGame";
 import { ServerBlockLogicController } from "server/blocks/ServerBlockLogicController";
 import { ServerBuildingRequestController } from "server/building/ServerBuildingRequestController";
@@ -59,6 +59,6 @@ export namespace SandboxGame {
 		builder.services.registerService(RagdollController);
 		builder.services.registerService(PlayersCollision);
 
-		BadgeController.initializeIfProd(builder);
+		// BadgeController.initializeIfProd(builder);
 	}
 }

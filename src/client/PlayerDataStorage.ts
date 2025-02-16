@@ -43,7 +43,6 @@ export namespace PlayerDataInitializer {
 				d.slots ?? [],
 				GameDefinitions.getMaxSlots(Players.LocalPlayer, d.purchasedSlots ?? 0),
 			),
-			imported_slots: d.imported_slots ?? [],
 			data: d.data ?? {},
 		};
 
@@ -60,7 +59,6 @@ export class PlayerDataStorage {
 
 	readonly config;
 	readonly slots;
-	readonly imported_slots;
 
 	readonly loadedSlot = new ObservableValue<number | undefined>(undefined);
 
@@ -72,7 +70,6 @@ export class PlayerDataStorage {
 		this.data.subscribe((d) => this.config.set(d.settings));
 
 		this.slots = this.data.createBased((x) => x.slots);
-		this.imported_slots = this.data.createBased((x) => x.imported_slots);
 	}
 
 	async sendPlayerConfig(config: PartialThrough<PlayerConfig>) {

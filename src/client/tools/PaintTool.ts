@@ -1,4 +1,3 @@
-import { Players } from "@rbxts/services";
 import { MaterialColorEditControl } from "client/gui/buildmode/MaterialColorEditControl";
 import { Interface } from "client/gui/Interface";
 import { ClientBuilding } from "client/modes/build/ClientBuilding";
@@ -7,9 +6,7 @@ import { ToolBase } from "client/tools/ToolBase";
 import { LocalPlayer } from "engine/client/LocalPlayer";
 import { Component } from "engine/shared/component/Component";
 import { ObservableValue } from "engine/shared/event/ObservableValue";
-import { Marketplace } from "engine/shared/Marketplace";
 import { BlockManager } from "shared/building/BlockManager";
-import { GameDefinitions } from "shared/data/GameDefinitions";
 import type { MainScreenLayout } from "client/gui/MainScreenLayout";
 import type { BuildingMode } from "client/modes/build/BuildingMode";
 import type { Keybinds } from "engine/client/Keybinds";
@@ -84,12 +81,6 @@ class Controller extends Component {
 			let [material, color] = this.pick();
 			if (!material || !color) return;
 
-			if (
-				material === Enum.Material.Neon &&
-				!Marketplace.Gamepass.has(Players.LocalPlayer, GameDefinitions.GAMEPASSES.NeonMaterial)
-			) {
-				material = Enum.Material.Plastic;
-			}
 			tool.selectedMaterial.set(material);
 
 			tool.selectedColor.set(color);
