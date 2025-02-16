@@ -95,4 +95,8 @@ export namespace SlotsMeta {
 
 		return ret;
 	}
+
+	export function toTable(slots: readonly SlotMeta[]): { readonly [k in number]: SlotMeta } {
+		return asObject(slots.mapToMap((v) => $tuple(v.index, v)));
+	}
 }
