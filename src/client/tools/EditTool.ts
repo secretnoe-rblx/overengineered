@@ -537,8 +537,7 @@ export class EditTool extends ToolBase {
 			noControler.subscribe((nc) => layer.setVisibleAndEnabled(nc));
 
 			// layer.addButton("mirror", "16686412951").subscribeToAction(actions.mirror);
-			// layer.addButton("paint", "15895846447").subscribeToAction(actions.paint);
-			layer.addButton("paint", "18369417777").subscribeToAction(actions.paint);
+			layer.addButton("paint", "15895846447").subscribeToAction(actions.paint);
 			layer.addButton("copy", "18369509575").subscribeToAction(actions.copy);
 			layer.addButton("paste", "18369509575").subscribeToAction(actions.paste);
 			layer.addButton("delete", "12539349041", "buttonNegative").subscribeToAction(actions.delete);
