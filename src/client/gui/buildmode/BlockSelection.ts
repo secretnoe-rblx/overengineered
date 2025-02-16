@@ -387,7 +387,7 @@ export class BlockSelectionControl extends Control<BlockSelectionControlDefiniti
 				(newblock) => {
 					button.overlayValue(
 						"BackgroundColor3",
-						newblock === block ? this.theme.get("buttonActive") : this.theme.get("buttonNormal"),
+						newblock === block ? this.theme.get("buttonActive") : this.theme.get("backgroundSecondary"),
 					);
 
 					button.instance.FindFirstChild("Highlight")?.Destroy();
