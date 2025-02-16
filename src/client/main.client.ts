@@ -1,4 +1,4 @@
-import { ContentProvider, Players, ReplicatedStorage, RunService } from "@rbxts/services";
+import { ContentProvider, Players, ReplicatedStorage, RunService, Workspace } from "@rbxts/services";
 import { AdminMessageController } from "client/AdminMessageController";
 import { LoadingController } from "client/controller/LoadingController";
 import { Anim } from "client/gui/Anim";
@@ -8,7 +8,9 @@ import { LogControl } from "client/gui/static/LogControl";
 import { SandboxGame } from "client/SandboxGame";
 import { ServerRestartController } from "client/ServerRestartController";
 import { InputController } from "engine/client/InputController";
+import { LocalPlayer } from "engine/client/LocalPlayer";
 import { Transforms } from "engine/shared/component/Transforms";
+import { Instances } from "engine/shared/fixes/Instances";
 import { Objects } from "engine/shared/fixes/Objects";
 import { GameHostBuilder } from "engine/shared/GameHostBuilder";
 import { TestFramework } from "engine/shared/TestFramework";
@@ -19,6 +21,12 @@ import { CustomRemotes } from "shared/Remotes";
 import { SlotsMeta } from "shared/SlotsMeta";
 import type { PlayerDataStorage } from "client/PlayerDataStorage";
 import type { TransformProps } from "engine/shared/component/Transform";
+
+LocalPlayer.character.waitOnceFor(
+	(character) => character !== undefined,
+	(character) =>
+		character.PivotTo(Instances.waitForChild<SpawnLocation>(Workspace, "Obstacles", "SpawnLocation").CFrame),
+);
 
 const host = LoadingController.run("Initializing", () => {
 	Interface.getGameUI<{ VERSION: TextLabel }>().VERSION.Text =
