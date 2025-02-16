@@ -3,7 +3,6 @@ import { RobloxUnit } from "engine/shared/RobloxUnit";
 import { Throttler } from "engine/shared/Throttler";
 
 export namespace GameDefinitions {
-	export const GROUP = 1088368;
 	export const DEVELOPERS = ["i3ymm", "3QAXM", "samlovebutter", "mgcode_ru", "grgrwerfwe", "hyprlandd"];
 
 	// Building
@@ -16,15 +15,8 @@ export namespace GameDefinitions {
 
 	export function isAdmin(player: Player): boolean {
 		if (RunService.IsStudio()) return true;
-		if (DEVELOPERS.includes(player.Name)) return true;
 
-		const req = Throttler.retryOnFail<boolean>(3, 1, () => player.GetRankInGroup(GROUP) > 250);
-
-		if (!req.success) {
-			warn(req.error_message);
-		}
-
-		return req.success ? req.message : false;
+		return DEVELOPERS.includes(player.Name);
 	}
 
 	export function isRobloxEngineer(player: Player) {
