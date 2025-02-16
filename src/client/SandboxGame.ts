@@ -42,9 +42,9 @@ import { NewBasicPlaneTutorial } from "client/tutorial/tutorials/NewBasicPlaneTu
 import { TestTutorial } from "client/tutorial/tutorials/TestTutorial";
 import { TutorialServiceInitializer } from "client/tutorial/TutorialService";
 import { Keybinds } from "engine/client/Keybinds";
+import { PlayerRank } from "engine/shared/PlayerRank";
 import { ReadonlyPlot } from "shared/building/ReadonlyPlot";
 import { SharedPlots } from "shared/building/SharedPlots";
-import { GameDefinitions } from "shared/data/GameDefinitions";
 import { RemoteEvents } from "shared/RemoteEvents";
 import { CreateSandboxBlocks } from "shared/SandboxBlocks";
 import type { TutorialDescriber } from "client/tutorial/TutorialController";
@@ -134,7 +134,7 @@ export namespace SandboxGame {
 				NewBasicPlaneTutorial,
 				BasicPlaneTutorial,
 			];
-			if (GameDefinitions.isAdmin(Players.LocalPlayer)) {
+			if (PlayerRank.isAdmin(Players.LocalPlayer)) {
 				tutorials.push(TestTutorial);
 			}
 

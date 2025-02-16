@@ -1,10 +1,8 @@
 import { Players, RunService } from "@rbxts/services";
+import { PlayerRank } from "engine/shared/PlayerRank";
 import { RobloxUnit } from "engine/shared/RobloxUnit";
-import { Throttler } from "engine/shared/Throttler";
 
 export namespace GameDefinitions {
-	export const DEVELOPERS = ["i3ymm", "3QAXM", "samlovebutter", "mgcode_ru", "grgrwerfwe", "hyprlandd"];
-
 	// Building
 	export const FREE_SLOTS = 30;
 	export const ADMIN_SLOTS = 65 - FREE_SLOTS;
@@ -13,25 +11,9 @@ export namespace GameDefinitions {
 	export const MAX_ANGULAR_SPEED = 40;
 	export const HEIGHT_OFFSET = -16384;
 
-	export function isAdmin(player: Player): boolean {
-		if (RunService.IsStudio()) return true;
-
-		return DEVELOPERS.includes(player.Name);
-	}
-
-	export function isRobloxEngineer(player: Player) {
-		const req = Throttler.retryOnFail<boolean>(3, 1, () => player.IsInGroup(1200769));
-
-		if (!req.success) {
-			warn(req.error_message);
-		}
-
-		return req.success ? req.message : false;
-	}
-
 	export function getMaxSlots(player: Player, additional: number) {
 		let max = FREE_SLOTS + additional;
-		if (isAdmin(player)) max += ADMIN_SLOTS;
+		if (PlayerRank.isAdmin(player)) max += ADMIN_SLOTS;
 
 		return max;
 	}

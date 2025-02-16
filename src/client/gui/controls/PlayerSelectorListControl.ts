@@ -6,7 +6,7 @@ import { Transforms } from "engine/shared/component/Transforms";
 import { TransformService } from "engine/shared/component/TransformService";
 import { ObservableCollectionSet } from "engine/shared/event/ObservableCollection";
 import { ArgsSignal } from "engine/shared/event/Signal";
-import { GameDefinitions } from "shared/data/GameDefinitions";
+import { PlayerRank } from "engine/shared/PlayerRank";
 
 type FakePlayer = {
 	readonly UserId: number;
@@ -100,7 +100,7 @@ export class PlayerSelectorColumnControl extends Control<PlayerSelectorColumnCon
 	}
 	private addPlayer(player: FakePlayer | Player) {
 		if (player === Players.LocalPlayer) return;
-		if (!RunService.IsStudio() && typeIs(player, "Instance") && GameDefinitions.isAdmin(player)) return;
+		if (!RunService.IsStudio() && typeIs(player, "Instance") && PlayerRank.isAdmin(player)) return;
 
 		const control = new PlayerContainer(this.playerTemplate(), player);
 

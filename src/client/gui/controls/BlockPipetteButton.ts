@@ -5,10 +5,10 @@ import { Element } from "engine/shared/Element";
 import { EventHandler } from "engine/shared/event/EventHandler";
 import { SlimFilter } from "engine/shared/event/SlimFilter";
 import { SlimSignal } from "engine/shared/event/SlimSignal";
+import { PlayerRank } from "engine/shared/PlayerRank";
 import { BlockManager } from "shared/building/BlockManager";
 import { BuildingManager } from "shared/building/BuildingManager";
 import { Colors } from "shared/Colors";
-import { GameDefinitions } from "shared/data/GameDefinitions";
 import type { ButtonDefinition } from "engine/client/gui/Button";
 
 export class BlockPipetteButton extends ButtonControl {
@@ -93,7 +93,7 @@ export class BlockPipetteButton extends ButtonControl {
 			return BlockManager.manager.material.get(part);
 		};
 		pipette.onSelect.Connect((part) => clicked(getMaterial(part)));
-		if (!GameDefinitions.isAdmin(Players.LocalPlayer)) {
+		if (!PlayerRank.isAdmin(Players.LocalPlayer)) {
 			pipette.filter.add((part) => BuildingManager.AllowedMaterials.includes(getMaterial(part)));
 		}
 

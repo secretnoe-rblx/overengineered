@@ -3,11 +3,11 @@ import { HostedService } from "engine/shared/di/HostedService";
 import { Element } from "engine/shared/Element";
 import { ObservableCollectionSet } from "engine/shared/event/ObservableCollection";
 import { JSON } from "engine/shared/fixes/Json";
+import { PlayerRank } from "engine/shared/PlayerRank";
 import { PlayerWatcher } from "engine/shared/PlayerWatcher";
 import { PlotsFloatingImageController } from "server/plots/PlotsFloatingImageController";
 import { BuildingPlot } from "shared/building/BuildingPlot";
 import { AutoPlotWelder } from "shared/building/PlotWelder";
-import { GameDefinitions } from "shared/data/GameDefinitions";
 import { CustomRemotes } from "shared/Remotes";
 import type { SharedPlot } from "shared/building/SharedPlot";
 import type { SharedPlots } from "shared/building/SharedPlots";
@@ -37,7 +37,7 @@ class ServerPlotController extends HostedService {
 		if (!plot) {
 			$warn("Plot checkeq: ", JSON.serialize(plots.plots.map((p) => `${p.instance.Name}: ${p.ownerId.get()}`)));
 			// TODO: Fix this shit asap
-			if (!GameDefinitions.isAdmin(player)) {
+			if (!PlayerRank.isAdmin(player)) {
 				player.Kick("No free plot found, try again later");
 			}
 

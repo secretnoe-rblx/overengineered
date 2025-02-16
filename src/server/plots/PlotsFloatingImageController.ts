@@ -2,7 +2,7 @@ import { Players, ReplicatedStorage } from "@rbxts/services";
 import { Component } from "engine/shared/component/Component";
 import { ComponentChild } from "engine/shared/component/ComponentChild";
 import { InstanceComponent } from "engine/shared/component/InstanceComponent";
-import { GameDefinitions } from "shared/data/GameDefinitions";
+import { PlayerRank } from "engine/shared/PlayerRank";
 import type { SharedPlot } from "shared/building/SharedPlot";
 import type { SharedPlots } from "shared/building/SharedPlots";
 
@@ -33,7 +33,7 @@ class PlotFloatingImageController extends Component {
 			gui.Parent = plot.instance;
 			gui.Adornee = plot.instance.FindFirstChild("BuildingArea") as BasePart;
 
-			if (GameDefinitions.isAdmin(player)) {
+			if (PlayerRank.isAdmin(player)) {
 				gui.RankLabel.Text = "Developer";
 				spawn(() => {
 					while (gui && gui.FindFirstChild("RankLabel")) {

@@ -4,8 +4,8 @@ import { Control } from "engine/client/gui/Control";
 import { InputController } from "engine/client/InputController";
 import { Component } from "engine/shared/component/Component";
 import { Element } from "engine/shared/Element";
+import { PlayerRank } from "engine/shared/PlayerRank";
 import { Colors } from "shared/Colors";
-import { GameDefinitions } from "shared/data/GameDefinitions";
 import type { DebuggableComponent } from "engine/shared/component/Component";
 
 type TreeControlDefinition = GuiObject & {
@@ -152,7 +152,7 @@ const toggle = (root: DebuggableComponent) => {
 	}
 };
 
-const launch = RunService.IsStudio() || GameDefinitions.isAdmin(Players.LocalPlayer);
+const launch = RunService.IsStudio() || PlayerRank.isAdmin(Players.LocalPlayer);
 if (!launch) new Instance("BindableEvent").Event.Wait();
 task.wait(0.5); // wait for the controls to enable
 

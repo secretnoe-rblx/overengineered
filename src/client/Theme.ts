@@ -6,6 +6,7 @@ const defaultColors = {
 	accent: Color3.fromRGB(18, 68, 144),
 
 	buttonNormal: Color3.fromRGB(1, 4, 9),
+	backgroundSecondary: Color3.fromRGB(13, 17, 23),
 	buttonActive: Color3.fromRGB(16, 68, 145), // should be the same as accent probably?
 	buttonNegative: Color3.fromRGB(103, 34, 34),
 	buttonPositive: Color3.fromRGB(27, 106, 22),

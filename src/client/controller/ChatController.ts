@@ -1,5 +1,5 @@
 import { TextChatService, Players } from "@rbxts/services";
-import { GameDefinitions } from "shared/data/GameDefinitions";
+import { PlayerRank } from "engine/shared/PlayerRank";
 
 export namespace ChatController {
 	export function initializeAdminPrefix() {
@@ -9,14 +9,9 @@ export namespace ChatController {
 			if (message.TextSource) {
 				const player = Players.GetPlayerByUserId(message.TextSource.UserId);
 
-				if (player && GameDefinitions.isAdmin(player)) {
-					/*
-						Sponsored by:
-						- is maks owner?
-						- no i dont think so
-					*/
+				if (player && PlayerRank.isAdmin(player)) {
 					props.PrefixText =
-						`<font color='#ff5555'>[${player.Name === "3QAXM" ? "Founder" : "Developer"}]</font> ` +
+						`<font color='#ff5555'>[${player.UserId === game.CreatorId ? "Founder" : "Developer"}]</font> ` +
 						message.PrefixText;
 
 					props.Text = `<b>` + message.Text + `</b>`;

@@ -12,7 +12,7 @@ import { InputController } from "engine/client/InputController";
 import { InstanceComponent } from "engine/shared/component/InstanceComponent";
 import { HostedService } from "engine/shared/di/HostedService";
 import { Element } from "engine/shared/Element";
-import { GameDefinitions } from "shared/data/GameDefinitions";
+import { PlayerRank } from "engine/shared/PlayerRank";
 import type { TutorialsService } from "client/tutorial/TutorialService";
 import type { GameHostBuilder } from "engine/shared/GameHostBuilder";
 import type { Switches } from "engine/shared/Switches";
@@ -23,8 +23,8 @@ export class AdminGui extends HostedService {
 	static initializeIfAdminOrStudio(host: GameHostBuilder) {
 		const enabled =
 			RunService.IsStudio() ||
-			GameDefinitions.isAdmin(Players.LocalPlayer) ||
-			GameDefinitions.isRobloxEngineer(Players.LocalPlayer);
+			PlayerRank.isAdmin(Players.LocalPlayer) ||
+			PlayerRank.isRobloxEngineer(Players.LocalPlayer);
 		if (!enabled) return;
 
 		host.services.registerService(this);
