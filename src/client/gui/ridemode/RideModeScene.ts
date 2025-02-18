@@ -24,7 +24,6 @@ import { BeaconBlock } from "shared/blocks/blocks/BeaconBlock";
 import { RocketBlocks } from "shared/blocks/blocks/RocketEngineBlocks";
 import { VehicleSeatBlock } from "shared/blocks/blocks/VehicleSeatBlock";
 import { CustomRemotes } from "shared/Remotes";
-import { SlotsMeta } from "shared/SlotsMeta";
 import type { ClientMachine } from "client/blocks/ClientMachine";
 import type { CheckBoxControlDefinition } from "client/gui/controls/CheckBoxControl";
 import type { ProgressBarControlDefinition } from "client/gui/controls/ProgressBarControl";
@@ -219,8 +218,7 @@ export class RideModeControls extends Control<RideModeControlsDefinition> {
 			//
 		];
 
-		const slots = this.playerData.slots.get();
-		const controlsInfo = SlotsMeta.get(slots, this.playerData.loadedSlot.get() ?? -1)?.touchControls;
+		const controlsInfo = this.playerData.slots.get()[this.playerData.loadedSlot.get() ?? -1]?.touchControls;
 
 		let pos = 0;
 		for (const control of controls) {

@@ -16,19 +16,8 @@ type NonNullableFields<T> = {
 	[P in keyof T]-?: NonNullable<T[P]>;
 };
 
-type ClientSlotMeta = SlotMeta & {
-	// readonly readonly: boolean;
-};
 type PD = NonNullableFields<PlayerDataResponse> & {
 	readonly settings: NonNullableFields<PlayerDataResponse["settings"]>;
-	// readonly slots: readonly ClientSlotMeta[];
-};
-
-const fixSlot = (slot: SlotMeta): ClientSlotMeta => {
-	return {
-		...slot,
-		...(SlotsMeta.getSpecial(slot.index) ?? {}),
-	};
 };
 
 export namespace PlayerDataInitializer {
@@ -50,7 +39,7 @@ export namespace PlayerDataInitializer {
 		const data: PD = {
 			purchasedSlots: d.purchasedSlots ?? 0,
 			settings: Config.addDefaults(d.settings ?? {}, PlayerConfigDefinition),
-			slots: d.slots?.map(fixSlot) ?? Objects.empty,
+			slots: d.slots ?? Objects.empty,
 			data: d.data ?? {},
 		};
 
@@ -67,7 +56,6 @@ export class PlayerDataStorage {
 
 	readonly config;
 	readonly slots;
-	readonly slotsf;
 
 	readonly loadedSlot = new ObservableValue<number | undefined>(undefined);
 
@@ -78,11 +66,9 @@ export class PlayerDataStorage {
 		this.config = new ObservableValue(data.settings);
 		this.data.subscribe((d) => this.config.set(d.settings));
 
-		this.slots = this.data.fReadonlyCreateBased((x) => x.slots);
-
-		const slotsf = new ObservableValue<{ readonly [k in number]: SlotMeta }>(Objects.empty);
-		this.data.subscribe((data) => slotsf.set(SlotsMeta.toTable(data.slots)), true);
-		this.slotsf = slotsf;
+		const slots = new ObservableValue<{ readonly [k in number]: SlotMeta }>(Objects.empty);
+		this.data.subscribe((data) => slots.set(SlotsMeta.toTable(data.slots)), true);
+		this.slots = slots;
 	}
 
 	async sendPlayerConfig(config: PartialThrough<PlayerConfig>) {
@@ -137,9 +123,9 @@ export class PlayerDataStorage {
 	async deletePlayerSlot(req: PlayerDeleteSlotRequest) {
 		$log("Deleting slot " + req.index);
 
-		const copy = { ...this.slotsf.get() };
+		const copy = { ...this.slots.get() };
 		delete copy[req.index];
-		this.slotsf.set(copy);
+		this.slots.set(copy);
 
 		const response = CustomRemotes.slots.delete.send(req);
 		if (!response.success) {
