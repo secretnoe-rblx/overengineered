@@ -1,6 +1,6 @@
 import { LoadingController } from "client/controller/LoadingController";
 import { MirrorVisualizer } from "client/controller/MirrorVisualizer";
-import { SavePopup2 } from "client/gui/popup/SavePopup2";
+import { SavePopup } from "client/gui/popup/SavePopup";
 import { Scene } from "client/gui/Scene";
 import { ActionController } from "client/modes/build/ActionController";
 import { CenterOfMassController } from "client/modes/build/CenterOfMassController";
@@ -22,7 +22,6 @@ import { Objects } from "engine/shared/fixes/Objects";
 import { SharedRagdoll } from "shared/SharedRagdoll";
 import type { MainScene } from "client/gui/MainScene";
 import type { MainScreenLayout } from "client/gui/MainScreenLayout";
-import type { SavePopup } from "client/gui/popup/SavePopup";
 import type { PopupController } from "client/gui/PopupController";
 import type { Theme } from "client/Theme";
 import type { ToolBase } from "client/tools/ToolBase";
@@ -86,7 +85,6 @@ export class BuildingMode extends PlayMode {
 		@inject plot: SharedPlot,
 		@inject private readonly toolController: ToolController,
 		@inject mainScene: MainScene,
-		@injectFunc createSavePopup: () => SavePopup,
 		@inject popupController: PopupController,
 		@inject di: DIContainer,
 	) {
@@ -96,8 +94,7 @@ export class BuildingMode extends PlayMode {
 			buildMode: this.enabledState,
 		});
 
-		// this.openSavePopupAction.subscribe(() => createSavePopup().show());
-		this.openSavePopupAction.subscribe(() => popupController.createAndShow(SavePopup2));
+		this.openSavePopupAction.subscribe(() => popupController.createAndShow(SavePopup));
 
 		di = di.beginScope((di) => {
 			di.registerSingletonValue(this);

@@ -24,7 +24,6 @@ import { MainScene } from "client/gui/MainScene";
 import { MainScreenLayout } from "client/gui/MainScreenLayout";
 import { ControlsPopup } from "client/gui/popup/ControlsPopup";
 import { ReportSubmitController } from "client/gui/popup/ReportSubmitPopup";
-import { SavePopup } from "client/gui/popup/SavePopup";
 import { WikiPopup } from "client/gui/popup/WikiPopup";
 import { PopupController } from "client/gui/PopupController";
 import { RainbowGuiController } from "client/gui/RainbowGuiController";
@@ -123,7 +122,6 @@ export namespace SandboxGame {
 
 		ChatController.initializeAdminPrefix();
 		builder.services.registerService(PopupController);
-		SavePopup.addAsService(builder);
 		ControlsPopup.addAsService(builder);
 		WikiPopup.addAsService(builder);
 		builder.services.registerSingletonClass(ReportSubmitController);

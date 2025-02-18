@@ -4,7 +4,6 @@ declare global {
 		readonly name: string;
 		readonly color: SerializedColor;
 		readonly blocks: number;
-		readonly size: number;
 		readonly touchControls: TouchControlInfo;
 		readonly index: number;
 		readonly saveTime: number | undefined;
@@ -26,5 +25,5 @@ declare global {
 		readonly data: PlayerData | undefined;
 	};
 
-	type SaveSlotResponse = Response<{ readonly blocks: number | undefined; readonly size: number | undefined }>;
+	type SaveSlotResponse = Response<{ readonly blocks: number | undefined }>;
 }

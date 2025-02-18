@@ -105,7 +105,6 @@ export class RideMode implements PlayModeBase {
 			player.UserId,
 			SlotsMeta.autosaveSlotIndex,
 			BlocksSerializer.serializeToObject(controller.blocks),
-			controller.blocks.getBlocks().size(),
 		);
 
 		const hrp = player.Character?.WaitForChild("Humanoid") as Humanoid;
@@ -164,9 +163,7 @@ export class RideMode implements PlayModeBase {
 			controller.blocks.deleteOperation.execute("all");
 
 			const blocksToLoad = this.slots.getBlocks(player.UserId, SlotsMeta.autosaveSlotIndex);
-			if (blocksToLoad !== undefined) {
-				BlocksSerializer.deserializeFromObject(blocksToLoad, controller.blocks, this.blockList);
-			}
+			BlocksSerializer.deserializeFromObject(blocksToLoad, controller.blocks, this.blockList);
 		}
 
 		this.cache.delete(player);

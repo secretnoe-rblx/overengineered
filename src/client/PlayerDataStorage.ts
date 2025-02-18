@@ -1,4 +1,4 @@
-import { HttpService, Players, Workspace } from "@rbxts/services";
+import { HttpService, Workspace } from "@rbxts/services";
 import { LoadingController } from "client/controller/LoadingController";
 import { LogControl } from "client/gui/static/LogControl";
 import { ObservableValue } from "engine/shared/event/ObservableValue";
@@ -8,7 +8,6 @@ import { Strings } from "engine/shared/fixes/String.propmacro";
 import { Colors } from "shared/Colors";
 import { Config } from "shared/config/Config";
 import { PlayerConfigDefinition } from "shared/config/PlayerConfig";
-import { GameDefinitions } from "shared/data/GameDefinitions";
 import { CustomRemotes } from "shared/Remotes";
 import { SlotsMeta } from "shared/SlotsMeta";
 import type { GameHostBuilder } from "engine/shared/GameHostBuilder";
@@ -16,8 +15,20 @@ import type { GameHostBuilder } from "engine/shared/GameHostBuilder";
 type NonNullableFields<T> = {
 	[P in keyof T]-?: NonNullable<T[P]>;
 };
+
+type ClientSlotMeta = SlotMeta & {
+	// readonly readonly: boolean;
+};
 type PD = NonNullableFields<PlayerDataResponse> & {
 	readonly settings: NonNullableFields<PlayerDataResponse["settings"]>;
+	// readonly slots: readonly ClientSlotMeta[];
+};
+
+const fixSlot = (slot: SlotMeta): ClientSlotMeta => {
+	return {
+		...slot,
+		...(SlotsMeta.getSpecial(slot.index) ?? {}),
+	};
 };
 
 export namespace PlayerDataInitializer {
@@ -39,10 +50,7 @@ export namespace PlayerDataInitializer {
 		const data: PD = {
 			purchasedSlots: d.purchasedSlots ?? 0,
 			settings: Config.addDefaults(d.settings ?? {}, PlayerConfigDefinition),
-			slots: SlotsMeta.getAll(
-				d.slots ?? [],
-				GameDefinitions.getMaxSlots(Players.LocalPlayer, d.purchasedSlots ?? 0),
-			),
+			slots: d.slots?.map(fixSlot) ?? Objects.empty,
 			data: d.data ?? {},
 		};
 
@@ -59,6 +67,7 @@ export class PlayerDataStorage {
 
 	readonly config;
 	readonly slots;
+	readonly slotsf;
 
 	readonly loadedSlot = new ObservableValue<number | undefined>(undefined);
 
@@ -69,7 +78,11 @@ export class PlayerDataStorage {
 		this.config = new ObservableValue(data.settings);
 		this.data.subscribe((d) => this.config.set(d.settings));
 
-		this.slots = this.data.createBased((x) => x.slots);
+		this.slots = this.data.fReadonlyCreateBased((x) => x.slots);
+
+		const slotsf = new ObservableValue<{ readonly [k in number]: SlotMeta }>(Objects.empty);
+		this.data.subscribe((data) => slotsf.set(SlotsMeta.toTable(data.slots)), true);
+		this.slotsf = slotsf;
 	}
 
 	async sendPlayerConfig(config: PartialThrough<PlayerConfig>) {
@@ -117,9 +130,21 @@ export class PlayerDataStorage {
 				...this.data.get()!,
 				slots: SlotsMeta.withSlot(d.slots, req.index, {
 					blocks: response.blocks ?? SlotsMeta.get(d.slots, req.index).blocks,
-					size: response.size ?? SlotsMeta.get(d.slots, req.index).size,
 				}),
 			});
+		}
+	}
+	async deletePlayerSlot(req: PlayerDeleteSlotRequest) {
+		$log("Deleting slot " + req.index);
+
+		const copy = { ...this.slotsf.get() };
+		delete copy[req.index];
+		this.slotsf.set(copy);
+
+		const response = CustomRemotes.slots.delete.send(req);
+		if (!response.success) {
+			$err(response.message);
+			return;
 		}
 	}
 

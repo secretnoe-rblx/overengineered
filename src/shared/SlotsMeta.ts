@@ -1,5 +1,3 @@
-import { Objects } from "engine/shared/fixes/Objects";
-
 /** Slots storage for a single user */
 export namespace SlotsMeta {
 	type SpecialSlotInfo = {
@@ -7,9 +5,11 @@ export namespace SlotsMeta {
 		readonly color: string;
 	};
 
+	const testSlotStart = 1_000_000;
+	const testSlotOffset = testSlotStart + 2;
 	export const autosaveSlotIndex = -1;
 	export const quitSlotIndex = -2;
-	export const specialSlots: Readonly<Record<number, SpecialSlotInfo>> = {
+	const specialSlots: Readonly<Record<number, SpecialSlotInfo>> = {
 		[autosaveSlotIndex]: {
 			name: "Last run",
 			color: "57dbfa",
@@ -19,7 +19,6 @@ export namespace SlotsMeta {
 			color: "ff1f5a",
 		},
 	};
-	const minSlot = math.min(...Objects.keys(specialSlots));
 
 	function defaultSlot(index: number): SlotMeta {
 		const def: SlotMeta = {
@@ -27,7 +26,6 @@ export namespace SlotsMeta {
 			name: "Slot " + (index + 1),
 			color: "FFFFFF",
 			blocks: 0,
-			size: 0,
 			touchControls: {},
 			saveTime: undefined,
 		};
@@ -41,6 +39,18 @@ export namespace SlotsMeta {
 		}
 
 		return def;
+	}
+
+	export function getSpecial(index: number): SpecialSlotInfo | undefined {
+		index = index >= testSlotStart ? index - testSlotOffset : index;
+		return specialSlots[index];
+	}
+	export function isReadonly(index: number) {
+		index = index >= testSlotStart ? index - testSlotOffset : index;
+		return index in specialSlots || index >= testSlotStart;
+	}
+	export function isTestSlot(index: number) {
+		return index >= testSlotStart;
 	}
 
 	export function indexOf(slots: readonly SlotMeta[], index: number): number | undefined {
@@ -78,22 +88,12 @@ export namespace SlotsMeta {
 		});
 		return s;
 	}
+	export function withRemovedSlot(slots: readonly SlotMeta[], index: number): readonly SlotMeta[] {
+		return slots.filter((s) => s.index !== index);
+	}
 
-	export function getAll(slots: readonly SlotMeta[], min: number): readonly SlotMeta[] {
-		const ret: SlotMeta[] = [];
-		for (let i = minSlot; i < min; i++) {
-			ret.push(get(slots, i));
-		}
-
-		for (const slot of [...slots].sort((l, r) => l.index < r.index)) {
-			if (ret.includes(slot)) {
-				continue;
-			}
-
-			ret.push(slot);
-		}
-
-		return ret;
+	export function getAll(slots: readonly SlotMeta[]): readonly SlotMeta[] {
+		return [...slots].sort((l, r) => l.index < r.index);
 	}
 
 	export function toTable(slots: readonly SlotMeta[]): { readonly [k in number]: SlotMeta } {

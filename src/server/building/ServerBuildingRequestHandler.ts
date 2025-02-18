@@ -6,6 +6,7 @@ import { BlockManager } from "shared/building/BlockManager";
 import { BlocksSerializer } from "shared/building/BlocksSerializer";
 import { BuildingManager } from "shared/building/BuildingManager";
 import { SlotsMeta } from "shared/SlotsMeta";
+import type { PlayerDatabase } from "server/database/PlayerDatabase";
 import type { SlotDatabase } from "server/database/SlotDatabase";
 import type { ServerPlotController, ServerPlots } from "server/plots/ServerPlots";
 import type { SharedPlots } from "shared/building/SharedPlots";
@@ -37,6 +38,7 @@ export class ServerBuildingRequestHandler extends HostedService {
 		updateConfig: new Operation(this.updateConfig.bind(this)),
 		resetConfig: new Operation(this.resetConfig.bind(this)),
 		saveSlot: new Operation(this.saveSlot.bind(this)),
+		deleteSlot: new Operation(this.deleteSlot.bind(this)),
 		loadSlot: new Operation(this.loadSlot.bind(this)),
 		loadSlotAsAdmin: new Operation(this.loadSlotAsAdmin.bind(this)),
 	} as const;
@@ -49,6 +51,7 @@ export class ServerBuildingRequestHandler extends HostedService {
 		@inject private readonly serverPlots: ServerPlots,
 		@inject private readonly blockList: BlockList,
 		@inject private readonly slots: SlotDatabase,
+		@inject private readonly players: PlayerDatabase,
 	) {
 		super();
 		this.player = controller.player;
@@ -206,15 +209,27 @@ export class ServerBuildingRequestHandler extends HostedService {
 	}
 
 	private saveSlot(request: PlayerSaveSlotRequest): SaveSlotResponse {
+		if (SlotsMeta.isReadonly(request.index)) {
+			throw "Slot is readonly";
+		}
+
 		const player = this.player;
 		$log(`Saving ${player.Name}'s slot ${request.index}`);
 
 		let output: ResponseResult<SaveSlotResponse> | undefined;
-		if (request.save) {
+		const currentMeta = this.players.get(player.UserId).slots ?? [];
+		if (!request.save && !currentMeta.any((c) => c.index === request.index)) {
+			// new slot creation
+
+			this.slots.setBlocks(player.UserId, request.index, undefined);
+			output = { blocks: 0 };
+		} else if (request.save) {
 			const controller = this.serverPlots.tryGetControllerByPlayer(player);
 			if (!controller) throw "what";
 
-			output = this.slots.save(player.UserId, request.index, controller.blocks);
+			const blocks = BlocksSerializer.serializeToObject(controller.blocks);
+			this.slots.setBlocks(player.UserId, request.index, blocks);
+			output = { blocks: blocks.blocks.size() };
 		}
 
 		this.slots.updateMeta(player.UserId, request.index, (meta) => {
@@ -229,8 +244,18 @@ export class ServerBuildingRequestHandler extends HostedService {
 		return {
 			success: true,
 			blocks: output?.blocks,
-			size: output?.size,
 		};
+	}
+	private deleteSlot(request: PlayerDeleteSlotRequest): Response {
+		if (SlotsMeta.isReadonly(request.index) && !SlotsMeta.isTestSlot(request.index)) {
+			throw "Slot is readonly";
+		}
+
+		const player = this.player;
+		$log(`Deleting ${player.Name}'s slot ${request.index}`);
+		this.slots.delete(player.UserId, request.index);
+
+		return { success: true };
 	}
 
 	private loadSlot({ index }: PlayerLoadSlotRequest): LoadSlotResponse {
@@ -249,7 +274,7 @@ export class ServerBuildingRequestHandler extends HostedService {
 		const blocks = this.slots.getBlocks(userid, index);
 
 		this.controller.blocks.deleteOperation.execute("all");
-		if (!blocks || blocks.blocks.size() === 0) {
+		if (blocks.blocks.size() === 0) {
 			return { success: true, isEmpty: true };
 		}
 

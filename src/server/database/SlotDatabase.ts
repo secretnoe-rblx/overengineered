@@ -6,7 +6,6 @@ import { SlotsMeta } from "shared/SlotsMeta";
 import type { DatabaseBackend } from "engine/server/backend/DatabaseBackend";
 import type { PlayerDatabase } from "server/database/PlayerDatabase";
 import type { LatestSerializedBlocks } from "shared/building/BlocksSerializer";
-import type { BuildingPlot } from "shared/building/BuildingPlot";
 
 @injectable
 export class SlotDatabase {
@@ -21,14 +20,14 @@ export class SlotDatabase {
 		@inject private readonly players: PlayerDatabase,
 	) {
 		this.blocksdb = new Db<
-			LatestSerializedBlocks | undefined,
-			BlocksSerializer.JsonSerializedBlocks | undefined,
+			LatestSerializedBlocks,
+			BlocksSerializer.JsonSerializedBlocks,
 			[ownerId: number, slotId: number]
 		>(
 			this.datastore,
-			() => undefined,
-			(slot) => slot && BlocksSerializer.objectToJson(slot),
-			(slot) => slot && BlocksSerializer.jsonToObject(slot),
+			() => ({ version: BlocksSerializer.latestVersion, blocks: [] }),
+			(slot) => BlocksSerializer.objectToJson(slot),
+			(slot) => BlocksSerializer.jsonToObject(slot),
 		);
 
 		Players.PlayerAdded.Connect((plr) => this.onlinePlayers.add(plr.UserId));
@@ -53,7 +52,7 @@ export class SlotDatabase {
 	}
 
 	private ensureValidSlotIndex(userId: number, index: number) {
-		if (index in SlotsMeta.specialSlots) return;
+		if (SlotsMeta.getSpecial(index)) return;
 
 		const pdata = this.players.get(userId);
 		const player = Players.GetPlayerByUserId(userId);
@@ -65,7 +64,7 @@ export class SlotDatabase {
 			return;
 		}
 
-		if (index >= 1000000 && index < maxSlots + 1000000) {
+		if (SlotsMeta.isTestSlot(index)) {
 			return;
 		}
 
@@ -91,19 +90,20 @@ export class SlotDatabase {
 		}
 	}
 
-	getBlocks(userId: number, index: number): LatestSerializedBlocks | undefined {
+	getBlocks(userId: number, index: number): LatestSerializedBlocks {
 		this.ensureValidSlotIndex(userId, index);
 		return this.blocksdb.get([userId, index]);
 	}
-	setBlocks(userId: number, index: number, blocks: LatestSerializedBlocks, blockCount: number) {
+	setBlocks(userId: number, index: number, blocks: LatestSerializedBlocks | undefined) {
 		this.ensureValidSlotIndex(userId, index);
+
+		blocks ??= { version: BlocksSerializer.latestVersion, blocks: [] };
 		this.blocksdb.set([userId, index], blocks);
 
 		const meta = [...this.getMeta(userId)];
 		SlotsMeta.set(meta, {
 			...SlotsMeta.get(meta, index),
-			blocks: blockCount,
-			size: 0,
+			blocks: blocks.blocks.size(),
 			saveTime: DateTime.now().UnixTimestampMillis,
 			index,
 		});
@@ -125,15 +125,10 @@ export class SlotDatabase {
 		const meta = metaUpdate(this.getMeta(userId));
 		this.setMeta(userId, meta);
 	}
-	save(userId: number, index: number, plot: BuildingPlot): ResponseResult<SaveSlotResponse> {
+	delete(userId: number, index: number): void {
 		this.ensureValidSlotIndex(userId, index);
 
-		const blocks = BlocksSerializer.serializeToObject(plot);
-		const blockCount = plot.getBlocks().size();
-
-		this.setBlocks(userId, index, blocks, blockCount);
-		const size = 0;
-
-		return { blocks: blockCount, size: size };
+		this.blocksdb.delete([userId, index]);
+		this.updateMeta(userId, index, (meta) => SlotsMeta.withRemovedSlot(meta, index));
 	}
 }

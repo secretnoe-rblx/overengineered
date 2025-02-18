@@ -82,6 +82,9 @@ declare global {
 		readonly touchControls?: TouchControlInfo;
 		readonly save: boolean;
 	};
+	type PlayerDeleteSlotRequest = {
+		readonly index: number;
+	};
 	type PlayerLoadSlotRequest = {
 		readonly index: number;
 	};
@@ -120,6 +123,7 @@ export const CustomRemotes = {
 		load: new C2S2CRemoteFunction<PlayerLoadSlotRequest, LoadSlotResponse>("rs_load"),
 		loadAsAdmin: new C2S2CRemoteFunction<PlayerLoadAdminSlotRequest, LoadSlotResponse>("rs_loadadm"),
 		save: new C2S2CRemoteFunction<PlayerSaveSlotRequest, SaveSlotResponse>("rs_save"),
+		delete: new C2S2CRemoteFunction<PlayerDeleteSlotRequest>("rs_delete"),
 	},
 	player: {
 		loaded: new C2SRemoteEvent<undefined>("client_initialized"),

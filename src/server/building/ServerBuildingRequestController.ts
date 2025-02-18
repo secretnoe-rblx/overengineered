@@ -45,7 +45,6 @@ export class ServerBuildingRequestController extends HostedService {
 								player.UserId,
 								SlotsMeta.quitSlotIndex,
 								BlocksSerializer.serializeToObject(blocks),
-								blocks.getBlocks().size(),
 							);
 						} else {
 							slots.setBlocksFromAnotherSlot(
@@ -88,5 +87,6 @@ export class ServerBuildingRequestController extends HostedService {
 		subFunc(s.load, (c) => c.loadSlot);
 		subFunc(s.loadAsAdmin, (c) => c.loadSlotAsAdmin);
 		subFunc(s.save, (c) => c.saveSlot);
+		subFunc(s.delete, (c) => c.deleteSlot);
 	}
 }
