@@ -25,7 +25,11 @@ import type { TransformProps } from "engine/shared/component/Transform";
 LocalPlayer.character.waitOnceFor(
 	(character) => character !== undefined,
 	(character) =>
-		character.PivotTo(Instances.waitForChild<SpawnLocation>(Workspace, "Obstacles", "SpawnLocation").CFrame),
+		character.PivotTo(
+			Instances.waitForChild<SpawnLocation>(Workspace, "Obstacles", "SpawnLocation").CFrame.add(
+				new Vector3(0, 1, 0),
+			),
+		),
 );
 
 const host = LoadingController.run("Initializing", () => {
