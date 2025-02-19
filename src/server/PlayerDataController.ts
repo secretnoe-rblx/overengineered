@@ -1,12 +1,12 @@
 import { Workspace } from "@rbxts/services";
-import { HostedService } from "engine/shared/di/HostedService";
+import { Component } from "engine/shared/component/Component";
 import { Objects } from "engine/shared/fixes/Objects";
 import type { PlayerDatabase } from "server/database/PlayerDatabase";
 import type { PlayerDatabaseData } from "server/database/PlayerDatabase";
 import type { PlayerDataStorageRemotesPlayer } from "shared/remotes/PlayerDataRemotes";
 
 @injectable
-export class PlayerDataController extends HostedService {
+export class PlayerDataController extends Component {
 	constructor(
 		private readonly playerId: number,
 		playerRemotes: PlayerDataStorageRemotesPlayer,
