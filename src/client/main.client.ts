@@ -52,7 +52,7 @@ const host = LoadingController.run("Initializing", () => {
 	});
 
 	LoadingController.run("Loading the rest", () => {
-		host.parent(LogControl.instance);
+		LogControl.instance.enable();
 
 		InputController.inputType.subscribe((newInputType) =>
 			LogControl.instance.addLine("New input type set to " + newInputType, Colors.yellow),
