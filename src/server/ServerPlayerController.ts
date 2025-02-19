@@ -62,6 +62,7 @@ export class ServerPlayerController extends Component {
 
 		this.plotController = this.parent(di.resolve<ServerPlotController>());
 		this.parent(di.resolve<ServerSlotRequestController>());
+		this.parent(di.resolve<ServerBuildingRequestController>());
 
 		const blocks = di.resolve<BuildingPlot>();
 
