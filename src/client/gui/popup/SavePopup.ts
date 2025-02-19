@@ -100,7 +100,7 @@ class SaveItem extends PartialControl<SaveItemParts, SaveItemDefinition> impleme
 			this.save.subscribe(() => {
 				const slot = meta.get();
 
-				popupController.createAndShow(ConfirmPopup2, "Save this slot?", "THERE WILL BE CONSEQUENCES", () => {
+				popupController.createAndShow(ConfirmPopup2, "Save this slot?", "YOU WILL REGRET THIS", () => {
 					playerData.sendPlayerSlot({
 						index: slot.index,
 						save: true,
