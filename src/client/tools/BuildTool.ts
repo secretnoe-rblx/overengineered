@@ -903,11 +903,7 @@ namespace MultiPlaceController {
 
 			this.event.subInput((ih, eh) => {
 				const buttonUnpress = async () => {
-					const result = await this.place();
-					if (result && !result.success) {
-						LogControl.instance.addLine(result.message, Colors.red);
-					}
-
+					await this.place();
 					this.destroy();
 				};
 				ih.onMouse1Up(buttonUnpress, true);
