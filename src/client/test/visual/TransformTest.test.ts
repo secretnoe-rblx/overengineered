@@ -71,6 +71,7 @@ namespace TransformTests {
 
 						return Transforms.create()
 							.wait(1)
+							.then()
 							.transform(i, "Transparency", 0.9, { duration: 1 })
 							.then()
 							.transform(i, "Transparency", tr);
@@ -99,6 +100,7 @@ namespace TransformTests {
 							return Transforms.create()
 								.func(() => (i.Transparency = 0))
 								.wait(1)
+								.then()
 								.transform(i, "Transparency", 0.9, { duration: 1 })
 								.transform(i, "Size", new UDim2(0, 80, 0, 10), { duration: 1 })
 								.then()
