@@ -4,7 +4,6 @@ import { TabControl } from "client/gui/controls/TabControl";
 import { Interface } from "client/gui/Interface";
 import { ServerRestartController } from "client/ServerRestartController";
 import { TestRunner } from "client/test/TestRunner";
-import { LoadSlotTest } from "client/test/visual/LoadSlotTest";
 import { TextButtonControl } from "engine/client/gui/Button";
 import { Control } from "engine/client/gui/Control";
 import { InputController } from "engine/client/InputController";
@@ -80,8 +79,6 @@ export class AdminGui extends HostedService {
 			closebtn.activated.Connect(() => destroy?.());
 
 			const tests: readonly (readonly [name: string, test: Control])[] = [
-				["Load", LoadSlotTest.create(false)],
-				["Load REMOTE", LoadSlotTest.create(true)],
 				["Global message", AdminMessageController.createControl()],
 				wrapNonVisual("Restart", {
 					startMeteors: () => ServerRestartController.sendToServer(false),

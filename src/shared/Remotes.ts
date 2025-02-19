@@ -91,7 +91,6 @@ declare global {
 	};
 	type PlayerLoadAdminSlotRequest = PlayerLoadSlotRequest & {
 		readonly userid: number;
-		readonly imported: boolean;
 	};
 }
 
@@ -124,9 +123,6 @@ export const CustomRemotes = {
 
 	physics: {
 		normalizeRootparts: new S2CRemoteEvent<NormalizeRootpartsRequest>("ph_normalize_rootparts"),
-	},
-	slots: {
-		loadAsAdmin: new C2S2CRemoteFunction<PlayerLoadAdminSlotRequest, LoadSlotResponse>("rs_loadadm"),
 	},
 	gui: {
 		settings: {
