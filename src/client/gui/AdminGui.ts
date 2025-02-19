@@ -5,7 +5,6 @@ import { Interface } from "client/gui/Interface";
 import { ServerRestartController } from "client/ServerRestartController";
 import { TestRunner } from "client/test/TestRunner";
 import { LoadSlotTest } from "client/test/visual/LoadSlotTest";
-import { TutorialCreator } from "client/tutorial/TutorialCreator";
 import { TextButtonControl } from "engine/client/gui/Button";
 import { Control } from "engine/client/gui/Control";
 import { InputController } from "engine/client/InputController";
@@ -13,10 +12,8 @@ import { InstanceComponent } from "engine/shared/component/InstanceComponent";
 import { HostedService } from "engine/shared/di/HostedService";
 import { Element } from "engine/shared/Element";
 import { PlayerRank } from "engine/shared/PlayerRank";
-import type { TutorialsService } from "client/tutorial/TutorialService";
 import type { GameHostBuilder } from "engine/shared/GameHostBuilder";
 import type { Switches } from "engine/shared/Switches";
-import type { ReadonlyPlot } from "shared/building/ReadonlyPlot";
 
 @injectable
 export class AdminGui extends HostedService {
@@ -86,19 +83,6 @@ export class AdminGui extends HostedService {
 				["Load", LoadSlotTest.create(false)],
 				["Load REMOTE", LoadSlotTest.create(true)],
 				["Global message", AdminMessageController.createControl()],
-				wrapNonVisual("Tutorial creator", {
-					...asObject(
-						di
-							.resolve<TutorialsService>()
-							.allTutorials.mapToMap((t) =>
-								$tuple(`run '${t.name}'`, () => di.resolve<TutorialsService>().run(t)),
-							),
-					),
-
-					setBefore: (di) => TutorialCreator.setBefore(di.resolve<ReadonlyPlot>()),
-					printDiff: (di) => print(TutorialCreator.serializeDiffToTsCode(di.resolve<ReadonlyPlot>())),
-					print: (di) => print(TutorialCreator.serializePlotToTsCode(di.resolve<ReadonlyPlot>())),
-				}),
 				wrapNonVisual("Restart", {
 					startMeteors: () => ServerRestartController.sendToServer(false),
 					restart: () => ServerRestartController.sendToServer(true),
