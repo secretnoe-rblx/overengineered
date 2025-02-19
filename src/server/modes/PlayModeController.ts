@@ -50,6 +50,9 @@ export class PlayModeController extends HostedService {
 	getPlayerMode(player: Player) {
 		return this.playerModes[player.UserId];
 	}
+	getPlayerModeById(playerId: number) {
+		return this.playerModes[playerId];
+	}
 
 	changeModeForPlayer(player: Player, mode: PlayModes | undefined): Response {
 		if (mode !== undefined && !PlayerUtils.isAlive(player)) {

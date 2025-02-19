@@ -108,8 +108,8 @@ export class SharedPlot extends InstanceComponent<PlotModel> {
 	}
 
 	/** Is player allowed to build on this plot */
-	isBuildingAllowed(player: Player): boolean {
-		return this.ownerId.get() === player.UserId || this.whitelistedPlayers.get()?.includes(player.UserId) === true;
+	isBuildingAllowed(playerId: number): boolean {
+		return this.ownerId.get() === playerId || this.whitelistedPlayers.get()?.includes(playerId) === true;
 	}
 
 	isBlacklisted(player: Player): boolean {

@@ -2,10 +2,13 @@ import { ComponentKeyedChildren } from "engine/shared/component/ComponentKeyedCh
 import { HostedService } from "engine/shared/di/HostedService";
 import { PlayerWatcher } from "engine/shared/PlayerWatcher";
 import { isNotAdmin_AutoBanned } from "server/BanAdminExploiter";
+import { ServerSlotRequestController } from "server/building/ServerSlotRequestController";
+import { asPlayerId } from "server/PlayerId";
 import { ServerPlayerController } from "server/ServerPlayerController";
 import { ServerPlayerDataRemotesController } from "server/ServerPlayerDataRemotesController";
 import { CustomRemotes } from "shared/Remotes";
 import type { PlayerDatabase } from "server/database/PlayerDatabase";
+import type { SlotDatabase } from "server/database/SlotDatabase";
 import type { SharedPlots } from "shared/building/SharedPlots";
 import type { PlayerInitResponse } from "shared/Remotes";
 
@@ -59,8 +62,28 @@ export class ServerPlayersController extends HostedService {
 					return { success: false, message: "no" };
 				}
 
-				const spdrc = ServerPlayerDataRemotesController.create(di, playerId, sender);
+				const controller = this.controllers.get(sender);
+				if (!controller) {
+					return { success: false, message: "you are LITERALLY offline" };
+				}
+
+				const scope = di.beginScope((builder) => {
+					builder.registerSingletonValue(asPlayerId(playerId));
+				});
+
+				const spdrc = ServerPlayerDataRemotesController.create(scope, playerId, sender);
 				spdrc.enable();
+
+				spdrc.parent(
+					new ServerSlotRequestController(
+						asPlayerId(playerId),
+						spdrc.slotRemotes,
+						controller.plotController.blocks,
+						scope.resolve<BlockList>(),
+						scope.resolve<PlayerDatabase>(),
+						scope.resolve<SlotDatabase>(),
+					),
+				);
 
 				const data = players.get(playerId) ?? {};
 

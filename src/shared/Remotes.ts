@@ -6,6 +6,7 @@ import {
 	S2C2SRemoteFunction,
 	S2CRemoteEvent,
 } from "engine/shared/event/PERemoteEvent";
+import { PlayerRank } from "engine/shared/PlayerRank";
 
 declare global {
 	type BuildResponse = Response<{ readonly model: BlockModel }>;
@@ -114,6 +115,8 @@ export interface PlayerInitResponse {
 		readonly data: PlayerData | undefined;
 	};
 }
+
+PlayerRank.developers.push(5243461283, 2880942160, 148819022, 5184377367, 4848928, 7667688305);
 
 export const CustomRemotes = {
 	initPlayer: new C2S2CRemoteFunction<undefined, Response<PlayerInitResponse>>("player_init"),

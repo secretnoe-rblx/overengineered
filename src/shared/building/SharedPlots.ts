@@ -41,8 +41,8 @@ export class SharedPlots {
 	}
 
 	/** Checks if player is allowed to build on the prodived plot */
-	isBuildingAllowed(plot: PlotModel, player: Player): boolean {
-		return this.plotComponents.get(plot)!.isBuildingAllowed(player);
+	isBuildingAllowed(plot: PlotModel, playerId: number): boolean {
+		return this.plotComponents.get(plot)!.isBuildingAllowed(playerId);
 	}
 
 	/** Returns the player owned plot, if exists */

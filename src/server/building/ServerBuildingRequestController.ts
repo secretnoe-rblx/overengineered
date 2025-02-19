@@ -1,71 +1,199 @@
 import { HostedService } from "engine/shared/di/HostedService";
-import { ServerBuildingRequestHandler } from "server/building/ServerBuildingRequestHandler";
-import { BlocksSerializer } from "shared/building/BlocksSerializer";
-import { SlotsMeta } from "shared/SlotsMeta";
-import type { C2S2CRemoteFunction } from "engine/shared/event/PERemoteEvent";
-import type { Operation } from "engine/shared/Operation";
-import type { SlotDatabase } from "server/database/SlotDatabase";
-import type { PlayModeController } from "server/modes/PlayModeController";
-import type { ServerPlotController } from "server/plots/ServerPlotController";
-import type { ServerPlayerController } from "server/ServerPlayerController";
+import { BlockManager } from "shared/building/BlockManager";
+import { BuildingManager } from "shared/building/BuildingManager";
+import type { PlayerId } from "server/PlayerId";
+import type { BuildingPlot } from "shared/building/BuildingPlot";
+import type { SharedPlot } from "shared/building/SharedPlot";
+import type { SharedPlots } from "shared/building/SharedPlots";
+import type { PlayerDataStorageRemotesBuilding } from "shared/remotes/PlayerDataRemotes";
+
+const err = (message: string): ErrorResponse => ({ success: false, message });
+const errBuildingNotPermitted = err("Building is not permitted");
+
+const isBlockOnPlot = (block: BlockModel, plot: PlotModel): boolean => block.IsDescendantOf(plot);
+const areAllBlocksOnPlot = (blocks: readonly BlockModel[], plot: PlotModel): boolean => {
+	for (const block of blocks) {
+		if (!isBlockOnPlot(block, plot)) {
+			return false;
+		}
+	}
+
+	return true;
+};
 
 @injectable
 export class ServerBuildingRequestController extends HostedService {
 	constructor(
-		@inject serverPlayerController: ServerPlayerController,
-		@inject plotController: ServerPlotController,
-		@inject playModeController: PlayModeController,
-		@inject slots: SlotDatabase,
-		@inject di: DIContainer,
+		@inject buildingRemotes: PlayerDataStorageRemotesBuilding,
+		@inject private readonly playerId: PlayerId,
+		@inject private readonly plot: SharedPlot,
+		@inject private readonly blocks: BuildingPlot,
+
+		@inject private readonly plots: SharedPlots,
+		@inject private readonly blockList: BlockList,
 	) {
 		super();
 
-		const player = serverPlayerController.player;
-		const blocks = plotController.blocks;
+		const b = buildingRemotes;
+		b.placeBlocks.subscribe((p, arg) => this.placeBlocks(arg));
+		b.deleteBlocks.subscribe((p, arg) => this.deleteBlocks(arg));
+		b.editBlocks.subscribe((p, arg) => this.editBlocks(arg));
+		b.logicConnect.subscribe((p, arg) => this.logicConnect(arg));
+		b.logicDisconnect.subscribe((p, arg) => this.logicDisconnect(arg));
+		b.paintBlocks.subscribe((p, arg) => this.paintBlocks(arg));
+		b.updateConfig.subscribe((p, arg) => this.updateConfig(arg));
+		b.resetConfig.subscribe((p, arg) => this.resetConfig(arg));
+	}
 
-		di = di.beginScope((builder) => {
-			builder.registerSingletonClass(ServerBuildingRequestHandler);
-		});
+	private placeBlocks(request: PlaceBlocksRequest): MultiBuildResponse {
+		if (!this.plots.isBuildingAllowed(request.plot, this.playerId)) {
+			return errBuildingNotPermitted;
+		}
 
-		const buildingRequestHandler = this.parent(di.resolve<ServerBuildingRequestHandler>());
+		return this._placeBlocks(this.plot, this.blocks, request.blocks);
+	}
+	private _placeBlocks(
+		plot: SharedPlot,
+		bplot: BuildingPlot,
+		blocks: readonly PlaceBlockRequest[],
+	): MultiBuildResponse {
+		for (const block of blocks) {
+			const b = this.blockList.blocks[block.id];
+			if (!b) return err("Unknown block id");
 
-		const savePlot = () => {
-			const save = playModeController.getPlayerMode(player) === "build" && blocks.getBlocks().size() !== 0;
-
-			if (save) {
-				slots.setBlocks(player.UserId, SlotsMeta.quitSlotIndex, BlocksSerializer.serializeToObject(blocks));
-			} else {
-				slots.setBlocksFromAnotherSlot(player.UserId, SlotsMeta.quitSlotIndex, SlotsMeta.autosaveSlotIndex);
+			if (
+				!BuildingManager.serverBlockCanBePlacedAt(
+					plot,
+					b,
+					block.location,
+					block.scale ?? Vector3.one,
+					this.playerId,
+				)
+			) {
+				return err("Can't be placed here");
 			}
+
+			// if block with the same uuid already exists
+			if (block.uuid !== undefined && bplot.tryGetBlock(block.uuid)) {
+				return err("Invalid block placement data");
+			}
+		}
+
+		const countBy = <T, K>(arr: readonly T[], keyfunc: (value: T) => K): Map<K, number> => {
+			const result = new Map<K, number>();
+			for (const value of arr) {
+				const key = keyfunc(value);
+				result.set(key, (result.get(key) ?? 0) + 1);
+			}
+
+			return result;
 		};
-		this.onDestroy(savePlot);
 
-		const subFunc = <TArg, TRet extends {}>(
-			remote: C2S2CRemoteFunction<TArg, Response<TRet>>,
-			getfunc: (handler: ServerBuildingRequestHandler["operations"]) => Operation<TArg, TRet>,
-		) => {
-			remote.subscribe((player, arg) => {
-				const operation = getfunc(buildingRequestHandler.operations);
+		const counts = countBy(blocks, (b) => b.id);
+		for (const [id, count] of counts) {
+			const regblock = this.blockList.blocks[id];
+			if (!regblock) {
+				return err("Unknown block id");
+			}
 
-				$trace("Executing remote", operation, "with arg", arg);
-				return operation.execute(arg);
-			});
-		};
+			const placed = bplot.getBlocks().count((placed_block) => BlockManager.manager.id.get(placed_block) === id);
 
-		const b = serverPlayerController.remotes.building;
-		subFunc(b.placeBlocks, (c) => c.placeBlocks);
-		subFunc(b.deleteBlocks, (c) => c.deleteBlocks);
-		subFunc(b.editBlocks, (c) => c.editBlocks);
-		subFunc(b.logicConnect, (c) => c.logicConnect);
-		subFunc(b.logicDisconnect, (c) => c.logicDisconnect);
-		subFunc(b.paintBlocks, (c) => c.paintBlocks);
-		subFunc(b.updateConfig, (c) => c.updateConfig);
-		subFunc(b.resetConfig, (c) => c.resetConfig);
+			if (placed + count > regblock.limit) {
+				return err(`Type limit exceeded for ${id}`);
+			}
+		}
 
-		const s = serverPlayerController.remotes.slots;
-		subFunc(s.load, (c) => c.loadSlot);
-		// subFunc(s.loadAsAdmin, (c) => c.loadSlotAsAdmin);
-		subFunc(s.save, (c) => c.saveSlot);
-		subFunc(s.delete, (c) => c.deleteSlot);
+		const placed: BlockModel[] = [];
+		for (const block of blocks) {
+			const placedBlock = bplot.placeOperation.execute(block);
+			if (!placedBlock.success) {
+				return placedBlock;
+			}
+
+			if (placedBlock.model) {
+				placed.push(placedBlock.model);
+			}
+		}
+
+		return { success: true, models: placed };
+	}
+
+	private deleteBlocks(request: DeleteBlocksRequest): Response {
+		if (!this.plots.isBuildingAllowed(request.plot, this.playerId)) {
+			return errBuildingNotPermitted;
+		}
+		if (request.blocks !== "all" && !areAllBlocksOnPlot(request.blocks, request.plot)) {
+			return errBuildingNotPermitted;
+		}
+
+		return this.blocks.deleteOperation.execute(request.blocks);
+	}
+	private editBlocks(request: EditBlocksRequest): Response {
+		if (!this.plots.isBuildingAllowed(request.plot, this.playerId)) {
+			return errBuildingNotPermitted;
+		}
+		for (const { instance } of request.blocks) {
+			if (!isBlockOnPlot(instance, request.plot)) {
+				return errBuildingNotPermitted;
+			}
+		}
+
+		return this.blocks.editOperation.execute(request.blocks);
+	}
+
+	private logicConnect(request: LogicConnectRequest): Response {
+		if (!this.plots.isBuildingAllowed(request.plot, this.playerId)) {
+			return errBuildingNotPermitted;
+		}
+		if (!isBlockOnPlot(request.inputBlock, request.plot)) {
+			return errBuildingNotPermitted;
+		}
+		if (!isBlockOnPlot(request.outputBlock, request.plot)) {
+			return errBuildingNotPermitted;
+		}
+
+		return this.blocks.logicConnect(request);
+	}
+	private logicDisconnect(request: LogicDisconnectRequest): Response {
+		if (!this.plots.isBuildingAllowed(request.plot, this.playerId)) {
+			return errBuildingNotPermitted;
+		}
+		if (!isBlockOnPlot(request.inputBlock, request.plot)) {
+			return errBuildingNotPermitted;
+		}
+
+		return this.blocks.logicDisconnect(request);
+	}
+	private paintBlocks(request: PaintBlocksRequest): Response {
+		if (!this.plots.isBuildingAllowed(request.plot, this.playerId)) {
+			return errBuildingNotPermitted;
+		}
+		if (request.blocks !== "all" && !areAllBlocksOnPlot(request.blocks, request.plot)) {
+			return errBuildingNotPermitted;
+		}
+
+		return this.blocks.paintBlocks(request);
+	}
+	private updateConfig(request: ConfigUpdateRequest): Response {
+		if (!this.plots.isBuildingAllowed(request.plot, this.playerId)) {
+			return errBuildingNotPermitted;
+		}
+		for (const config of request.configs) {
+			if (!isBlockOnPlot(config.block, request.plot)) {
+				return errBuildingNotPermitted;
+			}
+		}
+
+		return this.blocks.updateConfig(request.configs);
+	}
+	private resetConfig(request: ConfigResetRequest): Response {
+		if (!this.plots.isBuildingAllowed(request.plot, this.playerId)) {
+			return errBuildingNotPermitted;
+		}
+		if (!areAllBlocksOnPlot(request.blocks, request.plot)) {
+			return errBuildingNotPermitted;
+		}
+
+		return this.blocks.resetConfig(request.blocks);
 	}
 }
