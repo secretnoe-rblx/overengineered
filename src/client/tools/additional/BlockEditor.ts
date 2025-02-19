@@ -26,7 +26,7 @@ import { SharedBuilding } from "shared/building/SharedBuilding";
 import { Colors } from "shared/Colors";
 import { ReplicatedAssets } from "shared/ReplicatedAssets";
 import type { MainScreenLayout } from "client/gui/MainScreenLayout";
-import type { ClientBuilding } from "client/modes/build/ClientBuilding";
+import type { ClientBuildingTypes } from "client/modes/build/ClientBuilding";
 import type { PlayerDataStorage } from "client/PlayerDataStorage";
 import type { Theme, ThemeColorKey } from "client/Theme";
 import type { TextButtonDefinition } from "engine/client/gui/Button";
@@ -992,9 +992,9 @@ export class BlockEditor extends Component {
 		this.event.subscribeObservable(grids.scaleGrid, (grid) => this.scaleGrid.set(ScaleGrid.normal(grid)), true);
 	}
 
-	getUpdate(): readonly ClientBuilding.EditBlockInfo[] {
+	getUpdate(): readonly ClientBuildingTypes.EditBlockInfo[] {
 		return this.editBlocks.map(
-			(b): ClientBuilding.EditBlockInfo => ({
+			(b): ClientBuildingTypes.EditBlockInfo => ({
 				instance: b.block,
 				origPosition: b.origLocation,
 				newPosition: b.block.GetPivot(),

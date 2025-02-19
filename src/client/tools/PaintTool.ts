@@ -1,6 +1,5 @@
 import { MaterialColorEditControl } from "client/gui/buildmode/MaterialColorEditControl";
 import { Interface } from "client/gui/Interface";
-import { ClientBuilding } from "client/modes/build/ClientBuilding";
 import { MultiBlockSelector } from "client/tools/highlighters/MultiBlockSelector";
 import { ToolBase } from "client/tools/ToolBase";
 import { LocalPlayer } from "engine/client/LocalPlayer";
@@ -9,6 +8,7 @@ import { ObservableValue } from "engine/shared/event/ObservableValue";
 import { BlockManager } from "shared/building/BlockManager";
 import type { MainScreenLayout } from "client/gui/MainScreenLayout";
 import type { BuildingMode } from "client/modes/build/BuildingMode";
+import type { ClientBuilding } from "client/modes/build/ClientBuilding";
 import type { Keybinds } from "engine/client/Keybinds";
 
 namespace Scene {
@@ -108,7 +108,12 @@ export class PaintTool extends ToolBase {
 	readonly enableColor = new ObservableValue(true);
 	readonly controller;
 
-	constructor(@inject mode: BuildingMode, @inject keybinds: Keybinds, @inject di: DIContainer) {
+	constructor(
+		@inject mode: BuildingMode,
+		@inject keybinds: Keybinds,
+		@inject private readonly clientBuilding: ClientBuilding,
+		@inject di: DIContainer,
+	) {
 		super(mode);
 
 		this.parent(di.resolveForeignClass(Scene.PaintToolScene));
@@ -116,7 +121,7 @@ export class PaintTool extends ToolBase {
 	}
 
 	paintEverything(enableColor?: boolean, enableMaterial?: boolean) {
-		return ClientBuilding.paintOperation.execute({
+		return this.clientBuilding.paintOperation.execute({
 			plot: this.targetPlot.get(),
 			blocks: "all",
 			material: (enableMaterial ?? this.enableMaterial.get()) ? this.selectedMaterial.get() : undefined,
@@ -127,7 +132,7 @@ export class PaintTool extends ToolBase {
 		blocks: readonly BlockModel[],
 		original?: ReadonlyMap<BlockModel, { readonly material: Enum.Material; readonly color: Color3 }>,
 	) {
-		return ClientBuilding.paintOperation.execute({
+		return this.clientBuilding.paintOperation.execute({
 			plot: this.targetPlot.get(),
 			blocks,
 			material: this.enableMaterial.get() ? this.selectedMaterial.get() : undefined,

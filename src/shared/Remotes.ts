@@ -105,31 +105,25 @@ export namespace Remotes {
 	}
 }
 
+export interface PlayerInitResponse {
+	readonly remotes: Instance;
+	readonly data: {
+		readonly purchasedSlots: number | undefined;
+		readonly settings: Partial<PlayerConfig> | undefined;
+		readonly slots: readonly SlotMeta[] | undefined;
+		readonly data: PlayerData | undefined;
+	};
+}
+
 export const CustomRemotes = {
-	building: {
-		placeBlocks: new C2S2CRemoteFunction<PlaceBlocksRequest, MultiBuildResponse>("rb_place"),
-		deleteBlocks: new C2S2CRemoteFunction<DeleteBlocksRequest>("rb_delete"),
-		editBlocks: new C2S2CRemoteFunction<EditBlocksRequest>("rb_edit"),
-		logicConnect: new C2S2CRemoteFunction<LogicConnectRequest>("rb_lconnect"),
-		logicDisconnect: new C2S2CRemoteFunction<LogicDisconnectRequest>("rb_ldisconnect"),
-		paintBlocks: new C2S2CRemoteFunction<PaintBlocksRequest>("rb_paint"),
-		updateConfig: new C2S2CRemoteFunction<ConfigUpdateRequest>("rb_updatecfg"),
-		resetConfig: new C2S2CRemoteFunction<ConfigResetRequest>("rb_resetcfg"),
-	},
+	initPlayer: new C2S2CRemoteFunction<undefined, Response<PlayerInitResponse>>("player_init"),
+	adminDataFor: new C2S2CRemoteFunction<number, Response<PlayerInitResponse>>("player_init_admin"),
+
 	physics: {
 		normalizeRootparts: new S2CRemoteEvent<NormalizeRootpartsRequest>("ph_normalize_rootparts"),
 	},
 	slots: {
-		load: new C2S2CRemoteFunction<PlayerLoadSlotRequest, LoadSlotResponse>("rs_load"),
 		loadAsAdmin: new C2S2CRemoteFunction<PlayerLoadAdminSlotRequest, LoadSlotResponse>("rs_loadadm"),
-		save: new C2S2CRemoteFunction<PlayerSaveSlotRequest, SaveSlotResponse>("rs_save"),
-		delete: new C2S2CRemoteFunction<PlayerDeleteSlotRequest>("rs_delete"),
-	},
-	player: {
-		loaded: new C2SRemoteEvent<undefined>("client_initialized"),
-		updateSettings: new C2SRemoteEvent<PlayerUpdateSettingsRequest>("pl_updsettings"),
-		updateData: new C2SRemoteEvent<PlayerUpdateDataRequest>("pl_upddata"),
-		fetchData: new C2S2CRemoteFunction<undefined, Response<PlayerDataResponse>>("pl_fetchdata"),
 	},
 	gui: {
 		settings: {

@@ -2,7 +2,6 @@ import { Players } from "@rbxts/services";
 import { MultiBlockConfigControl } from "client/gui/BlockConfigControls";
 import { GuiAnimator } from "client/gui/GuiAnimator";
 import { LogControl } from "client/gui/static/LogControl";
-import { ClientBuilding } from "client/modes/build/ClientBuilding";
 import { MultiBlockHighlightedSelector } from "client/tools/highlighters/MultiBlockHighlightedSelector";
 import { SelectedBlocksHighlighter } from "client/tools/highlighters/SelectedBlocksHighlighter";
 import { ToolBase } from "client/tools/ToolBase";
@@ -22,6 +21,8 @@ import type { MainScreenLayout } from "client/gui/MainScreenLayout";
 import type { ReportSubmitController } from "client/gui/popup/ReportSubmitPopup";
 import type { ActionController } from "client/modes/build/ActionController";
 import type { BuildingMode } from "client/modes/build/BuildingMode";
+import type { ClientBuildingTypes } from "client/modes/build/ClientBuilding";
+import type { ClientBuilding } from "client/modes/build/ClientBuilding";
 //import type { TutorialConfigBlockHighlight } from "client/tutorial/TutorialConfigTool";
 import type { Keybinds } from "engine/client/Keybinds";
 import type { PlacedBlockConfig } from "shared/blockLogic/BlockConfig";
@@ -55,6 +56,7 @@ namespace Scene {
 			@inject private readonly di: DIContainer,
 			@inject private readonly reportSubmitter: ReportSubmitController,
 			@inject private readonly mainScreen: MainScreenLayout,
+			@inject private readonly clientBuilding: ClientBuilding,
 			@inject actionController: ActionController,
 		) {
 			super(gui);
@@ -81,7 +83,7 @@ namespace Scene {
 			this.gui.Bottom.ResetButton.Activated.Connect(async () => {
 				$log(`Resetting (${selected.get().size()}) block config values`);
 
-				const response = await ClientBuilding.resetConfigOperation.execute({
+				const response = await clientBuilding.resetConfigOperation.execute({
 					plot: tool.targetPlot.get(),
 					blocks: selected.getArr(),
 				});
@@ -178,14 +180,14 @@ namespace Scene {
 					const selected = this.tool.selected.get();
 					$log(`Sending (${selected.size()}) block config values ${JSON.serialize(asMap(config).values())}`);
 
-					const response = ClientBuilding.updateConfigOperation.execute({
+					const response = this.clientBuilding.updateConfigOperation.execute({
 						plot: this.tool.targetPlot.get(),
 						configs: selected.map(
 							(b) =>
 								({
 									block: b,
 									cfg: config[BlockManager.manager.uuid.get(b)] as never,
-								}) satisfies ClientBuilding.UpdateConfigArgs["configs"][number],
+								}) satisfies ClientBuildingTypes.UpdateConfigArgs["configs"][number],
 						),
 					});
 					if (!response.success) {

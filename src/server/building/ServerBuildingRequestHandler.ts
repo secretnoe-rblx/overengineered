@@ -8,7 +8,8 @@ import { BuildingManager } from "shared/building/BuildingManager";
 import { SlotsMeta } from "shared/SlotsMeta";
 import type { PlayerDatabase } from "server/database/PlayerDatabase";
 import type { SlotDatabase } from "server/database/SlotDatabase";
-import type { ServerPlotController, ServerPlots } from "server/plots/ServerPlots";
+import type { BuildingPlot } from "shared/building/BuildingPlot";
+import type { SharedPlot } from "shared/building/SharedPlot";
 import type { SharedPlots } from "shared/building/SharedPlots";
 
 const err = (message: string): ErrorResponse => ({ success: false, message });
@@ -43,19 +44,16 @@ export class ServerBuildingRequestHandler extends HostedService {
 		loadSlotAsAdmin: new Operation(this.loadSlotAsAdmin.bind(this)),
 	} as const;
 
-	readonly player: Player;
-	private readonly plots: SharedPlots;
-
 	constructor(
-		@inject readonly controller: ServerPlotController,
-		@inject private readonly serverPlots: ServerPlots,
+		@inject private readonly player: Player,
+		@inject private readonly plot: SharedPlot,
+		@inject private readonly plots: SharedPlots,
+		@inject private readonly blocks: BuildingPlot,
 		@inject private readonly blockList: BlockList,
 		@inject private readonly slots: SlotDatabase,
 		@inject private readonly players: PlayerDatabase,
 	) {
 		super();
-		this.player = controller.player;
-		this.plots = serverPlots.plots;
 	}
 
 	private placeBlocks(request: PlaceBlocksRequest): MultiBuildResponse {
@@ -63,16 +61,20 @@ export class ServerBuildingRequestHandler extends HostedService {
 			return errBuildingNotPermitted;
 		}
 
-		return this._placeBlocks(this.controller, request.blocks);
+		return this._placeBlocks(this.plot, this.blocks, request.blocks);
 	}
-	private _placeBlocks(plotc: ServerPlotController, blocks: readonly PlaceBlockRequest[]): MultiBuildResponse {
+	private _placeBlocks(
+		plot: SharedPlot,
+		bplot: BuildingPlot,
+		blocks: readonly PlaceBlockRequest[],
+	): MultiBuildResponse {
 		for (const block of blocks) {
 			const b = this.blockList.blocks[block.id];
 			if (!b) return err("Unknown block id");
 
 			if (
 				!BuildingManager.serverBlockCanBePlacedAt(
-					plotc.plot,
+					plot,
 					b,
 					block.location,
 					block.scale ?? Vector3.one,
@@ -83,7 +85,7 @@ export class ServerBuildingRequestHandler extends HostedService {
 			}
 
 			// if block with the same uuid already exists
-			if (block.uuid !== undefined && plotc.blocks.tryGetBlock(block.uuid)) {
+			if (block.uuid !== undefined && bplot.tryGetBlock(block.uuid)) {
 				return err("Invalid block placement data");
 			}
 		}
@@ -105,9 +107,7 @@ export class ServerBuildingRequestHandler extends HostedService {
 				return err("Unknown block id");
 			}
 
-			const placed = plotc.blocks
-				.getBlocks()
-				.count((placed_block) => BlockManager.manager.id.get(placed_block) === id);
+			const placed = bplot.getBlocks().count((placed_block) => BlockManager.manager.id.get(placed_block) === id);
 
 			if (placed + count > regblock.limit) {
 				return err(`Type limit exceeded for ${id}`);
@@ -116,7 +116,7 @@ export class ServerBuildingRequestHandler extends HostedService {
 
 		const placed: BlockModel[] = [];
 		for (const block of blocks) {
-			const placedBlock = plotc.blocks.placeOperation.execute(block);
+			const placedBlock = bplot.placeOperation.execute(block);
 			if (!placedBlock.success) {
 				return placedBlock;
 			}
@@ -137,7 +137,7 @@ export class ServerBuildingRequestHandler extends HostedService {
 			return errBuildingNotPermitted;
 		}
 
-		return this.controller.blocks.deleteOperation.execute(request.blocks);
+		return this.blocks.deleteOperation.execute(request.blocks);
 	}
 	private editBlocks(request: EditBlocksRequest): Response {
 		if (!this.plots.isBuildingAllowed(request.plot, this.player)) {
@@ -149,7 +149,7 @@ export class ServerBuildingRequestHandler extends HostedService {
 			}
 		}
 
-		return this.controller.blocks.editOperation.execute(request.blocks);
+		return this.blocks.editOperation.execute(request.blocks);
 	}
 
 	private logicConnect(request: LogicConnectRequest): Response {
@@ -163,7 +163,7 @@ export class ServerBuildingRequestHandler extends HostedService {
 			return errBuildingNotPermitted;
 		}
 
-		return this.controller.blocks.logicConnect(request);
+		return this.blocks.logicConnect(request);
 	}
 	private logicDisconnect(request: LogicDisconnectRequest): Response {
 		if (!this.plots.isBuildingAllowed(request.plot, this.player)) {
@@ -173,7 +173,7 @@ export class ServerBuildingRequestHandler extends HostedService {
 			return errBuildingNotPermitted;
 		}
 
-		return this.controller.blocks.logicDisconnect(request);
+		return this.blocks.logicDisconnect(request);
 	}
 	private paintBlocks(request: PaintBlocksRequest): Response {
 		if (!this.plots.isBuildingAllowed(request.plot, this.player)) {
@@ -183,7 +183,7 @@ export class ServerBuildingRequestHandler extends HostedService {
 			return errBuildingNotPermitted;
 		}
 
-		return this.controller.blocks.paintBlocks(request);
+		return this.blocks.paintBlocks(request);
 	}
 	private updateConfig(request: ConfigUpdateRequest): Response {
 		if (!this.plots.isBuildingAllowed(request.plot, this.player)) {
@@ -195,7 +195,7 @@ export class ServerBuildingRequestHandler extends HostedService {
 			}
 		}
 
-		return this.controller.blocks.updateConfig(request.configs);
+		return this.blocks.updateConfig(request.configs);
 	}
 	private resetConfig(request: ConfigResetRequest): Response {
 		if (!this.plots.isBuildingAllowed(request.plot, this.player)) {
@@ -205,7 +205,7 @@ export class ServerBuildingRequestHandler extends HostedService {
 			return errBuildingNotPermitted;
 		}
 
-		return this.controller.blocks.resetConfig(request.blocks);
+		return this.blocks.resetConfig(request.blocks);
 	}
 
 	private saveSlot(request: PlayerSaveSlotRequest): SaveSlotResponse {
@@ -224,10 +224,7 @@ export class ServerBuildingRequestHandler extends HostedService {
 			this.slots.setBlocks(player.UserId, request.index, undefined);
 			output = { blocks: 0 };
 		} else if (request.save) {
-			const controller = this.serverPlots.tryGetControllerByPlayer(player);
-			if (!controller) throw "what";
-
-			const blocks = BlocksSerializer.serializeToObject(controller.blocks);
+			const blocks = BlocksSerializer.serializeToObject(this.blocks);
 			this.slots.setBlocks(player.UserId, request.index, blocks);
 			output = { blocks: blocks.blocks.size() };
 		}
@@ -273,13 +270,13 @@ export class ServerBuildingRequestHandler extends HostedService {
 		const start = os.clock();
 		const blocks = this.slots.getBlocks(userid, index);
 
-		this.controller.blocks.deleteOperation.execute("all");
+		this.blocks.deleteOperation.execute("all");
 		if (blocks.blocks.size() === 0) {
 			return { success: true, isEmpty: true };
 		}
 
 		$log(`Loading ${userid}'s slot ${index}`);
-		const dblocks = BlocksSerializer.deserializeFromObject(blocks, this.controller.blocks, this.blockList);
+		const dblocks = BlocksSerializer.deserializeFromObject(blocks, this.blocks, this.blockList);
 		$log(`Loaded ${userid} slot ${index} in ${os.clock() - start}`);
 
 		return { success: true, isEmpty: dblocks === 0 };

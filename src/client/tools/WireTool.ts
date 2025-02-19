@@ -1,7 +1,6 @@
 import { GamepadService, GuiService, Players, ReplicatedStorage, RunService, Workspace } from "@rbxts/services";
 import { Interface } from "client/gui/Interface";
 import { LogControl } from "client/gui/static/LogControl";
-import { ClientBuilding } from "client/modes/build/ClientBuilding";
 import { ToolBase } from "client/tools/ToolBase";
 import { ButtonControl } from "engine/client/gui/Button";
 import { Control } from "engine/client/gui/Control";
@@ -19,6 +18,7 @@ import { ReplicatedAssets } from "shared/ReplicatedAssets";
 import type { Tooltip } from "client/gui/static/TooltipsControl";
 import type { ActionController } from "client/modes/build/ActionController";
 import type { BuildingMode } from "client/modes/build/BuildingMode";
+import type { ClientBuilding } from "client/modes/build/ClientBuilding";
 import type { ReadonlyObservableValue } from "engine/shared/event/ObservableValue";
 import type { BlockLogicTypes } from "shared/blockLogic/BlockLogicTypes";
 import type { SharedPlot } from "shared/building/SharedPlot";
@@ -481,14 +481,14 @@ namespace Visual {
 }
 
 namespace Controllers {
-	const connectMarkers = (from: Markers.Output, to: Markers.Input) => {
+	const connectMarkers = (clientBuilding: ClientBuilding, from: Markers.Output, to: Markers.Input) => {
 		if (from.plot !== to.plot) {
 			throw "Interplot connections are not supported";
 		}
 
 		from.marker.connect(to.marker);
 		task.spawn(async () => {
-			const result = await ClientBuilding.logicConnectOperation.execute({
+			const result = clientBuilding.logicConnectOperation.execute({
 				plot: from.plot,
 				inputBlock: to.block,
 				inputConnection: to.data.id,
@@ -501,11 +501,11 @@ namespace Controllers {
 			}
 		});
 	};
-	const disconnectMarker = (marker: Markers.Input) => {
+	const disconnectMarker = (clientBuilding: ClientBuilding, marker: Markers.Input) => {
 		marker.marker.disconnect();
 
 		task.spawn(async () => {
-			const result = await ClientBuilding.logicDisconnectOperation.execute({
+			const result = clientBuilding.logicDisconnectOperation.execute({
 				plot: marker.plot,
 				inputBlock: marker.block,
 				inputConnection: marker.data.id,
@@ -522,11 +522,12 @@ namespace Controllers {
 
 		stopDragging(): void;
 	}
+	@injectable
 	export class Desktop extends Component implements IController {
 		readonly selectedMarker = new ObservableValue<Markers.Output | undefined>(undefined);
 		private readonly currentMoverContainer;
 
-		constructor(markers: readonly Markers.Marker[]) {
+		constructor(markers: readonly Markers.Marker[], @inject clientBuilding: ClientBuilding) {
 			class WireMover extends InstanceComponent<WireComponentDefinition> {
 				readonly marker;
 
@@ -548,7 +549,7 @@ namespace Controllers {
 					this.event.subInput((ih) =>
 						ih.onMouse1Up(() => {
 							if (hoverMarker) {
-								connectMarkers(this.marker, hoverMarker);
+								connectMarkers(clientBuilding, this.marker, hoverMarker);
 							}
 
 							this.destroy();
@@ -557,7 +558,7 @@ namespace Controllers {
 					this.event.subInput((ih) =>
 						ih.onMouse2Down(() => {
 							if (hoverMarker) {
-								connectMarkers(this.marker, hoverMarker);
+								connectMarkers(clientBuilding, this.marker, hoverMarker);
 							}
 						}, true),
 					);
@@ -574,7 +575,7 @@ namespace Controllers {
 			for (const marker of markers) {
 				if (marker instanceof Markers.Input) {
 					this.event.subscribe(marker.instance.TextButton.MouseButton1Click, () => {
-						disconnectMarker(marker);
+						disconnectMarker(clientBuilding, marker);
 					});
 
 					this.event.subscribe(marker.instance.TextButton.MouseEnter, () => {
@@ -603,11 +604,12 @@ namespace Controllers {
 			this.currentMoverContainer.clear();
 		}
 	}
+	@injectable
 	export class Touch extends Component implements IController {
 		readonly selectedMarker = new ObservableValue<Markers.Output | undefined>(undefined);
 		private readonly markers: readonly Markers.Marker[];
 
-		constructor(markers: readonly Markers.Marker[]) {
+		constructor(markers: readonly Markers.Marker[], @inject clientBuilding: ClientBuilding) {
 			super();
 			this.markers = markers;
 
@@ -623,11 +625,11 @@ namespace Controllers {
 					this.event.subscribe(marker.instance.TextButton.Activated, () => {
 						const selected = this.selectedMarker.get();
 						if (!selected) {
-							disconnectMarker(marker);
+							disconnectMarker(clientBuilding, marker);
 							return;
 						}
 
-						connectMarkers(selected!, marker);
+						connectMarkers(clientBuilding, selected!, marker);
 						this.unset();
 					});
 				} else if (marker instanceof Markers.Output) {
@@ -656,9 +658,10 @@ namespace Controllers {
 			this.unset();
 		}
 	}
+	@injectable
 	export class Gamepad extends Desktop implements IController {
-		constructor(markers: readonly Markers.Marker[]) {
-			super(markers);
+		constructor(markers: readonly Markers.Marker[], @inject clientBuilding: ClientBuilding) {
+			super(markers, clientBuilding);
 
 			this.event.onKeyDown("ButtonY", () => {
 				if (GamepadService.GamepadCursorEnabled) {
@@ -684,6 +687,7 @@ export class WireTool extends ToolBase {
 		@inject mode: BuildingMode,
 		@inject actionController: ActionController,
 		@inject private readonly blockList: BlockList,
+		@inject di: DIContainer,
 	) {
 		super(mode);
 
@@ -709,12 +713,17 @@ export class WireTool extends ToolBase {
 			Gamepad: Controllers.Gamepad,
 		} as const satisfies Record<
 			InputType,
-			new (markers: readonly Markers.Marker[], wireParent: ViewportFrame) => Controllers.IController
+			new (markers: readonly Markers.Marker[], ...args: any[]) => Controllers.IController
 		>;
 
 		const setController = () => {
 			const inputType = InputController.inputType.get();
-			const controller = this.controllerContainer.set(new controllers[inputType](this.markers.getAll()));
+			const controller = this.controllerContainer.set(
+				di.resolveForeignClass<Controllers.IController, [readonly Markers.Marker[], ...never[]]>(
+					controllers[inputType],
+					[this.markers.getAll()],
+				),
+			);
 			controller.selectedMarker.subscribe((m) => this.selectedMarker.set(m), true);
 		};
 		this.event.onPrepare(setController);

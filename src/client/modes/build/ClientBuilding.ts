@@ -4,35 +4,99 @@ import { JSON } from "engine/shared/fixes/Json";
 import { Operation } from "engine/shared/Operation";
 import { BlockManager } from "shared/building/BlockManager";
 import { SharedBuilding } from "shared/building/SharedBuilding";
-import { CustomRemotes } from "shared/Remotes";
 import type { PlacedBlockConfig } from "shared/blockLogic/BlockConfig";
 import type { BlockLogicTypes } from "shared/blockLogic/BlockLogicTypes";
 import type { SharedPlot } from "shared/building/SharedPlot";
+import type { PlayerDataStorageRemotes } from "shared/remotes/PlayerDataRemotes";
 
-const building = CustomRemotes.building;
-
-/** Methods to send building requests to the server, with undo/redo support. No validation is performed. */
-export namespace ClientBuilding {
-	export const placeOperation = new Operation(placeBlocks);
-	export const deleteOperation = new Operation(deleteBlocks);
-	export const editOperation = new Operation(editBlocks);
-	export const paintOperation = new Operation(paintBlocks);
-	export const updateConfigOperation = new Operation(updateConfig);
-	export const resetConfigOperation = new Operation(resetConfig);
-	export const logicConnectOperation = new Operation(logicConnect);
-	export const logicDisconnectOperation = new Operation(logicDisconnect);
-
-	type PlaceBlocksArgs = {
+export namespace ClientBuildingTypes {
+	export type PlaceBlocksArgs = {
 		readonly plot: SharedPlot;
 		readonly blocks: readonly Omit<PlaceBlockRequest, "uuid">[];
 	};
-	function placeBlocks({ plot, blocks }: PlaceBlocksArgs) {
+
+	export type DeleteBlocksArgs = {
+		readonly plot: SharedPlot;
+		readonly blocks: readonly BlockModel[] | "all";
+	};
+
+	export type EditBlockInfoBase = {
+		readonly origPosition: CFrame;
+		readonly newPosition?: CFrame;
+		readonly origScale?: Vector3;
+		readonly newScale?: Vector3;
+	};
+	export type EditBlockInfo = EditBlockInfoBase & { readonly instance: BlockModel };
+	export type EditBlockRequestInfo = EditBlocksRequest["blocks"][number];
+	export type EditBlocksArgs = {
+		readonly plot: SharedPlot;
+		readonly blocks: readonly EditBlockInfo[];
+	};
+
+	export type PaintBlocksArgs = {
+		readonly plot: SharedPlot;
+		readonly blocks: readonly BlockModel[] | "all";
+		readonly material: Enum.Material | undefined;
+		readonly color: Color3 | undefined;
+		readonly original?: ReadonlyMap<BlockModel, { readonly material: Enum.Material; readonly color: Color3 }>;
+	};
+
+	export type UpdateConfigArgs = {
+		readonly plot: SharedPlot;
+		readonly configs: readonly {
+			readonly block: BlockModel;
+			readonly cfg: PlacedBlockConfig;
+		}[];
+	};
+
+	export type ResetConfigArgs = {
+		readonly plot: SharedPlot;
+		readonly blocks: readonly BlockModel[];
+	};
+
+	export type LogicConnectArgs = {
+		readonly plot: SharedPlot;
+		readonly inputBlock: BlockModel;
+		readonly inputConnection: BlockConnectionName;
+		readonly outputBlock: BlockModel;
+		readonly outputConnection: BlockConnectionName;
+	};
+
+	export type LogicDisconnectArgs = {
+		readonly plot: SharedPlot;
+		readonly inputBlock: BlockModel;
+		readonly inputConnection: BlockConnectionName;
+	};
+}
+
+/** Methods to send building requests to the server, with undo/redo support. No validation is performed. */
+@injectable
+export class ClientBuilding {
+	readonly placeOperation = new Operation(this.placeBlocks.bind(this));
+	readonly deleteOperation = new Operation(this.deleteBlocks.bind(this));
+	readonly editOperation = new Operation(this.editBlocks.bind(this));
+	readonly paintOperation = new Operation(this.paintBlocks.bind(this));
+	readonly updateConfigOperation = new Operation(this.updateConfig.bind(this));
+	readonly resetConfigOperation = new Operation(this.resetConfig.bind(this));
+	readonly logicConnectOperation = new Operation(this.logicConnect.bind(this));
+	readonly logicDisconnectOperation = new Operation(this.logicDisconnect.bind(this));
+
+	private readonly building;
+
+	constructor(
+		@inject private readonly actionController: ActionController,
+		@inject remotes: PlayerDataStorageRemotes,
+	) {
+		this.building = remotes.building;
+	}
+
+	placeBlocks({ plot, blocks }: ClientBuildingTypes.PlaceBlocksArgs) {
 		let placed: readonly BlockUuid[];
-		const result = ActionController.instance.execute(
+		const result = this.actionController.execute(
 			"Place blocks",
 			() => {
 				const execute = () =>
-					building.deleteBlocks.send({
+					this.building.deleteBlocks.send({
 						plot: plot.instance,
 						blocks: placed.map((uuid) => plot.getBlock(uuid)),
 					});
@@ -45,7 +109,7 @@ export namespace ClientBuilding {
 			},
 			() => {
 				const execute = () => {
-					const response = building.placeBlocks.send({ plot: plot.instance, blocks });
+					const response = this.building.placeBlocks.send({ plot: plot.instance, blocks });
 					if (response.success) {
 						placed = response.models.map(BlockManager.manager.uuid.get);
 					}
@@ -73,11 +137,7 @@ export namespace ClientBuilding {
 		return result;
 	}
 
-	type DeleteBlocksArgs = {
-		readonly plot: SharedPlot;
-		readonly blocks: readonly BlockModel[] | "all";
-	};
-	function deleteBlocks({ plot, blocks: _blocks }: DeleteBlocksArgs) {
+	deleteBlocks({ plot, blocks: _blocks }: ClientBuildingTypes.DeleteBlocksArgs) {
 		const uuids = _blocks === "all" ? "all" : _blocks.map(BlockManager.manager.uuid.get);
 		const blockCount = uuids === "all" ? plot.getBlocks().size() : uuids.size();
 
@@ -129,17 +189,17 @@ export namespace ClientBuilding {
 			};
 		};
 
-		const result = ActionController.instance.execute(
+		const result = this.actionController.execute(
 			uuids === "all" ? "Clear plot" : "Remove blocks",
 			() => {
 				const execute = (): Response => {
-					const response = building.placeBlocks.send(undo);
+					const response = this.building.placeBlocks.send(undo);
 					if (!response.success) {
 						return response;
 					}
 
 					for (const connection of connectedByLogic) {
-						const response = building.logicConnect.send(getConnectRequest(connection));
+						const response = this.building.logicConnect.send(getConnectRequest(connection));
 
 						if (!response.success) {
 							return response;
@@ -162,7 +222,7 @@ export namespace ClientBuilding {
 				return execute();
 			},
 			() => {
-				const execute = () => building.deleteBlocks.send({ plot: plot.instance, blocks: getBlocks() });
+				const execute = () => this.building.deleteBlocks.send({ plot: plot.instance, blocks: getBlocks() });
 
 				if (blockCount > 10) {
 					return LoadingController.run("Removing blocks", execute);
@@ -176,20 +236,8 @@ export namespace ClientBuilding {
 		return result;
 	}
 
-	type EditBlockInfoBase = {
-		readonly origPosition: CFrame;
-		readonly newPosition?: CFrame;
-		readonly origScale?: Vector3;
-		readonly newScale?: Vector3;
-	};
-	export type EditBlockInfo = EditBlockInfoBase & { readonly instance: BlockModel };
-	type EditBlockRequestInfo = EditBlocksRequest["blocks"][number];
-	type EditBlocksArgs = {
-		readonly plot: SharedPlot;
-		readonly blocks: readonly EditBlockInfo[];
-	};
-	function editBlocks({ plot, blocks: _blocks }: EditBlocksArgs) {
-		const blocks = _blocks.map((b): EditBlockInfoBase & { readonly uuid: BlockUuid } => ({
+	editBlocks({ plot, blocks: _blocks }: ClientBuildingTypes.EditBlocksArgs) {
+		const blocks = _blocks.map((b): ClientBuildingTypes.EditBlockInfoBase & { readonly uuid: BlockUuid } => ({
 			uuid: BlockManager.manager.uuid.get(b.instance),
 			newPosition: b.newPosition,
 			origPosition: b.origPosition,
@@ -197,27 +245,27 @@ export namespace ClientBuilding {
 			newScale: b.newScale,
 		}));
 
-		const getOrigBlocks = (): readonly EditBlockRequestInfo[] =>
+		const getOrigBlocks = (): readonly ClientBuildingTypes.EditBlockRequestInfo[] =>
 			blocks.map(
-				(b): EditBlockRequestInfo => ({
+				(b): ClientBuildingTypes.EditBlockRequestInfo => ({
 					instance: plot.getBlock(b.uuid),
 					position: b.origPosition,
 					scale: b.origScale,
 				}),
 			);
-		const getBlocks = (): readonly EditBlockRequestInfo[] =>
+		const getBlocks = (): readonly ClientBuildingTypes.EditBlockRequestInfo[] =>
 			blocks.map(
-				(b): EditBlockRequestInfo => ({
+				(b): ClientBuildingTypes.EditBlockRequestInfo => ({
 					instance: plot.getBlock(b.uuid),
 					position: b.newPosition,
 					scale: b.newScale,
 				}),
 			);
 
-		const result = ActionController.instance.execute(
+		const result = this.actionController.execute(
 			"Edit blocks",
 			() => {
-				const execute = () => building.editBlocks.send({ plot: plot.instance, blocks: getOrigBlocks() });
+				const execute = () => this.building.editBlocks.send({ plot: plot.instance, blocks: getOrigBlocks() });
 
 				if (blocks.size() > 10) {
 					return LoadingController.run("Editing blocks", execute);
@@ -225,7 +273,7 @@ export namespace ClientBuilding {
 				return execute();
 			},
 			() => {
-				const execute = () => building.editBlocks.send({ plot: plot.instance, blocks: getBlocks() });
+				const execute = () => this.building.editBlocks.send({ plot: plot.instance, blocks: getBlocks() });
 
 				if (blocks.size() > 10) {
 					return LoadingController.run("Editing blocks", execute);
@@ -238,14 +286,7 @@ export namespace ClientBuilding {
 		return result;
 	}
 
-	type PaintBlocksArgs = {
-		readonly plot: SharedPlot;
-		readonly blocks: readonly BlockModel[] | "all";
-		readonly material: Enum.Material | undefined;
-		readonly color: Color3 | undefined;
-		readonly original?: ReadonlyMap<BlockModel, { readonly material: Enum.Material; readonly color: Color3 }>;
-	};
-	function paintBlocks({ plot, blocks: _blocks, material, color, original: _original }: PaintBlocksArgs) {
+	paintBlocks({ plot, blocks: _blocks, material, color, original: _original }: ClientBuildingTypes.PaintBlocksArgs) {
 		$trace("Executing painting operation", { plot, _blocks, material, color, _original });
 
 		const origData = _original
@@ -264,7 +305,7 @@ export namespace ClientBuilding {
 				);
 		const getBlocks = (): readonly BlockModel[] => origData.map((uuid) => plot.getBlock(uuid));
 
-		const result = ActionController.instance.execute(
+		const result = this.actionController.execute(
 			"Paint blocks",
 			() => {
 				const grouped = new Map<Enum.Material, Map<string, BlockUuid[]>>();
@@ -288,7 +329,7 @@ export namespace ClientBuilding {
 					for (const [color, uuids] of colorgroup) {
 						const blocks = uuids.map((uuid) => plot.getBlock(uuid));
 
-						const result = building.paintBlocks.send({
+						const result = this.building.paintBlocks.send({
 							plot: plot.instance,
 							material,
 							color: Color3.fromHex(color),
@@ -304,7 +345,7 @@ export namespace ClientBuilding {
 				return { success: true };
 			},
 			() =>
-				building.paintBlocks.send({
+				this.building.paintBlocks.send({
 					plot: plot.instance,
 					material,
 					color,
@@ -316,14 +357,7 @@ export namespace ClientBuilding {
 		return result;
 	}
 
-	export type UpdateConfigArgs = {
-		readonly plot: SharedPlot;
-		readonly configs: readonly {
-			readonly block: BlockModel;
-			readonly cfg: PlacedBlockConfig;
-		}[];
-	};
-	function updateConfig({ plot, configs: _configs }: UpdateConfigArgs) {
+	updateConfig({ plot, configs: _configs }: ClientBuildingTypes.UpdateConfigArgs) {
 		const newConfigs = asObject(_configs.mapToMap((c) => $tuple(BlockManager.manager.uuid.get(c.block), c.cfg)));
 		const origConfigs = asObject(
 			_configs.mapToMap((c) =>
@@ -337,26 +371,22 @@ export namespace ClientBuilding {
 			return asMap(data).map((k, v) => ({ block: plot.getBlock(k), scfg: JSON.serialize(v) }));
 		};
 
-		return ActionController.instance.execute(
+		return this.actionController.execute(
 			"Update config",
 			() =>
-				building.updateConfig.send({
+				this.building.updateConfig.send({
 					plot: plot.instance,
 					configs: getBlocks(origConfigs),
 				}),
 			() =>
-				building.updateConfig.send({
+				this.building.updateConfig.send({
 					plot: plot.instance,
 					configs: getBlocks(newConfigs),
 				}),
 		);
 	}
 
-	type ResetConfigArgs = {
-		readonly plot: SharedPlot;
-		readonly blocks: readonly BlockModel[];
-	};
-	function resetConfig({ plot, blocks: _blocks }: ResetConfigArgs) {
+	resetConfig({ plot, blocks: _blocks }: ClientBuildingTypes.ResetConfigArgs) {
 		const origConfigs = asObject(
 			_blocks.mapToMap((b) => $tuple(BlockManager.manager.uuid.get(b), BlockManager.manager.config.get(b))),
 		);
@@ -370,42 +400,35 @@ export namespace ClientBuilding {
 		return ActionController.instance.execute(
 			"Reset config",
 			() =>
-				building.updateConfig.send({
+				this.building.updateConfig.send({
 					plot: plot.instance,
 					configs: getBlocks(origConfigs),
 				}),
-			() => building.resetConfig.send({ plot: plot.instance, blocks: _blocks }),
+			() => this.building.resetConfig.send({ plot: plot.instance, blocks: _blocks }),
 		);
 	}
 
-	type LogicConnectArgs = {
-		readonly plot: SharedPlot;
-		readonly inputBlock: BlockModel;
-		readonly inputConnection: BlockConnectionName;
-		readonly outputBlock: BlockModel;
-		readonly outputConnection: BlockConnectionName;
-	};
-	function logicConnect({
+	logicConnect({
 		plot,
 		inputBlock: _inputBlock,
 		inputConnection,
 		outputBlock: _outputBlock,
 		outputConnection,
-	}: LogicConnectArgs) {
+	}: ClientBuildingTypes.LogicConnectArgs) {
 		const inputBlock = BlockManager.manager.uuid.get(_inputBlock);
 		const outputBlock = BlockManager.manager.uuid.get(_outputBlock);
 
 		return ActionController.instance.execute(
 			"Connect logic",
 			() => {
-				return building.logicDisconnect.send({
+				return this.building.logicDisconnect.send({
 					plot: plot.instance,
 					inputBlock: plot.getBlock(inputBlock),
 					inputConnection,
 				});
 			},
 			() => {
-				return building.logicConnect.send({
+				return this.building.logicConnect.send({
 					plot: plot.instance,
 					inputBlock: plot.getBlock(inputBlock),
 					inputConnection,
@@ -416,12 +439,7 @@ export namespace ClientBuilding {
 		);
 	}
 
-	type LogicDisconnectArgs = {
-		readonly plot: SharedPlot;
-		readonly inputBlock: BlockModel;
-		readonly inputConnection: BlockConnectionName;
-	};
-	function logicDisconnect({ plot, inputBlock: _inputBlock, inputConnection }: LogicDisconnectArgs) {
+	logicDisconnect({ plot, inputBlock: _inputBlock, inputConnection }: ClientBuildingTypes.LogicDisconnectArgs) {
 		const inputBlock = BlockManager.manager.uuid.get(_inputBlock);
 		const output = BlockManager.manager.config.get(_inputBlock)![inputConnection]
 			.config as BlockLogicTypes.WireValue;
@@ -429,7 +447,7 @@ export namespace ClientBuilding {
 		return ActionController.instance.execute(
 			"Disconnect logic",
 			() => {
-				return building.logicConnect.send({
+				return this.building.logicConnect.send({
 					plot: plot.instance,
 					inputBlock: plot.getBlock(inputBlock),
 					inputConnection,
@@ -438,7 +456,7 @@ export namespace ClientBuilding {
 				});
 			},
 			() => {
-				return building.logicDisconnect.send({
+				return this.building.logicDisconnect.send({
 					plot: plot.instance,
 					inputBlock: plot.getBlock(inputBlock),
 					inputConnection,

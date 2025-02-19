@@ -17,7 +17,6 @@ import { TestFramework } from "engine/shared/TestFramework";
 import { Colors } from "shared/Colors";
 import { gameInfo } from "shared/GameInfo";
 import { RemoteEvents } from "shared/RemoteEvents";
-import { CustomRemotes } from "shared/Remotes";
 import { SlotsMeta } from "shared/SlotsMeta";
 import type { PlayerDataStorage } from "client/PlayerDataStorage";
 import type { TransformProps } from "engine/shared/component/Transform";
@@ -63,7 +62,6 @@ const host = LoadingController.run("Initializing", () => {
 		ServerRestartController.initialize();
 		// Atmosphere.initialize();
 
-		CustomRemotes.player.loaded.send();
 		$log("Client loaded.");
 	});
 
@@ -74,7 +72,7 @@ const host = LoadingController.run("Initializing", () => {
 			playerData.slots.get()[SlotsMeta.quitSlotIndex] &&
 			playerData.slots.get()[SlotsMeta.quitSlotIndex].blocks !== 0
 		) {
-			Objects.awaitThrow(playerData.loadPlayerSlot(SlotsMeta.quitSlotIndex, "Loading the autosave"));
+			playerData.loadPlayerSlot(SlotsMeta.quitSlotIndex, "Loading the autosave");
 		}
 	}
 

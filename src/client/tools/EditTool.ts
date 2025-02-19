@@ -1,7 +1,6 @@
 import { HttpService, Workspace } from "@rbxts/services";
 import { MaterialColorEditControl } from "client/gui/buildmode/MaterialColorEditControl";
 import { LogControl } from "client/gui/static/LogControl";
-import { ClientBuilding } from "client/modes/build/ClientBuilding";
 import { BlockEditor } from "client/tools/additional/BlockEditor";
 import { BlockGhoster } from "client/tools/additional/BlockGhoster";
 import { MultiBlockHighlightedSelector } from "client/tools/highlighters/MultiBlockHighlightedSelector";
@@ -24,6 +23,7 @@ import { PartUtils } from "shared/utils/PartUtils";
 import type { MainScreenLayout } from "client/gui/MainScreenLayout";
 import type { ActionController } from "client/modes/build/ActionController";
 import type { BuildingMode } from "client/modes/build/BuildingMode";
+import type { ClientBuilding } from "client/modes/build/ClientBuilding";
 import type { BlockSelectorModeGuiDefinition } from "client/tools/highlighters/BlockSelectorModeGui";
 import type { TextButtonDefinition } from "engine/client/gui/Button";
 import type { SharedPlot } from "shared/building/SharedPlot";
@@ -180,6 +180,7 @@ namespace Controllers {
 			private readonly plot: SharedPlot,
 			selected: readonly BlockModel[],
 			startMode: "move" | "rotate" | "scale",
+			@inject private readonly clientBuilding: ClientBuilding,
 			@inject di: DIContainer,
 		) {
 			super();
@@ -225,7 +226,7 @@ namespace Controllers {
 				}
 			}
 
-			const response = ClientBuilding.editOperation.execute({
+			const response = this.clientBuilding.editOperation.execute({
 				plot: this.plot,
 				blocks: update,
 			});
@@ -259,6 +260,7 @@ namespace Controllers {
 			selected: readonly BlockModel[],
 			@inject blockList: BlockList,
 			@inject keybinds: Keybinds,
+			@inject private readonly clientBuilding: ClientBuilding,
 			@inject di: DIContainer,
 		) {
 			super();
@@ -333,7 +335,7 @@ namespace Controllers {
 
 			const updateMap = update.mapToMap((u) => $tuple(BlockManager.manager.uuid.get(u.instance), u));
 
-			const response = ClientBuilding.placeOperation.execute({
+			const response = this.clientBuilding.placeOperation.execute({
 				plot: this.plot,
 				blocks: this.blocksRequests.map((b) => ({
 					...b,
@@ -380,6 +382,7 @@ namespace Controllers {
 			plot: SharedPlot,
 			blocks: readonly BlockModel[],
 			@inject mainScreen: MainScreenLayout,
+			@inject private readonly clientBuilding: ClientBuilding,
 		) {
 			super();
 
@@ -433,7 +436,7 @@ namespace Controllers {
 			this.onDestroy(() => {
 				if (this.canceled) return;
 
-				const response = ClientBuilding.paintOperation.execute({
+				const response = this.clientBuilding.paintOperation.execute({
 					plot,
 					blocks,
 					material: Paint.material.get(),
@@ -486,6 +489,7 @@ export class EditTool extends ToolBase {
 		@inject keybinds: Keybinds,
 		@inject actionController: ActionController,
 		@inject mainScreen: MainScreenLayout,
+		@inject private readonly clientBuilding: ClientBuilding,
 		@inject private readonly di: DIContainer,
 	) {
 		super(mode);
@@ -598,7 +602,7 @@ export class EditTool extends ToolBase {
 		const selected = [...this.selected.get()];
 		this.selected.setRange([]);
 
-		ClientBuilding.deleteOperation.execute({ plot: this.targetPlot.get(), blocks: selected });
+		this.clientBuilding.deleteOperation.execute({ plot: this.targetPlot.get(), blocks: selected });
 	}
 	mirrorSelectedBlocks(axis: "x" | "y" | "z") {
 		const selected = [...this.selected.get()];
@@ -633,9 +637,9 @@ export class EditTool extends ToolBase {
 			};
 		});
 
-		ClientBuilding.deleteOperation.execute({ plot: this.targetPlot.get(), blocks: selected });
+		this.clientBuilding.deleteOperation.execute({ plot: this.targetPlot.get(), blocks: selected });
 		task.wait();
-		ClientBuilding.placeOperation.execute({ plot: this.targetPlot.get(), blocks: mirrored });
+		this.clientBuilding.placeOperation.execute({ plot: this.targetPlot.get(), blocks: mirrored });
 	}
 
 	getDisplayName(): string {

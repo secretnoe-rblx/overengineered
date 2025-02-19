@@ -1,6 +1,5 @@
 import { SoundController } from "client/controller/SoundController";
 import { ConfirmPopup } from "client/gui/popup/ConfirmPopup";
-import { ClientBuilding } from "client/modes/build/ClientBuilding";
 import { MultiBlockSelector } from "client/tools/highlighters/MultiBlockSelector";
 import { SelectedBlocksHighlighter } from "client/tools/highlighters/SelectedBlocksHighlighter";
 import { ToolBase } from "client/tools/ToolBase";
@@ -12,6 +11,7 @@ import { ObservableCollectionSet } from "engine/shared/event/ObservableCollectio
 import type { MainScreenLayout } from "client/gui/MainScreenLayout";
 import type { Tooltip } from "client/gui/static/TooltipsControl";
 import type { BuildingMode } from "client/modes/build/BuildingMode";
+import type { ClientBuilding } from "client/modes/build/ClientBuilding";
 
 namespace Scene {
 	@injectable
@@ -46,7 +46,12 @@ export class DeleteTool extends ToolBase {
 	readonly highlightedBlocks = new ObservableCollectionSet<BlockModel>();
 	readonly clearPlotAction: Action;
 
-	constructor(@inject mode: BuildingMode, @inject keybinds: Keybinds, @inject di: DIContainer) {
+	constructor(
+		@inject mode: BuildingMode,
+		@inject keybinds: Keybinds,
+		@inject private readonly clientBuilding: ClientBuilding,
+		@inject di: DIContainer,
+	) {
 		super(mode);
 
 		this.clearPlotAction = this.parent(
@@ -116,7 +121,7 @@ export class DeleteTool extends ToolBase {
 			return;
 		}
 
-		const response = await ClientBuilding.deleteOperation.execute({ plot: this.targetPlot.get(), blocks });
+		const response = await this.clientBuilding.deleteOperation.execute({ plot: this.targetPlot.get(), blocks });
 		if (response.success) {
 			task.wait();
 

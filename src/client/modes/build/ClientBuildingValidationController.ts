@@ -1,22 +1,17 @@
 import { Players } from "@rbxts/services";
-import { ClientBuilding } from "client/modes/build/ClientBuilding";
-import { HostedService } from "engine/shared/di/HostedService";
+import { Component } from "engine/shared/component/Component";
 import { errorResponse, successResponse } from "engine/shared/Responses";
 import { PlayerUtils } from "engine/shared/utils/PlayerUtils";
 import { BuildingManager } from "shared/building/BuildingManager";
-import type { GameHostBuilder } from "engine/shared/GameHostBuilder";
+import type { ClientBuilding } from "client/modes/build/ClientBuilding";
 
 @injectable
-export class ClientBuildingValidationController extends HostedService {
-	static initialize(host: GameHostBuilder) {
-		host.services.registerService(this);
-	}
-
-	constructor(@inject blockList: BlockList) {
+export class ClientBuildingValidationController extends Component {
+	constructor(@inject blockList: BlockList, @inject clientBuilding: ClientBuilding) {
 		super();
 
-		this.event.eventHandler.register(
-			ClientBuilding.placeOperation.addMiddleware(({ plot, blocks }) => {
+		this.event.subscribeRegistration(() =>
+			clientBuilding.placeOperation.addMiddleware(({ plot, blocks }) => {
 				if (!PlayerUtils.isAlive(Players.LocalPlayer)) {
 					return errorResponse("Player is dead");
 				}

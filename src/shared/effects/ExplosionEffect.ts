@@ -1,5 +1,6 @@
 import { Debris, ReplicatedStorage } from "@rbxts/services";
 import { EffectBase } from "shared/effects/EffectBase";
+import type { EffectCreator } from "shared/effects/EffectBase";
 
 ReplicatedStorage.WaitForChild("Assets");
 
@@ -7,14 +8,15 @@ type Args = {
 	readonly part: BasePart;
 	readonly index?: number;
 };
+@injectable
 export class ExplosionEffect extends EffectBase<Args> {
 	readonly soundsFolder = ReplicatedStorage.Assets.Effects.Sounds.Explosion.GetChildren();
 
-	constructor() {
-		super("explosion_effect");
+	constructor(@inject creator: EffectCreator) {
+		super(creator, "explosion_effect");
 	}
 
-	justRun({ part, index }: Args): void {
+	override justRun({ part, index }: Args): void {
 		if (!part) return;
 
 		const soundIndex = index ?? math.random(0, this.soundsFolder.size() - 1);

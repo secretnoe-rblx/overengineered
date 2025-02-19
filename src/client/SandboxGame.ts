@@ -1,4 +1,5 @@
 import { Players, RunService, Workspace } from "@rbxts/services";
+import { ClientEffectCreator } from "client/ClientEffectCreator";
 import { BeaconController } from "client/controller/BeaconController";
 import { BlurController } from "client/controller/BlurController";
 import { CameraController } from "client/controller/CameraController";
@@ -27,35 +28,55 @@ import { ReportSubmitController } from "client/gui/popup/ReportSubmitPopup";
 import { WikiPopup } from "client/gui/popup/WikiPopup";
 import { PopupController } from "client/gui/PopupController";
 import { RainbowGuiController } from "client/gui/RainbowGuiController";
-import { ActionController } from "client/modes/build/ActionController";
-import { ClientBuildingValidationController } from "client/modes/build/ClientBuildingValidationController";
 import { PlayModeController } from "client/modes/PlayModeController";
-import { PlayerDataInitializer } from "client/PlayerDataStorage";
+import { PlayerDataStorage } from "client/PlayerDataStorage";
 import { TerrainController } from "client/terrain/TerrainController";
 import { Theme } from "client/Theme";
 import { ThemeAutoSetter } from "client/ThemeAutoSetter";
 import { ToolController } from "client/tools/ToolController";
 import { Keybinds } from "engine/client/Keybinds";
-import { PlayerRank } from "engine/shared/PlayerRank";
 import { ReadonlyPlot } from "shared/building/ReadonlyPlot";
 import { SharedPlots } from "shared/building/SharedPlots";
 import { RemoteEvents } from "shared/RemoteEvents";
+import { CustomRemotes } from "shared/Remotes";
+import { PlayerDataRemotes } from "shared/remotes/PlayerDataRemotes";
 import { CreateSandboxBlocks } from "shared/SandboxBlocks";
 import type { GameHostBuilder } from "engine/shared/GameHostBuilder";
 import type { SharedPlot } from "shared/building/SharedPlot";
+import type { EffectCreator } from "shared/effects/EffectBase";
 
 export namespace SandboxGame {
 	export function initialize(builder: GameHostBuilder) {
-		LoadingController.run("Pre-init", () => {
-			PlayerDataInitializer.initialize(builder);
+		LoadingController.run("Pre-pre-pre-init", () => {
+			builder.services.registerService(RagdollController);
+		});
 
+		LoadingController.run("Pre-pre-init", () => {
+			const result = CustomRemotes.initPlayer.send();
+			if (!result.success) {
+				throw `Error while initializing the game: ${result.message}`;
+			}
+
+			const remotes = PlayerDataRemotes.fromFolder(result.remotes);
+			builder.services.registerSingletonValue(remotes);
+			builder.services.registerSingletonValue(remotes.building);
+			builder.services.registerSingletonValue(remotes.player);
+			builder.services.registerSingletonValue(remotes.slots);
+			builder.services
+				.registerSingletonClass(PlayerDataStorage) //
+				.withArgs([PlayerDataStorage.convertData(result.data)]);
+		});
+
+		LoadingController.run("Pre-init", () => {
 			LocalPlayerController.initializeDisablingFluidForces(builder);
 			LocalPlayerController.initializeSprintLogic(builder);
 			LocalPlayerController.initializeCameraMaxZoomDistance(builder, 512);
 			OtherPlayersController.initializeMassless(builder);
-			builder.services.registerService(RagdollController);
+
+			builder.services
+				.registerSingletonClass(ClientEffectCreator) //
+				.as<EffectCreator>();
 			RemoteEvents.initializeVisualEffects(builder);
-			builder.services.registerSingletonValue(ActionController.instance);
 
 			builder.services.registerSingletonClass(Theme);
 			builder.services.registerService(ThemeAutoSetter);
@@ -81,7 +102,6 @@ export namespace SandboxGame {
 
 		builder.services.registerSingletonFunc(CreateSandboxBlocks);
 		PlayModeController.initialize(builder);
-		ClientBuildingValidationController.initialize(builder);
 
 		builder.services.registerService(MainScene);
 		builder.services.registerService(ToolController);

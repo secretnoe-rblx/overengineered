@@ -7,7 +7,6 @@ import { DebugLog } from "client/gui/DebugLog";
 import { Interface } from "client/gui/Interface";
 import { ScaleEditorControl } from "client/gui/ScaleEditor";
 import { LogControl } from "client/gui/static/LogControl";
-import { ClientBuilding } from "client/modes/build/ClientBuilding";
 import { Signals } from "client/Signals";
 import { BlockGhoster } from "client/tools/additional/BlockGhoster";
 import { BlockMirrorer } from "client/tools/additional/BlockMirrorer";
@@ -36,6 +35,7 @@ import type { MainScreenLayout } from "client/gui/MainScreenLayout";
 import type { ScaleEditorControlDefinition } from "client/gui/ScaleEditor";
 import type { Tooltip } from "client/gui/static/TooltipsControl";
 import type { BuildingMode } from "client/modes/build/BuildingMode";
+import type { ClientBuilding } from "client/modes/build/ClientBuilding";
 import type { ReadonlyObservableValue } from "engine/shared/event/ObservableValue";
 import type { SharedPlot } from "shared/building/SharedPlot";
 
@@ -399,9 +399,12 @@ namespace SinglePlaceController {
 		protected readonly mirrorMode;
 		protected readonly plot;
 		protected readonly blockMirrorer;
+		private readonly building;
 
 		protected constructor(state: BuildTool, di: DIContainer) {
 			super();
+
+			this.building = di.resolve<ClientBuilding>();
 
 			this.tool = state;
 			this.selectedBlock = state.selectedBlock.asReadonly();
@@ -572,7 +575,7 @@ namespace SinglePlaceController {
 				blocks.map((b) => [b.location.Position.apply((v) => MathUtils.round(v, 0.001)), b] as const),
 			).map((_, b) => b);
 
-			const response = await ClientBuilding.placeOperation.execute({ plot: this.plot.get(), blocks });
+			const response = await this.building.placeOperation.execute({ plot: this.plot.get(), blocks });
 			processPlaceResponse(response);
 			if (response.success) {
 				this.updateBlockPosition();
@@ -685,6 +688,7 @@ namespace MultiPlaceController {
 			readonly rotation: CFrame;
 		};
 		private fillRotationMode = 1;
+		private readonly building;
 
 		protected constructor(
 			protected readonly pressPosition: Vector3,
@@ -698,6 +702,7 @@ namespace MultiPlaceController {
 			di: DIContainer,
 		) {
 			super();
+			this.building = di.resolve<ClientBuilding>();
 			this.blockMirrorer = this.parent(di.resolveForeignClass(BlockMirrorer));
 			this.floatingText = this.parent(FloatingText.create(BlockGhoster.parent));
 
@@ -852,7 +857,7 @@ namespace MultiPlaceController {
 				locations.map((b) => [b.pos.Position.apply((v) => MathUtils.round(v, 0.001)), b] as const),
 			).map((_, b) => b);
 
-			const response = await ClientBuilding.placeOperation.execute({
+			const response = await this.building.placeOperation.execute({
 				plot: this.plot,
 				blocks: locations.map(
 					(loc): PlaceBlockRequest => ({

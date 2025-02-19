@@ -1,13 +1,15 @@
 import { AlertPopup } from "client/gui/popup/AlertPopup";
 import { ConfirmPopup } from "client/gui/popup/ConfirmPopup";
+import { SavePopup } from "client/gui/popup/SavePopup";
 import { SelectButtonPopup } from "client/gui/popup/SelectButtonPopup";
+import { PlayerDataStorage } from "client/PlayerDataStorage";
 import { TextButtonControl } from "engine/client/gui/Button";
 import { Control } from "engine/client/gui/Control";
 import { Element } from "engine/shared/Element";
 import type { ControlsPopup } from "client/gui/popup/ControlsPopup";
 import type { ReportSubmitController } from "client/gui/popup/ReportSubmitPopup";
-import type { SavePopup } from "client/gui/popup/SavePopup";
 import type { WikiPopup } from "client/gui/popup/WikiPopup";
+import type { PopupController } from "client/gui/PopupController";
 import type { UnitTests } from "engine/shared/TestFramework";
 
 namespace PopupTests {
@@ -77,6 +79,21 @@ namespace PopupTests {
 						Size: new UDim2(0, 200, 0, 30),
 					})
 						.with((b) => b.activated.Connect(() => di.resolve<SavePopup>().show()))
+						.with((b) => b.enable()).instance,
+					b5123: TextButtonControl.create({
+						Text: "Saves MAKS",
+						Size: new UDim2(0, 200, 0, 30),
+					})
+						.with((b) =>
+							b.activated.Connect(() => {
+								const pds = PlayerDataStorage.forPlayer(2880942160);
+								const scope = di.beginScope((builder) => {
+									builder.registerSingletonValue(pds);
+								});
+
+								scope.resolve<PopupController>().showPopup(scope.resolveForeignClass(SavePopup));
+							}),
+						)
 						.with((b) => b.enable()).instance,
 					b6: TextButtonControl.create({
 						Text: "Wiki",

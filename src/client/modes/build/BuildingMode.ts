@@ -4,6 +4,8 @@ import { SavePopup } from "client/gui/popup/SavePopup";
 import { Scene } from "client/gui/Scene";
 import { ActionController } from "client/modes/build/ActionController";
 import { CenterOfMassController } from "client/modes/build/CenterOfMassController";
+import { ClientBuilding } from "client/modes/build/ClientBuilding";
+import { ClientBuildingValidationController } from "client/modes/build/ClientBuildingValidationController";
 import { GridController } from "client/modes/build/GridController";
 import { PlayMode } from "client/modes/PlayMode";
 import { requestMode } from "client/modes/PlayModeRequest";
@@ -100,6 +102,8 @@ export class BuildingMode extends PlayMode {
 			di.registerSingletonValue(this);
 			di.registerSingletonClass(ActionController);
 			di.registerSingletonClass(CenterOfMassController);
+			di.registerSingletonClass(ClientBuilding);
+			di.registerSingletonClass(ClientBuildingValidationController);
 			di.registerSingletonClass(GridController).withArgs([this.moveGrid, this.rotateGrid, this.editMode]);
 
 			di.registerSingletonClass(BuildTool);
@@ -109,6 +113,8 @@ export class BuildingMode extends PlayMode {
 			di.registerSingletonClass(PaintTool);
 			di.registerSingletonClass(WireTool);
 		});
+
+		this.parent(di.resolve<ClientBuildingValidationController>());
 
 		this.event.subscribeObservable(
 			toolController.selectedTool,

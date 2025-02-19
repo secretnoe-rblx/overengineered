@@ -9,9 +9,9 @@ import { ObservableValue } from "engine/shared/event/ObservableValue";
 import { BuildingManager } from "shared/building/BuildingManager";
 import { SharedPlot } from "shared/building/SharedPlot";
 import { Colors } from "shared/Colors";
-import { CustomRemotes } from "shared/Remotes";
 import type { MainScreenLayout } from "client/gui/MainScreenLayout";
 import type { ActionController } from "client/modes/build/ActionController";
+import type { PlayerDataStorageRemotes } from "shared/remotes/PlayerDataRemotes";
 
 type CM = readonly [pos: Vector3, mass: number];
 const weightedAverage = (values: readonly CM[]) => {
@@ -28,7 +28,11 @@ export class CenterOfMassVisualizer extends Component {
 	private renderedBalls: Model[] = [];
 	private machineCOM: Model | undefined;
 
-	constructor(parent: Instance, @inject actionController: ActionController) {
+	constructor(
+		parent: Instance,
+		@inject actionController: ActionController,
+		@inject playerRemotes: PlayerDataStorageRemotes,
+	) {
 		super();
 
 		this.viewportFrame = Element.create("ViewportFrame", {
@@ -96,8 +100,8 @@ export class CenterOfMassVisualizer extends Component {
 
 		this.event.subscribe(actionController.onRedo, update);
 		this.event.subscribe(actionController.onUndo, update);
-		this.event.subscribe(CustomRemotes.slots.load.sent, clear);
-		this.event.subscribe(CustomRemotes.slots.load.completed, (v) => (v.success ? update() : undefined));
+		this.event.subscribe(playerRemotes.slots.load.sent, clear);
+		this.event.subscribe(playerRemotes.slots.load.completed, (v) => (v.success ? update() : undefined));
 		this.event.subscribe(SharedPlot.anyChanged, update);
 
 		this.onEnabledStateChange((enabled) => {
@@ -163,12 +167,13 @@ export class CenterOfMassController extends Component {
 		@inject mainScreen: MainScreenLayout,
 		@inject plot: SharedPlot,
 		@inject actionController: ActionController,
+		@inject playerRemotes: PlayerDataStorageRemotes,
 	) {
 		super();
 
 		const visualizerState = ComponentStateContainer.create(
 			this,
-			new CenterOfMassVisualizer(plot.instance.WaitForChild("Blocks"), actionController),
+			new CenterOfMassVisualizer(plot.instance.WaitForChild("Blocks"), actionController, playerRemotes),
 		);
 
 		const enabledByButton = new ObservableValue(false);
