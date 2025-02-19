@@ -86,7 +86,7 @@ export class SlotDatabase {
 				this.blocksdb.free([userId, slot.index]);
 			}
 
-			$log("SAVING AFTER QUIT2");
+			$log(`Saving data of the OFFLINE player ${userId}`);
 		}
 	}
 
