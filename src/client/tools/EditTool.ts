@@ -24,58 +24,7 @@ import type { MainScreenLayout } from "client/gui/MainScreenLayout";
 import type { ActionController } from "client/modes/build/ActionController";
 import type { BuildingMode } from "client/modes/build/BuildingMode";
 import type { ClientBuilding } from "client/modes/build/ClientBuilding";
-import type { BlockSelectorModeGuiDefinition } from "client/tools/highlighters/BlockSelectorModeGui";
-import type { TextButtonDefinition } from "engine/client/gui/Button";
 import type { SharedPlot } from "shared/building/SharedPlot";
-
-namespace Scene {
-	type MultiBlockSelectorGuiDefinition = GuiObject & {
-		readonly MobileSelection: BlockSelectorModeGuiDefinition;
-		readonly Top: GuiObject & {
-			readonly SelectAllButton: TextButtonDefinition;
-			readonly DeselectAllButton: TextButtonDefinition;
-		};
-	};
-	export class MultiBlockSelectorGui extends Component {
-		constructor(gui: MultiBlockSelectorGuiDefinition, tool: EditTool) {
-			super();
-
-			// const animationProps = Transforms.commonProps.quadOut02;
-			// const selectPlot = this.parent(new Control(gui.Top.SelectAllButton)).addButtonAction(() =>
-			// 	tool.selectPlot(),
-			// );
-			// const deselectAll = this.parent(new Control(gui.Top.DeselectAllButton)).addButtonAction(() =>
-			// 	tool.deselectAll(),
-			// );
-
-			// const animate = () => {
-			// 	const buttonsAreActive = this.isEnabled() && tool.selectedMode.get() === undefined;
-
-			// 	TransformService.run(gui.Top, (builder, instance) =>
-			// 		builder.transform(
-			// 			instance,
-			// 			"AnchorPoint",
-			// 			new Vector2(0.5, buttonsAreActive ? 0 : 0.8),
-			// 			animationProps,
-			// 		),
-			// 	);
-
-			// 	for (const control of [selectPlot, deselectAll]) {
-			// 		const button = control.instance;
-
-			// 		button.AutoButtonColor = button.Active = buttonsAreActive;
-			// 		TransformService.run(button, (builder, instance) =>
-			// 			builder.transform(instance, "Transparency", buttonsAreActive ? 0 : 0.6, animationProps),
-			// 		);
-			// 	}
-			// };
-
-			// this.event.subscribeObservable(tool.selectedMode, animate);
-			// this.onEnable(animate);
-			// this.onDisable(animate);
-		}
-	}
-}
 
 const placeToBlockRequest = (block: BlockModel): PlaceBlockRequestWithUuid => {
 	const data = BlockManager.getBlockDataByBlockModel(block);
@@ -471,6 +420,9 @@ const editKeybinds = {
 	paint: Keybinds.registerDefinition("edit_paint", ["Edit tool", "Paint"], [["G"]]),
 	copy: Keybinds.registerDefinition("edit_copy", ["Edit tool", "Copy"], [["C"]]),
 	paste: Keybinds.registerDefinition("edit_paste", ["Edit tool", "Paste"], [["V"]]),
+	mirrorX: Keybinds.registerDefinition("edit_mirrorX", ["Edit tool", "Mirror X"], [["I"]]),
+	mirrorY: Keybinds.registerDefinition("edit_mirrorY", ["Edit tool", "Mirror Y"], [["K"]]),
+	mirrorZ: Keybinds.registerDefinition("edit_mirrorZ", ["Edit tool", "Mirror Z"], [["M"]]),
 } as const;
 
 @injectable
@@ -516,6 +468,10 @@ export class EditTool extends ToolBase {
 			paste: this.parent(new Action(() => this.paste())),
 			paint: this.parent(new Action(() => this.paint())),
 			delete: this.parent(new Action(() => this.deleteSelectedBlocks())),
+
+			mirrorX: this.parent(new Action(() => this.mirrorSelectedBlocks("x"))),
+			mirrorY: this.parent(new Action(() => this.mirrorSelectedBlocks("y"))),
+			mirrorZ: this.parent(new Action(() => this.mirrorSelectedBlocks("z"))),
 		} as const;
 
 		for (const [k, action] of pairs(actions)) {
@@ -536,15 +492,22 @@ export class EditTool extends ToolBase {
 		actions.paint.subCanExecuteFrom({ noControler, someBlocksSelected });
 		actions.delete.subCanExecuteFrom({ noControler, someBlocksSelected });
 
+		actions.mirrorX.subCanExecuteFrom({ noControler, someBlocksSelected });
+		actions.mirrorY.subCanExecuteFrom({ noControler, someBlocksSelected });
+		actions.mirrorZ.subCanExecuteFrom({ noControler, someBlocksSelected });
+
 		{
 			const layer = this.parentGui(mainScreen.bottom.push());
 			noControler.subscribe((nc) => layer.setVisibleAndEnabled(nc));
 
-			// layer.addButton("mirror", "16686412951").subscribeToAction(actions.mirror);
+			layer
+				.addButton("select all")
+				.addButtonAction(() => this.selected.setRange(this.targetPlot.get().getBlocks()));
 			layer.addButton("paint", "15895846447").subscribeToAction(actions.paint);
 			layer.addButton("copy", "18369509575").subscribeToAction(actions.copy);
 			layer.addButton("paste", "18369509575").subscribeToAction(actions.paste);
 			layer.addButton("delete", "12539349041", "buttonNegative").subscribeToAction(actions.delete);
+			layer.addButton("deselect all").addButtonAction(() => this.selected.clear());
 		}
 
 		{
@@ -565,24 +528,19 @@ export class EditTool extends ToolBase {
 				.subscribeToAction(actions.scale);
 		}
 
+		{
+			const layer = this.parentGui(mainScreen.bottom.push());
+			noControler.subscribe((nc) => layer.setVisibleAndEnabled(nc));
+
+			layer.addButton("mirror X", "16686412951").subscribeToAction(actions.mirrorX);
+			layer.addButton("mirror Y", "16686412951").subscribeToAction(actions.mirrorY);
+			layer.addButton("mirror Z", "16686412951").subscribeToAction(actions.mirrorZ);
+		}
+
 		this.controller.childSet.Connect((child) => {
 			actionController.undoAction.canExecute.and("editTool_modeSelected", !child);
 			actionController.redoAction.canExecute.and("editTool_modeSelected", !child);
 		});
-
-		/*
-		this.event.subscribeObservable(this.selectedMode, (mode) => {
-			if (!mode) {
-				const controller = this.controller.get();
-				if (controller && "deselected" in controller) {
-					controller.deselected();
-				}
-
-				this.controller.clear();
-				return;
-			}
-		});
-		*/
 	}
 
 	private paste() {
