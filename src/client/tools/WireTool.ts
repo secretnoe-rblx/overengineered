@@ -2,7 +2,6 @@ import { GamepadService, GuiService, Players, ReplicatedStorage, RunService, Wor
 import { Interface } from "client/gui/Interface";
 import { LogControl } from "client/gui/static/LogControl";
 import { ToolBase } from "client/tools/ToolBase";
-import { ButtonControl } from "engine/client/gui/Button";
 import { Control } from "engine/client/gui/Control";
 import { InputController } from "engine/client/InputController";
 import { Component } from "engine/shared/component/Component";
@@ -15,6 +14,7 @@ import { BlockWireManager } from "shared/blockLogic/BlockWireManager";
 import { BlockManager } from "shared/building/BlockManager";
 import { Colors } from "shared/Colors";
 import { ReplicatedAssets } from "shared/ReplicatedAssets";
+import type { MainScreenLayout } from "client/gui/MainScreenLayout";
 import type { Tooltip } from "client/gui/static/TooltipsControl";
 import type { ActionController } from "client/modes/build/ActionController";
 import type { BuildingMode } from "client/modes/build/BuildingMode";
@@ -307,56 +307,71 @@ namespace Scene {
 		readonly TextLabel: TextLabel;
 	};
 
-	export class WireToolScene extends Control<WireToolSceneDefinition> {
-		readonly tool;
+	@injectable
+	export class WireToolScene extends Component {
+		constructor(@inject tool: WireTool, @inject mainScreen: MainScreenLayout) {
+			super();
 
-		constructor(gui: WireToolSceneDefinition, tool: WireTool) {
-			super(gui);
-			this.tool = tool;
+			const update = () => {
+				cancelLayer.setVisibleAndEnabled(false);
+				wireTooltip.instance.Visible = false;
+				nameTooltip.instance.Visible = false;
 
-			this.add(new ButtonControl(this.gui.Bottom.CancelButton, () => this.cancel()));
+				const inputType = InputController.inputType.get();
+				if (inputType !== "Desktop") {
+					wireTooltip.instance.Visible = true;
 
-			this.tool.selectedMarker.subscribe(() => this.update(), true);
-			this.event.subscribe(GuiService.GetPropertyChangedSignal("SelectedObject"), () => this.update());
-			this.event.onPrepare(() => this.update());
-		}
-
-		private update() {
-			this.gui.Bottom.CancelButton.Visible = false;
-			this.gui.TextLabel.Visible = false;
-			this.gui.NameLabel.Visible = false;
-
-			const inputType = InputController.inputType.get();
-			if (inputType !== "Desktop") {
-				this.gui.TextLabel.Visible = true;
-
-				if (!this.tool.selectedMarker.get()) {
-					this.gui.TextLabel.Text = "CLICK ON THE FIRST POINT";
-					this.gui.Bottom.CancelButton.Visible = false;
-				} else {
-					this.gui.TextLabel.Text = "CLICK ON THE SECOND POINT";
-					if (InputController.inputType.get() !== "Gamepad") {
-						this.gui.Bottom.CancelButton.Visible = true;
-					}
-				}
-			}
-
-			if (InputController.inputType.get() === "Gamepad") {
-				if (GamepadService.GamepadCursorEnabled) {
-					if (GuiService.SelectedObject) {
-						this.gui.NameLabel.Visible = true;
-						this.gui.NameLabel.Text = GuiService.SelectedObject.Name;
-						this.gui.NameLabel.TextColor3 = GuiService.SelectedObject.BackgroundColor3;
+					if (!tool.selectedMarker.get()) {
+						wireTooltip.instance.TextLabel.Text = "CLICK ON THE FIRST POINT";
+						cancelLayer.setVisibleAndEnabled(false);
 					} else {
-						this.gui.NameLabel.Visible = false;
+						wireTooltip.instance.TextLabel.Text = "CLICK ON THE SECOND POINT";
+						if (InputController.inputType.get() !== "Gamepad") {
+							cancelLayer.setVisibleAndEnabled(true);
+						}
 					}
 				}
-			}
-		}
 
-		private cancel() {
-			this.tool.stopDragging();
-			this.update();
+				if (InputController.inputType.get() === "Gamepad") {
+					if (GamepadService.GamepadCursorEnabled) {
+						if (GuiService.SelectedObject) {
+							nameTooltip.instance.Visible = true;
+							nameTooltip.instance.TextLabel.Text = GuiService.SelectedObject.Name;
+							nameTooltip.instance.TextLabel.TextColor3 = GuiService.SelectedObject.BackgroundColor3;
+						} else {
+							nameTooltip.instance.Visible = false;
+						}
+					}
+				}
+			};
+
+			const wireTooltipLayer = this.parentGui(mainScreen.bottom.push());
+			const nameTooltip = wireTooltipLayer.parent(
+				new Control(
+					Interface.getInterface<{
+						Tools: { Shared: { Bottom: { WireToolTip: GuiObject & { TextLabel: TextLabel } } } };
+					}>().Tools.Shared.Bottom.WireToolTip.Clone(),
+				),
+			);
+			const wireTooltip = wireTooltipLayer.parent(
+				new Control(
+					Interface.getInterface<{
+						Tools: { Shared: { Bottom: { WireToolTip: GuiObject & { TextLabel: TextLabel } } } };
+					}>().Tools.Shared.Bottom.WireToolTip.Clone(),
+				),
+			);
+
+			const cancelLayer = this.parentGui(mainScreen.bottom.push());
+			cancelLayer
+				.addButton("Cancel") //
+				.addButtonAction(() => {
+					tool.stopDragging();
+					update();
+				});
+
+			tool.selectedMarker.subscribe(update, true);
+			this.event.subscribe(GuiService.GetPropertyChangedSignal("SelectedObject"), update);
+			this.event.onPrepare(update);
 		}
 	}
 }
@@ -691,9 +706,7 @@ export class WireTool extends ToolBase {
 	) {
 		super(mode);
 
-		this.parentGui(
-			new Scene.WireToolScene(ToolBase.getToolGui<"Wire", Scene.WireToolSceneDefinition>().Wire, this),
-		);
+		this.parent(di.resolveForeignClass(Scene.WireToolScene));
 
 		this.event.onPrepare(() => this.createEverything());
 		this.onDisable(() => this.markers.clear());
