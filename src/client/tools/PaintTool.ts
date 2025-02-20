@@ -35,11 +35,11 @@ namespace Scene {
 
 			const paintLayer = this.parentGui(mainScreen.bottom.push());
 			paintLayer
-				.addButton("Paint Materials", undefined, undefined, { width: 150 }) //
-				.addButtonAction(() => this.paintEverything(true, false));
-			paintLayer
 				.addButton("Paint Colors", undefined, undefined, { width: 150 }) //
 				.addButtonAction(() => this.paintEverything(false, true));
+			paintLayer
+				.addButton("Paint Materials", undefined, undefined, { width: 150 }) //
+				.addButtonAction(() => this.paintEverything(true, false));
 
 			const layer = this.parentGui(mainScreen.bottom.push());
 			const materialColorEditor = layer.parent(MaterialColorEditControl.autoCreate(true));
