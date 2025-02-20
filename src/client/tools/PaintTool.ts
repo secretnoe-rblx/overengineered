@@ -1,11 +1,14 @@
 import { MaterialColorEditControl } from "client/gui/buildmode/MaterialColorEditControl";
+import { ToggleControl } from "client/gui/controls/ToggleControl";
 import { MultiBlockSelector } from "client/tools/highlighters/MultiBlockSelector";
 import { ToolBase } from "client/tools/ToolBase";
+import { Control } from "engine/client/gui/Control";
 import { Interface } from "engine/client/gui/Interface";
 import { LocalPlayer } from "engine/client/LocalPlayer";
 import { Component } from "engine/shared/component/Component";
 import { ObservableValue } from "engine/shared/event/ObservableValue";
 import { BlockManager } from "shared/building/BlockManager";
+import type { ToggleControlDefinition } from "client/gui/controls/ToggleControl";
 import type { MainScreenLayout } from "client/gui/MainScreenLayout";
 import type { BuildingMode } from "client/modes/build/BuildingMode";
 import type { ClientBuilding } from "client/modes/build/ClientBuilding";
@@ -47,12 +50,22 @@ namespace Scene {
 			materialColorEditor.colorPipette.onStart.Connect(disable);
 			materialColorEditor.colorPipette.onEnd.Connect(enable);
 
-			// const materialEnabler = this.parent(new ToggleControl(this.instance.Bottom.Material.Header.EnabledToggle));
-			// materialEnabler.value.set(tool.enableMaterial.get());
-			// this.event.subscribeObservable(materialEnabler.value, (value) => tool.enableMaterial.set(value));
-			// const colorEnabler = this.parent(new ToggleControl(this.instance.Bottom.Color.Header.EnabledToggle));
-			// colorEnabler.value.set(tool.enableColor.get());
-			// this.event.subscribeObservable(colorEnabler.value, (value) => tool.enableColor.set(value));
+			type Switches = GuiObject & {
+				readonly Material: GuiObject & {
+					readonly Toggle: ToggleControlDefinition;
+				};
+				readonly Color: GuiObject & {
+					readonly Toggle: ToggleControlDefinition;
+				};
+			};
+			const switches = this.parentGui(new Control(mainScreen.getTopCenterSecondary<Switches>("PaintSettings")));
+
+			const materialEnabler = switches.parent(new ToggleControl(switches.instance.Material.Toggle));
+			materialEnabler.value.set(tool.enableMaterial.get());
+			this.event.subscribeObservable(materialEnabler.value, (value) => tool.enableMaterial.set(value));
+			const colorEnabler = switches.parent(new ToggleControl(switches.instance.Color.Toggle));
+			colorEnabler.value.set(tool.enableColor.get());
+			this.event.subscribeObservable(colorEnabler.value, (value) => tool.enableColor.set(value));
 		}
 
 		private paintEverything(enableColor?: boolean, enableMaterial?: boolean) {
