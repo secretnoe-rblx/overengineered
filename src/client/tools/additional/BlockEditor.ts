@@ -4,9 +4,7 @@ import { TooltipsHolder } from "client/gui/static/TooltipsControl";
 import { FloatingText } from "client/tools/additional/FloatingText";
 import { MoveGrid, ScaleGrid } from "client/tools/additional/Grid";
 import { RotateGrid } from "client/tools/additional/Grid";
-import { ToolBase } from "client/tools/ToolBase";
 import { Action } from "engine/client/Action";
-import { Control } from "engine/client/gui/Control";
 import { InputController } from "engine/client/InputController";
 import { Keybinds } from "engine/client/Keybinds";
 import { Component } from "engine/shared/component/Component";
@@ -29,7 +27,7 @@ import type { MainScreenLayout } from "client/gui/MainScreenLayout";
 import type { ClientBuildingTypes } from "client/modes/build/ClientBuilding";
 import type { PlayerDataStorage } from "client/PlayerDataStorage";
 import type { Theme, ThemeColorKey } from "client/Theme";
-import type { TextButtonDefinition } from "engine/client/gui/Button";
+import type { Control } from "engine/client/gui/Control";
 import type { KeybindDefinition } from "engine/client/Keybinds";
 import type { ReadonlyObservableValue } from "engine/shared/event/ObservableValue";
 
@@ -266,7 +264,6 @@ class MoveComponent extends Component implements EditComponent {
 		blocks: readonly EditingBlock[],
 		originalBB: BB,
 		grid: ReadonlyObservableValue<MoveGrid>,
-		topControl: BlockEditorTopControl,
 		@inject keybinds: Keybinds,
 		@inject theme: Theme,
 		@inject mainScreen: MainScreenLayout,
@@ -404,7 +401,6 @@ class RotateComponent extends Component implements EditComponent {
 		blocks: readonly EditingBlock[],
 		originalBB: BB,
 		grid: ReadonlyObservableValue<RotateGrid>,
-		topControl: BlockEditorTopControl,
 	) {
 		super();
 
@@ -474,7 +470,6 @@ class ScaleComponent extends Component implements EditComponent {
 		blocks: readonly EditingBlock[],
 		originalBB: BB,
 		grid: ReadonlyObservableValue<ScaleGrid>,
-		topControl: BlockEditorTopControl,
 		@inject keybinds: Keybinds,
 		@inject mainScreen: MainScreenLayout,
 		@inject theme: Theme,
@@ -663,33 +658,6 @@ class ControlWithError extends Component {
 	setError(err: string | undefined) {
 		this.component.instance.WarningImage.Visible = err !== undefined;
 		this.component.setTooltipText(err);
-	}
-}
-
-type BlockEditorTopControlDefinition = GuiObject & {
-	readonly Template: TextButtonDefinition & {
-		readonly WarningImage: ImageLabel;
-	};
-};
-class BlockEditorTopControl extends Control<BlockEditorTopControlDefinition> {
-	private readonly template;
-
-	constructor(gui: BlockEditorTopControlDefinition) {
-		super(gui);
-		this.template = this.asTemplate(gui.Template, true);
-	}
-
-	create(text: string, activated?: () => void): Control<BlockEditorTopControlDefinition["Template"]> {
-		const btn = this.add(new Control(this.template()));
-
-		if (activated) {
-			btn.addButtonAction(activated);
-		}
-
-		btn.setButtonText(text);
-		btn.instance.WarningImage.Visible = false;
-
-		return btn;
 	}
 }
 
@@ -945,29 +913,14 @@ export class BlockEditor extends Component {
 			return Enum.ContextActionResult.Sink;
 		};
 
-		// #region
-		const gui = ToolBase.getToolGui<
-			"Edit2",
-			GuiObject & {
-				readonly EditTop: BlockEditorTopControlDefinition;
-			}
-		>().Edit2;
-
-		const topControl = this.parentGui(new BlockEditorTopControl(gui.EditTop.Clone()));
-		topControl.instance.Parent = gui;
-		// #endregion
-
 		const bb = BB.fromModels(blocks, editMode === "global" ? CFrame.identity : undefined);
 		handles.PivotTo(bb.center);
 		handles.Size = bb.originalSize;
 
 		const modes: { readonly [k in EditMode]: () => Component } = {
-			move: () =>
-				di.resolveForeignClass(MoveComponent, [handles, this.editBlocks, bb, this.moveGrid, topControl]),
-			rotate: () =>
-				di.resolveForeignClass(RotateComponent, [handles, this.editBlocks, bb, this.rotateGrid, topControl]),
-			scale: () =>
-				di.resolveForeignClass(ScaleComponent, [handles, this.editBlocks, bb, this.scaleGrid, topControl]),
+			move: () => di.resolveForeignClass(MoveComponent, [handles, this.editBlocks, bb, this.moveGrid]),
+			rotate: () => di.resolveForeignClass(RotateComponent, [handles, this.editBlocks, bb, this.rotateGrid]),
+			scale: () => di.resolveForeignClass(ScaleComponent, [handles, this.editBlocks, bb, this.scaleGrid]),
 		};
 
 		const container = this.parent(new ComponentChild<EditComponent>());
