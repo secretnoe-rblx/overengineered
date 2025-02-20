@@ -229,7 +229,7 @@ class NewSaveItem extends Control<GuiButton> implements CurrentItem {
 				index: slot.index,
 				save: true,
 				color: slot.color,
-				name: slot.color,
+				name: slot.name,
 			});
 		});
 		this.setColor.subscribe((color) => {
