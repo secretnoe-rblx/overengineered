@@ -26,8 +26,8 @@ export class SlotDatabase {
 		>(
 			this.datastore,
 			() => ({ version: BlocksSerializer.latestVersion, blocks: [] }),
-			(slot) => BlocksSerializer.objectToJson(slot),
 			(slot) => BlocksSerializer.jsonToObject(slot),
+			(slot) => BlocksSerializer.objectToJson(slot),
 		);
 
 		Players.PlayerAdded.Connect((plr) => this.onlinePlayers.add(plr.UserId));

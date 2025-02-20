@@ -1604,7 +1604,7 @@ export namespace BlocksSerializer {
 		};
 	}
 
-	export function jsonToObject(slot: LatestSerializedBlocks): JsonSerializedBlocks {
+	export function objectToJson(slot: LatestSerializedBlocks): JsonSerializedBlocks {
 		const fix = (block: LatestSerializedBlock): JsonBlock => {
 			return {
 				id: block.id,
@@ -1639,7 +1639,7 @@ export namespace BlocksSerializer {
 		return data;
 	}
 
-	export function objectToJson(slot: JsonSerializedBlocks): LatestSerializedBlocks {
+	export function jsonToObject(slot: JsonSerializedBlocks): LatestSerializedBlocks {
 		const fix = (block: JsonBlock): LatestSerializedBlock => {
 			return {
 				id: block.id,
