@@ -1,5 +1,6 @@
 import { Workspace } from "@rbxts/services";
 // import { BadgeController } from "server/BadgeController";
+import { NetworkLogging } from "engine/server/network/NetworkLogging";
 import { BaseGame } from "server/BaseGame";
 import { ServerBlockLogicController } from "server/blocks/ServerBlockLogicController";
 import { ExternalDatabaseBackendPlayers, ExternalDatabaseBackendSlots } from "server/database/ExternalDatabaseBackend";
@@ -27,6 +28,7 @@ export namespace SandboxGame {
 		}
 
 		BaseGame.initialize(builder);
+		builder.services.registerService(NetworkLogging);
 
 		// FIXME: Walkaround proxy is down, should we set up our own?
 		// builder.services.registerService(DiscordLogging).withArgs([

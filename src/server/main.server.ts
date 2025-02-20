@@ -14,6 +14,7 @@ Secrets.addDevelopmentSecret(
 	"https://webhook.lewisakura.moe/api/webhooks/1197990614671822999/kTKPwZN1p9sJQYLw7L4-jO3Au2LH6ffXxtJjNoLTZljuScGTpaVr9-hgVmGoq08IcfAV/queue",
 );
 Secrets.addDevelopmentSecret("api_token", "literal:REDACTED_TOKEN");
+Secrets.addDevelopmentSecret("logging_token", "literal:REDACTED_TOKEN");
 
 import { Players, RunService, Workspace } from "@rbxts/services";
 import { RemoteEvents } from "shared/RemoteEvents";
