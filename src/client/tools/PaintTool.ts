@@ -1,7 +1,7 @@
 import { MaterialColorEditControl } from "client/gui/buildmode/MaterialColorEditControl";
-import { Interface } from "client/gui/Interface";
 import { MultiBlockSelector } from "client/tools/highlighters/MultiBlockSelector";
 import { ToolBase } from "client/tools/ToolBase";
+import { Interface } from "engine/client/gui/Interface";
 import { LocalPlayer } from "engine/client/LocalPlayer";
 import { Component } from "engine/shared/component/Component";
 import { ObservableValue } from "engine/shared/event/ObservableValue";
@@ -74,16 +74,16 @@ class Controller extends Component {
 		stuff.submit.Connect(fireSelected);
 
 		this.event.subInput((ih) => {
-			const pick = () => {};
-			if (Interface.isCursorOnVisibleGui()) return;
+			const pick = () => {
+				if (Interface.isCursorOnVisibleGui()) return;
 
-			// eslint-disable-next-line prefer-const
-			let [material, color] = this.pick();
-			if (!material || !color) return;
+				const [material, color] = this.pick();
+				if (!material || !color) return;
 
-			tool.selectedMaterial.set(material);
+				tool.selectedMaterial.set(material);
+				tool.selectedColor.set(color);
+			};
 
-			tool.selectedColor.set(color);
 			ih.onMouse3Down(pick, false);
 			ih.onKeyDown("P", pick);
 		});
