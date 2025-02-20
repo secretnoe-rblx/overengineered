@@ -33,13 +33,42 @@ namespace Scene {
 				this.tool.controller.disable();
 			};
 
+			const newToggle = (name: string, value: ObservableValue<boolean>) => {
+				const template = Interface.getInterface<{
+					Tools: {
+						Shared: {
+							Bottom: {
+								Toggle: GuiObject & {
+									readonly Data: { readonly TitleLabel: TextLabel };
+									readonly Toggle: ToggleControlDefinition;
+								};
+							};
+						};
+					};
+				}>().Tools.Shared.Bottom.Toggle;
+
+				const gui = template.Clone();
+				gui.Data.TitleLabel.Text = name.upper();
+				gui.Visible = true;
+
+				const control = new Control(gui);
+				const toggle = control.parent(new ToggleControl(gui.Toggle));
+				value.connect(toggle.value);
+
+				return control;
+			};
+
 			const paintLayer = this.parentGui(mainScreen.bottom.push());
+			paintLayer.parent(newToggle("Colors", tool.enableColor));
+
 			paintLayer
 				.addButton("Paint Colors", undefined, undefined, { width: 150 }) //
 				.addButtonAction(() => this.paintEverything(false, true));
 			paintLayer
 				.addButton("Paint Materials", undefined, undefined, { width: 150 }) //
 				.addButtonAction(() => this.paintEverything(true, false));
+
+			paintLayer.parent(newToggle("Materials", tool.enableMaterial));
 
 			const layer = this.parentGui(mainScreen.bottom.push());
 			const materialColorEditor = layer.parent(MaterialColorEditControl.autoCreate(true));
@@ -49,23 +78,6 @@ namespace Scene {
 			materialColorEditor.materialPipette.onEnd.Connect(enable);
 			materialColorEditor.colorPipette.onStart.Connect(disable);
 			materialColorEditor.colorPipette.onEnd.Connect(enable);
-
-			type Switches = GuiObject & {
-				readonly Material: GuiObject & {
-					readonly Toggle: ToggleControlDefinition;
-				};
-				readonly Color: GuiObject & {
-					readonly Toggle: ToggleControlDefinition;
-				};
-			};
-			const switches = this.parentGui(new Control(mainScreen.getTopCenterSecondary<Switches>("PaintSettings")));
-
-			const materialEnabler = switches.parent(new ToggleControl(switches.instance.Material.Toggle));
-			materialEnabler.value.set(tool.enableMaterial.get());
-			this.event.subscribeObservable(materialEnabler.value, (value) => tool.enableMaterial.set(value));
-			const colorEnabler = switches.parent(new ToggleControl(switches.instance.Color.Toggle));
-			colorEnabler.value.set(tool.enableColor.get());
-			this.event.subscribeObservable(colorEnabler.value, (value) => tool.enableColor.set(value));
 		}
 
 		private paintEverything(enableColor?: boolean, enableMaterial?: boolean) {
