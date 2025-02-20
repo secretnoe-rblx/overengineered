@@ -104,9 +104,9 @@ export type ColorWindowDefinition = GuiObject & {
 		readonly Control: Color4ChooserDefinition;
 	};
 };
-class ColorWindow extends ResizableWindow<ColorWindowDefinition> {
+class ColorWindow extends Control<ColorWindowDefinition> {
 	constructor(gui: ColorWindowDefinition, value: SubmittableValue<Color3>) {
-		super(gui, 200, 250);
+		super(gui);
 
 		const v = new SubmittableValue<Color4>(new ObservableValue({ alpha: 1, color: value.get() }));
 		this.event.subscribeObservable(v.value, (val) => value.set(val.color));
