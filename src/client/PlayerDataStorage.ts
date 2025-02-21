@@ -91,6 +91,7 @@ export class PlayerDataStorage {
 
 	sendPlayerSlot(req: PlayerSaveSlotRequest) {
 		$log("Setting slot " + req.index + " to " + HttpService.JSONEncode(req));
+		this.loadedSlot.set(req.index);
 
 		let d = this.data.get();
 		if (d) {
