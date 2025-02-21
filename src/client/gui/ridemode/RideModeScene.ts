@@ -28,6 +28,7 @@ import type { ClientMachine } from "client/blocks/ClientMachine";
 import type { CheckBoxControlDefinition } from "client/gui/controls/CheckBoxControl";
 import type { ProgressBarControlDefinition } from "client/gui/controls/ProgressBarControl";
 import type { MainScreenLayout } from "client/gui/MainScreenLayout";
+import type { PopupController } from "client/gui/PopupController";
 import type { RideMode } from "client/modes/ride/RideMode";
 import type { PlayerDataStorage } from "client/PlayerDataStorage";
 import type { Theme } from "client/Theme";
@@ -301,6 +302,7 @@ export class RideModeScene extends Control<RideModeSceneDefinition> {
 		gui: RideModeSceneDefinition,
 		@inject readonly mode: RideMode,
 		@inject playerData: PlayerDataStorage,
+		@inject popupController: PopupController,
 		@inject mainScreen: MainScreenLayout,
 		@inject theme: Theme,
 	) {
@@ -339,8 +341,10 @@ export class RideModeScene extends Control<RideModeSceneDefinition> {
 
 		this.parent(mainScreen.registerTopRightButton("ResetControls"))
 			.addButtonAction(() =>
-				ConfirmPopup.showPopup("Reset the controls?", "It will be impossible to undo this action", () =>
-					this.controls.resetControls(),
+				popupController.showPopup(
+					new ConfirmPopup("Reset the controls?", "It will be impossible to undo this action", () =>
+						this.controls.resetControls(),
+					),
 				),
 			)
 			.subscribeVisibilityFrom({

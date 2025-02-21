@@ -1,17 +1,18 @@
 import { ByteTextBoxControl } from "client/gui/controls/ByteTextBoxControl";
 import { Interface } from "client/gui/Interface";
-import { Popup } from "client/gui/Popup";
 import { ConfirmPopup } from "client/gui/popup/ConfirmPopup";
 import { TextPopup } from "client/gui/popup/TextPopup";
 import { LogControl } from "client/gui/static/LogControl";
+import { AutoUIScaledComponent } from "engine/client/gui/AutoUIScaledControl";
 import { ButtonControl } from "engine/client/gui/Button";
 import { Control } from "engine/client/gui/Control";
 import { TextBoxControl } from "engine/client/gui/TextBoxControl";
 import { ComponentChildren } from "engine/shared/component/ComponentChildren";
 import { Colors } from "shared/Colors";
 import { VectorUtils } from "shared/utils/VectorUtils";
+import type { Popup, PopupController } from "client/gui/PopupController";
 
-export type MemoryEditorPopupDefinition = GuiObject & {
+type MemoryEditorPopupDefinition = GuiObject & {
 	readonly Heading: Frame & {
 		readonly CloseButton: TextButton;
 		readonly TitleLabel: TextLabel;
@@ -22,7 +23,7 @@ export type MemoryEditorPopupDefinition = GuiObject & {
 	readonly Content: MemoryEditorRecordsDefinition;
 };
 
-export type MemoryEditorRecordDefinition = Frame & {
+type MemoryEditorRecordDefinition = Frame & {
 	readonly b0: TextBox;
 	readonly b1: TextBox;
 	readonly b2: TextBox;
@@ -43,7 +44,7 @@ export type MemoryEditorRecordDefinition = Frame & {
 	readonly AsciiLabel: TextLabel;
 };
 
-export type MemoryEditorRecordsDefinition = ScrollingFrame & {
+type MemoryEditorRecordsDefinition = ScrollingFrame & {
 	Template: MemoryEditorRecordDefinition;
 };
 
@@ -193,28 +194,19 @@ class MemoryEditorRows extends Control<MemoryEditorRecordsDefinition> {
 	}
 }
 
-export class MemoryEditorPopup extends Popup<MemoryEditorPopupDefinition> {
-	static showPopup(bytesLimit: number, data: number[], callback: (data: number[]) => void) {
-		const popup = new MemoryEditorPopup(
-			Interface.getGameUI<{
-				Popup: {
-					MemoryEditor: MemoryEditorPopupDefinition;
-				};
-			}>().Popup.MemoryEditor.Clone(),
-			bytesLimit,
-			data,
-			callback,
-		);
-
-		popup.show();
-	}
+@injectable
+export class MemoryEditorPopup extends Control<MemoryEditorPopupDefinition> {
+	@inject private readonly parentScreen: Popup = undefined!;
+	@inject private readonly popupController: PopupController = undefined!;
 
 	constructor(
-		gui: MemoryEditorPopupDefinition,
 		readonly bytesLimit: number,
 		readonly data: number[],
 		callback: (data: number[]) => void,
 	) {
+		const gui = Interface.getGameUI<{
+			Popup: { MemoryEditor: MemoryEditorPopupDefinition };
+		}>().Popup.MemoryEditor.Clone();
 		super(gui);
 
 		if (bytesLimit % 128 !== 0) {
@@ -226,13 +218,28 @@ export class MemoryEditorPopup extends Popup<MemoryEditorPopupDefinition> {
 
 		const rows = this.parent(new MemoryEditorRows(gui.Content, this));
 
+		// Clear data button
+		this.parent(
+			new ButtonControl(gui.ClearButton, () => {
+				this.popupController.showPopup(
+					new ConfirmPopup(
+						"Clear memory store?",
+						"It will be impossible to undo this action",
+						() => {
+							data.clear();
+							rows.spawnRows();
+						},
+						() => {},
+					),
+				);
+			}),
+		);
+
 		// Update AddressTextBox on scroll
 		gui.Content.GetPropertyChangedSignal("CanvasPosition").Connect(() => {
 			const currentRow =
 				rows.rowCursor +
-				math.round(
-					gui.Content.CanvasPosition.Y / (gui.Content.Template.Size.Y.Offset * this.parentScreen.getScale()),
-				);
+				math.round(gui.Content.CanvasPosition.Y / (gui.Content.Template.Size.Y.Offset * this.getScale()));
 
 			gui.AddressTextBox.Text = this.numberToHex(currentRow * 16);
 		});
@@ -245,50 +252,40 @@ export class MemoryEditorPopup extends Popup<MemoryEditorPopupDefinition> {
 			}),
 		);
 
-		// Clear data button
-		this.parent(
-			new ButtonControl(gui.ClearButton, () => {
-				ConfirmPopup.showPopup(
-					"Clear memory store?",
-					"It will be impossible to undo this action",
-					() => {
-						data.clear();
-						rows.spawnRows();
-					},
-					() => {},
-				);
-			}),
-		);
-
 		// Import hex button
 		this.parent(
 			new ButtonControl(gui.ImportButton, () => {
-				TextPopup.showPopup(
-					"IMPORT",
-					"00 01 02 03 04 ...",
-					(text) => {
-						const spacelessText = string.gsub(string.gsub(text, "%s+", "")[0], "\n", "")[0];
+				this.popupController.showPopup(
+					new TextPopup(
+						"IMPORT",
+						"00 01 02 03 04 ...",
+						(text) => {
+							const spacelessText = string.gsub(string.gsub(text, "%s+", "")[0], "\n", "")[0];
 
-						if (spacelessText.size() % 2 !== 0 || string.match(text, "^[0-9a-fA-F%s]+$")[0] === undefined) {
-							LogControl.instance.addLine("Invalid data format!", Colors.red);
-							return;
-						}
+							if (
+								spacelessText.size() % 2 !== 0 ||
+								string.match(text, "^[0-9a-fA-F%s]+$")[0] === undefined
+							) {
+								LogControl.instance.addLine("Invalid data format!", Colors.red);
+								return;
+							}
 
-						if (spacelessText.size() / 2 > this.bytesLimit) {
-							LogControl.instance.addLine("Too long!", Colors.red);
-							return;
-						}
+							if (spacelessText.size() / 2 > this.bytesLimit) {
+								LogControl.instance.addLine("Too long!", Colors.red);
+								return;
+							}
 
-						data.clear();
-						for (const [value] of spacelessText.gmatch("%S%S")) {
-							data.push(tonumber(value, 16)!);
-						}
+							data.clear();
+							for (const [value] of spacelessText.gmatch("%S%S")) {
+								data.push(tonumber(value, 16)!);
+							}
 
-						rows.spawnRows();
+							rows.spawnRows();
 
-						LogControl.instance.addLine("Import successful!");
-					},
-					() => {},
+							LogControl.instance.addLine("Import successful!");
+						},
+						() => {},
+					),
 				);
 			}),
 		);
@@ -316,7 +313,7 @@ export class MemoryEditorPopup extends Popup<MemoryEditorPopupDefinition> {
 				rows.spawnRows();
 
 				// Scroll
-				const scale = this.parentScreen.getScale();
+				const scale = this.getScale();
 				gui.Content.CanvasPosition = new Vector2(
 					0,
 					gui.Content.Template.Size.Y.Offset * math.abs(cursorRow - row) * scale,
@@ -331,7 +328,7 @@ export class MemoryEditorPopup extends Popup<MemoryEditorPopupDefinition> {
 	}
 
 	getScale() {
-		return this.parentScreen.getScale();
+		return this.parentScreen.getComponent(AutoUIScaledComponent).getScale();
 	}
 
 	numberToHex(value: number) {

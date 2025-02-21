@@ -127,38 +127,40 @@ type SettingsPopup2Definition = GuiObject & {
 		readonly TitleLabel: TextLabel;
 	};
 };
-@injectable
 export class SettingsPopup extends Control<SettingsPopup2Definition> {
-	constructor(@inject playerData: PlayerDataStorage) {
+	constructor() {
 		const gui = template.Clone();
 		super(gui);
 
-		const original = playerData.config.get();
+		const start = $autoResolve((playerData: PlayerDataStorage) => {
+			const original = playerData.config.get();
 
-		const content = this.parent(new Content(gui.Content.Content, playerData.config));
-		const sidebar = this.parent(new Sidebar(gui.Content.Sidebar.ScrollingFrame));
+			const content = this.parent(new Content(gui.Content.Content, playerData.config));
+			const sidebar = this.parent(new Sidebar(gui.Content.Sidebar.ScrollingFrame));
 
-		sidebar.addButton("general", 18627409276, () => content.set(PlayerSettingsGeneral));
-		sidebar.addButton("interface", 18627409276, () => content.set(PlayerSettingsInterface));
-		sidebar.addButton("camera", 18627409276, () => content.set(PlayerSettingsCamera));
-		sidebar.addButton("colors", 18627409276, () => content.set(PlayerSettingsTheme));
-		sidebar.addButton("graphics", 18626628666, () => content.set(PlayerSettingsGraphics));
-		sidebar.addButton("environment", 18626647702, () => content.set(PlayerSettingsEnvironment));
-		sidebar.addButton("controls", 18626685039, () => content.set(PlayerSettingsControls));
-		sidebar.addButton("physics", 18626685039, () => content.set(PlayerSettingsPhysics));
-		sidebar.addButton("blacklist", 18626826844, () => content.set(PlayerSettingsBlacklist));
-		sidebar.addButton("tutorial", 98943721557973, () => content.set(PlayerSettingsTutorial));
+			sidebar.addButton("general", 18627409276, () => content.set(PlayerSettingsGeneral));
+			sidebar.addButton("interface", 18627409276, () => content.set(PlayerSettingsInterface));
+			sidebar.addButton("camera", 18627409276, () => content.set(PlayerSettingsCamera));
+			sidebar.addButton("colors", 18627409276, () => content.set(PlayerSettingsTheme));
+			sidebar.addButton("graphics", 18626628666, () => content.set(PlayerSettingsGraphics));
+			sidebar.addButton("environment", 18626647702, () => content.set(PlayerSettingsEnvironment));
+			sidebar.addButton("controls", 18626685039, () => content.set(PlayerSettingsControls));
+			sidebar.addButton("physics", 18626685039, () => content.set(PlayerSettingsPhysics));
+			sidebar.addButton("blacklist", 18626826844, () => content.set(PlayerSettingsBlacklist));
+			sidebar.addButton("tutorial", 98943721557973, () => content.set(PlayerSettingsTutorial));
 
-		this.onDestroy(() => {
-			const unchanged = Objects.deepEquals(original, playerData.config.get());
-			if (unchanged) return;
+			this.onDestroy(() => {
+				const unchanged = Objects.deepEquals(original, playerData.config.get());
+				if (unchanged) return;
 
-			task.spawn(() => {
-				playerData.sendPlayerConfig(playerData.config.get());
+				task.spawn(() => {
+					playerData.sendPlayerConfig(playerData.config.get());
+				});
 			});
-		});
 
-		this.parent(new Control(gui.Heading.CloseButton)) //
-			.addButtonAction(() => this.hideThenDestroy());
+			this.parent(new Control(gui.Heading.CloseButton)) //
+				.addButtonAction(() => this.hideThenDestroy());
+		});
+		this.onInject(start);
 	}
 }

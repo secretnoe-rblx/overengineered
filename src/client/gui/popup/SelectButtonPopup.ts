@@ -1,13 +1,12 @@
 import { GuiService } from "@rbxts/services";
 import { Interface } from "client/gui/Interface";
-import { Popup } from "client/gui/Popup";
 import { TextButtonControl } from "engine/client/gui/Button";
 import { Control } from "engine/client/gui/Control";
 import { TextBoxControl } from "engine/client/gui/TextBoxControl";
 import { Signal } from "engine/shared/event/Signal";
 import type { ButtonDefinition, TextButtonDefinition } from "engine/client/gui/Button";
 
-export type SelectButtonPopupDefinition = GuiObject & {
+type SelectButtonPopupDefinition = GuiObject & {
 	readonly Content: {
 		readonly ScrollingFrame: ScrollingFrame & {
 			readonly ButtonTemplate: TextButtonDefinition;
@@ -23,34 +22,21 @@ export type SelectButtonPopupDefinition = GuiObject & {
 	};
 };
 
-export class SelectButtonPopup<const TAllowCustomString extends boolean> extends Popup<SelectButtonPopupDefinition> {
+class _SelectButtonPopup<TAllowCustomString extends boolean> extends Control<SelectButtonPopupDefinition> {
 	private readonly buttonPressed = new Signal<(key: KeyCode) => void>();
 	private readonly cancelButton;
 	private readonly closeButton;
 
-	static showPopup<const TAllowCustomString extends boolean>(
-		allowCustomString: TAllowCustomString,
-		confirmFunc: (key: TAllowCustomString extends true ? string : KeyCode) => void,
-		cancelFunc: () => void,
-	) {
-		const popup = new SelectButtonPopup(
-			Interface.getGameUI<{
-				Popup: { MobileSelectButton: SelectButtonPopupDefinition };
-			}>().Popup.MobileSelectButton.Clone(),
-			allowCustomString,
-			confirmFunc,
-			cancelFunc,
-		);
-
-		popup.show();
-	}
 	constructor(
-		gui: SelectButtonPopupDefinition,
 		allowCustomString: TAllowCustomString,
 		confirmFunc: (key: TAllowCustomString extends true ? string : KeyCode) => void,
 		cancelFunc: () => void,
 	) {
+		const gui = Interface.getGameUI<{
+			Popup: { MobileSelectButton: SelectButtonPopupDefinition };
+		}>().Popup.MobileSelectButton.Clone();
 		super(gui);
+
 		this.cancelButton = this.parent(new Control(gui.Buttons.CancelButton));
 		this.closeButton = this.parent(new Control(gui.Head.CloseButton));
 
@@ -125,5 +111,16 @@ export class SelectButtonPopup<const TAllowCustomString extends boolean> extends
 		});
 
 		this.event.onPrepareGamepad(() => (GuiService.SelectedObject = this.cancelButton.instance));
+	}
+}
+
+export class SelectButtonPopup extends _SelectButtonPopup<false> {
+	constructor(confirmFunc: (key: KeyCode) => void, cancelFunc: () => void) {
+		super(false, confirmFunc, cancelFunc);
+	}
+}
+export class SelectButtonPopupWithCustomString extends _SelectButtonPopup<true> {
+	constructor(confirmFunc: (key: KeyCode | string) => void, cancelFunc: () => void) {
+		super(true, confirmFunc, cancelFunc);
 	}
 }

@@ -36,6 +36,7 @@ export class PlayModeController extends HostedService {
 		} as const;
 
 		for (const [_, mode] of pairs(this.modes)) {
+			this.parentDestroyOnly(mode);
 			mode.disable();
 		}
 

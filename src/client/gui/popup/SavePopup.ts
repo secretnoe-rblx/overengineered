@@ -1,4 +1,4 @@
-import { ConfirmPopup2 } from "client/gui/popup/ConfirmPopup";
+import { ConfirmPopup } from "client/gui/popup/ConfirmPopup";
 import { Action } from "engine/client/Action";
 import { ButtonControl } from "engine/client/gui/Button";
 import { Control } from "engine/client/gui/Control";
@@ -88,10 +88,7 @@ class SaveItem extends PartialControl<SaveItemParts, SaveItemDefinition> impleme
 		this.setName = this.parent(new Action<[string]>()) //
 			.subCanExecuteFrom({ can: this.event.addObservable(meta.fReadonlyCreateBased(isWritable)) });
 
-		this.onInject((di) => {
-			const popupController = di.resolve<PopupController>();
-			const playerData = di.resolve<PlayerDataStorage>();
-
+		const start = $autoResolve((popupController: PopupController, playerData: PlayerDataStorage) => {
 			this.load.subscribe(() => {
 				const slot = meta.get();
 				playerData.loadPlayerSlot(slot.index);
@@ -100,14 +97,16 @@ class SaveItem extends PartialControl<SaveItemParts, SaveItemDefinition> impleme
 			this.save.subscribe(() => {
 				const slot = meta.get();
 
-				popupController.createAndShow(ConfirmPopup2, "Save this slot?", "YOU WILL REGRET THIS", () => {
-					playerData.sendPlayerSlot({
-						index: slot.index,
-						save: true,
-						color: slot.color,
-						name: slot.name,
-					});
-				});
+				popupController.showPopup(
+					new ConfirmPopup("Save this slot?", "YOU WILL REGRET THIS", () => {
+						playerData.sendPlayerSlot({
+							index: slot.index,
+							save: true,
+							color: slot.color,
+							name: slot.name,
+						});
+					}),
+				);
 			});
 
 			this.setColor.subscribe((color) => {
@@ -130,34 +129,32 @@ class SaveItem extends PartialControl<SaveItemParts, SaveItemDefinition> impleme
 			this.delete.subscribe(() => {
 				const slot = meta.get();
 
-				popupController.createAndShow(
-					ConfirmPopup2,
-					"<b>DELETE</b> this slot?",
-					"THERE WILL BE CONSEQUENCES",
-					() => {
+				popupController.showPopup(
+					new ConfirmPopup("<b>DELETE</b> this slot?", "THERE WILL BE CONSEQUENCES", () => {
 						playerData.deletePlayerSlot({ index: slot.index });
-					},
+					}),
 				);
 			});
 		});
+		this.onInject(start);
 
 		//
 
 		this.addButtonAction(() => current.set(this));
 
-		this.onInject((di) => {
-			const theme = di.resolve<Theme>();
-
-			this.event.subscribeObservable(
-				current,
-				(current) => {
-					this.valuesComponent()
-						.get("BackgroundColor3")
-						.overlay("bg", theme.get(current === this ? "buttonActive" : "backgroundSecondary"));
-				},
-				true,
-			);
-		});
+		this.onInject(
+			$autoResolve((theme: Theme) => {
+				this.event.subscribeObservable(
+					current,
+					(current) => {
+						this.valuesComponent()
+							.get("BackgroundColor3")
+							.overlay("bg", theme.get(current === this ? "buttonActive" : "backgroundSecondary"));
+					},
+					true,
+				);
+			}),
+		);
 
 		this.event.subscribeObservable(
 			meta,
@@ -239,19 +236,19 @@ class NewSaveItem extends Control<GuiButton> implements CurrentItem {
 			meta.set({ ...meta.get(), name });
 		});
 
-		this.onInject((di) => {
-			const theme = di.resolve<Theme>();
-
-			this.event.subscribeObservable(
-				current,
-				(current) => {
-					this.valuesComponent()
-						.get("BackgroundColor3")
-						.overlay("bg", theme.get(current === this ? "buttonActive" : "backgroundSecondaryLight"));
-				},
-				true,
-			);
-		});
+		this.onInject(
+			$autoResolve((theme: Theme) => {
+				this.event.subscribeObservable(
+					current,
+					(current) => {
+						this.valuesComponent()
+							.get("BackgroundColor3")
+							.overlay("bg", theme.get(current === this ? "buttonActive" : "backgroundSecondaryLight"));
+					},
+					true,
+				);
+			}),
+		);
 
 		const newMeta = (index: number): SlotMetaLike => ({
 			index,
@@ -441,27 +438,33 @@ type SlotsPopupParts = {
 	readonly LoadButton: GuiButton;
 };
 
-@injectable
 export class SavePopup extends PartialControl<SlotsPopupParts> {
-	constructor(@inject playerData: PlayerDataStorage) {
+	constructor() {
 		super(template.Clone());
 
-		this.parent(new ButtonControl(this.parts.CloseButton, () => this.hide()));
+		const start = $autoResolve((playerData: PlayerDataStorage) => {
+			this.parent(new ButtonControl(this.parts.CloseButton, () => this.hide()));
 
-		const slots = this.parent(new SaveSlots(this.parts.SlotList, playerData));
-		this.parent(new SaveBottom(this.parts.Bottom, slots.current));
+			const slots = this.parent(new SaveSlots(this.parts.SlotList, playerData));
+			this.parent(new SaveBottom(this.parts.Bottom, slots.current));
 
-		const search = this.parent(new TextBoxControl(this.parts.SearchTextBox));
-		this.event.subscribeObservable(search.text, (text) => slots.search.set(text), true);
+			const search = this.parent(new TextBoxControl(this.parts.SearchTextBox));
+			this.event.subscribeObservable(search.text, (text) => slots.search.set(text), true);
 
-		const saveAction = this.parent(new Action()) //
-			.subscribeActionObservable(this.event.addObservable(slots.current.fReadonlyCreateBased((c) => c?.save)));
-		const loadAction = this.parent(new Action()) //
-			.subscribeActionObservable(this.event.addObservable(slots.current.fReadonlyCreateBased((c) => c?.load)));
+			const saveAction = this.parent(new Action()) //
+				.subscribeActionObservable(
+					this.event.addObservable(slots.current.fReadonlyCreateBased((c) => c?.save)),
+				);
+			const loadAction = this.parent(new Action()) //
+				.subscribeActionObservable(
+					this.event.addObservable(slots.current.fReadonlyCreateBased((c) => c?.load)),
+				);
 
-		this.parent(new Control(this.parts.SaveButton)) //
-			.subscribeToAction(saveAction);
-		this.parent(new Control(this.parts.LoadButton)) //
-			.subscribeToAction(loadAction);
+			this.parent(new Control(this.parts.SaveButton)) //
+				.subscribeToAction(saveAction);
+			this.parent(new Control(this.parts.LoadButton)) //
+				.subscribeToAction(loadAction);
+		});
+		this.onInject(start);
 	}
 }

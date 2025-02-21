@@ -12,7 +12,7 @@ export class MainScene extends Scene {
 	constructor(@inject mainScreen: MainScreenLayout, @inject theme: Theme, @inject popupController: PopupController) {
 		super();
 
-		this.openSettingsAction = this.parent(new Action(() => popupController.createAndShow(SettingsPopup)));
+		this.openSettingsAction = this.parent(new Action(() => popupController.showPopup(new SettingsPopup())));
 		this.parent(mainScreen.registerTopCenterButton("Menu")) //
 			.themeButton(theme, "buttonNormal")
 			.subscribeToAction(this.openSettingsAction)

@@ -100,8 +100,6 @@ export class PopupController extends HostedService {
 		}
 
 		this.isShown = this._isShown;
-		this.updateIsShown();
-
 		this.event.subscribeDestroyable(
 			blur.blur.addChildOverlay(this.isShown.createBased((visible) => (visible ? 12 : undefined))),
 		);
@@ -115,21 +113,6 @@ export class PopupController extends HostedService {
 			},
 			true,
 		);
-	}
-
-	private updateIsShown() {
-		return;
-		this._isShown.and(
-			undefined,
-			this.children.children.createBased((c) => c.any((c) => c.control.visibilityComponent().visible.get())),
-		);
-	}
-
-	createAndShow<TArgs extends unknown[]>(
-		clazz: ConstructorOf<InstanceComponent<GuiObject>, TArgs>,
-		...args: Partial<TArgs>
-	): void {
-		this.showPopup(this.di.resolveForeignClass(clazz, args));
 	}
 
 	showPopup(control: InstanceComponent<GuiObject>): Popup {

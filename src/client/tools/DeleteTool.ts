@@ -9,6 +9,7 @@ import { Keybinds } from "engine/client/Keybinds";
 import { Component } from "engine/shared/component/Component";
 import { ObservableCollectionSet } from "engine/shared/event/ObservableCollection";
 import type { MainScreenLayout } from "client/gui/MainScreenLayout";
+import type { PopupController } from "client/gui/PopupController";
 import type { Tooltip } from "client/gui/static/TooltipsControl";
 import type { BuildingMode } from "client/modes/build/BuildingMode";
 import type { ClientBuilding } from "client/modes/build/ClientBuilding";
@@ -50,16 +51,19 @@ export class DeleteTool extends ToolBase {
 		@inject mode: BuildingMode,
 		@inject keybinds: Keybinds,
 		@inject private readonly clientBuilding: ClientBuilding,
+		@inject popupController: PopupController,
 		@inject di: DIContainer,
 	) {
 		super(mode);
 
 		this.clearPlotAction = this.parent(
 			new Action(() => {
-				ConfirmPopup.showPopup(
-					"Are you sure you want to delete all blocks?",
-					"It will be impossible to undo this action",
-					() => this.deleteBlocks("all"),
+				popupController.showPopup(
+					new ConfirmPopup(
+						"Are you sure you want to delete all blocks?",
+						"It will be impossible to undo this action",
+						() => this.deleteBlocks("all"),
+					),
 				);
 			}),
 		);

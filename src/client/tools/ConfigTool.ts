@@ -1,6 +1,7 @@
 import { Players } from "@rbxts/services";
 import { MultiBlockConfigControl } from "client/gui/BlockConfigControls";
 import { GuiAnimator } from "client/gui/GuiAnimator";
+import { ReportSubmitPopup } from "client/gui/popup/ReportSubmitPopup";
 import { LogControl } from "client/gui/static/LogControl";
 import { MultiBlockHighlightedSelector } from "client/tools/highlighters/MultiBlockHighlightedSelector";
 import { SelectedBlocksHighlighter } from "client/tools/highlighters/SelectedBlocksHighlighter";
@@ -18,12 +19,11 @@ import { BlockManager } from "shared/building/BlockManager";
 import { Colors } from "shared/Colors";
 import { VectorUtils } from "shared/utils/VectorUtils";
 import type { MainScreenLayout } from "client/gui/MainScreenLayout";
-import type { ReportSubmitController } from "client/gui/popup/ReportSubmitPopup";
+import type { PopupController } from "client/gui/PopupController";
 import type { ActionController } from "client/modes/build/ActionController";
 import type { BuildingMode } from "client/modes/build/BuildingMode";
 import type { ClientBuildingTypes } from "client/modes/build/ClientBuilding";
 import type { ClientBuilding } from "client/modes/build/ClientBuilding";
-//import type { TutorialConfigBlockHighlight } from "client/tutorial/TutorialConfigTool";
 import type { Keybinds } from "engine/client/Keybinds";
 import type { PlacedBlockConfig } from "shared/blockLogic/BlockConfig";
 import type { BlockLogicBothDefinitions } from "shared/blockLogic/BlockLogic";
@@ -54,7 +54,7 @@ namespace Scene {
 			@inject private readonly tool: ConfigTool,
 			@inject private readonly blockList: BlockList,
 			@inject private readonly di: DIContainer,
-			@inject private readonly reportSubmitter: ReportSubmitController,
+			@inject private readonly popupController: PopupController,
 			@inject private readonly mainScreen: MainScreenLayout,
 			@inject private readonly clientBuilding: ClientBuilding,
 			@inject actionController: ActionController,
@@ -196,11 +196,7 @@ namespace Scene {
 					}
 				});
 			} catch (err) {
-				this.reportSubmitter.submit({
-					err,
-					selected,
-					configs,
-				});
+				this.popupController.showPopup(new ReportSubmitPopup({ err, selected, configs }));
 			}
 		}
 	}

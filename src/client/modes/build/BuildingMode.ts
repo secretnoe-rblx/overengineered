@@ -96,7 +96,7 @@ export class BuildingMode extends PlayMode {
 			buildMode: this.enabledState,
 		});
 
-		this.openSavePopupAction.subscribe(() => popupController.createAndShow(SavePopup));
+		this.openSavePopupAction.subscribe(() => popupController.showPopup(new SavePopup()));
 
 		di = di.beginScope((di) => {
 			di.registerSingletonValue(this);
@@ -178,6 +178,10 @@ export class BuildingMode extends PlayMode {
 			["paintTool", di.resolve<PaintTool>()],
 			["wireTool", di.resolve<WireTool>()],
 		] as const;
+		for (const [, tool] of tools) {
+			this.parentDestroyOnly(tool);
+		}
+
 		const toolsArr: readonly ToolBase[] = tools.map((t) => t[1]);
 
 		this.tools = Objects.fromEntries(tools);

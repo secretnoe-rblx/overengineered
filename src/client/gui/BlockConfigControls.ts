@@ -25,6 +25,7 @@ import type { DropdownListDefinition } from "client/gui/controls/DropdownList";
 import type { KeyOrStringChooserControlDefinition } from "client/gui/controls/KeyOrStringChooserControl";
 import type { NumberTextBoxControlDefinition } from "client/gui/controls/NumberTextBoxControl";
 import type { MultiKeyNumberControlDefinition, MultiKeyPart } from "client/gui/MultiKeyNumberControl";
+import type { PopupController } from "client/gui/PopupController";
 import type { TextBoxControlDefinition } from "engine/client/gui/TextBoxControl";
 import type { BlockConfigPart } from "shared/blockLogic/BlockConfig";
 import type { BlockLogicWithConfigDefinitionTypes } from "shared/blockLogic/BlockLogic";
@@ -380,15 +381,21 @@ namespace Controls {
 						return true;
 					});
 
-				const control = this.parent(new Control(this.control)).addButtonAction(() => {
-					MemoryEditorPopup.showPopup(definition.lengthLimit, [...(value() ?? [])], (v) =>
-						this.submitted.Fire((config = map(config, (_) => v))),
-					);
-				});
+				this.onInject((di) => {
+					const popupController = di.resolve<PopupController>();
 
-				if (!value()) {
-					control.setButtonInteractable(false);
-				}
+					const control = this.parent(new Control(this.control)).addButtonAction(() => {
+						popupController.showPopup(
+							new MemoryEditorPopup(definition.lengthLimit, [...(value() ?? [])], (v) =>
+								this.submitted.Fire((config = map(config, (_) => v))),
+							),
+						);
+					});
+
+					if (!value()) {
+						control.setButtonInteractable(false);
+					}
+				});
 			}
 		}
 		export class color extends Base<ColorChooserDefinition, "color"> {

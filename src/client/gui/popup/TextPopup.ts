@@ -1,9 +1,9 @@
 import { GuiService } from "@rbxts/services";
 import { Interface } from "client/gui/Interface";
-import { Popup } from "client/gui/Popup";
 import { ButtonControl } from "engine/client/gui/Button";
+import { Control } from "engine/client/gui/Control";
 
-export type TextPopupDefinition = GuiObject & {
+type TextPopupDefinition = GuiObject & {
 	readonly Heading: Frame & {
 		readonly CloseButton: TextButton;
 		readonly TitleLabel: TextLabel;
@@ -14,28 +14,12 @@ export type TextPopupDefinition = GuiObject & {
 	};
 };
 
-export class TextPopup extends Popup<TextPopupDefinition> {
+export class TextPopup extends Control<TextPopupDefinition> {
 	private readonly doneButton;
 	private readonly closeButton;
 
-	static showPopup(text: string, ps: string = "", okFunc: (text: string) => void, noFunc: () => void) {
-		const popup = new TextPopup(
-			Interface.getGameUI<{ Popup: { Text: TextPopupDefinition } }>().Popup.Text.Clone(),
-			text,
-			ps,
-			okFunc,
-			noFunc,
-		);
-
-		popup.show();
-	}
-	constructor(
-		gui: TextPopupDefinition,
-		text: string,
-		ps: string = "",
-		okFunc: (text: string) => void,
-		noFunc: () => void,
-	) {
+	constructor(text: string, ps: string = "", okFunc: (text: string) => void, noFunc: () => void) {
+		const gui = Interface.getGameUI<{ Popup: { Text: TextPopupDefinition } }>().Popup.Text.Clone();
 		super(gui);
 
 		this.doneButton = this.parent(new ButtonControl(gui.DoneButton));

@@ -1,10 +1,11 @@
 import { AlertPopup } from "client/gui/popup/AlertPopup";
 import { HostedService } from "engine/shared/di/HostedService";
+import type { PopupController } from "client/gui/PopupController";
 import type { PlayerDataStorage } from "client/PlayerDataStorage";
 
 @injectable
 export class UpdatePopupController extends HostedService {
-	constructor(@inject playerDataStorage: PlayerDataStorage) {
+	constructor(@inject playerDataStorage: PlayerDataStorage, @inject popupController: PopupController) {
 		super();
 
 		this.onEnable(() => {
@@ -16,8 +17,9 @@ export class UpdatePopupController extends HostedService {
 			}
 
 			if (lastVersion <= 123) {
-				AlertPopup.showPopup(
-					`
+				popupController.showPopup(
+					new AlertPopup(
+						`
 Scaling Update 📏
 
 You can now scale blocks! Yes, all of them. At once.
@@ -26,6 +28,7 @@ To scale blocks use either edit tool (new "scale" option) or build tool (scaling
 
 You can find more information in our community server.
 					`.trim(),
+					),
 				);
 			}
 		});
