@@ -470,11 +470,11 @@ export class SavePopup extends PartialControl<SlotsPopupParts> {
 
 			const saveAction = this.parent(new Action()) //
 				.subscribeActionObservable(
-					this.event.addObservable(slots.current.fReadonlyCreateBased((c) => c?.save)),
+					this.event.addObservable(slots.current.fReadonlyCreateBased((c) => c?.save ?? new Action())),
 				);
 			const loadAction = this.parent(new Action()) //
 				.subscribeActionObservable(
-					this.event.addObservable(slots.current.fReadonlyCreateBased((c) => c?.load)),
+					this.event.addObservable(slots.current.fReadonlyCreateBased((c) => c?.load ?? new Action())),
 				);
 
 			this.parent(new Control(this.parts.SaveButton)) //
