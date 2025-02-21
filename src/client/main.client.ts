@@ -25,9 +25,7 @@ LocalPlayer.character.waitOnceFor(
 	(character) => character !== undefined,
 	(character) =>
 		character.PivotTo(
-			Instances.waitForChild<SpawnLocation>(Workspace, "Obstacles", "SpawnLocation").CFrame.add(
-				new Vector3(0, 1, 0),
-			),
+			Instances.waitForChild<SpawnLocation>(Workspace, "Map", "SpawnLocation").CFrame.add(new Vector3(0, 1, 0)),
 		),
 );
 

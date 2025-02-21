@@ -3,6 +3,7 @@ import { Interface } from "client/gui/Interface";
 import { Control } from "engine/client/gui/Control";
 import { Transforms } from "engine/shared/component/Transforms";
 import { ObservableCollectionArr } from "engine/shared/event/ObservableCollection";
+import { Instances } from "engine/shared/fixes/Instances";
 import type { ReadonlyObservableValue } from "engine/shared/event/ObservableValue";
 
 class LoadingImage extends Control {
@@ -91,16 +92,15 @@ class LoadingPopup extends Control<LoadingPopupDefinition> {
 }
 
 spawn(() => {
-	const gui = Workspace.WaitForChild("Obstacles")
-		.WaitForChild("Baseplate 2")
-		.WaitForChild("Part")
-		.WaitForChild("SurfaceGui")
-		.WaitForChild("Spinner") as GuiObject;
+	for (const child of Instances.waitForChild(Workspace, "Map", "Main Island", "Base").GetChildren()) {
+		const gui = child.FindFirstChild("SurfaceGui") as SurfaceGui | undefined;
+		if (!gui) continue;
 
-	const loading = new LoadingImage(gui);
-	loading.enable();
+		const loading = new LoadingImage(gui.GetChildren()[0] as GuiObject);
+		loading.enable();
 
-	task.delay(60, () => loading.disable());
+		task.delay(60, () => loading.disable());
+	}
 });
 
 export namespace LoadingController {
