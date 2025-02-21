@@ -90,6 +90,8 @@ class SaveItem extends PartialControl<SaveItemParts, SaveItemDefinition> impleme
 
 		const start = $autoResolve((popupController: PopupController, playerData: PlayerDataStorage) => {
 			this.load.subscribe(() => {
+				popup.destroy();
+
 				const slot = meta.get();
 				playerData.loadPlayerSlot(slot.index);
 			});
