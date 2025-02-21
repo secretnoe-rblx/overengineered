@@ -88,7 +88,7 @@ class SaveItem extends PartialControl<SaveItemParts, SaveItemDefinition> impleme
 		this.setName = this.parent(new Action<[string]>()) //
 			.subCanExecuteFrom({ can: this.event.addObservable(meta.fReadonlyCreateBased(isWritable)) });
 
-		const start = $autoResolve((popupController: PopupController, playerData: PlayerDataStorage) => {
+		this.$onInjectAuto((popup: SavePopup, popupController: PopupController, playerData: PlayerDataStorage) => {
 			this.load.subscribe(() => {
 				popup.destroy();
 
@@ -138,25 +138,22 @@ class SaveItem extends PartialControl<SaveItemParts, SaveItemDefinition> impleme
 				);
 			});
 		});
-		this.onInject(start);
 
 		//
 
 		this.addButtonAction(() => current.set(this));
 
-		this.onInject(
-			$autoResolve((theme: Theme) => {
-				this.event.subscribeObservable(
-					current,
-					(current) => {
-						this.valuesComponent()
-							.get("BackgroundColor3")
-							.overlay("bg", theme.get(current === this ? "buttonActive" : "backgroundSecondary"));
-					},
-					true,
-				);
-			}),
-		);
+		this.$onInjectAuto((theme: Theme) => {
+			this.event.subscribeObservable(
+				current,
+				(current) => {
+					this.valuesComponent()
+						.get("BackgroundColor3")
+						.overlay("bg", theme.get(current === this ? "buttonActive" : "backgroundSecondary"));
+				},
+				true,
+			);
+		});
 
 		this.event.subscribeObservable(
 			meta,
@@ -238,19 +235,17 @@ class NewSaveItem extends Control<GuiButton> implements CurrentItem {
 			meta.set({ ...meta.get(), name });
 		});
 
-		this.onInject(
-			$autoResolve((theme: Theme) => {
-				this.event.subscribeObservable(
-					current,
-					(current) => {
-						this.valuesComponent()
-							.get("BackgroundColor3")
-							.overlay("bg", theme.get(current === this ? "buttonActive" : "backgroundSecondaryLight"));
-					},
-					true,
-				);
-			}),
-		);
+		this.$onInjectAuto((theme: Theme) => {
+			this.event.subscribeObservable(
+				current,
+				(current) => {
+					this.valuesComponent()
+						.get("BackgroundColor3")
+						.overlay("bg", theme.get(current === this ? "buttonActive" : "backgroundSecondaryLight"));
+				},
+				true,
+			);
+		});
 
 		const newMeta = (index: number): SlotMetaLike => ({
 			index,
@@ -444,7 +439,7 @@ export class SavePopup extends PartialControl<SlotsPopupParts> {
 	constructor() {
 		super(template.Clone());
 
-		const start = $autoResolve((playerData: PlayerDataStorage) => {
+		this.$onInjectAuto((playerData: PlayerDataStorage) => {
 			this.parent(new ButtonControl(this.parts.CloseButton, () => this.hide()));
 
 			const slots = this.parent(new SaveSlots(this.parts.SlotList, playerData));
@@ -467,6 +462,5 @@ export class SavePopup extends PartialControl<SlotsPopupParts> {
 			this.parent(new Control(this.parts.LoadButton)) //
 				.subscribeToAction(loadAction);
 		});
-		this.onInject(start);
 	}
 }

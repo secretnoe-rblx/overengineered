@@ -71,7 +71,7 @@ export class ReportSubmitPopup extends Control<ReportSubmitPopupDefinition> {
 			text ??
 			"An error has happened.\nPlease copy the text below and submit a bug report in our community server.";
 
-		const start = $autoResolve((playerDataStorage: PlayerDataStorage) => {
+		this.$onInjectAuto((playerDataStorage: PlayerDataStorage) => {
 			if (typeIs(data, "table")) {
 				data = {
 					...data,
@@ -108,6 +108,5 @@ export class ReportSubmitPopup extends Control<ReportSubmitPopupDefinition> {
 				}
 			}
 		});
-		this.onInject(start);
 	}
 }

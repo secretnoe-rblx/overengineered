@@ -26,7 +26,7 @@ export class ControlsPopup extends Control<ControlsPopupDefinition> {
 		super(gui);
 
 		this.template = this.asTemplate(gui.Content.Template, true);
-		const start = $autoResolve((keybinds: Keybinds) => {
+		this.$onInjectAuto((keybinds: Keybinds) => {
 			this.parent(new ButtonControl(gui.Heading.CloseButton, () => this.hide()));
 
 			const children = this.parent(new ComponentKeyedChildren<string, Control>().withParentInstance(gui.Content));
@@ -52,6 +52,5 @@ export class ControlsPopup extends Control<ControlsPopupDefinition> {
 				true,
 			);
 		});
-		this.onInject(start);
 	}
 }

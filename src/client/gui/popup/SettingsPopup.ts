@@ -132,7 +132,7 @@ export class SettingsPopup extends Control<SettingsPopup2Definition> {
 		const gui = template.Clone();
 		super(gui);
 
-		const start = $autoResolve((playerData: PlayerDataStorage) => {
+		this.$onInjectAuto((playerData: PlayerDataStorage) => {
 			const original = playerData.config.get();
 
 			const content = this.parent(new Content(gui.Content.Content, playerData.config));
@@ -161,6 +161,5 @@ export class SettingsPopup extends Control<SettingsPopup2Definition> {
 			this.parent(new Control(gui.Heading.CloseButton)) //
 				.addButtonAction(() => this.hideThenDestroy());
 		});
-		this.onInject(start);
 	}
 }

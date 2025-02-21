@@ -25,7 +25,7 @@ export class KeyOrStringChooserControl<
 
 		this.value.subscribe((value) => (this.gui.Text = value ?? ""));
 
-		const start = $autoResolve((popupController: PopupController) => {
+		this.$onInjectAuto((popupController: PopupController) => {
 			this.gui.Activated.Connect(() => {
 				if (InputController.inputType.get() === "Touch") {
 					popupController.showPopup(
@@ -68,6 +68,5 @@ export class KeyOrStringChooserControl<
 				}
 			});
 		});
-		this.onInject(start);
 	}
 }

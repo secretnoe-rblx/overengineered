@@ -67,7 +67,7 @@ export class WikiPopup extends Control<WikiPopupDefinition> {
 		const gui = Interface.getGameUI<{ Popup: { Wiki: WikiPopupDefinition } }>().Popup.Wiki.Clone();
 		super(gui);
 
-		const start = $autoResolve((blockList: BlockList, di: DIContainer) => {
+		this.$onInjectAuto((blockList: BlockList, di: DIContainer) => {
 			this.parent(new ButtonControl(gui.Heading.CloseButton, () => this.hide()));
 
 			const sidebar = this.parent(new WikiCategoriesControl(gui.Content.Categories));
@@ -85,6 +85,5 @@ export class WikiPopup extends Control<WikiPopupDefinition> {
 
 			this.onEnable(() => sidebar.select("blocks"));
 		});
-		this.onInject(start);
 	}
 }

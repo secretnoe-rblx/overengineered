@@ -69,6 +69,11 @@ export class ActionController extends Component {
 		this.redoHistory.clear();
 	}
 
+	clearHistory(): void {
+		this.history.clear();
+		this.redoHistory.clear();
+	}
+
 	private redo(): void {
 		const operation = this.redoHistory.pop();
 		if (!operation) return;

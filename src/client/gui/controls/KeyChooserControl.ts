@@ -23,7 +23,7 @@ export class KeyChooserControl extends Control<KeyChooserControlDefinition> {
 		this.value.subscribe((value) => (this.gui.Text = value === "Unknown" ? "" : value));
 		this.event.onPrepare(() => (this.gui.BackgroundColor3 = this.color));
 
-		const start = $autoResolve((popupController: PopupController) => {
+		this.$onInjectAuto((popupController: PopupController) => {
 			this.gui.Activated.Connect(() => {
 				if (InputController.inputType.get() === "Touch") {
 					popupController.showPopup(
@@ -66,6 +66,5 @@ export class KeyChooserControl extends Control<KeyChooserControlDefinition> {
 				}
 			});
 		});
-		this.onInject(start);
 	}
 }
