@@ -5,14 +5,8 @@ import type {
 } from "client/gui/configControls/ConfigControlsList";
 import type { ObservableValue } from "engine/shared/event/ObservableValue";
 
-@injectable
 export class PlayerSettingsTutorial extends ConfigControlList {
-	constructor(
-		gui: ConfigControlListDefinition & ConfigControlTemplateList,
-		value: ObservableValue<PlayerConfig>,
-		// @inject tutorialsService: TutorialsService,
-		@inject di: DIContainer,
-	) {
+	constructor(gui: ConfigControlListDefinition & ConfigControlTemplateList, value: ObservableValue<PlayerConfig>) {
 		super(gui);
 
 		this.addCategory("Tutorial; (disabled for the time being)");

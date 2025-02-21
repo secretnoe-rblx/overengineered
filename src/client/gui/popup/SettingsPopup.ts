@@ -84,28 +84,23 @@ class Content extends Control<ContentDefinition> {
 		const contentScrollTemplate = this.asTemplate(gui.ScrollingFrame);
 
 		const content = new ObservableValue<
-			| ConstructorOf<Component, [ConfigControlTemplateList, ObservableValue<PlayerConfig>, ...args: never[]]>
-			| undefined
+			ConstructorOf<Component, [ConfigControlTemplateList, ObservableValue<PlayerConfig>]> | undefined
 		>(undefined);
+		content.subscribe((clazz) => {
+			if (!clazz) {
+				contentParent.clear();
+				return;
+			}
+
+			contentParent.set(new clazz(contentScrollTemplate(), config));
+		});
+
 		this.onDisable(() => content.set(undefined));
 		this.content = content;
-
-		this.onInject((di) => {
-			content.subscribe((clazz) => {
-				if (!clazz) {
-					contentParent.clear();
-					return;
-				}
-
-				contentParent.set(di.resolveForeignClass(clazz, [contentScrollTemplate(), config]));
-			});
-		});
 	}
 
 	set<T extends GuiObject>(
-		clazz:
-			| ConstructorOf<Component, [T & ConfigControlTemplateList, ObservableValue<PlayerConfig>, ...args: never[]]>
-			| undefined,
+		clazz: ConstructorOf<Component, [T & ConfigControlTemplateList, ObservableValue<PlayerConfig>]> | undefined,
 	): void {
 		this.content.set(clazz as never);
 	}
@@ -134,6 +129,7 @@ export class SettingsPopup extends Control<SettingsPopup2Definition> {
 
 		this.$onInjectAuto((playerData: PlayerDataStorage) => {
 			const original = playerData.config.get();
+			playerData.config.subscribe((c) => print("CONIFGSUB", c));
 
 			const content = this.parent(new Content(gui.Content.Content, playerData.config));
 			const sidebar = this.parent(new Sidebar(gui.Content.Sidebar.ScrollingFrame));
@@ -150,6 +146,7 @@ export class SettingsPopup extends Control<SettingsPopup2Definition> {
 			sidebar.addButton("tutorial", 98943721557973, () => content.set(PlayerSettingsTutorial));
 
 			this.onDestroy(() => {
+				print("destroying?!");
 				const unchanged = Objects.deepEquals(original, playerData.config.get());
 				if (unchanged) return;
 
