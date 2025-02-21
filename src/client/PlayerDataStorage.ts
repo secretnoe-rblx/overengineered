@@ -2,6 +2,7 @@ import { HttpService } from "@rbxts/services";
 import { LoadingController } from "client/controller/LoadingController";
 import { LogControl } from "client/gui/static/LogControl";
 import { ObservableValue } from "engine/shared/event/ObservableValue";
+import { ArgsSignal } from "engine/shared/event/Signal";
 import { JSON } from "engine/shared/fixes/Json";
 import { Objects } from "engine/shared/fixes/Objects";
 import { Strings } from "engine/shared/fixes/String.propmacro";
@@ -42,6 +43,9 @@ export class PlayerDataStorage {
 			data: data.data ?? {},
 		};
 	}
+
+	private readonly _slotLoading = new ArgsSignal();
+	readonly slotLoading = this._slotLoading.asReadonly();
 
 	private readonly _data;
 	readonly data;
@@ -133,6 +137,7 @@ export class PlayerDataStorage {
 
 	loadPlayerSlot(index: number, message?: string) {
 		$log(`Loading slot ${index}`);
+		this._slotLoading.Fire();
 
 		LoadingController.run(message ?? `Loading slot ${index}`, () => {
 			const response = this.slotRemotes.load.send({ index });

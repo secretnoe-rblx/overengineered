@@ -25,6 +25,7 @@ import { SharedRagdoll } from "shared/SharedRagdoll";
 import type { MainScene } from "client/gui/MainScene";
 import type { MainScreenLayout } from "client/gui/MainScreenLayout";
 import type { PopupController } from "client/gui/PopupController";
+import type { PlayerDataStorage } from "client/PlayerDataStorage";
 import type { Theme } from "client/Theme";
 import type { ToolBase } from "client/tools/ToolBase";
 import type { ToolController } from "client/tools/ToolController";
@@ -88,6 +89,7 @@ export class BuildingMode extends PlayMode {
 		@inject private readonly toolController: ToolController,
 		@inject mainScene: MainScene,
 		@inject popupController: PopupController,
+		@inject playerData: PlayerDataStorage,
 		@inject di: DIContainer,
 	) {
 		super();
@@ -162,6 +164,9 @@ export class BuildingMode extends PlayMode {
 		this.parent(di.resolveForeignClass(BuildingModeScene));
 
 		this.actionController = this.parent(di.resolve<ActionController>());
+		const sl = playerData.slotLoading.Connect(() => this.actionController.clearHistory());
+		this.onDestroy(() => sl.Disconnect());
+
 		this.parent(di.resolve<GridController>());
 		this.parent(di.resolve<CenterOfMassController>());
 
