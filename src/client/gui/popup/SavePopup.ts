@@ -408,6 +408,8 @@ class SaveSlots extends Control<SaveSlotsDefinition> {
 		this.event.subscribeObservable(
 			playerData.slots,
 			(slotList) => {
+				const loadedSlot = playerData.loadedSlot.get();
+
 				for (const [index] of pairs(slotList)) {
 					if (children.get(index)) continue;
 
@@ -427,6 +429,17 @@ class SaveSlots extends Control<SaveSlotsDefinition> {
 
 						ov2.set(c);
 					});
+
+					if (loadedSlot === index) {
+						current.set(item);
+
+						task.delay(0, () => {
+							gui.CanvasPosition = new Vector2(
+								0,
+								item.instance.AbsolutePosition.Y - gui.AbsolutePosition.Y - gui.AbsoluteSize.Y / 3,
+							);
+						});
+					}
 				}
 
 				for (const [index] of [...children.getAll()]) {
