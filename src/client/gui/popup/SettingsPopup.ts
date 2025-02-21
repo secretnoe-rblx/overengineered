@@ -129,7 +129,6 @@ export class SettingsPopup extends Control<SettingsPopup2Definition> {
 
 		this.$onInjectAuto((playerData: PlayerDataStorage) => {
 			const original = playerData.config.get();
-			playerData.config.subscribe((c) => print("CONIFGSUB", c));
 
 			const content = this.parent(new Content(gui.Content.Content, playerData.config));
 			const sidebar = this.parent(new Sidebar(gui.Content.Sidebar.ScrollingFrame));
@@ -146,7 +145,6 @@ export class SettingsPopup extends Control<SettingsPopup2Definition> {
 			sidebar.addButton("tutorial", 98943721557973, () => content.set(PlayerSettingsTutorial));
 
 			this.onDestroy(() => {
-				print("destroying?!");
 				const unchanged = Objects.deepEquals(original, playerData.config.get());
 				if (unchanged) return;
 
