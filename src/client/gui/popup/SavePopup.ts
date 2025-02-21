@@ -17,6 +17,7 @@ import type { PopupController } from "client/gui/PopupController";
 import type { PlayerDataStorage } from "client/PlayerDataStorage";
 import type { Theme } from "client/Theme";
 import type { ReadonlyObservableValue } from "engine/shared/event/ObservableValue";
+import type { ReadonlyPlot } from "shared/building/ReadonlyPlot";
 
 interface SlotMetaLike {
 	readonly index: number;
@@ -88,56 +89,75 @@ class SaveItem extends PartialControl<SaveItemParts, SaveItemDefinition> impleme
 		this.setName = this.parent(new Action<[string]>()) //
 			.subCanExecuteFrom({ can: this.event.addObservable(meta.fReadonlyCreateBased(isWritable)) });
 
-		this.$onInjectAuto((popup: SavePopup, popupController: PopupController, playerData: PlayerDataStorage) => {
-			this.load.subscribe(() => {
-				popup.destroy();
+		this.$onInjectAuto(
+			(popup: SavePopup, popupController: PopupController, playerData: PlayerDataStorage, plot: ReadonlyPlot) => {
+				this.load.subscribe(() => {
+					const load = () => {
+						popup.destroy();
+						task.spawn(() => playerData.loadPlayerSlot(slot.index));
+					};
 
-				const slot = meta.get();
-				playerData.loadPlayerSlot(slot.index);
-			});
+					const slot = meta.get();
+					if (plot.getBlocks().size() === 0) {
+						load();
+					} else {
+						popupController.showPopup(new ConfirmPopup("Load this slot?", "ඞ", load));
+					}
+				});
 
-			this.save.subscribe(() => {
-				const slot = meta.get();
-
-				popupController.showPopup(
-					new ConfirmPopup("Save this slot?", "YOU WILL REGRET THIS", () => {
-						playerData.sendPlayerSlot({
-							index: slot.index,
-							save: true,
-							color: slot.color,
-							name: slot.name,
+				this.save.subscribe(() => {
+					const save = () => {
+						task.spawn(() => {
+							playerData.sendPlayerSlot({
+								index: slot.index,
+								save: true,
+								color: slot.color,
+								name: slot.name,
+							});
 						});
-					}),
-				);
-			});
+					};
 
-			this.setColor.subscribe((color) => {
-				const slot = meta.get();
-				playerData.sendPlayerSlot({
-					index: slot.index,
-					save: true,
-					color: Serializer.Color3Serializer.serialize(color),
+					const slot = meta.get();
+					if (slot.blocks === 0) {
+						save();
+					} else {
+						popupController.showPopup(new ConfirmPopup("Save this slot?", "YOU WILL REGRET THIS", save));
+					}
 				});
-			});
-			this.setName.subscribe((name) => {
-				const slot = meta.get();
-				playerData.sendPlayerSlot({
-					index: slot.index,
-					save: true,
-					name,
+
+				this.setColor.subscribe((color) => {
+					const slot = meta.get();
+					playerData.sendPlayerSlot({
+						index: slot.index,
+						save: true,
+						color: Serializer.Color3Serializer.serialize(color),
+					});
 				});
-			});
+				this.setName.subscribe((name) => {
+					const slot = meta.get();
+					playerData.sendPlayerSlot({
+						index: slot.index,
+						save: true,
+						name,
+					});
+				});
 
-			this.delete.subscribe(() => {
-				const slot = meta.get();
-
-				popupController.showPopup(
-					new ConfirmPopup("<b>DELETE</b> this slot?", "THERE WILL BE CONSEQUENCES", () => {
+				this.delete.subscribe(() => {
+					const del = () => {
 						playerData.deletePlayerSlot({ index: slot.index });
-					}),
-				);
-			});
-		});
+					};
+
+					const slot = meta.get();
+					if (slot.blocks === 0) {
+						del();
+					} else {
+						popupController.showPopup(
+							new ConfirmPopup("<b>DELETE</b> this slot?", "THERE WILL BE CONSEQUENCES", del),
+						);
+					}
+				});
+			},
+		);
 
 		//
 
