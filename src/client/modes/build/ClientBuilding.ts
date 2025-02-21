@@ -1,9 +1,9 @@
 import { LoadingController } from "client/controller/LoadingController";
-import { ActionController } from "client/modes/build/ActionController";
 import { JSON } from "engine/shared/fixes/Json";
 import { Operation } from "engine/shared/Operation";
 import { BlockManager } from "shared/building/BlockManager";
 import { SharedBuilding } from "shared/building/SharedBuilding";
+import type { ActionController } from "client/modes/build/ActionController";
 import type { PlacedBlockConfig } from "shared/blockLogic/BlockConfig";
 import type { BlockLogicTypes } from "shared/blockLogic/BlockLogicTypes";
 import type { SharedPlot } from "shared/building/SharedPlot";
@@ -397,7 +397,7 @@ export class ClientBuilding {
 			return asMap(data).map((k, v) => ({ block: plot.getBlock(k), scfg: JSON.serialize(v) }));
 		};
 
-		return ActionController.instance.execute(
+		return this.actionController.execute(
 			"Reset config",
 			() =>
 				this.building.updateConfig.send({
@@ -418,7 +418,7 @@ export class ClientBuilding {
 		const inputBlock = BlockManager.manager.uuid.get(_inputBlock);
 		const outputBlock = BlockManager.manager.uuid.get(_outputBlock);
 
-		return ActionController.instance.execute(
+		return this.actionController.execute(
 			"Connect logic",
 			() => {
 				return this.building.logicDisconnect.send({
@@ -444,7 +444,7 @@ export class ClientBuilding {
 		const output = BlockManager.manager.config.get(_inputBlock)![inputConnection]
 			.config as BlockLogicTypes.WireValue;
 
-		return ActionController.instance.execute(
+		return this.actionController.execute(
 			"Disconnect logic",
 			() => {
 				return this.building.logicConnect.send({

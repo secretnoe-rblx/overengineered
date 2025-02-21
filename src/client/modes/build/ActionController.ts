@@ -15,9 +15,6 @@ interface Operation {
 
 @injectable
 export class ActionController extends Component {
-	/** @deprecated Use `@inject` instead */
-	static instance: ActionController;
-
 	readonly undoAction = this.parent(new Action(() => this.undo()));
 	readonly redoAction = this.parent(new Action(() => this.redo()));
 
@@ -28,9 +25,6 @@ export class ActionController extends Component {
 
 	constructor(@inject mainScreen: MainScreenLayout) {
 		super();
-
-		if (ActionController.instance) throw "what";
-		ActionController.instance = this;
 
 		this.undoAction.subCanExecuteFrom({
 			isntLoading: LoadingController.isNotLoading,
