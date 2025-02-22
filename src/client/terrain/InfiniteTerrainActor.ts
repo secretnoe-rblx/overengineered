@@ -218,9 +218,15 @@ infterrainActor.Load.Event.ConnectParallel((chunkX: number, chunkZ: number, load
 
 					const data = {
 						1: ReplicatedStorage.FindFirstChild("TerrainModels")!.FindFirstChild(modelData[1]) as Model,
-						2: new CFrame(new Vector3(voxelX * 4, height, voxelZ * 4).add(offset)).mul(
-							CFrame.fromOrientation(math.rad(rotation.X), math.rad(rotation.Y), math.rad(rotation.Z)),
-						),
+						2: new CFrame(new Vector3(voxelX * 4, height, voxelZ * 4).add(offset))
+							.mul(
+								CFrame.fromOrientation(
+									math.rad(rotation.X),
+									math.rad(rotation.Y),
+									math.rad(rotation.Z),
+								),
+							)
+							.add(new Vector3(0, GameDefinitions.HEIGHT_OFFSET, 0)),
 						3: scale,
 					} as const;
 					models.push(data);
