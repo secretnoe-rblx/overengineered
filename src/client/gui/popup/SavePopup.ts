@@ -129,7 +129,7 @@ class SaveItem extends PartialControl<SaveItemParts, SaveItemDefinition> impleme
 					const slot = meta.get();
 					playerData.sendPlayerSlot({
 						index: slot.index,
-						save: true,
+						save: false,
 						color: Serializer.Color3Serializer.serialize(color),
 					});
 				});
@@ -137,7 +137,7 @@ class SaveItem extends PartialControl<SaveItemParts, SaveItemDefinition> impleme
 					const slot = meta.get();
 					playerData.sendPlayerSlot({
 						index: slot.index,
-						save: true,
+						save: false,
 						name,
 					});
 				});
