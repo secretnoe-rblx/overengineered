@@ -10,6 +10,7 @@ import { TouchModeButtonControl } from "client/gui/ridemode/TouchModeButtonContr
 import { requestMode } from "client/modes/PlayModeRequest";
 import { Action } from "engine/client/Action";
 import { Control } from "engine/client/gui/Control";
+import { Interface } from "engine/client/gui/Interface";
 import { InputController } from "engine/client/InputController";
 import { LocalPlayer } from "engine/client/LocalPlayer";
 import { Component } from "engine/shared/component/Component";
@@ -273,18 +274,6 @@ export type RideModeSceneDefinition = GuiObject & {
 		readonly Template: RideModeInfoControlDefinition & { Title: TextLabel };
 		readonly TextTemplate: RideModeInfoControlDefinition & { Title: TextLabel };
 	};
-	readonly LogicDebug: GuiObject & {
-		readonly Content: GuiObject & {
-			readonly Buttons: GuiObject & {
-				readonly Visualizer: GuiButton;
-				readonly Pause: GuiButton & { readonly ImageLabel: ImageLabel };
-				readonly Step: GuiButton;
-			};
-			readonly PauseOnStart: GuiObject & {
-				readonly Control: CheckBoxControlDefinition;
-			};
-		};
-	};
 };
 
 @injectable
@@ -297,6 +286,8 @@ export class RideModeScene extends Control<RideModeSceneDefinition> {
 
 	private readonly infoTemplate;
 	private readonly infoTextTemplate;
+
+	private readonly logicVisible = new ObservableValue(false);
 
 	constructor(
 		gui: RideModeSceneDefinition,
@@ -354,6 +345,7 @@ export class RideModeScene extends Control<RideModeSceneDefinition> {
 			});
 
 		this.parent(mainScreen.registerTopRightButton("Logic")) //
+			.addButtonAction(() => this.logicVisible.toggle())
 			.subscribeVisibilityFrom({
 				ride_editcontrols: notControlsEditMode,
 				ride_isntloading: LoadingController.isNotLoading,
@@ -499,38 +491,46 @@ export class RideModeScene extends Control<RideModeSceneDefinition> {
 		}
 	}
 
-	private initLogicController(machine: ClientMachine) {
+	private initLogicController(machine: ClientMachine, runLogic: boolean) {
 		const component = this.current.set(new Component());
 
-		this.gui.LogicDebug.Visible = false;
+		const template = Interface.getInterface<{
+			Floating: {
+				LogicDebug: GuiObject & {
+					readonly Visualizer: GuiObject & {
+						readonly Control: CheckBoxControlDefinition;
+					};
+					readonly Content: GuiObject & {
+						readonly Pause: TextButtonDefinition & {
+							readonly ImageLabel: ImageLabel;
+						};
+						readonly Step: GuiButton;
+					};
+				};
+			};
+		}>().Floating.LogicDebug;
+		const logicDebugGui = template.Clone();
 
-		const logicDebug = component.parent(new Control(this.gui.LogicDebug.Clone(), { showOnEnable: true }));
-		logicDebug.instance.Parent = this.gui.LogicDebug.Parent;
+		const logicDebug = component.parent(new Control(logicDebugGui));
+		logicDebug.instance.Parent = template.Parent;
 
-		// TODO:::
-		// logicDebug.disable("button");
-		// component.event.subscribe(this.logicButton.activated, () => logicDebug.switchEnabled("button"));
-
-		const pauseOnStart = logicDebug.add(new CheckBoxControl(logicDebug.instance.Content.PauseOnStart.Control));
-		logicDebug.onEnable(() => pauseOnStart.value.set(this.mode.pauseOnStart.get()));
-		logicDebug.event.subscribe(pauseOnStart.submitted, (value) => this.mode.pauseOnStart.set(value));
+		this.logicVisible.set(!runLogic);
+		const sub = this.logicVisible.subscribe((v) => (logicDebugGui.Visible = v), true);
+		logicDebug.onDestroy(() => sub.Disconnect());
 
 		const visualizer = component.parent(new ComponentChild(true));
-		logicDebug.add(
-			new Control(logicDebug.instance.Content.Buttons.Visualizer).addButtonAction(() => {
-				if (visualizer.get()) {
-					visualizer.clear();
-				} else {
-					visualizer.set(machine.createVisualizer());
-				}
-			}),
-		);
+		const vcb = logicDebug.add(new CheckBoxControl(logicDebug.instance.Visualizer.Control));
+		vcb.value.subscribe((c) => {
+			if (c) {
+				visualizer.set(machine.createVisualizer());
+			} else {
+				visualizer.clear();
+			}
+		});
 
-		logicDebug.add(
-			new Control(logicDebug.instance.Content.Buttons.Step).addButtonAction(() => machine.runner.tick()),
-		);
+		logicDebug.add(new Control(logicDebug.instance.Content.Step).addButtonAction(() => machine.runner.tick()));
 
-		const pauseButton = logicDebug.add(new Control(logicDebug.instance.Content.Buttons.Pause));
+		const pauseButton = logicDebug.add(new Control(logicDebug.instance.Content.Pause));
 		pauseButton.parent(
 			new Control(pauseButton.instance).addButtonAction(() => {
 				if (machine.runner.isRunning.get()) {
@@ -546,6 +546,7 @@ export class RideModeScene extends Control<RideModeSceneDefinition> {
 		component.event.subscribeObservable(
 			machine.runner.isRunning,
 			(running) => {
+				pauseButton.setButtonText(running ? "PAUSE" : "RESUME");
 				pauseButton.instance.ImageLabel.Image = running
 					? "rbxassetid://18627572768"
 					: "rbxassetid://15266883073";
@@ -556,7 +557,7 @@ export class RideModeScene extends Control<RideModeSceneDefinition> {
 
 	private readonly current = this.parent(new ComponentChild(true));
 
-	start(machine: ClientMachine) {
+	start(machine: ClientMachine, runLogic: boolean) {
 		if (InputController.inputType.get() === "Touch") {
 			this.controls.start(machine);
 		}
@@ -567,6 +568,6 @@ export class RideModeScene extends Control<RideModeSceneDefinition> {
 		);
 
 		this.addMeters(machine);
-		this.initLogicController(machine);
+		this.initLogicController(machine, runLogic);
 	}
 }

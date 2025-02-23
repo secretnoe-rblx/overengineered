@@ -9,6 +9,7 @@ import { ClientBuildingValidationController } from "client/modes/build/ClientBui
 import { GridController } from "client/modes/build/GridController";
 import { PlayMode } from "client/modes/PlayMode";
 import { requestMode } from "client/modes/PlayModeRequest";
+import { RideMode } from "client/modes/ride/RideMode";
 import { BuildTool } from "client/tools/BuildTool";
 import { ConfigTool } from "client/tools/ConfigTool";
 import { DeleteTool } from "client/tools/DeleteTool";
@@ -18,6 +19,7 @@ import { PaintTool } from "client/tools/PaintTool";
 import { WireTool } from "client/tools/WireTool";
 import { Action } from "engine/client/Action";
 import { LocalPlayer } from "engine/client/LocalPlayer";
+import { EventHandler } from "engine/shared/event/EventHandler";
 import { NumberObservableValue } from "engine/shared/event/NumberObservableValue";
 import { ObservableValue } from "engine/shared/event/ObservableValue";
 import { Objects } from "engine/shared/fixes/Objects";
@@ -48,10 +50,32 @@ export class BuildingModeScene extends Scene {
 	) {
 		super();
 
-		this.parent(mainScreen.registerTopCenterButton("Run"))
+		const runbtn = this.parent(mainScreen.registerTopCenterButton("Run"))
 			.themeButton(theme, "accent")
 			.subscribeToAction(mode.runAction)
 			.subscribeVisibilityFrom({ main_enabled: this.enabledState });
+
+		{
+			const eh = new EventHandler();
+			this.onDisable(() => eh.unsubscribeAll());
+			this.event.subscribe(runbtn.instance.MouseButton1Down, () => {
+				let holding = true;
+
+				eh.subscribe(runbtn.instance.MouseLeave, () => {
+					holding = false;
+					eh.unsubscribeAll();
+				});
+				eh.subscribe(runbtn.instance.MouseButton1Up, () => {
+					holding = false;
+					eh.unsubscribeAll();
+				});
+
+				task.delay(1, () => {
+					if (!holding) return;
+					mode.runAction.execute(false);
+				});
+			});
+		}
 
 		this.parent(mainScreen.registerTopCenterButton("Saves"))
 			.themeButton(theme, "buttonNormal")
@@ -70,7 +94,12 @@ export type EditMode = "global" | "local";
 @injectable
 export class BuildingMode extends PlayMode {
 	readonly openSavePopupAction = this.parent(new Action());
-	readonly runAction = this.parent(new Action(() => requestMode("ride")));
+	readonly runAction = this.parent(
+		new Action<[runLogic?: boolean]>((runLogic = true) => {
+			RideMode.runWithoutLogicThisTime = !runLogic;
+			requestMode("ride");
+		}),
+	);
 	readonly teleportToPlotAction = this.parent(new Action(() => this.teleportToPlot()));
 
 	readonly mirrorMode = new ObservableValue<MirrorMode>({});

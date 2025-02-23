@@ -3,16 +3,17 @@ import { SoundController } from "client/controller/SoundController";
 import { Interface } from "client/gui/Interface";
 import { RideModeScene } from "client/gui/ridemode/RideModeScene";
 import { PlayMode } from "client/modes/PlayMode";
-import { ObservableValue } from "engine/shared/event/ObservableValue";
 import { CustomRemotes } from "shared/Remotes";
 import type { RideModeSceneDefinition } from "client/gui/ridemode/RideModeScene";
 import type { SharedPlot } from "shared/building/SharedPlot";
 
 @injectable
 export class RideMode extends PlayMode {
+	// bad code
+	static runWithoutLogicThisTime = false;
+
 	private currentMachine?: ClientMachine;
 	private readonly rideModeScene;
-	readonly pauseOnStart = new ObservableValue(false);
 
 	constructor(
 		@inject private readonly plot: SharedPlot,
@@ -93,11 +94,14 @@ export class RideMode extends PlayMode {
 		if (prev === undefined) {
 			//
 		} else if (prev === "build") {
+			const runLogic = !RideMode.runWithoutLogicThisTime;
+			RideMode.runWithoutLogicThisTime = false;
+
 			this.currentMachine = this.di.resolveForeignClass(ClientMachine);
-			this.currentMachine.init(this.plot.getBlockDatas(), !this.pauseOnStart.get());
+			this.currentMachine.init(this.plot.getBlockDatas(), runLogic);
 
 			SoundController.getSounds().Start.Play();
-			this.rideModeScene.start(this.currentMachine);
+			this.rideModeScene.start(this.currentMachine, runLogic);
 		}
 	}
 }
