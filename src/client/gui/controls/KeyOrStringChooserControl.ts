@@ -1,6 +1,7 @@
 import { ContextActionService } from "@rbxts/services";
 import { SelectButtonPopupWithCustomString } from "client/gui/popup/SelectButtonPopup";
 import { Control } from "engine/client/gui/Control";
+import { Interface } from "engine/client/gui/Interface";
 import { InputController } from "engine/client/InputController";
 import { ObservableValue } from "engine/shared/event/ObservableValue";
 import { Signal } from "engine/shared/event/Signal";
@@ -28,16 +29,18 @@ export class KeyOrStringChooserControl<
 		this.$onInjectAuto((popupController: PopupController) => {
 			this.gui.Activated.Connect(() => {
 				if (InputController.inputType.get() === "Touch") {
-					popupController.showPopup(
-						new SelectButtonPopupWithCustomString(
-							(key) => {
-								const prev = this.value.get();
-								this.value.set(key);
-								this.submitted.Fire(key, prev);
-							},
-							() => {},
-						),
+					const p = new SelectButtonPopupWithCustomString(
+						(key) => {
+							const prev = this.value.get();
+							this.value.set(key);
+							this.submitted.Fire(key, prev);
+						},
+						() => {},
 					);
+
+					const popup = popupController.justCreatePopup(p);
+					popup.instance.Parent = Interface.getInterface();
+					popup.enable();
 				} else {
 					this.gui.BackgroundColor3 = buttonColorActive;
 

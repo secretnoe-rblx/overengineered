@@ -66,10 +66,7 @@ export class PopupController extends HostedService {
 	private readonly children;
 	private readonly screen: ScreenGui;
 
-	constructor(
-		@inject blur: BlurController,
-		@inject private readonly di: DIContainer,
-	) {
+	constructor(@inject blur: BlurController) {
 		super();
 		this.screen = Interface.getPopupUI();
 
@@ -116,15 +113,10 @@ export class PopupController extends HostedService {
 	}
 
 	showPopup(control: InstanceComponent<GuiObject>): Popup {
-		const p = this.children.add(new Popup(control));
-		// control.visibilityComponent().visible.subscribe(() => this.updateIsShown(), true);
+		return this.children.add(this.justCreatePopup(control));
+	}
 
-		// const ov = p.event.addObservable(
-		// 	this.children.children.createBasedAnyDC((c) => c.control.visibilityComponent().visible),
-		// );
-
-		// this._isShown.and({}, ov);
-
-		return p;
+	justCreatePopup(control: InstanceComponent<GuiObject>): Popup {
+		return new Popup(control);
 	}
 }
