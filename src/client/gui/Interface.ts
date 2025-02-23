@@ -2,6 +2,8 @@ import { Players } from "@rbxts/services";
 
 /** @deprecated Use engine interface namespace instead */
 export namespace Interface {
+	export const mouse = Players.LocalPlayer.GetMouse();
+
 	/** Receives GameUI from the PlayerGui */
 	export function getGameUI<T = ScreenGui>() {
 		return getPlayerGui().WaitForChild("GameUI") as T;
@@ -33,20 +35,7 @@ export namespace Interface {
 	}
 
 	export function isCursorOnVisibleGui(): boolean {
-		const playerGUI = getPlayerGui();
-		const gameUI = getGameUI();
-		const mouse = Players.LocalPlayer.GetMouse();
-		const objects = playerGUI.GetGuiObjectsAtPosition(mouse.X, mouse.Y);
-		if (
-			objects.some(
-				(value) =>
-					value.Visible === true &&
-					value.BackgroundTransparency < 1 &&
-					value.IsDescendantOf(gameUI as unknown as Instance),
-			)
-		) {
-			return true;
-		}
-		return false;
+		const objects = getPlayerGui().GetGuiObjectsAtPosition(mouse.X, mouse.Y);
+		return objects.some((value) => value.Visible && value.BackgroundTransparency < 1);
 	}
 }
