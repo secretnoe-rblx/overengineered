@@ -24,7 +24,7 @@ class NumberObservableValue<T extends number | undefined = number> extends Obser
 type ToNum<TAllowNull extends boolean> = TAllowNull extends false ? number : number | undefined;
 export type NumberTextBoxControlDefinition = TextBox;
 /** Control that represents a number via a text input */
-export class NumberTextBoxControl<TAllowNull extends boolean = false> extends Control<NumberTextBoxControlDefinition> {
+class _NumberTextBoxControl<TAllowNull extends boolean = false> extends Control<NumberTextBoxControlDefinition> {
 	readonly submitted = new Signal<(value: number) => void>();
 	readonly value: ObservableValue<ToNum<TAllowNull>>;
 	private textChanged = false;
@@ -97,3 +97,6 @@ export class NumberTextBoxControl<TAllowNull extends boolean = false> extends Co
 		super.destroy();
 	}
 }
+
+export class NumberTextBoxControl extends _NumberTextBoxControl<false> {}
+export class NumberTextBoxControlNullable extends _NumberTextBoxControl<true> {}

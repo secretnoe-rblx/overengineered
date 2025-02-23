@@ -141,6 +141,11 @@ export class ConfigControlBase<
 		return this.initToObjectsPart({ _: observable }, path, updateType);
 	}
 
+	setValues(values: Values<V>): this {
+		this._v.set(values);
+		return this;
+	}
+
 	initToObservableValues(observable: ObservableValue<Values<V>>, updateType: "value" | "submit" = "submit"): this {
 		if (updateType === "value") {
 			this.event.subscribeRegistration(() => observable.connect(this._v.value));

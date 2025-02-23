@@ -1,9 +1,13 @@
+import { RunService } from "@rbxts/services";
 import { ColorChooser } from "client/gui/ColorChooser";
+import { ConfigControlNumber } from "client/gui/configControls/ConfigControlNumber";
+import { ConfigControlSlider } from "client/gui/configControls/ConfigControlSlider";
+import { ConfigControlString } from "client/gui/configControls/ConfigControlString";
 import { ByteEditor } from "client/gui/controls/ByteEditorControl";
 import { CheckBoxControl } from "client/gui/controls/CheckBoxControl";
 import { DropdownList } from "client/gui/controls/DropdownList";
 import { KeyOrStringChooserControl } from "client/gui/controls/KeyOrStringChooserControl";
-import { NumberTextBoxControl } from "client/gui/controls/NumberTextBoxControl";
+import { NumberTextBoxControlNullable } from "client/gui/controls/NumberTextBoxControl";
 import { SliderControlNullable } from "client/gui/controls/SliderControl";
 import { Interface } from "client/gui/Interface";
 import { MultiKeyNumberControl } from "client/gui/MultiKeyNumberControl";
@@ -19,6 +23,7 @@ import { BlockConfig } from "shared/blockLogic/BlockConfig";
 import { BlockWireManager } from "shared/blockLogic/BlockWireManager";
 import { Colors } from "shared/Colors";
 import type { ColorChooserDefinition } from "client/gui/ColorChooser";
+import type { ConfigControlTemplateList } from "client/gui/configControls/ConfigControlsList";
 import type { ByteEditorDefinition } from "client/gui/controls/ByteEditorControl";
 import type { CheckBoxControlDefinition } from "client/gui/controls/CheckBoxControl";
 import type { DropdownListDefinition } from "client/gui/controls/DropdownList";
@@ -112,8 +117,10 @@ const map = <T, TOut extends defined>(
 
 //
 
-const template = Interface.getGameUI<{ Templates: { Config: { Template: ConfigValueWrapperDefinition } } }>().Templates
-	.Config.Template;
+const template = Interface.getInterface<{
+	Main: { Left: { Config: { Content: { ScrollingFrame: { Template: ConfigValueWrapperDefinition } } } } };
+}>().Main.Left.Config.Content.ScrollingFrame.Template;
+template.Visible = false;
 
 const setWrapperColor = (wrapper: ConfigValueWrapper, valueType: PrimitiveKeys) => {
 	wrapper.typeColor.set(BlockWireManager.types[valueType].color);
@@ -284,13 +291,13 @@ namespace Controls {
 
 				const control = this.parent(
 					definition.clamp
-						? new NumberTextBoxControl<true>(
+						? new NumberTextBoxControlNullable(
 								gui,
 								definition.clamp.min,
 								definition.clamp.max,
 								definition.clamp.step,
 							)
-						: new NumberTextBoxControl<true>(gui),
+						: new NumberTextBoxControlNullable(gui),
 				);
 				control.value.set(sameOrUndefined(config));
 
@@ -928,6 +935,15 @@ type ConfigValueWrapperDefinition = GuiObject & {
 				};
 			};
 		};
+	readonly ContentNew: GuiObject &
+		Controls.Templates & {
+			readonly TypeDropdown: DropdownListDefinition;
+			readonly TypeControllable: GuiObject & {
+				readonly Controllable: GuiObject & {
+					readonly Control: CheckBoxControlDefinition;
+				};
+			};
+		};
 };
 type m = "[multi]";
 type mk = PrimitiveKeys | m;
@@ -945,10 +961,12 @@ class ConfigValueWrapper extends Control<ConfigValueWrapperDefinition> {
 		super(gui);
 
 		this.event.subscribeObservable(this.typeColor, (color) => (gui.TypeLine.BackgroundColor3 = color), true);
-		this.dropdown = this.parent(new DropdownList<mk>(gui.Content.TypeDropdown));
-		this.content = this.parent(new ComponentChild<Control>()).withParentInstance(gui.Content);
+		this.dropdown = this.parent(new DropdownList<mk>(gui.ContentNew.TypeDropdown));
 
-		this.controls = this.parent(new Control(gui.Content.TypeControllable));
+		gui.Visible = true;
+		this.content = this.parent(new ComponentChild<Control>()).withParentInstance(gui.ContentNew);
+
+		this.controls = this.parent(new Control(gui.ContentNew.TypeControllable));
 		this.controllable = this.controls.parent(new CheckBoxControl(this.controls.instance.Controllable.Control));
 	}
 }
@@ -1103,6 +1121,101 @@ class ConfigAutoValueWrapper extends Control<ConfigValueWrapperDefinition> {
 				initControllable();
 			};
 			initControls();
+
+			if (RunService.IsStudio()) {
+				const clone = <T extends GuiObject>(instance: T): T => {
+					const clone = instance.Clone();
+					clone.Visible = true;
+
+					return clone;
+				};
+				const templates: ConfigControlTemplateList = Interface.getInterface<{
+					Popups: {
+						Crossplatform: {
+							Settings: {
+								Content: { Content: { ScrollingFrame: GuiObject & ConfigControlTemplateList } };
+							};
+						};
+					};
+				}>().Popups.Crossplatform.Settings.Content.Content.ScrollingFrame.Clone();
+
+				interface ConfigControl extends Control {
+					submitted(
+						func: (
+							value: OfBlocks<BlockLogicTypes.Primitives[keyof BlockLogicTypes.Primitives]["config"]>,
+						) => void,
+					): void;
+				}
+
+				type prims = BlockLogicTypes.Primitives;
+				type keys = keyof prims;
+
+				type retf<k extends keys> = (
+					values: OfBlocks<prims[k]["config"]>,
+					blockdef: VisualBlockConfigDefinition,
+					def: MiniPrimitives[k],
+				) => ConfigControl | undefined;
+				const controls = {
+					number: (values, blockdef, def) => {
+						if (def.clamp?.showAsSlider) {
+							return new ConfigControlSlider(clone(templates.Slider), blockdef.displayName, {
+								min: def.clamp.min,
+								max: def.clamp.max,
+								step: def.clamp.step,
+							}).setValues(values);
+						}
+
+						return new ConfigControlNumber(
+							clone(templates.Number),
+							blockdef.displayName,
+							def.clamp?.min,
+							def.clamp?.max,
+							def.clamp?.step,
+						).setValues(values);
+					},
+					string: (values, blockdef, def) => {
+						return new ConfigControlString(clone(templates.String), blockdef.displayName).setValues(values);
+					},
+				} satisfies { readonly [k in keys]?: retf<k> } as { readonly [k in keys]?: retf<keys> };
+
+				//
+
+				const cg = () => {
+					const isControllable = control.controllable.value.get();
+					if (isControllable === undefined) {
+						// TODO: [mixed] message or somethin
+						return;
+					}
+
+					const def = definition.types[stype];
+					if (!def) return;
+
+					if (!isControllable) {
+						const ctor = controls[stype];
+						if (!ctor) return;
+
+						const control = ctor(
+							map(configs, (c) => c.config),
+							definition,
+							def,
+						);
+						if (!control) return;
+
+						control.submitted((values) => {
+							this._submitted.Fire(
+								(configs = map(configs, (c, uuid) => ({ ...c, type: stype, config: values[uuid] }))),
+							);
+						});
+						return control;
+					}
+				};
+
+				const cfgcontrol = cg();
+				if (cfgcontrol) {
+					control.content.set(cfgcontrol);
+					return;
+				}
+			}
 
 			const createGui = (): Controls.Base | undefined => {
 				if (stype === "unset") {

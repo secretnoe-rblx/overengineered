@@ -1,5 +1,5 @@
 import { Players, UserInputService } from "@rbxts/services";
-import { NumberTextBoxControl } from "client/gui/controls/NumberTextBoxControl";
+import { NumberTextBoxControlNullable } from "client/gui/controls/NumberTextBoxControl";
 import { ProgressBarControl } from "client/gui/controls/ProgressBarControl";
 import { PartialControl } from "engine/client/gui/PartialControl";
 import { EventHandler } from "engine/shared/event/EventHandler";
@@ -64,7 +64,7 @@ class _SliderControl<TAllowNull extends boolean = false> extends PartialControl<
 		this.subscribeMovement();
 
 		if (this.parts.TextBox) {
-			const num = new NumberTextBoxControl<TAllowNull>(this.parts.TextBox, this.value);
+			const num = new NumberTextBoxControlNullable(this.parts.TextBox, this.value);
 			this.event.subscribe(num.submitted, (value) => this._submitted.Fire(value));
 			this.add(num);
 		}
