@@ -1,12 +1,12 @@
 import { RunService } from "@rbxts/services";
-import { Interface } from "client/gui/Interface";
+import { Interface } from "engine/client/gui/Interface";
 import { HostedService } from "engine/shared/di/HostedService";
 
 export class FpsCounterController extends HostedService {
 	constructor() {
 		super();
 
-		const gui = Interface.getGameUI<{ Fps: TextLabel }>().Fps;
+		const gui = Interface.getInterface<{ Fps: TextLabel }>().Fps;
 		gui.Visible = true;
 
 		let fps = 0;
