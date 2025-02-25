@@ -1,4 +1,4 @@
-import { HostedService } from "engine/shared/di/HostedService";
+import { Component } from "engine/shared/component/Component";
 import { BlockManager } from "shared/building/BlockManager";
 import { BuildingManager } from "shared/building/BuildingManager";
 import type { PlayerId } from "server/PlayerId";
@@ -22,7 +22,7 @@ const areAllBlocksOnPlot = (blocks: readonly BlockModel[], plot: PlotModel): boo
 };
 
 @injectable
-export class ServerBuildingRequestController extends HostedService {
+export class ServerBuildingRequestController extends Component {
 	constructor(
 		@inject buildingRemotes: PlayerDataStorageRemotesBuilding,
 		@inject private readonly playerId: PlayerId,
