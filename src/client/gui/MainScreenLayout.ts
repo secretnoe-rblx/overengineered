@@ -22,14 +22,10 @@ namespace Top {
 	type MainScreenTopLayerDefinition = GuiObject & {
 		readonly ButtonTemplate: TopButtonDefinition;
 	};
-	@injectable
 	class MainScreenTopLayer extends Control<MainScreenTopLayerDefinition> {
 		private readonly template;
 
-		constructor(
-			gui: MainScreenTopLayerDefinition,
-			@inject private readonly theme: Theme,
-		) {
+		constructor(gui: MainScreenTopLayerDefinition) {
 			super(gui);
 			this.template = this.asTemplate(gui.ButtonTemplate);
 		}
@@ -41,7 +37,7 @@ namespace Top {
 			const control = new Control(this.template());
 			control.instance.Name = name;
 			control.setButtonText((text ?? "").upper());
-			control.themeButton(this.theme, config.background ?? "buttonNormal");
+			this.$onInjectAuto((theme: Theme) => control.themeButton(theme, config.background ?? "buttonNormal"));
 			control.instance.ImageLabel.Visible = icon !== undefined;
 			control.instance.ImageLabel.Image = icon ? `rbxassetid://${icon}` : "";
 			if (config?.width) {
@@ -58,15 +54,11 @@ namespace Top {
 	export type MainScreenTopDefinition = GuiObject & {
 		readonly LayerTemplate: MainScreenTopLayerDefinition;
 	};
-	@injectable
 	export class MainScreenTop extends Control<MainScreenTopDefinition> {
 		readonly main;
 		private readonly template;
 
-		constructor(
-			gui: MainScreenTopDefinition,
-			@inject private readonly di: DIContainer,
-		) {
+		constructor(gui: MainScreenTopDefinition) {
 			super(gui);
 			gui.LayerTemplate.Visible = false;
 			this.template = this.asTemplate(gui.LayerTemplate);
@@ -75,7 +67,7 @@ namespace Top {
 		}
 
 		push(): MainScreenTopLayer {
-			const control = this.di.resolveForeignClass(MainScreenTopLayer, [this.template()]);
+			const control = new MainScreenTopLayer(this.template());
 			control.instance.LayoutOrder = this.gui.GetChildren().size();
 			control.instance.Parent = this.gui;
 
@@ -96,14 +88,10 @@ namespace Bottom {
 	type MainScreenBottomLayerDefinition = GuiObject & {
 		readonly ButtonTemplate: BottomButtonDefinition;
 	};
-	@injectable
 	class MainScreenBottomLayer extends Control<MainScreenBottomLayerDefinition> {
 		private readonly template;
 
-		constructor(
-			gui: MainScreenBottomLayerDefinition,
-			@inject private readonly theme: Theme,
-		) {
+		constructor(gui: MainScreenBottomLayerDefinition) {
 			super(gui);
 			this.template = this.asTemplate(gui.ButtonTemplate);
 		}
@@ -117,7 +105,7 @@ namespace Bottom {
 			const control = new Control(this.template());
 			control.instance.Name = text;
 			control.setButtonText(text.upper());
-			control.themeButton(this.theme, background ?? "buttonNormal");
+			this.$onInjectAuto((theme: Theme) => control.themeButton(theme, background ?? "buttonNormal"));
 			control.instance.Frame.ImageLabel.Visible = iconId !== undefined;
 			control.instance.Frame.ImageLabel.Image = iconId ? `rbxassetid://${iconId}` : "";
 			if (config?.width) {
@@ -134,21 +122,17 @@ namespace Bottom {
 	export type MainScreenBottomDefinition = GuiObject & {
 		readonly LayerTemplate: MainScreenBottomLayerDefinition;
 	};
-	@injectable
 	export class MainScreenBottom extends Control<MainScreenBottomDefinition> {
 		private readonly template;
 
-		constructor(
-			gui: MainScreenBottomDefinition,
-			@inject private readonly di: DIContainer,
-		) {
+		constructor(gui: MainScreenBottomDefinition) {
 			super(gui);
 			gui.LayerTemplate.Visible = false;
 			this.template = this.asTemplate(gui.LayerTemplate);
 		}
 
 		push(): MainScreenBottomLayer {
-			const control = this.di.resolveForeignClass(MainScreenBottomLayer, [this.template()]);
+			const control = new MainScreenBottomLayer(this.template());
 			control.instance.LayoutOrder = -this.gui.GetChildren().size();
 			control.instance.Parent = this.gui;
 
@@ -162,14 +146,10 @@ type MainScreenRightDefinition = GuiObject & {
 		readonly ImageLabel: ImageLabel;
 	};
 };
-@injectable
 class MainScreenRight extends Control<MainScreenRightDefinition> {
 	private readonly template;
 
-	constructor(
-		gui: MainScreenRightDefinition,
-		@inject private readonly di: DIContainer,
-	) {
+	constructor(gui: MainScreenRightDefinition) {
 		super(gui);
 		gui.Template.Visible = false;
 		this.template = this.asTemplate(gui.Template);
@@ -213,9 +193,9 @@ export class MainScreenLayout extends Component {
 		this.instance = Interface.getInterface<{ Main: MainScreenLayoutDefinition }>().Main;
 		ComponentInstance.init(this, this.instance);
 
-		this.top = this.parentGui(di.resolveForeignClass(Top.MainScreenTop, [this.instance.Top]));
-		this.bottom = this.parentGui(di.resolveForeignClass(Bottom.MainScreenBottom, [this.instance.Bottom]));
-		this.right = this.parentGui(di.resolveForeignClass(MainScreenRight, [this.instance.Right]));
+		this.top = this.parentGui(new Top.MainScreenTop(this.instance.Top));
+		this.bottom = this.parentGui(new Bottom.MainScreenBottom(this.instance.Bottom));
+		this.right = this.parentGui(new MainScreenRight(this.instance.Right));
 
 		const initHotbar = () => {
 			const hotbar = this.parent(

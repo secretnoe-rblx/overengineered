@@ -50,6 +50,11 @@ export class BuildingModeScene extends Scene {
 	) {
 		super();
 
+		this.parent(mainScreen.top.main.addButton("Save", { iconId: 15266766613 }))
+			.themeButton(theme, "buttonNormal")
+			.subscribeToAction(mode.openSavePopupAction)
+			.subscribeVisibilityFrom({ main_enabled: this.enabledState });
+
 		const runbtn = this.parent(
 			mainScreen.top.main.addButton("Run", { text: "►", background: "accent", width: 200 }),
 		)
@@ -78,11 +83,6 @@ export class BuildingModeScene extends Scene {
 				});
 			});
 		}
-
-		this.parent(mainScreen.top.main.addButton("Save", { iconId: 15266766613 }))
-			.themeButton(theme, "buttonNormal")
-			.subscribeToAction(mode.openSavePopupAction)
-			.subscribeVisibilityFrom({ main_enabled: this.enabledState });
 
 		this.parent(mainScreen.top.main.addButton("TeleportToPlot", { iconId: 18886409314 }))
 			.themeButton(theme, "buttonNormal")

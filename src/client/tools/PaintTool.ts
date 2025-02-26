@@ -58,17 +58,14 @@ namespace Scene {
 				return control;
 			};
 
-			const paintLayer = this.parentGui(mainScreen.bottom.push());
-			paintLayer.parent(newToggle("Colors", tool.enableColor));
+			const topLayer = this.parentGui(mainScreen.top.push());
+			topLayer.parentGui(newToggle("Colors", tool.enableColor));
+			topLayer.parentGui(newToggle("Materials", tool.enableMaterial));
 
-			paintLayer
-				.addButton("Paint Colors", undefined, undefined, { width: 150 }) //
+			this.parentGui(mainScreen.right.push("Paint Colors")) //
 				.addButtonAction(() => this.paintEverything(false, true));
-			paintLayer
-				.addButton("Paint Materials", undefined, undefined, { width: 150 }) //
+			this.parentGui(mainScreen.right.push("Paint Materials")) //
 				.addButtonAction(() => this.paintEverything(true, false));
-
-			paintLayer.parent(newToggle("Materials", tool.enableMaterial));
 
 			const layer = this.parentGui(mainScreen.bottom.push());
 			const materialColorEditor = layer.parent(MaterialColorEditControl.autoCreate(true));
