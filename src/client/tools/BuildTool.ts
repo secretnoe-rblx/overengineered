@@ -18,7 +18,6 @@ import { Control } from "engine/client/gui/Control";
 import { InputController } from "engine/client/InputController";
 import { Component } from "engine/shared/component/Component";
 import { ComponentChild } from "engine/shared/component/ComponentChild";
-import { ObjectOverlayStorage } from "engine/shared/component/ObjectOverlayStorage";
 import { Transforms } from "engine/shared/component/Transforms";
 import { ObservableValue } from "engine/shared/event/ObservableValue";
 import { AABB } from "engine/shared/fixes/AABB";
@@ -222,17 +221,8 @@ namespace Scene {
 		}
 	}
 
-	type TouchButtonsDefinition = GuiObject & {
-		readonly PlaceButton: GuiButton;
-		readonly MultiPlaceButton: GuiButton;
-		readonly RotateRButton: GuiButton;
-		readonly RotateTButton: GuiButton;
-		readonly RotateYButton: GuiButton;
-	};
 	@injectable
 	class TouchButtons extends Component {
-		private readonly visibilityOverlay = new ObjectOverlayStorage({ visible: false });
-
 		constructor(
 			selectedBlock: ReadonlyObservableValue<Block | undefined>,
 			@inject tool: BuildTool,
@@ -243,28 +233,28 @@ namespace Scene {
 			const isTouch = new ObservableValue(false);
 			this.event.onPrepare((inputType) => isTouch.set(inputType === "Touch"));
 
+			const isBlockSelected = this.event.addObservable(
+				selectedBlock.fReadonlyCreateBased((b) => b !== undefined),
+			);
+
 			this.parent(mainScreen.right.push("+")) //
-				.subscribeVisibilityFrom({ main: this.enabledState, isTouch })
+				.subscribeVisibilityFrom({ main: this.enabledState, isTouch, isBlockSelected })
 				.addButtonAction(() => tool.placeBlock());
 			this.parent(mainScreen.right.push("X"))
-				.subscribeVisibilityFrom({ main: this.enabledState, isTouch })
+				.subscribeVisibilityFrom({ main: this.enabledState, isTouch, isBlockSelected })
 				.addButtonAction(() => tool.rotateBlock("x"))
 				.with((c) => (c.instance.BackgroundColor3 = Color3.fromRGB(52, 17, 17)));
 			this.parent(mainScreen.right.push("Y"))
-				.subscribeVisibilityFrom({ main: this.enabledState, isTouch })
+				.subscribeVisibilityFrom({ main: this.enabledState, isTouch, isBlockSelected })
 				.addButtonAction(() => tool.rotateBlock("y"))
 				.with((c) => (c.instance.BackgroundColor3 = Color3.fromRGB(81, 162, 0)));
 			this.parent(mainScreen.right.push("Z"))
-				.subscribeVisibilityFrom({ main: this.enabledState, isTouch })
+				.subscribeVisibilityFrom({ main: this.enabledState, isTouch, isBlockSelected })
 				.addButtonAction(() => tool.rotateBlock("z"))
 				.with((c) => (c.instance.BackgroundColor3 = Color3.fromRGB(18, 68, 144)));
 			this.parent(mainScreen.right.push("++")) //
-				.subscribeVisibilityFrom({ main: this.enabledState, isTouch })
+				.subscribeVisibilityFrom({ main: this.enabledState, isTouch, isBlockSelected })
 				.addButtonAction(() => tool.multiPlaceBlock());
-		}
-
-		protected setInstanceVisibilityFunction(visible: boolean): void {
-			this.visibilityOverlay.get(0).visible = visible;
 		}
 	}
 
@@ -280,7 +270,6 @@ namespace Scene {
 		readonly Bottom: MaterialColorEditControlDefinition;
 		readonly Info: BlockInfoDefinition;
 		readonly Inventory: BlockSelectionControlDefinition;
-		readonly Touch: TouchButtonsDefinition;
 	};
 	@injectable
 	export class BuildToolScene extends Component {

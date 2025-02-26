@@ -448,7 +448,7 @@ export class EditTool extends ToolBase {
 
 		this.parent(di.resolveForeignClass(SelectedBlocksHighlighter, [this.selected]));
 		const selector = this.parent(
-			new MultiBlockHighlightedSelector(this.targetPlot, this.selected, undefined, undefined, keybinds),
+			new MultiBlockHighlightedSelector(this.targetPlot, this.selected, undefined, keybinds),
 		);
 		this.controller.childSet.Connect((child) => selector.setEnabled(!child));
 		this.onDisable(() => this.selected.clear());

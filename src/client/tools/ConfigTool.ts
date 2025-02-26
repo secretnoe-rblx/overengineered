@@ -275,7 +275,7 @@ export class ConfigTool extends ToolBase {
 			return [...newBlocks];
 		};
 
-		this.parent(new MultiBlockHighlightedSelector(mode.targetPlot, this.selected, undefined, { filter }, keybinds));
+		this.parent(new MultiBlockHighlightedSelector(mode.targetPlot, this.selected, { filter }, keybinds));
 		this.onDisable(() => this.unselectAll());
 	}
 

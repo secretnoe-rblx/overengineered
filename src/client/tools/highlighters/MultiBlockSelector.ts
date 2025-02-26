@@ -1,3 +1,4 @@
+import { BlockSelectorModeGui } from "client/tools/highlighters/BlockSelectorModeGui";
 import { BoxSelector } from "client/tools/highlighters/BoxSelector";
 import { HoveredBlocksSelector } from "client/tools/highlighters/HoveredBlocksSelector";
 import { HoldAction } from "engine/client/HoldAction";
@@ -85,5 +86,7 @@ export class MultiBlockSelector extends Component {
 		};
 		const selector = this.parent(ComponentChild.fromObservable(this.mode, (mode) => modes[mode]()));
 		selector.childSet.Connect((child) => child?.submit.Connect((blocks) => this._submit.Fire(blocks)));
+
+		this.parent(new BlockSelectorModeGui(this.mode));
 	}
 }

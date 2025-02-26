@@ -62,9 +62,9 @@ namespace Scene {
 			topLayer.parentGui(newToggle("Colors", tool.enableColor));
 			topLayer.parentGui(newToggle("Materials", tool.enableMaterial));
 
-			this.parentGui(mainScreen.right.push("Paint Colors")) //
+			this.parentGui(mainScreen.right.push("PAINT COLORS")) //
 				.addButtonAction(() => this.paintEverything(false, true));
-			this.parentGui(mainScreen.right.push("Paint Materials")) //
+			this.parentGui(mainScreen.right.push("PAINT MATERIALS")) //
 				.addButtonAction(() => this.paintEverything(true, false));
 
 			const layer = this.parentGui(mainScreen.bottom.push());
