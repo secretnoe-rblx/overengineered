@@ -213,6 +213,15 @@ export class MaterialColorEditControl extends InstanceComponent<MaterialColorEdi
 				this.onEnable(() => wnd.setVisibleAndEnabled(true));
 			}
 			colorbtn.addButtonAction(() => wnd.setVisibleAndEnabled(!wnd.isInstanceVisible()));
+			this.event.subscribeObservable(
+				wnd.visibilityComponent().visible,
+				(visible) => {
+					Transforms.create()
+						.transform(colorbtn.instance.Arrow, "Rotation", visible ? 180 : 0, Transforms.quadOut02)
+						.run(wnd, true);
+				},
+				true,
+			);
 		}
 		{
 			const gui = floatingTemplate.Material.Clone();
@@ -226,6 +235,15 @@ export class MaterialColorEditControl extends InstanceComponent<MaterialColorEdi
 				this.onEnable(() => wnd.setVisibleAndEnabled(true));
 			}
 			materialbtn.addButtonAction(() => wnd.setVisibleAndEnabled(!wnd.isInstanceVisible()));
+			this.event.subscribeObservable(
+				wnd.visibilityComponent().visible,
+				(visible) => {
+					Transforms.create()
+						.transform(materialbtn.instance.Arrow, "Rotation", visible ? 180 : 0, Transforms.quadOut02)
+						.run(wnd, true);
+				},
+				true,
+			);
 		}
 
 		this.materialPipette = this.parent(
