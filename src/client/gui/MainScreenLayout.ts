@@ -2,6 +2,7 @@ import { LoadingController } from "client/controller/LoadingController";
 import { HotbarControl } from "client/gui/buildmode/HotbarControl";
 import { Control } from "engine/client/gui/Control";
 import { Interface } from "engine/client/gui/Interface";
+import { PartialControl } from "engine/client/gui/PartialControl";
 import { Component } from "engine/shared/component/Component";
 import { ComponentInstance } from "engine/shared/component/ComponentInstance";
 import { Transforms } from "engine/shared/component/Transforms";
@@ -11,35 +12,41 @@ import type { Theme, ThemeColorKey } from "client/Theme";
 import type { TextButtonDefinition } from "engine/client/gui/Button";
 
 namespace Top {
-	type TopButtonDefinition = TextButtonDefinition & {
-		readonly ImageLabel: ImageLabel;
+	type TopButtonParts = {
+		readonly IconImage: ImageLabel;
 	};
 
 	type TopButtonConfig = ({ readonly text?: string } | { readonly iconId?: number }) & {
+		readonly kind?: "square" | "bottom";
 		readonly background?: ThemeColorKey;
 		readonly width?: number;
 	};
 	type MainScreenTopLayerDefinition = GuiObject & {
-		readonly ButtonTemplate: TopButtonDefinition;
+		readonly ButtonTemplate: TextButtonDefinition;
+		readonly BottomButtonTemplate: TextButtonDefinition;
 	};
 	class MainScreenTopLayer extends Control<MainScreenTopLayerDefinition> {
 		private readonly template;
+		private readonly bottomTemplate;
 
 		constructor(gui: MainScreenTopLayerDefinition) {
 			super(gui);
 			this.template = this.asTemplate(gui.ButtonTemplate);
+			this.bottomTemplate = this.asTemplate(gui.BottomButtonTemplate);
 		}
 
-		addButton(name: string, config: TopButtonConfig): Control<TopButtonDefinition> {
+		addButton(name: string, config: TopButtonConfig): PartialControl<TopButtonParts, TextButtonDefinition> {
 			const text = "text" in config ? config.text : undefined;
 			const icon = "iconId" in config ? config.iconId : undefined;
 
-			const control = new Control(this.template());
+			const control = new PartialControl<TopButtonParts, TextButtonDefinition>(
+				(config.kind ?? "square") === "square" ? this.template() : this.bottomTemplate(),
+			);
 			control.instance.Name = name;
 			control.setButtonText((text ?? "").upper());
 			this.$onInjectAuto((theme: Theme) => control.themeButton(theme, config.background ?? "buttonNormal"));
-			control.instance.ImageLabel.Visible = icon !== undefined;
-			control.instance.ImageLabel.Image = icon ? `rbxassetid://${icon}` : "";
+			control.parts.IconImage.Visible = icon !== undefined;
+			control.parts.IconImage.Image = icon ? `rbxassetid://${icon}` : "";
 			if (config?.width) {
 				control.instance.Size = new UDim2(new UDim(0, config.width), control.instance.Size.Y);
 			}

@@ -497,17 +497,21 @@ export class EditTool extends ToolBase {
 		actions.mirrorZ.subCanExecuteFrom({ noControler, someBlocksSelected });
 
 		{
+			this.parentGui(mainScreen.right.push("SELECT ALL")) //
+				.addButtonAction(() => this.selected.setRange(this.targetPlot.get().getBlocks()));
+
+			this.parentGui(mainScreen.right.push("DESELECT ALL")) //
+				.addButtonAction(() => this.selected.clear());
+		}
+
+		{
 			const layer = this.parentGui(mainScreen.bottom.push());
 			noControler.subscribe((nc) => layer.setVisibleAndEnabled(nc));
 
-			layer
-				.addButton("select all")
-				.addButtonAction(() => this.selected.setRange(this.targetPlot.get().getBlocks()));
 			layer.addButton("paint", "15895846447").subscribeToAction(actions.paint);
 			layer.addButton("copy", "18369509575").subscribeToAction(actions.copy);
 			layer.addButton("paste", "18369509575").subscribeToAction(actions.paste);
 			layer.addButton("delete", "12539349041", "buttonNegative").subscribeToAction(actions.delete);
-			layer.addButton("deselect all").addButtonAction(() => this.selected.clear());
 		}
 
 		{
@@ -529,12 +533,18 @@ export class EditTool extends ToolBase {
 		}
 
 		{
-			const layer = this.parentGui(mainScreen.bottom.push());
+			const layer = this.parentGui(mainScreen.top.push());
 			noControler.subscribe((nc) => layer.setVisibleAndEnabled(nc));
 
-			layer.addButton("mirror X", "16686412951").subscribeToAction(actions.mirrorX);
-			layer.addButton("mirror Y", "16686412951").subscribeToAction(actions.mirrorY);
-			layer.addButton("mirror Z", "16686412951").subscribeToAction(actions.mirrorZ);
+			layer
+				.addButton("mirror X", { kind: "bottom", text: "MIRROR X", iconId: 16686412951 })
+				.subscribeToAction(actions.mirrorX);
+			layer
+				.addButton("mirror Y", { kind: "bottom", text: "MIRROR Y", iconId: 16686412951 })
+				.subscribeToAction(actions.mirrorY);
+			layer
+				.addButton("mirror Z", { kind: "bottom", text: "MIRROR Z", iconId: 16686412951 })
+				.subscribeToAction(actions.mirrorZ);
 		}
 
 		this.controller.childSet.Connect((child) => {
