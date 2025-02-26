@@ -61,7 +61,7 @@ class ToolInputController extends Component {
 @injectable
 export class ToolController extends Component {
 	readonly selectedTool = new ObservableValue<ToolBase | undefined>(undefined, (value, current) => {
-		if (LoadingController.isLoading.get()) {
+		if (value && LoadingController.isLoading.get()) {
 			return current;
 		}
 
