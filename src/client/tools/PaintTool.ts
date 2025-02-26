@@ -63,9 +63,9 @@ namespace Scene {
 			topLayer.parentGui(newToggle("Materials", tool.enableMaterial));
 
 			this.parentGui(mainScreen.right.push("PAINT COLORS")) //
-				.addButtonAction(() => this.paintEverything(false, true));
-			this.parentGui(mainScreen.right.push("PAINT MATERIALS")) //
 				.addButtonAction(() => this.paintEverything(true, false));
+			this.parentGui(mainScreen.right.push("PAINT MATERIALS")) //
+				.addButtonAction(() => this.paintEverything(false, true));
 
 			const layer = this.parentGui(mainScreen.bottom.push());
 			const materialColorEditor = layer.parent(MaterialColorEditControl.autoCreate(true));
