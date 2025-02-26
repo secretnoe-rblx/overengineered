@@ -127,7 +127,7 @@ class MaterialWindow extends ResizableWindow<MaterialWindowDefinition> {
 		value: SubmittableValue<Enum.Material>,
 		color: ReadonlyObservableValue<Color3>,
 	) {
-		super(gui, 100, 592);
+		super(gui, 100, 504);
 		this.parent(new MaterialChooser(gui.Content, value, color));
 	}
 }
