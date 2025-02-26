@@ -14,7 +14,8 @@ export class ServerPlayerDataRemotesController extends Component {
 		player ??= Players.GetPlayerByUserId(playerId);
 		if (!player) throw `Player ${playerId} is not online`;
 
-		const remotesFolder = new Instance("Folder", player.WaitForChild("PlayerGui"));
+		const remotesFolder = new Instance("ScreenGui", player.WaitForChild("PlayerGui"));
+		remotesFolder.ResetOnSpawn = false;
 		remotesFolder.Name = HttpService.GenerateGUID(true);
 
 		return di.resolveForeignClass(ServerPlayerDataRemotesController, [playerId, remotesFolder]);
