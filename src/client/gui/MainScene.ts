@@ -13,8 +13,7 @@ export class MainScene extends Scene {
 		super();
 
 		this.openSettingsAction = this.parent(new Action(() => popupController.showPopup(new SettingsPopup())));
-		this.parent(mainScreen.registerTopCenterButton("Menu")) //
-			.themeButton(theme, "buttonNormal")
+		this.parent(mainScreen.top.main.addButton("Settings", { iconId: 18626485941 })) //
 			.subscribeToAction(this.openSettingsAction)
 			.subscribeVisibilityFrom({ main_enabled: this.enabledState });
 	}

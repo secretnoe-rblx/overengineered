@@ -115,6 +115,23 @@ export namespace Anim {
 		}
 	}
 
+	/** Wraps the provided `GuiObject` in a `Frame`. */
+	export function wrapInFrame(gui: GuiObject): Frame {
+		const frame = new Instance("Frame");
+		frame.Name = "Wrapper";
+		frame.AnchorPoint = gui.AnchorPoint;
+		frame.Position = gui.Position;
+		frame.AutomaticSize = Enum.AutomaticSize.XY;
+		frame.BackgroundTransparency = 1;
+		frame.Parent = gui.Parent;
+
+		gui.AnchorPoint = new Vector2();
+		gui.Position = new UDim2();
+		gui.Parent = frame;
+
+		return frame;
+	}
+
 	/** Creates a GuiScreen with all the provided instances being **copied** into it, with adjusted position/size/etc */
 	export function createScreenForAnimating<TChildren extends readonly GuiObject[]>(
 		...children: TChildren

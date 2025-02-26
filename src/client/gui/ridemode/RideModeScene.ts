@@ -307,7 +307,9 @@ export class RideModeScene extends Control<RideModeSceneDefinition> {
 			ride_editcontrols: notControlsEditMode,
 			ride_isntloading: LoadingController.isNotLoading,
 		});
-		this.parent(mainScreen.registerTopCenterButton("Stop")) //
+		this.parent(
+			mainScreen.top.main.addButton("Stop", { iconId: 15448899035, background: "buttonNegative", width: 200 }),
+		) //
 			.themeButton(theme, "accent")
 			.subscribeToAction(this.stopAction)
 			.subscribeVisibilityFrom({ main_enabled: this.enabledState });
@@ -317,7 +319,7 @@ export class RideModeScene extends Control<RideModeSceneDefinition> {
 			ride_editcontrols: notControlsEditMode,
 			ride_isntloading: LoadingController.isNotLoading,
 		});
-		this.parent(mainScreen.registerTopCenterButton("Sit")) //
+		this.parent(mainScreen.top.main.addButton("Sit", { iconId: 15568720419 })) //
 			.subscribeToAction(this.sitAction)
 			.subscribeVisibilityFrom({ main_enabled: this.enabledState });
 

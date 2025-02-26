@@ -50,7 +50,9 @@ export class BuildingModeScene extends Scene {
 	) {
 		super();
 
-		const runbtn = this.parent(mainScreen.registerTopCenterButton("Run"))
+		const runbtn = this.parent(
+			mainScreen.top.main.addButton("Run", { text: "►", background: "accent", width: 200 }),
+		)
 			.themeButton(theme, "accent")
 			.subscribeToAction(mode.runAction)
 			.subscribeVisibilityFrom({ main_enabled: this.enabledState });
@@ -77,12 +79,12 @@ export class BuildingModeScene extends Scene {
 			});
 		}
 
-		this.parent(mainScreen.registerTopCenterButton("Saves"))
+		this.parent(mainScreen.top.main.addButton("Save", { iconId: 15266766613 }))
 			.themeButton(theme, "buttonNormal")
 			.subscribeToAction(mode.openSavePopupAction)
 			.subscribeVisibilityFrom({ main_enabled: this.enabledState });
 
-		this.parent(mainScreen.registerTopCenterButton("TeleportToPlot"))
+		this.parent(mainScreen.top.main.addButton("TeleportToPlot", { iconId: 18886409314 }))
 			.themeButton(theme, "buttonNormal")
 			.subscribeToAction(mode.teleportToPlotAction)
 			.subscribeVisibilityFrom({ main_enabled: this.enabledState });

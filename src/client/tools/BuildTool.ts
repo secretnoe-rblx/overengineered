@@ -1,5 +1,6 @@
 import { Players, ReplicatedStorage, RunService, UserInputService, Workspace } from "@rbxts/services";
 import { SoundController } from "client/controller/SoundController";
+import { Anim } from "client/gui/Anim";
 import { BlockPreviewControl } from "client/gui/buildmode/BlockPreviewControl";
 import { BlockSelectionControl } from "client/gui/buildmode/BlockSelection";
 import { MaterialColorEditControl } from "client/gui/buildmode/MaterialColorEditControl";
@@ -308,9 +309,16 @@ namespace Scene {
 			const inventory = this.parentGui(mainScreen.registerLeft<BlockSelectionControlDefinition>("Inventory"));
 			this.blockSelector = this.parent(tool.di.resolveForeignClass(BlockSelectionControl, [inventory.instance]));
 
-			this.parentGui(
-				new BlockInfo(mainScreen.getTopCenterSecondary("CurrentBlock"), this.blockSelector.selectedBlock),
+			const topLayer = this.parentGui(mainScreen.top.push());
+
+			const blockInfo = topLayer.parentGui(
+				new BlockInfo(
+					Interface.getInterfaceByPath<BlockInfoDefinition>("Tools", "Shared", "Top", "CurrentBlock").Clone(),
+					this.blockSelector.selectedBlock,
+				),
 			);
+			Anim.wrapInFrame(blockInfo.instance);
+
 			this.parent(di.resolveForeignClass(TouchButtons, [this.blockSelector.selectedBlock]));
 
 			// const mirrorEditor = this.parent(

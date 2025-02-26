@@ -1,4 +1,5 @@
 import { Players } from "@rbxts/services";
+import { Instances } from "engine/shared/fixes/Instances";
 
 /** @deprecated Use engine interface namespace instead */
 export namespace Interface {
@@ -12,6 +13,11 @@ export namespace Interface {
 	/** Receives Interface from the PlayerGui */
 	export function getInterface<T = ScreenGui>() {
 		return getPlayerGui().WaitForChild("Interface") as T;
+	}
+
+	/** Receives Interface from the PlayerGui */
+	export function getInterfaceByPath<T = ScreenGui>(...path: string[]) {
+		return Instances.waitForChild<T>(getPlayerGui(), "Interface", ...path);
 	}
 
 	/** Receives Unscaled from the PlayerGui */
