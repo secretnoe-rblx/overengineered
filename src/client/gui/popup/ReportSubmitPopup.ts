@@ -51,9 +51,9 @@ type ReportSubmitPopupDefinition = GuiObject & {
 };
 export class ReportSubmitPopup extends Control<ReportSubmitPopupDefinition> {
 	constructor(data: unknown, text?: string, okFunc?: () => void) {
-		const gui = Interface.getGameUI<{
-			Popup: { Crossplatform: { ReportSubmit: ReportSubmitPopupDefinition } };
-		}>().Popup.Crossplatform.ReportSubmit.Clone();
+		const gui = Interface.getInterface<{
+			Popups: { Crossplatform: { ReportSubmit: ReportSubmitPopupDefinition } };
+		}>().Popups.Crossplatform.ReportSubmit.Clone();
 		super(gui);
 
 		const okButton = this.parent(new Control(gui.Content.Buttons.OkButton));
