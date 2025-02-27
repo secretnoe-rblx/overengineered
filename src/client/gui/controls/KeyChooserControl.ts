@@ -1,7 +1,6 @@
 import { ContextActionService } from "@rbxts/services";
-import { SelectButtonPopup } from "client/gui/popup/SelectButtonPopup";
+import { SelectButtonPopup, SelectButtonPopupWithCustomString } from "client/gui/popup/SelectButtonPopup";
 import { Control } from "engine/client/gui/Control";
-import { Interface } from "engine/client/gui/Interface";
 import { InputController } from "engine/client/InputController";
 import { ObservableValue } from "engine/shared/event/ObservableValue";
 import { Signal } from "engine/shared/event/Signal";
@@ -10,37 +9,38 @@ import type { PopupController } from "client/gui/PopupController";
 
 export type KeyChooserControlDefinition = TextButton;
 
-/** Control that represents a key. */
-export class KeyChooserControl extends Control<KeyChooserControlDefinition> {
-	readonly submitted = new Signal<(value: KeyCode, prev: KeyCode) => void>();
-	readonly value = new ObservableValue<KeyCode>("P");
+type ToStr<NonString extends boolean> = NonString extends false ? KeyCode : KeyCode | string;
+/** Control that represents a key */
+class _KeyChooserControl<TKC extends boolean> extends Control<KeyChooserControlDefinition> {
+	readonly submitted = new Signal<(value: ToStr<TKC>, prev: ToStr<TKC>) => void>();
+	readonly value = new ObservableValue<ToStr<TKC>>("P");
 
-	private readonly color = Colors.accentDark;
-	private readonly activeColor = Colors.accent;
-
-	constructor(gui: KeyChooserControlDefinition) {
+	constructor(
+		gui: KeyChooserControlDefinition,
+		touchChooserCtor: TKC extends true ? typeof SelectButtonPopupWithCustomString : typeof SelectButtonPopup,
+	) {
 		super(gui);
 
+		const buttonColor = this.gui.BackgroundColor3;
+		const buttonColorActive = Colors.lightenPressed(this.gui.BackgroundColor3);
+
 		this.value.subscribe((value) => (this.gui.Text = value === "Unknown" ? "" : value));
-		this.event.onPrepare(() => (this.gui.BackgroundColor3 = this.color));
 
 		this.$onInjectAuto((popupController: PopupController) => {
 			this.gui.Activated.Connect(() => {
 				if (InputController.inputType.get() === "Touch") {
-					const p = new SelectButtonPopup(
+					const p = new touchChooserCtor(
 						(key) => {
 							const prev = this.value.get();
-							this.value.set(key);
-							this.submitted.Fire(key, prev);
+							this.value.set(key as ToStr<TKC>);
+							this.submitted.Fire(key as ToStr<TKC>, prev);
 						},
 						() => {},
 					);
 
-					const popup = popupController.justCreatePopup(p);
-					popup.instance.Parent = Interface.getInterface();
-					popup.enable();
+					popupController.showPopup(p);
 				} else {
-					this.gui.BackgroundColor3 = this.activeColor;
+					this.gui.BackgroundColor3 = buttonColorActive;
 
 					const actionName = "peKeySelection";
 					ContextActionService.BindActionAtPriority(
@@ -56,7 +56,7 @@ export class KeyChooserControl extends Control<KeyChooserControlDefinition> {
 								const prev = this.value.get();
 								this.value.set(input.KeyCode.Name);
 								this.submitted.Fire(input.KeyCode.Name, prev);
-								this.gui.BackgroundColor3 = this.color;
+								this.gui.BackgroundColor3 = buttonColor;
 							}
 						},
 						false,
@@ -69,5 +69,16 @@ export class KeyChooserControl extends Control<KeyChooserControlDefinition> {
 				}
 			});
 		});
+	}
+}
+
+export class KeyChooserControl extends _KeyChooserControl<false> {
+	constructor(gui: KeyChooserControlDefinition) {
+		super(gui, SelectButtonPopup);
+	}
+}
+export class KeyOrStringChooserControl extends _KeyChooserControl<true> {
+	constructor(gui: KeyChooserControlDefinition) {
+		super(gui, SelectButtonPopupWithCustomString);
 	}
 }

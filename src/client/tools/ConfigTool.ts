@@ -280,7 +280,7 @@ export class ConfigTool extends ToolBase {
 	}
 
 	selectBlockByUuid(uuid: BlockUuid) {
-		this.selected.push(this.targetPlot.get().getBlock(uuid));
+		this.selected.setRange([this.targetPlot.get().getBlock(uuid)]);
 	}
 	unselectAll() {
 		this.selected.clear();

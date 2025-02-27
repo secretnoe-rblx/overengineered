@@ -92,9 +92,9 @@ export class ConfigControlBase<
 		this._v.submit(value);
 	}
 
-	protected multi(): V | undefined {
+	protected multiOf<V>(values: Values<V>): V | undefined {
 		let prev: V | undefined = undefined;
-		for (const [, v] of pairs(this._v.get())) {
+		for (const [, v] of pairs(values)) {
 			if (prev === undefined) {
 				prev = v;
 				continue;
@@ -106,6 +106,9 @@ export class ConfigControlBase<
 		}
 
 		return prev;
+	}
+	protected multi(): V | undefined {
+		return this.multiOf(this._v.get());
 	}
 	protected multiMap<U extends defined>(func: (key: keyof Values<V>, value: V) => U): Values<U> {
 		return Objects.mapValues(this._v.get(), (k, v) => func(k, v));

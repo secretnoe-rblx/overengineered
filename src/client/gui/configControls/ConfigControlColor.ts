@@ -26,43 +26,36 @@ class ColorControl extends Control<ConfigControlColorDefinition["Control"]> {
 		this.parent(new Color4TextBox(gui.RGBA, v, allowAlpha));
 		this.parent(new ColorVisualizerWithAlpha(gui.Preview, v.value));
 
-		this.onInject((di) => {
-			task.spawn(() => {
-				task.wait();
+		this.$onInjectAuto((popupController: PopupController) => {
+			const scale = (Anim.findScreen(gui)?.FindFirstChild("UIScale") as UIScale | undefined)?.Scale ?? 1;
 
-				const popupController = di.tryResolve<PopupController>();
-				if (!popupController) return;
+			this.parent(new Control(gui.EditControl)) //
+				.addButtonAction(() => {
+					const mousePos = UserInputService.GetMouseLocation().div(scale);
 
-				const scale = (Anim.findScreen(gui)?.FindFirstChild("UIScale") as UIScale | undefined)?.Scale ?? 1;
+					const template = Interface.getInterface<{
+						Floating: {
+							Color: GuiObject & { Content: GuiObject & { Control: Color4ChooserDefinition } };
+						};
+					}>().Floating.Color;
+					const colorGui = template.Clone();
+					colorGui.Position = new UDim2(0, mousePos.X, 0, mousePos.Y);
 
-				this.parent(new Control(gui.EditControl)) //
-					.addButtonAction(() => {
-						const mousePos = UserInputService.GetMouseLocation().div(scale);
+					const window = new Control(colorGui);
+					const color = window.parent(new Color4Chooser(colorGui.Content.Control, v, allowAlpha));
 
-						const template = Interface.getInterface<{
-							Floating: {
-								Color: GuiObject & { Content: GuiObject & { Control: Color4ChooserDefinition } };
-							};
-						}>().Floating.Color;
-						const colorGui = template.Clone();
-						colorGui.Position = new UDim2(0, mousePos.X, 0, mousePos.Y);
+					const popup = popupController.showPopup(window);
 
-						const window = new Control(colorGui);
-						const color = window.parent(new Color4Chooser(colorGui.Content.Control, v, allowAlpha));
-
-						const popup = popupController.showPopup(window);
-
-						let isInside = false;
-						colorGui.MouseEnter.Connect(() => (isInside = true));
-						colorGui.MouseLeave.Connect(() => (isInside = false));
-						popup.event.subInput((ih) => {
-							ih.onMouse1Down(() => {
-								if (isInside) return;
-								popup.destroy();
-							}, true);
-						});
+					let isInside = false;
+					colorGui.MouseEnter.Connect(() => (isInside = true));
+					colorGui.MouseLeave.Connect(() => (isInside = false));
+					popup.event.subInput((ih) => {
+						ih.onMouse1Down(() => {
+							if (isInside) return;
+							popup.destroy();
+						}, true);
 					});
-			});
+				});
 		});
 
 		this.parent(new Control(gui.UnsetControl)) //
@@ -116,5 +109,22 @@ export class ConfigControlColor extends ConfigControlBase<ConfigControlColorDefi
 		const stuff = this.event.addObservable(Observables.createObservableFromMultiple({ color, alpha }));
 
 		return this.initToObservable(stuff, updateType);
+	}
+}
+
+export class ConfigControlColor3 extends ConfigControlBase<ConfigControlColorDefinition, Color3> {
+	constructor(gui: ConfigControlColorDefinition, name: string, defaultColor: Color3) {
+		super(gui, name);
+
+		const control = this.parent(new ColorControl(gui.Control, { alpha: 1, color: defaultColor }, false));
+
+		const c3 = this.event.addObservable(
+			control.value.value.fCreateBased(
+				(c) => c.color,
+				(c) => ({ alpha: 1, color: c }),
+			),
+		);
+		this.initFromMultiWithDefault(c3, () => defaultColor);
+		this.event.subscribe(control.value.submitted, (value) => this.submit(this.multiMap(() => value.color)));
 	}
 }

@@ -1,4 +1,3 @@
-import { ButtonAnimatedClickComponent } from "engine/client/gui/ButtonAnimatedClickComponent";
 import { Control } from "engine/client/gui/Control";
 import { Transforms } from "engine/shared/component/Transforms";
 import { ObservableValue } from "engine/shared/event/ObservableValue";
@@ -22,7 +21,7 @@ class _SwitchControl<T extends string, AllowNull extends boolean> extends Contro
 	readonly submitted = this._submitted.asReadonly();
 	readonly value;
 
-	constructor(gui: SwitchControlDefinition, options: readonly [key: T, item: SwitchControlItem][]) {
+	constructor(gui: SwitchControlDefinition, options: readonly (readonly [key: T, item: SwitchControlItem])[]) {
 		super(gui);
 		this.value = new ObservableValue<TAllowNull<T, AllowNull>>(options[0][0]);
 
@@ -46,7 +45,6 @@ class _SwitchControl<T extends string, AllowNull extends boolean> extends Contro
 			const button = this.parent(new Control(template())) //
 				.setButtonText(option.name ?? key)
 				.addButtonAction(() => set(key));
-			button.getComponent(ButtonAnimatedClickComponent);
 
 			button
 				.valuesComponent() //

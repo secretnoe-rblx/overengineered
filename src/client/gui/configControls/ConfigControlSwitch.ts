@@ -22,7 +22,11 @@ export class ConfigControlSwitch<T extends string> extends ConfigControlBase<
 	T,
 	ConfigControlSwitchDefinitionParts
 > {
-	constructor(gui: ConfigControlSwitchDefinition, name: string, items: readonly [key: T, item: SwitchControlItem][]) {
+	constructor(
+		gui: ConfigControlSwitchDefinition,
+		name: string,
+		items: readonly (readonly [key: T, item: SwitchControlItem])[],
+	) {
 		super(gui, name);
 
 		const control = this.parent(new SwitchControl<T>(gui.Control, items));

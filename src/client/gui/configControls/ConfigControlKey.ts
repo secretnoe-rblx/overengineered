@@ -1,5 +1,5 @@
 import { ConfigControlBase } from "client/gui/configControls/ConfigControlBase";
-import { KeyChooserControl } from "client/gui/controls/KeyChooserControl";
+import { KeyChooserControl, KeyOrStringChooserControl } from "client/gui/controls/KeyChooserControl";
 import { Control } from "engine/client/gui/Control";
 import type {
 	ConfigControlBaseDefinition,
@@ -27,6 +27,24 @@ export class ConfigControlKey extends ConfigControlBase<
 		super(gui, name);
 
 		const control = this.parent(new KeyChooserControl(this.parts.Control));
+
+		this.initFromMultiWithDefault(control.value, () => "Unknown");
+		this.event.subscribe(control.submitted, (value) => this.submit(this.multiMap(() => value)));
+
+		this.parent(new Control(this.parts.UnsetControl)) //
+			.addButtonAction(() => this.submit(this.multiMap(() => "Unknown")));
+	}
+}
+
+export class ConfigControlKeyOrString extends ConfigControlBase<
+	ConfigControlBaseDefinition,
+	KeyCode | string | "Unknown",
+	ConfigControlKeyDefinitionParts
+> {
+	constructor(gui: ConfigControlBaseDefinition & ConfigControlKeyDefinitionParts, name: string) {
+		super(gui, name);
+
+		const control = this.parent(new KeyOrStringChooserControl(this.parts.Control));
 
 		this.initFromMultiWithDefault(control.value, () => "Unknown");
 		this.event.subscribe(control.submitted, (value) => this.submit(this.multiMap(() => value)));

@@ -52,6 +52,7 @@ const definition = {
 		},
 		colorMixing: {
 			displayName: "Color Priority",
+			tooltip: "Method of determining the resulting color of this lamp",
 			types: {
 				enum: inferEnumLogicType({
 					config: "paint",

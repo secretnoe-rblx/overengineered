@@ -13,10 +13,12 @@ export type ConfigControlButtonDefinition = ConfigControlBaseDefinition & {
 	readonly Control: ToggleControlDefinition;
 };
 export class ConfigControlButton extends ConfigControlBase<ConfigControlButtonDefinition, never> {
+	readonly button;
+
 	constructor(gui: ConfigControlButtonDefinition, name: string, action: () => void) {
 		super(gui, name);
 
-		this.parent(new Control(gui.Control)) //
+		this.button = this.parent(new Control(gui.Control)) //
 			.addButtonAction(action);
 	}
 }

@@ -1,11 +1,11 @@
 import { NumberTextBoxControl } from "client/gui/controls/NumberTextBoxControl";
 import { ButtonControl } from "engine/client/gui/Button";
-import { Control } from "engine/client/gui/Control";
+import { PartialControl } from "engine/client/gui/PartialControl";
 import { ObservableValue } from "engine/shared/event/ObservableValue";
 import { Signal } from "engine/shared/event/Signal";
 import { Colors } from "shared/Colors";
 
-export type ByteEditorDefinition = GuiObject & Partial<ByteEditorDefinitionParts>;
+export type ByteEditorDefinition = GuiObject;
 export type ByteEditorDefinitionParts = {
 	readonly Buttons: Frame & {
 		readonly b1: TextButton;
@@ -20,7 +20,7 @@ export type ByteEditorDefinitionParts = {
 	readonly TextBox: TextBox;
 };
 
-export class ByteEditor extends Control<ByteEditorDefinition> {
+export class ByteEditor extends PartialControl<ByteEditorDefinitionParts> {
 	readonly submitted = new Signal<(value: number) => void>();
 	readonly value = new ObservableValue<number>(0);
 
@@ -29,13 +29,10 @@ export class ByteEditor extends Control<ByteEditorDefinition> {
 	private readonly buttonColor;
 	private readonly buttonColorActive;
 
-	constructor(gui: ByteEditorDefinition, parts?: ByteEditorDefinitionParts) {
+	constructor(gui: GuiObject) {
 		super(gui);
 
-		parts = {
-			Buttons: parts?.Buttons ?? Control.waitForChild(gui, "Buttons"),
-			TextBox: parts?.TextBox ?? Control.waitForChild(gui, "TextBox"),
-		};
+		const parts = this.parts;
 
 		this.buttonColor = parts.Buttons.b2.BackgroundColor3;
 		this.buttonColorActive = Colors.newGui.blue;

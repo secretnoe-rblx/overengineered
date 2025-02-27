@@ -1,4 +1,4 @@
-import { KeyOrStringChooserControl } from "client/gui/controls/KeyOrStringChooserControl";
+import { KeyOrStringChooserControl } from "client/gui/controls/KeyChooserControl";
 import { NumberTextBoxControl } from "client/gui/controls/NumberTextBoxControl";
 import { ButtonControl } from "engine/client/gui/Button";
 import { Control } from "engine/client/gui/Control";
@@ -6,7 +6,7 @@ import { ComponentChildren } from "engine/shared/component/ComponentChildren";
 import { ObservableValue } from "engine/shared/event/ObservableValue";
 import { ArgsSignal } from "engine/shared/event/Signal";
 import { SubmittableValue } from "engine/shared/event/SubmittableValue";
-import type { KeyOrStringChooserControlDefinition } from "client/gui/controls/KeyOrStringChooserControl";
+import type { KeyChooserControlDefinition } from "client/gui/controls/KeyChooserControl";
 import type { NumberTextBoxControlDefinition } from "client/gui/controls/NumberTextBoxControl";
 
 // eslint-disable-next-line prettier/prettier
@@ -30,7 +30,7 @@ export type MultiKeyPart = {
 
 type MultiKeyPartControlDefinition = GuiObject & {
 	readonly Number: NumberTextBoxControlDefinition;
-	readonly Button: Frame & { Button: KeyOrStringChooserControlDefinition };
+	readonly Button: Frame & { Button: KeyChooserControlDefinition };
 	readonly DeleteButton: GuiButton;
 };
 class MultiKeyPartControl extends Control<MultiKeyPartControlDefinition> {
@@ -75,7 +75,7 @@ class MultiKeyPartControl extends Control<MultiKeyPartControlDefinition> {
 export type MultiKeyNumberControlDefinition = GuiObject & {
 	readonly Template: GuiObject & {
 		readonly Number: NumberTextBoxControlDefinition;
-		readonly Button: Frame & { Button: KeyOrStringChooserControlDefinition };
+		readonly Button: Frame & { Button: KeyChooserControlDefinition };
 		readonly DeleteButton: GuiButton;
 	};
 	readonly Add: GuiObject & {

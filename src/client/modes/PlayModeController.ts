@@ -40,10 +40,15 @@ export class PlayModeController extends HostedService {
 			mode.disable();
 		}
 
-		this.event.subscribeObservable(popupController.isShown, (shown) => {
-			const active = this.playmode.get();
-			if (active) this.modes[active].setEnabled(!shown);
-		});
+		// TODO: !!important!! this commented code disables the current play mode upon opening any popup, which is usually fine but not always
+		// for example, the config tool does not like being disabled when it's the one who opened the popup (byte array editor for example)
+		// i see no other way of fixing this right now, so this code is disabled
+		// i don't know whether it's fine to disable this or not, so testing required
+
+		// this.event.subscribeObservable(popupController.isShown, (shown) => {
+		// 	const active = this.playmode.get();
+		// 	if (active) this.modes[active].setEnabled(!shown);
+		// });
 
 		this.event.subscribeObservablePrev(this.playmode, (mode, prev) => {
 			this.callImmediateSetMode(mode, prev);
@@ -57,6 +62,10 @@ export class PlayModeController extends HostedService {
 			spawn(() => requestMode("build"));
 			LocalPlayer.spawnEvent.Connect(() => spawn(() => requestMode("build")));
 		});
+	}
+
+	get(): PlayModes | undefined {
+		return this.playmode.get();
 	}
 
 	private callImmediateSetMode(mode: PlayModes | undefined, prev: PlayModes | undefined) {

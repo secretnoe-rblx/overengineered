@@ -19,11 +19,11 @@ type Item = {
 };
 
 export class ConfigControlDropdown<T extends string> extends ConfigControlBase<ConfigControlDropdownDefinition, T> {
-	constructor(gui: ConfigControlDropdownDefinition, name: string, items: { readonly [k in T]: Item }) {
+	constructor(gui: ConfigControlDropdownDefinition, name: string, items: readonly (readonly [key: T, item: Item])[]) {
 		super(gui, name);
 
 		const control = this.parent(new DropdownList<T>(gui.Control));
-		for (const [k, { name, description }] of pairs(items)) {
+		for (const [k, { name, description }] of items) {
 			const btn = control.addItem(k, name);
 			if (description) {
 				btn.setTooltipText(description);

@@ -18,6 +18,7 @@ import { Transforms } from "engine/shared/component/Transforms";
 import { ObservableValue } from "engine/shared/event/ObservableValue";
 import { Objects } from "engine/shared/fixes/Objects";
 import type { ConfigControlTemplateList } from "client/gui/configControls/ConfigControlsList";
+import type { PlayModeController } from "client/modes/PlayModeController";
 import type { PlayerDataStorage } from "client/PlayerDataStorage";
 import type { Component } from "engine/shared/component/Component";
 
@@ -127,8 +128,10 @@ export class SettingsPopup extends Control<SettingsPopup2Definition> {
 		const gui = template.Clone();
 		super(gui);
 
-		this.$onInjectAuto((playerData: PlayerDataStorage) => {
+		this.$onInjectAuto((playerData: PlayerDataStorage, playModeController: PlayModeController) => {
 			const original = playerData.config.get();
+
+			const mode = playModeController.get();
 
 			const content = this.parent(new Content(gui.Content.Content, playerData.config));
 			const sidebar = this.parent(new Sidebar(gui.Content.Sidebar.ScrollingFrame));
@@ -142,7 +145,9 @@ export class SettingsPopup extends Control<SettingsPopup2Definition> {
 			sidebar.addButton("controls", 18626685039, () => content.set(PlayerSettingsControls));
 			sidebar.addButton("physics", 18626685039, () => content.set(PlayerSettingsPhysics));
 			sidebar.addButton("blacklist", 18626826844, () => content.set(PlayerSettingsBlacklist));
-			sidebar.addButton("tutorial", 98943721557973, () => content.set(PlayerSettingsTutorial));
+			sidebar
+				.addButton("tutorial", 98943721557973, () => content.set(PlayerSettingsTutorial))
+				.setButtonInteractable(mode === "build");
 
 			this.onEnable(() => content.set(PlayerSettingsGeneral));
 

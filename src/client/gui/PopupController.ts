@@ -113,10 +113,10 @@ export class PopupController extends HostedService {
 	}
 
 	showPopup(control: InstanceComponent<GuiObject>): Popup {
-		return this.children.add(this.justCreatePopup(control));
+		return this.children.add(PopupController.justCreatePopup(control));
 	}
 
-	justCreatePopup(control: InstanceComponent<GuiObject>): Popup {
+	static justCreatePopup(control: InstanceComponent<GuiObject>): Popup {
 		return new Popup(control);
 	}
 }
