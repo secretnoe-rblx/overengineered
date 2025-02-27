@@ -1,7 +1,7 @@
 import { HostedService } from "engine/shared/di/HostedService";
 import { BidirectionalRemoteEvent } from "engine/shared/event/PERemoteEvent";
 import { ArgsSignal } from "engine/shared/event/Signal";
-import type { CreatableRemoteEvents } from "engine/shared/event/RemoteEventBase";
+import type { CreatableRemoteEvents } from "engine/shared/event/PERemoteEvent";
 import type { EEEffect, EffectCreator } from "shared/effects/EffectBase";
 
 @injectable

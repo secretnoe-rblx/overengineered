@@ -1,6 +1,6 @@
 import { RunService, Workspace } from "@rbxts/services";
 import { InstanceComponent } from "engine/shared/component/InstanceComponent";
-import { AutoC2SRemoteEvent } from "engine/shared/event/C2SRemoteEvent";
+import { A2SRemoteEvent } from "engine/shared/event/PERemoteEvent";
 import { RemoteEvents } from "shared/RemoteEvents";
 import { ReplicatedAssets } from "shared/ReplicatedAssets";
 import { ModuleCollection } from "shared/weapons/WeaponModuleSystem";
@@ -33,17 +33,17 @@ projectileFolder.Name = "Projectiles";
 export type ProjectileType = "KINETIC" | "EXPLOSIVE" | "ENERGY";
 
 export class WeaponProjectile extends InstanceComponent<BasePart> {
-	static readonly spawn = new AutoC2SRemoteEvent<{
-		readonly startPosition: Vector3;
-		readonly projectileType: ProjectileType;
-		readonly projectilePart: BasePart;
-		readonly baseVelocity: Vector3;
-		readonly baseDamage: number;
-		readonly lifetime?: number; //<--- seconds
-		readonly modifier: projectileModifier; // <------ calculate it yourself!
-	}>("projectile_spawn", "RemoteEvent");
+	// static readonly spawn = new AutoC2SRemoteEvent<{
+	// 	readonly startPosition: Vector3;
+	// 	readonly projectileType: ProjectileType;
+	// 	readonly projectilePart: BasePart;
+	// 	readonly baseVelocity: Vector3;
+	// 	readonly baseDamage: number;
+	// 	readonly lifetime?: number; //<--- seconds
+	// 	readonly modifier: projectileModifier; // <------ calculate it yourself!
+	// }>("projectile_spawn", "RemoteEvent");
 
-	static readonly sync_hit = new AutoC2SRemoteEvent<{
+	static readonly sync_hit = new A2SRemoteEvent<{
 		//todo: finish sync
 		readonly startPosition: Vector3;
 		readonly projectileType: ProjectileType;
@@ -53,7 +53,7 @@ export class WeaponProjectile extends InstanceComponent<BasePart> {
 		readonly lifetime?: number; //<--- seconds
 	}>("projectile_sync_hit", "RemoteEvent");
 
-	static readonly sync_position = new AutoC2SRemoteEvent<{
+	static readonly sync_position = new A2SRemoteEvent<{
 		//todo: finish sync
 		readonly projectile: WeaponProjectile;
 	}>("projectile_sync_position", "RemoteEvent");

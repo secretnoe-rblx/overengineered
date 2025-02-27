@@ -1,4 +1,4 @@
-import { AutoC2SRemoteEvent } from "engine/shared/event/C2SRemoteEvent";
+import { A2SRemoteEvent } from "engine/shared/event/PERemoteEvent";
 import { Strings } from "engine/shared/fixes/String.propmacro";
 import { InstanceBlockLogic as InstanceBlockLogic } from "shared/blockLogic/BlockLogic";
 import { BlockConfigDefinitions } from "shared/blocks/BlockConfigDefinitions";
@@ -35,7 +35,7 @@ type ScreenBlock = BlockModel & {
 export type { Logic as ScreenBlockLogic };
 class Logic extends InstanceBlockLogic<typeof definition, ScreenBlock> {
 	static readonly events = {
-		update: new AutoC2SRemoteEvent<{
+		update: new A2SRemoteEvent<{
 			readonly block: ScreenBlock;
 			readonly color: Color3;
 			readonly text: string;

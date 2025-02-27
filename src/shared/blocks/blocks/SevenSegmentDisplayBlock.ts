@@ -1,4 +1,4 @@
-import { AutoC2SRemoteEvent } from "engine/shared/event/C2SRemoteEvent";
+import { A2SRemoteEvent } from "engine/shared/event/PERemoteEvent";
 import { InstanceBlockLogic } from "shared/blockLogic/BlockLogic";
 import { BlockCreation } from "shared/blocks/BlockCreation";
 import type { BlockLogicFullBothDefinitions, InstanceBlockLogicArgs } from "shared/blockLogic/BlockLogic";
@@ -21,7 +21,7 @@ const definition = {
 export type { Logic as SevenSegmentDisplayBlockLogic };
 class Logic extends InstanceBlockLogic<typeof definition> {
 	static readonly events = {
-		update: new AutoC2SRemoteEvent<{
+		update: new A2SRemoteEvent<{
 			readonly block: BlockModel;
 			readonly code: number;
 		}>("sevensegmentdisplay_update"),

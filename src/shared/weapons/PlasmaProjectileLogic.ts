@@ -1,13 +1,13 @@
 import { Workspace } from "@rbxts/services";
 import { Easing } from "engine/shared/component/Easing";
-import { AutoC2SRemoteEvent } from "engine/shared/event/C2SRemoteEvent";
+import { A2SRemoteEvent } from "engine/shared/event/PERemoteEvent";
 import { WeaponProjectile } from "shared/weapons/BaseProjectileLogic";
 import type { modifierValue, projectileModifier } from "shared/weapons/BaseProjectileLogic";
 
 export class PlasmaProjectile extends WeaponProjectile {
 	private startSize = this.projectilePart.Size;
 	private readonly vectorForce: VectorForce;
-	static readonly spawn = new AutoC2SRemoteEvent<{
+	static readonly spawn = new A2SRemoteEvent<{
 		readonly startPosition: Vector3;
 		readonly baseVelocity: Vector3;
 		readonly baseDamage: number;

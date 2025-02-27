@@ -1,7 +1,7 @@
 import { HostedService } from "engine/shared/di/HostedService";
 import { BidirectionalRemoteEvent } from "engine/shared/event/PERemoteEvent";
 import { PlayerConfigDefinition } from "shared/config/PlayerConfig";
-import type { CreatableRemoteEvents } from "engine/shared/event/RemoteEventBase";
+import type { CreatableRemoteEvents } from "engine/shared/event/PERemoteEvent";
 import type { PlayerDatabase } from "server/database/PlayerDatabase";
 import type { ServerPlayersController } from "server/ServerPlayersController";
 import type { SharedPlots } from "shared/building/SharedPlots";

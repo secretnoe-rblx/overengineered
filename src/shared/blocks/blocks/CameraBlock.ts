@@ -1,7 +1,7 @@
 import { Lighting, RunService, Workspace } from "@rbxts/services";
 import { Component } from "engine/shared/component/Component";
 import { Element } from "engine/shared/Element";
-import { AutoC2SRemoteEvent } from "engine/shared/event/C2SRemoteEvent";
+import { A2SRemoteEvent } from "engine/shared/event/PERemoteEvent";
 import { Objects } from "engine/shared/fixes/Objects";
 import { InstanceBlockLogic } from "shared/blockLogic/BlockLogic";
 import { BlockCreation } from "shared/blocks/BlockCreation";
@@ -105,7 +105,7 @@ const enabledCameras = new Set<Logic>();
 export type { Logic as CameraBlockLogic };
 class Logic extends InstanceBlockLogic<typeof definition> {
 	static readonly events = {
-		update: new AutoC2SRemoteEvent<{ readonly block: BlockModel; readonly enabled: boolean }>("b_camera_update"),
+		update: new A2SRemoteEvent<{ readonly block: BlockModel; readonly enabled: boolean }>("b_camera_update"),
 	} as const;
 
 	constructor(block: InstanceBlockLogicArgs) {

@@ -1,4 +1,4 @@
-import { AutoC2SRemoteEvent } from "engine/shared/event/C2SRemoteEvent";
+import { A2SRemoteEvent } from "engine/shared/event/PERemoteEvent";
 import { InstanceBlockLogic } from "shared/blockLogic/BlockLogic";
 import { BlockCreation } from "shared/blocks/BlockCreation";
 import type { BlockLogicFullBothDefinitions, InstanceBlockLogicArgs } from "shared/blockLogic/BlockLogic";
@@ -86,7 +86,7 @@ const definition = {
 export { Logic as PistonBlockLogic };
 export class Logic extends InstanceBlockLogic<typeof definition, Piston> {
 	static readonly events = {
-		update: new AutoC2SRemoteEvent<{
+		update: new A2SRemoteEvent<{
 			readonly block: BlockModel;
 			readonly speed: number;
 			readonly position: number;

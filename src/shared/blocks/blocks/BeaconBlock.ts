@@ -1,5 +1,5 @@
 import { RunService } from "@rbxts/services";
-import { AutoC2SRemoteEvent } from "engine/shared/event/C2SRemoteEvent";
+import { A2SRemoteEvent } from "engine/shared/event/PERemoteEvent";
 import { InstanceBlockLogic } from "shared/blockLogic/BlockLogic";
 import { BlockCreation } from "shared/blocks/BlockCreation";
 import { Colors } from "shared/Colors";
@@ -63,7 +63,7 @@ interface UpdateData {
 export type { Logic as BeaconBlockLogic };
 class Logic extends InstanceBlockLogic<typeof definition> {
 	static readonly events = {
-		update: new AutoC2SRemoteEvent<UpdateData>("beacon_update"),
+		update: new A2SRemoteEvent<UpdateData>("beacon_update"),
 	} as const;
 
 	static updateLedColor(data: UpdateData) {

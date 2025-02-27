@@ -1,5 +1,5 @@
 import { Colors } from "engine/shared/Colors";
-import { AutoC2SRemoteEvent } from "engine/shared/event/C2SRemoteEvent";
+import { A2SRemoteEvent } from "engine/shared/event/PERemoteEvent";
 import { InstanceBlockLogic } from "shared/blockLogic/BlockLogic";
 import { inferEnumLogicType } from "shared/blockLogic/BlockLogicTypes";
 import { BlockConfigDefinitions } from "shared/blocks/BlockConfigDefinitions";
@@ -81,7 +81,7 @@ interface UpdateData {
 export type { Logic as LampBlockLogic };
 class Logic extends InstanceBlockLogic<typeof definition> {
 	static readonly events = {
-		update: new AutoC2SRemoteEvent<UpdateData>("lamp_update"),
+		update: new A2SRemoteEvent<UpdateData>("lamp_update"),
 	} as const;
 
 	constructor(args: InstanceBlockLogicArgs) {

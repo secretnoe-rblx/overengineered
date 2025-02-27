@@ -1,4 +1,4 @@
-import { AutoC2SRemoteEvent } from "engine/shared/event/C2SRemoteEvent";
+import { A2SRemoteEvent } from "engine/shared/event/PERemoteEvent";
 import { InstanceBlockLogic as InstanceBlockLogic } from "shared/blockLogic/BlockLogic";
 import { BlockCreation } from "shared/blocks/BlockCreation";
 import type { BlockLogicFullBothDefinitions, InstanceBlockLogicArgs } from "shared/blockLogic/BlockLogic";
@@ -27,7 +27,7 @@ const definition = {
 export type { Logic as BracedShaftBlockLogic };
 class Logic extends InstanceBlockLogic<typeof definition> {
 	static readonly events = {
-		init: new AutoC2SRemoteEvent<{ readonly block: BlockModel; readonly angle: number }>("bracedshard_init"),
+		init: new A2SRemoteEvent<{ readonly block: BlockModel; readonly angle: number }>("bracedshard_init"),
 	} as const;
 
 	constructor(block: InstanceBlockLogicArgs) {

@@ -1,4 +1,4 @@
-import { AutoC2SRemoteEvent } from "engine/shared/event/C2SRemoteEvent";
+import { A2SRemoteEvent } from "engine/shared/event/PERemoteEvent";
 import { InstanceBlockLogic as InstanceBlockLogic } from "shared/blockLogic/BlockLogic";
 import { BlockCreation } from "shared/blocks/BlockCreation";
 import type { BlockLogicFullBothDefinitions, InstanceBlockLogicArgs } from "shared/blockLogic/BlockLogic";
@@ -31,7 +31,7 @@ const definition = {
 export type { Logic as DisconnectBlockLogic };
 class Logic extends InstanceBlockLogic<typeof definition> {
 	static readonly events = {
-		disconnect: new AutoC2SRemoteEvent<{ readonly block: BlockModel }>("b_disconnectblock_disconnect"),
+		disconnect: new A2SRemoteEvent<{ readonly block: BlockModel }>("b_disconnectblock_disconnect"),
 	} as const;
 
 	constructor(block: InstanceBlockLogicArgs) {

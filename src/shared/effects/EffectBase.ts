@@ -1,5 +1,4 @@
-import type { BidirectionalRemoteEvent } from "engine/shared/event/PERemoteEvent";
-import type { CreatableRemoteEvents } from "engine/shared/event/RemoteEventBase";
+import type { BidirectionalRemoteEvent, CreatableRemoteEvents } from "engine/shared/event/PERemoteEvent";
 
 export interface EEEffect<T> {
 	readonly event: BidirectionalRemoteEvent<T>;

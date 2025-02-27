@@ -1,4 +1,4 @@
-import { AutoC2SRemoteEvent } from "engine/shared/event/C2SRemoteEvent";
+import { A2SRemoteEvent } from "engine/shared/event/PERemoteEvent";
 import { InstanceBlockLogic as InstanceBlockLogic } from "shared/blockLogic/BlockLogic";
 import { BlockCreation } from "shared/blocks/BlockCreation";
 import type { BlockLogicFullBothDefinitions, InstanceBlockLogicArgs } from "shared/blockLogic/BlockLogic";
@@ -74,16 +74,16 @@ const definition = {
 export type { Logic as LedDisplayBlockLogic };
 class Logic extends InstanceBlockLogic<typeof definition> {
 	static readonly events = {
-		prepare: new AutoC2SRemoteEvent<{
+		prepare: new A2SRemoteEvent<{
 			readonly block: BlockModel;
 			readonly baseColor: Color3;
 		}>("leddisplay_prepare"), // TODO: fix this shit crap
-		update: new AutoC2SRemoteEvent<{
+		update: new A2SRemoteEvent<{
 			readonly block: BlockModel;
 			readonly color: Color3;
 			readonly frame: Frame;
 		}>("leddisplay_update"),
-		fill: new AutoC2SRemoteEvent<{
+		fill: new A2SRemoteEvent<{
 			readonly block: BlockModel;
 			readonly color: Color3;
 			readonly frames: Frame[][];

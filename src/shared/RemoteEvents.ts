@@ -1,4 +1,4 @@
-import { AutoC2SRemoteEvent } from "engine/shared/event/C2SRemoteEvent";
+import { A2SRemoteEvent } from "engine/shared/event/PERemoteEvent";
 import { ExplosionEffect } from "shared/effects/ExplosionEffect";
 import { FireEffect } from "shared/effects/FireEffect";
 import { ImpactSoundEffect } from "shared/effects/ImpactSoundEffect";
@@ -24,9 +24,9 @@ export namespace RemoteEvents {
 		host.services.registerSingletonClass(ParticleEffect).autoInit();
 	}
 
-	export const Burn = new AutoC2SRemoteEvent<BasePart[]>("burn");
-	export const ImpactBreak = new AutoC2SRemoteEvent<BasePart[]>("impact_break");
-	export const Explode = new AutoC2SRemoteEvent<ExplodeArgs>("explode");
+	export const Burn = new A2SRemoteEvent<BasePart[]>("burn");
+	export const ImpactBreak = new A2SRemoteEvent<BasePart[]>("impact_break");
+	export const Explode = new A2SRemoteEvent<ExplodeArgs>("explode");
 
 	// empty method just to trigger the constructors
 	export function initialize() {}
