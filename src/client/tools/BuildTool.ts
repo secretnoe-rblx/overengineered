@@ -535,7 +535,7 @@ namespace SinglePlaceController {
 			SoundController.getSounds().Build.BlockRotate.PlaybackSpeed = SoundController.randomSoundSpeed();
 			SoundController.getSounds().Build.BlockRotate.Play();
 
-			this.blockRotation.set(this.blockRotation.get().mul(rotation));
+			this.blockRotation.set(rotation.mul(this.blockRotation.get()));
 			this.updateBlockPosition();
 		}
 
