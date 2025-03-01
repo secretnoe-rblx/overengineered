@@ -7,7 +7,7 @@ export class DistanceHideController extends Component {
 	constructor() {
 		super();
 
-		const parts = [Workspace.WaitForChild("Plots"), Workspace.WaitForChild("Obstacles")];
+		const parts = [Workspace.WaitForChild("Obstacles")];
 
 		const transparencies = new Map<Instance & { Transparency: number }, number>();
 		for (const part of parts.map((p) => [p, ...p.GetDescendants()])) {

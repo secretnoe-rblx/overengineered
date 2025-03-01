@@ -1,10 +1,11 @@
-import { ReplicatedStorage, StarterGui, UserInputService, Workspace } from "@rbxts/services";
+import { ReplicatedStorage, StarterGui, UserInputService } from "@rbxts/services";
 import { Anim } from "client/gui/Anim";
 import { Interface } from "client/gui/Interface";
 import { ButtonControl } from "engine/client/gui/Button";
 import { HostedService } from "engine/shared/di/HostedService";
 import { ObservableValue } from "engine/shared/event/ObservableValue";
 import type { MainScreenLayout } from "client/gui/MainScreenLayout";
+import type { SharedPlots } from "shared/building/SharedPlots";
 
 @injectable
 export class HideInterfaceController extends HostedService {
@@ -13,7 +14,7 @@ export class HideInterfaceController extends HostedService {
 	private readonly guis = [Interface.getGameUI(), Interface.getUnscaledGameUI(), Interface.getInterface()] as const;
 	private currentUnhideScreen?: ScreenGui;
 
-	constructor(@inject mainScreen: MainScreenLayout) {
+	constructor(@inject mainScreen: MainScreenLayout, @inject plots: SharedPlots) {
 		super();
 
 		this.event.subscribeObservable(this.visible, (visible) => {
@@ -50,8 +51,8 @@ export class HideInterfaceController extends HostedService {
 			StarterGui.SetCoreGuiEnabled(Enum.CoreGuiType.Backpack, false);
 
 			// Plot owner gui hide
-			Workspace.Plots.GetChildren().forEach((plot) => {
-				const ownerGui = plot.FindFirstChild(ReplicatedStorage.Assets.PlotOwnerGui.Name) as
+			plots.plots.forEach((plot) => {
+				const ownerGui = plot.instance.FindFirstChild(ReplicatedStorage.Assets.PlotOwnerGui.Name) as
 					| BillboardGui
 					| undefined;
 				if (ownerGui) {

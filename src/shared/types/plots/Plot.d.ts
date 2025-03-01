@@ -1,7 +1,3 @@
-interface Workspace {
-	readonly Plots: Folder;
-}
-
 type PlotModel = Folder & {
 	readonly ___nominal: "plotModel";
 	//readonly PrimaryPart: BasePart;

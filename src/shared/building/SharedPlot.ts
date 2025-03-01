@@ -81,7 +81,7 @@ export class SharedPlot extends InstanceComponent<PlotModel> {
 
 	/** Is the provided `Instance` is a plot model */
 	static isPlot(model: Instance | undefined): model is PlotModel {
-		return model?.Parent === Workspace.Plots;
+		return model?.Parent === Workspace.FindFirstChild("Plots");
 	}
 
 	/** Is the provided instance a block on this plot */
