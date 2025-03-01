@@ -157,7 +157,7 @@ const logic: BlockLogicInfo = { definition, ctor: Logic };
 const list: BlockBuildersWithoutIdAndDefaults = {
 	lamp: {
 		displayName: "Lamp",
-		description: "A simple lamp. Turns on and off, but doesn't produce light yet.",
+		description: "A simple lamp. Turns on and off, or doesn't.",
 		weldRegionsSource: BlockCreation.WeldRegions.fAutomatic("cube"),
 		logic,
 		limit: 150,
