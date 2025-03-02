@@ -129,7 +129,13 @@ const getMouseTargetBlockPositionV2 = (
 	targetPosition = addBlockSize(block, normal, targetPosition);
 
 	if (gridEnabled) {
+		// костыль of fixing the plots position
+		targetPosition = targetPosition.add(new Vector3(0, 0.5, 0.5));
+
 		targetPosition = constrainPositionToGrid(block, normal, targetPosition);
+
+		// костыль of fixing the plots position
+		targetPosition = targetPosition.sub(new Vector3(0, 0.5, 0.5));
 	}
 
 	return targetPosition;
