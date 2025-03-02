@@ -1,3 +1,4 @@
+import { RunService } from "@rbxts/services";
 import { ColorChooser } from "client/gui/ColorChooser";
 import { ConfigControlButton } from "client/gui/configControls/ConfigControlButton";
 import { ConfigControlByte } from "client/gui/configControls/ConfigControlByte";
@@ -6,6 +7,7 @@ import { ConfigControlCheckbox } from "client/gui/configControls/ConfigControlCh
 import { ConfigControlColor3 } from "client/gui/configControls/ConfigControlColor";
 import { ConfigControlEmpty } from "client/gui/configControls/ConfigControlEmpty";
 import { ConfigControlKeyOrString } from "client/gui/configControls/ConfigControlKey";
+import { ConfigControlMulti } from "client/gui/configControls/ConfigControlMulti";
 import { ConfigControlNumber } from "client/gui/configControls/ConfigControlNumber";
 import { ConfigControlSlider } from "client/gui/configControls/ConfigControlSlider";
 import { ConfigControlString } from "client/gui/configControls/ConfigControlString";
@@ -31,6 +33,7 @@ import { BlockConfig } from "shared/blockLogic/BlockConfig";
 import { BlockWireManager } from "shared/blockLogic/BlockWireManager";
 import { Colors } from "shared/Colors";
 import type { ColorChooserDefinition } from "client/gui/ColorChooser";
+import type { ConfigControlMultiDefinition } from "client/gui/configControls/ConfigControlMulti";
 import type { ConfigControlTemplateList } from "client/gui/configControls/ConfigControlsList";
 import type { ByteEditorDefinitionParts } from "client/gui/controls/ByteEditorControl";
 import type { CheckBoxControlDefinition } from "client/gui/controls/CheckBoxControl";
@@ -910,6 +913,163 @@ class ConfigValueWrapper extends Control<ConfigValueWrapperDefinition> {
 	}
 }
 
+const clone = <T extends GuiObject>(instance: T): T => {
+	const clone = instance.Clone();
+	clone.Visible = true;
+
+	return clone;
+};
+namespace ControllableControls {
+	type args<k extends ControlKeys> = [
+		values: OfBlocks<Controls[k]["config"]>,
+		blockdef: VisualBlockConfigDefinition,
+		def: Omit<Primitives[k], "default" | "config">,
+	];
+
+	export class Number extends ConfigControlMulti<Controls["number"]["config"]> {
+		constructor(
+			gui: ConfigControlMultiDefinition,
+			name: string,
+			templates: ConfigControlTemplateList,
+			...[values, blockdef, def]: args<"number">
+		) {
+			super(gui, name);
+
+			this.parent(new ConfigControlCheckbox(clone(templates.Checkbox), "Smooth change")) //
+				.setValues(map(values, (v) => v.mode.type === "smooth"))
+				.submitted((v) => {
+					this.submit(
+						(values = map(v, (v, k) =>
+							Objects.deepCombine(values[k], { mode: { type: v ? "smooth" : "instant" } }),
+						)),
+					);
+					update();
+				});
+
+			const modeParent = this.parent(new ComponentChildren()).withParentInstance(gui);
+			const createSmoothMode = () => {
+				modeParent.clear();
+
+				const modes: readonly (readonly [BlockLogicTypes.NumberControlModesSmoothMode, SwitchControlItem])[] = [
+					[
+						"stopOnRelease",
+						{
+							name: "Stop on release",
+							description: "Stops upon releasing the key",
+						},
+					],
+					[
+						"stopOnDoublePress",
+						{
+							name: "Stop on double press",
+							description: "Stops upon pressing the same key twice",
+						},
+					],
+					[
+						"resetOnRelease",
+						{
+							name: "Reset on release",
+							description: "Smoothly resets upon releasing the key",
+						},
+					],
+					[
+						"instantResetOnRelease",
+						{
+							name: "Instant reset on release",
+							description: "Resets upon releasing the key",
+						},
+					],
+					[
+						"resetOnDoublePress",
+						{
+							name: "Reset on double press",
+							description: "Smoothly resets upon pressing the same key twice",
+						},
+					],
+					[
+						"instantResetOnDoublePress",
+						{
+							name: "Instant reset on double press",
+							description: "Resets upon pressing the same key twice",
+						},
+					],
+					[
+						"never",
+						{
+							name: "Never",
+							description: "Never stops or resets",
+						},
+					],
+				];
+
+				modeParent
+					.add(new ConfigControlSwitch(clone(templates.Switch), "Mode", modes))
+					.setValues(this.multiMap((k, v) => v.mode.smooth.mode));
+
+				modeParent
+					.add(
+						new ConfigControlSlider(clone(templates.Slider), "Speed", {
+							min: 0,
+							max: (def.clamp?.max ?? 200) - (def.clamp?.min ?? 0),
+						}),
+					)
+					.submitted((v) => {
+						this.submit(
+							(values = map(v, (v, k) =>
+								Objects.deepCombine(values[k], { mode: { smooth: { speed: v } } }),
+							)),
+						);
+						update();
+					});
+			};
+			const createInstantMode = () => {
+				modeParent.clear();
+
+				const modes: readonly (readonly [BlockLogicTypes.NumberControlModesResetMode, SwitchControlItem])[] = [
+					[
+						"onRelease",
+						{
+							name: "On release",
+							description: "Resets upon releasing the key",
+						},
+					],
+					[
+						"onDoublePress",
+						{
+							name: "On double press",
+							description: "Resets upon pressing the same key twice",
+						},
+					],
+					[
+						"never",
+						{
+							name: "Never",
+							description: "Does not reset",
+						},
+					],
+				];
+
+				modeParent
+					.add(new ConfigControlSwitch(clone(templates.Switch), "Mode", modes))
+					.setValues(this.multiMap((k, v) => v.mode.instant.mode));
+			};
+
+			const update = () => {
+				const mode = this.multiOf(this.multiMap((k, v) => v.mode.type));
+
+				if (mode === "instant") {
+					createInstantMode();
+				} else if (mode === "smooth") {
+					createSmoothMode();
+				} else if (!mode) {
+					modeParent.clear();
+				} else mode satisfies never;
+			};
+			this.valueChanged(update);
+		}
+	}
+}
+
 class ConfigAutoValueWrapper extends Control<ConfigValueWrapperDefinition> {
 	private readonly _submitted = new ArgsSignal<[config: BlocksConfigPart]>();
 	readonly submitted = this._submitted.asReadonly();
@@ -1062,12 +1222,6 @@ class ConfigAutoValueWrapper extends Control<ConfigValueWrapperDefinition> {
 			initControls();
 
 			if (true as boolean) {
-				const clone = <T extends GuiObject>(instance: T): T => {
-					const clone = instance.Clone();
-					clone.Visible = true;
-
-					return clone;
-				};
 				const templates: ConfigControlTemplateList = Interface.getInterface<{
 					Popups: {
 						Crossplatform: {
@@ -1079,11 +1233,7 @@ class ConfigAutoValueWrapper extends Control<ConfigValueWrapperDefinition> {
 				}>().Popups.Crossplatform.Settings.Content.Content.ScrollingFrame.Clone();
 
 				interface ConfigControl extends Control {
-					submitted(
-						func: (
-							value: OfBlocks<BlockLogicTypes.Primitives[keyof BlockLogicTypes.Primitives]["config"]>,
-						) => void,
-					): void;
+					submitted(func: (value: OfBlocks<prims[keys]["config"]>) => void): void;
 				}
 
 				type prims = BlockLogicTypes.Primitives;
@@ -1184,6 +1334,36 @@ class ConfigAutoValueWrapper extends Control<ConfigValueWrapperDefinition> {
 					readonly [k in keys]: retf<keys> | undefined;
 				};
 
+				interface controlConfigControl extends Control {
+					submitted(func: (value: OfBlocks<controlPrims[controlKeys]["config"]>) => void): void;
+				}
+
+				type controlPrims = Controls;
+				type controlKeys = keyof controlPrims;
+				type controlRetf<k extends controlKeys> = (
+					values: OfBlocks<controlPrims[k]["config"]>,
+					blockdef: VisualBlockConfigDefinition,
+					def: Omit<prims[k], "default">,
+				) => controlConfigControl | undefined;
+
+				const controlsControl = {
+					bool: undefined,
+					number: (values, blockdef, def) => {
+						return new ControllableControls.Number(
+							clone(templates.Multi),
+							blockdef.displayName,
+							templates,
+							values,
+							blockdef,
+							def,
+						);
+					},
+				} satisfies {
+					readonly [k in controlKeys]: controlRetf<k> | undefined;
+				} as {
+					readonly [k in controlKeys]: controlRetf<controlKeys> | undefined;
+				};
+
 				//
 
 				const cg = () => {
@@ -1206,7 +1386,35 @@ class ConfigAutoValueWrapper extends Control<ConfigValueWrapperDefinition> {
 
 						control.submitted((values) => {
 							this._submitted.Fire(
-								(configs = map(configs, (c, uuid) => ({ ...c, type: stype, config: values[uuid] }))),
+								(configs = map(configs, (c, uuid) => ({
+									...c,
+									type: stype,
+									config: values[uuid],
+								}))),
+							);
+						});
+						return control;
+					} else if (RunService.IsStudio()) {
+						const ctor = controlsControl[stype as controlKeys];
+						if (!ctor) return;
+
+						const def = definition.types[stype as controlKeys];
+						if (!def) return;
+
+						const control = ctor(
+							map(configs, (c) => c.controlConfig!),
+							definition,
+							def,
+						);
+						if (!control) return;
+
+						control.submitted((values) => {
+							this._submitted.Fire(
+								(configs = map(configs, (c, uuid) => ({
+									...c,
+									type: stype,
+									controlConfig: values[uuid],
+								}))),
 							);
 						});
 						return control;
@@ -1221,25 +1429,6 @@ class ConfigAutoValueWrapper extends Control<ConfigValueWrapperDefinition> {
 			}
 
 			const createGui = (): Controls.Base | undefined => {
-				if (stype === "unset") {
-					return Controls.controls[stype](
-						Controls.templates,
-						{ config: {} as BlockLogicTypes.UnsetValue },
-						{},
-						args,
-						{},
-					);
-				}
-				if (stype === "wire") {
-					return Controls.controls[stype](
-						Controls.templates,
-						{ config: undefined! },
-						map(configs, (c) => c.config),
-						args,
-						{},
-					);
-				}
-
 				const def = definition.types[stype];
 				if (!def) return;
 
@@ -1250,10 +1439,7 @@ class ConfigAutoValueWrapper extends Control<ConfigValueWrapperDefinition> {
 					return;
 				}
 
-				if (!isControllable) {
-					const cfg = map(configs, (c) => c.config);
-					return Controls.controls[stype](Controls.templates, def, cfg, args, configs);
-				}
+				if (!isControllable) return;
 
 				if (!(stype in Controls.extendedControls)) return;
 

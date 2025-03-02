@@ -79,14 +79,17 @@ export class ConfigControlBase<
 		});
 	}
 
-	protected valueChanged(func: (value: Values<V>) => void): void {
+	protected valueChanged(func: (value: Values<V>) => void): this {
 		this.event.subscribeObservable(this._v.value, func, true);
+		return this;
 	}
-	submitted(func: (value: Values<V>) => void): void {
+	submitted(func: (value: Values<V>) => void): this {
 		this.event.subscribe(this._v.submitted, func);
+		return this;
 	}
-	submittedMulti(func: (value: V | undefined) => void): void {
+	submittedMulti(func: (value: V | undefined) => void): this {
 		this.submitted(() => func(this.multi()));
+		return this;
 	}
 	protected submit(value: Values<V>): void {
 		this._v.submit(value);
