@@ -1101,16 +1101,15 @@ class ConfigAutoValueWrapper extends Control<ConfigValueWrapperDefinition> {
 					wire: (values, blockdef) => {
 						const size = Objects.size(values);
 						if (size === 1) {
-							const { blockUuid, connectionName } = firstValue(values)!;
+							const { blockUuid } = firstValue(values)!;
 
 							return new ConfigControlButton(clone(templates.Button), blockdef.displayName, () => {
 								args.travelTo(blockUuid);
-							})
-								.setDescription(`${blockUuid.sub(1, 8)}:${connectionName}`)
-								.with((b) => b.button.setButtonText("→"));
+							}).with((b) => b.button.setButtonText("→"));
 						}
 
 						return new ConfigControlButton(clone(templates.Button), blockdef.displayName, () => {}) //
+							.with((b) => b.button.setButtonText("→"))
 							.with((b) => b.button.setButtonInteractable(false));
 					},
 
