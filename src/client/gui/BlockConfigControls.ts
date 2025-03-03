@@ -26,6 +26,7 @@ import { Control } from "engine/client/gui/Control";
 import { TextBoxControl } from "engine/client/gui/TextBoxControl";
 import { ComponentChild } from "engine/shared/component/ComponentChild";
 import { ComponentChildren } from "engine/shared/component/ComponentChildren";
+import { Observables } from "engine/shared/event/Observables";
 import { ObservableValue } from "engine/shared/event/ObservableValue";
 import { ArgsSignal } from "engine/shared/event/Signal";
 import { Objects } from "engine/shared/fixes/Objects";
@@ -58,7 +59,7 @@ type MiniPrimitives = { readonly [k in PrimitiveKeys]: Omit<Primitives[k], "defa
 type WithoutDefaultPrimitives = { readonly [k in PrimitiveKeys]: Omit<Primitives[k], "default"> };
 type WithoutDefaultControls = { readonly [k in ControlKeys]: WithoutDefaultPrimitives[k] };
 
-type OfBlocks<T> = { readonly [k in BlockUuid]: T };
+type OfBlocks<T> = object & { readonly [k in BlockUuid]: T };
 
 export type VisualBlockConfigDefinition = {
 	readonly displayName: string;
@@ -933,22 +934,31 @@ namespace ControllableControls {
 			templates: ConfigControlTemplateList,
 			...[values, blockdef, def]: args<"number">
 		) {
+			type t = Controls["number"]["config"];
 			super(gui, name);
+			this.setValues(values);
 
-			this.parent(new ConfigControlCheckbox(clone(templates.Checkbox), "Smooth change")) //
-				.setValues(map(values, (v) => v.mode.type === "smooth"))
-				.submitted((v) => {
-					this.submit(
-						(values = map(v, (v, k) =>
-							Objects.deepCombine(values[k], { mode: { type: v ? "smooth" : "instant" } }),
-						)),
-					);
+			const ov = Objects.mapValues(values, (k, v) => new ObservableValue(v));
+			for (const [, observable] of pairs(ov)) {
+				observable.subscribe(() => {
+					this.submit(map(ov, (v, k) => v.get()));
 					update();
 				});
+			}
 
-			const modeParent = this.parent(new ComponentChildren()).withParentInstance(gui);
+			const fromPath = <const TPath extends Objects.PathsOf<t>>(...path: TPath) => {
+				return Objects.mapValues(ov, (k, ov) => Observables.createObservableFromObjectPropertyTyped(ov, path));
+			};
+
+			this.parent(
+				new ConfigControlSwitch(clone(templates.Switch), "Type", [
+					["smooth", { name: "Smooth" }],
+					["instant", { name: "Instant" }],
+				]),
+			).initToObservables(fromPath("mode", "type"));
+
 			const createSmoothMode = () => {
-				modeParent.clear();
+				const modeParent = this.parent(new ComponentChildren<Control>()).withParentInstance(gui);
 
 				const modes: readonly (readonly [BlockLogicTypes.NumberControlModesSmoothMode, SwitchControlItem])[] = [
 					[
@@ -1003,8 +1013,8 @@ namespace ControllableControls {
 				];
 
 				modeParent
-					.add(new ConfigControlSwitch(clone(templates.Switch), "Mode", modes))
-					.setValues(this.multiMap((k, v) => v.mode.smooth.mode));
+					.add(new ConfigControlSwitch(clone(templates.Switch), "Smooth mode", modes))
+					.initToObservables(fromPath("mode", "smooth", "mode"));
 
 				modeParent
 					.add(
@@ -1013,17 +1023,12 @@ namespace ControllableControls {
 							max: (def.clamp?.max ?? 200) - (def.clamp?.min ?? 0),
 						}),
 					)
-					.submitted((v) => {
-						this.submit(
-							(values = map(v, (v, k) =>
-								Objects.deepCombine(values[k], { mode: { smooth: { speed: v } } }),
-							)),
-						);
-						update();
-					});
+					.initToObservables(fromPath("mode", "smooth", "speed"));
+
+				return modeParent;
 			};
 			const createInstantMode = () => {
-				modeParent.clear();
+				const modeParent = this.parent(new ComponentChildren<Control>()).withParentInstance(gui);
 
 				const modes: readonly (readonly [BlockLogicTypes.NumberControlModesResetMode, SwitchControlItem])[] = [
 					[
@@ -1050,22 +1055,31 @@ namespace ControllableControls {
 				];
 
 				modeParent
-					.add(new ConfigControlSwitch(clone(templates.Switch), "Mode", modes))
-					.setValues(this.multiMap((k, v) => v.mode.instant.mode));
+					.add(new ConfigControlSwitch(clone(templates.Switch), "Instant mode", modes))
+					.initToObservables(fromPath("mode", "instant", "mode"));
+				return modeParent;
+			};
+
+			const modes = {
+				smooth: createSmoothMode(),
+				instant: createInstantMode(),
 			};
 
 			const update = () => {
-				const mode = this.multiOf(this.multiMap((k, v) => v.mode.type));
+				for (const [, container] of pairs(modes)) {
+					for (const child of container.getAll()) {
+						child.hide();
+					}
+				}
 
-				if (mode === "instant") {
-					createInstantMode();
-				} else if (mode === "smooth") {
-					createSmoothMode();
-				} else if (!mode) {
-					modeParent.clear();
-				} else mode satisfies never;
+				const mode = this.multiOf(this.multiMap((k, v) => v.mode.type));
+				if (mode) {
+					for (const child of modes[mode].getAll()) {
+						child.show();
+					}
+				}
 			};
-			this.valueChanged(update);
+			this.onEnable(update);
 		}
 	}
 }
