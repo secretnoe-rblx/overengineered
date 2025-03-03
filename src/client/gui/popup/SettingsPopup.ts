@@ -143,7 +143,9 @@ export class SettingsPopup extends Control<SettingsPopup2Definition> {
 			sidebar.addButton("graphics", 18626628666, () => content.set(PlayerSettingsGraphics));
 			sidebar.addButton("environment", 18626647702, () => content.set(PlayerSettingsEnvironment));
 			sidebar.addButton("controls", 18626685039, () => content.set(PlayerSettingsControls));
-			sidebar.addButton("physics", 18626685039, () => content.set(PlayerSettingsPhysics));
+			sidebar
+				.addButton("physics", 18626685039, () => content.set(PlayerSettingsPhysics))
+				.setButtonInteractable(mode === "build");
 			sidebar.addButton("blacklist", 18626826844, () => content.set(PlayerSettingsBlacklist));
 			sidebar
 				.addButton("tutorial", 98943721557973, () => content.set(PlayerSettingsTutorial))

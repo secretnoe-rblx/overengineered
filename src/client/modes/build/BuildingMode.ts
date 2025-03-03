@@ -24,7 +24,6 @@ import { NumberObservableValue } from "engine/shared/event/NumberObservableValue
 import { ObservableValue } from "engine/shared/event/ObservableValue";
 import { Objects } from "engine/shared/fixes/Objects";
 import { SharedRagdoll } from "shared/SharedRagdoll";
-import type { MainScene } from "client/gui/MainScene";
 import type { MainScreenLayout } from "client/gui/MainScreenLayout";
 import type { PopupController } from "client/gui/PopupController";
 import type { PlayerDataStorage } from "client/PlayerDataStorage";
@@ -118,16 +117,11 @@ export class BuildingMode extends PlayMode {
 	constructor(
 		@inject plot: SharedPlot,
 		@inject private readonly toolController: ToolController,
-		@inject mainScene: MainScene,
 		@inject popupController: PopupController,
 		@inject playerData: PlayerDataStorage,
 		@inject di: DIContainer,
 	) {
 		super();
-
-		mainScene.openSettingsAction.subCanExecuteFrom({
-			buildMode: this.enabledState,
-		});
 
 		this.openSavePopupAction.subscribe(() => popupController.showPopup(new SavePopup()));
 

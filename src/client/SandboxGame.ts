@@ -100,7 +100,9 @@ export namespace SandboxGame {
 		builder.services.registerSingletonFunc(CreateSandboxBlocks);
 		PlayModeController.initialize(builder);
 
-		builder.services.registerService(MainScene);
+		builder.services
+			.registerService(MainScene) //
+			.autoInit();
 		builder.services.registerService(ToolController);
 
 		builder.services.registerService(GameEnvironmentController);
