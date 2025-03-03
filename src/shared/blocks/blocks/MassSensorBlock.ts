@@ -51,8 +51,8 @@ class Logic extends InstanceBlockLogic<typeof definition> {
 			);
 		};
 
-		this.event.subscribe(DisconnectBlock.logic.ctor.events.disconnect.clientInvoked, update);
-		this.event.subscribe(RemoteEvents.ImpactBreak.clientInvoked, update);
+		this.event.subscribe(DisconnectBlock.logic.ctor.events.disconnect.senderInvoked, update);
+		this.event.subscribe(RemoteEvents.ImpactBreak.senderInvoked, update);
 
 		this.onFirstInputs(update);
 	}
