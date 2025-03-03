@@ -7,12 +7,14 @@ import { FormattedLabelControl } from "client/gui/controls/FormattedLabelControl
 import { ProgressBarControl } from "client/gui/controls/ProgressBarControl";
 import { ConfirmPopup } from "client/gui/popup/ConfirmPopup";
 import { TouchModeButtonControl } from "client/gui/ridemode/TouchModeButtonControl";
+import { LogControl } from "client/gui/static/LogControl";
 import { requestMode } from "client/modes/PlayModeRequest";
 import { Action } from "engine/client/Action";
 import { Control } from "engine/client/gui/Control";
 import { Interface } from "engine/client/gui/Interface";
 import { InputController } from "engine/client/InputController";
 import { LocalPlayer } from "engine/client/LocalPlayer";
+import { Colors } from "engine/shared/Colors";
 import { Component } from "engine/shared/component/Component";
 import { ComponentChild } from "engine/shared/component/ComponentChild";
 import { ComponentChildren } from "engine/shared/component/ComponentChildren";
@@ -197,11 +199,14 @@ export class RideModeControls extends Control<RideModeControlsDefinition> {
 				};
 			}
 
-			await this.playerData.sendPlayerSlot({
+			const result = this.playerData.sendPlayerSlot({
 				index: this.playerData.loadedSlot.get() ?? -1,
 				touchControls,
 				save: false,
 			});
+			if (!result.success) {
+				LogControl.instance.addLine(result.message, Colors.red);
+			}
 		};
 	}
 

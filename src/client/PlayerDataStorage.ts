@@ -108,7 +108,7 @@ export class PlayerDataStorage {
 		const response = this.slotRemotes.save.send(req);
 		if (!response.success) {
 			$err(response.message);
-			return;
+			return response;
 		}
 
 		d = this.data.get();
@@ -120,6 +120,8 @@ export class PlayerDataStorage {
 				}),
 			});
 		}
+
+		return response;
 	}
 	deletePlayerSlot(req: PlayerDeleteSlotRequest) {
 		$log("Deleting slot " + req.index);
@@ -131,15 +133,17 @@ export class PlayerDataStorage {
 		const response = this.slotRemotes.delete.send(req);
 		if (!response.success) {
 			$err(response.message);
-			return;
+			return response;
 		}
+
+		return response;
 	}
 
 	loadPlayerSlot(index: number, message?: string) {
 		$log(`Loading slot ${index}`);
 		this._slotLoading.Fire();
 
-		LoadingController.run(message ?? `Loading slot ${index}`, () => {
+		return LoadingController.run(message ?? `Loading slot ${index}`, () => {
 			const response = this.slotRemotes.load.send({ index });
 			if (response.success && !response.isEmpty) {
 				this.loadedSlot.set(index);
