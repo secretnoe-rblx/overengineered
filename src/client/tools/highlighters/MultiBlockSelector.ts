@@ -40,6 +40,8 @@ export class MultiBlockSelector extends Component {
 	) {
 		super();
 
+		this.onDisable(() => this.mode.set("single"));
+
 		for (const [mode, keybindsDef] of pairs(selectionKeybinds)) {
 			if (config?.enabled?.includes(mode) === false) continue;
 
