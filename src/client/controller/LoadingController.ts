@@ -105,8 +105,8 @@ spawn(() => {
 
 export namespace LoadingController {
 	const state = new ObservableCollectionArr<{ readonly text: string }>();
-	export const isLoading: ReadonlyObservableValue<boolean> = state.createBased((c) => !c.isEmpty());
-	export const isNotLoading: ReadonlyObservableValue<boolean> = isLoading.not();
+	export const isLoading: ReadonlyObservableValue<boolean> = state.fReadonlyCreateBased((c) => !c.isEmpty());
+	export const isNotLoading: ReadonlyObservableValue<boolean> = isLoading.fReadonlyCreateBased((b) => !b);
 
 	const control = new LoadingPopup(Interface.getGameUI<{ Loading: LoadingPopupDefinition }>().Loading);
 	state.subscribe((state) => {

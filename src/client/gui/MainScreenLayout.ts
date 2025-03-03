@@ -237,6 +237,16 @@ export class MainScreenLayout extends Component {
 		forEachChild(this.instance.Left, (child) => (child.Visible = false));
 	}
 
+	addTopRightButton<T extends GuiButton>(name: string, icon: number): Control<T> {
+		const template = this.instance.TopRight.WaitForChild("Template") as T & { ImageLabel: ImageLabel };
+		const gui = template.Clone();
+		gui.Name = name;
+		gui.ImageLabel.Image = `rbxassetid://${icon}`;
+		gui.Parent = template.Parent;
+
+		return new Control(gui);
+	}
+	/** @deprecated Use {@link addTopRightButton} instead */
 	registerTopRightButton<T extends GuiButton>(name: string): Control<T> {
 		return new Control(this.instance.TopRight.WaitForChild(name) as T);
 	}

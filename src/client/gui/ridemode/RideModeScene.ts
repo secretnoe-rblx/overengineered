@@ -300,7 +300,7 @@ export class RideModeScene extends Control<RideModeSceneDefinition> {
 		super(gui);
 
 		const controlsEditMode = new ObservableValue(false);
-		const notControlsEditMode = controlsEditMode.not();
+		const notControlsEditMode = controlsEditMode.fReadonlyCreateBased((b) => !b);
 
 		this.stopAction = this.parent(new Action(() => requestMode("build")));
 		this.stopAction.subCanExecuteFrom({
@@ -323,16 +323,19 @@ export class RideModeScene extends Control<RideModeSceneDefinition> {
 			.subscribeToAction(this.sitAction)
 			.subscribeVisibilityFrom({ main_enabled: this.enabledState });
 
-		this.parent(mainScreen.registerTopRightButton("EditControls"))
+		this.parent(mainScreen.addTopRightButton("EditControls", 18474772799))
 			.addButtonAction(() => this.controls.toggleSettingsMode())
 			.subscribeVisibilityFrom({
 				ride_touchOnly: InputController.isTouch,
-				ride_editcontrols: notControlsEditMode,
 				ride_isntloading: LoadingController.isNotLoading,
 				ride_enabled: this.enabledState,
-			});
+			})
+			.addValueOverlayChild(
+				"BackgroundColor3",
+				controlsEditMode.fReadonlyCreateBased((c) => (c ? theme.get("buttonActive") : undefined)),
+			);
 
-		this.parent(mainScreen.registerTopRightButton("ResetControls"))
+		this.parent(mainScreen.addTopRightButton("ResetControls", 15654861713))
 			.addButtonAction(() =>
 				popupController.showPopup(
 					new ConfirmPopup("Reset the controls?", "It will be impossible to undo this action", () =>
@@ -346,7 +349,7 @@ export class RideModeScene extends Control<RideModeSceneDefinition> {
 				ride_enabled: this.enabledState,
 			});
 
-		this.parent(mainScreen.registerTopRightButton("Logic")) //
+		this.parent(mainScreen.addTopRightButton("Logic", 18626718502)) //
 			.addButtonAction(() => this.logicVisible.toggle())
 			.subscribeVisibilityFrom({
 				ride_editcontrols: notControlsEditMode,
