@@ -42,18 +42,23 @@ export class ServerPlayersController extends HostedService {
 
 				const controller = scope.resolveForeignClass(ServerPlayerController, [player, plot]);
 				controllers.add(player, controller);
-				const data = players.get(player.UserId) ?? {};
 
-				return {
-					success: true,
-					remotes: controller.remotesFolder,
-					data: {
-						purchasedSlots: data.purchasedSlots,
-						settings: data.settings,
-						slots: data.slots,
-						data: data.data,
-					},
-				};
+				try {
+					const data = players.get(player.UserId) ?? {};
+					return {
+						success: true,
+						remotes: controller.remotesFolder,
+						data: {
+							purchasedSlots: data.purchasedSlots,
+							settings: data.settings,
+							slots: data.slots,
+							data: data.data,
+						},
+					};
+				} catch (err) {
+					player.Kick("The server is currently unavailable, try again later.");
+					return { success: false, message: tostring(err) };
+				}
 			}),
 		);
 		this.event.subscribeRegistration(() =>
