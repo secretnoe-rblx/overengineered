@@ -8,6 +8,7 @@ import { ConfigControlColor3 } from "client/gui/configControls/ConfigControlColo
 import { ConfigControlEmpty } from "client/gui/configControls/ConfigControlEmpty";
 import { ConfigControlKeyOrString } from "client/gui/configControls/ConfigControlKey";
 import { ConfigControlMulti } from "client/gui/configControls/ConfigControlMulti";
+import { ConfigControlMultiKeys } from "client/gui/configControls/ConfigControlMultiKeys";
 import { ConfigControlNumber } from "client/gui/configControls/ConfigControlNumber";
 import { ConfigControlSlider } from "client/gui/configControls/ConfigControlSlider";
 import { ConfigControlString } from "client/gui/configControls/ConfigControlString";
@@ -566,14 +567,14 @@ namespace Controls {
 					this,
 					new MultiKeyNumberControl(
 						templates.MultiKeys(),
-						keys,
+						// keys,
 						definition.config,
 						definition.clamp?.min,
 						definition.clamp?.max,
 					),
 				);
 				wKeys.typeColor.set(Colors.red);
-				cKeys.submitted.Connect((v) =>
+				cKeys.v.submitted.Connect((v) =>
 					this.submittedControl.Fire((controlConfig = map(controlConfig, (c) => ({ ...c, keys: v })))),
 				);
 
@@ -924,7 +925,7 @@ namespace ControllableControls {
 	type args<k extends ControlKeys> = [
 		values: OfBlocks<Controls[k]["config"]>,
 		blockdef: VisualBlockConfigDefinition,
-		def: Omit<Primitives[k], "default" | "config">,
+		def: Omit<Primitives[k], "default">,
 	];
 
 	export class Number extends ConfigControlMulti<Controls["number"]["config"]> {
@@ -949,6 +950,24 @@ namespace ControllableControls {
 			const fromPath = <const TPath extends Objects.PathsOf<t>>(...path: TPath) => {
 				return Objects.mapValues(ov, (k, ov) => Observables.createObservableFromObjectPropertyTyped(ov, path));
 			};
+			const fromPathNoDeepCombine = <const TPath extends Objects.PathsOf<t>>(...path: TPath) => {
+				return Objects.mapValues(ov, (k, ov) =>
+					ov.fCreateBased(
+						(c) => Objects.getValueByPathTyped(c, path),
+						(c) => Objects.withValueByPath(ov.get(), c, path),
+					),
+				);
+			};
+
+			this.parent(
+				new ConfigControlMultiKeys(
+					clone(templates.MultiKeys),
+					"Keys",
+					def.config,
+					def.clamp?.min,
+					def.clamp?.max,
+				),
+			).initToObservables(fromPathNoDeepCombine("keys"));
 
 			this.parent(
 				new ConfigControlSwitch(clone(templates.Switch), "Type", [
