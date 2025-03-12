@@ -1,5 +1,6 @@
-import { Workspace } from "@rbxts/services";
+import { DataStoreService, Workspace } from "@rbxts/services";
 // import { BadgeController } from "server/BadgeController";
+import { BackupBackedDatabaseBackend } from "engine/server/backend/BackupBackedDatabaseBackend";
 import { NetworkLogging } from "engine/server/network/NetworkLogging";
 import { BaseGame } from "server/BaseGame";
 import { ServerBlockLogicController } from "server/blocks/ServerBlockLogicController";
@@ -42,10 +43,20 @@ export namespace SandboxGame {
 
 		builder.services
 			.registerSingletonClass(PlayerDatabase) //
-			.withArgs([new ExternalDatabaseBackendPlayers()]);
+			.withArgs([
+				new BackupBackedDatabaseBackend(
+					new ExternalDatabaseBackendPlayers(),
+					DataStoreService.GetDataStore("players-bkp"),
+				),
+			]);
 		builder.services
 			.registerSingletonClass(SlotDatabase) //
-			.withArgs([new ExternalDatabaseBackendSlots()]);
+			.withArgs([
+				new BackupBackedDatabaseBackend(
+					new ExternalDatabaseBackendSlots(),
+					DataStoreService.GetDataStore("slots-bkp"),
+				),
+			]);
 
 		builder.services.registerService(ServerPlayersController);
 

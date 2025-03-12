@@ -16,8 +16,15 @@ export class ExternalDatabaseBackendSlots implements DatabaseBackend<BlocksSeria
 		const url = `${endpoint}/slot?ownerId=${ownerId}&slotIds=${slotId}`;
 		$log("Fetching", url);
 
-		const response = HttpService.GetAsync(url, true, headers);
-		return (JSON.deserialize(response) as { value: BlocksSerializer.JsonSerializedBlocks }[])[0].value;
+		const result = HttpService.RequestAsync({ Method: "GET", Url: url, Headers: headers });
+		if (result.StatusCode === 404) {
+			return undefined;
+		}
+		if (result.StatusCode !== 200) {
+			throw `Got HTTP ${result.StatusCode}`;
+		}
+
+		return (JSON.deserialize(result.Body) as { value: BlocksSerializer.JsonSerializedBlocks }[])[0].value;
 	}
 	SetAsync(value: BlocksSerializer.JsonSerializedBlocks, [ownerId, slotId]: SlotKeys): void {
 		const url = `${endpoint}/slot?ownerId=${ownerId}&slotIds=${slotId}`;
@@ -52,8 +59,15 @@ export class ExternalDatabaseBackendPlayers implements DatabaseBackend<PlayerDat
 		const url = `${endpoint}/player?id=${id}`;
 		$log("Fetching", url);
 
-		const response = HttpService.GetAsync(url, true, headers);
-		return (JSON.deserialize(response) as { value: PlayerDatabaseData }).value;
+		const result = HttpService.RequestAsync({ Method: "GET", Url: url, Headers: headers });
+		if (result.StatusCode === 404) {
+			return undefined;
+		}
+		if (result.StatusCode !== 200) {
+			throw `Got HTTP ${result.StatusCode}`;
+		}
+
+		return (JSON.deserialize(result.Body) as { value: PlayerDatabaseData }).value;
 	}
 	SetAsync(value: PlayerDatabaseData, [id]: PlayerKeys): void {
 		const url = `${endpoint}/player?id=${id}`;
