@@ -55,7 +55,7 @@ export const BracedShaftBlock = {
 	...BlockCreation.defaults,
 	id: "bracedshaft",
 	displayName: "Braced Shaft",
-	description: "A shaft with adjustable braces",
+	description: "A shaft with adjustable mounting points",
 
 	logic: { definition, ctor: Logic },
 } as const satisfies BlockBuilder;

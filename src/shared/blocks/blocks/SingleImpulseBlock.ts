@@ -66,7 +66,7 @@ export const SingleImpulseBlock = {
 	...BlockCreation.defaults,
 	id: "singleimpulse",
 	displayName: "Signal Edge Detector",
-	description: "Converts a bit into a pulse",
+	description: "Generates a single tick pulse from input boolean",
 	search: {
 		partialAliases: ["edge", "rise", "single", "impulse"],
 	},

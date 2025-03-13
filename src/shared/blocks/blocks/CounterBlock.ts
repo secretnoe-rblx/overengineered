@@ -68,7 +68,7 @@ export const CounterBlock = {
 	...BlockCreation.defaults,
 	id: "counter",
 	displayName: "Counter",
-	description: "Returns a previous value plus step value.",
+	description: "Increments value by Step Value, starting with New Value",
 
 	logic: { definition, ctor: Logic },
 	modelSource: {

@@ -39,7 +39,7 @@ export const RandomBlock = {
 	...BlockCreation.defaults,
 	id: "rand",
 	displayName: "Random",
-	description: `Returns a "random" value between chosen minimum and maximum (excluding maximum)`,
+	description: `Returns a "random" number between min and max (excluding maximum)`,
 	modelSource: {
 		model: BlockCreation.Model.fAutoCreated("DoubleGenericLogicBlockPrefab", "RAND"),
 		category: () => BlockCreation.Categories.math,

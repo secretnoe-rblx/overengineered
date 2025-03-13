@@ -206,7 +206,7 @@ export const RadarSectionBlock = {
 	...BlockCreation.defaults,
 	id: "radarsection",
 	displayName: "Radar Section",
-	description: "Returns the closest object that got into the block's sight",
+	description: "Returns the position of the closest object in its field of view",
 	limit: 400,
 
 	logic: { definition, ctor: Logic },

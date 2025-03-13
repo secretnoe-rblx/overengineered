@@ -217,7 +217,7 @@ const list: BlockBuildersWithoutIdAndDefaults = {
 	},
 	smallrocketengine: {
 		displayName: "Small Rocket Engine",
-		description: "Engines your rocket into the space and onto the ground",
+		description: "Engines your rocket into the space and onto the ground, but smaller",
 		logic,
 		mirror: {
 			behaviour: "offset180",

@@ -136,7 +136,7 @@ const list: BlockBuildersWithoutIdAndDefaults = {
 	},
 	sphericaltnt: {
 		displayName: "Spherical TNT",
-		description: "Catch this anarchid-man!",
+		description: "Catch this, anarchid boy!",
 		limit: 100,
 		logic,
 	},

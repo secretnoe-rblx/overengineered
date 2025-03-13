@@ -27,12 +27,12 @@ const blocks: BlockBuildersWithoutIdAndDefaults = {
 	},
 	driveshaft: {
 		displayName: "Driveshaft",
-		description: "A shaft that drives",
+		description: "Kinda like a ball socket but with transmitting rotational force",
 		limit: 50,
 	},
 	bearingshaft: {
 		displayName: "Bearing Shaft",
-		description: "A shaft that bears",
+		description: "A free spinning shaft with a bearing",
 	},
 
 	smallgear: {
