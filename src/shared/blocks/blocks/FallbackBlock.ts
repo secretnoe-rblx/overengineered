@@ -18,6 +18,12 @@ const definition = {
 			types: BlockConfigDefinitions.any,
 			group: "1",
 		},
+		startingValue: {
+			displayName: "Start with value",
+			types: BlockConfigDefinitions.any,
+			group: "1",
+			connectorHidden: true,
+		},
 	},
 	output: {
 		result: {
@@ -36,6 +42,10 @@ class Logic extends BlockLogic<typeof definition> {
 		let valueSet = false;
 		let cfallbackValue: string | number | boolean | Vector3 | Color3 | undefined;
 		let cfallbackType: "string" | "number" | "bool" | "vector3" | "color" | "byte" | undefined;
+
+		this.onk(["startingValue"], ({ startingValue }) => {
+			this.output.result.set("bool", false);
+		});
 
 		this.onkRecalcInputs(
 			["value"],
