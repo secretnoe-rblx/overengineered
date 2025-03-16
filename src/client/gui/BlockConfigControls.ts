@@ -21,7 +21,6 @@ import { KeyOrStringChooserControl } from "client/gui/controls/KeyChooserControl
 import { NumberTextBoxControlNullable } from "client/gui/controls/NumberTextBoxControl";
 import { SliderControlNullable } from "client/gui/controls/SliderControl";
 import { Interface } from "client/gui/Interface";
-import { MultiKeyNumberControl } from "client/gui/MultiKeyNumberControl";
 import { MemoryEditorPopup } from "client/gui/popup/MemoryEditorPopup";
 import { Control } from "engine/client/gui/Control";
 import { TextBoxControl } from "engine/client/gui/TextBoxControl";
@@ -563,20 +562,20 @@ namespace Controls {
 					else keys = firstval;
 				}
 
-				const [wKeys, cKeys] = addSingleTypeWrapper(
-					this,
-					new MultiKeyNumberControl(
-						templates.MultiKeys(),
-						// keys,
-						definition.config,
-						definition.clamp?.min,
-						definition.clamp?.max,
-					),
-				);
-				wKeys.typeColor.set(Colors.red);
-				cKeys.v.submitted.Connect((v) =>
-					this.submittedControl.Fire((controlConfig = map(controlConfig, (c) => ({ ...c, keys: v })))),
-				);
+				// const [wKeys, cKeys] = addSingleTypeWrapper(
+				// 	this,
+				// 	new MultiKeyNumberControl(
+				// 		templates.MultiKeys(),
+				// 		// keys,
+				// 		definition.config,
+				// 		definition.clamp?.min,
+				// 		definition.clamp?.max,
+				// 	),
+				// );
+				// wKeys.typeColor.set(Colors.red);
+				// cKeys.v.submitted.Connect((v) =>
+				// 	this.submittedControl.Fire((controlConfig = map(controlConfig, (c) => ({ ...c, keys: v })))),
+				// );
 
 				const createSmoothStuff = (redrawMode: () => void) => {
 					const def = definition.control.config.mode.smooth;
@@ -1427,7 +1426,7 @@ class ConfigAutoValueWrapper extends Control<ConfigValueWrapperDefinition> {
 							);
 						});
 						return control;
-					} else if (RunService.IsStudio()) {
+					} else if ((false as boolean) && RunService.IsStudio()) {
 						const ctor = controlsControl[stype as controlKeys];
 						if (!ctor) return;
 
