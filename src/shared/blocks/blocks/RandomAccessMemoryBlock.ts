@@ -60,6 +60,8 @@ const definition = {
 	},
 } satisfies BlockLogicFullBothDefinitions;
 
+export const size = 0xffff;
+
 export type { Logic as RandomAccessMemoryBlockLogic };
 class Logic extends BlockLogic<typeof definition> {
 	constructor(block: BlockLogicArgs) {
@@ -67,7 +69,6 @@ class Logic extends BlockLogic<typeof definition> {
 
 		type PrimitiveKeys = keyof BlockLogicTypes.Primitives;
 
-		const size = 0xffff;
 		const internalMemory: { [k in number]: { readonly value: unknown; readonly type: PrimitiveKeys } } = {};
 		this.output.size.set("number", 0);
 
@@ -122,7 +123,7 @@ export const RandomAccessMemoryBlock = {
 	...BlockCreation.defaults,
 	id: "randomaccessmemory",
 	displayName: "RAM",
-	description: "An addressed memory. Allows you to store up to 256 values",
+	description: `An addressed memory. Allows you to store up to ${size} values`,
 
 	logic: { definition, ctor: Logic },
 } as const satisfies BlockBuilder;
