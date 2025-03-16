@@ -93,7 +93,7 @@ class Logic extends BlockLogic<typeof definition> {
 
 			const value = internalMemory[address];
 			if (value === undefined) {
-				this.disableAndBurn();
+				// this.disableAndBurn();
 				return;
 			}
 
