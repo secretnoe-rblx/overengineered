@@ -2,12 +2,10 @@ import { KeyOrStringChooserControl } from "client/gui/controls/KeyChooserControl
 import { NumberTextBoxControl } from "client/gui/controls/NumberTextBoxControl";
 import { ButtonControl } from "engine/client/gui/Button";
 import { Control } from "engine/client/gui/Control";
-import { PartialControl } from "engine/client/gui/PartialControl";
 import { ComponentChildren } from "engine/shared/component/ComponentChildren";
 import { ObservableValue } from "engine/shared/event/ObservableValue";
 import { ArgsSignal } from "engine/shared/event/Signal";
 import { SubmittableValue } from "engine/shared/event/SubmittableValue";
-import { Objects } from "engine/shared/fixes/Objects";
 import type { KeyChooserControlDefinition } from "client/gui/controls/KeyChooserControl";
 import type { NumberTextBoxControlDefinition } from "client/gui/controls/NumberTextBoxControl";
 
@@ -32,7 +30,7 @@ export type MultiKeyPart = {
 
 type MultiKeyPartControlDefinition = GuiObject & {
 	readonly Number: NumberTextBoxControlDefinition;
-	readonly Button: KeyChooserControlDefinition;
+	readonly Button: Frame & { Button: KeyChooserControlDefinition };
 	readonly DeleteButton: GuiButton;
 };
 class MultiKeyPartControl extends Control<MultiKeyPartControlDefinition> {
@@ -53,7 +51,7 @@ class MultiKeyPartControl extends Control<MultiKeyPartControlDefinition> {
 		const value = new SubmittableValue(new ObservableValue<MultiKeyPart>({ key, value: num }));
 		this.value = value.asHalfReadonly();
 
-		const keyChooser = this.parent(new KeyOrStringChooserControl(gui.Button));
+		const keyChooser = this.parent(new KeyOrStringChooserControl(gui.Button.Button));
 		keyChooser.submitted.Connect((key) => value.submit({ ...value.get(), key }));
 
 		const numbertb = this.parent(new NumberTextBoxControl(gui.Number, min, max));
@@ -74,33 +72,42 @@ class MultiKeyPartControl extends Control<MultiKeyPartControlDefinition> {
 	}
 }
 
-export type MultiKeyNumberControlDefinition = GuiObject;
-export type MultiKeyNumberControlParts = {
-	readonly Template: MultiKeyPartControlDefinition;
-	readonly AddButton: GuiButton;
+export type MultiKeyNumberControlDefinition = GuiObject & {
+	readonly Template: GuiObject & {
+		readonly Number: NumberTextBoxControlDefinition;
+		readonly Button: Frame & { Button: KeyChooserControlDefinition };
+		readonly DeleteButton: GuiButton;
+	};
+	readonly Add: GuiObject & {
+		readonly Button: GuiButton;
+	};
 };
-export class MultiKeyNumberControl extends PartialControl<MultiKeyNumberControlParts, GuiObject> {
-	readonly v;
+export class MultiKeyNumberControl extends Control<MultiKeyNumberControlDefinition> {
+	private readonly _submitted = new ArgsSignal<[value: readonly MultiKeyPart[]]>();
+	readonly submitted = this._submitted.asReadonly();
 
 	constructor(
-		gui: GuiObject,
+		gui: MultiKeyNumberControlDefinition,
+		config: readonly MultiKeyPart[],
 		defaultValue: number,
 		numberMin: number | undefined,
 		numberMax: number | undefined,
-		parts?: Partial<MultiKeyNumberControlParts>,
 	) {
-		super(gui, parts);
+		super(gui);
 
-		const v = new SubmittableValue(new ObservableValue<readonly MultiKeyPart[]>(Objects.empty));
-		this.v = v.asHalfReadonly();
+		const template = this.asTemplate(gui.Template, true);
 
-		const template = this.asTemplate(this.parts.Template, true);
 		const children = this.parent(new ComponentChildren<MultiKeyPartControl>().withParentInstance(gui));
 
-		const submit = () => v.submit(children.getAll().map((c) => c.value.get()));
+		const submit = () => {
+			const values = children.getAll().map((c) => c.value.get());
+
+			config = values;
+			this._submitted.Fire(values);
+		};
 
 		const add = (key?: string | KeyCode, value?: number) => {
-			key ??= generateKey(v.get());
+			key ??= generateKey(config);
 			if (!key) return;
 
 			value ??= defaultValue;
@@ -128,19 +135,12 @@ export class MultiKeyNumberControl extends PartialControl<MultiKeyNumberControlP
 			submit();
 		};
 
-		this.event.subscribeObservable(
-			v.value,
-			(v) => {
-				children.clear();
-				for (const { key, value } of v) {
-					add(key, value);
-				}
-			},
-			true,
-		);
+		for (const { key, value } of config) {
+			add(key, value);
+		}
 
 		this.parent(
-			new ButtonControl(this.parts.AddButton, () => {
+			new ButtonControl(gui.Add.Button, () => {
 				add();
 				submit();
 			}),

@@ -28,11 +28,11 @@ export class ConfigControlMultiKeys extends ConfigControlBase<
 	) {
 		super(gui, name);
 
-		const control = this.parent(
-			new MultiKeyNumberControl(gui.Buttons, defaultValue, min, max, { AddButton: gui.AddButton }),
-		);
+		// const control = this.parent(
+		// 	new MultiKeyNumberControl(gui.Buttons, defaultValue, min, max, { AddButton: gui.AddButton }),
+		// );
 
-		this.initFromMultiWithDefault(control.v.value, () => Objects.empty);
-		this.event.subscribe(control.v.submitted, (value) => this.submit(this.multiMap(() => value)));
+		// this.initFromMultiWithDefault(control.v.value, () => Objects.empty);
+		// this.event.subscribe(control.v.submitted, (value) => this.submit(this.multiMap(() => value)));
 	}
 }
