@@ -29,7 +29,6 @@ const definition = {
 					config: false,
 				},
 			},
-			configHidden: true,
 		},
 		triggerValue: {
 			//a.k.a. rewrite value
