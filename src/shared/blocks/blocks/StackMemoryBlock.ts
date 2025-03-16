@@ -59,7 +59,7 @@ class Logic extends BlockLogic<typeof definition> {
 
 		type PrimitiveKeys = keyof BlockLogicTypes.Primitives;
 
-		const size = 32;
+		const size = 0xff;
 		const internalMemory: { readonly value: unknown; readonly type: PrimitiveKeys }[] = [];
 
 		const pushValue = (value: unknown, valueType: PrimitiveKeys) => {
