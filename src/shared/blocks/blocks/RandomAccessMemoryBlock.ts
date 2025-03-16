@@ -67,7 +67,7 @@ class Logic extends BlockLogic<typeof definition> {
 
 		type PrimitiveKeys = keyof BlockLogicTypes.Primitives;
 
-		const size = 0xff;
+		const size = 0xffff;
 		const internalMemory: { [k in number]: { readonly value: unknown; readonly type: PrimitiveKeys } } = {};
 		this.output.size.set("number", 0);
 
