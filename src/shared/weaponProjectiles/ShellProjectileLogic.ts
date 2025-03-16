@@ -1,10 +1,10 @@
 import { RunService } from "@rbxts/services";
-import { AutoC2SRemoteEvent } from "engine/shared/event/C2SRemoteEvent";
+import { A2SRemoteEvent } from "engine/shared/event/PERemoteEvent";
 import { WeaponProjectile } from "shared/weaponProjectiles/BaseProjectileLogic";
 import type { projectileModifier } from "shared/weaponProjectiles/BaseProjectileLogic";
 
 export class ShellProjectile extends WeaponProjectile {
-	static readonly spawn = new AutoC2SRemoteEvent<{
+	static readonly spawn = new A2SRemoteEvent<{
 		readonly startPosition: Vector3;
 		readonly baseVelocity: Vector3;
 		readonly baseDamage: number;

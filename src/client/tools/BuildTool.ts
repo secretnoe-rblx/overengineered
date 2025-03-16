@@ -43,6 +43,15 @@ const allowedColor = Colors.blue;
 const forbiddenColor = Colors.red;
 const mouse = Players.LocalPlayer.GetMouse();
 
+const fromModel = (block: Model, cframe?: CFrame): AABB => {
+	return AABB.combine(
+		block
+			.GetDescendants()
+			.filter((c) => c.Parent?.Name !== "moduleMarkers" && c.IsA("BasePart"))
+			.map((b) => AABB.fromPart(b as BasePart)),
+	);
+};
+
 type ModelOnlyBlock = Pick<Block, "model">;
 
 const createBlockGhost = (block: ModelOnlyBlock, scale: Vector3): BlockModel => {
@@ -89,7 +98,7 @@ const getMouseTargetBlockPositionV2 = (
 		const block = BlockManager.tryGetBlockModelByPart(target);
 		if (block) {
 			position = block.GetPivot().Position;
-			size = AABB.fromModel(block).getSize();
+			size = fromModel(block).getSize();
 		} else {
 			position = target.Position;
 			size = AABB.fromPart(target).getSize();
@@ -788,7 +797,7 @@ namespace MultiPlaceController {
 				return this.oldPositions;
 			}
 
-			const aabb = AABB.fromModel(part);
+			const aabb = fromModel(part);
 			const baseBlockSize = BB.from(part).originalSize;
 			const blockSize = aabb
 				.withCenter(this.blockRotation.Rotation.add(aabb.getCenter()))

@@ -9,6 +9,7 @@ import type { ObservableCollectionSet } from "engine/shared/event/ObservableColl
 export namespace BlockSelect {
 	export const blockRaycastParams = new RaycastParams();
 	blockRaycastParams.FilterType = Enum.RaycastFilterType.Include;
+	blockRaycastParams.CollisionGroup = "BlockRaycast";
 
 	export function getTargetedPart(): BasePart | undefined {
 		if (GuiService.MenuIsOpen || !PlayerUtils.isAlive(Players.LocalPlayer) || Interface.isCursorOnVisibleGui()) {

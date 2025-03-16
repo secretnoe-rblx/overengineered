@@ -67,7 +67,6 @@ import { MachineGunAmmoBlocks } from "shared/blocks/blocks/Weaponary/Machinegun/
 import { MachineGunBarrels } from "shared/blocks/blocks/Weaponary/Machinegun/MachineGunBarrels";
 import { MachineGunLoader } from "shared/blocks/blocks/Weaponary/Machinegun/MachineGunLoaderBlock";
 import { MachineGunMuzzleBreaks } from "shared/blocks/blocks/Weaponary/Machinegun/MachineGunMuzzleBreaks";
-import { PlasmaCoilAcceleratorUpgradeBlock } from "shared/blocks/blocks/Weaponary/Plasma/PlasmaAcceleratorUpgradeBlock";
 import { PlasmaGunBarrelBlock } from "shared/blocks/blocks/Weaponary/Plasma/PlasmaGunBarrelBlock";
 import { PlasmaGunBlock } from "shared/blocks/blocks/Weaponary/Plasma/PlasmaGunBlock";
 import { PlasmaSeparatorMuzzleBlock } from "shared/blocks/blocks/Weaponary/Plasma/PlasmaSeparatorMuzzleBlock";
@@ -123,7 +122,7 @@ export const CreateSandboxBlocks = (di: DIContainer): BlockList => {
 		ReadonlyMemoryBlock,
 		RandomBlock,
 
-		PlasmaCoilAcceleratorUpgradeBlock, //todo: remove later
+		// PlasmaCoilAcceleratorUpgradeBlock, //todo: remove later
 
 		//plasma stuff
 		PlasmaShotgunMuzzleBlock,
