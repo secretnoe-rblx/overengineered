@@ -1,10 +1,11 @@
 import { Players, RunService } from "@rbxts/services";
-import { DictionaryControl } from "client/gui/controls/DictionaryControl";
 import { ButtonControl } from "engine/client/gui/Button";
 import { Control } from "engine/client/gui/Control";
-import { TransformService } from "engine/shared/component/TransformService";
+import { ComponentKeyedChildren } from "engine/shared/component/ComponentKeyedChildren";
+import { Transforms } from "engine/shared/component/Transforms";
+import { ObservableCollectionSet } from "engine/shared/event/ObservableCollection";
 import { ArgsSignal } from "engine/shared/event/Signal";
-import { GameDefinitions } from "shared/data/GameDefinitions";
+import { PlayerRank } from "engine/shared/PlayerRank";
 
 type FakePlayer = {
 	readonly UserId: number;
@@ -15,8 +16,10 @@ type FakePlayer = {
 type PlayerContainerDefinition = Frame & {
 	readonly TextButton: TextButton & {
 		readonly ImageLabel: ImageLabel;
-		readonly TitleLabel: TextLabel;
-		readonly UsernameLabel: TextLabel;
+		readonly Texts: GuiObject & {
+			readonly TitleLabel: TextLabel;
+			readonly UsernameLabel: TextLabel;
+		};
 	};
 };
 class PlayerContainer extends Control<PlayerContainerDefinition> {
@@ -28,8 +31,8 @@ class PlayerContainer extends Control<PlayerContainerDefinition> {
 	) {
 		super(gui);
 
-		gui.TextButton.TitleLabel.Text = player.DisplayName;
-		gui.TextButton.UsernameLabel.Text = `@${player.Name}`;
+		gui.TextButton.Texts.TitleLabel.Text = player.DisplayName;
+		gui.TextButton.Texts.UsernameLabel.Text = `@${player.Name}`;
 		task.spawn(() => {
 			gui.TextButton.ImageLabel.Image = Players.GetUserThumbnailAsync(
 				player.UserId,
@@ -44,7 +47,6 @@ class PlayerContainer extends Control<PlayerContainerDefinition> {
 }
 
 export type PlayerSelectorColumnControlDefinition = Frame & {
-	readonly TextLabel: TextLabel;
 	readonly Left: Frame & {
 		readonly Container: PlayerContainerDefinition;
 	};
@@ -53,20 +55,23 @@ export type PlayerSelectorColumnControlDefinition = Frame & {
 
 export class PlayerSelectorColumnControl extends Control<PlayerSelectorColumnControlDefinition> {
 	private readonly playerTemplate;
-	private readonly addedPlayers;
 
 	private readonly leftControl;
 	private readonly rightControl;
 
-	readonly submitted = new ArgsSignal<[players: readonly number[]]>();
+	readonly value = new ObservableCollectionSet<number>();
+	readonly submitted = new ArgsSignal<[players: ReadonlySet<number>]>();
 
-	constructor(gui: PlayerSelectorColumnControlDefinition, addedPlayers: readonly number[]) {
+	constructor(gui: PlayerSelectorColumnControlDefinition) {
 		super(gui);
 
 		this.playerTemplate = this.asTemplate(gui.Left.Container, true);
-		this.leftControl = this.add(new DictionaryControl<GuiObject, FakePlayer, PlayerContainer>(gui.Left));
-		this.rightControl = this.add(new DictionaryControl<GuiObject, FakePlayer, PlayerContainer>(gui.Right));
-		this.addedPlayers = new Set(addedPlayers);
+		this.leftControl = this.parent(
+			new ComponentKeyedChildren<FakePlayer, PlayerContainer>().withParentInstance(gui.Left),
+		);
+		this.rightControl = this.parent(
+			new ComponentKeyedChildren<FakePlayer, PlayerContainer>().withParentInstance(gui.Right),
+		);
 
 		this.onEnable(() => this.updateOnlinePlayers());
 		this.event.subscribe(Players.PlayerAdded, (player) => this.addPlayer(player));
@@ -80,105 +85,73 @@ export class PlayerSelectorColumnControl extends Control<PlayerSelectorColumnCon
 		for (const player of Players.GetPlayers()) {
 			this.addPlayer(player);
 		}
-		// const pl: FakePlayer[] = [
-		// ];
-		// for (const player of pl) {
-		// 	this.addPlayer(player);
-		// }
-	}
-	private addPlayer(player: FakePlayer | Player) {
-		if (player === Players.LocalPlayer) return;
-		if (!RunService.IsStudio() && typeIs(player, "Instance") && GameDefinitions.isAdmin(player)) return;
 
-		const control = new PlayerContainer(this.playerTemplate(), player);
-
-		if (!this.addedPlayers.has(player.UserId)) {
-			this.leftControl.keyedChildren.add(player, control);
-			TransformService.run(control.instance.TextButton, (tr, instance) =>
-				tr
-					.func(() => (instance.Visible = false))
-					.transform("BackgroundTransparency", 1)
-					.moveRelative(new UDim2(0, -50, 0, 0))
-					.wait(this.leftControl.keyedChildren.getAll().size() * 0.05)
-					.then()
-					.func(() => (instance.Visible = true))
-					.transform("BackgroundTransparency", 0, TransformService.commonProps.quadOut02)
-					.moveRelative(new UDim2(0, 50, 0, 0), TransformService.commonProps.quadOut02)
-					.then()
-					.func(() => {
-						control.clicked.Connect(() => {
-							this.addedPlayers.add(player.UserId);
-							this.removePlayer(player);
-							this.addPlayer(player);
-							this.submitted.Fire([...this.addedPlayers]);
-						});
-					}),
-			);
-		} else {
-			this.rightControl.keyedChildren.add(player, control);
-			TransformService.run(control.instance.TextButton, (tr, instance) =>
-				tr
-					.func(() => (instance.Visible = false))
-					.transform("BackgroundTransparency", 1)
-					.moveRelative(new UDim2(0, 50, 0, 0))
-					.wait(this.rightControl.keyedChildren.getAll().size() * 0.05)
-					.then()
-					.func(() => (instance.Visible = true))
-					.transform("BackgroundTransparency", 0, TransformService.commonProps.quadOut02)
-					.moveRelative(new UDim2(0, -50, 0, 0), TransformService.commonProps.quadOut02)
-					.then()
-					.func(() => {
-						control.clicked.Connect(() => {
-							this.addedPlayers.delete(player.UserId);
-							this.removePlayer(player);
-							this.addPlayer(player);
-							this.submitted.Fire([...this.addedPlayers]);
-						});
-					}),
-			);
+		if (RunService.IsStudio()) {
+			const pl: FakePlayer[] = [
+				{ DisplayName: "Amongus3", Name: "Sus3", UserId: 123 },
+				{ DisplayName: "Amongus4", Name: "Sus4", UserId: 124 },
+				{ DisplayName: "Amongus5", Name: "Sus5", UserId: 125 },
+			];
+			for (const player of pl) {
+				this.addPlayer(player);
+			}
 		}
 	}
+	private addPlayer(player: FakePlayer) {
+		if (player === Players.LocalPlayer) return;
+		if (!RunService.IsStudio() && PlayerRank.isAdminById(player.UserId)) return;
+
+		const control = new PlayerContainer(this.playerTemplate(), player);
+		const instance = control.instance.TextButton;
+
+		if (!this.value.has(player.UserId)) {
+			this.leftControl.add(player, control);
+		} else {
+			this.rightControl.add(player, control);
+		}
+
+		const direction = this.leftControl.get(player) ? -1 : 1;
+		Transforms.create()
+			.func(() => (instance.Visible = false))
+			.transform(instance, "BackgroundTransparency", 1)
+			.moveRelative(instance, new UDim2(0, direction * 50, 0, 0))
+			.wait(this.leftControl.getAll().size() * 0.05)
+			.then()
+			.func(() => (instance.Visible = true))
+			.transform(instance, "BackgroundTransparency", 0, Transforms.quadOut02)
+			.moveRelative(instance, new UDim2(0, direction * -50, 0, 0), Transforms.quadOut02)
+			.then()
+			.func(() => {
+				control.clicked.Connect(() => {
+					if (!this.value.has(player.UserId)) {
+						this.value.add(player.UserId);
+					} else {
+						this.value.remove(player.UserId);
+					}
+
+					this.removePlayer(player);
+					this.addPlayer(player);
+					this.submitted.Fire(this.value.get());
+				});
+			})
+			.run(instance);
+	}
 	private removePlayer(player: FakePlayer) {
-		const control = this.leftControl.keyedChildren.get(player) ?? this.rightControl.keyedChildren.get(player);
+		const control = this.leftControl.get(player) ?? this.rightControl.get(player);
 		if (!control) return;
 
 		control.disable();
 		control.instance.Interactable = false;
 
-		if (this.leftControl.keyedChildren.get(player)) {
-			TransformService.run(control.instance.TextButton.TitleLabel, (tr) =>
-				tr.transform("TextTransparency", 1, TransformService.commonProps.quadOut02),
-			);
-			TransformService.run(control.instance.TextButton.UsernameLabel, (tr) =>
-				tr.transform("TextTransparency", 1, TransformService.commonProps.quadOut02),
-			);
-			TransformService.run(control.instance.TextButton.ImageLabel, (tr) =>
-				tr.transform("ImageTransparency", 1, TransformService.commonProps.quadOut02),
-			);
-			TransformService.run(control.instance.TextButton, (tr) =>
-				tr
-					.moveRelative(new UDim2(0, -50, 0, 0), TransformService.commonProps.quadOut02)
-					.transform("BackgroundTransparency", 1, TransformService.commonProps.quadOut02)
-					.then()
-					.func(() => control.destroy()),
-			);
-		} else {
-			TransformService.run(control.instance.TextButton.TitleLabel, (tr) =>
-				tr.transform("TextTransparency", 1, TransformService.commonProps.quadOut02),
-			);
-			TransformService.run(control.instance.TextButton.UsernameLabel, (tr) =>
-				tr.transform("TextTransparency", 1, TransformService.commonProps.quadOut02),
-			);
-			TransformService.run(control.instance.TextButton.ImageLabel, (tr) =>
-				tr.transform("ImageTransparency", 1, TransformService.commonProps.quadOut02),
-			);
-			TransformService.run(control.instance.TextButton, (tr) =>
-				tr
-					.moveRelative(new UDim2(0, 50, 0, 0), TransformService.commonProps.quadOut02)
-					.transform("BackgroundTransparency", 1, TransformService.commonProps.quadOut02)
-					.then()
-					.func(() => control.destroy()),
-			);
-		}
+		const direction = this.leftControl.get(player) ? -1 : 1;
+		Transforms.create()
+			.transform(control.instance.TextButton.Texts.TitleLabel, "TextTransparency", 1, Transforms.quadOut02)
+			.transform(control.instance.TextButton.Texts.UsernameLabel, "TextTransparency", 1, Transforms.quadOut02)
+			.transform(control.instance.TextButton.ImageLabel, "ImageTransparency", 1, Transforms.quadOut02)
+			.moveRelative(control.instance.TextButton, new UDim2(0, direction * 50, 0, 0), Transforms.quadOut02)
+			.transform(control.instance.TextButton, "BackgroundTransparency", 1, Transforms.quadOut02)
+			.then()
+			.func(() => control.destroy())
+			.run({});
 	}
 }

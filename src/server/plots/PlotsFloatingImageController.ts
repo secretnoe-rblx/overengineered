@@ -2,7 +2,7 @@ import { Players, ReplicatedStorage } from "@rbxts/services";
 import { Component } from "engine/shared/component/Component";
 import { ComponentChild } from "engine/shared/component/ComponentChild";
 import { InstanceComponent } from "engine/shared/component/InstanceComponent";
-import { GameDefinitions } from "shared/data/GameDefinitions";
+import { PlayerRank } from "engine/shared/PlayerRank";
 import type { SharedPlot } from "shared/building/SharedPlot";
 import type { SharedPlots } from "shared/building/SharedPlots";
 
@@ -20,7 +20,7 @@ class PlotFloatingImageController extends Component {
 	constructor(plot: SharedPlot) {
 		super();
 
-		const container = new ComponentChild(this);
+		const container = this.parent(new ComponentChild());
 		const create = (player: Player) => {
 			const gui = ReplicatedStorage.Assets.PlotOwnerGui.Clone();
 			gui.UserImage.Image = Players.GetUserThumbnailAsync(
@@ -33,23 +33,17 @@ class PlotFloatingImageController extends Component {
 			gui.Parent = plot.instance;
 			gui.Adornee = plot.instance.FindFirstChild("BuildingArea") as BasePart;
 
-			const rank = GameDefinitions.getRank(player);
-			const rankData = GameDefinitions.RANKS[rank];
-			if (rankData) {
-				gui.RankLabel.Text = rankData.name;
-				if (rankData.rainbow) {
-					spawn(() => {
-						while (gui && gui.FindFirstChild("RankLabel")) {
-							const t = 5;
-							const hue = (tick() % t) / t;
-							const colorrr = Color3.fromHSV(hue, 1, 1);
-							gui.RankLabel.TextColor3 = colorrr;
-							task.wait();
-						}
-					});
-				} else if (rankData.color) {
-					gui.RankLabel.TextColor3 = rankData.color;
-				}
+			if (PlayerRank.isAdmin(player)) {
+				gui.RankLabel.Text = "Developer";
+				spawn(() => {
+					while (gui && gui.FindFirstChild("RankLabel")) {
+						const t = 5;
+						const hue = (tick() % t) / t;
+						const colorrr = Color3.fromHSV(hue, 1, 1);
+						gui.RankLabel.TextColor3 = colorrr;
+						task.wait();
+					}
+				});
 			}
 
 			return new InstanceComponent(gui);

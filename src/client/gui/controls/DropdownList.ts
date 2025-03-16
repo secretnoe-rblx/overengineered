@@ -1,10 +1,11 @@
-import { TextButtonControl } from "engine/client/gui/Button";
 import { Control } from "engine/client/gui/Control";
+import { ComponentChildren } from "engine/shared/component/ComponentChildren";
+import { Transforms } from "engine/shared/component/Transforms";
 import { TransformService } from "engine/shared/component/TransformService";
 import { ObservableValue } from "engine/shared/event/ObservableValue";
 import { ArgsSignal } from "engine/shared/event/Signal";
 import type { DropdownDefinition } from "client/gui/controls/Dropdown";
-import type { ButtonControl, TextButtonDefinition } from "engine/client/gui/Button";
+import type { TextButtonDefinition } from "engine/client/gui/Button";
 
 export type DropdownListDefinition = DropdownDefinition & {
 	readonly Button: TextButtonDefinition;
@@ -28,13 +29,12 @@ export class DropdownList<TValue extends string = string> extends Control<Dropdo
 
 		this.itemTemplate = this.asTemplate(this.gui.Content.Template);
 
-		this.button = this.add(new TextButtonControl(this.gui.Button));
-		this.contents = this.add(new Control<GuiObject, TextButtonControl>(this.gui.Content));
+		this.button = this.add(new Control(this.gui.Button)).addButtonAction(() => this.toggle());
+		this.contents = this.parent(new ComponentChildren<Control>().withParentInstance(this.gui.Content));
 
-		this.event.subscribe(this.button.activated, () => this.toggle());
 		this.event.subscribeObservable(
 			this.selectedItem,
-			(v) => this.button.text.set(v === undefined ? "" : (this.names.get(v) ?? v)),
+			(v) => this.button.setButtonText(v === undefined ? "" : (this.names.get(v) ?? v)),
 			true,
 		);
 	}
@@ -44,7 +44,7 @@ export class DropdownList<TValue extends string = string> extends Control<Dropdo
 		this.contentsVisible = !this.contentsVisible;
 
 		let height = this.button.instance.Size.Y.Offset;
-		for (const button of this.contents.getChildren()) {
+		for (const button of this.contents.getAll()) {
 			TransformService.run(button.instance, (tr) =>
 				tr
 					.func(() => {
@@ -52,7 +52,11 @@ export class DropdownList<TValue extends string = string> extends Control<Dropdo
 							button.instance.Interactable = false;
 						}
 					})
-					.moveY(new UDim(0, this.contentsVisible ? height : 0), TransformService.commonProps.quadOut02)
+					.moveY(
+						button.instance,
+						new UDim(0, this.contentsVisible ? height : 0),
+						Transforms.commonProps.quadOut02,
+					)
 					.then()
 					.func(() => {
 						if (this.contentsVisible) {
@@ -65,8 +69,10 @@ export class DropdownList<TValue extends string = string> extends Control<Dropdo
 		}
 	}
 
-	addItem(name: TValue, text?: string): ButtonControl {
-		const btn = new TextButtonControl(this.itemTemplate(), () => {
+	addItem(name: TValue, text?: string): Control {
+		const btn = new Control(this.itemTemplate());
+
+		btn.addButtonAction(() => {
 			this._submitted.Fire(name);
 			this.selectedItem.set(name);
 			this.toggle();
@@ -76,7 +82,7 @@ export class DropdownList<TValue extends string = string> extends Control<Dropdo
 			this.names.set(name, text);
 		}
 
-		btn.text.set(text ?? name);
+		btn.setButtonText(text ?? name);
 		btn.instance.Interactable = false;
 		this.contents.add(btn);
 

@@ -5,22 +5,29 @@ import { GameDefinitions } from "shared/data/GameDefinitions";
 import { SlotsMeta } from "shared/SlotsMeta";
 import type { DatabaseBackend } from "engine/server/backend/DatabaseBackend";
 import type { PlayerDatabase } from "server/database/PlayerDatabase";
-import type { BuildingPlot } from "shared/building/BuildingPlot";
+import type { LatestSerializedBlocks } from "shared/building/BlocksSerializer";
 
 @injectable
 export class SlotDatabase {
 	private readonly onlinePlayers = new Set<number>();
-	private readonly datastore: DatabaseBackend;
 	private readonly blocksdb;
 
-	constructor(@inject private readonly players: PlayerDatabase) {
-		this.datastore = Db.createStore("slots");
-
-		this.blocksdb = new Db<string | undefined>(
+	constructor(
+		private readonly datastore: DatabaseBackend<
+			BlocksSerializer.JsonSerializedBlocks,
+			[ownerId: number, slotId: number]
+		>,
+		@inject private readonly players: PlayerDatabase,
+	) {
+		this.blocksdb = new Db<
+			LatestSerializedBlocks,
+			BlocksSerializer.JsonSerializedBlocks,
+			[ownerId: number, slotId: number]
+		>(
 			this.datastore,
-			() => undefined,
-			(data) => data ?? "",
-			(data) => data,
+			() => ({ version: BlocksSerializer.latestVersion, blocks: [] }),
+			(slot) => BlocksSerializer.jsonToObject(slot),
+			(slot) => BlocksSerializer.objectToJson(slot),
 		);
 
 		Players.PlayerAdded.Connect((plr) => this.onlinePlayers.add(plr.UserId));
@@ -32,26 +39,32 @@ export class SlotDatabase {
 
 			const id = tostring(plr.UserId);
 
-			for (const [key] of this.blocksdb.loadedUnsavedEntries()) {
+			for (const [key, { keys }] of this.blocksdb.loadedUnsavedEntries()) {
 				if (key.find(id + "_")[0] === undefined) {
 					continue;
 				}
 
 				$log("Saving " + key);
-				this.blocksdb.save(key);
-				this.blocksdb.free(key);
+				this.blocksdb.save(keys, key);
+				this.blocksdb.free(keys, key);
 			}
 		});
 	}
 
 	private ensureValidSlotIndex(userId: number, index: number) {
-		if (index in SlotsMeta.specialSlots) return;
+		if (SlotsMeta.getSpecial(index)) return;
 
 		const pdata = this.players.get(userId);
 		const player = Players.GetPlayerByUserId(userId);
 		if (!player) return;
 
-		if (index >= 0 && index < GameDefinitions.getMaxSlots(player, pdata.purchasedSlots ?? 0)) {
+		const maxSlots = GameDefinitions.getMaxSlots(player, pdata.purchasedSlots ?? 0);
+
+		if (index >= 0 && index < maxSlots) {
+			return;
+		}
+
+		if (SlotsMeta.isTestSlot(index)) {
 			return;
 		}
 
@@ -68,28 +81,29 @@ export class SlotDatabase {
 		});
 
 		if (!this.onlinePlayers.has(userId)) {
-			this.blocksdb.save(tostring(userId));
-			this.blocksdb.free(tostring(userId));
-			$log("SAVING AFTER QUIT2");
+			for (const slot of slots) {
+				this.blocksdb.save([userId, slot.index]);
+				this.blocksdb.free([userId, slot.index]);
+			}
+
+			$log(`Saving data of the OFFLINE player ${userId}`);
 		}
 	}
 
-	private toKey(userId: number, index: number) {
-		return `${userId}_${index}`;
-	}
-	getBlocks(userId: number, index: number) {
+	getBlocks(userId: number, index: number): LatestSerializedBlocks {
 		this.ensureValidSlotIndex(userId, index);
-		return this.blocksdb.get(this.toKey(userId, index)) as string | undefined;
+		return this.blocksdb.get([userId, index]);
 	}
-	setBlocks(userId: number, index: number, blocks: string, blockCount: number) {
+	setBlocks(userId: number, index: number, blocks: LatestSerializedBlocks | undefined) {
 		this.ensureValidSlotIndex(userId, index);
-		this.blocksdb.set(this.toKey(userId, index), blocks);
+
+		blocks ??= { version: BlocksSerializer.latestVersion, blocks: [] };
+		this.blocksdb.set([userId, index], blocks);
 
 		const meta = [...this.getMeta(userId)];
 		SlotsMeta.set(meta, {
 			...SlotsMeta.get(meta, index),
-			blocks: blockCount,
-			size: blocks.size(),
+			blocks: blocks.blocks.size(),
 			saveTime: DateTime.now().UnixTimestampMillis,
 			index,
 		});
@@ -98,7 +112,7 @@ export class SlotDatabase {
 	setBlocksFromAnotherSlot(userId: number, index: number, indexfrom: number) {
 		this.ensureValidSlotIndex(userId, index);
 		this.ensureValidSlotIndex(userId, indexfrom);
-		this.blocksdb.set(this.toKey(userId, index), this.getBlocks(userId, indexfrom));
+		this.blocksdb.set([userId, index], this.getBlocks(userId, indexfrom));
 
 		const meta = [...this.getMeta(userId)];
 		SlotsMeta.set(meta, { ...SlotsMeta.get(meta, indexfrom), index });
@@ -111,15 +125,10 @@ export class SlotDatabase {
 		const meta = metaUpdate(this.getMeta(userId));
 		this.setMeta(userId, meta);
 	}
-	save(userId: number, index: number, plot: BuildingPlot): ResponseResult<SaveSlotResponse> {
+	delete(userId: number, index: number): void {
 		this.ensureValidSlotIndex(userId, index);
 
-		const blocks = BlocksSerializer.serialize(plot);
-		const blockCount = plot.getBlocks().size();
-
-		this.setBlocks(userId, index, blocks, blockCount);
-		const size = blocks.size();
-
-		return { blocks: blockCount, size: size };
+		this.blocksdb.delete([userId, index]);
+		this.updateMeta(userId, index, (meta) => SlotsMeta.withRemovedSlot(meta, index));
 	}
 }

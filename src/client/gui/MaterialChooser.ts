@@ -1,21 +1,21 @@
 import { MarketplaceService, Players } from "@rbxts/services";
 import { ButtonControl } from "engine/client/gui/Button";
 import { Control } from "engine/client/gui/Control";
+import { Colors } from "engine/shared/Colors";
+import { Materials } from "engine/shared/data/Materials";
 import { SubmittableValue } from "engine/shared/event/SubmittableValue";
 import { Marketplace } from "engine/shared/Marketplace";
-import { GameDefinitions } from "shared/data/GameDefinitions";
+import { BuildingManager } from "shared/building/BuildingManager";
+import type { ReadonlyObservableValue } from "engine/shared/event/ObservableValue";
 
 class MaterialButton extends ButtonControl {
-	constructor(gui: GuiButton, set: (material: Enum.Material) => void, gamePass?: number) {
+	constructor(gui: GuiButton, set: () => void, gamePass?: number) {
 		super(gui);
-
-		const material = Enum.Material.GetEnumItems().find((m) => m.Name === gui.Name);
-		if (!material) throw `Unknown material ${gui.Name}`;
 
 		let bought = gamePass === undefined;
 		this.event.subscribe(this.activated, () => {
 			if (!bought) return;
-			set(material);
+			set();
 		});
 
 		if (gamePass !== undefined) {
@@ -35,7 +35,7 @@ class MaterialButton extends ButtonControl {
 
 					bought = true;
 					lockFrame.Visible = false;
-					set(material);
+					set();
 				});
 
 				this.event.subscribe(this.activated, () => {
@@ -48,23 +48,83 @@ class MaterialButton extends ButtonControl {
 }
 
 export type MaterialChooserDefinition = GuiObject & {
-	GetChildren(undefined: undefined): readonly ImageButton[];
+	readonly Left: GuiObject & {
+		readonly Preview: ImageLabel;
+	};
+	readonly Right: GuiObject & {
+		readonly ScrollingFrame: ScrollingFrame & {
+			readonly MaterialTemplate: ImageButton & {
+				readonly TextLabel: TextLabel;
+			};
+		};
+	};
 };
 /** Material chooser part */
 export class MaterialChooser extends Control<MaterialChooserDefinition> {
+	static setColorOfPreview(color: Color3, child: ImageLabel | ImageButton) {
+		if (child.Image === "") {
+			child.BackgroundColor3 = color;
+			child.ImageColor3 = Colors.white;
+		} else {
+			child.BackgroundColor3 = Colors.white;
+			child.ImageColor3 = color;
+		}
+	}
+
 	readonly value;
 
-	constructor(gui: MaterialChooserDefinition, value?: SubmittableValue<Enum.Material>) {
+	constructor(
+		gui: MaterialChooserDefinition,
+		value?: SubmittableValue<Enum.Material>,
+		color?: ReadonlyObservableValue<Color3>,
+	) {
 		super(gui);
 
 		value ??= SubmittableValue.from<Enum.Material>(Enum.Material.Plastic);
 		this.value = value.asHalfReadonly();
 
-		for (const instance of this.gui.GetChildren(undefined)) {
-			if (!instance.IsA("ImageButton")) continue;
+		this.event.subscribeObservable(
+			value.value,
+			(material) => {
+				gui.Left.Preview.Image = Materials.getMaterialTextureAssetId(material);
+				if (color) {
+					MaterialChooser.setColorOfPreview(color.get(), gui.Left.Preview);
+				}
+			},
+			true,
+		);
 
-			const gamepassid = instance.Name === "Neon" ? GameDefinitions.GAMEPASSES.NeonMaterial : undefined;
-			this.add(new MaterialButton(instance, (material) => value.submit(material), gamepassid));
+		if (color) {
+			this.event.subscribeObservable(
+				color,
+				(c) => {
+					MaterialChooser.setColorOfPreview(c, gui.Left.Preview);
+
+					for (const child of gui.Right.ScrollingFrame.GetChildren()) {
+						if (!child.IsA("ImageButton")) continue;
+						MaterialChooser.setColorOfPreview(c, child);
+					}
+				},
+				true,
+			);
+		}
+
+		const template = this.asTemplate(gui.Right.ScrollingFrame.MaterialTemplate, true);
+		for (const [i, material] of ipairs(
+			BuildingManager.AllowedMaterials.clone().sort((r, l) => r.Value < l.Value),
+		)) {
+			const instance = template();
+			instance.LayoutOrder = i;
+			instance.Parent = gui.Right.ScrollingFrame;
+
+			instance.TextLabel.Text = Materials.getMaterialDisplayName(material).upper();
+			instance.BackgroundColor3 = Colors.white;
+			instance.Image = Materials.getMaterialTextureAssetId(material);
+
+			// gamepasses disabled as this is uploaded as another game
+			// const gamepassid = instance.Name === "Neon" ? GameDefinitions.GAMEPASSES.NeonMaterial : undefined;
+			const gamepassid = undefined;
+			this.parent(new MaterialButton(instance, () => value.submit(material), gamepassid));
 		}
 	}
 }

@@ -1,76 +1,169 @@
-import { Gui } from "client/gui/Gui";
-import { MultiPlayerConfigControl } from "client/gui/PlayerConfigControls";
-import { Popup } from "client/gui/Popup";
-import { ButtonControl, TextButtonControl } from "engine/client/gui/Button";
-import { Colors } from "shared/Colors";
-import { PlayerConfigDefinition } from "shared/config/PlayerConfig";
-import type { NewSettingsPopup } from "client/gui/popup/NewSettingsPopup";
+import { Interface } from "client/gui/Interface";
+import { PlayerSettingsBlacklist } from "client/gui/playerSettings/PlayerSettingsBlacklist";
+import { PlayerSettingsCamera } from "client/gui/playerSettings/PlayerSettingsCamera";
+import { PlayerSettingsControls } from "client/gui/playerSettings/PlayerSettingsControls";
+import { PlayerSettingsEnvironment } from "client/gui/playerSettings/PlayerSettingsEnvironment";
+import { PlayerSettingsGeneral } from "client/gui/playerSettings/PlayerSettingsGeneral";
+import { PlayerSettingsGraphics } from "client/gui/playerSettings/PlayerSettingsGraphics";
+import { PlayerSettingsInterface } from "client/gui/playerSettings/PlayerSettingsInterface";
+import { PlayerSettingsPhysics } from "client/gui/playerSettings/PlayerSettingsPhysics";
+import { PlayerSettingsTheme } from "client/gui/playerSettings/PlayerSettingsTheme";
+import { PlayerSettingsTutorial } from "client/gui/playerSettings/PlayerSettingsTutorial";
+import { ButtonAnimatedClickComponent } from "engine/client/gui/ButtonAnimatedClickComponent";
+import { ButtonBackgroundColorComponent } from "engine/client/gui/ButtonBackgroundColorComponent";
+import { Control } from "engine/client/gui/Control";
+import { Colors } from "engine/shared/Colors";
+import { ComponentChild } from "engine/shared/component/ComponentChild";
+import { Transforms } from "engine/shared/component/Transforms";
+import { ObservableValue } from "engine/shared/event/ObservableValue";
+import { Objects } from "engine/shared/fixes/Objects";
+import type { ConfigControlTemplateList } from "client/gui/configControls/ConfigControlsList";
+import type { PlayModeController } from "client/modes/PlayModeController";
 import type { PlayerDataStorage } from "client/PlayerDataStorage";
-import type { TextButtonDefinition } from "engine/client/gui/Button";
-import type { GameHostBuilder } from "engine/shared/GameHostBuilder";
+import type { Component } from "engine/shared/component/Component";
 
-export type ConfigPartDefinition<T extends GuiObject> = GuiObject & {
-	readonly HeadingLabel: TextLabel;
-	readonly Control: T;
+type SidebarButton = GuiButton & {
+	readonly ImageLabel: ImageLabel;
+	readonly TextLabel: TextLabel;
 };
 
-export type SettingsPopupDefinition = GuiObject & {
-	readonly Content: {
-		readonly ScrollingFrame: ScrollingFrame;
-	};
-	readonly Buttons: {
-		readonly CancelButton: GuiButton;
-	};
-	readonly Head: {
-		readonly CloseButton: GuiButton;
-	};
+type SidebarDefinition = ScrollingFrame & {
+	readonly Template: SidebarButton;
 };
+class Sidebar extends Control<SidebarDefinition> {
+	private readonly buttonTemplate;
 
-@injectable
-export class SettingsPopup extends Popup<SettingsPopupDefinition> {
-	static addAsService(host: GameHostBuilder) {
-		const gui = Gui.getGameUI<{ Popup: { Settings: SettingsPopupDefinition } }>().Popup.Settings;
-		host.services.registerTransientFunc((ctx) => ctx.resolveForeignClass(this, [gui.Clone()]));
+	constructor(gui: SidebarDefinition) {
+		super(gui);
+		this.buttonTemplate = this.asTemplate(gui.Template);
 	}
 
-	private readonly config;
+	addButton(text: string, image: number, action: () => void) {
+		const btn = this.parent(new Control(this.buttonTemplate()));
+		btn.instance.Name = text;
+		btn.addButtonAction(action);
+		btn.getComponent(ButtonAnimatedClickComponent);
+		btn.getComponent(ButtonBackgroundColorComponent) //
+			.with((c) => c.mouseHoldingColor.set(c.mouseEnterColor.get()));
+		btn.addButtonAction(() => {
+			const bg = new ObservableValue(0.7);
+			bg.subscribe((v) => {
+				btn.valuesComponent() //
+					.get("BackgroundColor3")
+					.effect("click_flash", (c) => c.Lerp(Colors.white, v));
+			}, true);
 
-	constructor(gui: SettingsPopupDefinition, @inject playerData: PlayerDataStorage, @inject di: DIContainer) {
-		super(gui);
-
-		this.config = this.add(
-			new MultiPlayerConfigControl<PlayerConfigDefinition>(this.gui.Content.ScrollingFrame, di),
-		);
-
-		this.event.subscribe(this.config.configUpdated, async (key, value) => {
-			await playerData.sendPlayerConfigValue(key, value as PlayerConfig[keyof PlayerConfig]);
+			Transforms.create() //
+				.transformObservable(bg, 0, { ...Transforms.quadOut02, duration: 0.5 })
+				.run(btn);
 		});
 
-		this.add(new ButtonControl(this.gui.Buttons.CancelButton, () => this.hide()));
-		this.add(new ButtonControl(this.gui.Head.CloseButton, () => this.hide()));
+		btn.setButtonText(text.upper());
+		btn.instance.ImageLabel.Image = `rbxassetid://${image}`;
 
-		this.event.subscribeObservable(
-			playerData.config,
-			(config) => {
-				this.config.set(config, PlayerConfigDefinition);
+		return btn;
+	}
+}
 
-				const btn = this.config.add(
-					new TextButtonControl(
-						Gui.getGameUI<{ Templates: { Button: TextButtonDefinition } }>().Templates.Button.Clone(),
-						() => {
-							const popup = di.resolve<NewSettingsPopup>();
-							popup.setScene("Permissions");
-							popup.show();
-							this.hide();
-						},
-					),
-				);
-				btn.instance.LayoutOrder = 0;
-				btn.instance.BackgroundColor3 = Colors.accentDark;
-				btn.instance.Size = new UDim2(new UDim(1, 0), btn.instance.Size.Y);
-				btn.text.set("Permissions");
-			},
-			true,
-		);
+type ContentDefinition = GuiObject & {
+	readonly ScrollingFrame: ScrollingFrame & ConfigControlTemplateList;
+};
+class Content extends Control<ContentDefinition> {
+	private readonly content;
+
+	constructor(gui: ContentDefinition, config: ObservableValue<PlayerConfig>) {
+		super(gui);
+
+		const contentParent = this.parent(new ComponentChild(true)) //
+			.withParentInstance(gui);
+
+		for (const child of gui.ScrollingFrame.GetChildren()) {
+			if (child.IsA("GuiObject")) {
+				child.Visible = false;
+			}
+		}
+		const contentScrollTemplate = this.asTemplate(gui.ScrollingFrame);
+
+		const content = new ObservableValue<
+			ConstructorOf<Component, [ConfigControlTemplateList, ObservableValue<PlayerConfig>]> | undefined
+		>(undefined);
+		content.subscribe((clazz) => {
+			if (!clazz) {
+				contentParent.clear();
+				return;
+			}
+
+			contentParent.set(new clazz(contentScrollTemplate(), config));
+		});
+
+		this.onDisable(() => content.set(undefined));
+		this.content = content;
+	}
+
+	set<T extends GuiObject>(
+		clazz: ConstructorOf<Component, [T & ConfigControlTemplateList, ObservableValue<PlayerConfig>]> | undefined,
+	): void {
+		this.content.set(clazz as never);
+	}
+}
+
+const template = Interface.getInterface<{ Popups: { Crossplatform: { Settings: SettingsPopup2Definition } } }>().Popups
+	.Crossplatform.Settings;
+template.Visible = false;
+
+type SettingsPopup2Definition = GuiObject & {
+	readonly Content: GuiObject & {
+		readonly Sidebar: GuiObject & {
+			readonly ScrollingFrame: SidebarDefinition;
+		};
+		readonly Content: ContentDefinition;
+	};
+	readonly Heading: GuiObject & {
+		readonly CloseButton: GuiButton;
+		readonly TitleLabel: TextLabel;
+	};
+};
+export class SettingsPopup extends Control<SettingsPopup2Definition> {
+	constructor() {
+		const gui = template.Clone();
+		super(gui);
+
+		this.$onInjectAuto((playerData: PlayerDataStorage, playModeController: PlayModeController) => {
+			const original = playerData.config.get();
+
+			const mode = playModeController.get();
+
+			const content = this.parent(new Content(gui.Content.Content, playerData.config));
+			const sidebar = this.parent(new Sidebar(gui.Content.Sidebar.ScrollingFrame));
+
+			sidebar.addButton("general", 18627409276, () => content.set(PlayerSettingsGeneral));
+			sidebar.addButton("interface", 18627409276, () => content.set(PlayerSettingsInterface));
+			sidebar.addButton("camera", 18627409276, () => content.set(PlayerSettingsCamera));
+			sidebar.addButton("colors", 18627409276, () => content.set(PlayerSettingsTheme));
+			sidebar.addButton("graphics", 18626628666, () => content.set(PlayerSettingsGraphics));
+			sidebar.addButton("environment", 18626647702, () => content.set(PlayerSettingsEnvironment));
+			sidebar.addButton("controls", 18626685039, () => content.set(PlayerSettingsControls));
+			sidebar
+				.addButton("physics", 18626685039, () => content.set(PlayerSettingsPhysics))
+				.setButtonInteractable(mode === "build");
+			sidebar.addButton("blacklist", 18626826844, () => content.set(PlayerSettingsBlacklist));
+			sidebar
+				.addButton("tutorial", 98943721557973, () => content.set(PlayerSettingsTutorial))
+				.setButtonInteractable(mode === "build");
+
+			this.onEnable(() => content.set(PlayerSettingsGeneral));
+
+			this.onDestroy(() => {
+				const unchanged = Objects.deepEquals(original, playerData.config.get());
+				if (unchanged) return;
+
+				task.spawn(() => {
+					playerData.sendPlayerConfig(playerData.config.get());
+				});
+			});
+
+			this.parent(new Control(gui.Heading.CloseButton)) //
+				.addButtonAction(() => this.hideThenDestroy());
+		});
 	}
 }

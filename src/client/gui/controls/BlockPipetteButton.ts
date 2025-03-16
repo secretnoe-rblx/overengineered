@@ -1,13 +1,14 @@
 import { Players, UserInputService } from "@rbxts/services";
 import { HoveredPartHighlighter } from "client/tools/highlighters/HoveredPartHighlighter";
 import { ButtonControl } from "engine/client/gui/Button";
+import { Element } from "engine/shared/Element";
 import { EventHandler } from "engine/shared/event/EventHandler";
 import { SlimFilter } from "engine/shared/event/SlimFilter";
 import { SlimSignal } from "engine/shared/event/SlimSignal";
+import { PlayerRank } from "engine/shared/PlayerRank";
 import { BlockManager } from "shared/building/BlockManager";
 import { BuildingManager } from "shared/building/BuildingManager";
 import { Colors } from "shared/Colors";
-import { GameDefinitions } from "shared/data/GameDefinitions";
 import type { ButtonDefinition } from "engine/client/gui/Button";
 
 export class BlockPipetteButton extends ButtonControl {
@@ -19,7 +20,6 @@ export class BlockPipetteButton extends ButtonControl {
 	constructor(gui: ButtonDefinition) {
 		super(gui);
 
-		const bg = this.gui.BackgroundColor3;
 		let stop: (() => void) | undefined;
 
 		const g = (part: BasePart): BasePart | BlockModel | undefined => {
@@ -34,16 +34,26 @@ export class BlockPipetteButton extends ButtonControl {
 				return;
 			}
 
-			this.onStart.Fire();
-			this.gui.BackgroundColor3 = Colors.accentLight;
+			const visualFrame = Element.create(
+				"Frame",
+				{
+					Size: new UDim2(1, 0, 1, 0),
+					BackgroundColor3: Colors.accentLight,
+					Parent: gui,
+				},
+				{ corner: Element.create("UICorner", { CornerRadius: new UDim(0, 8) }) },
+			);
 
-			const visualizer = this.add(new HoveredPartHighlighter(g));
+			this.onStart.Fire();
+
+			const visualizer = new HoveredPartHighlighter(g);
 			visualizer.enable();
 
 			const eh = new EventHandler();
 			stop = () => {
-				this.gui.BackgroundColor3 = bg;
-				this.remove(visualizer);
+				visualFrame.Destroy();
+
+				visualizer.destroy();
 				eh.unsubscribeAll();
 				this.onEnd.Fire();
 				stop = undefined;
@@ -83,7 +93,7 @@ export class BlockPipetteButton extends ButtonControl {
 			return BlockManager.manager.material.get(part);
 		};
 		pipette.onSelect.Connect((part) => clicked(getMaterial(part)));
-		if (!GameDefinitions.isAdmin(Players.LocalPlayer)) {
+		if (!PlayerRank.isAdmin(Players.LocalPlayer)) {
 			pipette.filter.add((part) => BuildingManager.AllowedMaterials.includes(getMaterial(part)));
 		}
 

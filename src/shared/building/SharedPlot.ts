@@ -62,13 +62,13 @@ export class SharedPlot extends InstanceComponent<PlotModel> {
 	}
 	/** @deprecated TOBEDELETED */
 	getBlocks(): readonly BlockModel[] {
-		return this.instance.Blocks.GetChildren(undefined);
+		return this.instance.WaitForChild("Blocks").GetChildren() as BlockModel[];
 	}
 	getBlock(uuid: BlockUuid): BlockModel {
-		return (this.instance.Blocks as unknown as Record<BlockUuid, BlockModel>)[uuid];
+		return (this.instance.WaitForChild("Blocks") as unknown as Record<BlockUuid, BlockModel>)[uuid];
 	}
 	tryGetBlock(uuid: BlockUuid): BlockModel | undefined {
-		return this.instance.Blocks.FindFirstChild(uuid) as BlockModel | undefined;
+		return this.instance.WaitForChild("Blocks").FindFirstChild(uuid) as BlockModel | undefined;
 	}
 	getSpawnCFrame() {
 		return new CFrame(this.getSpawnPosition()).mul(CFrame.Angles(0, math.rad(90), 0));
@@ -81,7 +81,7 @@ export class SharedPlot extends InstanceComponent<PlotModel> {
 
 	/** Is the provided `Instance` is a plot model */
 	static isPlot(model: Instance | undefined): model is PlotModel {
-		return model?.Parent === Workspace.Plots;
+		return model?.Parent === Workspace.FindFirstChild("Plots");
 	}
 
 	/** Is the provided instance a block on this plot */
@@ -108,8 +108,8 @@ export class SharedPlot extends InstanceComponent<PlotModel> {
 	}
 
 	/** Is player allowed to build on this plot */
-	isBuildingAllowed(player: Player): boolean {
-		return this.ownerId.get() === player.UserId || this.whitelistedPlayers.get()?.includes(player.UserId) === true;
+	isBuildingAllowed(playerId: number): boolean {
+		return this.ownerId.get() === playerId || this.whitelistedPlayers.get()?.includes(playerId) === true;
 	}
 
 	isBlacklisted(player: Player): boolean {

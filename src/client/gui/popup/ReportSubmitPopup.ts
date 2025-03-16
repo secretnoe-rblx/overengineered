@@ -1,14 +1,13 @@
 import { Base64 } from "@rbxts/crypto";
 import { GuiService, Players } from "@rbxts/services";
 import { SoundController } from "client/controller/SoundController";
-import { Gui } from "client/gui/Gui";
-import { Popup } from "client/gui/Popup";
+import { Interface } from "client/gui/Interface";
 import { ButtonControl } from "engine/client/gui/Button";
+import { Control } from "engine/client/gui/Control";
 import { JSON } from "engine/shared/fixes/Json";
 import { GameDefinitions } from "shared/data/GameDefinitions";
 import type { PlayerDataStorage } from "client/PlayerDataStorage";
 import type { ButtonDefinition } from "engine/client/gui/Button";
-import type { SharedPlot } from "shared/building/SharedPlot";
 
 const processDataForJsonSerializationForSubmit = (data: unknown): unknown => {
 	if (typeIs(data, "Instance")) {
@@ -38,33 +37,6 @@ const serialize = (data: unknown): string => {
 	return Base64.Encode(str);
 };
 
-@injectable
-export class ReportSubmitController {
-	constructor(
-		@inject private readonly plot: SharedPlot,
-		@inject private readonly playerDataStorage: PlayerDataStorage,
-	) {}
-
-	submit(data: object, text?: string) {
-		warn(text);
-
-		const popup = new ReportSubmitPopup(
-			Gui.getGameUI<{
-				Popup: { Crossplatform: { ReportSubmit: ReportSubmitPopupDefinition } };
-			}>().Popup.Crossplatform.ReportSubmit.Clone(),
-			{
-				...data,
-				loadedSlotIdx: this.playerDataStorage.loadedSlot.get(),
-				// loadedSlot: this.plot.getBlocks(), // too much text
-				data: this.playerDataStorage.data.get(),
-			},
-			text,
-		);
-
-		popup.show();
-	}
-}
-
 type ReportSubmitPopupDefinition = GuiObject & {
 	readonly Content: Frame & {
 		readonly Text: TextLabel;
@@ -77,69 +49,64 @@ type ReportSubmitPopupDefinition = GuiObject & {
 		readonly CloseButton: ButtonDefinition;
 	};
 };
-class ReportSubmitPopup extends Popup<ReportSubmitPopupDefinition> {
-	private readonly okButton;
-
-	static showPopup(data: unknown, text?: string, okFunc?: () => void) {
-		const popup = new ReportSubmitPopup(
-			Gui.getGameUI<{
-				Popup: { Crossplatform: { ReportSubmit: ReportSubmitPopupDefinition } };
-			}>().Popup.Crossplatform.ReportSubmit.Clone(),
-			data,
-			text,
-			okFunc,
-		);
-
-		popup.show();
-	}
-	constructor(gui: ReportSubmitPopupDefinition, data: unknown, text?: string, okFunc?: () => void) {
+export class ReportSubmitPopup extends Control<ReportSubmitPopupDefinition> {
+	constructor(data: unknown, text?: string, okFunc?: () => void) {
+		const gui = Interface.getInterface<{
+			Popups: { Crossplatform: { ReportSubmit: ReportSubmitPopupDefinition } };
+		}>().Popups.Crossplatform.ReportSubmit.Clone();
 		super(gui);
 
-		this.okButton = this.add(new ButtonControl(gui.Content.Buttons.OkButton));
+		const okButton = this.parent(new Control(gui.Content.Buttons.OkButton));
+		okButton.addButtonAction(() => {
+			okFunc?.();
+			this.hide();
+		});
+		this.event.onPrepareGamepad(() => (GuiService.SelectedObject = okButton.instance));
 
-		SoundController.getSounds().Warning.Play();
+		this.parent(new ButtonControl(gui.Heading.CloseButton, () => this.hide()));
 
-		this.gui.Content.Text.Text =
+		this.onEnable(() => SoundController.getSounds().Warning.Play());
+
+		gui.Content.Text.Text =
 			text ??
-			`
-			An error has happened.\nPlease copy the text below and submit a bug report in our community server.
-			`.trim();
+			"An error has happened.\nPlease copy the text below and submit a bug report in our community server.";
 
-		try {
-			this.gui.Content.TextBox.Text = serialize({
-				uid: Players.LocalPlayer.UserId,
-				uname: Players.LocalPlayer.Name,
-				udname: Players.LocalPlayer.DisplayName,
-				text: text ?? "Never gonna give you up",
-				env: GameDefinitions.getEnvironmentInfo(),
-				trace: debug.traceback(undefined, 1)?.split("\n"),
-				data: processDataForJsonSerializationForSubmit(data),
-			});
-		} catch {
+		this.$onInjectAuto((playerDataStorage: PlayerDataStorage) => {
+			if (typeIs(data, "table")) {
+				data = {
+					...data,
+					loadedSlotIdx: playerDataStorage.loadedSlot.get(),
+					data: playerDataStorage.data.get(),
+					// loadedSlot: this.plot.getBlocks(), // too much text
+				};
+			}
+
 			try {
-				this.gui.Content.TextBox.Text = serialize({
+				gui.Content.TextBox.Text = serialize({
+					uid: Players.LocalPlayer.UserId,
+					uname: Players.LocalPlayer.Name,
+					udname: Players.LocalPlayer.DisplayName,
+					text: text ?? "Never gonna give you up",
 					env: GameDefinitions.getEnvironmentInfo(),
+					trace: debug.traceback(undefined, 1)?.split("\n"),
 					data: processDataForJsonSerializationForSubmit(data),
 				});
 			} catch {
 				try {
-					this.gui.Content.TextBox.Text = serialize({
-						trace: debug.traceback(undefined, 1)?.split("\n"),
+					gui.Content.TextBox.Text = serialize({
+						env: GameDefinitions.getEnvironmentInfo(),
+						data: processDataForJsonSerializationForSubmit(data),
 					});
 				} catch {
-					this.gui.Content.TextBox.Text = serialize("[ERRTOOLONG]");
+					try {
+						gui.Content.TextBox.Text = serialize({
+							trace: debug.traceback(undefined, 1)?.split("\n"),
+						});
+					} catch {
+						gui.Content.TextBox.Text = serialize("[ERRTOOLONG]");
+					}
 				}
 			}
-		}
-
-		this.event.subscribe(this.okButton.activated, () => {
-			okFunc?.();
-			this.hide();
 		});
-		this.add(new ButtonControl(this.gui.Heading.CloseButton, () => this.hide()));
-	}
-
-	protected prepareGamepad(): void {
-		GuiService.SelectedObject = this.okButton.instance;
 	}
 }

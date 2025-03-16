@@ -1,8 +1,10 @@
 import { TextButtonControl } from "engine/client/gui/Button";
 import { Control } from "engine/client/gui/Control";
+import { ComponentChildren } from "engine/shared/component/ComponentChildren";
 import { InstanceComponent } from "engine/shared/component/InstanceComponent";
 import { TestFramework } from "engine/shared/TestFramework";
 import type { TextButtonDefinition } from "engine/client/gui/Button";
+import type { Component } from "engine/shared/component/Component";
 import type { UnitTest } from "engine/shared/TestFramework";
 
 export type TestsUIDefinition = ScreenGui & {
@@ -26,9 +28,9 @@ export class TestsUI extends InstanceComponent<TestsUIDefinition> {
 		const testButtonTemplate = this.asTemplate(gui.TestList.Template);
 		const subTestButtonTemplate = this.asTemplate(gui.SubTestList.Template);
 
-		const ctestList = this.add(new Control(gui.TestList));
-		const csubTestList = this.add(new Control(gui.SubTestList));
-		const ccontent = this.add(new Control(gui.Content));
+		const ctestList = this.parent(new ComponentChildren<Component>().withParentInstance(gui.TestList));
+		const csubTestList = this.parent(new ComponentChildren<Component>().withParentInstance(gui.SubTestList));
+		const ccontent = this.parent(new ComponentChildren<Component>().withParentInstance(gui.Content));
 
 		//
 

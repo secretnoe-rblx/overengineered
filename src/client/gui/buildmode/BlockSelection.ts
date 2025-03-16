@@ -1,13 +1,15 @@
 import { ContentProvider, GuiService, Players } from "@rbxts/services";
 import { BlockPreviewControl } from "client/gui/buildmode/BlockPreviewControl";
 import { BlockPipetteButton } from "client/gui/controls/BlockPipetteButton";
-import { Gui } from "client/gui/Gui";
 import { GuiAnimator } from "client/gui/GuiAnimator";
+import { Interface } from "client/gui/Interface";
 import { TextButtonControl } from "engine/client/gui/Button";
 import { Control } from "engine/client/gui/Control";
+import { ComponentChildren } from "engine/shared/component/ComponentChildren";
 import { ObservableValue } from "engine/shared/event/ObservableValue";
 import { Localization } from "engine/shared/Localization";
-import { Colors } from "shared/Colors";
+import type { Theme } from "client/Theme";
+import type { InstanceComponent } from "engine/shared/component/InstanceComponent";
 import type { BlockCategoryPath } from "shared/blocks/Block";
 
 type Category = {
@@ -128,7 +130,7 @@ class CategoryControl extends TextButtonControl<CategoryControlDefinition> {
 		this.text.set(text);
 
 		if (blocks.size() !== 0) {
-			const preview = this.add(new BlockPreviewControl(template.ViewportFrame));
+			const preview = this.parent(new BlockPreviewControl(template.ViewportFrame));
 			let blockIndex = 0;
 
 			const update = () => preview.set(blocks[blockIndex++ % blocks.size()]);
@@ -147,15 +149,20 @@ class BlockControl extends TextButtonControl<BlockControlDefinition> {
 		super(template);
 
 		this.text.set(block.displayName);
-		this.add(new BlockPreviewControl(template.ViewportFrame, block.model));
+		this.parent(new BlockPreviewControl(template.ViewportFrame, block.model));
 	}
 }
 
 export type BlockSelectionControlDefinition = GuiObject & {
-	readonly SearchTextBox: TextBox;
-	readonly NoResultsLabel: TextLabel;
 	readonly Content: {
+		readonly SearchTextBox: TextBox;
+		readonly Breadcrumbs: GuiObject & {
+			readonly Content: ScrollingFrame & {
+				readonly PathTemplate: TextButton;
+			};
+		};
 		readonly ScrollingFrame: ScrollingFrame & {
+			readonly NoResultsLabel: TextLabel;
 			readonly BackButtonTemplate: CategoryControlDefinition;
 			readonly BlockButtonTemplate: BlockControlDefinition;
 			readonly CategoryButtonTemplate: CategoryControlDefinition;
@@ -163,11 +170,6 @@ export type BlockSelectionControlDefinition = GuiObject & {
 	};
 	readonly Header: {
 		readonly Pipette: GuiButton;
-	};
-	readonly Breadcrumbs: GuiObject & {
-		readonly Content: ScrollingFrame & {
-			readonly PathTemplate: TextButton;
-		};
 	};
 };
 
@@ -193,6 +195,7 @@ export class BlockSelectionControl extends Control<BlockSelectionControlDefiniti
 	constructor(
 		template: BlockSelectionControlDefinition,
 		@inject readonly blockList: BlockList,
+		@inject private readonly theme: Theme,
 	) {
 		super(template);
 
@@ -216,12 +219,14 @@ export class BlockSelectionControl extends Control<BlockSelectionControlDefiniti
 
 		this.categories = Categories.createCategoryTreeFromBlocks(blockList.sorted);
 
-		this.list = this.add(
-			new Control<ScrollingFrame, BlockControl | CategoryControl>(this.gui.Content.ScrollingFrame),
+		this.list = this.parent(
+			new ComponentChildren<BlockControl | CategoryControl>().withParentInstance(this.gui.Content.ScrollingFrame),
 		);
 
-		this.breadcrumbs = this.add(new Control<ScrollingFrame, TextButtonControl>(this.gui.Breadcrumbs.Content));
-		this.breadcrumbTemplate = this.asTemplate(this.gui.Breadcrumbs.Content.PathTemplate);
+		this.breadcrumbs = this.parent(
+			new ComponentChildren<TextButtonControl>().withParentInstance(this.gui.Content.Breadcrumbs.Content),
+		);
+		this.breadcrumbTemplate = this.asTemplate(this.gui.Content.Breadcrumbs.Content.PathTemplate);
 
 		// Prepare templates
 		this.backTemplate = this.asTemplate(this.gui.Content.ScrollingFrame.BackButtonTemplate);
@@ -241,7 +246,7 @@ export class BlockSelectionControl extends Control<BlockSelectionControlDefiniti
 
 		// might be useful
 		// const searchText = this.event.observableFromGuiParam(this.gui.SearchTextBox, "Text");
-		this.event.subscribe(this.gui.SearchTextBox.GetPropertyChangedSignal("Text"), () => {
+		this.event.subscribe(this.gui.Content.SearchTextBox.GetPropertyChangedSignal("Text"), () => {
 			this.selectedCategory.set([]);
 			this.selectedBlock.set(undefined);
 
@@ -250,8 +255,8 @@ export class BlockSelectionControl extends Control<BlockSelectionControlDefiniti
 	}
 
 	private create(selectedCategory: BlockCategoryPath, animated: boolean) {
-		const highlightButton = (control: Control) =>
-			(Gui.getTemplates<{ Highlight: GuiObject }>().Highlight.Clone().Parent = control.instance);
+		const highlightButton = (control: InstanceComponent<Instance>) =>
+			(Interface.getTemplates<{ Highlight: GuiObject }>().Highlight.Clone().Parent = control.instance);
 
 		let idx = 0;
 
@@ -338,12 +343,15 @@ export class BlockSelectionControl extends Control<BlockSelectionControlDefiniti
 				addSlashBreadcrumb();
 			}
 		}
-		this.breadcrumbs.instance.CanvasPosition = new Vector2(this.breadcrumbs.instance.AbsoluteCanvasSize.X, 0);
+		this.gui.Content.Breadcrumbs.Content.CanvasPosition = new Vector2(
+			this.gui.Content.Breadcrumbs.Content.AbsoluteCanvasSize.X,
+			0,
+		);
 
 		// Back button
 		if (selectedCategory.size() !== 0) {
 			createBackButton(() => {
-				this.gui.SearchTextBox.Text = "";
+				this.gui.Content.SearchTextBox.Text = "";
 				this.selectedCategory.set(selectedCategory.filter((_, i) => i !== selectedCategory.size() - 1));
 			});
 		}
@@ -351,14 +359,14 @@ export class BlockSelectionControl extends Control<BlockSelectionControlDefiniti
 		// Block buttons
 		let prev: BlockControl | CategoryControl | undefined;
 
-		const lowerSearch = this.gui.SearchTextBox.Text.fullLower();
+		const lowerSearch = this.gui.Content.SearchTextBox.Text.fullLower();
 
 		const processBlock = (block: Block) => {
 			if (block.hidden) return;
 
 			const button = createBlockButton(block, () => {
-				if (this.gui.SearchTextBox.Text !== "") {
-					this.gui.SearchTextBox.Text = "";
+				if (this.gui.Content.SearchTextBox.Text !== "") {
+					this.gui.Content.SearchTextBox.Text = "";
 					this.selectedCategory.set(block.category);
 				}
 				this.selectedBlock.set(block);
@@ -377,7 +385,10 @@ export class BlockSelectionControl extends Control<BlockSelectionControlDefiniti
 			button.event.subscribeObservable(
 				this.selectedBlock,
 				(newblock) => {
-					button.instance.BackgroundColor3 = newblock === block ? Colors.accentDark : Colors.staticBackground;
+					button.overlayValue(
+						"BackgroundColor3",
+						newblock === block ? this.theme.get("buttonActive") : this.theme.get("backgroundSecondary"),
+					);
 
 					button.instance.FindFirstChild("Highlight")?.Destroy();
 					const targetBlocks = this.highlightedBlocks.get();
@@ -395,7 +406,7 @@ export class BlockSelectionControl extends Control<BlockSelectionControlDefiniti
 			prev = button;
 		};
 
-		if (this.gui.SearchTextBox.Text === "") {
+		if (this.gui.Content.SearchTextBox.Text === "") {
 			for (const block of Categories.getBlocksByCategory(this.blockList.sorted, this.selectedCategory.get())) {
 				processBlock(block);
 			}
@@ -423,7 +434,7 @@ export class BlockSelectionControl extends Control<BlockSelectionControlDefiniti
 			}
 		}
 
-		if (this.gui.SearchTextBox.Text === "") {
+		if (this.gui.Content.SearchTextBox.Text === "") {
 			const sorted = asMap(
 				Categories.getCategoryByPath(this.categories, selectedCategory)?.sub ?? this.categories,
 			)
@@ -439,16 +450,17 @@ export class BlockSelectionControl extends Control<BlockSelectionControlDefiniti
 		}
 
 		// No results label for searching menu
-		this.gui.NoResultsLabel.Visible = this.gui.SearchTextBox.Text !== "" && this.list.getChildren().size() === 0;
+		this.gui.Content.ScrollingFrame.NoResultsLabel.Visible =
+			this.gui.Content.SearchTextBox.Text !== "" && this.list.getAll().size() === 0;
 
 		// Gamepad selection improvements
 		const isSelected = GuiService.SelectedObject !== undefined;
-		GuiService.SelectedObject = isSelected ? this.list.getChildren()[0].instance : undefined;
-		this.list.instance.CanvasPosition = Vector2.zero;
+		GuiService.SelectedObject = isSelected ? this.list.getAll()[0].instance : undefined;
+		this.gui.Content.ScrollingFrame.CanvasPosition = Vector2.zero;
 
-		if (animated && this.gui.SearchTextBox.Text === "") {
+		if (animated && this.gui.Content.SearchTextBox.Text === "") {
 			GuiAnimator.transition(this.gui.Content.ScrollingFrame, 0.2, "up", 10);
-			GuiAnimator.transition(this.gui.NoResultsLabel, 0.2, "down", 10);
+			GuiAnimator.transition(this.gui.Content.ScrollingFrame.NoResultsLabel, 0.2, "down", 10);
 		}
 	}
 }

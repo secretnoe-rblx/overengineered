@@ -1,5 +1,5 @@
 import { Workspace } from "@rbxts/services";
-import { AutoC2SRemoteEvent } from "engine/shared/event/C2SRemoteEvent";
+import { A2SRemoteEvent } from "engine/shared/event/PERemoteEvent";
 import { WeaponProjectile } from "shared/weaponProjectiles/BaseProjectileLogic";
 import type { baseWeaponProjectile, projectileModifier } from "shared/weaponProjectiles/BaseProjectileLogic";
 
@@ -7,7 +7,7 @@ type laserVisualsAmountConstant = 1 | 2 | 3 | 4 | 5;
 type laser = baseWeaponProjectile & Record<`LaserProjectileVisual${laserVisualsAmountConstant}`, BasePart>;
 
 export class LaserProjectile extends WeaponProjectile {
-	static readonly spawn = new AutoC2SRemoteEvent<{
+	static readonly spawn = new A2SRemoteEvent<{
 		readonly startPosition: Vector3;
 		readonly baseVelocity: Vector3;
 		readonly baseDamage: number;

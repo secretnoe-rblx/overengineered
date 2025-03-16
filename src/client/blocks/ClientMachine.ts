@@ -1,6 +1,6 @@
 import { ClientBlockControls } from "client/blocks/ClientBlockControls";
 import { LogicVisualizer } from "client/blocks/LogicVisuaizer";
-import { ContainerComponent } from "engine/shared/component/ContainerComponent";
+import { ComponentChildren } from "engine/shared/component/ComponentChildren";
 import { BlockConfig } from "shared/blockLogic/BlockConfig";
 import { SharedMachine } from "shared/blockLogic/SharedMachine";
 import type { IClientBlockControl } from "client/blocks/ClientBlockControls";
@@ -11,7 +11,7 @@ import type { ILogicValueStorage } from "shared/blockLogic/BlockLogicValueStorag
 
 @injectable
 export class ClientMachine extends SharedMachine {
-	readonly logicInputs = this.parent(new ContainerComponent<IClientBlockControl>());
+	readonly logicInputs = this.parent(new ComponentChildren<IClientBlockControl>());
 
 	constructor(
 		@inject private readonly playerData: PlayerDataStorage,
@@ -22,7 +22,7 @@ export class ClientMachine extends SharedMachine {
 	}
 
 	getLogicInputs() {
-		return this.logicInputs.getChildren();
+		return this.logicInputs.getAll();
 	}
 
 	createVisualizer() {

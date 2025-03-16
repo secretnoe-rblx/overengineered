@@ -167,7 +167,7 @@ class Logic extends InstanceBlockLogic<typeof servoDefinition, ServoMotorModel> 
 const list: BlockBuildersWithoutIdAndDefaults = {
 	servomotorblock: {
 		displayName: "Servo",
-		description: "A configurable motor. Rotates to the desired angle",
+		description: "Turns to the configured angle",
 		limit: 100,
 		logic: {
 			definition: servoDefinition,

@@ -7,6 +7,7 @@ import { HostedService } from "engine/shared/di/HostedService";
 import { Keys } from "engine/shared/fixes/Keys";
 import { SharedRagdoll } from "shared/SharedRagdoll";
 import type { PlayerDataStorage } from "client/PlayerDataStorage";
+import type { ReadonlyObservableValue } from "engine/shared/event/ObservableValue";
 
 const { isPlayerRagdolling } = SharedRagdoll;
 function initAutoRagdoll(event: ComponentEvents, humanoid: Humanoid, enabled: ReadonlyObservableValue<boolean>) {
@@ -110,10 +111,7 @@ function initRagdollUp(event: ComponentEvents, humanoid: Humanoid, autoRecovery:
 		}),
 	);
 }
-function initRagdollKey(
-	event: ComponentEvents,
-	key: ReadonlyObservableValue<{ triggerByKey: boolean; triggerKey: KeyCode }>,
-) {
+function initRagdollKey(event: ComponentEvents, key: ReadonlyObservableValue<{ triggerKey: KeyCode | undefined }>) {
 	const actionName = "ragdoll";
 
 	function bind(key: KeyCode, func: () => void) {
@@ -127,7 +125,7 @@ function initRagdollKey(
 				return Enum.ContextActionResult.Pass;
 			},
 			InputController.inputType.get() === "Touch",
-			Keys[key],
+			Keys.Keys[key],
 		);
 
 		ContextActionService.SetDescription(actionName, "funny falling");
@@ -140,11 +138,11 @@ function initRagdollKey(
 
 	let can = true;
 	const rebind = () => {
-		const { triggerKey, triggerByKey } = key.get();
+		const { triggerKey } = key.get();
 		can = true;
 
 		unbind();
-		if (!triggerByKey) return;
+		if (!triggerKey) return;
 
 		bind(triggerKey, () => {
 			if (!can) return;

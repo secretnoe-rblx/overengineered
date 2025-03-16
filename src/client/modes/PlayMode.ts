@@ -1,6 +1,6 @@
-import { ClientComponent } from "engine/client/component/ClientComponent";
+import { Component } from "engine/shared/component/Component";
 
-export abstract class PlayMode extends ClientComponent {
+export abstract class PlayMode extends Component {
 	abstract getName(): PlayModes;
 	abstract onSwitchToNext(mode: PlayModes | undefined): void;
 	abstract onSwitchFromPrev(prev: PlayModes | undefined): void;

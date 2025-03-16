@@ -4,12 +4,12 @@ import { BeaconServerLogic } from "server/blocks/logic/BeaconBlockServerLogic";
 import { BracedShaftServerLogic } from "server/blocks/logic/BracedShaftServerLogic";
 import { CameraBlockServerLogic } from "server/blocks/logic/CameraBlockServerLogic";
 import { DisconnectBlockServerLogic } from "server/blocks/logic/DisconnectBlockServerLogic";
-import { LampServerLogic } from "server/blocks/logic/LampServerLogic";
 import { LEDDisplayServerLogic } from "server/blocks/logic/LEDDisplayServerLogic";
 import { PistonBlockServerLogic } from "server/blocks/logic/PistonBlockServerLogic";
 import { ScreenServerLogic } from "server/blocks/logic/ScreenServerLogic";
 import { SevenSegmentDisplayServerLogic } from "server/blocks/logic/SevenSegmentDisplayServerLogic";
-import type { ServerBlockLogic } from "server/blocks/ServerBlockLogic";
+import { ServerBlockLogic } from "server/blocks/ServerBlockLogic";
+import type { PlayModeController } from "server/modes/PlayModeController";
 import type { GenericBlockLogicCtor } from "shared/blockLogic/BlockLogic";
 
 type ServerBlockLogicRegistry = {
@@ -18,15 +18,34 @@ type ServerBlockLogicRegistry = {
 
 @injectable
 export class ServerBlockLogicController extends HostedService {
-	constructor(@inject blockList: BlockList, @inject container: DIContainer) {
+	constructor(
+		@inject blockList: BlockList,
+		@inject playModeController: PlayModeController,
+		@inject container: DIContainer,
+	) {
 		super();
 		container = container.beginScope();
+
+		for (const [, { logic }] of pairs(blockList.blocks)) {
+			if (!logic?.events) continue;
+
+			for (const [, event] of pairs(logic.events)) {
+				event.addServerMiddleware((invoker, arg) => {
+					if (!arg.block) return { success: false, message: "No block" };
+					if (!arg.block?.PrimaryPart) return { success: false, message: "No primary part" };
+
+					if (!ServerBlockLogic.staticIsValidBlock(arg.block.PrimaryPart, invoker, playModeController)) {
+						return { success: false, message: "Invalid something" };
+					}
+
+					return { success: true, value: arg };
+				});
+			}
+		}
 
 		const serverBlockLogicRegistry: ServerBlockLogicRegistry = {
 			camera: CameraBlockServerLogic,
 			disconnectblock: DisconnectBlockServerLogic,
-			lamp: LampServerLogic,
-			smalllamp: LampServerLogic,
 			leddisplay: LEDDisplayServerLogic,
 			screen: ScreenServerLogic,
 			piston: PistonBlockServerLogic,

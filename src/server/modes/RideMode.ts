@@ -1,7 +1,6 @@
 import { Players } from "@rbxts/services";
 import { Throttler } from "engine/shared/Throttler";
 import { ServerPartUtils } from "server/plots/ServerPartUtils";
-import { ServerPlayers } from "server/ServerPlayers";
 import { BlockManager } from "shared/building/BlockManager";
 import { BlocksSerializer } from "shared/building/BlocksSerializer";
 import { CustomRemotes } from "shared/Remotes";
@@ -9,7 +8,7 @@ import { SlotsMeta } from "shared/SlotsMeta";
 import type { PlayerDatabase } from "server/database/PlayerDatabase";
 import type { SlotDatabase } from "server/database/SlotDatabase";
 import type { PlayModeBase } from "server/modes/PlayModeBase";
-import type { ServerPlots } from "server/plots/ServerPlots";
+import type { ServerPlayersController } from "server/ServerPlayersController";
 
 @injectable
 export class RideMode implements PlayModeBase {
@@ -17,7 +16,7 @@ export class RideMode implements PlayModeBase {
 	private readonly required;
 
 	constructor(
-		@inject private readonly serverPlots: ServerPlots,
+		@inject private readonly serverControllers: ServerPlayersController,
 		@inject private readonly blockList: BlockList,
 		@inject private readonly slots: SlotDatabase,
 		@inject private readonly playerData: PlayerDatabase,
@@ -40,11 +39,10 @@ export class RideMode implements PlayModeBase {
 		if (!hrp) return;
 		if (hrp.Sit) return;
 
-		const plot = this.serverPlots.plots.getPlotByOwnerID(player.UserId);
-		const blocks = this.serverPlots.plots.getPlotComponent(plot).getBlocks();
-
-		const vehicleSeat = blocks
-			.find((model) => BlockManager.manager.id.get(model) === "vehicleseat")
+		const vehicleSeat = this.serverControllers.controllers
+			.get(player)
+			?.plotController.blocks?.getBlocks()
+			?.find((model) => BlockManager.manager.id.get(model) === "vehicleseat")
 			?.FindFirstChild("VehicleSeat") as VehicleSeat | undefined;
 		if (!vehicleSeat) return;
 
@@ -79,12 +77,12 @@ export class RideMode implements PlayModeBase {
 			}
 		}
 
-		const players = ServerPlayers.GetLoadedPlayers().filter((p) => p !== owner);
+		const players = this.serverControllers.getPlayers().filter((p) => p !== owner);
 		CustomRemotes.physics.normalizeRootparts.send(players, { parts: rootParts });
 	}
 
 	private rideStart(player: Player): Response {
-		const controller = this.serverPlots.tryGetControllerByPlayer(player);
+		const controller = this.serverControllers.controllers.get(player)?.plotController;
 		if (!controller) throw "what";
 
 		const blocksChildren = controller.blocks.getBlocks();
@@ -101,12 +99,10 @@ export class RideMode implements PlayModeBase {
 		const copy = controller.blocks.cloneBlocks();
 		this.cache.set(player, copy);
 
-		const serialized = BlocksSerializer.serialize(controller.blocks);
 		this.slots.setBlocks(
 			player.UserId,
 			SlotsMeta.autosaveSlotIndex,
-			serialized,
-			controller.blocks.getBlocks().size(),
+			BlocksSerializer.serializeToObject(controller.blocks),
 		);
 
 		const hrp = player.Character?.WaitForChild("Humanoid") as Humanoid;
@@ -147,7 +143,7 @@ export class RideMode implements PlayModeBase {
 		return { success: true };
 	}
 	private rideStop(player: Player): Response {
-		const controller = this.serverPlots.tryGetControllerByPlayer(player);
+		const controller = this.serverControllers.controllers.get(player)?.plotController;
 		if (!controller) throw "what";
 
 		Throttler.forEach(6, controller.blocks.getBlocks(), (b) => b.Destroy());
@@ -165,9 +161,7 @@ export class RideMode implements PlayModeBase {
 			controller.blocks.deleteOperation.execute("all");
 
 			const blocksToLoad = this.slots.getBlocks(player.UserId, SlotsMeta.autosaveSlotIndex);
-			if (blocksToLoad !== undefined) {
-				BlocksSerializer.deserialize(blocksToLoad, controller.blocks, this.blockList);
-			}
+			BlocksSerializer.deserializeFromObject(blocksToLoad, controller.blocks, this.blockList);
 		}
 
 		this.cache.delete(player);

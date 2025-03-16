@@ -1,11 +1,12 @@
-import { Definitions } from "@rbxts/net";
 import {
+	BidirectionalRemoteEvent,
 	C2S2CRemoteFunction,
 	C2SRemoteEvent,
 	PERemoteEventMiddlewares,
 	S2C2SRemoteFunction,
 	S2CRemoteEvent,
 } from "engine/shared/event/PERemoteEvent";
+import { PlayerRank } from "engine/shared/PlayerRank";
 
 declare global {
 	type BuildResponse = Response<{ readonly model: BlockModel }>;
@@ -30,10 +31,6 @@ declare global {
 	type EditBlocksRequest = {
 		readonly plot: PlotModel;
 		readonly blocks: readonly EditBlockRequest[];
-	};
-
-	type GuiSettingsPermissionsGetBlacklist = {
-		readonly players: readonly number[];
 	};
 
 	type LogicConnectRequest = {
@@ -74,10 +71,7 @@ declare global {
 		readonly blocks: readonly BlockModel[];
 	};
 
-	type PlayerUpdateSettingsRequest = {
-		readonly key: keyof PlayerConfig;
-		readonly value: PlayerConfig[keyof PlayerConfig];
-	};
+	type PlayerUpdateSettingsRequest = PartialThrough<PlayerConfig>;
 	type PlayerUpdateDataRequest = {
 		readonly key: keyof PlayerData;
 		readonly value: PlayerData[keyof PlayerData];
@@ -89,40 +83,46 @@ declare global {
 		readonly touchControls?: TouchControlInfo;
 		readonly save: boolean;
 	};
+	type PlayerDeleteSlotRequest = {
+		readonly index: number;
+	};
 	type PlayerLoadSlotRequest = {
 		readonly index: number;
 	};
 	type PlayerLoadAdminSlotRequest = PlayerLoadSlotRequest & {
 		readonly userid: number;
-		readonly imported: boolean;
 	};
 }
 
+export namespace Remotes {
+	export interface AdminSendMessageArgs {
+		readonly text: string;
+		readonly color?: Color3;
+		readonly duration?: number;
+	}
+	export interface ServerRestartProgressArgs {
+		readonly atmosphereColor: number;
+	}
+}
+
+export interface PlayerInitResponse {
+	readonly remotes: Instance;
+	readonly data: {
+		readonly purchasedSlots: number | undefined;
+		readonly settings: Partial<PlayerConfig> | undefined;
+		readonly slots: readonly SlotMeta[] | undefined;
+		readonly data: PlayerData | undefined;
+	};
+}
+
+PlayerRank.developers.push(5243461283, 2880942160, 148819022, 5184377367, 4848928, 7667688305);
+
 export const CustomRemotes = {
-	building: {
-		placeBlocks: new C2S2CRemoteFunction<PlaceBlocksRequest, MultiBuildResponse>("rb_place"),
-		deleteBlocks: new C2S2CRemoteFunction<DeleteBlocksRequest>("rb_delete"),
-		editBlocks: new C2S2CRemoteFunction<EditBlocksRequest>("rb_edit"),
-		logicConnect: new C2S2CRemoteFunction<LogicConnectRequest>("rb_lconnect"),
-		logicDisconnect: new C2S2CRemoteFunction<LogicDisconnectRequest>("rb_ldisconnect"),
-		paintBlocks: new C2S2CRemoteFunction<PaintBlocksRequest>("rb_paint"),
-		updateConfig: new C2S2CRemoteFunction<ConfigUpdateRequest>("rb_updatecfg"),
-		resetConfig: new C2S2CRemoteFunction<ConfigResetRequest>("rb_resetcfg"),
-	},
+	initPlayer: new C2S2CRemoteFunction<undefined, Response<PlayerInitResponse>>("player_init"),
+	adminDataFor: new C2S2CRemoteFunction<number, Response<PlayerInitResponse>>("player_init_admin"),
+
 	physics: {
 		normalizeRootparts: new S2CRemoteEvent<NormalizeRootpartsRequest>("ph_normalize_rootparts"),
-	},
-	slots: {
-		load: new C2S2CRemoteFunction<PlayerLoadSlotRequest, LoadSlotResponse>("rs_load"),
-		loadImported: new C2S2CRemoteFunction<PlayerLoadSlotRequest, LoadSlotResponse>("rs_loadi"),
-		loadAsAdmin: new C2S2CRemoteFunction<PlayerLoadAdminSlotRequest, LoadSlotResponse>("rs_loadadm"),
-		save: new C2S2CRemoteFunction<PlayerSaveSlotRequest, SaveSlotResponse>("rs_save"),
-	},
-	player: {
-		loaded: new C2SRemoteEvent<undefined>("client_initialized"),
-		updateSettings: new C2SRemoteEvent<PlayerUpdateSettingsRequest>("pl_updsettings"),
-		updateData: new C2SRemoteEvent<PlayerUpdateDataRequest>("pl_upddata"),
-		fetchData: new C2S2CRemoteFunction<undefined, Response<PlayerDataResponse>>("pl_fetchdata"),
 	},
 	gui: {
 		settings: {
@@ -139,14 +139,9 @@ export const CustomRemotes = {
 			teleportOnSeat: new C2SRemoteEvent("mdr_seat"),
 		},
 	},
+	admin: {
+		sendMessage: new BidirectionalRemoteEvent<Remotes.AdminSendMessageArgs>("adm_sendmessage"),
+		restart: new C2SRemoteEvent<boolean>("adm_restart"),
+	},
+	restartProgress: new S2CRemoteEvent<Remotes.ServerRestartProgressArgs>("restartprogress"),
 } as const;
-export const Remotes = Definitions.Create({
-	Admin: Definitions.Namespace({
-		SendMessage: Definitions.BidirectionalEvent<
-			[text: string, color?: Color3, duration?: number],
-			[text: string, color?: Color3, duration?: number]
-		>(),
-		Restart: Definitions.ClientToServerEvent<[restart: boolean]>(),
-	}),
-	ServerRestartProgress: Definitions.ServerToClientEvent<[atmosphereColor: number]>(),
-});

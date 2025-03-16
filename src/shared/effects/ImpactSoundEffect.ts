@@ -1,5 +1,6 @@
 import { Debris, ReplicatedStorage, Workspace } from "@rbxts/services";
 import { EffectBase } from "shared/effects/EffectBase";
+import type { EffectCreator } from "shared/effects/EffectBase";
 
 ReplicatedStorage.WaitForChild("Assets");
 
@@ -7,6 +8,7 @@ type Args = {
 	readonly blocks: readonly BasePart[];
 	readonly index?: number;
 };
+@injectable
 export class ImpactSoundEffect extends EffectBase<Args> {
 	private readonly materialSounds: { readonly [key: string]: Instance[] } = {
 		Default: ReplicatedStorage.Assets.Effects.Sounds.Impact.Materials.Metal.GetChildren(),
@@ -17,11 +19,11 @@ export class ImpactSoundEffect extends EffectBase<Args> {
 		WoodPlanks: ReplicatedStorage.Assets.Effects.Sounds.Impact.Materials.Wood.GetChildren(),
 	};
 
-	constructor() {
-		super("impact_sound_effect");
+	constructor(@inject creator: EffectCreator) {
+		super(creator, "impact_sound_effect");
 	}
 
-	justRun({ blocks, index }: Args): void {
+	override justRun({ blocks, index }: Args): void {
 		if (!blocks || blocks.size() === 0) return;
 
 		for (const part of blocks) {

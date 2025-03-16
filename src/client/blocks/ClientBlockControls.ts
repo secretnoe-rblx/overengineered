@@ -1,5 +1,5 @@
 import { KeyPressingDefinitionsController } from "client/controller/KeyPressingController";
-import { ClientComponent } from "engine/client/component/ClientComponent";
+import { Component } from "engine/shared/component/Component";
 import { Keys } from "engine/shared/fixes/Keys";
 import { MathUtils } from "engine/shared/fixes/MathUtils";
 import { Objects } from "engine/shared/fixes/Objects";
@@ -12,7 +12,7 @@ type Controls = BlockLogicTypes.Controls;
 type ControlKeys = keyof Controls;
 
 namespace ClientBlockControlsNamespace {
-	export class Bool extends ClientComponent implements IClientBlockControl {
+	export class Bool extends Component implements IClientBlockControl {
 		private readonly touchButtonDatas: readonly TouchModeButtonData[];
 
 		constructor(
@@ -27,8 +27,7 @@ namespace ClientBlockControlsNamespace {
 			const set = (newValue: boolean) => value.set("bool", (val = newValue));
 			set(config.reversed);
 
-			const isKeyCode = (key: string): key is KeyCode => key in Keys;
-			if (isKeyCode(config.key)) {
+			if (Keys.isKey(config.key)) {
 				if (definition.canBeSwitch && config.switch) {
 					this.event.onKeyDown(config.key, () => set(!get()));
 				} else {
@@ -209,7 +208,7 @@ namespace ClientBlockControlsNamespace {
 		return new KeyPressingDefinitionsController(def);
 	}
 
-	export class Number extends ClientComponent implements IClientBlockControl {
+	export class Number extends Component implements IClientBlockControl {
 		private readonly touchButtonDatas: readonly TouchModeButtonData[];
 
 		constructor(
@@ -237,7 +236,7 @@ namespace ClientBlockControlsNamespace {
 	}
 }
 
-export type IClientBlockControl = IComponent & {
+export type IClientBlockControl = Component & {
 	getTouchButtonDatas(): readonly TouchModeButtonData[];
 };
 

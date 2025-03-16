@@ -1581,6 +1581,7 @@ const getVersion = (version: number) => versions.find((v) => v.version === versi
 
 /** Methods to save and load buildings */
 export namespace BlocksSerializer {
+	export type JsonSerializedBlocks = SerializedBlocks<JsonBlock>;
 	type JsonBlock = ReplaceWith<
 		Omit<LatestSerializedBlock, "location" | "color" | "material" | "scale">,
 		{
@@ -1602,7 +1603,8 @@ export namespace BlocksSerializer {
 			blocks: plot.getBlocks().map((block) => serializeBlockToObject(plot, block)),
 		};
 	}
-	export function serialize(plot: ReadonlyPlot): string {
+
+	export function objectToJson(slot: LatestSerializedBlocks): JsonSerializedBlocks {
 		const fix = (block: LatestSerializedBlock): JsonBlock => {
 			return {
 				id: block.id,
@@ -1617,17 +1619,13 @@ export namespace BlocksSerializer {
 			};
 		};
 
-		const serialized = serializeToObject(plot);
-		return JSON.serialize({ ...serialized, blocks: serialized.blocks.map(fix) });
+		return {
+			version: slot.version,
+			blocks: slot.blocks.map(fix),
+		};
 	}
 
-	export function deserializeFromObject(
-		data: SerializedBlocks<SerializedBlockBase>,
-		plot: BuildingPlot,
-		blockList: BlockList,
-	): number {
-		$log(`Loaded a slot using savev${data.version}`);
-
+	export function upgradeSave(data: SerializedBlocks<SerializedBlockBase>, blockList: BlockList) {
 		const version = data.version;
 		for (let i = version + 1; i <= current.version; i++) {
 			const version = getVersion(i);
@@ -1638,10 +1636,10 @@ export namespace BlocksSerializer {
 			$log(`Upgrading a slot to savev${version.version}`);
 		}
 
-		place.blocksOnPlot(plot, data.blocks as readonly LatestSerializedBlock[], place.blockOnPlotV3);
-		return data.blocks.size();
+		return data;
 	}
-	export function deserialize(data: string, plot: BuildingPlot, blockList: BlockList): number {
+
+	export function jsonToObject(slot: JsonSerializedBlocks): LatestSerializedBlocks {
 		const fix = (block: JsonBlock): LatestSerializedBlock => {
 			return {
 				id: block.id,
@@ -1656,15 +1654,28 @@ export namespace BlocksSerializer {
 			};
 		};
 
-		const deserialized = JSON.deserialize(data) as SerializedBlocks<JsonBlock>;
-		if (deserialized.version === undefined) {
+		return {
+			version: slot.version,
+			blocks: slot.blocks.map(fix),
+		};
+	}
+	export function deserializeFromObject(
+		data: SerializedBlocks<SerializedBlockBase>,
+		plot: BuildingPlot,
+		blockList: BlockList,
+	): number {
+		if (data.version === undefined) {
 			throw "Corrupted slot data";
 		}
-		if (deserialized.version > latestVersion) {
+		if (data.version > latestVersion) {
 			throw "Trying to load a slot with an unknown version (loaded from testing?)";
 		}
 
-		return deserializeFromObject({ ...deserialized, blocks: deserialized.blocks.map(fix) }, plot, blockList);
+		$log(`Loading a slot using savev${data.version}`);
+
+		data = upgradeSave(data, blockList);
+		place.blocksOnPlot(plot, data.blocks as readonly LatestSerializedBlock[], place.blockOnPlotV3);
+		return data.blocks.size();
 	}
 
 	export function serializedBlockToPlaceRequest(

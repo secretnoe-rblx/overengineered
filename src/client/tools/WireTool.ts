@@ -1,26 +1,25 @@
 import { GamepadService, GuiService, Players, ReplicatedStorage, RunService, Workspace } from "@rbxts/services";
-import { Gui } from "client/gui/Gui";
-import { GuiAnimator } from "client/gui/GuiAnimator";
+import { Interface } from "client/gui/Interface";
 import { LogControl } from "client/gui/static/LogControl";
-import { ActionController } from "client/modes/build/ActionController";
-import { ClientBuilding } from "client/modes/build/ClientBuilding";
 import { ToolBase } from "client/tools/ToolBase";
-import { ClientComponent } from "engine/client/component/ClientComponent";
-import { ClientInstanceComponent } from "engine/client/component/ClientInstanceComponent";
-import { ButtonControl } from "engine/client/gui/Button";
 import { Control } from "engine/client/gui/Control";
 import { InputController } from "engine/client/InputController";
 import { Component } from "engine/shared/component/Component";
 import { ComponentChild } from "engine/shared/component/ComponentChild";
 import { ComponentChildren } from "engine/shared/component/ComponentChildren";
+import { InstanceComponent } from "engine/shared/component/InstanceComponent";
 import { Element } from "engine/shared/Element";
 import { ObservableValue } from "engine/shared/event/ObservableValue";
-import { Instances } from "engine/shared/fixes/Instances";
 import { BlockWireManager } from "shared/blockLogic/BlockWireManager";
 import { BlockManager } from "shared/building/BlockManager";
 import { Colors } from "shared/Colors";
-import type { InputTooltips } from "client/gui/static/TooltipsControl";
+import { ReplicatedAssets } from "shared/ReplicatedAssets";
+import type { MainScreenLayout } from "client/gui/MainScreenLayout";
+import type { Tooltip } from "client/gui/static/TooltipsControl";
+import type { ActionController } from "client/modes/build/ActionController";
 import type { BuildingMode } from "client/modes/build/BuildingMode";
+import type { ClientBuilding } from "client/modes/build/ClientBuilding";
+import type { ReadonlyObservableValue } from "engine/shared/event/ObservableValue";
 import type { BlockLogicTypes } from "shared/blockLogic/BlockLogicTypes";
 import type { SharedPlot } from "shared/building/SharedPlot";
 
@@ -29,7 +28,7 @@ const markerParent = Element.create("ScreenGui", {
 	ScreenInsets: Enum.ScreenInsets.None,
 	IgnoreGuiInset: true,
 	DisplayOrder: -1, // to draw behind the wires
-	Parent: Gui.getPlayerGui(),
+	Parent: Interface.getPlayerGui(),
 	ResetOnSpawn: false,
 });
 const wireParent = Element.create("ViewportFrame", {
@@ -73,7 +72,7 @@ namespace Markers {
 			readonly Filled: Frame;
 		};
 	};
-	export abstract class Marker extends ClientInstanceComponent<MarkerComponentDefinition> {
+	export abstract class Marker extends InstanceComponent<MarkerComponentDefinition> {
 		private static getPartMarkerPositions(originalOrigin: BasePart): Vector3[] {
 			const sizeX = originalOrigin.Size.X / 2;
 			const sizeY = originalOrigin.Size.Y / 2;
@@ -122,6 +121,7 @@ namespace Markers {
 		readonly availableTypes;
 		sameGroupMarkers?: readonly Marker[];
 		protected pauseColors = false;
+		protected readonly children;
 
 		constructor(
 			readonly block: BlockModel,
@@ -130,6 +130,8 @@ namespace Markers {
 			readonly plot: SharedPlot,
 		) {
 			super(instance);
+
+			this.children = this.parent(new ComponentChildren().withParentInstance(instance));
 
 			this.onEnable(() => (this.instance.Enabled = true));
 			this.onDisable(() => (this.instance.Enabled = false));
@@ -143,11 +145,11 @@ namespace Markers {
 		}
 
 		private initTooltips() {
-			const tooltipParent = new ComponentChild<
-				Control<GuiObject & { WireInfoLabel: TextLabel; TypeTextLabel: TextLabel }>
-			>(this, true);
+			const tooltipParent = this.parent(
+				new ComponentChild<Control<GuiObject & { WireInfoLabel: TextLabel; TypeTextLabel: TextLabel }>>(true),
+			);
 			const createTooltip = () => {
-				const wireInfoSource = Instances.getAssets<{
+				const wireInfoSource = ReplicatedAssets.get<{
 					Wires: { WireInfo: GuiObject & { WireInfoLabel: TextLabel; TypeTextLabel: TextLabel } };
 				}>().Wires.WireInfo;
 				const control = new Control(wireInfoSource.Clone());
@@ -164,15 +166,15 @@ namespace Markers {
 			};
 			const removeTooltip = () => tooltipParent.clear();
 
-			this.onPrepare((inputType) => {
+			this.event.onPrepare((inputType, eh) => {
 				if (inputType === "Desktop") {
-					this.eventHandler.subscribe(this.instance.TextButton.MouseEnter, createTooltip);
-					this.eventHandler.subscribe(this.instance.TextButton.MouseLeave, removeTooltip);
+					eh.subscribe(this.instance.TextButton.MouseEnter, createTooltip);
+					eh.subscribe(this.instance.TextButton.MouseLeave, removeTooltip);
 				} else if (inputType === "Touch") {
 					createTooltip();
 				} else if (inputType === "Gamepad") {
-					this.eventHandler.subscribe(this.instance.TextButton.MouseEnter, createTooltip);
-					this.eventHandler.subscribe(this.instance.TextButton.MouseLeave, removeTooltip);
+					eh.subscribe(this.instance.TextButton.MouseEnter, createTooltip);
+					eh.subscribe(this.instance.TextButton.MouseLeave, removeTooltip);
 				}
 
 				if (inputType === "Gamepad") {
@@ -234,10 +236,12 @@ namespace Markers {
 				marker.connected,
 				(connected) => {
 					this.updateConnectedVisual(connected !== undefined);
-					this.clear();
+					this.children.clear();
 
 					if (connected) {
-						const wire = this.add(WireComponent.create(componentMap.get(connected) as Output, this));
+						const wire = this.children.add(
+							WireComponent.create(componentMap.get(connected) as Output, this),
+						);
 						wire.instance.Parent = wireParent;
 					}
 				},
@@ -303,68 +307,77 @@ namespace Scene {
 		readonly TextLabel: TextLabel;
 	};
 
-	export class WireToolScene extends Control<WireToolSceneDefinition> {
-		readonly tool;
+	@injectable
+	export class WireToolScene extends Component {
+		constructor(@inject tool: WireTool, @inject mainScreen: MainScreenLayout) {
+			super();
 
-		constructor(gui: WireToolSceneDefinition, tool: WireTool) {
-			super(gui);
-			this.tool = tool;
+			const update = () => {
+				cancelLayer.setVisibleAndEnabled(false);
+				wireTooltip.instance.Visible = false;
+				nameTooltip.instance.Visible = false;
 
-			this.add(new ButtonControl(this.gui.Bottom.CancelButton, () => this.cancel()));
+				const inputType = InputController.inputType.get();
+				if (inputType !== "Desktop") {
+					wireTooltip.instance.Visible = true;
 
-			this.tool.selectedMarker.subscribe(() => this.update(), true);
-			this.event.subscribe(GuiService.GetPropertyChangedSignal("SelectedObject"), () => this.update());
-			this.onPrepare(() => this.update());
-		}
-
-		private update() {
-			this.gui.Bottom.CancelButton.Visible = false;
-			this.gui.TextLabel.Visible = false;
-			this.gui.NameLabel.Visible = false;
-
-			const inputType = InputController.inputType.get();
-			if (inputType !== "Desktop") {
-				this.gui.TextLabel.Visible = true;
-
-				if (!this.tool.selectedMarker.get()) {
-					this.gui.TextLabel.Text = "CLICK ON THE FIRST POINT";
-					this.gui.Bottom.CancelButton.Visible = false;
-				} else {
-					this.gui.TextLabel.Text = "CLICK ON THE SECOND POINT";
-					if (InputController.inputType.get() !== "Gamepad") {
-						this.gui.Bottom.CancelButton.Visible = true;
-					}
-				}
-			}
-
-			if (InputController.inputType.get() === "Gamepad") {
-				if (GamepadService.GamepadCursorEnabled) {
-					if (GuiService.SelectedObject) {
-						this.gui.NameLabel.Visible = true;
-						this.gui.NameLabel.Text = GuiService.SelectedObject.Name;
-						this.gui.NameLabel.TextColor3 = GuiService.SelectedObject.BackgroundColor3;
+					if (!tool.selectedMarker.get()) {
+						wireTooltip.instance.TextLabel.Text = "CLICK ON THE FIRST POINT";
+						cancelLayer.setVisibleAndEnabled(false);
 					} else {
-						this.gui.NameLabel.Visible = false;
+						wireTooltip.instance.TextLabel.Text = "CLICK ON THE SECOND POINT";
+						if (InputController.inputType.get() !== "Gamepad") {
+							cancelLayer.setVisibleAndEnabled(true);
+						}
 					}
 				}
-			}
-		}
 
-		private cancel() {
-			this.tool.stopDragging();
-			this.update();
-		}
+				if (InputController.inputType.get() === "Gamepad") {
+					if (GamepadService.GamepadCursorEnabled) {
+						if (GuiService.SelectedObject) {
+							nameTooltip.instance.Visible = true;
+							nameTooltip.instance.TextLabel.Text = GuiService.SelectedObject.Name;
+							nameTooltip.instance.TextLabel.TextColor3 = GuiService.SelectedObject.BackgroundColor3;
+						} else {
+							nameTooltip.instance.Visible = false;
+						}
+					}
+				}
+			};
 
-		show() {
-			super.show();
+			const wireTooltipLayer = this.parentGui(mainScreen.bottom.push());
+			const nameTooltip = wireTooltipLayer.parent(
+				new Control(
+					Interface.getInterface<{
+						Tools: { Shared: { Bottom: { WireToolTip: GuiObject & { TextLabel: TextLabel } } } };
+					}>().Tools.Shared.Bottom.WireToolTip.Clone(),
+				),
+			);
+			const wireTooltip = wireTooltipLayer.parent(
+				new Control(
+					Interface.getInterface<{
+						Tools: { Shared: { Bottom: { WireToolTip: GuiObject & { TextLabel: TextLabel } } } };
+					}>().Tools.Shared.Bottom.WireToolTip.Clone(),
+				),
+			);
 
-			GuiAnimator.transition(this.gui.TextLabel, 0.2, "down");
+			const cancelLayer = this.parentGui(mainScreen.bottom.push());
+			cancelLayer
+				.addButton("Cancel") //
+				.addButtonAction(() => {
+					tool.stopDragging();
+					update();
+				});
+
+			tool.selectedMarker.subscribe(update, true);
+			this.event.subscribe(GuiService.GetPropertyChangedSignal("SelectedObject"), update);
+			this.event.onPrepare(update);
 		}
 	}
 }
 
 type WireComponentDefinition = Part;
-class WireComponent extends ClientInstanceComponent<WireComponentDefinition> {
+class WireComponent extends InstanceComponent<WireComponentDefinition> {
 	private static readonly visibleTransparency = 0.4;
 	static createInstance(): WireComponentDefinition {
 		return Element.create("Part", {
@@ -429,14 +442,14 @@ class WireComponent extends ClientInstanceComponent<WireComponentDefinition> {
 }
 
 namespace Visual {
-	const hidden: Record<string, Set<Markers.Marker>> = {};
+	const hidden: Record<string, Set<Markers.Marker> | undefined> = {};
 
 	function hide(tipe: string, marker: Markers.Marker) {
 		(hidden[tipe] ??= new Set()).add(marker);
 	}
 	function show(tipe: string, markers: readonly Markers.Marker[]) {
 		for (const marker of markers) {
-			hidden[tipe].delete(marker);
+			hidden[tipe]?.delete(marker);
 
 			const h = asMap(hidden).any((k, v) => v.has(marker));
 			if (h) continue;
@@ -483,14 +496,14 @@ namespace Visual {
 }
 
 namespace Controllers {
-	const connectMarkers = (from: Markers.Output, to: Markers.Input) => {
+	const connectMarkers = (clientBuilding: ClientBuilding, from: Markers.Output, to: Markers.Input) => {
 		if (from.plot !== to.plot) {
 			throw "Interplot connections are not supported";
 		}
 
 		from.marker.connect(to.marker);
 		task.spawn(async () => {
-			const result = await ClientBuilding.logicConnectOperation.execute({
+			const result = clientBuilding.logicConnectOperation.execute({
 				plot: from.plot,
 				inputBlock: to.block,
 				inputConnection: to.data.id,
@@ -503,11 +516,11 @@ namespace Controllers {
 			}
 		});
 	};
-	const disconnectMarker = (marker: Markers.Input) => {
+	const disconnectMarker = (clientBuilding: ClientBuilding, marker: Markers.Input) => {
 		marker.marker.disconnect();
 
 		task.spawn(async () => {
-			const result = await ClientBuilding.logicDisconnectOperation.execute({
+			const result = clientBuilding.logicDisconnectOperation.execute({
 				plot: marker.plot,
 				inputBlock: marker.block,
 				inputConnection: marker.data.id,
@@ -519,17 +532,18 @@ namespace Controllers {
 		});
 	};
 
-	export interface IController extends IComponent {
+	export interface IController extends Component {
 		readonly selectedMarker: ReadonlyObservableValue<Markers.Output | undefined>;
 
 		stopDragging(): void;
 	}
-	export class Desktop extends ClientComponent implements IController {
+	@injectable
+	export class Desktop extends Component implements IController {
 		readonly selectedMarker = new ObservableValue<Markers.Output | undefined>(undefined);
 		private readonly currentMoverContainer;
 
-		constructor(markers: readonly Markers.Marker[]) {
-			class WireMover extends ClientInstanceComponent<WireComponentDefinition> {
+		constructor(markers: readonly Markers.Marker[], @inject clientBuilding: ClientBuilding) {
+			class WireMover extends InstanceComponent<WireComponentDefinition> {
 				readonly marker;
 
 				constructor(instance: WireComponentDefinition, marker: Markers.Output) {
@@ -550,7 +564,7 @@ namespace Controllers {
 					this.event.subInput((ih) =>
 						ih.onMouse1Up(() => {
 							if (hoverMarker) {
-								connectMarkers(this.marker, hoverMarker);
+								connectMarkers(clientBuilding, this.marker, hoverMarker);
 							}
 
 							this.destroy();
@@ -559,7 +573,7 @@ namespace Controllers {
 					this.event.subInput((ih) =>
 						ih.onMouse2Down(() => {
 							if (hoverMarker) {
-								connectMarkers(this.marker, hoverMarker);
+								connectMarkers(clientBuilding, this.marker, hoverMarker);
 							}
 						}, true),
 					);
@@ -568,7 +582,7 @@ namespace Controllers {
 
 			super();
 
-			const currentMoverContainer = new ComponentChild<WireMover>(this, true);
+			const currentMoverContainer = this.parent(new ComponentChild<WireMover>(true));
 			this.currentMoverContainer = currentMoverContainer;
 			currentMoverContainer.childSet.Connect((child) => this.selectedMarker.set(child?.marker));
 			let hoverMarker: Markers.Input | undefined;
@@ -576,7 +590,7 @@ namespace Controllers {
 			for (const marker of markers) {
 				if (marker instanceof Markers.Input) {
 					this.event.subscribe(marker.instance.TextButton.MouseButton1Click, () => {
-						disconnectMarker(marker);
+						disconnectMarker(clientBuilding, marker);
 					});
 
 					this.event.subscribe(marker.instance.TextButton.MouseEnter, () => {
@@ -605,11 +619,12 @@ namespace Controllers {
 			this.currentMoverContainer.clear();
 		}
 	}
+	@injectable
 	export class Touch extends Component implements IController {
 		readonly selectedMarker = new ObservableValue<Markers.Output | undefined>(undefined);
 		private readonly markers: readonly Markers.Marker[];
 
-		constructor(markers: readonly Markers.Marker[]) {
+		constructor(markers: readonly Markers.Marker[], @inject clientBuilding: ClientBuilding) {
 			super();
 			this.markers = markers;
 
@@ -625,11 +640,11 @@ namespace Controllers {
 					this.event.subscribe(marker.instance.TextButton.Activated, () => {
 						const selected = this.selectedMarker.get();
 						if (!selected) {
-							disconnectMarker(marker);
+							disconnectMarker(clientBuilding, marker);
 							return;
 						}
 
-						connectMarkers(selected!, marker);
+						connectMarkers(clientBuilding, selected!, marker);
 						this.unset();
 					});
 				} else if (marker instanceof Markers.Output) {
@@ -658,9 +673,10 @@ namespace Controllers {
 			this.unset();
 		}
 	}
+	@injectable
 	export class Gamepad extends Desktop implements IController {
-		constructor(markers: readonly Markers.Marker[]) {
-			super(markers);
+		constructor(markers: readonly Markers.Marker[], @inject clientBuilding: ClientBuilding) {
+			super(markers, clientBuilding);
 
 			this.event.onKeyDown("ButtonY", () => {
 				if (GamepadService.GamepadCursorEnabled) {
@@ -679,27 +695,27 @@ namespace Controllers {
 @injectable
 export class WireTool extends ToolBase {
 	readonly selectedMarker = new ObservableValue<Markers.Output | undefined>(undefined);
-	private readonly markers = this.parent(new ComponentChildren<Markers.Marker>(this, true));
-	private readonly controllerContainer = new ComponentChild<Controllers.IController>(this, true);
+	private readonly markers = this.parent(new ComponentChildren<Markers.Marker>(true));
+	private readonly controllerContainer = this.parent(new ComponentChild<Controllers.IController>(true));
 
 	constructor(
 		@inject mode: BuildingMode,
+		@inject actionController: ActionController,
 		@inject private readonly blockList: BlockList,
+		@inject di: DIContainer,
 	) {
 		super(mode);
 
-		this.parentGui(
-			new Scene.WireToolScene(ToolBase.getToolGui<"Wire", Scene.WireToolSceneDefinition>().Wire, this),
-		);
+		this.parent(di.resolveForeignClass(Scene.WireToolScene));
 
-		this.onPrepare(() => this.createEverything());
+		this.event.onPrepare(() => this.createEverything());
 		this.onDisable(() => this.markers.clear());
 
-		this.event.subscribe(ActionController.instance.onUndo, () => {
+		this.event.subscribe(actionController.onUndo, () => {
 			this.disable();
 			this.enable();
 		});
-		this.event.subscribe(ActionController.instance.onRedo, () => {
+		this.event.subscribe(actionController.onRedo, () => {
 			this.disable();
 			this.enable();
 		});
@@ -710,12 +726,17 @@ export class WireTool extends ToolBase {
 			Gamepad: Controllers.Gamepad,
 		} as const satisfies Record<
 			InputType,
-			new (markers: readonly Markers.Marker[], wireParent: ViewportFrame) => Controllers.IController
+			new (markers: readonly Markers.Marker[], ...args: any[]) => Controllers.IController
 		>;
 
 		const setController = () => {
 			const inputType = InputController.inputType.get();
-			const controller = this.controllerContainer.set(new controllers[inputType](this.markers.getAll()));
+			const controller = this.controllerContainer.set(
+				di.resolveForeignClass<Controllers.IController, [readonly Markers.Marker[], ...never[]]>(
+					controllers[inputType],
+					[this.markers.getAll()],
+				),
+			);
 			controller.selectedMarker.subscribe((m) => this.selectedMarker.set(m), true);
 		};
 		this.event.onPrepare(setController);
@@ -809,15 +830,13 @@ export class WireTool extends ToolBase {
 		return "http://www.roblox.com/asset/?id=15895880948";
 	}
 
-	protected getTooltips(): InputTooltips {
-		return {
-			Desktop: [{ keys: ["F"], text: "Hide connected markers" }],
-			Gamepad: [
-				{ keys: ["ButtonY"], text: "Marker selection mode" },
-				{ keys: ["ButtonA"], text: "Click on marker" },
-				{ keys: ["ButtonX"], text: "Cancel selection" },
-				{ keys: ["ButtonB"], text: "Unequip" },
-			],
-		};
+	protected getTooltips(): readonly Tooltip[] {
+		return [
+			{ keys: [["F"]], text: "Hide connected markers" },
+			{ keys: [["ButtonY"]], text: "Marker selection mode" },
+			{ keys: [["ButtonA"]], text: "Click on marker" },
+			{ keys: [["ButtonX"]], text: "Cancel selection" },
+			{ keys: [["ButtonB"]], text: "Unequip" },
+		];
 	}
 }

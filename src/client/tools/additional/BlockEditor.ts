@@ -1,35 +1,35 @@
 import { RunService, UserInputService, Workspace } from "@rbxts/services";
-import { Tooltip } from "client/gui/controls/Tooltip";
-import { Gui } from "client/gui/Gui";
+import { Interface } from "client/gui/Interface";
 import { TooltipsHolder } from "client/gui/static/TooltipsControl";
-import { Keybinds } from "client/Keybinds";
 import { FloatingText } from "client/tools/additional/FloatingText";
 import { MoveGrid, ScaleGrid } from "client/tools/additional/Grid";
 import { RotateGrid } from "client/tools/additional/Grid";
-import { ToolBase } from "client/tools/ToolBase";
-import { ClientComponent } from "engine/client/component/ClientComponent";
-import { ButtonControl, TextButtonControl } from "engine/client/gui/Button";
-import { Control } from "engine/client/gui/Control";
+import { Action } from "engine/client/Action";
 import { InputController } from "engine/client/InputController";
+import { Keybinds } from "engine/client/Keybinds";
 import { Component } from "engine/shared/component/Component";
 import { ComponentChild } from "engine/shared/component/ComponentChild";
 import { ComponentInstance } from "engine/shared/component/ComponentInstance";
-import { InstanceComponent } from "engine/shared/component/InstanceComponent";
+import { OverlayValueStorage } from "engine/shared/component/OverlayValueStorage";
+import { Transforms } from "engine/shared/component/Transforms";
 import { TransformService } from "engine/shared/component/TransformService";
 import { Element } from "engine/shared/Element";
 import { ObservableCollectionSet } from "engine/shared/event/ObservableCollection";
-import { ObservableSwitch } from "engine/shared/event/ObservableSwitch";
 import { ObservableValue } from "engine/shared/event/ObservableValue";
 import { ArgsSignal } from "engine/shared/event/Signal";
 import { BB } from "engine/shared/fixes/BB";
-import { Instances } from "engine/shared/fixes/Instances";
 import { Strings } from "engine/shared/fixes/String.propmacro";
 import { BlockManager } from "shared/building/BlockManager";
 import { SharedBuilding } from "shared/building/SharedBuilding";
 import { Colors } from "shared/Colors";
-import type { ClientBuilding } from "client/modes/build/ClientBuilding";
+import { ReplicatedAssets } from "shared/ReplicatedAssets";
+import type { MainScreenLayout } from "client/gui/MainScreenLayout";
+import type { ClientBuildingTypes } from "client/modes/build/ClientBuilding";
 import type { PlayerDataStorage } from "client/PlayerDataStorage";
-import type { TextButtonDefinition } from "engine/client/gui/Button";
+import type { Theme, ThemeColorKey } from "client/Theme";
+import type { Control } from "engine/client/gui/Control";
+import type { KeybindDefinition } from "engine/client/Keybinds";
+import type { ReadonlyObservableValue } from "engine/shared/event/ObservableValue";
 
 type EditHandles = BasePart & {
 	readonly SelectionBox: SelectionBox;
@@ -197,17 +197,17 @@ interface EditComponent extends Component {
 const centerBasedKb = Keybinds.registerDefinition(
 	"edit_scale_centerBased",
 	["Edit Tool", "Scale", "Scale from the center"],
-	["LeftAlt"],
+	[["LeftAlt"]],
 );
 const sameSizeKb = Keybinds.registerDefinition(
 	"edit_scale_sameSize",
 	["Edit Tool", "Scale", "Uniform scaling"],
-	["LeftShift"],
+	[["LeftShift"]],
 );
 const sidewaysKb = Keybinds.registerDefinition(
 	"edit_move_sideways",
 	["Edit Tool", "Move", "Sideways movement"],
-	["LeftAlt"],
+	[["LeftAlt"]],
 );
 
 const formatVecForFloatingText = (vec: Vector3): string => {
@@ -221,17 +221,52 @@ const formatVecForFloatingText = (vec: Vector3): string => {
 	return `${format(vec.X)}, ${format(vec.Y)}, ${format(vec.Z)}`;
 };
 
+interface b {
+	readonly iconId?: string;
+	readonly background?: ThemeColorKey;
+	readonly state: OverlayValueStorage<boolean>;
+}
+const createButtonList = <K extends string>(
+	parent: Component,
+	mainScreen: MainScreenLayout,
+	theme: Theme,
+	buttons: { readonly [k in K]: b },
+): { readonly [k in K]: Control } => {
+	const layer = parent.parentGui(mainScreen.bottom.push());
+
+	const ret: { [k in K]?: Control } = {};
+	for (const [k, { iconId, background, state }] of pairs(buttons)) {
+		const kb = new ObservableValue(state.get());
+
+		const btn = layer
+			.addButton(k.upper(), iconId, background)
+			.addButtonAction(() => state.and("kb", kb.toggle()))
+			.initializeSimpleTransform("BackgroundColor3")
+			.themeButton(
+				theme,
+				parent.event.addObservable(
+					state.fReadonlyCreateBased((enabled) => (enabled ? "buttonActive" : "buttonNormal")),
+				),
+			);
+
+		ret[k] = btn;
+	}
+
+	return ret as { [k in K]: Control };
+};
+
 // #region Move
 // #endregion
 @injectable
-class MoveComponent extends ClientComponent implements EditComponent {
+class MoveComponent extends Component implements EditComponent {
 	constructor(
 		handles: EditHandles,
 		blocks: readonly EditingBlock[],
 		originalBB: BB,
 		grid: ReadonlyObservableValue<MoveGrid>,
-		topControl: BlockEditorTopControl,
 		@inject keybinds: Keybinds,
+		@inject theme: Theme,
+		@inject mainScreen: MainScreenLayout,
 	) {
 		super();
 
@@ -243,7 +278,7 @@ class MoveComponent extends ClientComponent implements EditComponent {
 
 		this.onEnabledStateChange((enabled) => forEachHandle((handle) => (handle.Visible = enabled)));
 
-		const sideways = new ObservableSwitch(false);
+		const sideways = OverlayValueStorage.bool();
 		let bb = BB.fromPart(handles);
 
 		const floatingText = this.parent(FloatingText.create(handles));
@@ -271,16 +306,17 @@ class MoveComponent extends ClientComponent implements EditComponent {
 
 		// #region Keyboard controls initialization
 		const tooltips = this.parent(TooltipsHolder.createComponent("Edit Tool > Move"));
-		tooltips.setFromKeybinds(keybinds, sidewaysKb);
+		tooltips.setFromKeybinds(keybinds.fromDefinition(sidewaysKb));
 
 		this.event.subscribeObservable(keybinds.fromDefinition(sidewaysKb).isPressed, (value) => {
-			sideways.set("kb", value);
+			sideways.and("kb", value);
 			updateFromCurrentMovement();
 		});
+		createButtonList(this, mainScreen, theme, { sideways: { state: sideways } });
 		// #endregion
 
 		const createVisualizer = () => {
-			const instance = Instances.getAssets<{
+			const instance = ReplicatedAssets.get<{
 				MovementVisualizer: BasePart & { Decal: Decal };
 			}>().MovementVisualizer.Clone();
 			instance.Decal.Transparency = 1;
@@ -308,7 +344,9 @@ class MoveComponent extends ClientComponent implements EditComponent {
 					visible = true;
 
 					TransformService.cancel(instance);
-					TransformService.run(instance.Decal, (tr) => tr.transform("Transparency", 0.95, props));
+					TransformService.run(instance.Decal, (tr) =>
+						tr.transform(instance.Decal, "Transparency", 0.95, props),
+					);
 				}
 
 				instance.CFrame = CFrame.lookAt(Vector3.zero, direction)
@@ -321,7 +359,7 @@ class MoveComponent extends ClientComponent implements EditComponent {
 				visible = false;
 
 				TransformService.cancel(instance);
-				TransformService.run(instance.Decal, (tr) => tr.transform("Transparency", 1, props));
+				TransformService.run(instance.Decal, (tr) => tr.transform(instance.Decal, "Transparency", 1, props));
 			};
 
 			return { update, stop };
@@ -351,14 +389,6 @@ class MoveComponent extends ClientComponent implements EditComponent {
 				),
 			);
 		});
-
-		const sidewaysBtn = topControl.create("SIDEWAYS", () => sideways.set("kb", !sideways.get()));
-		ComponentInstance.init(this, sidewaysBtn.instance);
-		this.event.subscribeObservable(
-			sideways,
-			(sideways) => (sidewaysBtn.instance.Transparency = sideways ? 0 : 0.5),
-			true,
-		);
 	}
 }
 
@@ -371,7 +401,6 @@ class RotateComponent extends Component implements EditComponent {
 		blocks: readonly EditingBlock[],
 		originalBB: BB,
 		grid: ReadonlyObservableValue<RotateGrid>,
-		topControl: BlockEditorTopControl,
 	) {
 		super();
 
@@ -433,7 +462,7 @@ class RotateComponent extends Component implements EditComponent {
 // #region Scale
 // #endregion
 @injectable
-class ScaleComponent extends ClientComponent implements EditComponent {
+class ScaleComponent extends Component implements EditComponent {
 	readonly error = new ObservableValue<string | undefined>(undefined);
 
 	constructor(
@@ -441,8 +470,9 @@ class ScaleComponent extends ClientComponent implements EditComponent {
 		blocks: readonly EditingBlock[],
 		originalBB: BB,
 		grid: ReadonlyObservableValue<ScaleGrid>,
-		topControl: BlockEditorTopControl,
 		@inject keybinds: Keybinds,
+		@inject mainScreen: MainScreenLayout,
+		@inject theme: Theme,
 	) {
 		super();
 
@@ -456,8 +486,8 @@ class ScaleComponent extends ClientComponent implements EditComponent {
 
 		let bb = BB.fromPart(handles);
 
-		const centerBased = new ObservableSwitch(false);
-		const sameSize = new ObservableSwitch(false);
+		const centerBased = OverlayValueStorage.bool();
+		const sameSize = OverlayValueStorage.bool();
 
 		const pivot = Element.create(
 			"Part",
@@ -552,14 +582,14 @@ class ScaleComponent extends ClientComponent implements EditComponent {
 
 		// #region Keyboard controls initialization
 		const tooltips = this.parent(TooltipsHolder.createComponent("Edit Tool > Scale"));
-		tooltips.setFromKeybinds(keybinds, centerBasedKb, sameSizeKb);
+		tooltips.setFromKeybinds(keybinds.fromDefinition(centerBasedKb), keybinds.fromDefinition(sameSizeKb));
 
 		this.event.subscribeObservable(keybinds.fromDefinition(centerBasedKb).isPressed, (value) => {
-			centerBased.set("kb", value);
+			centerBased.and("kb", value);
 			updateFromCurrentMovement();
 		});
 		this.event.subscribeObservable(keybinds.fromDefinition(sameSizeKb).isPressed, (value) => {
-			sameSize.set("kb", value);
+			sameSize.and("kb", value);
 			updateFromCurrentMovement();
 		});
 		// #endregion
@@ -584,22 +614,11 @@ class ScaleComponent extends ClientComponent implements EditComponent {
 			});
 		});
 
-		const centerBasedBtn = topControl.create("CENTERED", () => centerBased.set("kb", !centerBased.get()));
-		ComponentInstance.init(this, centerBasedBtn.instance);
-		this.event.subscribeObservable(
-			centerBased,
-			(centerBased) => (centerBasedBtn.instance.Transparency = centerBased ? 0 : 0.5),
-			true,
-		);
-
-		const sameSizeBtn = topControl.create("UNIFORM", () => sameSize.set("kb", !sameSize.get()));
-		ComponentInstance.init(this, sameSizeBtn.instance);
-		this.event.subscribeObservable(
-			sameSize,
-			(sameSize) => (sameSizeBtn.instance.Transparency = sameSize ? 0 : 0.5),
-			true,
-		);
-		const sameSizeErr = this.parent(new ControlWithError(sameSizeBtn.instance));
+		const { centered, uniform } = createButtonList(this, mainScreen, theme, {
+			centered: { state: centerBased },
+			uniform: { state: sameSize },
+		});
+		const sameSizeErr = (uniform as Control<ControlWithErrorDefinition>).getComponent(ControlWithError);
 
 		// #region Block rotation check
 		const areRotations90DegreesApart = (cframeA: CFrame, cframeB: CFrame): boolean => {
@@ -614,7 +633,7 @@ class ScaleComponent extends ClientComponent implements EditComponent {
 		};
 
 		if (blocks.any((b) => !areRotations90DegreesApart(bb.center, b.block.GetPivot()))) {
-			sameSize.set("multipleBlocks", true);
+			sameSize.and("multipleBlocks", true);
 			sameSizeErr.setError(
 				"Uniform scaling is forced because the selection has blocks with non-aligned rotations.",
 			);
@@ -625,81 +644,20 @@ class ScaleComponent extends ClientComponent implements EditComponent {
 
 //
 
-type BlockEditorControlBottomDefinition = GuiObject & {
-	readonly MoveButton: GuiButton;
-	readonly RotateButton: GuiButton;
-	readonly ScaleButton: GuiButton;
-	readonly CompleteButton: GuiButton;
-};
-class BlockEditorBottomControl extends Control<BlockEditorControlBottomDefinition> {
-	constructor(
-		gui: BlockEditorControlBottomDefinition,
-		currentMode: ReadonlyObservableValue<EditMode>,
-		set: (type: EditMode) => void,
-		commit: () => void,
-	) {
-		super(gui);
-
-		const move = this.add(new ButtonControl(gui.MoveButton, () => set("move")));
-		const rotate = this.add(new ButtonControl(gui.RotateButton, () => set("rotate")));
-		const scale = this.add(new ButtonControl(gui.ScaleButton, () => set("scale")));
-		this.add(new ButtonControl(gui.CompleteButton, commit));
-
-		const buttons = { move, rotate, scale };
-		this.event.subscribeObservable(
-			currentMode,
-			(mode) => {
-				for (const [name, button] of pairs(buttons)) {
-					button.instance.BackgroundColor3 = mode === name ? Colors.accentDark : Colors.staticBackground;
-				}
-			},
-			true,
-		);
-	}
-}
-
 type ControlWithErrorDefinition = GuiObject & {
 	readonly WarningImage: ImageLabel;
 };
-class ControlWithError extends InstanceComponent<ControlWithErrorDefinition> {
-	private tooltip?: SignalConnection;
+class ControlWithError extends Component {
+	constructor(private readonly component: Control<ControlWithErrorDefinition>) {
+		super();
 
-	constructor(gui: ControlWithErrorDefinition) {
-		super(gui);
-
-		gui.WarningImage.Visible = false;
-		this.onDisable(() => this.tooltip?.Disconnect());
+		component.instance.WarningImage.Visible = false;
+		this.onDisable(() => component.setTooltipText(undefined));
 	}
 
 	setError(err: string | undefined) {
-		this.instance.WarningImage.Visible = err !== undefined;
-		this.tooltip?.Disconnect();
-
-		if (err) {
-			this.tooltip = Tooltip.init(this, err);
-		}
-	}
-}
-
-type BlockEditorTopControlDefinition = GuiObject & {
-	readonly Template: TextButtonDefinition & {
-		readonly WarningImage: ImageLabel;
-	};
-};
-class BlockEditorTopControl extends Control<BlockEditorTopControlDefinition> {
-	private readonly template;
-
-	constructor(gui: BlockEditorTopControlDefinition) {
-		super(gui);
-		this.template = this.asTemplate(gui.Template, true);
-	}
-
-	create(text: string, activated?: () => void): ButtonControl<BlockEditorTopControlDefinition["Template"]> {
-		const btn = this.add(new TextButtonControl(this.template(), activated));
-		btn.text.set(text);
-		btn.instance.WarningImage.Visible = false;
-
-		return btn;
+		this.component.instance.WarningImage.Visible = err !== undefined;
+		this.component.setTooltipText(err);
 	}
 }
 
@@ -707,7 +665,7 @@ class CompoundObservableSet<T extends defined> {
 	readonly set = new ObservableCollectionSet<T>();
 
 	addSource(observable: ReadonlyObservableValue<T | undefined>) {
-		observable.subscribe((value, prev) => {
+		observable.subscribePrev((value, prev) => {
 			if (value !== undefined) {
 				this.set.add(value);
 			} else if (prev !== undefined) {
@@ -718,8 +676,14 @@ class CompoundObservableSet<T extends defined> {
 }
 
 @injectable
-export class BlockEditor extends ClientComponent {
-	private readonly _completed = new ArgsSignal();
+export class BlockEditor extends Component {
+	static readonly keybinds = {
+		move: Keybinds.registerDefinition("edit_move", ["Edit tool", "Move"], [["F"], ["ButtonX"]]),
+		rotate: Keybinds.registerDefinition("edit_rotate", ["Edit tool", "Rotate"], [["R"]]),
+		scale: Keybinds.registerDefinition("edit_scale", ["Edit tool", "Scale"], [["B"]]),
+	} as const satisfies { readonly [k in string]: KeybindDefinition };
+
+	private readonly _completed = new ArgsSignal<[state: "completed" | "cancelled"]>();
 	readonly completed = this._completed.asReadonly();
 
 	private readonly editBlocks: readonly EditingBlock[];
@@ -739,10 +703,82 @@ export class BlockEditor extends ClientComponent {
 		@inject keybinds: Keybinds,
 		@inject blockList: BlockList,
 		@inject playerData: PlayerDataStorage,
+		@inject mainScreen: MainScreenLayout,
+		@inject theme: Theme,
 		@inject di: DIContainer,
 	) {
 		super();
 		this.currentMode = new ObservableValue<EditMode>(startMode);
+
+		const actions = {
+			move: this.parent(new Action(() => setModeByKey("move"))),
+			rotate: this.parent(new Action(() => setModeByKey("rotate"))),
+			scale: this.parent(new Action(() => setModeByKey("scale"))),
+
+			cancel: this.parent(
+				new Action(() => {
+					this.cancel();
+					this._completed.Fire("cancelled");
+				}),
+			),
+			finish: this.parent(new Action(() => this._completed.Fire("completed"))),
+		} as const;
+
+		actions.move.initKeybind(keybinds.fromDefinition(BlockEditor.keybinds.move), { priority: -1 });
+		actions.rotate.initKeybind(keybinds.fromDefinition(BlockEditor.keybinds.rotate), { priority: -1 });
+		actions.scale.initKeybind(keybinds.fromDefinition(BlockEditor.keybinds.scale), { priority: -1 });
+
+		actions.move.subCanExecuteFrom({ main: new ObservableValue(true) });
+		actions.rotate.subCanExecuteFrom({ main: new ObservableValue(true) });
+		actions.scale.subCanExecuteFrom({ main: new ObservableValue(true) });
+
+		actions.cancel.subCanExecuteFrom({ main: new ObservableValue(true) });
+		actions.finish.subCanExecuteFrom({ main: new ObservableValue(true) });
+
+		{
+			const layer = this.parentGui(mainScreen.bottom.push());
+
+			layer.addButton("cancel", "15429854809", "buttonNegative").subscribeToAction(actions.cancel);
+			layer.addButton("finish", "15429854809", "buttonPositive").subscribeToAction(actions.finish);
+		}
+
+		{
+			const layer = this.parentGui(mainScreen.bottom.push());
+			layer.visibilityComponent().addTransform(false, () =>
+				Transforms.create() //
+					.fullFadeOut(layer.instance, Transforms.quadOut02)
+					.then()
+					.hide(layer.instance),
+			);
+			this.onDestroy(() => layer.visibilityComponent().waitForTransformThenDestroy());
+
+			const move = layer
+				.addButton("move", "18369400240")
+				.initializeSimpleTransform("BackgroundColor3")
+				.subscribeToAction(actions.move);
+			const rotate = layer
+				.addButton("rotate", "18369417777")
+				.initializeSimpleTransform("BackgroundColor3")
+				.subscribeToAction(actions.rotate);
+			const scale = layer
+				.addButton("scale", "89349384867990")
+				.initializeSimpleTransform("BackgroundColor3")
+				.subscribeToAction(actions.scale);
+
+			const btns = { move, rotate, scale };
+			this.event.subscribeObservable(
+				this.currentMode,
+				(mode) => {
+					for (const [name, button] of pairs(btns)) {
+						button.overlayValue(
+							"BackgroundColor3",
+							theme.get(mode === name ? "buttonActive" : "buttonNormal"),
+						);
+					}
+				},
+				true,
+			);
+		}
 
 		this.editBlocks = blocks.map((b): EditingBlock => {
 			const origModel = blockList.blocks[BlockManager.manager.id.get(b)]!.model;
@@ -756,8 +792,8 @@ export class BlockEditor extends ClientComponent {
 			};
 		});
 
-		const handles = Instances.getAssets<{ EditHandles: EditHandles }>().EditHandles.Clone();
-		handles.Parent = Gui.getPlayerGui();
+		const handles = ReplicatedAssets.get<{ EditHandles: EditHandles }>().EditHandles.Clone();
+		handles.Parent = Interface.getPlayerGui();
 		ComponentInstance.init(this, handles);
 
 		this.event.subscribeObservable(
@@ -796,7 +832,7 @@ export class BlockEditor extends ClientComponent {
 			Adornee: handles,
 			Parent: handles,
 		});
-		this.event.subscribe(this.errors.changed, () => {
+		this.event.subscribe(this.errors.collectionChanged, () => {
 			const valid = this.errors.size() === 0;
 
 			const props = {
@@ -806,8 +842,8 @@ export class BlockEditor extends ClientComponent {
 
 			TransformService.run(errIndicator, (tr) =>
 				tr
-					.transform("Transparency", valid ? 1 : 0, props)
-					.transform("SurfaceTransparency", valid ? 1 : 0.3, props),
+					.transform(errIndicator, "Transparency", valid ? 1 : 0, props)
+					.transform(errIndicator, "SurfaceTransparency", valid ? 1 : 0.3, props),
 			);
 		});
 
@@ -869,7 +905,7 @@ export class BlockEditor extends ClientComponent {
 
 		const setModeByKey = (mode: EditMode) => {
 			if (this.currentMode.get() === mode) {
-				this._completed.Fire();
+				this._completed.Fire("completed");
 				return Enum.ContextActionResult.Sink;
 			}
 
@@ -877,55 +913,22 @@ export class BlockEditor extends ClientComponent {
 			return Enum.ContextActionResult.Sink;
 		};
 
-		// #region
-		const gui = ToolBase.getToolGui<
-			"Edit2",
-			GuiObject & {
-				readonly EditBottom: BlockEditorControlBottomDefinition;
-				readonly EditTop: BlockEditorTopControlDefinition;
-			}
-		>().Edit2;
-		const bottomControl = this.parentGui(
-			new BlockEditorBottomControl(gui.EditBottom.Clone(), this.currentMode, setModeByKey, () =>
-				this._completed.Fire(),
-			),
-		);
-		bottomControl.instance.Parent = gui;
-
-		const topControl = this.parentGui(new BlockEditorTopControl(gui.EditTop.Clone()));
-		topControl.instance.Parent = gui;
-		// #endregion
-
 		const bb = BB.fromModels(blocks, editMode === "global" ? CFrame.identity : undefined);
 		handles.PivotTo(bb.center);
 		handles.Size = bb.originalSize;
 
 		const modes: { readonly [k in EditMode]: () => Component } = {
-			move: () =>
-				di.resolveForeignClass(MoveComponent, [handles, this.editBlocks, bb, this.moveGrid, topControl]),
-			rotate: () =>
-				di.resolveForeignClass(RotateComponent, [handles, this.editBlocks, bb, this.rotateGrid, topControl]),
-			scale: () =>
-				di.resolveForeignClass(ScaleComponent, [handles, this.editBlocks, bb, this.scaleGrid, topControl]),
+			move: () => di.resolveForeignClass(MoveComponent, [handles, this.editBlocks, bb, this.moveGrid]),
+			rotate: () => di.resolveForeignClass(RotateComponent, [handles, this.editBlocks, bb, this.rotateGrid]),
+			scale: () => di.resolveForeignClass(ScaleComponent, [handles, this.editBlocks, bb, this.scaleGrid]),
 		};
 
-		const container = new ComponentChild<EditComponent>(this);
+		const container = this.parent(new ComponentChild<EditComponent>());
 		container.childSet.Connect((child) => {
 			if (!child?.error) return;
 			this._errors.addSource(child.error);
 		});
 		this.event.subscribeObservable(this.currentMode, (mode) => container.set(modes[mode]()), true);
-
-		//
-
-		const move = keybinds.get("edit_move");
-		this.event.subscribeRegistration(() => move.onDown(() => setModeByKey("move"), -1));
-
-		const rotate = keybinds.get("edit_rotate");
-		this.event.subscribeRegistration(() => rotate.onDown(() => setModeByKey("rotate"), -1));
-
-		const scale = keybinds.get("edit_scale");
-		this.event.subscribeRegistration(() => scale.onDown(() => setModeByKey("scale"), -1));
 	}
 
 	initializeGrids(grids: {
@@ -942,9 +945,9 @@ export class BlockEditor extends ClientComponent {
 		this.event.subscribeObservable(grids.scaleGrid, (grid) => this.scaleGrid.set(ScaleGrid.normal(grid)), true);
 	}
 
-	getUpdate(): readonly ClientBuilding.EditBlockInfo[] {
+	getUpdate(): readonly ClientBuildingTypes.EditBlockInfo[] {
 		return this.editBlocks.map(
-			(b): ClientBuilding.EditBlockInfo => ({
+			(b): ClientBuildingTypes.EditBlockInfo => ({
 				instance: b.block,
 				origPosition: b.origLocation,
 				newPosition: b.block.GetPivot(),

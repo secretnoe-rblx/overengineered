@@ -1,50 +1,61 @@
 import { Workspace } from "@rbxts/services";
-import { Gui } from "client/gui/Gui";
+import { Interface } from "client/gui/Interface";
 import { Control } from "engine/client/gui/Control";
-import { ObservableValue } from "engine/shared/event/ObservableValue";
-import type { TransformProps } from "engine/shared/component/Transform";
+import { Transforms } from "engine/shared/component/Transforms";
+import { ObservableCollectionArr } from "engine/shared/event/ObservableCollection";
+import { Instances } from "engine/shared/fixes/Instances";
+import type { ReadonlyObservableValue } from "engine/shared/event/ObservableValue";
 
 class LoadingImage extends Control {
-	runShowAnimation() {
-		const startanim = () => {
-			if (!this.isEnabled()) return;
+	constructor(gui: GuiObject) {
+		super(gui);
 
-			this.transform((transform, instance) =>
-				transform
-					.transform("Rotation", instance.Rotation + 90, {
+		this.onEnable(() => {
+			const startanim = () => {
+				if (!this.isEnabled()) return;
+
+				Transforms.create()
+					.transform(this.instance, "Rotation", this.instance.Rotation + 90, {
 						duration: 0.8,
 						style: "Quad",
 						direction: "InOut",
 					})
 					.then()
-					.func(startanim),
-			);
-		};
+					.func(startanim)
+					.run(this.instance, true);
+			};
 
-		this.cancelTransforms();
-		this.transform((transform, instance) =>
-			transform
+			Transforms.create()
 				.then()
-				.transform("Rotation", () => instance.Rotation + 270, {
-					duration: 0.3,
-					style: "Quad",
-					direction: "Out",
-				})
+				.transform(
+					this.instance,
+					"Rotation",
+					{ run: "once", func: () => this.instance.Rotation + 270 },
+					{
+						duration: 0.3,
+						style: "Quad",
+						direction: "Out",
+					},
+				)
 				.then()
-				.func(startanim),
-		);
-	}
-	runHideAnimation() {
-		this.disable();
+				.func(startanim)
+				.run(this.instance, true);
+		});
 
-		this.cancelTransforms();
-		this.transform((transform, instance) =>
-			transform.then().transform("Rotation", () => instance.Rotation - 270, {
-				duration: 0.3,
-				style: "Quad",
-				direction: "In",
-			}),
-		);
+		this.onDisable(() => {
+			Transforms.create()
+				.transform(
+					this.instance,
+					"Rotation",
+					{ run: "once", func: () => this.instance.Rotation - 270 },
+					{
+						duration: 0.3,
+						style: "Quad",
+						direction: "In",
+					},
+				)
+				.run(this.instance, true);
+		});
 	}
 }
 
@@ -53,94 +64,69 @@ type LoadingPopupDefinition = GuiObject & {
 	readonly TextLabel: TextLabel;
 };
 class LoadingPopup extends Control<LoadingPopupDefinition> {
-	private readonly loadingImage;
-
 	constructor(gui: LoadingPopupDefinition) {
 		super(gui);
-		this.loadingImage = this.add(new LoadingImage(gui.LoadingImage));
-	}
 
-	show(): void {
-		super.show();
-		this.cancelTransforms();
+		this.parent(new LoadingImage(gui.LoadingImage));
 
-		this.loadingImage.runShowAnimation();
-		const params: TransformProps = {
-			duration: 0.3,
-			style: "Quad",
-			direction: "Out",
-		};
-		this.transform((tr) => tr.moveY(new UDim(0, 80), params));
-	}
-	hide(): void {
-		const params: TransformProps = {
-			duration: 0.4,
-			style: "Quad",
-			direction: "In",
-		};
-
-		this.loadingImage.disable();
-		this.loadingImage.runHideAnimation();
-		this.cancelTransforms();
-		this.transform((tr) =>
-			tr
-				.moveY(new UDim(0, -200), params)
-				.then()
-				.func(() => super.hide()),
+		this.visibilityComponent().addTransform(true, () =>
+			Transforms.create()
+				.show(this.instance)
+				.fadeIn(this.instance, { duration: 0.3, style: "Quad", direction: "Out" })
+				.moveY(this.instance, new UDim(0, 80), { duration: 0.3, style: "Quad", direction: "Out" }),
 		);
+		this.visibilityComponent().addTransform(false, () =>
+			Transforms.create()
+				.moveY(this.instance, new UDim(0, 40), { duration: 0.4, style: "Quad", direction: "In" })
+				.fadeOut(this.instance, { duration: 0.3, style: "Quad", direction: "In" })
+				.then()
+				.hide(this.instance),
+		);
+
+		this.hide();
 	}
 
 	setText(text: string) {
-		this.gui.TextLabel.Text = text;
+		this.instance.TextLabel.Text = text;
 	}
 }
 
 spawn(() => {
-	const gui = Workspace.WaitForChild("Obstacles")
-		.WaitForChild("Baseplate 2")
-		.WaitForChild("Part")
-		.WaitForChild("SurfaceGui")
-		.WaitForChild("Spinner") as GuiObject;
+	for (const child of Instances.waitForChild(Workspace, "Map", "Main Island", "Base").GetChildren()) {
+		const gui = child.FindFirstChild("SurfaceGui") as SurfaceGui | undefined;
+		if (!gui) continue;
 
-	const loading = new LoadingImage(gui);
-	loading.enable();
-	loading.runShowAnimation();
+		const loading = new LoadingImage(gui.GetChildren()[0] as GuiObject);
+		loading.enable();
 
-	task.delay(10_000, () => loading.disable());
+		task.delay(60, () => loading.disable());
+	}
 });
 
-const control = new LoadingPopup(Gui.getGameUI<{ Loading: LoadingPopupDefinition }>().Loading);
-control.hide();
-
-const state = new ObservableValue<boolean>(false);
 export namespace LoadingController {
-	export const isLoading = state.asReadonly();
+	const state = new ObservableCollectionArr<{ readonly text: string }>();
+	export const isLoading: ReadonlyObservableValue<boolean> = state.fReadonlyCreateBased((c) => !c.isEmpty());
+	export const isNotLoading: ReadonlyObservableValue<boolean> = isLoading.fReadonlyCreateBased((b) => !b);
 
-	export function show(text: string) {
-		$log(text);
-		control.setText(`${text}...`);
+	const control = new LoadingPopup(Interface.getGameUI<{ Loading: LoadingPopupDefinition }>().Loading);
+	state.subscribe((state) => {
+		if (state.isEmpty()) {
+			control.hide();
+			return;
+		}
+
+		control.setText(`${state[state.size() - 1].text}...`);
 		control.show();
-		state.set(true);
-	}
-	export function hide() {
-		control.hide();
-		state.set(false);
-	}
+	});
 
-	export function run<T>(text: string, func: () => T) {
+	export function run<T>(text: string, func: () => T): T {
+		const key = { text };
+
 		try {
-			LoadingController.show(text);
+			state.add(key);
 			return func();
 		} finally {
-			LoadingController.hide();
-		}
-	}
-	export async function runAsync<T>(text: string, func: () => T | Promise<T>) {
-		try {
-			LoadingController.show(text);
-			return await func();
-		} finally {
-			LoadingController.hide();
+			state.remove(key);
 		}
 	}
 }

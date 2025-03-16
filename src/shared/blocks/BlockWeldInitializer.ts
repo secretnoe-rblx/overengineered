@@ -1,14 +1,18 @@
 import { RunService } from "@rbxts/services";
 import { Element } from "engine/shared/Element";
 import { Instances } from "engine/shared/fixes/Instances";
+import { ReplicatedAssets } from "shared/ReplicatedAssets";
 import type { BlockWeldRegions } from "shared/blocks/Block";
 import type { AutoWeldColliderBlockShape } from "shared/blocks/BlockCreation";
 
 const folderName = "BlocksWeldModels";
 if (RunService.IsServer()) {
-	Element.create("Folder", { Name: folderName, Parent: Instances.assets });
+	Element.create("Folder", { Name: folderName, Parent: ReplicatedAssets.assets });
 }
-const folder = Instances.waitForChild<Folder & { readonly [k in string]: BlockModel }>(Instances.assets, folderName);
+const folder = Instances.waitForChild<Folder & { readonly [k in string]: BlockModel }>(
+	ReplicatedAssets.assets,
+	folderName,
+);
 
 export namespace BlockWeldInitializer {
 	function region(center: Vector3, size: Vector3) {

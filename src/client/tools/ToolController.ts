@@ -1,24 +1,18 @@
 import { LoadingController } from "client/controller/LoadingController";
-import { BuildTool } from "client/tools/BuildTool";
-import { ConfigTool } from "client/tools/ConfigTool";
-import { DeleteTool } from "client/tools/DeleteTool";
-import { EditTool } from "client/tools/EditTool";
-import { PaintTool } from "client/tools/PaintTool";
-import { WireTool } from "client/tools/WireTool";
-import { ClientComponent } from "engine/client/component/ClientComponent";
 import { LocalPlayer } from "engine/client/LocalPlayer";
+import { Component } from "engine/shared/component/Component";
 import { ComponentChild } from "engine/shared/component/ComponentChild";
 import { ComponentDisabler } from "engine/shared/component/ComponentDisabler";
+import { ObservableCollectionArr } from "engine/shared/event/ObservableCollection";
 import { ObservableValue } from "engine/shared/event/ObservableValue";
-import { Objects } from "engine/shared/fixes/Objects";
-import type { BuildingMode } from "client/modes/build/BuildingMode";
 import type { ToolBase } from "client/tools/ToolBase";
+import type { DebuggableComponent } from "engine/shared/component/Component";
 
-class ToolInputController extends ClientComponent {
-	constructor(tools: ToolController) {
+class ToolInputController extends Component {
+	constructor(toolController: ToolController) {
 		super();
 
-		this.event.onPrepareDesktop(() => {
+		this.event.onPrepareDesktop((eh, ih) => {
 			const keycodes: readonly KeyCode[] = [
 				"One",
 				"Two",
@@ -31,21 +25,21 @@ class ToolInputController extends ClientComponent {
 				"Nine",
 			];
 
-			tools.visibleTools.enabled.get().forEach((tool, i) => {
-				this.inputHandler.onKeyDown(keycodes[i], () =>
-					tools.selectedTool.set(tool === tools.selectedTool.get() ? undefined : tool),
+			toolController.tools.get().forEach((tool, i) => {
+				ih.onKeyDown(keycodes[i], () =>
+					toolController.selectedTool.set(tool === toolController.selectedTool.get() ? undefined : tool),
 				);
 			});
 		});
 
 		const gamepadSelectTool = (isRight: boolean) => {
-			if (!tools.selectedTool.get()) {
-				tools.selectedTool.set(tools.visibleTools.enabled.get()[0]);
+			if (!toolController.selectedTool.get()) {
+				toolController.selectedTool.set(toolController.tools.get()[0]);
 				return;
 			}
 
-			const currentIndex = tools.visibleTools.enabled.get().indexOf(tools.selectedTool.get()!);
-			const toolsLength = tools.visibleTools.enabled.get().size();
+			const currentIndex = toolController.tools.get().indexOf(toolController.selectedTool.get()!);
+			const toolsLength = toolController.tools.get().size();
 			let newIndex = isRight ? currentIndex + 1 : currentIndex - 1;
 
 			if (newIndex >= toolsLength) {
@@ -54,19 +48,23 @@ class ToolInputController extends ClientComponent {
 				newIndex = toolsLength - 1;
 			}
 
-			tools.selectedTool.set(tools.visibleTools.enabled.get()[newIndex]);
+			toolController.selectedTool.set(toolController.tools.get()[newIndex]);
 		};
-		this.event.onPrepareGamepad(() => {
-			this.inputHandler.onKeyDown("ButtonB", () => tools.selectedTool.set(undefined));
-			this.inputHandler.onKeyDown("ButtonR1", () => gamepadSelectTool(true));
-			this.inputHandler.onKeyDown("ButtonL1", () => gamepadSelectTool(false));
+		this.event.onPrepareGamepad((eh, ih) => {
+			ih.onKeyDown("ButtonB", () => toolController.selectedTool.set(undefined));
+			ih.onKeyDown("ButtonR1", () => gamepadSelectTool(true));
+			ih.onKeyDown("ButtonL1", () => gamepadSelectTool(false));
 		});
 	}
 }
 
 @injectable
-export class ToolController extends ClientComponent {
-	readonly selectedTool = new ObservableValue<ToolBase | undefined>(undefined, (value) => {
+export class ToolController extends Component {
+	readonly selectedTool = new ObservableValue<ToolBase | undefined>(undefined, (value, current) => {
+		if (value && LoadingController.isLoading.get()) {
+			return current;
+		}
+
 		if (!value) return value;
 
 		if (this.enabledTools.isDisabled(value)) {
@@ -75,55 +73,30 @@ export class ToolController extends ClientComponent {
 
 		return value;
 	});
-	readonly visibleTools: ComponentDisabler<ToolBase>;
 	readonly enabledTools: ComponentDisabler<ToolBase>;
+	readonly tools = new ObservableCollectionArr<ToolBase>();
 
-	readonly allTools;
-	readonly allToolsOrdered: readonly ToolBase[];
-
-	constructor(@inject mode: BuildingMode, @inject di: DIContainer) {
+	constructor() {
 		super();
-		di = di.beginScope((di) => di.registerSingletonValue(this));
 
 		LocalPlayer.diedEvent.Connect(() => {
 			this.selectedTool.set(undefined);
 		});
 
-		this.selectedTool.subscribe((tool, prev) => {
+		this.selectedTool.subscribePrev((tool, prev) => {
 			prev?.disable();
 			tool?.enable();
 		});
-
-		this.event.subscribeObservable(
-			this.selectedTool,
-			(tool) => mode.mirrorVisualizer.setEnabled(tool?.supportsMirror() ?? false),
-			true,
-		);
-
-		// array instead of an object for ordering purposes
-		const tools = [
-			["buildTool", di.resolveForeignClass(BuildTool)],
-			["editTool", di.resolveForeignClass(EditTool)],
-			["deleteTool", di.resolveForeignClass(DeleteTool)],
-			["configTool", di.resolveForeignClass(ConfigTool)],
-			["paintTool", di.resolveForeignClass(PaintTool)],
-			["wireTool", di.resolveForeignClass(WireTool)],
-		] as const;
-
-		this.allTools = Objects.fromEntries(tools);
-		this.allToolsOrdered = tools.map((t) => t[1]);
-		this.enabledTools = new ComponentDisabler(this.allToolsOrdered);
-		this.visibleTools = new ComponentDisabler(this.allToolsOrdered);
-
-		this.enabledTools.enabled.subscribe(() => this.selectedTool.set(undefined));
-		this.visibleTools.enabled.subscribe(() => this.selectedTool.set(undefined));
+		this.enabledTools = new ComponentDisabler<ToolBase>();
+		this.enabledTools.updated.Connect(() => this.selectedTool.set(undefined));
+		this.tools.subscribe(() => this.selectedTool.set(undefined));
 
 		let prevTool: ToolBase | undefined = undefined;
 		let wasSetByLoading = false;
 		this.onEnable(() => (wasSetByLoading = false));
 
-		const inputParent = new ComponentChild<ToolInputController>(this);
-		this.visibleTools.enabled.subscribe(() => inputParent.set(new ToolInputController(this)), true);
+		const inputParent = this.parent(new ComponentChild<ToolInputController>());
+		this.tools.subscribe(() => inputParent.set(new ToolInputController(this)), true);
 
 		this.event.subscribeObservable(
 			LoadingController.isLoading,
@@ -133,7 +106,10 @@ export class ToolController extends ClientComponent {
 					prevTool = this.selectedTool.get();
 					this.selectedTool.set(undefined);
 				} else if (wasSetByLoading) {
-					this.selectedTool.set(prevTool);
+					if (prevTool && this.tools.has(prevTool)) {
+						this.selectedTool.set(prevTool);
+					}
+
 					prevTool = undefined;
 				}
 
@@ -143,7 +119,7 @@ export class ToolController extends ClientComponent {
 		);
 	}
 
-	getDebugChildren(): readonly IDebuggableComponent[] {
-		return [...super.getDebugChildren(), ...this.visibleTools.enabled.get()];
+	getDebugChildren(): readonly DebuggableComponent[] {
+		return [...super.getDebugChildren(), ...this.tools.get()];
 	}
 }

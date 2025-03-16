@@ -4,14 +4,17 @@ import { SliderControl } from "client/gui/controls/SliderControl";
 import { ButtonControl } from "engine/client/gui/Button";
 import { Control } from "engine/client/gui/Control";
 import { TextBoxControl } from "engine/client/gui/TextBoxControl";
+import { Colors } from "engine/shared/Colors";
+import { Transforms } from "engine/shared/component/Transforms";
 import { ArgsSignal } from "engine/shared/event/Signal";
 import { SubmittableValue } from "engine/shared/event/SubmittableValue";
-import { Colors } from "shared/Colors";
 import type { SliderControlDefinition } from "client/gui/controls/SliderControl";
 import type { ReadonlyArgsSignal } from "engine/shared/event/Signal";
 
 export type ColorChooserDefinition = GuiObject & {
-	readonly Preview: GuiObject;
+	readonly Preview: GuiObject & {
+		readonly UIGradient?: UIGradient;
+	};
 	readonly Sliders: GuiObject & {
 		readonly QuickAction?: GuiObject & {
 			readonly ResetButton: GuiButton;
@@ -26,11 +29,15 @@ export type ColorChooserDefinition = GuiObject & {
 		readonly Brightness: SliderControlDefinition & {
 			readonly UIGradient: UIGradient;
 		};
+		readonly Alpha?: SliderControlDefinition & {
+			readonly UIGradient: UIGradient;
+		};
 	};
 	readonly Inputs: GuiObject & {
-		readonly ManualBlue: TextBox;
 		readonly ManualRed: TextBox;
 		readonly ManualGreen: TextBox;
+		readonly ManualBlue: TextBox;
+		readonly ManualAlpha?: TextBox;
 		readonly ManualHex: TextBox;
 	};
 };
@@ -39,6 +46,7 @@ class ColorChooserSliders extends Control<ColorChooserDefinition["Sliders"]> {
 	private readonly _value = SubmittableValue.from<Color3>(Color3.fromRGB(255, 255, 255));
 	readonly value = this._value.asHalfReadonly();
 	readonly moved: ReadonlyArgsSignal<[color: Color3]>;
+
 	private readonly sliders;
 	private setBySelf = false;
 
@@ -56,12 +64,16 @@ class ColorChooserSliders extends Control<ColorChooserDefinition["Sliders"]> {
 				gui.Brightness.UIGradient.Color.Keypoints[0].Value,
 				Color3.fromHSV(h, s, 1),
 			);
+
+			if (Control.exists(gui, "Alpha")) {
+				gui.Alpha.UIGradient.Color = new ColorSequence(Color3.fromHSV(h, s, v));
+			}
 		};
 		this.onEnable(updateSliderColors);
 
 		const getColorFromSliders = () => Color3.fromHSV(hue.value.get(), sat.value.get(), bri.value.get());
 		const createSlider = <T extends SliderControlDefinition>(gui: T) => {
-			const slider = new SliderControl(gui, 0, 1, 1 / 255);
+			const slider = new SliderControl(gui, { min: 0, max: 1, step: 1 / 255 });
 			slider.submitted.Connect(() => {
 				this.setBySelf = true;
 				this._value.submit(getColorFromSliders());
@@ -73,7 +85,7 @@ class ColorChooserSliders extends Control<ColorChooserDefinition["Sliders"]> {
 				this.setBySelf = false;
 			});
 			slider.value.subscribe(updateSliderColors);
-			this.add(slider);
+			this.parent(slider);
 
 			return slider;
 		};
@@ -83,18 +95,14 @@ class ColorChooserSliders extends Control<ColorChooserDefinition["Sliders"]> {
 		const bri = createSlider(this.gui.Brightness);
 		this.sliders = { hue, sat, bri } as const;
 
-		this.event.subscribeObservable(
-			this.value.value,
-			(value) => {
-				if (this.setBySelf) return;
+		this.value.value.subscribe((value) => {
+			if (this.setBySelf) return;
 
-				const [h, s, v] = value.ToHSV();
-				this.sliders.hue.value.set(h);
-				this.sliders.sat.value.set(s);
-				this.sliders.bri.value.set(v);
-			},
-			true,
-		);
+			const [h, s, v] = value.ToHSV();
+			this.sliders.hue.value.set(h);
+			this.sliders.sat.value.set(s);
+			this.sliders.bri.value.set(v);
+		}, true);
 	}
 }
 class ColorChooserInputs extends Control<ColorChooserDefinition["Inputs"]> {
@@ -107,51 +115,62 @@ class ColorChooserInputs extends Control<ColorChooserDefinition["Inputs"]> {
 		const getColorFromRgbTextBoxes = () => Color3.fromRGB(rtext.value.get(), gtext.value.get(), btext.value.get());
 		const submitFromRgb = () => this._value.submit(getColorFromRgbTextBoxes());
 
-		const rtext = this.add(new NumberTextBoxControl(this.gui.ManualRed, 0, 255, 1));
-		const gtext = this.add(new NumberTextBoxControl(this.gui.ManualGreen, 0, 255, 1));
-		const btext = this.add(new NumberTextBoxControl(this.gui.ManualBlue, 0, 255, 1));
+		const rtext = this.parent(new NumberTextBoxControl(this.gui.ManualRed, 0, 255, 1));
+		const gtext = this.parent(new NumberTextBoxControl(this.gui.ManualGreen, 0, 255, 1));
+		const btext = this.parent(new NumberTextBoxControl(this.gui.ManualBlue, 0, 255, 1));
 
 		this.event.subscribe(rtext.submitted, submitFromRgb);
 		this.event.subscribe(gtext.submitted, submitFromRgb);
 		this.event.subscribe(btext.submitted, submitFromRgb);
 
-		const hextext = this.add(new TextBoxControl(this.gui.ManualHex));
+		const hextext = this.parent(new TextBoxControl(this.gui.ManualHex));
 		this.event.subscribe(hextext.submitted, (hex) => {
 			try {
 				this._value.submit(Color3.fromHex(hex));
 			} catch {
 				hextext.text.set("#" + getColorFromRgbTextBoxes().ToHex().upper());
-				hextext.transform((tr) => tr.flashColor(Colors.red, "BackgroundColor3"));
+				Transforms.create() //
+					.flashColor(hextext.instance, Colors.red)
+					.run(hextext.instance);
 			}
 		});
 
-		this.event.subscribeObservable(
-			this.value.value,
-			(value) => {
-				rtext.value.set(math.floor(value.R * 255));
-				gtext.value.set(math.floor(value.G * 255));
-				btext.value.set(math.floor(value.B * 255));
-				hextext.text.set("#" + value.ToHex().upper());
-			},
-			true,
-		);
+		this.value.value.subscribe((value) => {
+			rtext.value.set(math.floor(value.R * 255));
+			gtext.value.set(math.floor(value.G * 255));
+			btext.value.set(math.floor(value.B * 255));
+			hextext.text.set("#" + value.ToHex().upper());
+		}, true);
 	}
 }
 
 export class ColorChooser extends Control<ColorChooserDefinition> {
 	readonly value;
+	readonly alpha;
 
-	constructor(gui: ColorChooserDefinition, value?: SubmittableValue<Color3>) {
+	constructor(gui: ColorChooserDefinition, value?: SubmittableValue<Color3>, allowAlpha = false) {
 		super(gui);
+
+		if (Control.exists(gui.Inputs, "ManualAlpha")) {
+			gui.Inputs.ManualAlpha.Visible = allowAlpha;
+		}
+		if (Control.exists(gui.Sliders, "Alpha")) {
+			gui.Sliders.Alpha.Visible = allowAlpha;
+		}
 
 		value ??= SubmittableValue.from<Color3>(Color3.fromRGB(255, 255, 255));
 		this.value = value.asHalfReadonly();
+
+		const alpha = SubmittableValue.from(0.5);
+		this.alpha = alpha.asHalfReadonly();
 
 		if (Control.exists(gui.Sliders, "QuickAction")) {
 			this.add(
 				new ButtonControl(gui.Sliders.QuickAction.ResetButton, () => {
 					value.set(Colors.black);
 					value.submit(Colors.black);
+					alpha.set(1);
+					alpha.submit(1);
 				}),
 			);
 
@@ -174,22 +193,44 @@ export class ColorChooser extends Control<ColorChooserDefinition> {
 			value.submit(v);
 		});
 
-		const inputs = this.add(new ColorChooserInputs(gui.Inputs));
+		const inputs = this.parent(new ColorChooserInputs(gui.Inputs));
 		inputs.value.submitted.Connect((v) => {
 			value.set(v);
 			sliders.value.set(v);
 			value.submit(v);
 		});
 
-		this.event.subscribeObservable(
-			value.value,
-			(color) => {
-				this.gui.Preview.BackgroundColor3 = color;
+		value.value.subscribe((color) => {
+			this.gui.Preview.BackgroundColor3 = color;
 
-				inputs.value.set(color);
-				sliders.value.set(color);
-			},
-			true,
-		);
+			inputs.value.set(color);
+			sliders.value.set(color);
+		}, true);
+
+		if (Control.exists(this.gui.Inputs, "ManualAlpha") && Control.exists(this.gui.Sliders, "Alpha")) {
+			const alphaSlider = this.parent(
+				new SliderControl(
+					this.gui.Sliders.Alpha,
+					{ min: 0, max: 1, inputStep: 0.01 },
+					{ TextBox: this.gui.Inputs.ManualAlpha },
+				),
+			);
+			alpha.value.connect(alphaSlider.value);
+			alphaSlider.submitted.Connect((v) => alpha.submit(v));
+			alphaSlider.moved.Connect((v) => alpha.set(v));
+		}
+
+		if (Control.exists(this.gui.Preview, "UIGradient")) {
+			const gradient = this.gui.Preview.UIGradient;
+			const originalKeypoints = gradient.Transparency.Keypoints;
+
+			alpha.value.subscribe((alpha) => {
+				gradient.Transparency = new NumberSequence(
+					originalKeypoints.map(
+						(k) => new NumberSequenceKeypoint(k.Time, k.Value === 0 ? 0 : 1 - alpha, k.Envelope),
+					),
+				);
+			}, true);
+		}
 	}
 }

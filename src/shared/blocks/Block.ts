@@ -1,4 +1,5 @@
 import type { BlockLogicFullBothDefinitions, GenericBlockLogicCtor } from "shared/blockLogic/BlockLogic";
+import type { BlockSynchronizer } from "shared/blockLogic/BlockSynchronizer";
 import type { BlockCreation, BlockMirrorBehaviour } from "shared/blocks/BlockCreation";
 import type { projectileModifier } from "shared/weaponProjectiles/BaseProjectileLogic";
 
@@ -6,6 +7,7 @@ export type BlockCategoryPath = readonly string[];
 export type BlockLogicInfo = {
 	readonly definition: BlockLogicFullBothDefinitions;
 	readonly ctor: GenericBlockLogicCtor;
+	readonly events?: { readonly [k in string]?: BlockSynchronizer<{ readonly block: BlockModel }> };
 };
 export type BlockModelSource = {
 	readonly model: (self: BlockBuilder) => BlockModel;

@@ -1,16 +1,18 @@
 import { Debris, ReplicatedStorage } from "@rbxts/services";
 import { EffectBase } from "shared/effects/EffectBase";
+import type { EffectCreator } from "shared/effects/EffectBase";
 
 type Args = {
 	readonly part: BasePart;
 	readonly duration?: number;
 };
+@injectable
 export class FireEffect extends EffectBase<Args> {
-	constructor() {
-		super("fire_effect");
+	constructor(@inject creator: EffectCreator) {
+		super(creator, "effect_fire");
 	}
 
-	justRun({ part, duration }: Args): void {
+	override justRun({ part, duration }: Args): void {
 		if (!part) return;
 
 		const effects = ReplicatedStorage.Assets.Effects.Fire.GetChildren();

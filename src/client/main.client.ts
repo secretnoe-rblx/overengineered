@@ -1,79 +1,81 @@
-import { ContentProvider, Players, ReplicatedStorage, RunService } from "@rbxts/services";
+import { ContentProvider, Players, ReplicatedStorage, RunService, Workspace } from "@rbxts/services";
 import { AdminMessageController } from "client/AdminMessageController";
 import { LoadingController } from "client/controller/LoadingController";
+import { Anim } from "client/gui/Anim";
 import { BSOD } from "client/gui/BSOD";
-import { Gui } from "client/gui/Gui";
+import { Interface } from "client/gui/Interface";
 import { LogControl } from "client/gui/static/LogControl";
 import { SandboxGame } from "client/SandboxGame";
 import { ServerRestartController } from "client/ServerRestartController";
 import { InputController } from "engine/client/InputController";
+import { LocalPlayer } from "engine/client/LocalPlayer";
+import { Transforms } from "engine/shared/component/Transforms";
+import { Instances } from "engine/shared/fixes/Instances";
 import { Objects } from "engine/shared/fixes/Objects";
 import { GameHostBuilder } from "engine/shared/GameHostBuilder";
 import { TestFramework } from "engine/shared/TestFramework";
 import { Colors } from "shared/Colors";
 import { gameInfo } from "shared/GameInfo";
 import { RemoteEvents } from "shared/RemoteEvents";
-import { CustomRemotes } from "shared/Remotes";
 import { SlotsMeta } from "shared/SlotsMeta";
 import type { PlayerDataStorage } from "client/PlayerDataStorage";
+import type { TransformProps } from "engine/shared/component/Transform";
 
-LoadingController.show("Initializing");
-Gui.getGameUI<{ VERSION: TextLabel }>().VERSION.Text = `v${RunService.IsStudio() ? "studio" : game.PlaceVersion}`;
-
-const builder = new GameHostBuilder(gameInfo);
-try {
-	SandboxGame.initialize(builder);
-} catch (err) {
-	BSOD.showWithDefaultText(err, "The game has failed to load.");
-	throw err;
-}
-
-const host = builder.build();
-
-host.run();
-
-LoadingController.show("Loading sounds");
-
-const allSoundIDs = ReplicatedStorage.Assets.GetDescendants().filter((value) => value.IsA("Sound"));
-
-Objects.awaitThrow(
-	new Promise<undefined>((resolve) => {
-		let i = 0;
-		ContentProvider.PreloadAsync(allSoundIDs, (contentId, status) => {
-			i++;
-
-			if (i === allSoundIDs.size() - 1) {
-				resolve(undefined);
-			}
-		});
-	}),
+LocalPlayer.character.waitOnceFor(
+	(character) => character !== undefined,
+	(character) =>
+		character.PivotTo(
+			Instances.waitForChild<SpawnLocation>(Workspace, "Map", "SpawnLocation").CFrame.add(new Vector3(0, 1, 0)),
+		),
 );
 
-LoadingController.show("Loading the rest");
+const host = LoadingController.run("Initializing", () => {
+	Interface.getGameUI<{ VERSION: TextLabel }>().VERSION.Text =
+		`v${RunService.IsStudio() ? "studio" : game.PlaceVersion}`;
 
-LogControl.instance.show();
-
-InputController.inputType.subscribe((newInputType) =>
-	LogControl.instance.addLine("New input type set to " + newInputType, Colors.yellow),
-);
-RemoteEvents.initialize();
-AdminMessageController.initialize();
-ServerRestartController.initialize();
-// Atmosphere.initialize();
-
-LoadingController.hide();
-CustomRemotes.player.loaded.send();
-$log("Client loaded.");
-
-{
-	const playerData = host.services.resolve<PlayerDataStorage>();
-	if (
-		playerData.config.get().autoLoad &&
-		SlotsMeta.get(playerData.slots.get(), SlotsMeta.quitSlotIndex).blocks !== 0
-	) {
-		Objects.awaitThrow(playerData.loadPlayerSlot(SlotsMeta.quitSlotIndex, false, "Loading the autosave"));
+	const builder = new GameHostBuilder(gameInfo);
+	try {
+		SandboxGame.initialize(builder);
+	} catch (err) {
+		BSOD.showWithDefaultText(err, "The game has failed to load.");
+		throw err;
 	}
-}
+
+	const host = LoadingController.run("Initializing services", () => builder.build());
+	LoadingController.run("Starting services", () => host.run());
+
+	task.spawn(() => {
+		const allSoundIDs = ReplicatedStorage.Assets.GetDescendants().filter((value) => value.IsA("Sound"));
+		ContentProvider.PreloadAsync(allSoundIDs);
+	});
+
+	LoadingController.run("Loading the rest", () => {
+		LogControl.instance.enable();
+
+		InputController.inputType.subscribe((newInputType) =>
+			LogControl.instance.addLine("New input type set to " + newInputType, Colors.yellow),
+		);
+		RemoteEvents.initialize();
+		AdminMessageController.initialize();
+		ServerRestartController.initialize();
+		// Atmosphere.initialize();
+
+		$log("Client loaded.");
+	});
+
+	{
+		const playerData = host.services.resolve<PlayerDataStorage>();
+		if (
+			playerData.config.get().autoLoad &&
+			playerData.slots.get()[SlotsMeta.quitSlotIndex] &&
+			playerData.slots.get()[SlotsMeta.quitSlotIndex].blocks !== 0
+		) {
+			playerData.loadPlayerSlot(SlotsMeta.quitSlotIndex, "Loading the autosave");
+		}
+	}
+
+	return host;
+});
 
 //host.services.resolveForeignClass(CenterOfMassController).enable();
 
@@ -137,3 +139,59 @@ if (RunService.IsStudio() && Players.LocalPlayer.Name === "i3ymm") {
 
 	TestFramework.runMultiple("BlockLogic", tests!, host.services);
 }
+
+//
+
+task.spawn(() => {
+	if (true as boolean) return;
+
+	const d = 0.2;
+	const gui = Interface.getPlayerGui<{ test_delete_later: ScreenGui & { Build: GuiObject } }>().test_delete_later
+		.Build;
+	const props: TransformProps = { duration: 0.2 };
+
+	const e = (child: GuiObject) => {
+		while (true as boolean) {
+			Transforms.parallel(
+				Transforms.func(() => {
+					const [asc, childcopy] = Anim.createScreenForAnimating(child);
+					return (
+						Transforms.create()
+							// .moveRelative(childcopy, new UDim2(0, 0, 0, -50), props)
+							.show(childcopy)
+							.fadeOutFrom1(childcopy, props)
+							.then()
+							.destroy(asc)
+					);
+				}),
+				Anim.UIListLayout.animRemove(gui, child, props, "hide"),
+			).run(child);
+
+			task.wait(d);
+
+			Transforms.parallel(
+				Transforms.func(() => {
+					const [asc, childcopy] = Anim.createScreenForAnimating(child);
+					return (
+						Transforms.create()
+							// .moveRelative(childcopy, new UDim2(0, 0, 0, -50))
+							.show(childcopy)
+							// .moveRelative(childcopy, new UDim2(0, 0, 0, 50), props)
+							.fadeInFrom0(childcopy, props)
+							.then()
+							.destroy(asc)
+					);
+				}),
+				Anim.UIListLayout.animAdd(gui, child, props) //
+					.then()
+					.show(child),
+			).run(child);
+
+			task.wait(d);
+		}
+	};
+
+	task.spawn(() => e(gui.WaitForChild("Undo") as GuiObject));
+	//task.spawn(() => e(gui.WaitForChild("Redo") as GuiObject));
+	//task.spawn(() => e(gui.WaitForChild("CenterOfMass") as GuiObject));
+});

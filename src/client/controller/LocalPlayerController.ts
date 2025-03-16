@@ -7,6 +7,7 @@ import { GameDefinitions } from "shared/data/GameDefinitions";
 import { Physics } from "shared/Physics";
 import { PartUtils } from "shared/utils/PartUtils";
 import type { PlayerDataStorage } from "client/PlayerDataStorage";
+import type { ReadonlyObservableValue } from "engine/shared/event/ObservableValue";
 import type { GameHostBuilder } from "engine/shared/GameHostBuilder";
 import type { LocalHeight } from "shared/Physics";
 

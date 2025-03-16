@@ -9,8 +9,6 @@ export type TabControlDefinition = Frame & {
 	readonly Content: Frame;
 };
 export class TabControl extends Control<TabControlDefinition> {
-	private readonly tabs = new Map<string, Control>();
-
 	static createInstance() {
 		return Element.create(
 			"Frame",
@@ -42,6 +40,7 @@ export class TabControl extends Control<TabControlDefinition> {
 		return new TabControl(this.createInstance());
 	}
 
+	private readonly tabs = new Map<string, Control>();
 	private readonly buttonTemplate;
 
 	constructor(gui: TabControlDefinition) {

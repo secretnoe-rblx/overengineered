@@ -1,5 +1,6 @@
 import { ButtonControl } from "engine/client/gui/Button";
 import { Control } from "engine/client/gui/Control";
+import { Transforms } from "engine/shared/component/Transforms";
 import { TransformService } from "engine/shared/component/TransformService";
 import { ObservableValue } from "engine/shared/event/ObservableValue";
 
@@ -20,16 +21,16 @@ export class Dropdown<T extends DropdownDefinition = DropdownDefinition> extends
 		this.isOpen = new ObservableValue(defaultVisibility);
 
 		const initVisibilityAnimation = (button: ButtonControl, gui: DropdownDefinition) => {
-			const materialVisibleTransform = TransformService.multi(
-				TransformService.boolStateMachine(
+			const materialVisibleTransform = Transforms.multiStateMachine(
+				Transforms.boolStateMachine(
 					gui,
-					TransformService.commonProps.quadOut02,
+					Transforms.commonProps.quadOut02,
 					{ Size: gui.Size },
 					{ Size: new UDim2(gui.Size.X, new UDim(0, 40)) },
 				),
-				TransformService.boolStateMachine(
+				Transforms.boolStateMachine(
 					gui.Header.FindFirstChild("Arrow") ? gui.Header.Arrow! : new Instance("ImageLabel"),
-					TransformService.commonProps.quadOut02,
+					Transforms.commonProps.quadOut02,
 					{ Rotation: 180 },
 					{ Rotation: 0 },
 				),

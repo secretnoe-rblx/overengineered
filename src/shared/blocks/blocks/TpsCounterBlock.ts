@@ -41,7 +41,7 @@ export const TpsCounterBlock = {
 	...BlockCreation.defaults,
 	id: "tpscounter",
 	displayName: "TPS Counter",
-	description: "Returns the Ticks per Second number",
+	description: "Returns your current Ticks per Second",
 
 	logic: { definition, ctor: Logic },
 	modelSource: {

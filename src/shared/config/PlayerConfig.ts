@@ -46,7 +46,7 @@ declare global {
 	type RagdollConfiguration = {
 		readonly autoFall: boolean;
 		readonly triggerByKey: boolean;
-		readonly triggerKey: KeyCode;
+		readonly triggerKey: KeyCode | undefined;
 		readonly autoRecovery: boolean;
 	};
 	type PhysicsConfiguration = {
@@ -108,20 +108,17 @@ declare global {
 
 export const PlayerConfigDefinition = {
 	autoLoad: {
-		displayName: "Automatically load last slot",
 		type: "bool",
 		config: true as boolean,
 	},
 	sprintSpeed: {
-		displayName: "Sprint speed",
 		type: "clampedNumber",
 		min: 20,
 		max: 200,
-		config: 60,
+		config: 60 as number,
 		step: 0.01,
 	},
 	betterCamera: {
-		displayName: "Camera",
 		type: "camera",
 		config: {
 			improved: true as boolean,
@@ -131,7 +128,6 @@ export const PlayerConfigDefinition = {
 		},
 	},
 	graphics: {
-		displayName: "Graphics",
 		type: "graphics",
 		config: {
 			localShadows: true as boolean,
@@ -140,12 +136,10 @@ export const PlayerConfigDefinition = {
 		},
 	},
 	music: {
-		displayName: "Music",
 		type: "bool",
 		config: true as boolean,
 	},
 	beacons: {
-		displayName: "Beacons",
 		type: "beacons",
 		config: {
 			plot: true as boolean,
@@ -153,12 +147,10 @@ export const PlayerConfigDefinition = {
 		},
 	},
 	impact_destruction: {
-		displayName: "Impact destruction",
 		type: "bool",
 		config: true as boolean,
 	},
 	dayCycle: {
-		displayName: "Day cycle",
 		type: "dayCycle",
 		config: {
 			automatic: false as boolean,
@@ -167,7 +159,6 @@ export const PlayerConfigDefinition = {
 		},
 	},
 	uiScale: {
-		displayName: "UI scale",
 		type: "clampedNumber",
 		config: 1 as number,
 		min: 0.5,
@@ -175,7 +166,6 @@ export const PlayerConfigDefinition = {
 		step: 0.01,
 	},
 	terrain: {
-		displayName: "Terrain",
 		type: "terrain",
 		config: {
 			kind: "Classic" as TerrainConfiguration["kind"],
@@ -188,24 +178,21 @@ export const PlayerConfigDefinition = {
 		},
 	},
 	tutorial: {
-		displayName: "Tutorial",
 		type: "tutorial",
 		config: {
 			basics: false as boolean,
 		},
 	},
 	ragdoll: {
-		displayName: "Ragdoll",
 		type: "ragdoll",
 		config: {
-			autoFall: true,
-			triggerByKey: false,
-			triggerKey: "X",
-			autoRecovery: true,
+			autoFall: true as boolean,
+			triggerByKey: false as boolean,
+			triggerKey: "X" as KeyCode | undefined,
+			autoRecovery: true as boolean,
 		},
 	},
 	visuals: {
-		displayName: "Visuals",
 		type: "visuals",
 		config: {
 			selection: {
@@ -225,11 +212,10 @@ export const PlayerConfigDefinition = {
 		},
 	},
 	physics: {
-		displayName: "Physics",
 		type: "physics",
 		config: {
-			advanced_aerodynamics: false,
-			simplified_aerodynamics: true,
+			advanced_aerodynamics: false as boolean,
+			simplified_aerodynamics: true as boolean,
 		},
 	},
 } as const satisfies ConfigTypesToDefinition<keyof PlayerConfigTypes.Types, PlayerConfigTypes.Types>;

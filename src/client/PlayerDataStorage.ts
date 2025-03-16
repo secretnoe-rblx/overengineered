@@ -1,92 +1,88 @@
-import { HttpService, Players, Workspace } from "@rbxts/services";
+import { HttpService } from "@rbxts/services";
 import { LoadingController } from "client/controller/LoadingController";
 import { LogControl } from "client/gui/static/LogControl";
 import { ObservableValue } from "engine/shared/event/ObservableValue";
+import { ArgsSignal } from "engine/shared/event/Signal";
 import { JSON } from "engine/shared/fixes/Json";
 import { Objects } from "engine/shared/fixes/Objects";
+import { Strings } from "engine/shared/fixes/String.propmacro";
 import { Colors } from "shared/Colors";
 import { Config } from "shared/config/Config";
 import { PlayerConfigDefinition } from "shared/config/PlayerConfig";
-import { GameDefinitions } from "shared/data/GameDefinitions";
 import { CustomRemotes } from "shared/Remotes";
+import { PlayerDataRemotes } from "shared/remotes/PlayerDataRemotes";
 import { SlotsMeta } from "shared/SlotsMeta";
-import type { GameHostBuilder } from "engine/shared/GameHostBuilder";
+import type { PlayerDataStorageRemotesPlayer, PlayerDataStorageRemotesSlots } from "shared/remotes/PlayerDataRemotes";
 
 type NonNullableFields<T> = {
 	[P in keyof T]-?: NonNullable<T[P]>;
 };
+
 type PD = NonNullableFields<PlayerDataResponse> & {
 	readonly settings: NonNullableFields<PlayerDataResponse["settings"]>;
 };
 
-export namespace PlayerDataInitializer {
-	export function initialize(host: GameHostBuilder): void {
-		host.services.registerSingletonFunc(() => new PlayerDataStorage(Objects.awaitThrow(fetchPlayerData())));
-	}
-
-	function waitForLoadableData(): void {
-		while (!Workspace.HasTag("data_loadable")) {
-			task.wait();
-		}
-	}
-	async function fetchPlayerData(): Promise<PD> {
-		waitForLoadableData();
-
-		const d = CustomRemotes.player.fetchData.send();
-		if (!d.success) throw d.message;
-
-		const data: PD = {
-			purchasedSlots: d.purchasedSlots ?? 0,
-			settings: Config.addDefaults(d.settings ?? {}, PlayerConfigDefinition),
-			slots: SlotsMeta.getAll(
-				d.slots ?? [],
-				GameDefinitions.getMaxSlots(Players.LocalPlayer, d.purchasedSlots ?? 0),
-			),
-			imported_slots: d.imported_slots ?? [],
-			data: d.data ?? {},
-		};
-
-		$log(
-			`Configuration loaded (v${data.settings["version" as never] ?? "?"}): ${HttpService.JSONEncode(data.settings)}`,
-		);
-		return data;
-	}
-}
-
+@injectable
 export class PlayerDataStorage {
+	static forPlayer(playerId: number) {
+		const result = CustomRemotes.adminDataFor.send(playerId);
+		if (!result.success) {
+			throw `Error while initializing the game: ${result.message}`;
+		}
+
+		const playerRemotes = PlayerDataRemotes.createPlayer(result.remotes);
+		const slotRemotes = PlayerDataRemotes.createSlots(result.remotes);
+		return new PlayerDataStorage(PlayerDataStorage.convertData(result.data), playerRemotes, slotRemotes);
+	}
+
+	static convertData(data: PlayerDataResponse): PD {
+		return {
+			purchasedSlots: data.purchasedSlots ?? 0,
+			settings: Config.addDefaults(data.settings ?? {}, PlayerConfigDefinition),
+			slots: data.slots ?? Objects.empty,
+			data: data.data ?? {},
+		};
+	}
+
+	private readonly _slotLoading = new ArgsSignal();
+	readonly slotLoading = this._slotLoading.asReadonly();
+
 	private readonly _data;
 	readonly data;
 
 	readonly config;
 	readonly slots;
-	readonly imported_slots;
 
 	readonly loadedSlot = new ObservableValue<number | undefined>(undefined);
 
-	constructor(data: PD) {
+	constructor(
+		data: PD,
+		@inject private readonly playerRemotes: PlayerDataStorageRemotesPlayer,
+		@inject private readonly slotRemotes: PlayerDataStorageRemotesSlots,
+	) {
 		this._data = new ObservableValue(data);
 		this.data = this._data.asReadonly();
 
-		this.config = this.data.createBased((x) => x.settings);
-		this.slots = this.data.createBased((x) => x.slots);
-		this.imported_slots = this.data.createBased((x) => x.imported_slots);
+		this.config = new ObservableValue(data.settings);
+		this.data.subscribe((d) => this.config.set(d.settings));
+
+		const slots = new ObservableValue<{ readonly [k in number]: SlotMeta }>(Objects.empty);
+		this.data.subscribe((data) => slots.set(SlotsMeta.toTable(data.slots)), true);
+		this.slots = slots;
 	}
 
-	async sendPlayerConfigValue<TKey extends keyof PlayerConfig>(key: TKey, value: PlayerConfig[TKey] & defined) {
-		$log(`Setting player config value ${key} to ${JSON.serialize(value)}`);
-		CustomRemotes.player.updateSettings.send({ key, value });
+	async sendPlayerConfig(config: PartialThrough<PlayerConfig>) {
+		$log(`Updating player config: ${Strings.pretty(config)}`);
+		this.playerRemotes.updateSettings.send(config);
 
 		this._data.set({
 			...this.data.get(),
-			settings: {
-				...this.data.get().settings,
-				[key]: value,
-			},
+			settings: Objects.deepCombine(this.data.get().settings, config),
 		});
 	}
 	async sendPlayerDataValue<TKey extends keyof PlayerData>(key: TKey, value: PlayerData[TKey] & defined) {
 		$log(`Setting player data value ${key} to ${JSON.serialize(value)}`);
-		CustomRemotes.player.updateData.send({ key, value });
+		this.playerRemotes.updateData.send({ key, value });
 
 		this._data.set({
 			...this.data.get(),
@@ -97,8 +93,9 @@ export class PlayerDataStorage {
 		});
 	}
 
-	async sendPlayerSlot(req: PlayerSaveSlotRequest) {
+	sendPlayerSlot(req: PlayerSaveSlotRequest) {
 		$log("Setting slot " + req.index + " to " + HttpService.JSONEncode(req));
+		this.loadedSlot.set(req.index);
 
 		let d = this.data.get();
 		if (d) {
@@ -108,10 +105,10 @@ export class PlayerDataStorage {
 			});
 		}
 
-		const response = CustomRemotes.slots.save.send(req);
+		const response = this.slotRemotes.save.send(req);
 		if (!response.success) {
 			$err(response.message);
-			return;
+			return response;
 		}
 
 		d = this.data.get();
@@ -120,18 +117,34 @@ export class PlayerDataStorage {
 				...this.data.get()!,
 				slots: SlotsMeta.withSlot(d.slots, req.index, {
 					blocks: response.blocks ?? SlotsMeta.get(d.slots, req.index).blocks,
-					size: response.size ?? SlotsMeta.get(d.slots, req.index).size,
 				}),
 			});
 		}
+
+		return response;
+	}
+	deletePlayerSlot(req: PlayerDeleteSlotRequest) {
+		$log("Deleting slot " + req.index);
+
+		const copy = { ...this.slots.get() };
+		delete copy[req.index];
+		this.slots.set(copy);
+
+		const response = this.slotRemotes.delete.send(req);
+		if (!response.success) {
+			$err(response.message);
+			return response;
+		}
+
+		return response;
 	}
 
-	async loadPlayerSlot(index: number, isImported: boolean, message?: string) {
-		$log("Loading slot " + index);
-		LoadingController.show(message ?? "Loading a slot");
+	loadPlayerSlot(index: number, message?: string) {
+		$log(`Loading slot ${index}`);
+		this._slotLoading.Fire();
 
-		try {
-			const response = CustomRemotes.slots[isImported ? "loadImported" : "load"].send({ index });
+		return LoadingController.run(message ?? `Loading slot ${index}`, () => {
+			const response = this.slotRemotes.load.send({ index });
 			if (response.success && !response.isEmpty) {
 				this.loadedSlot.set(index);
 			} else if (!response.success) {
@@ -140,8 +153,6 @@ export class PlayerDataStorage {
 			}
 
 			return response;
-		} finally {
-			LoadingController.hide();
-		}
+		});
 	}
 }

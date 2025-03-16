@@ -1,8 +1,7 @@
 import { Players, RunService, UserInputService } from "@rbxts/services";
-import { AutoC2SRemoteEvent } from "engine/shared/event/C2SRemoteEvent";
 import { EventHandler } from "engine/shared/event/EventHandler";
-import { C2CRemoteEvent } from "engine/shared/event/PERemoteEvent";
-import { isKey, Keys } from "engine/shared/fixes/Keys";
+import { A2SRemoteEvent, C2CRemoteEvent } from "engine/shared/event/PERemoteEvent";
+import { Keys } from "engine/shared/fixes/Keys";
 import { InstanceBlockLogic } from "shared/blockLogic/BlockLogic";
 import { BlockCreation } from "shared/blocks/BlockCreation";
 import { BuildingManager } from "shared/building/BuildingManager";
@@ -103,7 +102,7 @@ const init = ({
 	blocks.set(block, eh);
 
 	const pp = block.ProximityPrompt;
-	pp.KeyboardKeyCode = Keys[key];
+	pp.KeyboardKeyCode = Keys.Keys[key];
 	pp.Triggered.Connect(() => {
 		// fix teleporting to 000; todo make a better fix later
 		for (const b of BuildingManager.getMachineBlocks(block)) {
@@ -143,17 +142,17 @@ const detach = (block: BackMountModel, owner: Player) => {
 
 class Logic extends InstanceBlockLogic<typeof definition, BackMountModel> {
 	static readonly events = {
-		initServer: new AutoC2SRemoteEvent<{
+		initServer: new A2SRemoteEvent<{
 			block: BackMountModel;
 			key: KeyCode;
 			connectToRootPart: boolean;
 			owner: Player;
 		}>("backmount_initServer", "RemoteEvent"),
-		weldMountToPlayer: new AutoC2SRemoteEvent<{
+		weldMountToPlayer: new A2SRemoteEvent<{
 			readonly block: BackMountModel;
 			readonly connectToRootPart: boolean;
 		}>("backmount_weld", "RemoteEvent"),
-		unweldMountFromPlayer: new AutoC2SRemoteEvent<{
+		unweldMountFromPlayer: new A2SRemoteEvent<{
 			readonly owner: Player;
 			readonly block: BackMountModel;
 		}>("backmount_unweld", "RemoteEvent"),
@@ -185,9 +184,9 @@ class Logic extends InstanceBlockLogic<typeof definition, BackMountModel> {
 		);
 
 		this.onk(["detachKey", "connectToRootPart", "shared"], ({ detachKey, connectToRootPart, shared }) => {
-			if (!isKey(detachKey)) {
+			if (!Keys.isKey(detachKey)) {
 				detachKey = this.definition.input.detachKey.types.key.config;
-				if (!isKey(detachKey)) return;
+				if (!Keys.isKey(detachKey)) return;
 			}
 
 			if (shared) {

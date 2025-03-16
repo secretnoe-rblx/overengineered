@@ -1,14 +1,16 @@
 import { BlockPreviewControl } from "client/gui/buildmode/BlockPreviewControl";
-import { DictionaryControl } from "client/gui/controls/DictionaryControl";
 import { Dropdown } from "client/gui/controls/Dropdown";
 import { TextButtonControl } from "engine/client/gui/Button";
 import { Control } from "engine/client/gui/Control";
-import { TransformService } from "engine/shared/component/TransformService";
+import { ComponentChildren } from "engine/shared/component/ComponentChildren";
+import { ComponentKeyedChildren } from "engine/shared/component/ComponentKeyedChildren";
+import { Transforms } from "engine/shared/component/Transforms";
 import { Element } from "engine/shared/Element";
 import { ArgsSignal } from "engine/shared/event/Signal";
 import { Colors } from "shared/Colors";
 import type { DropdownDefinition } from "client/gui/controls/Dropdown";
 import type { TextButtonDefinition } from "engine/client/gui/Button";
+import type { Component } from "engine/shared/component/Component";
 
 export type WikiCategoriesControlDefinition = GuiObject & {
 	readonly ScrollingFrame: ScrollingFrame & {
@@ -27,35 +29,36 @@ export class WikiCategoriesControl extends Control<WikiCategoriesControlDefiniti
 		super(gui);
 
 		this.itemTemplate = this.asTemplate(gui.ScrollingFrame.Template, true);
-		this.list = this.add(new DictionaryControl<ScrollingFrame, string>(gui.ScrollingFrame));
+		this.list = this.parent(
+			new ComponentKeyedChildren<string, TextButtonControl>().withParentInstance(gui.ScrollingFrame),
+		);
 	}
 
 	addItems(items: readonly { readonly id: string; readonly title: string; readonly parent?: string }[]) {
 		for (const { id, title } of items) {
-			const control = this.list.keyedChildren.add(
-				id,
-				new TextButtonControl(this.itemTemplate(), () => this._clicked.Fire(id)),
-			);
+			const control = this.list.add(id, new TextButtonControl(this.itemTemplate(), () => this._clicked.Fire(id)));
 			control.text.set(title);
 		}
 	}
 
 	select(id: string) {
-		const child = this.list.keyedChildren.get(id);
+		const child = this.list.get(id);
 		if (!child) return;
 
 		const pos = child.instance.AbsolutePosition.sub(
-			this.list.instance.AbsolutePosition.sub(this.list.instance.CanvasPosition),
+			this.gui.ScrollingFrame.AbsolutePosition.sub(this.gui.ScrollingFrame.CanvasPosition),
 		);
-		this.list.instance.CanvasPosition = pos;
+		this.gui.ScrollingFrame.CanvasPosition = pos;
 
-		child.transform((tr) =>
-			tr.flash(
-				tr.instance.BackgroundColor3.Lerp(Colors.white, 0.2),
+		Transforms.create()
+			.flash(
+				child.instance,
+				child.instance.BackgroundColor3.Lerp(Colors.white, 0.2),
 				"BackgroundColor3",
-				TransformService.commonProps.quadOut02,
-			),
-		);
+				Transforms.commonProps.quadOut02,
+			)
+			.run(child.instance);
+
 		this._clicked.Fire(id);
 	}
 }
@@ -97,7 +100,7 @@ export class WikiContentControl extends Control<WikiContentControlDefinition> {
 	) {
 		super(gui);
 
-		this.contents = this.add(new Control(gui.ScrollingFrame));
+		this.contents = this.parent(new ComponentChildren().withParentInstance(gui.ScrollingFrame));
 		this.contentsItemTemplate = this.asTemplate(gui.ScrollingFrame.ContentsTemplate.Content.Template, true);
 		this.contentsTemplate = this.asTemplate(gui.ScrollingFrame.ContentsTemplate, true);
 		this.stringTemplate = this.asTemplate(gui.ScrollingFrame.StringTemplate, true);
@@ -120,8 +123,8 @@ export class WikiContentControl extends Control<WikiContentControlDefinition> {
 		// this.contents.instance.CanvasPosition
 		return dropdown;
 	}
-	private contentFromEntries(entries: readonly WikiEntryContent[]): readonly Control[] {
-		const controls: Control[] = [];
+	private contentFromEntries(entries: readonly WikiEntryContent[]): readonly Component[] {
+		const controls: Component[] = [];
 		const context: ContentContext = { h1s: [] };
 
 		for (const part of entries) {
@@ -134,7 +137,7 @@ export class WikiContentControl extends Control<WikiContentControlDefinition> {
 
 		return controls;
 	}
-	private contentFromEntry(entry: WikiEntryContent, context: ContentContext): Control {
+	private contentFromEntry(entry: WikiEntryContent, context: ContentContext): Component {
 		if (typeIs(entry, "string")) {
 			const gui = this.stringTemplate();
 			gui.Text = entry

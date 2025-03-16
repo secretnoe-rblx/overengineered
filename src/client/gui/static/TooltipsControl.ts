@@ -1,24 +1,21 @@
 import { UserInputService } from "@rbxts/services";
-import { Gui } from "client/gui/Gui";
-import { ClientInstanceComponent } from "engine/client/component/ClientInstanceComponent";
+import { Interface } from "client/gui/Interface";
 import { Control } from "engine/client/gui/Control";
 import { InputController } from "engine/client/InputController";
-import { TransformService } from "engine/shared/component/TransformService";
+import { InstanceComponent } from "engine/shared/component/InstanceComponent";
 import { Element } from "engine/shared/Element";
-import type { KeybindDefinition, Keybinds } from "client/Keybinds";
-import type { InstanceComponent } from "engine/shared/component/InstanceComponent";
+import { Keys } from "engine/shared/fixes/Keys";
+import type { KeybindRegistration, KeyCombination } from "engine/client/Keybinds";
 
-const tooltipsGui = Gui.getGameUI<{ Help: { Controls: TooltipsControlDefinition } }>().Help.Controls;
+const tooltipsGui = Interface.getInterface<{ Help: { Controls: TooltipsControlDefinition } }>().Help.Controls;
 tooltipsGui.Visible = true;
 
 const keyboardTooltipTemplate = Control.asTemplateWithMemoryLeak(tooltipsGui.KeyboardTemplate);
 const gamepadTooltipTemplate = Control.asTemplateWithMemoryLeak(tooltipsGui.GamepadTemplate);
 
-export type Tooltip = { readonly keys: readonly KeyCode[]; readonly text: string };
-export type Tooltips = readonly Tooltip[];
-export interface InputTooltips {
-	readonly Desktop?: Tooltips;
-	readonly Gamepad?: Tooltips;
+export interface Tooltip {
+	readonly keys: readonly KeyCombination[];
+	readonly text: string;
 }
 
 type TooltipsControlDefinition = GuiObject & {
@@ -36,10 +33,7 @@ type TooltipsControlDefinition = GuiObject & {
 	};
 };
 
-export class TooltipsHolder extends ClientInstanceComponent<
-	GuiObject,
-	InstanceComponent<typeof tooltipsGui.KeyboardTemplate>
-> {
+export class TooltipsHolder extends InstanceComponent<GuiObject> {
 	static createComponent(category: string): TooltipsHolder {
 		const gui = Element.create(
 			"Frame",
@@ -63,132 +57,90 @@ export class TooltipsHolder extends ClientInstanceComponent<
 	}
 
 	private readonly instances: GuiObject[] = [];
-	private tooltips: InputTooltips = {};
+	private tooltips: readonly Tooltip[] = [];
 	constructor(instance: GuiObject) {
 		super(instance);
-		this.onPrepare(() => this.set(this.tooltips));
-		this.onDisable(() => this.justSet({}));
+		this.event.onPrepare(() => this.set(this.tooltips));
+		this.onDisable(() => this.clear());
 	}
 
 	private createTooltip(tooltip: Tooltip) {
 		const button = keyboardTooltipTemplate();
 		button.TextLabel.Text = tooltip.text;
 
-		for (let i = 0; i < tooltip.keys.size(); i++) {
-			let key;
+		button.Keys.ImageLabel.Visible = false;
 
-			if (i === 0) key = button.Keys.ImageLabel;
-			else {
-				key = button.Keys.ImageLabel.Clone();
-				key.Parent = button.Keys;
-			}
+		for (const combination of tooltip.keys) {
+			for (const k of combination) {
+				if (Keys.isKeyGamepad(k)) {
+					if (InputController.inputType.get() !== "Gamepad") continue;
 
-			const sub = (key: KeyCode): string => {
-				if (key === "Zero") return "0";
-				if (key === "One") return "1";
-				if (key === "Two") return "2";
-				if (key === "Three") return "3";
-				if (key === "Four") return "4";
-				if (key === "Five") return "5";
-				if (key === "Six") return "6";
-				if (key === "Seven") return "7";
-				if (key === "Eight") return "8";
-				if (key === "Nine") return "9";
+					const key = button.Keys.ImageLabel.Clone();
+					key.Visible = true;
+					key.Parent = button.Keys;
+					key.KeyLabel.Text = "";
+					key.Image = UserInputService.GetImageForKeyCode(k);
+				} else {
+					if (InputController.inputType.get() !== "Desktop") continue;
 
-				if (key === "KeypadZero") return "Num0";
-				if (key === "KeypadOne") return "Num1";
-				if (key === "KeypadTwo") return "Num2";
-				if (key === "KeypadThree") return "Num3";
-				if (key === "KeypadFour") return "Num4";
-				if (key === "KeypadFive") return "Num5";
-				if (key === "KeypadSix") return "Num6";
-				if (key === "KeypadSeven") return "Num7";
-				if (key === "KeypadEight") return "Num8";
-				if (key === "KeypadNine") return "Num9";
-
-				if (key === "LeftControl") return "Ctrl";
-				if (key === "LeftShift") return "Shift";
-				if (key === "LeftAlt") return "Alt";
-				if (key === "RightControl") return "RCtrl";
-				if (key === "RightShift") return "RShift";
-				if (key === "RightAlt") return "RAlt";
-
-				return key;
-			};
-
-			if (tooltip.keys[i].sub(0, "Button".size()) === "Button") {
-				// gamepad button
-				key.KeyLabel.Text = "";
-				key.Image = UserInputService.GetImageForKeyCode(tooltip.keys[i]);
-			} else if (tooltip.keys[i].sub(0, "DPad".size()) === "DPad") {
-				// gamepad dpad
-				key.KeyLabel.Text = "";
-				key.Image = UserInputService.GetImageForKeyCode(tooltip.keys[i]);
-			} else {
-				key.KeyLabel.Text = sub(tooltip.keys[i]);
+					const key = button.Keys.ImageLabel.Clone();
+					key.Visible = true;
+					key.Parent = button.Keys;
+					key.KeyLabel.Text = Keys.toReadable(k);
+				}
 			}
 		}
 
-		if (this.isEnabled()) {
-			TransformService.run(button, (tr) =>
-				tr
-					.transform("Size", new UDim2(1, 0, 0, 0))
-					.then()
-					.transform("Size", new UDim2(1, 0, 0, 50), TransformService.commonProps.quadOut02),
-			);
-		} else {
+		if (!this.isEnabled()) {
 			button.Visible = false;
 		}
 
 		return button;
 	}
 
-	private destroyTooltip(tooltip: GuiObject) {
-		TransformService.run(tooltip, (tr) => {
-			tr.transform("Size", new UDim2(1, 0, 0, 0), TransformService.commonProps.quadOut02)
-				.then()
-				.func(() => tooltip.Destroy());
-		});
-	}
-
-	setFromKeybinds(keybinds: Keybinds, ...definitions: KeybindDefinition[]) {
-		this.set({
-			Desktop: definitions.map((d): Tooltip => {
-				const kb = keybinds.fromDefinition(d);
-				return {
+	setFromKeybinds(...keybinds: readonly KeybindRegistration[]) {
+		this.set(
+			keybinds.map(
+				(kb): Tooltip => ({
 					text: kb.displayPath[kb.displayPath.size() - 1],
-					keys: [...kb.getKeys()],
-				};
-			}),
-		});
+					keys: kb.getKeys(),
+				}),
+			),
+		);
 	}
 
-	set(tooltips: InputTooltips) {
+	set(tooltips: readonly Tooltip[]) {
 		this.tooltips = tooltips;
 		this.justSet(tooltips);
 	}
-	private justSet(tooltips: InputTooltips) {
+
+	private clear(): void {
 		for (const tooltip of this.instances) {
-			this.destroyTooltip(tooltip);
+			tooltip.Destroy();
 		}
 		this.instances.clear();
+	}
+	private justSet(tooltips: readonly Tooltip[]) {
+		this.clear();
 
-		const set = (tooltips: Tooltips) => {
+		const set = (tooltips: readonly Tooltip[]) => {
 			for (const tooltip of tooltips) {
+				if (tooltip.keys.size() === 0) continue;
+
 				const instance = this.createTooltip(tooltip);
 				instance.Parent = this.instance;
 				this.instances.push(instance);
 			}
 		};
 
-		if (InputController.inputType.get() === "Desktop" && tooltips.Desktop) {
-			set(tooltips.Desktop);
-		} else if (InputController.inputType.get() === "Gamepad" && tooltips.Gamepad) {
-			set(tooltips.Gamepad);
-		}
-	}
+		const filterTooltipsBy = (tooltips: readonly Tooltip[], func: (key: KeyCode) => boolean): Tooltip[] =>
+			tooltips.map((t): Tooltip => ({ ...t, keys: t.keys.filter((k) => k.any(func)) }));
 
-	destroy(): void {
-		task.delay(0.2, () => super.destroy());
+		const inputType = InputController.inputType.get();
+		if (inputType === "Desktop") {
+			set(filterTooltipsBy(tooltips, (k) => !Keys.isKeyGamepad(k)));
+		} else if (inputType === "Gamepad") {
+			set(filterTooltipsBy(tooltips, (k) => Keys.isKeyGamepad(k)));
+		}
 	}
 }

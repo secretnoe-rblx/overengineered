@@ -1,36 +1,27 @@
-import { ReplicatedStorage, StarterGui, UserInputService, Workspace } from "@rbxts/services";
-import { Gui } from "client/gui/Gui";
-import { ScaledScreenGui } from "client/gui/ScaledScreenGui";
+import { ReplicatedStorage, StarterGui, UserInputService } from "@rbxts/services";
+import { Anim } from "client/gui/Anim";
+import { Interface } from "client/gui/Interface";
 import { ButtonControl } from "engine/client/gui/Button";
 import { HostedService } from "engine/shared/di/HostedService";
 import { ObservableValue } from "engine/shared/event/ObservableValue";
+import type { MainScreenLayout } from "client/gui/MainScreenLayout";
+import type { SharedPlots } from "shared/building/SharedPlots";
 
+@injectable
 export class HideInterfaceController extends HostedService {
-	readonly visible = new ObservableValue(true);
-	private readonly guis = [Gui.getGameUI(), Gui.getUnscaledGameUI()] as const;
+	private readonly visible = new ObservableValue(true);
 
-	constructor() {
+	private readonly guis = [Interface.getGameUI(), Interface.getUnscaledGameUI(), Interface.getInterface()] as const;
+	private currentUnhideScreen?: ScreenGui;
+
+	constructor(@inject mainScreen: MainScreenLayout, @inject plots: SharedPlots) {
 		super();
 
-		this.onEnable(() => {
-			type HiddenUi = ScreenGui & {
-				readonly Action: GuiObject & {
-					readonly Hide: GuiButton;
-				};
-			};
-			const hiddenUiOriginal = Gui.getPlayerGui<{ GameUIHidden: HiddenUi }>().GameUIHidden;
-			hiddenUiOriginal.Enabled = false;
-
-			const hiddenUi = new ScaledScreenGui(hiddenUiOriginal.Clone());
-			hiddenUi.onEnable(() => (hiddenUi.instance.Enabled = true));
-			hiddenUi.onDisable(() => (hiddenUi.instance.Enabled = false));
-			this.onDestroy(() => hiddenUi.destroy());
-
-			hiddenUi.add(new ButtonControl(hiddenUi.instance.Action.Hide, () => this.visible.set(true)));
-			hiddenUi.instance.Parent = hiddenUiOriginal.Parent;
-			hiddenUi.enable();
-
-			this.visible.subscribe((visible) => hiddenUi.setEnabled(!visible), true);
+		this.event.subscribeObservable(this.visible, (visible) => {
+			if (visible) {
+				this.currentUnhideScreen?.Destroy();
+				this.currentUnhideScreen = undefined;
+			}
 		});
 
 		this.event.subscribe(UserInputService.InputBegan, (input) => {
@@ -60,8 +51,8 @@ export class HideInterfaceController extends HostedService {
 			StarterGui.SetCoreGuiEnabled(Enum.CoreGuiType.Backpack, false);
 
 			// Plot owner gui hide
-			Workspace.Plots.GetChildren().forEach((plot) => {
-				const ownerGui = plot.FindFirstChild(ReplicatedStorage.Assets.PlotOwnerGui.Name) as
+			plots.plots.forEach((plot) => {
+				const ownerGui = plot.instance.FindFirstChild(ReplicatedStorage.Assets.PlotOwnerGui.Name) as
 					| BillboardGui
 					| undefined;
 				if (ownerGui) {
@@ -69,5 +60,21 @@ export class HideInterfaceController extends HostedService {
 				}
 			});
 		});
+
+		const hideButton = this.parent(mainScreen.registerTopRightButton("Hide"));
+		this.parent(
+			new ButtonControl(hideButton.instance, () => {
+				this.currentUnhideScreen = this.createUnhideGui(hideButton.instance);
+				this.visible.set(false);
+			}),
+		);
+	}
+
+	private createUnhideGui(button: GuiButton): ScreenGui {
+		const [screen, ghost] = Anim.createScreenForAnimating(button);
+		ghost.Transparency = 0.8;
+
+		new ButtonControl(ghost, () => this.visible.set(true)).enable();
+		return screen;
 	}
 }

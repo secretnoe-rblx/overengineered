@@ -1,8 +1,9 @@
-import { ClientComponent } from "engine/client/component/ClientComponent";
+import { Component } from "engine/shared/component/Component";
 import type { PlayerDataStorage } from "client/PlayerDataStorage";
+import type { ReadonlyObservableCollectionSet } from "engine/shared/event/ObservableCollection";
 
 @injectable
-export class SelectedBlocksHighlighter extends ClientComponent {
+export class SelectedBlocksHighlighter extends Component {
 	private readonly selectionBoxName = "selectionBox";
 	private readonly selections = new Map<BlockModel, SelectionBox>();
 

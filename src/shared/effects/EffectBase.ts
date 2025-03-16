@@ -1,20 +1,27 @@
-import { BidirectionalRemoteEvent } from "engine/shared/event/PERemoteEvent";
-import { SharedImpl } from "shared/SharedImpl";
-import type { CreatableRemoteEvents } from "engine/shared/event/RemoteEventBase";
+import type { BidirectionalRemoteEvent, CreatableRemoteEvents } from "engine/shared/event/PERemoteEvent";
 
-abstract class _EffectBase<T> {
+export interface EEEffect<T> {
+	readonly event: BidirectionalRemoteEvent<T>;
+
+	send(ownerPart: BasePart, arg: T): void;
+}
+
+export interface EffectCreator {
+	create<T>(name: string, eventType: CreatableRemoteEvents, func?: (arg: T) => void): EEEffect<T>;
+}
+
+export abstract class EffectBase<T> {
+	private readonly effect;
 	readonly event;
 
-	constructor(name: string, eventType: CreatableRemoteEvents = "UnreliableRemoteEvent") {
-		this.event = new BidirectionalRemoteEvent<T>(name, eventType);
+	constructor(creator: EffectCreator, name: string, eventType: CreatableRemoteEvents = "UnreliableRemoteEvent") {
+		this.effect = creator.create<T>(name, eventType, (arg) => this.justRun(arg));
+		this.event = this.effect.event;
 	}
 
-	protected abstract justRun(arg: T): void;
+	send(ownerPart: BasePart, arg: T) {
+		this.effect.send(ownerPart, arg);
+	}
 
-	send(ownerPart: BasePart, arg: T): void {}
+	abstract justRun(arg: T): void;
 }
-export type { _EffectBase };
-
-const impl = SharedImpl.getSharedImpl(script);
-const req = require(impl) as { EffectBase: typeof _EffectBase };
-export const EffectBase = req.EffectBase;

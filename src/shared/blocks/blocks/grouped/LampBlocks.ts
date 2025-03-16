@@ -1,7 +1,8 @@
 import { Colors } from "engine/shared/Colors";
-import { AutoC2SRemoteEvent } from "engine/shared/event/C2SRemoteEvent";
+import { t } from "engine/shared/t";
 import { InstanceBlockLogic } from "shared/blockLogic/BlockLogic";
 import { inferEnumLogicType } from "shared/blockLogic/BlockLogicTypes";
+import { BlockSynchronizer } from "shared/blockLogic/BlockSynchronizer";
 import { BlockConfigDefinitions } from "shared/blocks/BlockConfigDefinitions";
 import { BlockCreation } from "shared/blocks/BlockCreation";
 import { BlockManager } from "shared/building/BlockManager";
@@ -22,7 +23,6 @@ const definition = {
 						showAsSlider: true,
 						min: 0,
 						max: 100,
-						step: 0.1,
 					},
 					config: 20,
 				},
@@ -44,7 +44,6 @@ const definition = {
 						showAsSlider: true,
 						min: 0,
 						max: 100,
-						step: 0.1,
 					},
 					config: 20,
 				},
@@ -52,6 +51,7 @@ const definition = {
 		},
 		colorMixing: {
 			displayName: "Color Priority",
+			tooltip: "Method of determining the resulting color of this lamp",
 			types: {
 				enum: inferEnumLogicType({
 					config: "paint",
@@ -70,20 +70,43 @@ const definition = {
 	output: {},
 } satisfies BlockLogicFullBothDefinitions;
 
-interface UpdateData {
-	readonly block: BlockModel;
-	readonly state: boolean;
-	readonly color: Color3 | undefined;
-	readonly brightness: number;
-	readonly range: number;
-}
+const update = ({ block, state, color, brightness, range }: UpdateData) => {
+	const part = block.PrimaryPart;
+	if (!part) return;
+
+	const light = part?.FindFirstChild("PointLight") as PointLight | undefined;
+	if (!light) return;
+
+	if (state) {
+		const commonColor = color ?? Color3.fromRGB(255, 255, 255);
+		light.Range = range;
+		part.Color = commonColor;
+		light.Color = commonColor;
+		part.Material = Enum.Material.Neon;
+		light.Brightness = brightness;
+		return;
+	}
+
+	part.Color = Color3.fromRGB(0, 0, 0);
+	part.Material = Enum.Material.SmoothPlastic;
+	light.Brightness = 0;
+};
+
+const updateEventType = t.interface({
+	block: t.instance("Model").nominal("blockModel").as<BlockModel>(),
+	state: t.boolean,
+	color: t.color.orUndefined(),
+	brightness: t.numberWithBounds(0, 100),
+	range: t.numberWithBounds(0, 100),
+});
+type UpdateData = t.Infer<typeof updateEventType>;
+
+const events = {
+	update: new BlockSynchronizer("b_lamp_update", updateEventType, update),
+} as const;
 
 export type { Logic as LampBlockLogic };
 class Logic extends InstanceBlockLogic<typeof definition> {
-	static readonly events = {
-		update: new AutoC2SRemoteEvent<UpdateData>("lamp_update"),
-	} as const;
-
 	constructor(args: InstanceBlockLogicArgs) {
 		super(definition, args);
 
@@ -124,39 +147,18 @@ class Logic extends InstanceBlockLogic<typeof definition> {
 				range: lightRange * 0.6, // a.k.a. / 100 * 60
 			};
 
-			Logic.update(data);
-			Logic.events.update.send(data);
+			events.update.send(data);
 		});
-	}
-
-	static update({ block, state, color, brightness, range }: UpdateData) {
-		const part = block.PrimaryPart;
-		const light = part?.WaitForChild("PointLight") as PointLight;
-		if (!part) return;
-		if (!light) return;
-
-		if (state) {
-			const commonColor = color ?? Color3.fromRGB(255, 255, 255);
-			light.Range = range;
-			part.Color = commonColor;
-			light.Color = commonColor;
-			part.Material = Enum.Material.Neon;
-			light.Brightness = brightness;
-			return;
-		}
-		part.Color = Color3.fromRGB(0, 0, 0);
-		part.Material = Enum.Material.SmoothPlastic;
-		light.Brightness = 0;
 	}
 }
 
 //
 
-const logic: BlockLogicInfo = { definition, ctor: Logic };
+const logic: BlockLogicInfo = { definition, ctor: Logic, events };
 const list: BlockBuildersWithoutIdAndDefaults = {
 	lamp: {
 		displayName: "Lamp",
-		description: "A simple lamp. Turns on and off, but doesn't produce light yet.",
+		description: "A simple lamp. Turns on and off, or doesn't.",
 		weldRegionsSource: BlockCreation.WeldRegions.fAutomatic("cube"),
 		logic,
 		limit: 150,

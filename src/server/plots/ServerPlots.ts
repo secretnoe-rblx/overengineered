@@ -1,105 +1,11 @@
-import { Players } from "@rbxts/services";
 import { HostedService } from "engine/shared/di/HostedService";
-import { Element } from "engine/shared/Element";
-import { ObservableCollectionSet } from "engine/shared/event/ObservableCollection";
-import { JSON } from "engine/shared/fixes/Json";
-import { PlayerWatcher } from "engine/shared/PlayerWatcher";
 import { PlotsFloatingImageController } from "server/plots/PlotsFloatingImageController";
-import { BuildingPlot } from "shared/building/BuildingPlot";
-import { AutoPlotWelder } from "shared/building/PlotWelder";
-import { GameDefinitions } from "shared/data/GameDefinitions";
-import { CustomRemotes } from "shared/Remotes";
 import type { SharedPlot } from "shared/building/SharedPlot";
 import type { SharedPlots } from "shared/building/SharedPlots";
 
 @injectable
-class ServerPlotController extends HostedService {
-	static tryCreate(player: Player, di: DIContainer, splots: ServerPlots, plots: SharedPlots) {
-		const tryGetFreePlot = (firstTime = true): SharedPlot | undefined => {
-			const plot = plots.plots.find((p) => p.ownerId.get() === undefined);
-			if (firstTime) return plot;
-			if (plot) return plot;
-
-			for (const plot of plots.plots) {
-				const ownerid = plot.ownerId.get();
-				if (!ownerid) return;
-
-				if (!Players.GetPlayerByUserId(ownerid)) {
-					$warn(`Plot ${plot.instance} was occupied by player ${ownerid} while being offline. Destroying...`);
-
-					splots.tryGetController(plot.instance)?.destroy();
-					return tryGetFreePlot(false);
-				}
-			}
-		};
-
-		const plot = tryGetFreePlot();
-		if (!plot) {
-			$warn("Plot checkeq: ", JSON.serialize(plots.plots.map((p) => `${p.instance.Name}: ${p.ownerId.get()}`)));
-			// TODO: Fix this shit asap
-			if (!GameDefinitions.isAdmin(player)) {
-				player.Kick("No free plot found, try again later");
-			}
-
-			return;
-		}
-
-		return di.resolveForeignClass(ServerPlotController, [player, plot]);
-	}
-
-	readonly blocks;
-
-	constructor(
-		readonly player: Player,
-		readonly plot: SharedPlot,
-		@inject di: DIContainer,
-	) {
-		super();
-
-		plot.ownerId.set(player.UserId);
-		player.RespawnLocation = plot.instance.WaitForChild("SpawnLocation") as SpawnLocation;
-
-		const initializeBlocksFolder = (plot: SharedPlot): PlotBlocks => {
-			plot.instance.FindFirstChild("Blocks")?.Destroy();
-
-			const blocks = Element.create("Folder", { Name: "Blocks" }) as PlotBlocks;
-			blocks.Parent = plot.instance;
-
-			return blocks;
-		};
-
-		this.blocks = di.resolveForeignClass(BuildingPlot, [
-			initializeBlocksFolder(plot),
-			plot.getCenter(),
-			plot.bounds,
-		]);
-		this.blocks.initializeDelay(3, 6, 3);
-
-		this.parent(di.resolveForeignClass(AutoPlotWelder, [this.blocks]));
-
-		this.onDestroy(() => {
-			this.plot.ownerId.set(undefined);
-			this.plot.whitelistedPlayers.set([5243461283]);
-			this.plot.blacklistedPlayers.set(undefined);
-			this.plot.isolationMode.set(undefined);
-
-			this.blocks.unparent();
-			task.delay(1, () => this.blocks.destroy());
-		});
-	}
-}
-export type { ServerPlotController };
-
-@injectable
 export class ServerPlots extends HostedService {
-	readonly controllers = new ObservableCollectionSet<ServerPlotController>();
-	private readonly controllersByPlot = new Map<PlotModel, ServerPlotController>();
-	private readonly controllersByPlayer = new Map<Player, ServerPlotController>();
-
-	constructor(
-		@inject di: DIContainer,
-		@inject readonly plots: SharedPlots,
-	) {
+	constructor(@inject readonly plots: SharedPlots) {
 		super();
 
 		this.parent(new PlotsFloatingImageController(plots));
@@ -122,61 +28,19 @@ export class ServerPlots extends HostedService {
 			}
 		});
 
-		this.event.subscribeCollectionAdded(
-			PlayerWatcher.players,
-			(player) => {
-				const controller = ServerPlotController.tryCreate(player, di, this, plots);
-				if (!controller) return;
+		// TODO:
+		// this.event.subscribe(CustomRemotes.gui.settings.permissions.updateBlacklist.invoked, (player, newBlacklist) => {
+		// 	const plot = this.tryGetControllerByPlayer(player);
+		// 	if (!plot) throw "what";
 
-				controller.onDestroy(() => {
-					this.controllers.remove(controller);
-					this.controllersByPlayer.delete(controller.player);
-					this.controllersByPlot.delete(controller.plot.instance);
-				});
+		// 	plot.plot.blacklistedPlayers.set(newBlacklist);
+		// });
 
-				this.controllers.add(controller);
-				this.controllersByPlot.set(controller.plot.instance, controller);
-				this.controllersByPlayer.set(controller.player, controller);
+		// this.event.subscribe(CustomRemotes.gui.settings.permissions.isolationMode.invoked, (player, state) => {
+		// 	const plot = this.tryGetControllerByPlayer(player);
+		// 	if (!plot) throw "what";
 
-				controller.plot.whitelistedPlayers.set([5243461283]);
-				controller.plot.blacklistedPlayers.set(undefined);
-				controller.plot.isolationMode.set(undefined);
-
-				controller.enable();
-			},
-			true,
-		);
-
-		this.event.subscribe(Players.PlayerRemoving, (player) => this.tryGetControllerByPlayer(player)?.destroy());
-
-		this.event.subscribe(CustomRemotes.gui.settings.permissions.updateBlacklist.invoked, (player, newBlacklist) => {
-			const plot = this.tryGetControllerByPlayer(player);
-			if (!plot) throw "what";
-
-			plot.plot.blacklistedPlayers.set(newBlacklist);
-		});
-
-		this.event.subscribe(CustomRemotes.gui.settings.permissions.isolationMode.invoked, (player, state) => {
-			const plot = this.tryGetControllerByPlayer(player);
-			if (!plot) throw "what";
-
-			plot.plot.isolationMode.set(state);
-		});
-
-		game.BindToClose(() => {
-			$log("Game quit, destroying controllers...");
-
-			for (const controller of this.controllers.get()) {
-				$log("Destroying", controller.player.Name);
-				controller.destroy();
-			}
-		});
-	}
-
-	tryGetControllerByPlayer(player: Player): ServerPlotController | undefined {
-		return this.controllersByPlayer.get(player);
-	}
-	tryGetController(plot: PlotModel): ServerPlotController | undefined {
-		return this.controllersByPlot.get(plot);
+		// 	plot.plot.isolationMode.set(state);
+		// });
 	}
 }

@@ -1,10 +1,11 @@
 import { StarterGui, UserInputService } from "@rbxts/services";
 import { LoadingController } from "client/controller/LoadingController";
 import { SoundController } from "client/controller/SoundController";
-import { DictionaryControl } from "client/gui/controls/DictionaryControl";
 import { Control } from "engine/client/gui/Control";
-import { TransformService } from "engine/shared/component/TransformService";
-import { Colors } from "shared/Colors";
+import { ComponentKeyedChildren } from "engine/shared/component/ComponentKeyedChildren";
+import { InstanceComponent } from "engine/shared/component/InstanceComponent";
+import { Transforms } from "engine/shared/component/Transforms";
+import type { Theme } from "client/Theme";
 import type { ToolBase } from "client/tools/ToolBase";
 import type { ToolController } from "client/tools/ToolController";
 
@@ -13,30 +14,30 @@ export type HotbarToolButtonControlDefinition = TextButton & {
 	readonly NumLabel: TextLabel;
 };
 
+@injectable
 export class HotbarButtonControl extends Control<HotbarToolButtonControlDefinition> {
-	constructor(gui: HotbarToolButtonControlDefinition, tools: ToolController, tool: ToolBase, index: number) {
+	constructor(
+		gui: HotbarToolButtonControlDefinition,
+		tools: ToolController,
+		tool: ToolBase,
+		index: number,
+		@inject theme: Theme,
+	) {
 		super(gui);
 
-		this.gui.Name = tool.getDisplayName();
-		this.gui.ImageLabel.Image = tool.getImageID();
-		this.gui.NumLabel.Text = tostring(index);
+		this.instance.Name = tool.getDisplayName();
+		this.instance.ImageLabel.Image = tool.getImageID();
+		this.instance.NumLabel.Text = tostring(index);
 
-		this.event.subscribe(this.gui.Activated, () => {
+		this.event.subscribe(this.instance.Activated, () => {
 			if (LoadingController.isLoading.get()) return;
 			tools.selectedTool.set(tool === tools.selectedTool.get() ? undefined : tool);
 		});
 
-		const selectedToolStateMachine = TransformService.multi(
-			TransformService.boolStateMachine(
-				this.gui,
-				TransformService.commonProps.quadOut02,
-				{ BackgroundColor3: Colors.newGui.blue },
-				{ BackgroundColor3: Colors.newGui.staticBackground },
-			),
-		);
+		this.initializeSimpleTransform("BackgroundColor3");
 		this.event.subscribeObservable(
 			tools.selectedTool,
-			(newtool) => selectedToolStateMachine(newtool === tool),
+			(newTool) => this.themeButton(theme, newTool === tool ? "buttonActive" : "buttonNormal"),
 			true,
 		);
 	}
@@ -51,45 +52,46 @@ export type HotbarControlDefinition = GuiObject & {
 	readonly NameLabel: TextLabel;
 };
 
-export class HotbarControl extends Control<HotbarControlDefinition> {
-	private readonly tools;
+@injectable
+export class HotbarControl extends InstanceComponent<HotbarControlDefinition> {
 	private readonly nameLabel;
 
-	constructor(tools: ToolController, gui: HotbarControlDefinition) {
+	constructor(gui: HotbarControlDefinition, @inject toolController: ToolController, @inject di: DIContainer) {
 		super(gui);
-		this.tools = tools;
 
 		// Disable roblox native backpack
 		StarterGui.SetCoreGuiEnabled(Enum.CoreGuiType.Backpack, false);
 
-		const template = this.asTemplate(this.gui.Tools.ToolTemplate);
-		const toolButtons = new DictionaryControl<GuiObject, ToolBase, HotbarButtonControl>(this.gui.Tools);
-		this.add(toolButtons);
+		const template = this.asTemplate(this.instance.Tools.ToolTemplate);
+		const toolButtons = this.parent(
+			new ComponentKeyedChildren<ToolBase, HotbarButtonControl>().withParentInstance(this.instance.Tools),
+		);
 
-		this.nameLabel = this.add(new Control(this.gui.NameLabel));
+		this.nameLabel = this.parent(new Control(this.instance.NameLabel));
 
 		this.event.subscribeObservable(
-			tools.visibleTools.enabled,
-			(visible) => {
+			toolController.tools,
+			(tools) => {
 				toolButtons.clear();
 
 				let index = 0;
-				for (const tool of tools.allToolsOrdered) {
-					if (!visible.includes(tool)) {
-						continue;
-					}
-
-					const button = new HotbarButtonControl(template(), tools, tool, ++index);
-					toolButtons.keyedChildren.add(tool, button);
+				for (const tool of tools) {
+					const button = di.resolveForeignClass(HotbarButtonControl, [
+						template(),
+						toolController,
+						tool,
+						++index,
+					]);
+					toolButtons.add(tool, button);
 				}
 			},
 			true,
 		);
-		this.event.subscribeObservable(
-			tools.enabledTools.enabled,
-			(enabled) => {
-				for (const [tool, control] of toolButtons.keyedChildren.getAll()) {
-					const isenabled = enabled.includes(tool);
+		this.event.subscribeImmediately(
+			toolController.enabledTools.updated,
+			() => {
+				for (const [tool, control] of toolButtons.getAll()) {
+					const isenabled = toolController.enabledTools.isEnabled(tool);
 
 					control.instance.BackgroundTransparency = isenabled ? 0.2 : 0.6;
 					control.instance.Active = isenabled;
@@ -101,63 +103,51 @@ export class HotbarControl extends Control<HotbarControlDefinition> {
 		);
 
 		this.event.onPrepare((inputType) => {
-			for (const button of toolButtons.keyedChildren.getAll()) {
+			for (const button of toolButtons.getAll()) {
 				button[1].instance.NumLabel.Visible = inputType === "Desktop";
 			}
 
-			this.gui.Tools.GamepadLeft.Visible = inputType === "Gamepad";
-			this.gui.Tools.GamepadRight.Visible = inputType === "Gamepad";
+			this.instance.Tools.GamepadLeft.Visible = inputType === "Gamepad";
+			this.instance.Tools.GamepadRight.Visible = inputType === "Gamepad";
 		});
 
 		this.event.onPrepareGamepad(() => {
-			this.gui.Tools.GamepadLeft.ImageLabel.Image = UserInputService.GetImageForKeyCode(Enum.KeyCode.ButtonL1);
-			this.gui.Tools.GamepadRight.ImageLabel.Image = UserInputService.GetImageForKeyCode(Enum.KeyCode.ButtonR1);
+			this.instance.Tools.GamepadLeft.ImageLabel.Image = UserInputService.GetImageForKeyCode(
+				Enum.KeyCode.ButtonL1,
+			);
+			this.instance.Tools.GamepadRight.ImageLabel.Image = UserInputService.GetImageForKeyCode(
+				Enum.KeyCode.ButtonR1,
+			);
 		});
 
-		this.event.subscribeObservable(tools.selectedTool, (tool, prev) => this.toolChanged(tool, prev));
-		this.resetLabels();
-	}
+		const toolChanged = (tool: ToolBase | undefined, prev: ToolBase | undefined) => {
+			const duration = tool && prev ? 0.07 : 0.15;
 
-	private readonly visibilityFunction = TransformService.boolStateMachine(
-		this.gui,
-		TransformService.commonProps.quadOut02,
-		{ AnchorPoint: new Vector2(0.5, 1) },
-		{ AnchorPoint: new Vector2(0.5, 0) },
-		(tr, enabled) => (enabled ? tr.func(() => super.setInstanceVisibilityFunction(true)) : 0),
-		(tr, enabled) => (enabled ? 0 : tr.func(() => super.setInstanceVisibilityFunction(false))),
-	);
-	protected setInstanceVisibilityFunction(visible: boolean): void {
-		this.visibilityFunction(visible);
-	}
+			Transforms.create()
+				.if(prev !== undefined, (tr) =>
+					tr
+						.moveRelative(this.nameLabel.instance, new UDim2(0, 0, 0, -20), { duration })
+						.transform(this.nameLabel.instance, "TextTransparency", 1, { duration: duration * 0.8 })
+						.then()
+						.moveRelative(this.nameLabel.instance, new UDim2(0, 0, 0, 20)),
+				)
+				.then()
+				.func(() => (this.instance.NameLabel.Text = tool?.getDisplayName() ?? ""))
+				.if(tool !== undefined, (tr) =>
+					tr
+						.then()
+						.moveRelative(this.nameLabel.instance, new UDim2(0, 0, 0, 20))
+						.transform(this.nameLabel.instance, "TextTransparency", 1)
+						.moveRelative(this.nameLabel.instance, new UDim2(0, 0, 0, -20), { duration })
+						.transform(this.nameLabel.instance, "TextTransparency", 0, { duration: duration * 0.8 })
+						.then(),
+				)
+				.run(this.nameLabel.instance);
 
-	private toolChanged(tool: ToolBase | undefined, prev: ToolBase | undefined) {
-		const duration = tool && prev ? 0.07 : 0.15;
-
-		this.nameLabel.transform((transform) => {
-			if (prev) {
-				transform
-					.moveY(new UDim(0, 0), { duration })
-					.transform("TextTransparency", 1, { duration: duration * 0.8 });
-			}
-
-			transform.then().func(() => (this.instance.NameLabel.Text = tool?.getDisplayName() ?? ""));
-
-			if (tool) {
-				transform
-					.then()
-					.moveY(new UDim(1, 0))
-					.transform("TextTransparency", 1)
-					.moveY(new UDim(0.05, 0), { duration })
-					.transform("TextTransparency", 0, { duration: duration * 0.8 })
-					.then();
-			}
-		});
-
-		// Play sound
-		SoundController.getSounds().Click.Play();
-	}
-
-	private resetLabels() {
+			// Play sound
+			SoundController.getSounds().Click.Play();
+		};
+		this.event.subscribeObservablePrev(toolController.selectedTool, toolChanged, true);
 		this.instance.NameLabel.Text = "";
 	}
 }

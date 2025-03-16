@@ -1,14 +1,15 @@
 import { Players } from "@rbxts/services";
-import { Gui } from "client/gui/Gui";
+import { Interface } from "client/gui/Interface";
 import { TooltipsHolder } from "client/gui/static/TooltipsControl";
-import { ClientComponent } from "engine/client/component/ClientComponent";
-import type { InputTooltips } from "client/gui/static/TooltipsControl";
+import { Component } from "engine/shared/component/Component";
+import { Objects } from "engine/shared/fixes/Objects";
+import type { Tooltip } from "client/gui/static/TooltipsControl";
 import type { BuildingMode } from "client/modes/build/BuildingMode";
 import type { ComponentEvents } from "engine/shared/component/ComponentEvents";
 import type { SharedPlot } from "shared/building/SharedPlot";
 
 /** An abstract class of tools for working with the world */
-export abstract class ToolBase extends ClientComponent {
+export abstract class ToolBase extends Component {
 	readonly mirrorMode;
 	readonly targetPlot;
 
@@ -26,12 +27,12 @@ export abstract class ToolBase extends ClientComponent {
 		this.tooltipHolder = this.parent(TooltipsHolder.createComponent(this.getDisplayName()));
 		this.tooltipHolder.set(this.getTooltips());
 
-		this.gameUI = Gui.getGameUI<ScreenGui>();
+		this.gameUI = Interface.getGameUI<ScreenGui>();
 		this.mouse = Players.LocalPlayer.GetMouse();
 	}
 
 	subscribeSomethingToCurrentPlot(
-		state: IComponent & { readonly event: ComponentEvents },
+		state: Component & { readonly event: ComponentEvents },
 		func: (plot: SharedPlot) => void,
 	) {
 		state.event.subscribeObservable(
@@ -48,7 +49,7 @@ export abstract class ToolBase extends ClientComponent {
 	}
 
 	static getToolGui<TName extends string, TType>(): { readonly [k in TName]: TType } {
-		return Gui.getGameUI<{ BuildingMode: { Tools: { [k in TName]: TType } } }>().BuildingMode.Tools;
+		return Interface.getGameUI<{ BuildingMode: { Tools: { [k in TName]: TType } } }>().BuildingMode.Tools;
 	}
 
 	supportsMirror() {
@@ -61,7 +62,7 @@ export abstract class ToolBase extends ClientComponent {
 	/** Image of the tool*/
 	abstract getImageID(): string;
 
-	protected getTooltips(): InputTooltips {
-		return {};
+	protected getTooltips(): readonly Tooltip[] {
+		return Objects.empty;
 	}
 }

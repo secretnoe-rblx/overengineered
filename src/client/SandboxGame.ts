@@ -1,5 +1,7 @@
 import { Players, RunService, Workspace } from "@rbxts/services";
+import { ClientEffectCreator } from "client/ClientEffectCreator";
 import { BeaconController } from "client/controller/BeaconController";
+import { BlurController } from "client/controller/BlurController";
 import { CameraController } from "client/controller/CameraController";
 import { ChatController } from "client/controller/ChatController";
 import { DayCycleController } from "client/controller/DayCycleController";
@@ -9,73 +11,101 @@ import { GameEnvironmentController } from "client/controller/GameEnvironmentCont
 import { GraphicsSettingsController } from "client/controller/GraphicsSettingsController";
 import { LoadingController } from "client/controller/LoadingController";
 import { LocalPlayerController } from "client/controller/LocalPlayerController";
+import { ObstaclesController } from "client/controller/ObstaclesController";
 import { OtherPlayersController } from "client/controller/OtherPlayersController";
 import { RagdollController } from "client/controller/RagdollController";
 import { MusicController } from "client/controller/sound/MusicController";
 import { SoundController } from "client/controller/SoundController";
 import { UpdatePopupController } from "client/controller/UpdatePopupController";
-import { ActionsGui } from "client/gui/ActionsGui";
 import { AdminGui } from "client/gui/AdminGui";
+import { FpsCounterController } from "client/gui/FpsCounterController";
 import { GuiAutoScaleController } from "client/gui/GuiAutoScaleController";
 import { HideInterfaceController } from "client/gui/HideInterfaceController";
-import { ControlsPopup } from "client/gui/popup/ControlsPopup";
-import { NewSettingsPopup } from "client/gui/popup/NewSettingsPopup";
-import { ReportSubmitController } from "client/gui/popup/ReportSubmitPopup";
-import { SavePopup } from "client/gui/popup/SavePopup";
-import { SettingsPopup } from "client/gui/popup/SettingsPopup";
-import { WikiPopup } from "client/gui/popup/WikiPopup";
-import { Keybinds } from "client/Keybinds";
-import { ActionController } from "client/modes/build/ActionController";
-import { ClientBuildingValidationController } from "client/modes/build/ClientBuildingValidationController";
+import { MainScene } from "client/gui/MainScene";
+import { MainScreenLayout } from "client/gui/MainScreenLayout";
+import { PopupController } from "client/gui/PopupController";
+import { RainbowGuiController } from "client/gui/RainbowGuiController";
 import { PlayModeController } from "client/modes/PlayModeController";
-import { PlayerDataInitializer } from "client/PlayerDataStorage";
+import { PlayerDataStorage } from "client/PlayerDataStorage";
 import { TerrainController } from "client/terrain/TerrainController";
 import { ReadonlyPlot } from "shared/building/ReadonlyPlot";
 import { SharedPlots } from "shared/building/SharedPlots";
 import { RemoteEvents } from "shared/RemoteEvents";
+import { CustomRemotes } from "shared/Remotes";
+import { PlayerDataRemotes } from "shared/remotes/PlayerDataRemotes";
 import { CreateSandboxBlocks } from "shared/SandboxBlocks";
-import { WeaponModuleSystem } from "shared/weaponProjectiles/WeaponModuleSystem";
 import type { GameHostBuilder } from "engine/shared/GameHostBuilder";
 import type { SharedPlot } from "shared/building/SharedPlot";
+import type { EffectCreator } from "shared/effects/EffectBase";
 
 export namespace SandboxGame {
 	export function initialize(builder: GameHostBuilder) {
-		PlayerDataInitializer.initialize(builder);
+		LoadingController.run("Pre-pre-pre-init", () => {
+			builder.services.registerService(RagdollController);
+		});
 
-		LoadingController.show("Pre-init");
-		LocalPlayerController.initializeDisablingFluidForces(builder);
-		LocalPlayerController.initializeSprintLogic(builder);
-		LocalPlayerController.initializeCameraMaxZoomDistance(builder, 512);
-		OtherPlayersController.initializeMassless(builder);
-		builder.services.registerService(RagdollController);
-		RemoteEvents.initializeVisualEffects(builder);
-		builder.services.registerSingletonValue(ActionController.instance);
+		LoadingController.run("Pre-pre-init", () => {
+			const result = CustomRemotes.initPlayer.send();
+			if (!result.success) {
+				throw `Error while initializing the game: ${result.message}`;
+			}
 
-		LoadingController.show("Waiting for server");
-		while (!(Workspace.HasTag("GameLoaded") as boolean | undefined)) {
-			task.wait();
-		}
+			const remotes = PlayerDataRemotes.fromFolder(result.remotes);
+			builder.services.registerSingletonValue(remotes);
+			builder.services.registerSingletonValue(remotes.building);
+			builder.services.registerSingletonValue(remotes.player);
+			builder.services.registerSingletonValue(remotes.slots);
+			builder.services
+				.registerSingletonClass(PlayerDataStorage) //
+				.withArgs([PlayerDataStorage.convertData(result.data)]);
+		});
+
+		LoadingController.run("Pre-init", () => {
+			LocalPlayerController.initializeDisablingFluidForces(builder);
+			LocalPlayerController.initializeSprintLogic(builder);
+			LocalPlayerController.initializeCameraMaxZoomDistance(builder, 512);
+			OtherPlayersController.initializeMassless(builder);
+
+			builder.services
+				.registerSingletonClass(ClientEffectCreator) //
+				.as<EffectCreator>();
+			RemoteEvents.initializeVisualEffects(builder);
+
+			builder.services.registerSingletonClass(Theme);
+			builder.services.registerService(ThemeAutoSetter);
+		});
+
+		LoadingController.run("Waiting for server", () => {
+			while (!(Workspace.HasTag("GameLoaded") as boolean | undefined)) {
+				task.wait();
+			}
+		});
 
 		builder.services.registerSingletonClass(Keybinds);
 		builder.services.registerSingletonFunc(() => SharedPlots.initialize());
 
-		LoadingController.show("Waiting for plot");
 		builder.services.registerSingletonFunc((ctx) =>
 			ctx.resolve<SharedPlots>().waitForPlot(Players.LocalPlayer.UserId),
 		);
+
 		builder.services.registerSingletonFunc((ctx): ReadonlyPlot => {
 			const plot = ctx.resolve<SharedPlot>();
-			return new ReadonlyPlot(plot.instance.Blocks, plot.getCenter(), plot.bounds);
+			return new ReadonlyPlot(plot.instance.WaitForChild("Blocks"), plot.getCenter(), plot.bounds);
 		});
 
 		builder.services.registerSingletonFunc(CreateSandboxBlocks);
 		PlayModeController.initialize(builder);
-		ClientBuildingValidationController.initialize(builder);
+
+		builder.services
+			.registerService(MainScene) //
+			.autoInit();
+		builder.services.registerService(ToolController);
 
 		builder.services.registerService(GameEnvironmentController);
 		builder.services.registerService(EnvBlacklistsController);
 		SoundController.initializeAll(builder);
 		builder.services.registerService(DistanceHideController);
+		builder.services.registerService(ObstaclesController);
 		AdminGui.initializeIfAdminOrStudio(builder);
 
 		builder.services.registerService(DayCycleController);
@@ -87,36 +117,19 @@ export namespace SandboxGame {
 		builder.services.registerService(GuiAutoScaleController);
 		builder.services.registerService(HideInterfaceController);
 		builder.services.registerService(WeaponModuleSystem); //weapons test
-		ActionsGui.initialize(builder);
+		builder.services.registerService(FpsCounterController);
+		builder.services.registerService(RainbowGuiController);
+		builder.services.registerService(BlurController);
+		builder.services
+			.registerSingletonClass(MainScreenLayout)
+			.autoInit()
+			.onInit((c) => c.enable());
 
 		if (!RunService.IsStudio()) {
 			builder.services.registerService(UpdatePopupController);
 		}
 
 		ChatController.initializeAdminPrefix();
-		SettingsPopup.addAsService(builder);
-		NewSettingsPopup.addAsService(builder);
-		SavePopup.addAsService(builder);
-		ControlsPopup.addAsService(builder);
-		WikiPopup.addAsService(builder);
-		builder.services.registerSingletonClass(ReportSubmitController);
-
-		// {
-		// 	const tutorials: (new (...args: any[]) => TutorialDescriber)[] = [
-		// 		BasicCarTutorial,
-		// 		NewBasicPlaneTutorial,
-		// 		BasicPlaneTutorial,
-		// 	];
-		// 	if (GameDefinitions.isAdmin(Players.LocalPlayer)) {
-		// 		tutorials.push(TestTutorial);
-		// 	}
-
-		// 	TutorialServiceInitializer.initialize(builder, {
-		// 		tutorials,
-		// 		tutorialToRunWhenNoSlots: NewBasicPlaneTutorial,
-		// 	});
-		// }
-
-		LoadingController.show("Initializing services");
+		builder.services.registerService(PopupController);
 	}
 }

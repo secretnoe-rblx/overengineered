@@ -1,45 +1,42 @@
 import { Players, ReplicatedStorage, RunService, UserInputService, Workspace } from "@rbxts/services";
 import { SoundController } from "client/controller/SoundController";
+import { Anim } from "client/gui/Anim";
 import { BlockPreviewControl } from "client/gui/buildmode/BlockPreviewControl";
 import { BlockSelectionControl } from "client/gui/buildmode/BlockSelection";
 import { MaterialColorEditControl } from "client/gui/buildmode/MaterialColorEditControl";
-import { MirrorEditorControl } from "client/gui/buildmode/MirrorEditorControl";
 import { DebugLog } from "client/gui/DebugLog";
-import { Gui } from "client/gui/Gui";
+import { Interface } from "client/gui/Interface";
 import { ScaleEditorControl } from "client/gui/ScaleEditor";
 import { LogControl } from "client/gui/static/LogControl";
-import { ClientBuilding } from "client/modes/build/ClientBuilding";
 import { Signals } from "client/Signals";
 import { BlockGhoster } from "client/tools/additional/BlockGhoster";
 import { BlockMirrorer } from "client/tools/additional/BlockMirrorer";
 import { FloatingText } from "client/tools/additional/FloatingText";
 import { ToolBase } from "client/tools/ToolBase";
-import { ClientComponent } from "engine/client/component/ClientComponent";
 import { ClientComponentChild } from "engine/client/component/ClientComponentChild";
-import { ButtonControl } from "engine/client/gui/Button";
 import { Control } from "engine/client/gui/Control";
 import { InputController } from "engine/client/InputController";
 import { Component } from "engine/shared/component/Component";
 import { ComponentChild } from "engine/shared/component/ComponentChild";
-import { ObjectOverlayStorage } from "engine/shared/component/ObjectOverlayStorage";
-import { TransformService } from "engine/shared/component/TransformService";
+import { Transforms } from "engine/shared/component/Transforms";
 import { ObservableValue } from "engine/shared/event/ObservableValue";
 import { AABB } from "engine/shared/fixes/AABB";
 import { BB } from "engine/shared/fixes/BB";
 import { MathUtils } from "engine/shared/fixes/MathUtils";
-import { Marketplace } from "engine/shared/Marketplace";
 import { BlockManager } from "shared/building/BlockManager";
 import { BuildingManager } from "shared/building/BuildingManager";
 import { SharedBuilding } from "shared/building/SharedBuilding";
 import { Colors } from "shared/Colors";
-import { GameDefinitions } from "shared/data/GameDefinitions";
 import { VectorUtils } from "shared/utils/VectorUtils";
 import type { BlockSelectionControlDefinition } from "client/gui/buildmode/BlockSelection";
 import type { MaterialColorEditControlDefinition } from "client/gui/buildmode/MaterialColorEditControl";
 import type { MirrorEditorControlDefinition } from "client/gui/buildmode/MirrorEditorControl";
+import type { MainScreenLayout } from "client/gui/MainScreenLayout";
 import type { ScaleEditorControlDefinition } from "client/gui/ScaleEditor";
-import type { InputTooltips } from "client/gui/static/TooltipsControl";
+import type { Tooltip } from "client/gui/static/TooltipsControl";
 import type { BuildingMode } from "client/modes/build/BuildingMode";
+import type { ClientBuilding } from "client/modes/build/ClientBuilding";
+import type { ReadonlyObservableValue } from "engine/shared/event/ObservableValue";
 import type { SharedPlot } from "shared/building/SharedPlot";
 
 const allowedColor = Colors.blue;
@@ -120,7 +117,7 @@ const getMouseTargetBlockPositionV2 = (
 	const globalMouseHitPos = mouseHit.PointToWorldSpace(Vector3.zero);
 	const normal = target.CFrame.Rotation.VectorToWorldSpace(Vector3.FromNormalId(mouseSurface));
 
-	DebugLog.startCategory("BuildTool");
+	DebugLog.startCategory("BuildTool", true);
 	DebugLog.named("Target", target);
 	DebugLog.named("Hit", mouseHit);
 	DebugLog.named("Normal", `${mouseSurface} ${normal}`);
@@ -141,7 +138,13 @@ const getMouseTargetBlockPositionV2 = (
 	targetPosition = addBlockSize(normal, targetPosition);
 
 	if (gridEnabled) {
+		// костыль of fixing the plots position
+		targetPosition = targetPosition.add(new Vector3(0, 0.5, 0.5));
+
 		targetPosition = constrainPositionToGrid(normal, targetPosition);
+
+		// костыль of fixing the plots position
+		targetPosition = targetPosition.sub(new Vector3(0, 0.5, 0.5));
 	}
 
 	return targetPosition;
@@ -166,12 +169,39 @@ const processPlaceResponse = (response: Response) => {
 namespace Scene {
 	type BlockInfoDefinition = GuiObject & {
 		readonly ViewportFrame: ViewportFrame;
-		readonly DescriptionLabel: TextLabel;
-		readonly NameLabel: TextLabel;
+		readonly Frame: GuiObject & {
+			readonly DescriptionLabel: TextLabel;
+			readonly NameLabel: TextLabel;
+		};
 	};
 	class BlockInfo extends Control<BlockInfoDefinition> {
 		constructor(gui: BlockInfoDefinition, selectedBlock: ReadonlyObservableValue<Block | undefined>) {
 			super(gui);
+
+			this.visibilityComponent() //
+				.addTransformFunc((enabling) => {
+					const props = Transforms.quadOut02;
+					const textSize = math.max(
+						gui.Frame.NameLabel.TextBounds.X,
+						gui.Frame.DescriptionLabel.TextBounds.X,
+					);
+
+					if (enabling) {
+						return Transforms.create()
+							.resize(gui.ViewportFrame, new UDim2(0, 50, 1, 0), props)
+							.resize(gui.Frame, new UDim2(0, textSize, 1, 0), props)
+							.then()
+							.transform(gui.Frame, "AutomaticSize", Enum.AutomaticSize.X)
+							.transform(gui.Frame, "Size", new UDim2(0, 0, 1, 0));
+					}
+
+					return Transforms.create()
+						.transform(gui.Frame, "AutomaticSize", Enum.AutomaticSize.None)
+						.transform(gui.Frame, "Size", new UDim2(0, textSize, 1, 0))
+						.then()
+						.resize(gui.ViewportFrame, new UDim2(0, 0, 1, 0), props)
+						.resize(gui.Frame, new UDim2(0, 0, 1, 0), props);
+				});
 
 			const preview = this.add(new BlockPreviewControl(this.gui.ViewportFrame));
 			this.event.subscribeObservable(
@@ -181,114 +211,65 @@ namespace Scene {
 					preview.set(block?.model);
 
 					if (block) {
-						this.gui.NameLabel.Text = block.displayName;
-						this.gui.DescriptionLabel.Text = block.description;
+						this.gui.Frame.NameLabel.Text = block.displayName;
+						this.gui.Frame.DescriptionLabel.Text = block.description;
 					} else {
-						this.gui.NameLabel.Text = "";
-						this.gui.DescriptionLabel.Text = "";
+						this.gui.Frame.NameLabel.Text = "";
+						this.gui.Frame.DescriptionLabel.Text = "";
 					}
-
-					TransformService.run(this.gui, (tr) =>
-						tr
-							.moveRelative(new UDim2(0, 0, 0, -10), {
-								...TransformService.commonProps.quadOut02,
-								duration: 0.1,
-							})
-							.then()
-							.moveRelative(new UDim2(0, 0, 0, 10), {
-								...TransformService.commonProps.quadOut02,
-								duration: 0.1,
-							}),
-					);
 				},
 				true,
 			);
-		}
-
-		private readonly visibilityStateMachine = TransformService.multi(
-			TransformService.boolStateMachine(
-				this.gui.NameLabel,
-				TransformService.commonProps.quadOut02,
-				{ AnchorPoint: this.gui.NameLabel.AnchorPoint, Position: this.gui.NameLabel.Position },
-				{
-					AnchorPoint: new Vector2(1, this.gui.NameLabel.AnchorPoint.Y),
-					Position: new UDim2(new UDim(), this.gui.NameLabel.Position.Y),
-				},
-			),
-			TransformService.boolStateMachine(
-				this.gui.DescriptionLabel,
-				TransformService.commonProps.quadOut02,
-				{
-					AnchorPoint: this.gui.DescriptionLabel.AnchorPoint,
-					Position: this.gui.DescriptionLabel.Position,
-				},
-				{
-					AnchorPoint: new Vector2(1, this.gui.DescriptionLabel.AnchorPoint.Y),
-					Position: new UDim2(new UDim(), this.gui.DescriptionLabel.Position.Y),
-				},
-				(tr) => tr.wait(0.05).then(),
-			),
-			TransformService.boolStateMachine(
-				this.gui.ViewportFrame,
-				TransformService.commonProps.quadOut02,
-				{
-					AnchorPoint: this.gui.ViewportFrame.AnchorPoint,
-					Position: this.gui.ViewportFrame.Position,
-				},
-				{
-					AnchorPoint: new Vector2(1, this.gui.ViewportFrame.AnchorPoint.Y),
-					Position: new UDim2(new UDim(), this.gui.ViewportFrame.Position.Y),
-				},
-				(tr) => tr.wait(0.1).then(),
-			),
-		);
-		protected setInstanceVisibilityFunction(visible: boolean): void {
-			this.visibilityStateMachine(visible);
+			this.event.subscribeObservable(selectedBlock, (block) => {
+				Transforms.create()
+					.moveRelative(this.gui, new UDim2(0, 0, 0, -10), {
+						...Transforms.commonProps.quadOut02,
+						duration: 0.1,
+					})
+					.then()
+					.moveRelative(this.gui, new UDim2(0, 0, 0, 10), {
+						...Transforms.commonProps.quadOut02,
+						duration: 0.1,
+					})
+					.run(this.gui);
+			});
 		}
 	}
 
-	type TouchButtonsDefinition = GuiObject & {
-		readonly PlaceButton: GuiButton;
-		readonly MultiPlaceButton: GuiButton;
-		readonly RotateRButton: GuiButton;
-		readonly RotateTButton: GuiButton;
-		readonly RotateYButton: GuiButton;
-	};
-	class TouchButtons extends Control<TouchButtonsDefinition> {
-		private readonly visibilityOverlay = new ObjectOverlayStorage({ visible: false });
+	@injectable
+	class TouchButtons extends Component {
+		constructor(
+			selectedBlock: ReadonlyObservableValue<Block | undefined>,
+			@inject tool: BuildTool,
+			@inject mainScreen: MainScreenLayout,
+		) {
+			super();
 
-		constructor(gui: TouchButtonsDefinition, selectedBlock: ReadonlyObservableValue<Block | undefined>) {
-			super(gui);
+			const isTouch = new ObservableValue(false);
+			this.event.onPrepare((inputType) => isTouch.set(inputType === "Touch"));
 
-			const visibilityState = TransformService.boolStateMachine(
-				this.gui,
-				TransformService.commonProps.quadOut02,
-				{ AnchorPoint: this.gui.AnchorPoint, Position: this.gui.Position },
-				{
-					AnchorPoint: new Vector2(0, this.gui.AnchorPoint.Y),
-					Position: new UDim2(new UDim(1, 0), this.gui.Position.Y),
-				},
-				(tr, enabled) => (enabled ? tr.func(() => (this.gui.Visible = true)) : 0),
-				(tr, enabled) => (enabled ? 0 : tr.func(() => (this.gui.Visible = false))),
+			const isBlockSelected = this.event.addObservable(
+				selectedBlock.fReadonlyCreateBased((b) => b !== undefined),
 			);
-			this.visibilityOverlay.value.changed.Connect(({ visible }) => visibilityState(visible));
 
-			const updateTouchControls = () => {
-				const visible = InputController.inputType.get() === "Touch" && selectedBlock.get() !== undefined;
-				this.visibilityOverlay.get(-1).visible = visible ? undefined : false;
-			};
-
-			this.event.onPrepare(() => {
-				this.visibilityOverlay.get(-1).visible = false;
-				TransformService.finish(this.gui);
-
-				updateTouchControls();
-			});
-			this.event.subscribeObservable(selectedBlock, updateTouchControls);
-		}
-
-		protected setInstanceVisibilityFunction(visible: boolean): void {
-			this.visibilityOverlay.get(0).visible = visible;
+			this.parent(mainScreen.right.push("+")) //
+				.subscribeVisibilityFrom({ main: this.enabledState, isTouch, isBlockSelected })
+				.addButtonAction(() => tool.placeBlock());
+			this.parent(mainScreen.right.push("X"))
+				.subscribeVisibilityFrom({ main: this.enabledState, isTouch, isBlockSelected })
+				.addButtonAction(() => tool.rotateBlock("x"))
+				.with((c) => (c.instance.BackgroundColor3 = Color3.fromRGB(52, 17, 17)));
+			this.parent(mainScreen.right.push("Y"))
+				.subscribeVisibilityFrom({ main: this.enabledState, isTouch, isBlockSelected })
+				.addButtonAction(() => tool.rotateBlock("y"))
+				.with((c) => (c.instance.BackgroundColor3 = Color3.fromRGB(81, 162, 0)));
+			this.parent(mainScreen.right.push("Z"))
+				.subscribeVisibilityFrom({ main: this.enabledState, isTouch, isBlockSelected })
+				.addButtonAction(() => tool.rotateBlock("z"))
+				.with((c) => (c.instance.BackgroundColor3 = Color3.fromRGB(18, 68, 144)));
+			this.parent(mainScreen.right.push("++")) //
+				.subscribeVisibilityFrom({ main: this.enabledState, isTouch, isBlockSelected })
+				.addButtonAction(() => tool.multiPlaceBlock());
 		}
 	}
 
@@ -304,52 +285,59 @@ namespace Scene {
 		readonly Bottom: MaterialColorEditControlDefinition;
 		readonly Info: BlockInfoDefinition;
 		readonly Inventory: BlockSelectionControlDefinition;
-		readonly Touch: TouchButtonsDefinition;
 	};
-	export class BuildToolScene extends Control<BuildToolSceneDefinition> {
+	@injectable
+	export class BuildToolScene extends Component {
 		readonly tool;
 		readonly blockSelector;
-		private readonly materialColorSelector;
-		private readonly blockInfo;
-		private readonly touchButtons;
 
-		constructor(gui: BuildToolSceneDefinition, tool: BuildTool) {
-			super(gui);
+		constructor(@inject tool: BuildTool, @inject mainScreen: MainScreenLayout, @inject di: DIContainer) {
+			super();
 			this.tool = tool;
 
-			const scaleEditorGui = Gui.getGameUI<{
+			const scaleEditorGui = Interface.getGameUI<{
 				BuildingMode: { Scale: GuiObject & { Content: ScaleEditorControlDefinition } };
 			}>().BuildingMode.Scale;
 			scaleEditorGui.Visible = false;
-			this.add(new ScaleEditorControl(scaleEditorGui.Content, tool.blockScale));
+			this.parent(new ScaleEditorControl(scaleEditorGui.Content, tool.blockScale));
 
-			const scaleEditorBtn = this.add(
-				new ButtonControl(
-					Gui.getGameUI<{ BuildingMode: { Action: { Scale: GuiButton } } }>().BuildingMode.Action.Scale,
-					() => (scaleEditorGui.Visible = !scaleEditorGui.Visible),
+			const scaleEditorBtn = this.parent(
+				new Control(
+					Interface.getGameUI<{ BuildingMode: { Action: { Scale: GuiButton } } }>().BuildingMode.Action.Scale,
 				),
-			);
-			this.onEnabledStateChange((enabled) => scaleEditorBtn.setVisible(enabled), true);
+			).addButtonAction(() => (scaleEditorGui.Visible = !scaleEditorGui.Visible));
+
+			this.onEnabledStateChange((enabled) => scaleEditorBtn.setVisibleAndEnabled(enabled), true);
 			this.onDisable(() => (scaleEditorGui.Visible = false));
 
-			this.blockSelector = tool.di.resolveForeignClass(BlockSelectionControl, [gui.Inventory]);
-			this.blockSelector.show();
-			this.add(this.blockSelector);
+			const inventory = this.parentGui(mainScreen.registerLeft<BlockSelectionControlDefinition>("Inventory"));
+			this.blockSelector = this.parent(tool.di.resolveForeignClass(BlockSelectionControl, [inventory.instance]));
 
-			this.blockInfo = this.add(new BlockInfo(gui.Info, this.blockSelector.selectedBlock));
-			this.touchButtons = this.add(new TouchButtons(gui.Touch, this.blockSelector.selectedBlock));
+			const topLayer = this.parentGui(mainScreen.top.push());
 
-			const mirrorEditor = this.add(new MirrorEditorControl(this.gui.Mirror.Content, tool.targetPlot.get()));
-			this.event.subscribeObservable(tool.mirrorMode, (val) => mirrorEditor.value.set(val), true);
-			this.event.subscribe(mirrorEditor.submitted, (val) => tool.mirrorMode.set(val));
-
-			this.onEnable(() => (this.gui.Mirror.Visible = false));
-			this.add(
-				new ButtonControl(
-					this.gui.ActionBar.Buttons.Mirror,
-					() => (this.gui.Mirror.Visible = !this.gui.Mirror.Visible),
+			const blockInfo = topLayer.parentGui(
+				new BlockInfo(
+					Interface.getInterfaceByPath<BlockInfoDefinition>("Tools", "Shared", "Top", "CurrentBlock").Clone(),
+					this.blockSelector.selectedBlock,
 				),
 			);
+			Anim.wrapInFrame(blockInfo.instance);
+
+			this.parent(di.resolveForeignClass(TouchButtons, [this.blockSelector.selectedBlock]));
+
+			// const mirrorEditor = this.parent(
+			// 	new MirrorEditorControl(this.instance.Mirror.Content, tool.targetPlot.get()),
+			// );
+			// this.event.subscribeObservable(tool.mirrorMode, (val) => mirrorEditor.value.set(val), true);
+			// this.event.subscribe(mirrorEditor.submitted, (val) => tool.mirrorMode.set(val));
+
+			// this.onEnable(() => (this.instance.Mirror.Visible = false));
+			// this.parent(
+			// 	new ButtonControl(
+			// 		this.instance.ActionBar.Buttons.Mirror,
+			// 		() => (this.instance.Mirror.Visible = !this.instance.Mirror.Visible),
+			// 	),
+			// );
 
 			this.event.subscribeObservable(
 				this.blockSelector.selectedBlock,
@@ -371,8 +359,9 @@ namespace Scene {
 				const disable = () => {
 					this.tool.controller.disable();
 				};
-				const materialColorEditor = this.add(new MaterialColorEditControl(this.gui.Bottom));
-				this.materialColorSelector = materialColorEditor;
+
+				const mceLayer = this.parentGui(mainScreen.bottom.push());
+				const materialColorEditor = mceLayer.parent(MaterialColorEditControl.autoCreate());
 				materialColorEditor.autoSubscribe(tool.selectedMaterial, tool.selectedColor);
 
 				materialColorEditor.materialPipette.onStart.Connect(disable);
@@ -402,59 +391,16 @@ namespace Scene {
 
 			this.event.subscribeObservable(tool.selectedBlock, updateSelectedBlock);
 		}
-
-		protected prepareTouch(): void {
-			// Touchscreen controls
-			this.eventHandler.subscribe(this.gui.Touch.PlaceButton.MouseButton1Click, () => this.tool.placeBlock());
-			this.eventHandler.subscribe(this.gui.Touch.MultiPlaceButton.MouseButton1Click, () =>
-				this.tool.multiPlaceBlock(),
-			);
-			this.eventHandler.subscribe(this.gui.Touch.RotateRButton.MouseButton1Click, () =>
-				this.tool.rotateBlock("x", true),
-			);
-			this.eventHandler.subscribe(this.gui.Touch.RotateTButton.MouseButton1Click, () =>
-				this.tool.rotateBlock("y", true),
-			);
-			this.eventHandler.subscribe(this.gui.Touch.RotateYButton.MouseButton1Click, () =>
-				this.tool.rotateBlock("z", true),
-			);
-		}
-
-		private readonly visibilityStateMachine = TransformService.multi(
-			TransformService.boolStateMachine(
-				this.gui.Inventory,
-				TransformService.commonProps.quadOut02,
-				{ AnchorPoint: this.gui.Inventory.AnchorPoint, Position: this.gui.Inventory.Position },
-				{
-					AnchorPoint: new Vector2(1, this.gui.Inventory.AnchorPoint.Y),
-					Position: new UDim2(new UDim(), this.gui.Inventory.Position.Y),
-				},
-			),
-			TransformService.boolStateMachine(
-				this.gui.ActionBar,
-				TransformService.commonProps.quadOut02,
-				{ AnchorPoint: this.gui.ActionBar.AnchorPoint },
-				{ AnchorPoint: new Vector2(0.5, 1) },
-				(tr, enabled) => (enabled ? tr.func(() => super.setInstanceVisibilityFunction(true)) : 0),
-				(tr, enabled) => (enabled ? 0 : tr.func(() => super.setInstanceVisibilityFunction(false))),
-			),
-		);
-		protected setInstanceVisibilityFunction(visible: boolean): void {
-			this.materialColorSelector.setVisible(visible);
-			this.blockInfo.setVisible(visible);
-			this.touchButtons.setVisible(visible);
-			this.visibilityStateMachine(visible);
-		}
 	}
 }
 
-interface IController extends IComponent {
+interface IController extends Component {
 	rotate(axis: "x" | "y" | "z", inverted?: boolean): void;
 	place(): Promise<unknown>;
 }
 namespace SinglePlaceController {
-	abstract class Controller extends ClientComponent implements IController {
-		protected readonly state: BuildTool;
+	abstract class Controller extends Component implements IController {
+		protected readonly tool: BuildTool;
 
 		private mainGhost?: BlockModel;
 		protected readonly blockRotation;
@@ -465,11 +411,14 @@ namespace SinglePlaceController {
 		protected readonly mirrorMode;
 		protected readonly plot;
 		protected readonly blockMirrorer;
+		private readonly building;
 
 		protected constructor(state: BuildTool, di: DIContainer) {
 			super();
 
-			this.state = state;
+			this.building = di.resolve<ClientBuilding>();
+
+			this.tool = state;
 			this.selectedBlock = state.selectedBlock.asReadonly();
 			this.selectedColor = state.selectedColor.asReadonly();
 			this.selectedMaterial = state.selectedMaterial.asReadonly();
@@ -480,7 +429,7 @@ namespace SinglePlaceController {
 
 			this.blockMirrorer = this.parent(di.resolveForeignClass(BlockMirrorer));
 
-			this.onPrepare(() => this.updateBlockPosition());
+			this.event.onPrepare(() => this.updateBlockPosition());
 			this.event.subscribeObservable(this.mirrorMode, () => this.updateBlockPosition());
 			this.event.subscribe(Signals.CAMERA.MOVED, () => this.updateBlockPosition());
 			this.event.subscribeObservable(this.selectedBlock, () => this.destroyGhosts());
@@ -532,7 +481,7 @@ namespace SinglePlaceController {
 			if (!selectedBlock) return;
 
 			if (!mainPosition) {
-				if (Gui.isCursorOnVisibleGui()) {
+				if (Interface.isCursorOnVisibleGui()) {
 					return;
 				}
 
@@ -540,8 +489,8 @@ namespace SinglePlaceController {
 					selectedBlock,
 					this.blockRotation.get(),
 					this.blockScale.get(),
-					this.state.mode.gridEnabled.get(),
-					this.state.mode.moveGrid.get(),
+					this.tool.mode.gridEnabled.get(),
+					this.tool.mode.moveGrid.get(),
 				);
 			}
 			if (!mainPosition) return;
@@ -601,7 +550,7 @@ namespace SinglePlaceController {
 			SoundController.getSounds().Build.BlockRotate.PlaybackSpeed = SoundController.randomSoundSpeed();
 			SoundController.getSounds().Build.BlockRotate.Play();
 
-			this.blockRotation.set(this.blockRotation.get().mul(rotation));
+			this.blockRotation.set(rotation.mul(this.blockRotation.get()));
 			this.updateBlockPosition();
 		}
 
@@ -638,7 +587,7 @@ namespace SinglePlaceController {
 				blocks.map((b) => [b.location.Position.apply((v) => MathUtils.round(v, 0.001)), b] as const),
 			).map((_, b) => b);
 
-			const response = await ClientBuilding.placeOperation.execute({ plot: this.plot.get(), blocks });
+			const response = await this.building.placeOperation.execute({ plot: this.plot.get(), blocks });
 			processPlaceResponse(response);
 			if (response.success) {
 				this.updateBlockPosition();
@@ -679,7 +628,7 @@ namespace SinglePlaceController {
 
 			this.event.subInput((ih) => {
 				ih.onTouchTap(() => {
-					if (!Gui.isCursorOnVisibleGui()) {
+					if (!Interface.isCursorOnVisibleGui()) {
 						const target = mouse.Target;
 						if (target) {
 							this.prevTarget = [target, mouse.Hit, mouse.TargetSurface];
@@ -699,8 +648,8 @@ namespace SinglePlaceController {
 				selectedBlock,
 				this.blockRotation.get(),
 				this.blockScale.get(),
-				this.state.mode.gridEnabled.get(),
-				this.state.mode.moveGrid.get(),
+				this.tool.mode.gridEnabled.get(),
+				this.tool.mode.moveGrid.get(),
 				this.prevTarget,
 			);
 			super.updateBlockPosition(mainPosition);
@@ -739,7 +688,7 @@ namespace SinglePlaceController {
 }
 
 namespace MultiPlaceController {
-	export abstract class Base extends ClientComponent implements IController {
+	export abstract class Base extends Component implements IController {
 		private readonly possibleFillRotationAxis = [Vector3.xAxis, Vector3.yAxis, Vector3.zAxis] as const;
 		private readonly blocksFillLimit = 16;
 		private readonly drawnGhostsMap = new Map<Vector3, Model>();
@@ -751,6 +700,7 @@ namespace MultiPlaceController {
 			readonly rotation: CFrame;
 		};
 		private fillRotationMode = 1;
+		private readonly building;
 
 		protected constructor(
 			protected readonly pressPosition: Vector3,
@@ -764,6 +714,7 @@ namespace MultiPlaceController {
 			di: DIContainer,
 		) {
 			super();
+			this.building = di.resolve<ClientBuilding>();
 			this.blockMirrorer = this.parent(di.resolveForeignClass(BlockMirrorer));
 			this.floatingText = this.parent(FloatingText.create(BlockGhoster.parent));
 
@@ -918,7 +869,7 @@ namespace MultiPlaceController {
 				locations.map((b) => [b.pos.Position.apply((v) => MathUtils.round(v, 0.001)), b] as const),
 			).map((_, b) => b);
 
-			const response = await ClientBuilding.placeOperation.execute({
+			const response = await this.building.placeOperation.execute({
 				plot: this.plot,
 				blocks: locations.map(
 					(loc): PlaceBlockRequest => ({
@@ -962,18 +913,14 @@ namespace MultiPlaceController {
 				di,
 			);
 
-			this.event.subInput((ih) => {
+			this.event.subInput((ih, eh) => {
 				const buttonUnpress = async () => {
-					const result = await this.place();
-					if (result && !result.success) {
-						LogControl.instance.addLine(result.message, Colors.red);
-					}
-
+					await this.place();
 					this.destroy();
 				};
 				ih.onMouse1Up(buttonUnpress, true);
 				ih.onKeyUp("ButtonR2", buttonUnpress);
-				this.eventHandler.subscribe(UserInputService.TouchEnded, buttonUnpress);
+				eh.subscribe(UserInputService.TouchEnded, buttonUnpress);
 			});
 
 			this.event.subscribe(mouse.Move, () => this.updateGhosts());
@@ -1030,7 +977,7 @@ namespace MultiPlaceController {
 		}
 	}
 
-	abstract class Starter extends ClientComponent {
+	abstract class Starter extends Component {
 		constructor(state: BuildTool, parent: ComponentChild<IController>) {
 			super();
 		}
@@ -1125,7 +1072,7 @@ export class BuildTool extends ToolBase {
 	readonly selectedMaterial = new ObservableValue<Enum.Material>(Enum.Material.Plastic);
 	readonly selectedColor = new ObservableValue<Color3>(Color3.fromRGB(255, 255, 255));
 	readonly selectedBlock = new ObservableValue<Block | undefined>(undefined);
-	readonly currentMode = new ComponentChild<IController>(this, true);
+	readonly currentMode = this.parent(new ComponentChild<IController>(true));
 	readonly blockRotation = new ObservableValue<CFrame>(CFrame.identity);
 	readonly blockScale = new ObservableValue<Vector3>(Vector3.one, (v) =>
 		v.Max(new Vector3(1 / 16, 1 / 16, 1 / 16)).Min(new Vector3(8, 8, 8)),
@@ -1140,9 +1087,7 @@ export class BuildTool extends ToolBase {
 	) {
 		super(mode);
 
-		this.gui = this.parentGui(
-			new Scene.BuildToolScene(ToolBase.getToolGui<"Build", Scene.BuildToolSceneDefinition>().Build, this),
-		);
+		this.gui = this.parent(di.resolveForeignClass(Scene.BuildToolScene));
 
 		this.controller = this.parent(new Component());
 		this.controller.onEnable(() => this.currentMode.set(SinglePlaceController.create(this, di)));
@@ -1202,13 +1147,7 @@ export class BuildTool extends ToolBase {
 
 		this.selectedBlock.set(block);
 
-		let material = BlockManager.manager.material.get(model);
-		if (
-			material === Enum.Material.Neon &&
-			!Marketplace.Gamepass.has(Players.LocalPlayer, GameDefinitions.GAMEPASSES.NeonMaterial)
-		) {
-			material = Enum.Material.Plastic;
-		}
+		const material = BlockManager.manager.material.get(model);
 		this.selectedMaterial.set(material);
 
 		this.selectedColor.set(BlockManager.manager.color.get(model));
@@ -1229,22 +1168,16 @@ export class BuildTool extends ToolBase {
 		return "rbxassetid://12539295858";
 	}
 
-	protected getTooltips(): InputTooltips {
-		return {
-			Desktop: [
-				{ keys: ["R"], text: "Rotate by Y" },
-				{ keys: ["T"], text: "Rotate by X" },
-				{ keys: ["Y"], text: "Rotate by Z" },
-				{ keys: ["LeftControl"], text: "Disable grid" },
-			],
-			Gamepad: [
-				{ keys: ["ButtonX"], text: "Place" },
-				{ keys: ["ButtonB"], text: "Unequip" },
-				{ keys: ["ButtonSelect"], text: "Select block" },
-				{ keys: ["DPadLeft"], text: "Rotate by X" },
-				{ keys: ["DPadUp"], text: "Rotate by Y" },
-				{ keys: ["DPadRight"], text: "Rotate by Z" },
-			],
-		};
+	protected getTooltips(): readonly Tooltip[] {
+		return [
+			{ keys: [["R"], ["DPadLeft"]], text: "Rotate by Y" },
+			{ keys: [["T"], ["DPadUp"]], text: "Rotate by X" },
+			{ keys: [["Y"], ["DPadRight"]], text: "Rotate by Z" },
+			{ keys: [["LeftControl"]], text: "Disable grid" },
+
+			{ keys: [["ButtonX"]], text: "Place" },
+			{ keys: [["ButtonB"]], text: "Unequip" },
+			{ keys: [["ButtonSelect"]], text: "Select block" },
+		];
 	}
 }

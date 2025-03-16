@@ -8,7 +8,7 @@ type FloatingTextDefinition = BillboardGui & {
 	readonly text: TextLabel;
 };
 export class FloatingText extends InstanceComponent<FloatingTextDefinition> {
-	static create(adornee: PVInstance | Attachment) {
+	static create(adornee: PVInstance | Attachment): FloatingText {
 		const instance = Element.create(
 			"BillboardGui",
 			{

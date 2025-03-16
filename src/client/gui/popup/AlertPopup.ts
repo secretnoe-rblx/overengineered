@@ -1,11 +1,10 @@
 import { GuiService } from "@rbxts/services";
 import { SoundController } from "client/controller/SoundController";
-import { Gui } from "client/gui/Gui";
-import { Popup } from "client/gui/Popup";
-import { ButtonControl } from "engine/client/gui/Button";
+import { Interface } from "client/gui/Interface";
+import { Control } from "engine/client/gui/Control";
 import type { ButtonDefinition } from "engine/client/gui/Button";
 
-export type AlertPopupDefinition = GuiObject & {
+type AlertPopupDefinition = GuiObject & {
 	readonly Content: Frame & {
 		readonly Text: TextLabel;
 		readonly Buttons: {
@@ -17,45 +16,35 @@ export type AlertPopupDefinition = GuiObject & {
 	};
 };
 
-export class AlertPopup extends Popup<AlertPopupDefinition> {
+export class AlertPopup extends Control<AlertPopupDefinition> {
 	private readonly okButton;
 
-	static showPopup(text: string, okFunc?: () => void) {
-		const popup = new AlertPopup(
-			Gui.getGameUI<{
-				Popup: { Crossplatform: { Alert: AlertPopupDefinition } };
-			}>().Popup.Crossplatform.Alert.Clone(),
-			text,
-			okFunc,
-		);
-
-		popup.show();
-	}
-	constructor(gui: AlertPopupDefinition, text: string, okFunc?: () => void) {
+	constructor(text: string, okFunc?: () => void) {
+		const gui = Interface.getGameUI<{
+			Popup: { Crossplatform: { Alert: AlertPopupDefinition } };
+		}>().Popup.Crossplatform.Alert.Clone();
 		super(gui);
 
-		this.okButton = this.add(new ButtonControl(gui.Content.Buttons.OkButton));
+		this.okButton = this.parent(new Control(gui.Content.Buttons.OkButton));
 
 		SoundController.getSounds().Warning.Play();
 
-		this.gui.Content.Text.Text = text;
+		gui.Content.Text.Text = text;
 
-		this.event.subscribe(this.okButton.activated, () => {
+		this.okButton.addButtonAction(() => {
 			okFunc?.();
 			this.hide();
 		});
 
-		const closeButton = this.add(new ButtonControl(this.gui.Heading.CloseButton, () => this.hide()));
+		const closeButton = this.parent(new Control(gui.Heading.CloseButton).addButtonAction(() => this.hide()));
 
-		this.okButton.setInteractable(false);
-		closeButton.setInteractable(false);
+		this.okButton.setButtonInteractable(false);
+		closeButton.setButtonInteractable(false);
 		task.delay(3, () => {
-			this.okButton.setInteractable(true);
-			closeButton.setInteractable(true);
+			this.okButton.setButtonInteractable(true);
+			closeButton.setButtonInteractable(true);
 		});
-	}
 
-	protected prepareGamepad(): void {
-		GuiService.SelectedObject = this.okButton.instance;
+		this.event.onPrepareGamepad(() => (GuiService.SelectedObject = this.okButton.instance));
 	}
 }

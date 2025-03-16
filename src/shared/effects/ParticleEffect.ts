@@ -1,5 +1,6 @@
 import { BlockManager } from "shared/building/BlockManager";
 import { EffectBase } from "shared/effects/EffectBase";
+import type { EffectCreator } from "shared/effects/EffectBase";
 
 type Args = {
 	readonly particle: ParticleEmitter;
@@ -8,12 +9,13 @@ type Args = {
 	readonly scale?: number;
 	readonly color?: Color3;
 };
+@injectable
 export class ParticleEffect extends EffectBase<Args> {
-	constructor() {
-		super("particle_effect");
+	constructor(@inject creator: EffectCreator) {
+		super(creator, "particle_effect");
 	}
 
-	justRun({ particle, isEnabled, acceleration, color, scale }: Args): void {
+	override justRun({ particle, isEnabled, acceleration, color, scale }: Args): void {
 		if (!particle || !particle.Parent) return;
 
 		const part = particle.Parent;

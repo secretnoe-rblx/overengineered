@@ -1,11 +1,17 @@
 import { ReplicatedStorage, Workspace } from "@rbxts/services";
-import { Gui } from "client/gui/Gui";
-import { ActionController } from "client/modes/build/ActionController";
-import { ClientComponent } from "engine/client/component/ClientComponent";
+import { Interface } from "client/gui/Interface";
+import { Component } from "engine/shared/component/Component";
+import { ComponentInstance } from "engine/shared/component/ComponentInstance";
+import { ComponentStateContainer } from "engine/shared/component/ComponentStateContainer";
+import { Transforms } from "engine/shared/component/Transforms";
+import { Element } from "engine/shared/Element";
+import { ObservableValue } from "engine/shared/event/ObservableValue";
 import { BuildingManager } from "shared/building/BuildingManager";
 import { SharedPlot } from "shared/building/SharedPlot";
 import { Colors } from "shared/Colors";
-import { CustomRemotes } from "shared/Remotes";
+import type { MainScreenLayout } from "client/gui/MainScreenLayout";
+import type { ActionController } from "client/modes/build/ActionController";
+import type { PlayerDataStorageRemotes } from "shared/remotes/PlayerDataRemotes";
 
 type CM = readonly [pos: Vector3, mass: number];
 const weightedAverage = (values: readonly CM[]) => {
@@ -16,23 +22,30 @@ const weightedAverage = (values: readonly CM[]) => {
 };
 
 @injectable
-export class CenterOfMassController extends ClientComponent {
-	private readonly viewportFrame;
+export class CenterOfMassVisualizer extends Component {
+	private readonly viewportFrame: ViewportFrame;
+
 	private renderedBalls: Model[] = [];
 	private machineCOM: Model | undefined;
 
-	constructor(@inject plot: SharedPlot) {
+	constructor(
+		parent: Instance,
+		@inject actionController: ActionController,
+		@inject playerRemotes: PlayerDataStorageRemotes,
+	) {
 		super();
 
-		this.viewportFrame = new Instance("ViewportFrame");
-		this.viewportFrame.Name = "CenterOfMass";
-		this.viewportFrame.Size = UDim2.fromScale(1, 1);
-		this.viewportFrame.CurrentCamera = Workspace.CurrentCamera;
-		this.viewportFrame.Transparency = 1;
-		this.viewportFrame.Parent = Gui.getGameUI();
-		this.viewportFrame.Ambient = Colors.white;
-		this.viewportFrame.LightColor = Colors.white;
-		this.viewportFrame.ZIndex = -1000;
+		this.viewportFrame = Element.create("ViewportFrame", {
+			Name: "CenterOfMass",
+			Size: UDim2.fromScale(1, 1),
+			CurrentCamera: Workspace.CurrentCamera,
+			Transparency: 1,
+			Ambient: Colors.white,
+			LightColor: Colors.white,
+			ZIndex: -1000,
+			Parent: Interface.getGameUI(),
+		});
+		ComponentInstance.init(this, this.viewportFrame);
 
 		const update = () => {
 			if (!this.machineCOM) {
@@ -40,7 +53,7 @@ export class CenterOfMassController extends ClientComponent {
 				this.machineCOM.Parent = this.viewportFrame;
 			}
 
-			const blocks = plot.getBlocks();
+			const blocks = parent.GetChildren() as BlockModel[];
 			const pos = this.calculateCentersOfMass(blocks);
 
 			if (pos.size() > this.renderedBalls.size()) {
@@ -85,13 +98,16 @@ export class CenterOfMassController extends ClientComponent {
 			this.renderedBalls.clear();
 		};
 
-		this.event.subscribe(ActionController.instance.onRedo, update);
-		this.event.subscribe(ActionController.instance.onUndo, update);
-		this.event.subscribe(CustomRemotes.slots.load.sent, clear);
-		this.event.subscribe(CustomRemotes.slots.load.completed, (v) => (v.success ? update() : undefined));
+		this.event.subscribe(actionController.onRedo, update);
+		this.event.subscribe(actionController.onUndo, update);
+		this.event.subscribe(playerRemotes.slots.load.sent, clear);
+		this.event.subscribe(playerRemotes.slots.load.completed, (v) => (v.success ? update() : undefined));
 		this.event.subscribe(SharedPlot.anyChanged, update);
-		this.event.onEnable(update);
-		this.onDisable(clear);
+
+		this.onEnabledStateChange((enabled) => {
+			if (enabled) update();
+			else clear();
+		});
 	}
 
 	private calculateCentersOfMass(blocks: readonly BlockModel[]): readonly CM[] {
@@ -142,5 +158,36 @@ export class CenterOfMassController extends ClientComponent {
 		}
 
 		return ass;
+	}
+}
+
+@injectable
+export class CenterOfMassController extends Component {
+	constructor(
+		@inject mainScreen: MainScreenLayout,
+		@inject plot: SharedPlot,
+		@inject actionController: ActionController,
+		@inject playerRemotes: PlayerDataStorageRemotes,
+	) {
+		super();
+
+		const visualizerState = ComponentStateContainer.create(
+			this,
+			new CenterOfMassVisualizer(plot.instance.WaitForChild("Blocks"), actionController, playerRemotes),
+		);
+
+		const enabledByButton = new ObservableValue(false);
+		visualizerState.subscribeAndFrom({ enabledByButton });
+		const button = this.parentGui(mainScreen.registerTopRightButton("CenterOfMass")) //
+			.addButtonAction(() => enabledByButton.set(!enabledByButton.get()));
+
+		this.event.subscribeObservable(
+			visualizerState,
+			(enabled) =>
+				Transforms.create()
+					.transform(button.instance, "Transparency", enabled ? 0 : 0.5, Transforms.commonProps.quadOut02)
+					.run(button.instance),
+			true,
+		);
 	}
 }

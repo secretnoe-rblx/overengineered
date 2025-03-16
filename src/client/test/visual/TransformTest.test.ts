@@ -1,7 +1,9 @@
-import { ButtonControl } from "engine/client/gui/Button";
 import { Control } from "engine/client/gui/Control";
+import { Transforms } from "engine/shared/component/Transforms";
 import { Element } from "engine/shared/Element";
 import { Colors } from "shared/Colors";
+import type { InstanceComponent } from "engine/shared/component/InstanceComponent";
+import type { TransformBuilder } from "engine/shared/component/Transform";
 import type { UnitTests } from "engine/shared/TestFramework";
 
 namespace TransformTests {
@@ -16,33 +18,64 @@ namespace TransformTests {
 
 		const list = new Control(Element.create("Frame", { Size: new UDim2(0, 200, 1, 0), Transparency: 1 }));
 
+		const transform = <T extends Instance>(
+			component: InstanceComponent<T>,
+			setup: (tr: TransformBuilder, instance: T) => void,
+		) => {
+			Transforms.create()
+				.setup((t) => setup(t, component.instance))
+				.run(component.instance);
+		};
+
 		{
 			const tweenable = newbtn("instant transparency", 0);
-			const component = list.add(new ButtonControl(tweenable));
+			const component = list.add(new Control(tweenable));
+			const btn = component.add(new Control(component.instance));
 			component.enable();
-			component.activated.Connect(() =>
-				component.transform((t) => t.func(() => (tweenable.Transparency = 0)).transform("Transparency", 0.9)),
+			btn.addButtonAction(() =>
+				transform(component, (t, i) =>
+					t.func(() => (tweenable.Transparency = 0)).transform(i, "Transparency", 0.9),
+				),
 			);
 		}
 
 		{
 			const tweenable = newbtn("transparency over 1sec", 1);
-			const component = list.add(new ButtonControl(tweenable));
+			const component = list.add(new Control(tweenable));
+			const btn = component.add(new Control(component.instance));
 			component.enable();
-			component.activated.Connect(() =>
-				component.transform((t) =>
-					t.save("Transparency").transform("Transparency", 0.9, { duration: 1 }).then().restore(),
+			btn.addButtonAction(() =>
+				transform(component, (t, i) =>
+					t //
+						.func(() => {
+							const tr = i.Transparency;
+
+							return Transforms.create()
+								.transform(i, "Transparency", 0.9, { duration: 1 })
+								.then()
+								.transform(i, "Transparency", tr);
+						}),
 				),
 			);
 		}
 
 		{
 			const tweenable = newbtn("transparency over 1sec after 1sec", 2);
-			const component = list.add(new ButtonControl(tweenable));
+			const component = list.add(new Control(tweenable));
+			const btn = component.add(new Control(component.instance));
 			component.enable();
-			component.activated.Connect(() =>
-				component.transform((t) =>
-					t.save("Transparency").wait(1).transform("Transparency", 0.9, { duration: 1 }).then().restore(),
+			btn.addButtonAction(() =>
+				transform(component, (t, i) =>
+					t.func(() => {
+						const tr = i.Transparency;
+
+						return Transforms.create()
+							.wait(1)
+							.then()
+							.transform(i, "Transparency", 0.9, { duration: 1 })
+							.then()
+							.transform(i, "Transparency", tr);
+					}),
 				),
 			);
 		}
@@ -54,60 +87,67 @@ namespace TransformTests {
 			);
 			tweenable.AnchorPoint = new Vector2(0.5, 0.5);
 
-			const component = list.add(new ButtonControl(tweenable));
+			const component = list.add(new Control(tweenable));
+			const btn = component.add(new Control(component.instance));
 			component.enable();
 
-			component.activated.Connect(() => {
+			btn.addButtonAction(() => {
 				const anim = 1 as number;
 				if (anim === 0) {
-					component.transform((transform, instance) =>
-						transform
-							.save("Transparency")
-							.func(() => (instance.Transparency = 0))
-							.wait(1)
-							.transform("Transparency", 0.9, { duration: 1 })
-							.transform("Size", new UDim2(0, 80, 0, 10), { duration: 1 })
-							.then()
-							.transform("Transparency", 0, { duration: 1 })
-							.transform("Size", new UDim2(0, 100, 0, 30), { duration: 1 })
-							.then()
-							.restore(),
+					transform(component, (transform, i) =>
+						transform.func(() => {
+							const tr = i.Transparency;
+							return Transforms.create()
+								.func(() => (i.Transparency = 0))
+								.wait(1)
+								.then()
+								.transform(i, "Transparency", 0.9, { duration: 1 })
+								.transform(i, "Size", new UDim2(0, 80, 0, 10), { duration: 1 })
+								.then()
+								.transform(i, "Transparency", 0, { duration: 1 })
+								.transform(i, "Size", new UDim2(0, 100, 0, 30), { duration: 1 })
+								.then()
+								.transform(i, "Transparency", tr);
+						}),
 					);
 				} else if (anim === 1) {
-					component.transform((transform, instance) =>
+					transform(component, (transform, i) =>
 						transform.parallel(
-							(transform) =>
-								transform
-									.func(() => (instance.Transparency = 0))
-									.save("Position", "Size")
-									.resizeRelative(new UDim2(0, -4, 0, -4), { duration: 0.05 })
-									.moveRelative(new UDim2(0, -5, 0, 0), { duration: 0.1 })
-									.then()
-									.moveRelative(new UDim2(0, 10, 0, 0), { duration: 0.1 })
-									.then()
-									.moveRelative(new UDim2(0, -10, 0, 0), { duration: 0.1 })
-									.then()
-									.moveRelative(new UDim2(0, 10, 0, 0), { duration: 0.1 })
-									.then()
-									.moveRelative(new UDim2(0, -5, 0, 0), { duration: 0.1 })
-									.resizeRelative(new UDim2(0, 4, 0, 4), { duration: 0.05 })
-									.then()
-									.restore(),
-							(transform) =>
-								transform.repeat(4, (transform) =>
+							Transforms.create()
+								.func(() => (i.Transparency = 0))
+								.func(() => {
+									const { Position, Size } = i;
+
+									return Transforms.create()
+										.resizeRelative(i, new UDim2(0, -4, 0, -4), { duration: 0.05 })
+										.moveRelative(i, new UDim2(0, -5, 0, 0), { duration: 0.1 })
+										.then()
+										.moveRelative(i, new UDim2(0, 10, 0, 0), { duration: 0.1 })
+										.then()
+										.moveRelative(i, new UDim2(0, -10, 0, 0), { duration: 0.1 })
+										.then()
+										.moveRelative(i, new UDim2(0, 10, 0, 0), { duration: 0.1 })
+										.then()
+										.moveRelative(i, new UDim2(0, -5, 0, 0), { duration: 0.1 })
+										.resizeRelative(i, new UDim2(0, 4, 0, 4), { duration: 0.05 })
+										.then()
+										.transformMulti(i, { Position, Size });
+								}),
+							Transforms.create() //
+								.repeat(4, (transform) =>
 									transform
-										.func(() => (instance.BackgroundColor3 = Colors.red))
-										.transform("BackgroundColor3", Colors.green, {
+										.func(() => (i.BackgroundColor3 = Colors.red))
+										.transform(i, "BackgroundColor3", Colors.green, {
 											duration: 0.33,
 											style: "Linear",
 										})
 										.then()
-										.transform("BackgroundColor3", Colors.blue, {
+										.transform(i, "BackgroundColor3", Colors.blue, {
 											duration: 0.33,
 											style: "Linear",
 										})
 										.then()
-										.transform("BackgroundColor3", Colors.red, {
+										.transform(i, "BackgroundColor3", Colors.red, {
 											duration: 0.34,
 											style: "Linear",
 										})
@@ -121,17 +161,19 @@ namespace TransformTests {
 
 		{
 			const tweenable = newbtn("flash color", 4);
-			const component = list.add(new ButtonControl(tweenable));
+			const component = list.add(new Control(tweenable));
+			const btn = component.add(new Control(component.instance));
 			component.enable();
-			component.activated.Connect(() => component.transform((t) => t.flashColor(Colors.red)));
+			btn.addButtonAction(() => transform(component, (t, i) => t.flashColor(i, Colors.red)));
 		}
 
 		{
 			const tweenable = newbtn("flash position", 5);
-			const component = list.add(new ButtonControl(tweenable));
+			const component = list.add(new Control(tweenable));
+			const btn = component.add(new Control(component.instance));
 			component.enable();
-			component.activated.Connect(() =>
-				component.transform((t) => t.flash(new UDim2(0, 200, 0, 200), "Position")),
+			btn.addButtonAction(() =>
+				transform(component, (t, i) => t.flash(i, new UDim2(0, 200, 0, 200), "Position")),
 			);
 		}
 
@@ -140,12 +182,13 @@ namespace TransformTests {
 			const bnotvisible = newbtn("Not visible", 7 + 1);
 			const binteractable = newbtn("Interactable", 8 + 1);
 			const bnotinteractable = newbtn("Not interactable", 9 + 1);
-			const visual = list.add(new ButtonControl(newbtn("Button", 10 + 1)));
+			// const visual = list.add(new Control2(newbtn("Button", 10 + 1)));
+			const visual = list.add(new Control(newbtn("Button", 10 + 1)));
 
-			list.add(new ButtonControl(bvisible, () => visual.show()));
-			list.add(new ButtonControl(bnotvisible, () => visual.hide()));
-			list.add(new ButtonControl(binteractable, () => visual.setInteractable(true)));
-			list.add(new ButtonControl(bnotinteractable, () => visual.setInteractable(false)));
+			list.add(new Control(bvisible).addButtonAction(() => visual.setVisibleAndEnabled(true)));
+			list.add(new Control(bnotvisible).addButtonAction(() => visual.setVisibleAndEnabled(false)));
+			list.add(new Control(binteractable).addButtonAction(() => visual.setButtonInteractable(true)));
+			list.add(new Control(bnotinteractable).addButtonAction(() => visual.setButtonInteractable(false)));
 		}
 
 		return list;

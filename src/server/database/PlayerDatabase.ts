@@ -1,6 +1,5 @@
 import { Players } from "@rbxts/services";
 import { Db } from "engine/server/Database";
-import { JSON } from "engine/shared/fixes/Json";
 import { PlayerConfigUpdater } from "server/PlayerConfigVersioning";
 import type { DatabaseBackend } from "engine/server/backend/DatabaseBackend";
 
@@ -13,23 +12,17 @@ export type PlayerDatabaseData = {
 
 export class PlayerDatabase {
 	private readonly onlinePlayers = new Set<number>();
-	private readonly datastore: DatabaseBackend;
 	private readonly db;
 
-	constructor() {
-		this.datastore = Db.createStore("players");
-
-		this.db = new Db<PlayerDatabaseData>(
+	constructor(private readonly datastore: DatabaseBackend<PlayerDatabaseData, [id: number]>) {
+		this.db = new Db<PlayerDatabaseData, PlayerDatabaseData, [id: number]>(
 			this.datastore,
 			() => ({}),
-			(data) => JSON.serialize(data),
-			(data) => {
-				const pdata = JSON.deserialize<PlayerDatabaseData>(data);
-				return {
-					...pdata,
-					settings: pdata.settings === undefined ? undefined : PlayerConfigUpdater.update(pdata.settings),
-				};
-			},
+			(data) => ({
+				...data,
+				settings: data.settings === undefined ? undefined : PlayerConfigUpdater.update(data.settings),
+			}),
+			(data) => data,
 		);
 
 		Players.PlayerAdded.Connect((plr) => this.onlinePlayers.add(plr.UserId));
@@ -39,21 +32,20 @@ export class PlayerDatabase {
 			// Roblox Stuido Local Server
 			if (plr.UserId <= 0) return;
 
-			const key = tostring(plr.UserId);
-			this.db.save(key);
-			this.db.free(key);
+			this.db.save([plr.UserId]);
+			this.db.free([plr.UserId]);
 		});
 	}
 
 	get(userId: number) {
-		return this.db.get(tostring(userId));
+		return this.db.get([userId]);
 	}
 
 	set(userId: number, data: PlayerDatabaseData) {
-		this.db.set(tostring(userId), data);
+		this.db.set([userId], data);
 
 		if (!this.onlinePlayers.has(userId)) {
-			this.db.save(tostring(userId));
+			this.db.save([userId]);
 		}
 	}
 }

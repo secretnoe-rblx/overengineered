@@ -1,66 +1,53 @@
 import { GuiService } from "@rbxts/services";
 import { SoundController } from "client/controller/SoundController";
-import { Gui } from "client/gui/Gui";
-import { Popup } from "client/gui/Popup";
-import { ButtonControl } from "engine/client/gui/Button";
-import type { ButtonDefinition } from "engine/client/gui/Button";
+import { Control } from "engine/client/gui/Control";
+import { Interface } from "engine/client/gui/Interface";
+import { PartialControl } from "engine/client/gui/PartialControl";
 
-export type ConfirmPopupDefinition = GuiObject & {
-	readonly Content: Frame & {
-		readonly TextLabel1: TextLabel;
-		readonly TextLabel2: TextLabel;
-	};
-	readonly Head: {
-		readonly CloseButton: ButtonDefinition;
-	};
-	readonly Buttons: {
-		readonly AcceptButton: TextButton;
-		readonly CancelButton: TextButton;
-	};
+const template = Interface.getInterface<{
+	Popups: { Crossplatform: { Confirmation: GuiObject } };
+}>().Popups.Crossplatform.Confirmation;
+template.Visible = false;
+
+type ConfirmPopupParts = {
+	readonly CloseButton: GuiButton;
+
+	readonly TextLabel1: TextLabel;
+	readonly TextLabel2: TextLabel;
+
+	readonly AcceptButton: GuiButton;
+	readonly CancelButton: GuiButton;
 };
-
-export class ConfirmPopup extends Popup<ConfirmPopupDefinition> {
+export class ConfirmPopup extends PartialControl<ConfirmPopupParts> {
 	private readonly confirmButton;
 	private readonly cancelButton;
 	private readonly closeButton;
 
-	static showPopup(text: string, ps: string = "", okFunc: () => void, noFunc: () => void) {
-		const popup = new ConfirmPopup(
-			Gui.getGameUI<{ Popup: { Confirm: ConfirmPopupDefinition } }>().Popup.Confirm.Clone(),
-			text,
-			ps,
-			okFunc,
-			noFunc,
-		);
-
-		popup.show();
-	}
-	constructor(gui: ConfirmPopupDefinition, text: string, ps: string = "", okFunc: () => void, noFunc: () => void) {
+	constructor(text: string, ps: string = "", okFunc?: () => void, noFunc?: () => void) {
+		const gui = template.Clone();
 		super(gui);
 
-		this.confirmButton = this.add(new ButtonControl(gui.Buttons.AcceptButton));
-		this.cancelButton = this.add(new ButtonControl(gui.Buttons.CancelButton));
-		this.closeButton = this.add(new ButtonControl(gui.Head.CloseButton));
+		this.confirmButton = this.parent(new Control(this.parts.AcceptButton));
+		this.cancelButton = this.parent(new Control(this.parts.CancelButton));
+		this.closeButton = this.parent(new Control(this.parts.CloseButton));
 
 		SoundController.getSounds().Warning.Play();
 
-		this.gui.Content.TextLabel1.Text = text;
-		this.gui.Content.TextLabel2.Text = ps;
-		this.event.subscribe(this.confirmButton.activated, () => {
-			okFunc();
+		this.parts.TextLabel1.Text = text;
+		this.parts.TextLabel2.Text = ps;
+		this.confirmButton.addButtonAction(() => {
+			okFunc?.();
 			this.hide();
 		});
-		this.event.subscribe(this.cancelButton.activated, () => {
-			noFunc();
+		this.cancelButton.addButtonAction(() => {
+			noFunc?.();
 			this.hide();
 		});
-		this.event.subscribe(this.closeButton.activated, () => {
-			noFunc();
+		this.closeButton.addButtonAction(() => {
+			noFunc?.();
 			this.hide();
 		});
-	}
 
-	protected prepareGamepad(): void {
-		GuiService.SelectedObject = this.cancelButton.instance;
+		this.event.onPrepareGamepad(() => (GuiService.SelectedObject = this.cancelButton.instance));
 	}
 }

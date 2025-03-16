@@ -1,10 +1,11 @@
 import { Players, UserInputService } from "@rbxts/services";
-import { NumberTextBoxControl } from "client/gui/controls/NumberTextBoxControl";
+import { NumberTextBoxControlNullable } from "client/gui/controls/NumberTextBoxControl";
 import { ProgressBarControl } from "client/gui/controls/ProgressBarControl";
-import { Control } from "engine/client/gui/Control";
+import { PartialControl } from "engine/client/gui/PartialControl";
 import { EventHandler } from "engine/shared/event/EventHandler";
 import { NumberObservableValue } from "engine/shared/event/NumberObservableValue";
 import { Signal } from "engine/shared/event/Signal";
+import { MathUtils } from "engine/shared/fixes/MathUtils";
 import type {
 	ProgressBarControlDefinition,
 	ProgressBarControlDefinitionParts,
@@ -17,8 +18,19 @@ export type SliderControlDefinitionParts = ProgressBarControlDefinitionParts & {
 	readonly Hitbox?: GuiObject;
 };
 
+export interface SliderControlConfig {
+	readonly min: number;
+	readonly max: number;
+	readonly step?: number;
+	readonly inputStep?: number;
+}
+
 /** Control that represents a number via a slider. */
-export class SliderControl<TAllowNull extends boolean = false> extends Control<SliderControlDefinition> {
+class _SliderControl<TAllowNull extends boolean = false> extends PartialControl<
+	SliderControlDefinitionParts,
+	GuiObject,
+	SliderControlDefinitionParts & { readonly Hitbox: GuiObject }
+> {
 	private readonly _submitted = new Signal<(value: number) => void>();
 	readonly submitted = this._submitted.asReadonly();
 	private readonly _moved = new Signal<(value: number) => void>();
@@ -26,24 +38,21 @@ export class SliderControl<TAllowNull extends boolean = false> extends Control<S
 	readonly value;
 
 	private readonly progressBar;
-	private readonly parts: MakeRequired<SliderControlDefinitionParts, "Hitbox">;
+	private readonly inputStep;
 
 	constructor(
 		gui: SliderControlDefinition,
-		min: number,
-		max: number,
-		step?: number,
+		private readonly config: SliderControlConfig,
 		parts?: SliderControlDefinitionParts,
 	) {
-		super(gui);
+		if (!parts?.Hitbox) {
+			parts = { ...parts, Hitbox: gui };
+		}
 
-		this.parts = {
-			Filled: parts?.Filled ?? Control.findFirstChild(gui, "Filled"),
-			Knob: parts?.Knob ?? Control.findFirstChild(gui, "Knob"),
-			Text: parts?.Text ?? Control.findFirstChild(gui, "Text"),
-			TextBox: parts?.TextBox ?? Control.findFirstChild(gui, "TextBox"),
-			Hitbox: parts?.Hitbox ?? this.gui,
-		};
+		super(gui, parts);
+
+		const { min, max, step, inputStep } = config;
+		this.inputStep = inputStep ?? step ?? 0.01;
 
 		this.progressBar = new ProgressBarControl(this.gui, min, max, step, this.parts);
 		this.progressBar.instance.Active = true;
@@ -55,8 +64,7 @@ export class SliderControl<TAllowNull extends boolean = false> extends Control<S
 		this.subscribeMovement();
 
 		if (this.parts.TextBox) {
-			const num = new NumberTextBoxControl<TAllowNull>(this.parts.TextBox, min, max, step);
-			num.value.bindTo(this.value);
+			const num = new NumberTextBoxControlNullable(this.parts.TextBox, this.value);
 			this.event.subscribe(num.submitted, (value) => this._submitted.Fire(value));
 			this.add(num);
 		}
@@ -72,19 +80,21 @@ export class SliderControl<TAllowNull extends boolean = false> extends Control<S
 			if (this.progressBar.vertical) {
 				const y = this.parts.Hitbox.AbsoluteSize.Y - Players.LocalPlayer.GetMouse().Y;
 
-				const value =
-					((y - startpos) / this.parts.Hitbox.AbsoluteSize.Y) * this.value.getRange() +
-					this.value.min +
-					(this.value.step ? this.value.step / 2 : 0);
+				let value =
+					((y - startpos) / this.parts.Hitbox.AbsoluteSize.Y) * this.value.getRange() + this.value.min;
+				value = MathUtils.round(value, this.inputStep);
+
 				this.value.set(value);
-				this._moved.Fire(value);
+				this._moved.Fire(math.clamp(value, this.config.min, this.config.max));
 			} else {
 				const x = Players.LocalPlayer.GetMouse().X;
 
-				const value =
+				let value =
 					((x - startpos) / this.parts.Hitbox.AbsoluteSize.X) * this.value.getRange() + this.value.min;
+				value = MathUtils.round(value, this.inputStep);
+
 				this.value.set(value);
-				this._moved.Fire(value);
+				this._moved.Fire(math.clamp(value, this.config.min, this.config.max));
 			}
 		};
 
@@ -135,7 +145,7 @@ export class SliderControl<TAllowNull extends boolean = false> extends Control<S
 		}
 
 		const moveGamepad = (posx: boolean) => {
-			const step = this.value.step ?? this.value.getRange() / 10;
+			const step = this.inputStep;
 			const value = (this.value.get() ?? 0) + (posx ? step : -step);
 			this.value.set(value);
 			this._moved.Fire(value);
@@ -184,3 +194,9 @@ export class SliderControl<TAllowNull extends boolean = false> extends Control<S
 		sub(this.parts.Hitbox.InputBegan);
 	}
 }
+
+/** Control that represents a number via a slider. */
+export class SliderControl extends _SliderControl<false> {}
+
+/** Control that represents a number via a slider, nullable. */
+export class SliderControlNullable extends _SliderControl<true> {}

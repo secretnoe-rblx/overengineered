@@ -1,4 +1,4 @@
-import { Gui } from "client/gui/Gui";
+import { Interface } from "client/gui/Interface";
 import { TextButtonControl } from "engine/client/gui/Button";
 import { Signal } from "engine/shared/event/Signal";
 import type { IClientBlockControl } from "client/blocks/ClientBlockControls";
@@ -20,7 +20,7 @@ export class TouchModeButtonControl extends TextButtonControl {
 	constructor(gui: TouchModeButtonControlDefinition) {
 		super(gui);
 
-		this.event.subscribe(this.gui.InputBegan, (input) => {
+		this.event.subscribe(gui.InputBegan, (input) => {
 			if (
 				input.UserInputType !== Enum.UserInputType.MouseButton1 &&
 				input.UserInputType !== Enum.UserInputType.Touch
@@ -29,7 +29,7 @@ export class TouchModeButtonControl extends TextButtonControl {
 
 			this.pressed.Fire();
 		});
-		this.event.subscribe(this.gui.InputEnded, (input) => {
+		this.event.subscribe(gui.InputEnded, (input) => {
 			if (
 				input.UserInputType !== Enum.UserInputType.MouseButton1 &&
 				input.UserInputType !== Enum.UserInputType.Touch
@@ -50,7 +50,7 @@ export class TouchModeButtonControl extends TextButtonControl {
 	}
 
 	static fromTemplate() {
-		const template = Gui.getTemplates<{
+		const template = Interface.getTemplates<{
 			readonly RideMode: { readonly TouchControlButton: TouchModeButtonControlDefinition };
 		}>().RideMode.TouchControlButton;
 

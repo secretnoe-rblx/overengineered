@@ -1,13 +1,17 @@
 import { InstanceComponent } from "engine/shared/component/InstanceComponent";
 import { ServerBlockLogic } from "server/blocks/ServerBlockLogic";
-import { ServerPlayers } from "server/ServerPlayers";
 import { SharedRagdoll } from "shared/SharedRagdoll";
 import type { PlayModeController } from "server/modes/PlayModeController";
+import type { ServerPlayersController } from "server/ServerPlayersController";
 import type { BackMountBlockLogic } from "shared/blocks/blocks/BackMountBlock";
 
 @injectable
 export class BackMountBlockServerLogic extends ServerBlockLogic<typeof BackMountBlockLogic> {
-	constructor(logic: typeof BackMountBlockLogic, @inject playModeController: PlayModeController) {
+	constructor(
+		logic: typeof BackMountBlockLogic,
+		@inject playModeController: PlayModeController,
+		@inject playersController: ServerPlayersController,
+	) {
 		super(logic, playModeController);
 
 		logic.events.initServer.invoked.Connect((player, data) => {
@@ -17,7 +21,14 @@ export class BackMountBlockServerLogic extends ServerBlockLogic<typeof BackMount
 			if (!block.FindFirstChild("PlayerWeldConstraint")) return;
 
 			const c = new InstanceComponent(block);
-			c.event.subscribe(ServerPlayers.PlayerLoaded, (player) => logic.events.initClient.send(data, player));
+			c.event.subscribeMap(
+				playersController.controllers,
+				(player, controller) => {
+					if (!controller) return;
+					logic.events.initClient.send(data, player);
+				},
+				true,
+			);
 			c.enable();
 		});
 

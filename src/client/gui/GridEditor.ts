@@ -43,8 +43,12 @@ class DoubleSwitch extends Control<DoubleSwitchDefinition> {
 }
 
 export type GridEditorControlDefinition = GuiObject & {
-	readonly MoveControl: NumberControlDefinition;
-	readonly RotateControl: NumberControlDefinition;
+	readonly Move: GuiObject & {
+		readonly Control: NumberControlDefinition;
+	};
+	readonly Rotate: GuiObject & {
+		readonly Control: NumberControlDefinition;
+	};
 	readonly RelativeSwitch: DoubleSwitchDefinition;
 };
 export class GridEditorControl extends Control<GridEditorControlDefinition> {
@@ -61,7 +65,7 @@ export class GridEditorControl extends Control<GridEditorControlDefinition> {
 			this.add(new DoubleSwitch(gui.RelativeSwitch, mode));
 		}
 
-		this.add(new NumberControl(gui.MoveControl, moveStep));
-		this.add(new NumberControl(gui.RotateControl, rotateStep));
+		this.add(new NumberControl(gui.Move.Control, moveStep));
+		this.add(new NumberControl(gui.Rotate.Control, rotateStep));
 	}
 }

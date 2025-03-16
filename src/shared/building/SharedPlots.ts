@@ -1,25 +1,25 @@
 import { Workspace } from "@rbxts/services";
 import { SharedPlot } from "shared/building/SharedPlot";
 
-Workspace.WaitForChild("Plots");
+const plotsFolder = Workspace.WaitForChild("Plots");
 
-const count = Workspace.Plots.GetAttribute("count") as number | undefined;
-if (Workspace.Plots.GetChildren().size() !== count) {
+const count = plotsFolder.GetAttribute("count") as number | undefined;
+if (plotsFolder.GetChildren().size() !== count) {
 	print(
-		`!! Target plot count ${count} is not equal to loaded plot count ${Workspace.Plots.GetChildren().size()}, waiting...`,
+		`!! Target plot count ${count} is not equal to loaded plot count ${plotsFolder.GetChildren().size()}, waiting...`,
 	);
 }
-while (Workspace.Plots.GetChildren().size() !== count) {
+while (plotsFolder.GetChildren().size() !== count) {
 	task.wait();
 }
-for (const plot of Workspace.Plots.GetChildren()) {
+for (const plot of plotsFolder.GetChildren()) {
 	plot.WaitForChild("BuildingArea");
 }
 
 /** Reading the plots data */
 export class SharedPlots {
 	static initialize() {
-		const plots: readonly SharedPlot[] = (Workspace.Plots.GetChildren() as unknown as PlotModel[])
+		const plots: readonly SharedPlot[] = (plotsFolder.GetChildren() as unknown as PlotModel[])
 			.map((p) => new SharedPlot(p).with((c) => c.enable()))
 			.sort((left, right) => left.instance.Name < right.instance.Name);
 		const plotComponents: ReadonlyMap<PlotModel, SharedPlot> = new Map(plots.map((p) => [p.instance, p]));
@@ -41,8 +41,8 @@ export class SharedPlots {
 	}
 
 	/** Checks if player is allowed to build on the prodived plot */
-	isBuildingAllowed(plot: PlotModel, player: Player): boolean {
-		return this.plotComponents.get(plot)!.isBuildingAllowed(player);
+	isBuildingAllowed(plot: PlotModel, playerId: number): boolean {
+		return this.plotComponents.get(plot)!.isBuildingAllowed(playerId);
 	}
 
 	/** Returns the player owned plot, if exists */
@@ -57,7 +57,7 @@ export class SharedPlots {
 	}
 	/** Returns the player owned plot, if exists */
 	static staticTryGetPlotByOwnerID(ownerID: number): PlotModel | undefined {
-		for (const plot of Workspace.Plots.GetChildren() as unknown as PlotModel[]) {
+		for (const plot of plotsFolder.GetChildren() as unknown as PlotModel[]) {
 			if ((plot.GetAttribute("ownerid") as number) === ownerID) {
 				return plot;
 			}

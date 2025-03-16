@@ -1,8 +1,8 @@
 import { RunService, Workspace } from "@rbxts/services";
 import { InstanceComponent } from "engine/shared/component/InstanceComponent";
-import { AutoC2SRemoteEvent } from "engine/shared/event/C2SRemoteEvent";
-import { Instances } from "engine/shared/fixes/Instances";
+import { A2SRemoteEvent } from "engine/shared/event/PERemoteEvent";
 import { RemoteEvents } from "shared/RemoteEvents";
+import { ReplicatedAssets } from "shared/ReplicatedAssets";
 import { ModuleCollection } from "shared/weaponProjectiles/WeaponModuleSystem";
 
 export type modifierValue = {
@@ -23,19 +23,10 @@ export type baseWeaponProjectile = {
 	Projectile: BasePart;
 } & Model;
 
-const CANNON_SHELL = Instances.assets
-	.WaitForChild("WeaponProjectiles")
-	.WaitForChild("ShellProjectile") as baseWeaponProjectile;
-
-const PLASMA_BALL = Instances.assets
-	.WaitForChild("WeaponProjectiles")
-	.WaitForChild("PlasmaProjectile") as baseWeaponProjectile;
-const BULLET = Instances.assets
-	.WaitForChild("WeaponProjectiles")
-	.WaitForChild("BulletProjectile") as baseWeaponProjectile;
-const LASER = Instances.assets
-	.WaitForChild("WeaponProjectiles")
-	.WaitForChild("LaserProjectile") as baseWeaponProjectile;
+const CANNON_SHELL = ReplicatedAssets.waitForAsset<baseWeaponProjectile>("WeaponProjectiles", "ShellProjectile");
+const PLASMA_BALL = ReplicatedAssets.waitForAsset<baseWeaponProjectile>("WeaponProjectiles", "PlasmaProjectile");
+const BULLET = ReplicatedAssets.waitForAsset<baseWeaponProjectile>("WeaponProjectiles", "BulletProjectile");
+const LASER = ReplicatedAssets.waitForAsset<baseWeaponProjectile>("WeaponProjectiles", "LaserProjectile");
 
 const projectileFolder = new Instance("Folder", Workspace);
 projectileFolder.Name = "Projectiles";
@@ -43,17 +34,17 @@ projectileFolder.Name = "Projectiles";
 export type DamageType = "KINETIC" | "EXPLOSIVE" | "ENERGY";
 
 export class WeaponProjectile extends InstanceComponent<BasePart> {
-	static readonly spawn = new AutoC2SRemoteEvent<{
-		readonly startPosition: Vector3;
-		readonly projectileType: DamageType;
-		readonly projectilePart: BasePart;
-		readonly baseVelocity: Vector3;
-		readonly baseDamage: number;
-		readonly lifetime?: number; //<--- seconds
-		readonly modifier: projectileModifier; // <------ calculate it yourself!
-	}>("projectile_spawn", "RemoteEvent");
+	// static readonly spawn = new AutoC2SRemoteEvent<{
+	// 	readonly startPosition: Vector3;
+	// 	readonly projectileType: DamageType;
+	// 	readonly projectilePart: BasePart;
+	// 	readonly baseVelocity: Vector3;
+	// 	readonly baseDamage: number;
+	// 	readonly lifetime?: number; //<--- seconds
+	// 	readonly modifier: projectileModifier; // <------ calculate it yourself!
+	// }>("projectile_spawn", "RemoteEvent");
 
-	static readonly sync_hit = new AutoC2SRemoteEvent<{
+	static readonly sync_hit = new A2SRemoteEvent<{
 		//todo: finish sync
 		readonly startPosition: Vector3;
 		readonly projectileType: DamageType;
@@ -63,7 +54,7 @@ export class WeaponProjectile extends InstanceComponent<BasePart> {
 		readonly lifetime?: number; //<--- seconds
 	}>("projectile_sync_hit", "RemoteEvent");
 
-	static readonly sync_position = new AutoC2SRemoteEvent<{
+	static readonly sync_position = new A2SRemoteEvent<{
 		//todo: finish sync
 		readonly projectile: WeaponProjectile;
 	}>("projectile_sync_position", "RemoteEvent");

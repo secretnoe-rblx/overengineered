@@ -1,18 +1,18 @@
 import { Players, RunService, UserInputService } from "@rbxts/services";
-import { Gui } from "client/gui/Gui";
-import { rootComponents } from "client/test/RootComponents";
-import { ButtonControl } from "engine/client/gui/Button";
+import { Interface } from "client/gui/Interface";
 import { Control } from "engine/client/gui/Control";
 import { InputController } from "engine/client/InputController";
+import { Component } from "engine/shared/component/Component";
 import { Element } from "engine/shared/Element";
+import { PlayerRank } from "engine/shared/PlayerRank";
 import { Colors } from "shared/Colors";
-import { GameDefinitions } from "shared/data/GameDefinitions";
+import type { DebuggableComponent } from "engine/shared/component/Component";
 
 type TreeControlDefinition = GuiObject & {
 	readonly Main: GuiButton;
 	readonly Children: Frame;
 };
-class TreeControl extends Control<TreeControlDefinition, Control> {
+class TreeControl extends Control<TreeControlDefinition> {
 	static createChildList(main: GuiButton): TreeControl {
 		const createElement = Element.create;
 		const gui = createElement(
@@ -46,24 +46,27 @@ class TreeControl extends Control<TreeControlDefinition, Control> {
 		return new TreeControl(gui);
 	}
 
-	private readonly main: ButtonControl;
+	private readonly main: Control<GuiButton>;
 	readonly childContainer: Control;
 
 	constructor(gui: TreeControlDefinition) {
 		super(gui);
-		this.main = this.add(new ButtonControl(gui.Main));
+		this.main = this.add(new Control(gui.Main));
 		this.childContainer = this.add(new Control(this.gui.Children));
 
 		this.main.instance.BackgroundColor3 = Colors.accent;
-		this.event.subscribe(this.main.activated, () => {
-			if (this.childContainer.isVisible()) {
-				this.main.instance.BackgroundColor3 = Colors.accentDark;
-				this.childContainer.hide();
-			} else {
-				this.main.instance.BackgroundColor3 = Colors.accent;
-				this.childContainer.show();
-			}
-		});
+
+		this.main.parent(
+			new Control(this.main.instance).addButtonAction(() => {
+				if (this.childContainer.isInstanceVisible()) {
+					this.main.instance.BackgroundColor3 = Colors.accentDark;
+					this.childContainer.hide();
+				} else {
+					this.main.instance.BackgroundColor3 = Colors.accent;
+					this.childContainer.show();
+				}
+			}),
+		);
 	}
 }
 
@@ -81,7 +84,7 @@ const create = (): TreeControl => {
 			AutomaticCanvasSize: Enum.AutomaticSize.Y,
 			Parent: createElement("ScreenGui", {
 				Name: "DebugSCREEN",
-				Parent: Gui.getPlayerGui(),
+				Parent: Interface.getPlayerGui(),
 			}),
 		},
 		{
@@ -112,10 +115,10 @@ const create = (): TreeControl => {
 };
 
 let tree: TreeControl | undefined;
-const update = () => {
+const update = (root: DebuggableComponent) => {
 	if (!tree) throw "what";
 
-	const add = (component: object | IDebuggableComponent, tree: TreeControl) => {
+	const add = (component: object | DebuggableComponent, tree: TreeControl) => {
 		const childtree = tree.childContainer.add(
 			TreeControl.createChildList(
 				Element.create("TextButton", {
@@ -135,14 +138,12 @@ const update = () => {
 		}
 	};
 
-	for (const root of rootComponents) {
-		add(root, tree);
-	}
+	add(root, tree);
 };
-const toggle = () => {
+const toggle = (root: DebuggableComponent) => {
 	if (!tree) {
 		tree = create();
-		update();
+		update(root);
 		tree.show();
 		return;
 	} else {
@@ -151,7 +152,7 @@ const toggle = () => {
 	}
 };
 
-const launch = RunService.IsStudio() || GameDefinitions.isAdmin(Players.LocalPlayer);
+const launch = RunService.IsStudio() || PlayerRank.isAdmin(Players.LocalPlayer);
 if (!launch) new Instance("BindableEvent").Event.Wait();
 task.wait(0.5); // wait for the controls to enable
 
@@ -160,5 +161,5 @@ UserInputService.InputBegan.Connect((input) => {
 	if (input.KeyCode !== Enum.KeyCode.F6) return;
 	if (!InputController.isShiftPressed()) return;
 
-	toggle();
+	toggle(new Component()); // TODO:
 });

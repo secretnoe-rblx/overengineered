@@ -1,17 +1,18 @@
 import { ByteTextBoxControl } from "client/gui/controls/ByteTextBoxControl";
-import { Gui } from "client/gui/Gui";
-import { Popup } from "client/gui/Popup";
+import { Interface } from "client/gui/Interface";
 import { ConfirmPopup } from "client/gui/popup/ConfirmPopup";
 import { TextPopup } from "client/gui/popup/TextPopup";
 import { LogControl } from "client/gui/static/LogControl";
+import { AutoUIScaledComponent } from "engine/client/gui/AutoUIScaledControl";
 import { ButtonControl } from "engine/client/gui/Button";
 import { Control } from "engine/client/gui/Control";
 import { TextBoxControl } from "engine/client/gui/TextBoxControl";
-import { TransformService } from "engine/shared/component/TransformService";
+import { ComponentChildren } from "engine/shared/component/ComponentChildren";
 import { Colors } from "shared/Colors";
 import { VectorUtils } from "shared/utils/VectorUtils";
+import type { Popup, PopupController } from "client/gui/PopupController";
 
-export type MemoryEditorPopupDefinition = GuiObject & {
+type MemoryEditorPopupDefinition = GuiObject & {
 	readonly Heading: Frame & {
 		readonly CloseButton: TextButton;
 		readonly TitleLabel: TextLabel;
@@ -22,7 +23,7 @@ export type MemoryEditorPopupDefinition = GuiObject & {
 	readonly Content: MemoryEditorRecordsDefinition;
 };
 
-export type MemoryEditorRecordDefinition = Frame & {
+type MemoryEditorRecordDefinition = Frame & {
 	readonly b0: TextBox;
 	readonly b1: TextBox;
 	readonly b2: TextBox;
@@ -43,11 +44,13 @@ export type MemoryEditorRecordDefinition = Frame & {
 	readonly AsciiLabel: TextLabel;
 };
 
-export type MemoryEditorRecordsDefinition = ScrollingFrame & {
+type MemoryEditorRecordsDefinition = ScrollingFrame & {
 	Template: MemoryEditorRecordDefinition;
 };
 
-class MemoryEditorRow extends Control<MemoryEditorRecordDefinition, ByteTextBoxControl> {
+class MemoryEditorRow extends Control<MemoryEditorRecordDefinition> {
+	private readonly columns;
+
 	constructor(
 		gui: MemoryEditorRecordDefinition,
 		private readonly popup: MemoryEditorPopup,
@@ -55,6 +58,8 @@ class MemoryEditorRow extends Control<MemoryEditorRecordDefinition, ByteTextBoxC
 		recolorPreviousUntil: (index: number) => void,
 	) {
 		super(gui);
+
+		this.columns = this.parent(new ComponentChildren<ByteTextBoxControl>().withParentInstance(gui));
 
 		this.onEnable(() => {
 			// Address
@@ -70,7 +75,7 @@ class MemoryEditorRow extends Control<MemoryEditorRecordDefinition, ByteTextBoxC
 				tb.TextColor3 = popup.data[row * 16 + i] !== undefined ? Colors.white : Color3.fromRGB(180, 180, 180);
 
 				const idx = i;
-				const control = this.add(new ByteTextBoxControl(tb));
+				const control = this.columns.add(new ByteTextBoxControl(tb));
 				control.value.set(popup.data[row * 16 + i] ?? 0);
 				control.submitted.Connect((value) => {
 					tb.TextColor3 = Colors.white;
@@ -98,7 +103,7 @@ class MemoryEditorRow extends Control<MemoryEditorRecordDefinition, ByteTextBoxC
 	}
 
 	updateColor(index: number) {
-		this.getChildren()[index].instance.TextColor3 =
+		this.columns.getAll()[index].instance.TextColor3 =
 			this.popup.data[this.row * 16 + index] !== undefined ? Colors.white : Color3.fromRGB(180, 180, 180);
 	}
 }
@@ -123,8 +128,7 @@ class MemoryEditorRows extends Control<MemoryEditorRecordsDefinition> {
 		this.template = this.asTemplate(this.gui.Template, false);
 		this.gui.Template.Visible = false;
 
-		this.rows = new Control<GuiObject, MemoryEditorRow>(this.gui);
-		this.add(this.rows);
+		this.rows = this.parent(new ComponentChildren<MemoryEditorRow>().withParentInstance(this.gui));
 
 		// Dynamic scroll
 		this.gui.GetPropertyChangedSignal("CanvasPosition").Connect(() => {
@@ -155,7 +159,7 @@ class MemoryEditorRows extends Control<MemoryEditorRecordsDefinition> {
 
 		const loadBelow = () => {
 			if (this.rowCursor >= this.popup.bytesLimit / 16) return;
-			if (this.rows.getChildren().size() < this.contentSize) return;
+			if (this.rows.getAll().size() < this.contentSize) return;
 			this.rowCursor += this.getContentSection();
 
 			this.spawnRows();
@@ -176,7 +180,7 @@ class MemoryEditorRows extends Control<MemoryEditorRecordsDefinition> {
 			const row = i + this.rowCursor;
 			if (row >= this.popup.bytesLimit / 16) break;
 
-			const children = this.rows.getChildren();
+			const children = this.rows.getAll();
 			this.rows.add(
 				new MemoryEditorRow(this.template(), this.popup, row, (index) => {
 					for (let i = 0; i < math.ceil(index / 16) + 2; i++) {
@@ -190,28 +194,19 @@ class MemoryEditorRows extends Control<MemoryEditorRecordsDefinition> {
 	}
 }
 
-export class MemoryEditorPopup extends Popup<MemoryEditorPopupDefinition> {
-	static showPopup(bytesLimit: number, data: number[], callback: (data: number[]) => void) {
-		const popup = new MemoryEditorPopup(
-			Gui.getGameUI<{
-				Popup: {
-					MemoryEditor: MemoryEditorPopupDefinition;
-				};
-			}>().Popup.MemoryEditor.Clone(),
-			bytesLimit,
-			data,
-			callback,
-		);
-
-		popup.show();
-	}
+@injectable
+export class MemoryEditorPopup extends Control<MemoryEditorPopupDefinition> {
+	@inject private readonly parentScreen: Popup = undefined!;
+	@inject private readonly popupController: PopupController = undefined!;
 
 	constructor(
-		gui: MemoryEditorPopupDefinition,
 		readonly bytesLimit: number,
 		readonly data: number[],
 		callback: (data: number[]) => void,
 	) {
+		const gui = Interface.getGameUI<{
+			Popup: { MemoryEditor: MemoryEditorPopupDefinition };
+		}>().Popup.MemoryEditor.Clone();
 		super(gui);
 
 		if (bytesLimit % 128 !== 0) {
@@ -221,77 +216,81 @@ export class MemoryEditorPopup extends Popup<MemoryEditorPopupDefinition> {
 			return;
 		}
 
-		const rows = this.add(new MemoryEditorRows(this.gui.Content, this));
+		const rows = this.parent(new MemoryEditorRows(gui.Content, this));
+
+		// Clear data button
+		this.parent(
+			new ButtonControl(gui.ClearButton, () => {
+				this.popupController.showPopup(
+					new ConfirmPopup(
+						"Clear memory store?",
+						"It will be impossible to undo this action",
+						() => {
+							data.clear();
+							rows.spawnRows();
+						},
+						() => {},
+					),
+				);
+			}),
+		);
 
 		// Update AddressTextBox on scroll
-		this.gui.Content.GetPropertyChangedSignal("CanvasPosition").Connect(() => {
+		gui.Content.GetPropertyChangedSignal("CanvasPosition").Connect(() => {
 			const currentRow =
 				rows.rowCursor +
-				math.round(
-					this.gui.Content.CanvasPosition.Y /
-						(this.gui.Content.Template.Size.Y.Offset * this.parentScreen.getScale()),
-				);
+				math.round(gui.Content.CanvasPosition.Y / (gui.Content.Template.Size.Y.Offset * this.getScale()));
 
-			this.gui.AddressTextBox.Text = this.numberToHex(currentRow * 16);
+			gui.AddressTextBox.Text = this.numberToHex(currentRow * 16);
 		});
 
 		// Close button
-		this.add(
-			new ButtonControl(this.gui.Heading.CloseButton, () => {
+		this.parent(
+			new ButtonControl(gui.Heading.CloseButton, () => {
 				this.hide();
 				callback(data);
 			}),
 		);
 
-		// Clear data button
-		this.add(
-			new ButtonControl(this.gui.ClearButton, () => {
-				ConfirmPopup.showPopup(
-					"Clear memory store?",
-					"It will be impossible to undo this action",
-					() => {
-						data.clear();
-						rows.spawnRows();
-					},
-					() => {},
-				);
-			}),
-		);
-
 		// Import hex button
-		this.add(
-			new ButtonControl(this.gui.ImportButton, () => {
-				TextPopup.showPopup(
-					"IMPORT",
-					"00 01 02 03 04 ...",
-					(text) => {
-						const spacelessText = string.gsub(string.gsub(text, "%s+", "")[0], "\n", "")[0];
+		this.parent(
+			new ButtonControl(gui.ImportButton, () => {
+				this.popupController.showPopup(
+					new TextPopup(
+						"IMPORT",
+						"00 01 02 03 04 ...",
+						(text) => {
+							const spacelessText = string.gsub(string.gsub(text, "%s+", "")[0], "\n", "")[0];
 
-						if (spacelessText.size() % 2 !== 0 || string.match(text, "^[0-9a-fA-F%s]+$")[0] === undefined) {
-							LogControl.instance.addLine("Invalid data format!", Colors.red);
-							return;
-						}
+							if (
+								spacelessText.size() % 2 !== 0 ||
+								string.match(text, "^[0-9a-fA-F%s]+$")[0] === undefined
+							) {
+								LogControl.instance.addLine("Invalid data format!", Colors.red);
+								return;
+							}
 
-						if (spacelessText.size() / 2 > this.bytesLimit) {
-							LogControl.instance.addLine("Too long!", Colors.red);
-							return;
-						}
+							if (spacelessText.size() / 2 > this.bytesLimit) {
+								LogControl.instance.addLine("Too long!", Colors.red);
+								return;
+							}
 
-						data.clear();
-						for (const [value] of spacelessText.gmatch("%S%S")) {
-							data.push(tonumber(value, 16)!);
-						}
+							data.clear();
+							for (const [value] of spacelessText.gmatch("%S%S")) {
+								data.push(tonumber(value, 16)!);
+							}
 
-						rows.spawnRows();
+							rows.spawnRows();
 
-						LogControl.instance.addLine("Import successful!");
-					},
-					() => {},
+							LogControl.instance.addLine("Import successful!");
+						},
+						() => {},
+					),
 				);
 			}),
 		);
 
-		const addressTextBox = new TextBoxControl(this.gui.AddressTextBox);
+		const addressTextBox = new TextBoxControl(gui.AddressTextBox);
 		addressTextBox.text.set(this.numberToHex(0));
 		addressTextBox.submitted.Connect((value) => {
 			if (value === "") {
@@ -314,10 +313,10 @@ export class MemoryEditorPopup extends Popup<MemoryEditorPopupDefinition> {
 				rows.spawnRows();
 
 				// Scroll
-				const scale = this.parentScreen.getScale();
-				this.gui.Content.CanvasPosition = new Vector2(
+				const scale = this.getScale();
+				gui.Content.CanvasPosition = new Vector2(
 					0,
-					this.gui.Content.Template.Size.Y.Offset * math.abs(cursorRow - row) * scale,
+					gui.Content.Template.Size.Y.Offset * math.abs(cursorRow - row) * scale,
 				);
 
 				return;
@@ -325,16 +324,11 @@ export class MemoryEditorPopup extends Popup<MemoryEditorPopupDefinition> {
 
 			LogControl.instance.addLine("Invalid address format!", Colors.red);
 		});
-		this.add(addressTextBox);
-	}
-
-	show() {
-		super.show();
-		TransformService.run(this.instance, (transform) => transform.slideIn("top", 50, { duration: 0.2 }));
+		this.parent(addressTextBox);
 	}
 
 	getScale() {
-		return this.parentScreen.getScale();
+		return this.parentScreen.getComponent(AutoUIScaledComponent).getScale();
 	}
 
 	numberToHex(value: number) {

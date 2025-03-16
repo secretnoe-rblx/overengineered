@@ -1,4 +1,6 @@
 import { Control } from "engine/client/gui/Control";
+import { Colors } from "engine/shared/Colors";
+import { Transforms } from "engine/shared/component/Transforms";
 import { ObservableValue } from "engine/shared/event/ObservableValue";
 import { Signal } from "engine/shared/event/Signal";
 import { MathUtils } from "engine/shared/fixes/MathUtils";
@@ -22,17 +24,17 @@ class NumberObservableValue<T extends number | undefined = number> extends Obser
 type ToNum<TAllowNull extends boolean> = TAllowNull extends false ? number : number | undefined;
 export type NumberTextBoxControlDefinition = TextBox;
 /** Control that represents a number via a text input */
-export class NumberTextBoxControl<TAllowNull extends boolean = false> extends Control<NumberTextBoxControlDefinition> {
+class _NumberTextBoxControl<TAllowNull extends boolean = false> extends Control<NumberTextBoxControlDefinition> {
 	readonly submitted = new Signal<(value: number) => void>();
 	readonly value: ObservableValue<ToNum<TAllowNull>>;
 	private textChanged = false;
 
 	constructor(gui: NumberTextBoxControlDefinition);
-	constructor(gui: NumberTextBoxControlDefinition, value: ObservableValue<number>);
+	constructor(gui: NumberTextBoxControlDefinition, value: ObservableValue<ToNum<TAllowNull>>);
 	constructor(gui: NumberTextBoxControlDefinition, min: number | undefined, max: number | undefined, step?: number);
 	constructor(
 		gui: NumberTextBoxControlDefinition,
-		min?: number | ObservableValue<number>,
+		min?: number | ObservableValue<ToNum<TAllowNull>>,
 		max?: number,
 		step?: number,
 	) {
@@ -71,6 +73,10 @@ export class NumberTextBoxControl<TAllowNull extends boolean = false> extends Co
 
 		let num = tonumber(text);
 		if (num === undefined) {
+			Transforms.create() //
+				.flashColor(this.instance, Colors.red)
+				.run(this.instance);
+
 			if (byLostFocus) {
 				this.gui.Text = tostring(this.value.get() ?? "");
 				return;
@@ -91,3 +97,6 @@ export class NumberTextBoxControl<TAllowNull extends boolean = false> extends Co
 		super.destroy();
 	}
 }
+
+export class NumberTextBoxControl extends _NumberTextBoxControl<false> {}
+export class NumberTextBoxControlNullable extends _NumberTextBoxControl<true> {}

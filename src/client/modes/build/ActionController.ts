@@ -1,90 +1,106 @@
 import { LoadingController } from "client/controller/LoadingController";
 import { LogControl } from "client/gui/static/LogControl";
-import { ClientComponent } from "engine/client/component/ClientComponent";
+import { Action } from "engine/client/Action";
 import { InputController } from "engine/client/InputController";
+import { Component } from "engine/shared/component/Component";
 import { ObservableCollectionArr } from "engine/shared/event/ObservableCollection";
 import { Signal } from "engine/shared/event/Signal";
+import type { MainScreenLayout } from "client/gui/MainScreenLayout";
 
-type Operation = {
+interface Operation {
 	readonly description: string;
 	readonly undo: () => void | Response;
 	readonly redo: () => void | Response;
-};
+}
 
-export class ActionController extends ClientComponent {
-	static readonly instance = new ActionController();
+@injectable
+export class ActionController extends Component {
+	readonly undoAction = this.parent(new Action(() => this.undo()));
+	readonly redoAction = this.parent(new Action(() => this.redo()));
 
 	readonly onUndo = new Signal<(operation: Operation) => void>();
 	readonly onRedo = new Signal<(operation: Operation) => void>();
-	private readonly _history = new ObservableCollectionArr<Operation>();
-	private readonly _redoHistory = new ObservableCollectionArr<Operation>();
-	readonly history = this._history.asReadonly();
-	readonly redoHistory = this._redoHistory.asReadonly();
+	private readonly history = new ObservableCollectionArr<Operation>();
+	private readonly redoHistory = new ObservableCollectionArr<Operation>();
 
-	constructor() {
+	constructor(@inject mainScreen: MainScreenLayout) {
 		super();
+
+		this.undoAction.subCanExecuteFrom({
+			isntLoading: LoadingController.isNotLoading,
+			historyNotEmpty: this.history.createBased((ops) => ops.size() !== 0),
+		});
+		this.redoAction.subCanExecuteFrom({
+			isntLoading: LoadingController.isNotLoading,
+			historyNotEmpty: this.redoHistory.createBased((ops) => ops.size() !== 0),
+		});
+
+		this.parent(mainScreen.registerTopRightButton("Undo")) //
+			.subscribeToAction(this.undoAction)
+			.subscribeVisibilityFrom({ main_enabled: this.enabledState });
+		this.parent(mainScreen.registerTopRightButton("Redo")) //
+			.subscribeToAction(this.redoAction)
+			.subscribeVisibilityFrom({ main_enabled: this.enabledState });
 
 		this.event.onKeyDown("Z", () => {
 			if (!InputController.isCtrlPressed()) return;
-			if (LoadingController.isLoading.get()) return;
-			this.undo();
+			this.undoAction.execute();
 		});
 		this.event.onKeyDown("Y", () => {
 			if (!InputController.isCtrlPressed()) return;
-			if (LoadingController.isLoading.get()) return;
-			this.redo();
+			this.redoAction.execute();
 		});
 	}
 
-	execute<TResult extends Response>(description: string, undo: () => Response, func: () => TResult) {
+	execute<TResult extends Response>(description: string, undo: () => Response, func: () => TResult): TResult {
 		const result = func();
-		if (result.success)
-			this.appendOperation({
-				description,
-				undo,
-				redo: func,
-			});
+		if (result.success) {
+			this.appendOperation({ description, undo, redo: func });
+		}
 
 		return result;
 	}
 
-	appendRedo(operation: Operation) {
-		this._redoHistory.push(operation);
+	appendRedo(operation: Operation): void {
+		this.redoHistory.push(operation);
 	}
-	appendOperation(operation: Operation) {
-		this._history.push(operation);
-		this._redoHistory.clear();
+	appendOperation(operation: Operation): void {
+		this.history.push(operation);
+		this.redoHistory.clear();
 	}
 
-	redo() {
-		const operation = this._redoHistory.pop();
-		if (!operation) return false;
+	clearHistory(): void {
+		this.history.clear();
+		this.redoHistory.clear();
+	}
 
-		this._history.push(operation);
+	private redo(): void {
+		const operation = this.redoHistory.pop();
+		if (!operation) return;
+
+		this.history.push(operation);
 		const response = operation.redo();
 		if (response && !response.success) {
 			LogControl.instance.addLine(`Error redoing "${operation.description}": ${response.message}`);
-			return true;
+			return;
 		}
 
 		this.onRedo.Fire(operation);
 		LogControl.instance.addLine(`Redone "${operation.description}"`);
-		return true;
 	}
 
-	undo() {
-		const operation = this._history.pop();
-		if (!operation) return false;
+	private undo(): void {
+		const operation = this.history.pop();
+		if (!operation) return;
 
-		this._redoHistory.push(operation);
+		this.redoHistory.push(operation);
 		const response = operation.undo();
 		if (response && !response.success) {
 			LogControl.instance.addLine(`Error undoing "${operation.description}": ${response.message}`);
-			return true;
+			return;
 		}
 
 		this.onUndo.Fire(operation);
 		LogControl.instance.addLine(`Undone "${operation.description}"`);
-		return true;
 	}
 }

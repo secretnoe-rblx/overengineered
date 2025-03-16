@@ -92,7 +92,7 @@ export namespace BuildingManager {
 		pivot: CFrame,
 		scale: Vector3,
 	): boolean {
-		return serverBlockCanBePlacedAt(plot, block, pivot, scale, Players.LocalPlayer);
+		return serverBlockCanBePlacedAt(plot, block, pivot, scale, Players.LocalPlayer.UserId);
 	}
 
 	export function serverBlockCanBePlacedAt(
@@ -100,9 +100,9 @@ export namespace BuildingManager {
 		block: { readonly model: Model },
 		pivot: CFrame,
 		scale: Vector3,
-		player: Player,
+		playerId: number,
 	): boolean {
-		if (!plot.isBuildingAllowed(player ?? Players.LocalPlayer)) {
+		if (!plot.isBuildingAllowed(playerId)) {
 			return false;
 		}
 

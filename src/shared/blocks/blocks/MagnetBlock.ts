@@ -154,7 +154,7 @@ export const MagnetBlock = {
 	...BlockCreation.defaults,
 	id: "magnet",
 	displayName: "Magnet",
-	description: "A magnet. Attracts to different polarity, repels from same polarity. Only for you though",
+	description: "Block that attracts to different polarity magnets, repels from same. Only for your blocks, though",
 	limit: 200,
 
 	logic: { definition, ctor: Logic },

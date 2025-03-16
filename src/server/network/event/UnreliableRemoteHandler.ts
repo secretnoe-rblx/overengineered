@@ -2,12 +2,12 @@ import { Players, RunService, Workspace } from "@rbxts/services";
 import { HostedService } from "engine/shared/di/HostedService";
 import { ServerBlockLogic } from "server/blocks/ServerBlockLogic";
 import { ServerPartUtils } from "server/plots/ServerPartUtils";
-import { ServerPlayers } from "server/ServerPlayers";
 import { BlockManager } from "shared/building/BlockManager";
 import { RemoteEvents } from "shared/RemoteEvents";
 import { CustomRemotes } from "shared/Remotes";
 import { PartUtils } from "shared/utils/PartUtils";
 import type { PlayModeController } from "server/modes/PlayModeController";
+import type { ServerPlayersController } from "server/ServerPlayersController";
 import type { SpreadingFireController } from "server/SpreadingFireController";
 import type { ExplosionEffect } from "shared/effects/ExplosionEffect";
 import type { ImpactSoundEffect } from "shared/effects/ImpactSoundEffect";
@@ -20,6 +20,7 @@ export class UnreliableRemoteController extends HostedService {
 		@inject spreadingFire: SpreadingFireController,
 		@inject explosionEffect: ExplosionEffect,
 		@inject playModeController: PlayModeController,
+		@inject private readonly playersController: ServerPlayersController,
 	) {
 		super();
 
@@ -44,14 +45,14 @@ export class UnreliableRemoteController extends HostedService {
 			});
 		};
 
-		this.event.subscribe(RunService.Heartbeat, (dT) => {
+		this.event.subscribe(RunService.Heartbeat, () => {
 			if (breakQueue.size() > 0) {
 				const copy = [...breakQueue];
 				breakQueue.clear();
 
 				task.spawn(() => {
 					for (const [player, blocks] of copy) {
-						const players = ServerPlayers.GetLoadedPlayers().filter((p) => p !== player);
+						const players = this.playersController.getPlayers().filter((p) => p !== player);
 						CustomRemotes.physics.normalizeRootparts.send(players, { parts: blocks });
 						impactSoundEffect.send(blocks[0], { blocks, index: undefined });
 
@@ -72,7 +73,7 @@ export class UnreliableRemoteController extends HostedService {
 						impactSoundEffect.send(block, { blocks: [block], index: undefined });
 						ServerPartUtils.BreakJoints(block);
 					}
-					const players = ServerPlayers.GetLoadedPlayers();
+					const players = this.playersController.getPlayers();
 					CustomRemotes.physics.normalizeRootparts.send(players, { parts: copy });
 				});
 			}

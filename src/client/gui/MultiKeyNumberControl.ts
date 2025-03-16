@@ -1,13 +1,14 @@
-import { KeyOrStringChooserControl } from "client/gui/controls/KeyOrStringChooserControl";
+import { KeyOrStringChooserControl } from "client/gui/controls/KeyChooserControl";
 import { NumberTextBoxControl } from "client/gui/controls/NumberTextBoxControl";
-import { Tooltip } from "client/gui/controls/Tooltip";
 import { ButtonControl } from "engine/client/gui/Button";
 import { Control } from "engine/client/gui/Control";
+import { PartialControl } from "engine/client/gui/PartialControl";
 import { ComponentChildren } from "engine/shared/component/ComponentChildren";
 import { ObservableValue } from "engine/shared/event/ObservableValue";
 import { ArgsSignal } from "engine/shared/event/Signal";
 import { SubmittableValue } from "engine/shared/event/SubmittableValue";
-import type { KeyOrStringChooserControlDefinition } from "client/gui/controls/KeyOrStringChooserControl";
+import { Objects } from "engine/shared/fixes/Objects";
+import type { KeyChooserControlDefinition } from "client/gui/controls/KeyChooserControl";
 import type { NumberTextBoxControlDefinition } from "client/gui/controls/NumberTextBoxControl";
 
 // eslint-disable-next-line prettier/prettier
@@ -31,7 +32,7 @@ export type MultiKeyPart = {
 
 type MultiKeyPartControlDefinition = GuiObject & {
 	readonly Number: NumberTextBoxControlDefinition;
-	readonly Button: Frame & { Button: KeyOrStringChooserControlDefinition };
+	readonly Button: KeyChooserControlDefinition;
 	readonly DeleteButton: GuiButton;
 };
 class MultiKeyPartControl extends Control<MultiKeyPartControlDefinition> {
@@ -52,10 +53,10 @@ class MultiKeyPartControl extends Control<MultiKeyPartControlDefinition> {
 		const value = new SubmittableValue(new ObservableValue<MultiKeyPart>({ key, value: num }));
 		this.value = value.asHalfReadonly();
 
-		const keyChooser = this.add(new KeyOrStringChooserControl(gui.Button.Button));
+		const keyChooser = this.parent(new KeyOrStringChooserControl(gui.Button));
 		keyChooser.submitted.Connect((key) => value.submit({ ...value.get(), key }));
 
-		const numbertb = this.add(new NumberTextBoxControl(gui.Number, min, max));
+		const numbertb = this.parent(new NumberTextBoxControl(gui.Number, min, max));
 		numbertb.submitted.Connect((num) => value.submit({ ...value.get(), value: num }));
 
 		this.event.subscribeObservable(
@@ -67,48 +68,39 @@ class MultiKeyPartControl extends Control<MultiKeyPartControlDefinition> {
 			true,
 		);
 
-		const delButton = this.add(new ButtonControl(gui.DeleteButton, () => this._deleted.Fire()));
-		Tooltip.init(delButton, "Remove the key from the list");
+		const delButton = this.parent(new Control(gui.DeleteButton));
+		this.parent(new ButtonControl(delButton.instance, () => this._deleted.Fire()));
+		delButton.setTooltipText("Remove the key from the list");
 	}
 }
 
-export type MultiKeyNumberControlDefinition = GuiObject & {
-	readonly Template: GuiObject & {
-		readonly Number: NumberTextBoxControlDefinition;
-		readonly Button: Frame & { Button: KeyOrStringChooserControlDefinition };
-		readonly DeleteButton: GuiButton;
-	};
-	readonly Add: GuiObject & {
-		readonly Button: GuiButton;
-	};
+export type MultiKeyNumberControlDefinition = GuiObject;
+export type MultiKeyNumberControlParts = {
+	readonly Template: MultiKeyPartControlDefinition;
+	readonly AddButton: GuiButton;
 };
-export class MultiKeyNumberControl extends Control<MultiKeyNumberControlDefinition> {
-	private readonly _submitted = new ArgsSignal<[value: readonly MultiKeyPart[]]>();
-	readonly submitted = this._submitted.asReadonly();
+export class MultiKeyNumberControl extends PartialControl<MultiKeyNumberControlParts, GuiObject> {
+	readonly v;
 
 	constructor(
-		gui: MultiKeyNumberControlDefinition,
-		config: readonly MultiKeyPart[],
+		gui: GuiObject,
 		defaultValue: number,
 		numberMin: number | undefined,
 		numberMax: number | undefined,
+		parts?: Partial<MultiKeyNumberControlParts>,
 	) {
-		super(gui);
+		super(gui, parts);
 
-		const template = this.asTemplate(gui.Template, true);
+		const v = new SubmittableValue(new ObservableValue<readonly MultiKeyPart[]>(Objects.empty));
+		this.v = v.asHalfReadonly();
 
-		const children = new ComponentChildren<MultiKeyPartControl>(this);
-		children.onAdded.Connect((control) => (control.instance.Parent = this.instance));
+		const template = this.asTemplate(this.parts.Template, true);
+		const children = this.parent(new ComponentChildren<MultiKeyPartControl>().withParentInstance(gui));
 
-		const submit = () => {
-			const values = children.getAll().map((c) => c.value.get());
-
-			config = values;
-			this._submitted.Fire(values);
-		};
+		const submit = () => v.submit(children.getAll().map((c) => c.value.get()));
 
 		const add = (key?: string | KeyCode, value?: number) => {
-			key ??= generateKey(config);
+			key ??= generateKey(v.get());
 			if (!key) return;
 
 			value ??= defaultValue;
@@ -136,12 +128,19 @@ export class MultiKeyNumberControl extends Control<MultiKeyNumberControlDefiniti
 			submit();
 		};
 
-		for (const { key, value } of config) {
-			add(key, value);
-		}
+		this.event.subscribeObservable(
+			v.value,
+			(v) => {
+				children.clear();
+				for (const { key, value } of v) {
+					add(key, value);
+				}
+			},
+			true,
+		);
 
-		this.add(
-			new ButtonControl(gui.Add.Button, () => {
+		this.parent(
+			new ButtonControl(this.parts.AddButton, () => {
 				add();
 				submit();
 			}),

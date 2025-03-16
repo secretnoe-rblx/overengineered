@@ -1,13 +1,12 @@
 import { GuiService } from "@rbxts/services";
-import { Gui } from "client/gui/Gui";
-import { Popup } from "client/gui/Popup";
-import { ButtonControl, TextButtonControl } from "engine/client/gui/Button";
+import { Interface } from "client/gui/Interface";
+import { TextButtonControl } from "engine/client/gui/Button";
 import { Control } from "engine/client/gui/Control";
 import { TextBoxControl } from "engine/client/gui/TextBoxControl";
 import { Signal } from "engine/shared/event/Signal";
 import type { ButtonDefinition, TextButtonDefinition } from "engine/client/gui/Button";
 
-export type SelectButtonPopupDefinition = GuiObject & {
+type SelectButtonPopupDefinition = GuiObject & {
 	readonly Content: {
 		readonly ScrollingFrame: ScrollingFrame & {
 			readonly ButtonTemplate: TextButtonDefinition;
@@ -23,53 +22,40 @@ export type SelectButtonPopupDefinition = GuiObject & {
 	};
 };
 
-export class SelectButtonPopup<const TAllowCustomString extends boolean> extends Popup<SelectButtonPopupDefinition> {
+class _SelectButtonPopup<TAllowCustomString extends boolean> extends Control<SelectButtonPopupDefinition> {
 	private readonly buttonPressed = new Signal<(key: KeyCode) => void>();
 	private readonly cancelButton;
 	private readonly closeButton;
 
-	static showPopup<const TAllowCustomString extends boolean>(
-		allowCustomString: TAllowCustomString,
-		confirmFunc: (key: TAllowCustomString extends true ? string : KeyCode) => void,
-		cancelFunc: () => void,
-	) {
-		const popup = new SelectButtonPopup(
-			Gui.getGameUI<{
-				Popup: { MobileSelectButton: SelectButtonPopupDefinition };
-			}>().Popup.MobileSelectButton.Clone(),
-			allowCustomString,
-			confirmFunc,
-			cancelFunc,
-		);
-
-		popup.show();
-	}
 	constructor(
-		gui: SelectButtonPopupDefinition,
 		allowCustomString: TAllowCustomString,
 		confirmFunc: (key: TAllowCustomString extends true ? string : KeyCode) => void,
 		cancelFunc: () => void,
 	) {
+		const gui = Interface.getGameUI<{
+			Popup: { MobileSelectButton: SelectButtonPopupDefinition };
+		}>().Popup.MobileSelectButton.Clone();
 		super(gui);
-		this.cancelButton = this.add(new ButtonControl(gui.Buttons.CancelButton));
-		this.closeButton = this.add(new ButtonControl(gui.Head.CloseButton));
 
-		const customTextBox = this.add(new TextBoxControl(gui.Content.CustomTextBox));
-		const acceptButton = this.add(new ButtonControl(gui.Content.AcceptButton));
+		this.cancelButton = this.parent(new Control(gui.Buttons.CancelButton));
+		this.closeButton = this.parent(new Control(gui.Head.CloseButton));
+
+		const customTextBox = this.parent(new TextBoxControl(gui.Content.CustomTextBox));
+		const acceptButton = this.parent(new Control(gui.Content.AcceptButton));
 		if (allowCustomString) {
-			acceptButton.activated.Connect(() => {
+			acceptButton.addButtonAction(() => {
 				this.hide();
 				confirmFunc(customTextBox.text.get() as KeyCode);
 			});
 		} else {
 			customTextBox.instance.Interactable = false;
-			acceptButton.setInteractable(false);
+			acceptButton.setButtonInteractable(false);
 		}
 
 		const list = new Control(gui.Content.ScrollingFrame);
-		this.add(list);
+		this.parent(list);
 
-		const template = this.asTemplate(this.gui.Content.ScrollingFrame.ButtonTemplate);
+		const template = this.asTemplate(gui.Content.ScrollingFrame.ButtonTemplate);
 
 		const keys = Enum.KeyCode.GetEnumItems().filter((value) => {
 			// numbers
@@ -115,17 +101,26 @@ export class SelectButtonPopup<const TAllowCustomString extends boolean> extends
 			this.hide();
 			confirmFunc(key);
 		});
-		this.event.subscribe(this.cancelButton.activated, () => {
+		this.cancelButton.addButtonAction(() => {
 			this.hide();
 			cancelFunc();
 		});
-		this.event.subscribe(this.closeButton.activated, () => {
+		this.closeButton.addButtonAction(() => {
 			this.hide();
 			cancelFunc();
 		});
-	}
 
-	protected prepareGamepad(): void {
-		GuiService.SelectedObject = this.cancelButton.instance;
+		this.event.onPrepareGamepad(() => (GuiService.SelectedObject = this.cancelButton.instance));
+	}
+}
+
+export class SelectButtonPopup extends _SelectButtonPopup<false> {
+	constructor(confirmFunc: (key: KeyCode) => void, cancelFunc: () => void) {
+		super(false, confirmFunc, cancelFunc);
+	}
+}
+export class SelectButtonPopupWithCustomString extends _SelectButtonPopup<true> {
+	constructor(confirmFunc: (key: KeyCode | string) => void, cancelFunc: () => void) {
+		super(true, confirmFunc, cancelFunc);
 	}
 }

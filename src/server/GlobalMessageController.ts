@@ -1,8 +1,7 @@
 import { MessagingService, RunService } from "@rbxts/services";
 import { HostedService } from "engine/shared/di/HostedService";
 import { isNotAdmin_AutoBanned } from "server/BanAdminExploiter";
-import { registerOnRemoteEvent } from "server/network/event/RemoteHandler";
-import { Remotes } from "shared/Remotes";
+import { CustomRemotes } from "shared/Remotes";
 
 export class GlobalMessageController extends HostedService {
 	constructor() {
@@ -14,31 +13,31 @@ export class GlobalMessageController extends HostedService {
 					this.event.eventHandler.register(
 						MessagingService.SubscribeAsync("global_message", (message) => {
 							const msg = message as unknown as { text: string; color: Color3; duration: number };
-							Remotes.Server.GetNamespace("Admin")
-								.Get("SendMessage")
-								.SendToAllPlayers(msg.text, msg.color, msg.duration);
+							CustomRemotes.admin.sendMessage.s2c.send("everyone", {
+								text: msg.text,
+								color: msg.color,
+								duration: msg.duration,
+							});
 						}),
 					);
 				});
 			}
 		});
 
-		registerOnRemoteEvent("Admin", "SendMessage", this.sendMessageAsAdmin.bind(this));
-	}
+		CustomRemotes.admin.sendMessage.c2s.invoked.Connect((player, { text, color, duration }) => {
+			if (isNotAdmin_AutoBanned(player, "globalMessage")) {
+				return;
+			}
 
-	private sendMessageAsAdmin(player: Player, text: string, color?: Color3, duration?: number) {
-		if (isNotAdmin_AutoBanned(player, "globalMessage")) {
-			return;
-		}
-
-		task.spawn(() => {
-			MessagingService.PublishAsync("global_message", {
-				text: text,
-				color: color,
-				duration: duration,
+			task.spawn(() => {
+				MessagingService.PublishAsync("global_message", {
+					text: text,
+					color: color,
+					duration: duration,
+				});
 			});
-		});
 
-		Remotes.Server.GetNamespace("Admin").Get("SendMessage").SendToAllPlayers(text, color, duration);
+			CustomRemotes.admin.sendMessage.s2c.send("everyone", { text, color, duration });
+		});
 	}
 }

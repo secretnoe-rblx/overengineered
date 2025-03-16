@@ -1,21 +1,26 @@
-import { Workspace } from "@rbxts/services";
-import { BadgeController } from "server/BadgeController";
+import { DataStoreService, Workspace } from "@rbxts/services";
+// import { BadgeController } from "server/BadgeController";
+import { BackupBackedDatabaseBackend } from "engine/server/backend/BackupBackedDatabaseBackend";
+import { NetworkLogging } from "engine/server/network/NetworkLogging";
 import { BaseGame } from "server/BaseGame";
 import { ServerBlockLogicController } from "server/blocks/ServerBlockLogicController";
-import { ServerBuildingRequestController } from "server/building/ServerBuildingRequestController";
+import { ExternalDatabaseBackendPlayers, ExternalDatabaseBackendSlots } from "server/database/ExternalDatabaseBackend";
 import { PlayerDatabase } from "server/database/PlayerDatabase";
 import { SlotDatabase } from "server/database/SlotDatabase";
 import { PlayModeController as PlayModeController } from "server/modes/PlayModeController";
 import { UnreliableRemoteController } from "server/network/event/UnreliableRemoteHandler";
-import { PlayerDataController } from "server/PlayerDataController";
 import { PlayersCollision } from "server/PlayersCollision";
 import { ServerPlots } from "server/plots/ServerPlots";
 import { RagdollController } from "server/RagdollController";
+import { ServerEffectCreator } from "server/ServerEffectCreator";
+import { ServerPlayersController } from "server/ServerPlayersController";
 import { SpreadingFireController } from "server/SpreadingFireController";
+import { UsernameGuiController } from "server/UsernameGuiController";
 import { SharedPlots } from "shared/building/SharedPlots";
 import { RemoteEvents } from "shared/RemoteEvents";
 import { CreateSandboxBlocks } from "shared/SandboxBlocks";
 import type { GameHostBuilder } from "engine/shared/GameHostBuilder";
+import type { EffectCreator } from "shared/effects/EffectBase";
 
 export namespace SandboxGame {
 	export function initialize(builder: GameHostBuilder) {
@@ -24,6 +29,7 @@ export namespace SandboxGame {
 		}
 
 		BaseGame.initialize(builder);
+		builder.services.registerService(NetworkLogging);
 
 		// FIXME: Walkaround proxy is down, should we set up our own?
 		// builder.services.registerService(DiscordLogging).withArgs([
@@ -35,24 +41,43 @@ export namespace SandboxGame {
 		// 	},
 		// ]);
 
-		builder.services.registerSingletonClass(PlayerDatabase);
-		builder.services.registerSingletonClass(SlotDatabase);
-		builder.services.registerService(PlayerDataController);
+		builder.services
+			.registerSingletonClass(PlayerDatabase) //
+			.withArgs([
+				new BackupBackedDatabaseBackend(
+					new ExternalDatabaseBackendPlayers(),
+					DataStoreService.GetDataStore("players-bkp"),
+				),
+			]);
+		builder.services
+			.registerSingletonClass(SlotDatabase) //
+			.withArgs([
+				new BackupBackedDatabaseBackend(
+					new ExternalDatabaseBackendSlots(),
+					DataStoreService.GetDataStore("slots-bkp"),
+				),
+			]);
+
+		builder.services.registerService(ServerPlayersController);
 
 		builder.services.registerSingletonClass(SpreadingFireController);
+
+		builder.services
+			.registerSingletonClass(ServerEffectCreator) //
+			.as<EffectCreator>();
 		RemoteEvents.initializeVisualEffects(builder);
 
 		builder.services.registerSingletonFunc(() => SharedPlots.initialize());
 		builder.services.registerSingletonFunc(CreateSandboxBlocks);
 
 		builder.services.registerService(ServerPlots);
+		builder.services.registerService(UsernameGuiController);
 		PlayModeController.initialize(builder);
-		builder.services.registerService(ServerBuildingRequestController);
 		builder.services.registerService(ServerBlockLogicController);
 		builder.services.registerService(UnreliableRemoteController);
 		builder.services.registerService(RagdollController);
 		builder.services.registerService(PlayersCollision);
 
-		BadgeController.initializeIfProd(builder);
+		// BadgeController.initializeIfProd(builder);
 	}
 }

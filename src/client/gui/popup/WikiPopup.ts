@@ -1,11 +1,10 @@
 import { ReplicatedStorage } from "@rbxts/services";
-import { Gui } from "client/gui/Gui";
-import { Popup } from "client/gui/Popup";
+import { Interface } from "client/gui/Interface";
 import { WikiCategoriesControl, WikiContentControl } from "client/wiki/WikiControl";
 import { ButtonControl } from "engine/client/gui/Button";
+import { Control } from "engine/client/gui/Control";
 import { LocalPlayer } from "engine/client/LocalPlayer";
 import type { WikiCategoriesControlDefinition, WikiContentControlDefinition } from "client/wiki/WikiControl";
-import type { GameHostBuilder } from "engine/shared/GameHostBuilder";
 
 namespace WikiStorage {
 	let cache: readonly WikiEntry[] | undefined = undefined;
@@ -52,7 +51,7 @@ namespace WikiStorage {
 	}
 }
 
-export type WikiPopupDefinition = GuiObject & {
+type WikiPopupDefinition = GuiObject & {
 	readonly Heading: Frame & {
 		readonly CloseButton: TextButton;
 		readonly TitleLabel: TextLabel;
@@ -63,31 +62,28 @@ export type WikiPopupDefinition = GuiObject & {
 	};
 };
 
-@injectable
-export class WikiPopup extends Popup<WikiPopupDefinition> {
-	static addAsService(host: GameHostBuilder) {
-		const gui = Gui.getGameUI<{ Popup: { Wiki: WikiPopupDefinition } }>().Popup.Wiki;
-		host.services.registerTransientFunc((ctx) => ctx.resolveForeignClass(this, [gui.Clone()]));
-	}
-
-	constructor(gui: WikiPopupDefinition, @inject blockList: BlockList, @inject di: DIContainer) {
+export class WikiPopup extends Control<WikiPopupDefinition> {
+	constructor() {
+		const gui = Interface.getGameUI<{ Popup: { Wiki: WikiPopupDefinition } }>().Popup.Wiki.Clone();
 		super(gui);
 
-		this.add(new ButtonControl(gui.Heading.CloseButton, () => this.hide()));
+		this.$onInjectAuto((blockList: BlockList, di: DIContainer) => {
+			this.parent(new ButtonControl(gui.Heading.CloseButton, () => this.hide()));
 
-		const sidebar = this.add(new WikiCategoriesControl(gui.Content.Categories));
-		const content = this.add(new WikiContentControl(gui.Content.Content, blockList));
-		content.requestedTeleport.Connect((id) => sidebar.select(id));
-		content.set({ id: "", title: "", tags: new ReadonlySet(), content: [] });
+			const sidebar = this.parent(new WikiCategoriesControl(gui.Content.Categories));
+			const content = this.parent(new WikiContentControl(gui.Content.Content, blockList));
+			content.requestedTeleport.Connect((id) => sidebar.select(id));
+			content.set({ id: "", title: "", tags: new ReadonlySet(), content: [] });
 
-		const wikis = asObject(WikiStorage.getAll(di).mapToMap((w) => $tuple(w.id, w)));
-		sidebar.addItems(
-			asMap(wikis)
-				.map((k, w) => ({ id: k, title: w.title }))
-				.sort((l, r) => l.id < r.id),
-		);
-		this.event.subscribe(sidebar.clicked, (id) => content.set(wikis[id]));
+			const wikis = asObject(WikiStorage.getAll(di).mapToMap((w) => $tuple(w.id, w)));
+			sidebar.addItems(
+				asMap(wikis)
+					.map((k, w) => ({ id: k, title: w.title }))
+					.sort((l, r) => l.id < r.id),
+			);
+			this.event.subscribe(sidebar.clicked, (id) => content.set(wikis[id]));
 
-		this.onEnable(() => sidebar.select("blocks"));
+			this.onEnable(() => sidebar.select("blocks"));
+		});
 	}
 }

@@ -136,7 +136,7 @@ namespace Or {
 		...BlockCreation.defaults,
 		id: "or",
 		displayName: "OR Gate",
-		description: "Returns true when any of the inputs are true",
+		description: "Returns true when either input is true",
 		modelSource: autoModel("DoubleGenericLogicBlockPrefab", "OR", BlockCreation.Categories.bool),
 
 		logic: { definition, ctor: Logic },
@@ -181,7 +181,7 @@ namespace Nand {
 		...BlockCreation.defaults,
 		id: "nand",
 		displayName: "NAND Gate",
-		description: "Returns true when both inputs are not true",
+		description: "Returns true when both inputs are false",
 		modelSource: autoModel("DoubleGenericLogicBlockPrefab", "NAND", BlockCreation.Categories.bool),
 
 		logic: { definition, ctor: Logic },
@@ -307,7 +307,7 @@ namespace Not {
 		...BlockCreation.defaults,
 		id: "not",
 		displayName: "NOT Gate",
-		description: "Returns true when false is given, and vice versa",
+		description: "Returns true when input is false, and vice versa",
 		modelSource: autoModel("GenericLogicBlockPrefab", "NOT", BlockCreation.Categories.bool),
 
 		logic: { definition, ctor: Logic },
@@ -387,7 +387,7 @@ namespace Mux {
 		...BlockCreation.defaults,
 		id: "multiplexer",
 		displayName: "Multiplexer",
-		description: "Outputs values depending on the incoming boolean",
+		description: "Outputs values depending on 'State' input",
 		modelSource: autoModel("TripleGenericLogicBlockPrefab", "MUX", BlockCreation.Categories.other),
 		search: {
 			aliases: ["mux"],

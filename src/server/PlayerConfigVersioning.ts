@@ -170,8 +170,8 @@ const v11: UpdatablePlayerConfigVersion<PlayerConfigV10, PlayerConfigV10> = {
 
 	update(prev: Partial<PlayerConfigV10>): Partial<PlayerConfigV10> {
 		return {
-			version: this.version,
 			...prev,
+			version: this.version,
 		};
 	},
 };

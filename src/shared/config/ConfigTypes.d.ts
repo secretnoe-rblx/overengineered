@@ -1,7 +1,6 @@
 type ConfigType<TName extends string, TValue> = {
 	readonly type: TName;
 	readonly config: TValue;
-	readonly displayName: string;
 };
 
 //

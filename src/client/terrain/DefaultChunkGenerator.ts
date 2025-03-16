@@ -1,10 +1,14 @@
 import { Workspace } from "@rbxts/services";
+import { BB } from "engine/shared/fixes/BB";
 import { TerrainDataInfo } from "shared/TerrainDataInfo";
 import type { ChunkGenerator } from "client/terrain/ChunkLoader";
 
 const baseplate = Workspace.WaitForChild("Obstacles").WaitForChild("Baseplate") as BasePart;
-const offset = baseplate.Position.div(4);
-const size = baseplate.Size.div(4);
+const bb = BB.fromPart(baseplate);
+
+const offset = bb.center.Position.div(4);
+const size = bb.originalSize.div(2);
+
 const slopefunc = (x: number, w: number) => math.max(-math.pow(x / w, -16) + 1, 0);
 
 const terrainData = TerrainDataInfo.data;

@@ -19,6 +19,11 @@ export class DayCycleController extends HostedService {
 			return config.manual * 60;
 		};
 
-		this.event.loop(1 / 4, () => Lighting.SetMinutesAfterMidnight(getMinutesAfterMidnightTime()));
+		const update = () => {
+			Lighting.SetMinutesAfterMidnight(getMinutesAfterMidnightTime());
+		};
+
+		this.event.loop(1 / 4, update);
+		this.event.addObservable(playerData.config.fReadonlyCreateBased((c) => c.dayCycle)).subscribe(update);
 	}
 }

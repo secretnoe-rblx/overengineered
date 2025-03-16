@@ -254,7 +254,7 @@ const defs = {
 const constants = {
 	constant: {
 		displayName: "Constant",
-		description: "Returns the value you've set",
+		description: "Returns the configured value, forever",
 		modelSource: autoModel("ConstLogicBlockPrefab", "CONST", BlockCreation.Categories.other),
 		logic: logic(
 			{
@@ -294,7 +294,7 @@ const constants = {
 const maths = {
 	negate: {
 		displayName: "Negate",
-		description: "Negates the input",
+		description: "Converts negative numbers to positive and vice versa",
 		modelSource: autoModel("GenericLogicBlockPrefab", "NEG", categories.math),
 		search: {
 			aliases: ["neg"],
@@ -326,7 +326,7 @@ const maths = {
 	},
 	abs: {
 		displayName: "Absolute",
-		description: "Returns the modulus of incoming number",
+		description: "Removes the minus from your number",
 		modelSource: autoModel("GenericLogicBlockPrefab", "ABS", categories.math),
 		logic: logic(defs.num1_num, ({ value }) => ({
 			result: { type: "number", value: math.abs(value) },
@@ -334,7 +334,7 @@ const maths = {
 	},
 	round: {
 		displayName: "Round",
-		description: "Returns rounded input value",
+		description: "Returns rounded value with a given precision",
 		modelSource: autoModel("GenericLogicBlockPrefab", "ROUND", categories.math),
 		logic: logic(
 			{
@@ -364,7 +364,7 @@ const maths = {
 	},
 	floor: {
 		displayName: "Floor",
-		description: "It's like rounding but it only rounds down",
+		description: "Rounds down the input number",
 		modelSource: autoModel("GenericLogicBlockPrefab", "FLOOR", categories.math),
 		logic: logic(defs.num1_num, ({ value }) => ({
 			result: { type: "number", value: math.floor(value) },
@@ -372,7 +372,7 @@ const maths = {
 	},
 	ceil: {
 		displayName: "Ceil",
-		description: "It's like rounding but it only rounds up",
+		description: "Rounds up the input number",
 		modelSource: autoModel("GenericLogicBlockPrefab", "CEIL", categories.math),
 		logic: logic(defs.num1_num, ({ value }) => ({
 			result: { type: "number", value: math.ceil(value) },
@@ -380,7 +380,7 @@ const maths = {
 	},
 	sign: {
 		displayName: "Sign",
-		description: "Returns -1 if input value is less than zero, 1 if greater than zero and zero if equals zero",
+		description: "Returns -1 if the value is under 0, 1 if greater than zero, and 0 if value is zero",
 		modelSource: autoModel("GenericLogicBlockPrefab", "SIGN", categories.math),
 		logic: logic(defs.num1_num, ({ value }) => ({
 			result: { type: "number", value: math.sign(value) },
@@ -397,7 +397,7 @@ const maths = {
 
 	add: {
 		displayName: "Addition",
-		description: "Returns a sum of input values",
+		description: "What does this block do? I don't know, you guess.",
 		modelSource: autoModel("DoubleGenericLogicBlockPrefab", "ADD", categories.math),
 		logic: logic(
 			{
@@ -443,7 +443,7 @@ const maths = {
 	},
 	sub: {
 		displayName: "Subtraction",
-		description: "Returns the result of substruction of two given values",
+		description: "do you realy not know what subtraction is? bruh",
 		modelSource: autoModel("DoubleGenericLogicBlockPrefab", "SUB", categories.math),
 		logic: logic(
 			{
@@ -648,7 +648,7 @@ const maths = {
 	},
 	clamp: {
 		displayName: "Clamp",
-		description: "Limits the output between max and min.",
+		description: "Limits the output between min and max.",
 		modelSource: autoModel("TripleGenericLogicBlockPrefab", "CLAMP", categories.math),
 		logic: logic(
 			{
@@ -673,7 +673,7 @@ const maths = {
 
 	equals: {
 		displayName: "Equals",
-		description: "Returns true if two given values are the exact same",
+		description: "Returns true if inputs are the same",
 		modelSource: autoModel("DoubleGenericLogicBlockPrefab", "=", categories.math),
 		logic: logic(defs.equality, ({ value1, value2 }) => ({
 			result: { type: "bool", value: value1 === value2 },
@@ -681,7 +681,7 @@ const maths = {
 	},
 	notequals: {
 		displayName: "Not Equals",
-		description: "Returns true if two given values are not the same",
+		description: "Returns true if inputs are not the same",
 		modelSource: autoModel("DoubleGenericLogicBlockPrefab", "≠", categories.math),
 		logic: logic(defs.equality, ({ value1, value2 }) => ({
 			result: { type: "bool", value: value1 !== value2 },
@@ -690,7 +690,7 @@ const maths = {
 
 	greaterthan: {
 		displayName: "Greater Than",
-		description: "Returns true if first value greater than second one",
+		description: "Returns true if first value is greater than second",
 		modelSource: autoModel("DoubleGenericLogicBlockPrefab", ">", categories.math),
 		search: {
 			aliases: ["mor", "more", "gre", "grea", "greater"],
@@ -701,7 +701,7 @@ const maths = {
 	},
 	lessthan: {
 		displayName: "Less Than",
-		description: "Returns true if the first value or lesser than second one",
+		description: "Returns true if first value less than second",
 		modelSource: autoModel("DoubleGenericLogicBlockPrefab", "<", categories.math),
 		search: {
 			aliases: ["les", "less"],
@@ -712,7 +712,7 @@ const maths = {
 	},
 	greaterthanorequals: {
 		displayName: "Greater Than or Equals",
-		description: "Returns true if the first value greater than second one",
+		description: "Returns true if first value is greater than or equals to second",
 		search: {
 			partialAliases: ["more"],
 		},
@@ -723,7 +723,7 @@ const maths = {
 	},
 	lessthanorequals: {
 		displayName: "Less Than or Equals",
-		description: "Returns true if the first value equal to or lesser than second one",
+		description: "Returns true if first value less than or equals to second",
 		modelSource: autoModel("DoubleGenericLogicBlockPrefab", "≤", categories.math),
 		logic: logic(defs.num2_bool, ({ value1, value2 }) => ({
 			result: { type: "bool", value: value1 <= value2 },
@@ -758,7 +758,7 @@ const trigonometry = {
 	},
 	asin: {
 		displayName: "Arcsine",
-		description: "The opposite of the Sine",
+		description: "The inverse of Sine",
 		modelSource: autoModel("GenericLogicBlockPrefab", "ASIN", categories.trigonometry),
 		logic: logic(defs.num1_num, ({ value }) => ({
 			result: { type: "number", value: math.asin(value) },
@@ -766,7 +766,7 @@ const trigonometry = {
 	},
 	acos: {
 		displayName: "Arccosine",
-		description: "The opposite of the Cosine",
+		description: "The inverse of Cosine",
 		modelSource: autoModel("GenericLogicBlockPrefab", "ACOS", categories.trigonometry),
 		logic: logic(defs.num1_num, ({ value }) => ({
 			result: { type: "number", value: math.acos(value) },
@@ -774,7 +774,7 @@ const trigonometry = {
 	},
 	atan: {
 		displayName: "Arctangent",
-		description: "The opposite of the Tangent",
+		description: "The inverse of Tangent",
 		modelSource: autoModel("GenericLogicBlockPrefab", "ATAN", categories.trigonometry),
 		search: {
 			aliases: ["ata"],
@@ -785,7 +785,7 @@ const trigonometry = {
 	},
 	deg: {
 		displayName: "To degrees",
-		description: "Returns input value converted from radians to degrees",
+		description: "Converts input value given in radians, into degrees",
 		modelSource: autoModel("GenericLogicBlockPrefab", "DEG", categories.trigonometry),
 		logic: logic(defs.num1_num, ({ value }) => ({
 			result: { type: "number", value: math.deg(value) },
@@ -793,7 +793,7 @@ const trigonometry = {
 	},
 	rad: {
 		displayName: "To radians",
-		description: "Returns input value converted from degrees to to radians",
+		description: "Converts input value given in degreees, into radians",
 		modelSource: autoModel("GenericLogicBlockPrefab", "RAD", categories.trigonometry),
 		logic: logic(defs.num1_num, ({ value }) => ({
 			result: { type: "number", value: math.rad(value) },
@@ -913,7 +913,7 @@ const vec3 = {
 
 	vec3magnitude: {
 		displayName: "Vector3 Magnitude",
-		description: "Returns magnitude of the given vector",
+		description: "Returns length of the given vector",
 		modelSource: autoModel("TripleGenericLogicBlockPrefab", "VEC3 MAG", categories.converterVector),
 		logic: logic(
 			{
@@ -934,7 +934,7 @@ const vec3 = {
 	},
 	vec3normalize: {
 		displayName: "Vector3 Normalize",
-		description: "Returns normalized vector from the given vector",
+		description: "Creates a unit vector with the direction of the given vector",
 		modelSource: autoModel("TripleGenericLogicBlockPrefab", "VEC3 NORM", categories.converterVector),
 		search: {
 			aliases: ["unit"],
@@ -1020,7 +1020,14 @@ const color = {
 				},
 			},
 			({ value_r, value_g, value_b }) => ({
-				result: { type: "color", value: Color3.fromRGB(value_r, value_g, value_b) },
+				result: {
+					type: "color",
+					value: Color3.fromRGB(
+						math.clamp(value_r, 0, 255),
+						math.clamp(value_g, 0, 255),
+						math.clamp(value_b, 0, 255),
+					),
+				},
 			}),
 		),
 	},
@@ -1041,7 +1048,14 @@ const color = {
 				},
 			},
 			({ input }) => ({
-				result: { type: "color", value: Color3.fromRGB(input.X, input.Y, input.Z) },
+				result: {
+					type: "color",
+					value: Color3.fromRGB(
+						math.clamp(input.X, 0, 255),
+						math.clamp(input.Y, 0, 255),
+						math.clamp(input.Z, 0, 255),
+					),
+				},
 			}),
 		),
 	},
@@ -1164,7 +1178,14 @@ const color = {
 				},
 			},
 			({ input }) => ({
-				result: { type: "color", value: Color3.fromHSV(input.X, input.Y, input.Z) },
+				result: {
+					type: "color",
+					value: Color3.fromHSV(
+						math.clamp(input.X, 0, 1),
+						math.clamp(input.Y, 0, 1),
+						math.clamp(input.Z, 0, 1),
+					),
+				},
 			}),
 		),
 	},
@@ -1446,7 +1467,7 @@ const byte = {
 const other = {
 	buffer: {
 		displayName: "Buffer",
-		description: "Returns the same value it was given. Useful for logic organization",
+		description: "Returns input value as output, useful for logic organization",
 		logic: logic(
 			{
 				input: {
@@ -1467,7 +1488,7 @@ const other = {
 	},
 	switch: {
 		displayName: "Switch",
-		description: "Allows signals to pass through only when enabled",
+		description: "Toggleable buffer",
 		modelSource: autoModel("GenericLogicBlockPrefab", "SWITCH", categories.other),
 		logic: logic(
 			{
