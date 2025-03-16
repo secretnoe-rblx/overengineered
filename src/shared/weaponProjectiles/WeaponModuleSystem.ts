@@ -2,7 +2,7 @@ import { Workspace } from "@rbxts/services";
 import { HostedService } from "engine/shared/di/HostedService";
 import { BlockManager } from "shared/building/BlockManager";
 import type { SharedPlots } from "shared/building/SharedPlots";
-import type { modifierValue, projectileModifier } from "shared/weapons/BaseProjectileLogic";
+import type { modifierValue, projectileModifier } from "shared/weaponProjectiles/BaseProjectileLogic";
 
 type weaponMarker = {
 	markerInstance: BasePart;
@@ -75,10 +75,11 @@ export class WeaponModule {
 		const configMarkers = this.block.weaponConfig!.markers;
 		const params = new OverlapParams();
 		params.CollisionGroup = "Blocks";
+		params.FilterType = Enum.RaycastFilterType.Exclude;
+		params.AddToFilter(this.instance);
+		params.AddToFilter(this.instance.PrimaryPart!);
 
 		const allCollidedCollections: Set<ModuleCollection> = new Set();
-
-		const pivo = this.instance.GetPivot();
 		for (const [k, v] of pairs(configMarkers)) {
 			const marker = foundMarkers.get(k)!;
 			const touching = Workspace.GetPartsInPart(marker.markerInstance, params);
@@ -88,17 +89,15 @@ export class WeaponModule {
 
 			for (const t of touching) {
 				const touchingBlock = BlockManager.getBlockDataByPart(t); //get the first one
+				marker.occupiedWith.block = touchingBlock;
 				if (!touchingBlock) continue;
 				const mod = WeaponModule.allModules[touchingBlock.uuid];
+				if (!mod) continue;
 				const config = this.block.weaponConfig!.markers[k];
 
-				//check if the type of the block is the same as the module's
-				//if (config.allowedTypes.indexOf(mod.block.weaponConfig!.type) < 0) continue;
-
 				//check if the id of the block is the same as allowed for this module
+				if (config.allowedBlockIds === undefined) continue;
 				if (config.allowedBlockIds.indexOf(mod.block.id) < 0) continue;
-
-				marker.occupiedWith.block = touchingBlock;
 				marker.occupiedWith.module = mod;
 
 				if (marker.occupiedWith.module.parentCollection !== this.parentCollection)
@@ -155,22 +154,60 @@ export class ModuleCollection {
 		}
 	}
 
+	setMarkersVisibility(isVisible: boolean) {
+		isVisible = !isVisible;
+		for (const m of this.modules) {
+			for (const o of m.getModuleMarkers()) {
+				o.markerInstance.Anchored = isVisible;
+				o.markerInstance.Transparency = isVisible ? 1 : 0;
+			}
+		}
+	}
+
 	recursivePath(
 		outputArray: recalcOut[][],
 		nextModule: WeaponModule,
 		path: recalcOut[] = [],
 	): recalcOut[] | undefined {
+		//check if there's a loop
+		for (const p of path) if (p.module === nextModule) return;
+
 		const connectedModules: WeaponModule[] = [];
 		const activeOutputs: weaponMarker[] = [];
 
 		//get all markers
 		for (const [n, e] of pairs(nextModule.allMarkers)) {
-			if (!e.occupiedWith.block && nextModule.block.weaponConfig!.markers[n].emitsProjectiles) {
-				activeOutputs.push(e);
+			if (e.occupiedWith.module) {
+				//get marker rotation
+				const [x1, y1, z1] = e.markerInstance.GetPivot().ToEulerAnglesXYZ();
+				const markerRotation = new Vector3(x1, y1, z1);
+
+				//get module rotation
+				const [x2, y2, z2] = e.occupiedWith.module.instance.GetPivot().ToEulerAnglesXYZ();
+				const moduleRotation = new Vector3(x2, y2, z2);
+
+				//get offset in degrees
+				const hardcodedRotationOffset = 5;
+				const offset = moduleRotation
+					.sub(markerRotation)
+					.Abs()
+					.apply((v) => math.deg(v));
+
+				// print(offset);
+				// //add module if offset is lower than "hardcodedRotationOffset"
+				// if (
+				// 	offset.X <= hardcodedRotationOffset &&
+				// 	offset.Y <= hardcodedRotationOffset &&
+				// 	offset.Z <= hardcodedRotationOffset
+				// )
+				connectedModules.push(e.occupiedWith.module);
+
+				continue;
 			}
 
-			if (e.occupiedWith.module) {
-				connectedModules.push(e.occupiedWith.module);
+			if (!e.occupiedWith.block && nextModule.block.weaponConfig!.markers[n].emitsProjectiles) {
+				activeOutputs.push(e);
+				// print(e);
 			}
 		}
 
@@ -179,6 +216,7 @@ export class ModuleCollection {
 			activeOutputs,
 		};
 
+		// print(obj.activeOutputs);
 		// add modifier because outputs split, i.e. divide output between modules
 		if (connectedModules.size() > 0) {
 			const baseModifierValue: modifierValue = { value: 1 / activeOutputs.size(), isRelative: true };
@@ -191,13 +229,13 @@ export class ModuleCollection {
 			};
 		}
 
-		//if size === then there's only one block
+		//if size === 0 then there's only one block
 		// therefore just stop iterations on it
 		if (path.size() + connectedModules.size() === 0) {
 			outputArray.push([obj]);
 			return;
 		}
-
+		// print(path);
 		//just add last module to the path at this point
 		path.push(obj);
 
@@ -233,7 +271,7 @@ export class ModuleCollection {
 	recalc() {
 		const paths: recalcOut[][] = [];
 		for (const e of this.emitters) this.recursivePath(paths, e);
-		//print(paths.map((v) => v.map((e) => e.module.instance)));
+		// print("paths:", paths);
 		this.calculatedOutputs.clear();
 
 		const getUpgrades = (a: WeaponModule): projectileModifier[] => {
@@ -248,10 +286,7 @@ export class ModuleCollection {
 					buf.push(m.module.block.weaponConfig!.modifier);
 					if (m.extraModifier) buf.push(m.extraModifier);
 				}
-				//print([a.instance, ...buf]);
 				const mod = ModuleCollection.calculateTotalModifier(buf);
-				//print(upgradePath.map((v) => v.module.block.weaponConfig!.modifier));
-				//print(mod);
 				if (!mod) continue;
 				result.push(mod);
 			}
@@ -284,21 +319,8 @@ export class ModuleCollection {
 					outputs: p.activeOutputs,
 				});
 			}
-			//print(buf);
 		}
-		//print(this.calculatedOutputs.map((v) => v.modifiers));
-
-		// print(
-		// 	"res:",
-		// 	paths.map((v) => v.map((j) => j.activeOutputs.size()).reduce((v, n) => (v += n))),
-		// );
 	}
-
-	// Осталось
-	// 1. починить рекурсию - done
-	// 2. преобразовать путь в модификаторы (можно во время рекурсии) -  done
-	// 3. заспавнить проджектайл с указанными модификаторами
-	// 4. прицепить логику к спавну проджектайла
 }
 
 @injectable
@@ -307,12 +329,8 @@ export class WeaponModuleSystem extends HostedService {
 		super();
 
 		function updateAll() {
-			for (const [_, m] of pairs(WeaponModule.allModules)) {
-				m.update();
-				wait();
-			}
+			for (const [_, m] of pairs(WeaponModule.allModules)) m.update();
 
-			//debug
 			const arr = new Set<ModuleCollection>();
 			for (const [_, m] of pairs(WeaponModule.allModules)) {
 				arr.add(m.parentCollection);

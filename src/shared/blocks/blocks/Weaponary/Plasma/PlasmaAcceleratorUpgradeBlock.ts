@@ -31,4 +31,6 @@ export const PlasmaCoilAcceleratorUpgradeBlock = {
 		},
 		markers: {},
 	},
+
+	logic: { definition, ctor: Logic },
 } as const satisfies BlockBuilder;

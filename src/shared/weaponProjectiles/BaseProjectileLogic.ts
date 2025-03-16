@@ -3,7 +3,7 @@ import { InstanceComponent } from "engine/shared/component/InstanceComponent";
 import { AutoC2SRemoteEvent } from "engine/shared/event/C2SRemoteEvent";
 import { Instances } from "engine/shared/fixes/Instances";
 import { RemoteEvents } from "shared/RemoteEvents";
-import { ModuleCollection } from "shared/weapons/WeaponModuleSystem";
+import { ModuleCollection } from "shared/weaponProjectiles/WeaponModuleSystem";
 
 export type modifierValue = {
 	isRelative?: boolean;
@@ -23,6 +23,10 @@ export type baseWeaponProjectile = {
 	Projectile: BasePart;
 } & Model;
 
+const CANNON_SHELL = Instances.assets
+	.WaitForChild("WeaponProjectiles")
+	.WaitForChild("ShellProjectile") as baseWeaponProjectile;
+
 const PLASMA_BALL = Instances.assets
 	.WaitForChild("WeaponProjectiles")
 	.WaitForChild("PlasmaProjectile") as baseWeaponProjectile;
@@ -36,12 +40,12 @@ const LASER = Instances.assets
 const projectileFolder = new Instance("Folder", Workspace);
 projectileFolder.Name = "Projectiles";
 
-export type ProjectileType = "KINETIC" | "EXPLOSIVE" | "ENERGY";
+export type DamageType = "KINETIC" | "EXPLOSIVE" | "ENERGY";
 
 export class WeaponProjectile extends InstanceComponent<BasePart> {
 	static readonly spawn = new AutoC2SRemoteEvent<{
 		readonly startPosition: Vector3;
-		readonly projectileType: ProjectileType;
+		readonly projectileType: DamageType;
 		readonly projectilePart: BasePart;
 		readonly baseVelocity: Vector3;
 		readonly baseDamage: number;
@@ -52,7 +56,7 @@ export class WeaponProjectile extends InstanceComponent<BasePart> {
 	static readonly sync_hit = new AutoC2SRemoteEvent<{
 		//todo: finish sync
 		readonly startPosition: Vector3;
-		readonly projectileType: ProjectileType;
+		readonly projectileType: DamageType;
 		readonly projectilePart: BasePart;
 		readonly baseVelocity: Vector3;
 		readonly baseDamage: number;
@@ -74,13 +78,14 @@ export class WeaponProjectile extends InstanceComponent<BasePart> {
 	static readonly unweldedParts: Map<BasePart, number> = new Map();
 	readonly projectilePart: BasePart;
 	readonly originalProjectileModel;
+	static readonly SHELL_PROJECTILE: baseWeaponProjectile = CANNON_SHELL;
 	static readonly PLASMA_PROJECTILE: baseWeaponProjectile = PLASMA_BALL;
 	static readonly LASER_PROJECTILE: baseWeaponProjectile = LASER;
 	static readonly BULLET_PROJECTILE: baseWeaponProjectile = BULLET;
 
 	constructor(
 		public startPosition: Vector3,
-		readonly projectileType: ProjectileType,
+		readonly projectileType: DamageType,
 		originalProjectileModel: baseWeaponProjectile,
 		public baseVelocity: Vector3,
 		public baseDamage: number,
@@ -217,7 +222,7 @@ export class WeaponProjectile extends InstanceComponent<BasePart> {
 	}
 
 	onHit(part: BasePart, point: Vector3, destroyOnHit = false): void {
-		this.applyDamageToPart(part);
+		if (!part.Anchored) this.applyDamageToPart(part);
 		if (destroyOnHit) this.destroy();
 	}
 

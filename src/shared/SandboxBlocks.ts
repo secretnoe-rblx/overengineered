@@ -57,11 +57,21 @@ import { SingleImpulseBlock } from "shared/blocks/blocks/SingleImpulseBlock";
 import { SpeedometerBlock } from "shared/blocks/blocks/SpeedometerBlock";
 import { StackMemoryBlock } from "shared/blocks/blocks/StackMemoryBlock";
 import { SuspensionBlock } from "shared/blocks/blocks/SuspensionBlock";
-import { PlasmaCoilAcceleratorBlock } from "shared/blocks/blocks/testingWeaponary/PlasmaAccelerator";
-import { PlasmaCoilAcceleratorUpgradeBlock } from "shared/blocks/blocks/testingWeaponary/PlasmaAcceleratorUpgrade";
-import { PlasmaEmitterBlock } from "shared/blocks/blocks/testingWeaponary/PlasmaEmitter";
 import { TpsCounterBlock } from "shared/blocks/blocks/TpsCounterBlock";
 import { VehicleSeatBlock } from "shared/blocks/blocks/VehicleSeatBlock";
+import { CannonBarrels } from "shared/blocks/blocks/Weaponary/Cannon/CannonBarrels";
+import { CannonBases } from "shared/blocks/blocks/Weaponary/Cannon/CannonBases";
+import { CannonBreech } from "shared/blocks/blocks/Weaponary/Cannon/CannonBreechBlock";
+import { ArmoredMachineGunBarrels } from "shared/blocks/blocks/Weaponary/Machinegun/ArmoredMachineGunBarrels";
+import { MachineGunAmmoBlocks } from "shared/blocks/blocks/Weaponary/Machinegun/MachineGunAmmoBlocks";
+import { MachineGunBarrels } from "shared/blocks/blocks/Weaponary/Machinegun/MachineGunBarrels";
+import { MachineGunLoader } from "shared/blocks/blocks/Weaponary/Machinegun/MachineGunLoaderBlock";
+import { MachineGunMuzzleBreaks } from "shared/blocks/blocks/Weaponary/Machinegun/MachineGunMuzzleBreaks";
+import { PlasmaCoilAcceleratorUpgradeBlock } from "shared/blocks/blocks/Weaponary/Plasma/PlasmaAcceleratorUpgradeBlock";
+import { PlasmaGunBarrelBlock } from "shared/blocks/blocks/Weaponary/Plasma/PlasmaGunBarrelBlock";
+import { PlasmaGunBlock } from "shared/blocks/blocks/Weaponary/Plasma/PlasmaGunBlock";
+import { PlasmaSeparatorMuzzleBlock } from "shared/blocks/blocks/Weaponary/Plasma/PlasmaSeparatorMuzzleBlock";
+import { PlasmaShotgunMuzzleBlock } from "shared/blocks/blocks/Weaponary/Plasma/PlasmaShotgunMuzzleBlock";
 import type { BlockBuilder } from "shared/blocks/Block";
 
 export const CreateSandboxBlocks = (di: DIContainer): BlockList => {
@@ -113,9 +123,25 @@ export const CreateSandboxBlocks = (di: DIContainer): BlockList => {
 		ReadonlyMemoryBlock,
 		RandomBlock,
 
-		PlasmaCoilAcceleratorUpgradeBlock,
-		PlasmaCoilAcceleratorBlock,
-		PlasmaEmitterBlock,
+		PlasmaCoilAcceleratorUpgradeBlock, //todo: remove later
+
+		//plasma stuff
+		PlasmaShotgunMuzzleBlock,
+		PlasmaSeparatorMuzzleBlock,
+		PlasmaGunBarrelBlock,
+		PlasmaGunBlock,
+
+		//cannon stuff
+		CannonBreech,
+		...CannonBases,
+		...CannonBarrels,
+
+		// machinegun stuff
+		MachineGunLoader,
+		...MachineGunAmmoBlocks,
+		...ArmoredMachineGunBarrels,
+		...MachineGunBarrels,
+		...MachineGunMuzzleBreaks,
 
 		AltimeterBlock,
 		KeySensorBlock,

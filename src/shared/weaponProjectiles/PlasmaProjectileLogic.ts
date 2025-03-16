@@ -1,8 +1,10 @@
 import { Workspace } from "@rbxts/services";
 import { Easing } from "engine/shared/component/Easing";
 import { AutoC2SRemoteEvent } from "engine/shared/event/C2SRemoteEvent";
-import { WeaponProjectile } from "shared/weapons/BaseProjectileLogic";
-import type { modifierValue, projectileModifier } from "shared/weapons/BaseProjectileLogic";
+import { WeaponProjectile } from "shared/weaponProjectiles/BaseProjectileLogic";
+import type { modifierValue, projectileModifier } from "shared/weaponProjectiles/BaseProjectileLogic";
+
+type palsmaProjectile = BasePart & { VectorForce: VectorForce };
 
 export class PlasmaProjectile extends WeaponProjectile {
 	private startSize = this.projectilePart.Size;
@@ -32,9 +34,8 @@ export class PlasmaProjectile extends WeaponProjectile {
 			5,
 			color,
 		);
-		print(this.projectilePart.Color);
-		print(color);
-		this.vectorForce = this.projectilePart.WaitForChild("VectorForce") as VectorForce;
+
+		this.vectorForce = (this.projectilePart as unknown as palsmaProjectile).VectorForce;
 		this.updateLifetimeModifier(1);
 	}
 

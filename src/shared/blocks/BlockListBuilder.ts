@@ -43,6 +43,9 @@ export namespace BlockListBuilder {
 					const markerPositions = b.markerPositionsSource(b, model);
 					const weldRegions = b.weldRegionsSource(b, model);
 
+					const markers = model.FindFirstChild("moduleMarkers")?.GetChildren();
+					if (markers) for (const m of markers) (m as BasePart).CollisionGroup = "WeaponMarker";
+
 					return $tuple(b.id, {
 						model,
 						category,

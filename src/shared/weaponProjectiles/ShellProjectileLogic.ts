@@ -1,20 +1,24 @@
+import { RunService } from "@rbxts/services";
 import { AutoC2SRemoteEvent } from "engine/shared/event/C2SRemoteEvent";
-import { WeaponProjectile } from "shared/weapons/BaseProjectileLogic";
-import type { projectileModifier } from "shared/weapons/BaseProjectileLogic";
+import { WeaponProjectile } from "shared/weaponProjectiles/BaseProjectileLogic";
+import type { projectileModifier } from "shared/weaponProjectiles/BaseProjectileLogic";
 
-export class BulletProjectile extends WeaponProjectile {
+export class ShellProjectile extends WeaponProjectile {
 	static readonly spawn = new AutoC2SRemoteEvent<{
 		readonly startPosition: Vector3;
 		readonly baseVelocity: Vector3;
 		readonly baseDamage: number;
 		readonly modifier: projectileModifier;
-	}>("bullet_spawn", "RemoteEvent");
+	}>("shell_spawn", "RemoteEvent");
 
 	constructor(startPosition: Vector3, baseVelocity: Vector3, baseDamage: number, modifier: projectileModifier) {
-		super(startPosition, "KINETIC", WeaponProjectile.BULLET_PROJECTILE, baseVelocity, baseDamage, modifier);
+		super(startPosition, "KINETIC", WeaponProjectile.SHELL_PROJECTILE, baseVelocity, baseDamage, modifier);
 	}
 
 	onHit(part: BasePart, point: Vector3): void {
+		const force = this.projectilePart.AssemblyLinearVelocity.add(this.projectilePart.AssemblyAngularVelocity).mul(
+			this.projectilePart.Mass,
+		);
 		const startedWithSize = this.projectilePart.Size;
 		this.projectilePart.AssemblyLinearVelocity = Vector3.zero;
 		this.projectilePart.Anchored = true;
@@ -25,6 +29,11 @@ export class BulletProjectile extends WeaponProjectile {
 			new Vector3(0, startedWithSize.Y / 2, 0),
 		);
 
+		//push impcated part
+		//if (!part.Anchored)
+		//part.ApplyImpulse(Vector3.xAxis.mul(1000)); //force.mul(100));
+		print(part);
+		RunService.Heartbeat.Connect(() => part.ApplyImpulse(Vector3.xAxis.mul(100000)));
 		super.onHit(part, point, true);
 	}
 
@@ -32,7 +41,7 @@ export class BulletProjectile extends WeaponProjectile {
 		super.onTick(dt, percentage, reversePercentage);
 	}
 }
-BulletProjectile.spawn.invoked.Connect((player, { startPosition, baseVelocity, baseDamage, modifier }) => {
+ShellProjectile.spawn.invoked.Connect((player, { startPosition, baseVelocity, baseDamage, modifier }) => {
 	print("Bullet spawned");
-	new BulletProjectile(startPosition, baseVelocity, baseDamage, modifier);
+	new ShellProjectile(startPosition, baseVelocity, baseDamage, modifier);
 });

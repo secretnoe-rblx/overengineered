@@ -1,7 +1,7 @@
 import { Workspace } from "@rbxts/services";
 import { AutoC2SRemoteEvent } from "engine/shared/event/C2SRemoteEvent";
-import { WeaponProjectile } from "shared/weapons/BaseProjectileLogic";
-import type { baseWeaponProjectile, projectileModifier } from "shared/weapons/BaseProjectileLogic";
+import { WeaponProjectile } from "shared/weaponProjectiles/BaseProjectileLogic";
+import type { baseWeaponProjectile, projectileModifier } from "shared/weaponProjectiles/BaseProjectileLogic";
 
 type laserVisualsAmountConstant = 1 | 2 | 3 | 4 | 5;
 type laser = baseWeaponProjectile & Record<`LaserProjectileVisual${laserVisualsAmountConstant}`, BasePart>;

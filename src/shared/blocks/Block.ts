@@ -1,6 +1,6 @@
 import type { BlockLogicFullBothDefinitions, GenericBlockLogicCtor } from "shared/blockLogic/BlockLogic";
 import type { BlockCreation, BlockMirrorBehaviour } from "shared/blocks/BlockCreation";
-import type { projectileModifier } from "shared/weapons/BaseProjectileLogic";
+import type { projectileModifier } from "shared/weaponProjectiles/BaseProjectileLogic";
 
 export type BlockCategoryPath = readonly string[];
 export type BlockLogicInfo = {
@@ -22,7 +22,7 @@ export type BlockMarkerPositions = {
 	readonly [name in string]?: Vector3;
 };
 export type BlockWeldRegions = Model;
-type weaponBlockTypes = "CORE" | "PROCESSOR" | "FILLER" | "UPGRADE";
+export type weaponBlockType = "CORE" | "PROCESSOR" | "FILLER" | "UPGRADE";
 type weaponMarkerName = string;
 export type BlockBuilder = {
 	readonly id: string;
@@ -32,13 +32,13 @@ export type BlockBuilder = {
 	readonly hidden?: boolean;
 	readonly logic?: BlockLogicInfo;
 	readonly weaponConfig?: {
-		type: weaponBlockTypes;
+		type: weaponBlockType;
 		modifier: projectileModifier;
 		markers: Record<
 			weaponMarkerName,
 			{
-				emitsProjectiles: boolean;
-				allowedBlockIds: string[];
+				emitsProjectiles?: boolean;
+				allowedBlockIds?: string[];
 				//allowedTypes: weaponBlockTypes[];
 			}
 		>;

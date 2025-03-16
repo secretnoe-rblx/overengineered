@@ -68,7 +68,7 @@ const getMouseTargetBlockPositionV2 = (
 	step: number,
 	info?: [target: BasePart, hit: CFrame, surface: Enum.NormalId],
 ): Vector3 | undefined => {
-	const constrainPositionToGrid = (selectedBlock: ModelOnlyBlock, normal: Vector3, pos: Vector3) => {
+	const constrainPositionToGrid = (normal: Vector3, pos: Vector3) => {
 		const from = (coord: number, size: number) => {
 			const offset = (size % 2) / 2;
 
@@ -77,7 +77,7 @@ const getMouseTargetBlockPositionV2 = (
 			return pos + offset;
 		};
 
-		const size = AABB.fromModel(selectedBlock.model, rotation).getSize().mul(scale);
+		const size = aabb.getRotatedSize().mul(scale);
 
 		return new Vector3(
 			normal.X === 0 ? from(pos.X, size.X) : pos.X,
@@ -102,13 +102,13 @@ const getMouseTargetBlockPositionV2 = (
 	};
 	const offsetBlockPivotToCenter = (selectedBlock: ModelOnlyBlock, pos: Vector3) => {
 		const pivot = selectedBlock.model.GetPivot().Position;
-		const center = AABB.fromModel(selectedBlock.model).getCenter();
+		const center = aabb.center.Position;
 		const offset = rotation.mul(center.sub(pivot));
 
 		return pos.sub(offset);
 	};
-	const addBlockSize = (selectedBlock: ModelOnlyBlock, normal: Vector3, pos: Vector3) => {
-		return pos.add(AABB.fromModel(selectedBlock.model, rotation).getSize().mul(scale).mul(normal).div(2));
+	const addBlockSize = (normal: Vector3, pos: Vector3) => {
+		return pos.add(aabb.getRotatedSize().mul(scale).mul(normal).div(2));
 	};
 
 	const target = info?.[0] ?? mouse.Target;
@@ -126,13 +126,22 @@ const getMouseTargetBlockPositionV2 = (
 	DebugLog.named("Normal", `${mouseSurface} ${normal}`);
 	DebugLog.endCategory();
 
+	const aabb = BB.fromBBs(
+		block.model
+			.GetChildren()
+			.mapFiltered((c) =>
+				c.IsA("Folder") ? undefined : c.IsA("Model") || c.IsA("BasePart") ? BB.from(c) : undefined,
+			),
+		rotation,
+	);
+
 	let targetPosition = globalMouseHitPos;
 	targetPosition = addTargetSize(target, normal, targetPosition);
 	targetPosition = offsetBlockPivotToCenter(block, targetPosition);
-	targetPosition = addBlockSize(block, normal, targetPosition);
+	targetPosition = addBlockSize(normal, targetPosition);
 
 	if (gridEnabled) {
-		targetPosition = constrainPositionToGrid(block, normal, targetPosition);
+		targetPosition = constrainPositionToGrid(normal, targetPosition);
 	}
 
 	return targetPosition;

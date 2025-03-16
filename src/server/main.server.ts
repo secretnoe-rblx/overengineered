@@ -18,12 +18,12 @@ Secrets.addDevelopmentSecret("backend_token", "d81b0f61-7f62-4016-b5fe-8c5904c9b
 import { Players, RunService, Workspace } from "@rbxts/services";
 import { RemoteEvents } from "shared/RemoteEvents";
 import { SandboxGame } from "server/SandboxGame";
-import { PlasmaProjectile } from "shared/weapons/PlasmaProjectileLogic";
-import { BulletProjectile } from "shared/weapons/BulletProjectileLogic";
+import { PlasmaProjectile } from "shared/weaponProjectiles/PlasmaProjectileLogic";
+import { BulletProjectile } from "shared/weaponProjectiles/BulletProjectileLogic";
 import { GameHostBuilder } from "engine/shared/GameHostBuilder";
 import { gameInfo } from "shared/GameInfo";
 import { LaunchDataController } from "engine/server/network/LaunchDataController";
-import { LaserProjectile } from "shared/weapons/LaserProjectileLogic";
+import { LaserProjectile } from "shared/weaponProjectiles/LaserProjectileLogic";
 import { GameDefinitions } from "shared/data/GameDefinitions";
 
 const builder = new GameHostBuilder(gameInfo);

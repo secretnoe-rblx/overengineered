@@ -8,38 +8,53 @@ const definition = {
 	output: {},
 } satisfies BlockLogicFullBothDefinitions;
 
-export type { Logic as PlasmaCoilAcceleratorBlockLogic };
+export type { Logic as PlasmaShotgunMuzzleBlockLogic };
 class Logic extends InstanceBlockLogic<typeof definition> {
 	constructor(block: InstanceBlockLogicArgs) {
 		super(definition, block);
 	}
 }
 
-export const PlasmaCoilAcceleratorBlock = {
+export const PlasmaShotgunMuzzleBlock = {
 	...BlockCreation.defaults,
-	id: "plasmacoilaccelerator",
-	displayName: "Plasma Accelerator",
+	id: "plasmashotgunmuzzle",
+	displayName: "Plasma Shotgun Muzzle",
 	description: "",
 
 	weaponConfig: {
 		type: "PROCESSOR",
-		modifier: {
-			speedModifier: {
-				value: 1.4,
-				isRelative: true,
-			},
-		},
+		modifier: {},
 		markers: {
-			marker1: {
+			inputMarker: {},
+			output1: {
 				emitsProjectiles: true,
-				allowedBlockIds: ["plasmacoilaccelerator"],
-				//allowedTypes: ["PROCESSOR", "UPGRADE"],
 			},
-			marker2: {
-				emitsProjectiles: false,
-				allowedBlockIds: ["plasmaupgrade"],
-				//allowedTypes: ["PROCESSOR", "UPGRADE"],
+			output2: {
+				emitsProjectiles: true,
+			},
+			output3: {
+				emitsProjectiles: true,
+			},
+			output4: {
+				emitsProjectiles: true,
+			},
+			output5: {
+				emitsProjectiles: true,
+			},
+			output6: {
+				emitsProjectiles: true,
+			},
+			output7: {
+				emitsProjectiles: true,
+			},
+			output8: {
+				emitsProjectiles: true,
+			},
+			output9: {
+				emitsProjectiles: true,
 			},
 		},
 	},
+
+	logic: { definition, ctor: Logic },
 } as const satisfies BlockBuilder;

@@ -34,7 +34,7 @@ import { ReadonlyPlot } from "shared/building/ReadonlyPlot";
 import { SharedPlots } from "shared/building/SharedPlots";
 import { RemoteEvents } from "shared/RemoteEvents";
 import { CreateSandboxBlocks } from "shared/SandboxBlocks";
-import { WeaponModuleSystem } from "shared/weapons/WeaponModuleSystem";
+import { WeaponModuleSystem } from "shared/weaponProjectiles/WeaponModuleSystem";
 import type { GameHostBuilder } from "engine/shared/GameHostBuilder";
 import type { SharedPlot } from "shared/building/SharedPlot";
 
