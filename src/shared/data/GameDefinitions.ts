@@ -4,8 +4,8 @@ import { RobloxUnit } from "engine/shared/RobloxUnit";
 
 export namespace GameDefinitions {
 	// Building
-	export const FREE_SLOTS = 30;
-	export const ADMIN_SLOTS = 65 - FREE_SLOTS;
+	export const FREE_SLOTS = 70;
+	export const ADMIN_SLOTS = 100 - FREE_SLOTS;
 
 	export const MAX_LINEAR_SPEED = RobloxUnit.Meters_To_Studs(1000);
 	export const MAX_ANGULAR_SPEED = 40;
