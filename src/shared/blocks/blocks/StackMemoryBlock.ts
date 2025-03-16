@@ -52,14 +52,14 @@ const definition = {
 	},
 } satisfies BlockLogicFullBothDefinitions;
 
+export const size = 0xff;
+
 export type { Logic as StackMemoryBlockLogic };
 class Logic extends BlockLogic<typeof definition> {
 	constructor(block: BlockLogicArgs) {
 		super(definition, block);
 
 		type PrimitiveKeys = keyof BlockLogicTypes.Primitives;
-
-		const size = 0xff;
 		const internalMemory: { readonly value: unknown; readonly type: PrimitiveKeys }[] = [];
 
 		const pushValue = (value: unknown, valueType: PrimitiveKeys) => {
@@ -109,7 +109,7 @@ export const StackMemoryBlock = {
 	...BlockCreation.defaults,
 	id: "stackmemory",
 	displayName: "Stack",
-	description: "Storage for your stacked data. Allows to store up to 32 values",
+	description: `Storage for your stacked data. Allows to store up to ${size} values`,
 
 	logic: { definition, ctor: Logic },
 } as const satisfies BlockBuilder;
