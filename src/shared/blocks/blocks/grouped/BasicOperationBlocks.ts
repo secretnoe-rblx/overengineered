@@ -665,9 +665,13 @@ const maths = {
 					},
 				},
 			},
-			({ value, min, max }) => ({
-				result: { type: "number", value: math.clamp(value, min, max) },
-			}),
+			({ value, min, max }) => {
+				if (min >= max) {
+					return BlockLogicValueResults.garbage;
+				}
+
+				return { result: { type: "number", value: math.clamp(value, min, max) } };
+			},
 		),
 	},
 
