@@ -666,7 +666,7 @@ const maths = {
 				},
 			},
 			({ value, min, max }) => {
-				if (min >= max) {
+				if (min > max) {
 					return BlockLogicValueResults.garbage;
 				}
 
