@@ -3,7 +3,7 @@ import { Secrets } from "engine/server/Secrets";
 import { JSON } from "engine/shared/fixes/Json";
 import { Strings } from "engine/shared/fixes/String.propmacro";
 import type { DatabaseBackend } from "engine/server/backend/DatabaseBackend";
-import type { PlayerDatabaseData } from "server/database/PlayerDatabase";
+import type { PlayerBanned, PlayerDatabaseData } from "server/database/PlayerDatabase";
 import type { BlocksSerializer } from "shared/building/BlocksSerializer";
 
 const endpoint = "literal:REDACTED_DOMAIN";
@@ -67,7 +67,16 @@ export class ExternalDatabaseBackendPlayers implements DatabaseBackend<PlayerDat
 			throw `Got HTTP ${result.StatusCode}`;
 		}
 
-		return (JSON.deserialize(result.Body) as { value: PlayerDatabaseData }).value;
+		const data = JSON.deserialize(result.Body) as { value: PlayerDatabaseData } | PlayerBanned;
+		if (!("value" in data)) {
+			if ("errorCode" in data) {
+				throw data;
+			}
+
+			throw "Received unknown error from the server.";
+		}
+
+		return data.value;
 	}
 	SetAsync(value: PlayerDatabaseData, [id]: PlayerKeys): void {
 		const url = `${endpoint}/player?id=${id}`;
