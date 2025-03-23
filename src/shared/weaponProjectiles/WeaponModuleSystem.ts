@@ -195,12 +195,12 @@ export class ModuleCollection {
 
 				// print(offset);
 				// //add module if offset is lower than "hardcodedRotationOffset"
-				// if (
-				// 	offset.X <= hardcodedRotationOffset &&
-				// 	offset.Y <= hardcodedRotationOffset &&
-				// 	offset.Z <= hardcodedRotationOffset
-				// )
-				connectedModules.push(e.occupiedWith.module);
+				if (
+					offset.X <= hardcodedRotationOffset &&
+					offset.Y <= hardcodedRotationOffset &&
+					offset.Z <= hardcodedRotationOffset
+				)
+					connectedModules.push(e.occupiedWith.module);
 
 				continue;
 			}
