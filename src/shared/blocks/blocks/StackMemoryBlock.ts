@@ -109,7 +109,7 @@ export const StackMemoryBlock = {
 	...BlockCreation.defaults,
 	id: "stackmemory",
 	displayName: "Stack",
-	description: `Storage for your stacked data. Allows to store up to ${size} values`,
+	description: `Storage for your stacked data. Allows to store up to ${size + 1} values`,
 
 	logic: { definition, ctor: Logic },
 } as const satisfies BlockBuilder;
