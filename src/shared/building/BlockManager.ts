@@ -9,6 +9,7 @@ declare global {
 		readonly color: Color3;
 		readonly material: Enum.Material;
 		readonly config: PlacedBlockConfig | undefined;
+		readonly customData?: { [k in string | number]: unknown };
 		readonly scale: Vector3 | undefined;
 	};
 
@@ -95,6 +96,17 @@ export namespace BlockManager {
 				return JSON.deserialize<PlacedBlockConfig>(attribute);
 			},
 		},
+
+		customData: {
+			set: (block, value: PlacedBlockData["customData"] | undefined) =>
+				block.SetAttribute("customData", value ? JSON.serialize(value) : undefined),
+			get: (block) => {
+				const attribute = block.GetAttribute("customData") as string | undefined;
+				if (attribute === undefined) return undefined;
+
+				return JSON.deserialize<PlacedBlockData["customData"]>(attribute);
+			},
+		},
 	} satisfies { readonly [k in Exclude<keyof PlacedBlockData, "instance">]: Manager<PlacedBlockData[k]> };
 
 	export function getBlockDataByBlockModel(model: BlockModel): PlacedBlockData {
@@ -105,6 +117,7 @@ export namespace BlockManager {
 			material: manager.material.get(model),
 			uuid: manager.uuid.get(model),
 			config: manager.config.get(model),
+			customData: manager.customData.get(model),
 			scale: manager.scale.get(model),
 		};
 	}

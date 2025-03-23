@@ -113,6 +113,7 @@ export class BuildingMode extends PlayMode {
 	readonly tools;
 
 	private readonly actionController;
+	readonly building;
 
 	constructor(
 		@inject plot: SharedPlot,
@@ -141,6 +142,7 @@ export class BuildingMode extends PlayMode {
 			di.registerSingletonClass(WireTool);
 		});
 
+		this.building = di.resolve<ClientBuilding>();
 		this.parent(di.resolve<ClientBuildingValidationController>());
 
 		this.event.subscribeObservable(
@@ -267,6 +269,10 @@ export class BuildingMode extends PlayMode {
 	onSwitchToNext(mode: PlayModes | undefined) {}
 	onSwitchFromPrev(prev: PlayModes | undefined) {
 		const plot = this.targetPlot.get();
+
+		if (prev === "ride") {
+			RideMode.buildModeScheduler.execute(this.building, plot);
+		}
 
 		const tp = () => {
 			const rootPart = LocalPlayer.rootPart.get();
