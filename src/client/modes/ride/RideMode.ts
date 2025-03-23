@@ -3,6 +3,7 @@ import { SoundController } from "client/controller/SoundController";
 import { Interface } from "client/gui/Interface";
 import { RideModeScene } from "client/gui/ridemode/RideModeScene";
 import { PlayMode } from "client/modes/PlayMode";
+import { RideToBuildModeSlotScheduler } from "client/modes/ride/RideToBuildModeSlotScheduler";
 import { CustomRemotes } from "shared/Remotes";
 import type { RideModeSceneDefinition } from "client/gui/ridemode/RideModeScene";
 import type { SharedPlot } from "shared/building/SharedPlot";
@@ -14,6 +15,8 @@ export class RideMode extends PlayMode {
 
 	private currentMachine?: ClientMachine;
 	private readonly rideModeScene;
+
+	static readonly buildModeScheduler = new RideToBuildModeSlotScheduler();
 
 	constructor(
 		@inject private readonly plot: SharedPlot,
@@ -97,7 +100,12 @@ export class RideMode extends PlayMode {
 			const runLogic = !RideMode.runWithoutLogicThisTime;
 			RideMode.runWithoutLogicThisTime = false;
 
-			this.currentMachine = this.di.resolveForeignClass(ClientMachine);
+			const di = this.di.beginScope((builder) => {
+				builder.registerSingletonValue(RideMode.buildModeScheduler);
+			});
+			RideMode.buildModeScheduler.clear();
+
+			this.currentMachine = di.resolveForeignClass(ClientMachine);
 			this.currentMachine.init(this.plot.getBlockDatas(), runLogic);
 
 			SoundController.getSounds().Start.Play();
