@@ -4,6 +4,7 @@ import { Anim } from "client/gui/Anim";
 import { BlockPreviewControl } from "client/gui/buildmode/BlockPreviewControl";
 import { BlockSelectionControl } from "client/gui/buildmode/BlockSelection";
 import { MaterialColorEditControl } from "client/gui/buildmode/MaterialColorEditControl";
+import { MirrorEditorControl } from "client/gui/buildmode/MirrorEditorControl";
 import { DebugLog } from "client/gui/DebugLog";
 import { Interface } from "client/gui/Interface";
 import { ScaleEditorControl } from "client/gui/ScaleEditor";
@@ -334,19 +335,26 @@ namespace Scene {
 
 			this.parent(di.resolveForeignClass(TouchButtons, [this.blockSelector.selectedBlock]));
 
-			// const mirrorEditor = this.parent(
-			// 	new MirrorEditorControl(this.instance.Mirror.Content, tool.targetPlot.get()),
-			// );
-			// this.event.subscribeObservable(tool.mirrorMode, (val) => mirrorEditor.value.set(val), true);
-			// this.event.subscribe(mirrorEditor.submitted, (val) => tool.mirrorMode.set(val));
+			{
+				this.parentGui(mainScreen.addTopRightButton("mirror", 16686412951)) //
+					.addButtonAction(() => (instance.Visible = !instance.Visible));
 
-			// this.onEnable(() => (this.instance.Mirror.Visible = false));
-			// this.parent(
-			// 	new ButtonControl(
-			// 		this.instance.ActionBar.Buttons.Mirror,
-			// 		() => (this.instance.Mirror.Visible = !this.instance.Mirror.Visible),
-			// 	),
-			// );
+				const floatingTemplate = Interface.getInterface<{
+					readonly Floating: GuiObject & {
+						readonly Mirror: GuiObject & {
+							readonly Content: MirrorEditorControlDefinition;
+						};
+					};
+				}>().Floating;
+				const instance = floatingTemplate.Mirror.Clone();
+				instance.Parent = floatingTemplate;
+
+				const mirrorEditor = this.parent(new MirrorEditorControl(instance.Content, tool.targetPlot.get()));
+				this.event.subscribeObservable(tool.mirrorMode, (val) => mirrorEditor.value.set(val), true);
+				this.event.subscribe(mirrorEditor.submitted, (val) => tool.mirrorMode.set(val));
+
+				this.onEnable(() => (instance.Visible = false));
+			}
 
 			this.event.subscribeObservable(
 				this.blockSelector.selectedBlock,
