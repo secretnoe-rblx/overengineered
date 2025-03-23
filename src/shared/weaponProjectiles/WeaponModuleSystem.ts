@@ -44,7 +44,7 @@ export class WeaponModule {
 		}
 
 		for (const m of fm) {
-			if (!configMarkers.has(m.Name)) throw "Weapon marker not found";
+			if (!configMarkers.has(m.Name)) throw `Weapon marker "${m.Name}" not found`;
 			this.allMarkers.set(m.Name, {
 				markerInstance: m,
 				occupiedWith: {
@@ -77,7 +77,7 @@ export class WeaponModule {
 		params.CollisionGroup = "Blocks";
 		params.FilterType = Enum.RaycastFilterType.Exclude;
 		params.AddToFilter(this.instance);
-		params.AddToFilter(this.instance.PrimaryPart!);
+		if (this.instance.PrimaryPart) params.AddToFilter(this.instance.PrimaryPart);
 
 		const allCollidedCollections: Set<ModuleCollection> = new Set();
 		for (const [k, v] of pairs(configMarkers)) {

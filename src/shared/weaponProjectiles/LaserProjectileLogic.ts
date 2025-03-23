@@ -8,19 +8,28 @@ type laser = baseWeaponProjectile & Record<`LaserProjectileVisual${laserVisualsA
 
 export class LaserProjectile extends WeaponProjectile {
 	static readonly spawn = new A2SRemoteEvent<{
-		readonly startPosition: Vector3;
-		readonly baseVelocity: Vector3;
+		readonly originPart: BasePart;
 		readonly baseDamage: number;
 		readonly modifier: projectileModifier;
 	}>("laser_spawn", "RemoteEvent");
 
-	private forwardVector = this.projectilePart.GetPivot().LookVector;
 	private detectionlessSize = new Vector3(1024, this.projectilePart.Size.Y, this.projectilePart.Size.Z);
 	private laserModel: BasePart[] = [];
 	private damage;
 
-	constructor(startPosition: Vector3, baseVelocity: Vector3, baseDamage: number, modifier: projectileModifier) {
-		super(startPosition, "ENERGY", WeaponProjectile.LASER_PROJECTILE, baseVelocity.Unit, baseDamage, modifier);
+	constructor(
+		private originPart: BasePart,
+		baseDamage: number,
+		modifier: projectileModifier,
+	) {
+		super(
+			originPart.CFrame.Position,
+			"ENERGY",
+			WeaponProjectile.LASER_PROJECTILE,
+			originPart.Rotation,
+			baseDamage,
+			modifier,
+		);
 		this.projectilePart.Transparency = 1;
 		this.projectilePart.Size = Vector3.one;
 		this.damage = this.baseDamage;
@@ -31,18 +40,22 @@ export class LaserProjectile extends WeaponProjectile {
 	}
 
 	onTick(dt: number, percentage: number, reversePercentage: number): void {
+		const pivo = this.originPart.GetPivot();
+		const forwardVector = pivo.XVector.mul(-1);
+		this.startPosition = pivo.Position;
+		this.projectilePart.PivotTo(pivo);
+
 		let res;
 		let iter = 0;
 		const length = this.laserModel.size();
 		for (iter = 0; iter < length; iter++) {
 			const posOffset = 1024 * iter;
-			this.projectilePart.Position = this.forwardVector.mul(posOffset).add(this.startPosition);
-			res = Workspace.Shapecast(this.projectilePart, this.baseVelocity.Unit.mul(1023));
+			res = Workspace.Shapecast(this.projectilePart, forwardVector.mul(1023));
 			this.laserModel[iter].Transparency = 0;
-			this.laserModel[iter].PivotTo(this.projectilePart.GetPivot());
+			this.laserModel[iter].PivotTo(this.projectilePart.CFrame);
 			if (res === undefined) {
 				this.laserModel[iter].Size = this.detectionlessSize;
-				this.laserModel[iter].Position = this.forwardVector.mul(512 + posOffset).add(this.startPosition);
+				this.laserModel[iter].Position = forwardVector.mul(512 + posOffset).add(this.startPosition);
 				continue;
 			}
 
@@ -51,11 +64,10 @@ export class LaserProjectile extends WeaponProjectile {
 				this.projectilePart.Size.Y,
 				this.projectilePart.Size.Z,
 			);
-			this.laserModel[iter].Position = this.forwardVector
-				.mul(res.Distance / 2 + posOffset)
-				.add(this.startPosition);
+			this.laserModel[iter].Position = forwardVector.mul(res.Distance / 2 + posOffset).add(this.startPosition);
 			break;
 		}
+
 		// скрыть неактивные части
 		for (let i = math.min(iter + 1, length - 1); i < length; i++) this.laserModel[i].Transparency = 1;
 
@@ -68,7 +80,7 @@ export class LaserProjectile extends WeaponProjectile {
 	}
 }
 
-LaserProjectile.spawn.invoked.Connect((player, { startPosition, baseVelocity, baseDamage, modifier }) => {
+LaserProjectile.spawn.invoked.Connect((player, { originPart, baseDamage, modifier }) => {
 	print("Laser spawned");
-	new LaserProjectile(startPosition, baseVelocity, baseDamage, modifier);
+	new LaserProjectile(originPart, baseDamage, modifier);
 });

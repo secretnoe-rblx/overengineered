@@ -62,6 +62,8 @@ import { VehicleSeatBlock } from "shared/blocks/blocks/VehicleSeatBlock";
 import { CannonBarrels } from "shared/blocks/blocks/Weaponary/Cannon/CannonBarrels";
 import { CannonBases } from "shared/blocks/blocks/Weaponary/Cannon/CannonBases";
 import { CannonBreech } from "shared/blocks/blocks/Weaponary/Cannon/CannonBreechBlock";
+import { LaserEmitterBlock } from "shared/blocks/blocks/Weaponary/Laser/LaserEmitterBlock";
+import { LaserLensBlock } from "shared/blocks/blocks/Weaponary/Laser/LaserLensBlock";
 import { ArmoredMachineGunBarrels } from "shared/blocks/blocks/Weaponary/Machinegun/ArmoredMachineGunBarrels";
 import { MachineGunAmmoBlocks } from "shared/blocks/blocks/Weaponary/Machinegun/MachineGunAmmoBlocks";
 import { MachineGunBarrels } from "shared/blocks/blocks/Weaponary/Machinegun/MachineGunBarrels";
@@ -123,6 +125,10 @@ export const CreateSandboxBlocks = (di: DIContainer): BlockList => {
 		RandomBlock,
 
 		// PlasmaCoilAcceleratorUpgradeBlock, //todo: remove later
+
+		//laser stuff
+		LaserLensBlock,
+		LaserEmitterBlock,
 
 		//plasma stuff
 		PlasmaShotgunMuzzleBlock,
