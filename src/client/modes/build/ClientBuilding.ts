@@ -49,6 +49,14 @@ export namespace ClientBuildingTypes {
 		}[];
 	};
 
+	export type UpdateCustomDataArgs = {
+		readonly plot: SharedPlot;
+		readonly datas: readonly {
+			readonly block: BlockModel;
+			readonly data: PlacedBlockData["customData"];
+		}[];
+	};
+
 	export type ResetConfigArgs = {
 		readonly plot: SharedPlot;
 		readonly blocks: readonly BlockModel[];
@@ -355,6 +363,21 @@ export class ClientBuilding {
 
 		plot.changed.Fire();
 		return result;
+	}
+
+	updateCustomData({ plot, datas: _datas }: ClientBuildingTypes.UpdateCustomDataArgs) {
+		const newConfigs = asObject(_datas.mapToMap((c) => $tuple(BlockManager.manager.uuid.get(c.block), c.data)));
+
+		const getBlocks = (
+			data: Record<BlockUuid, PlacedBlockData["customData"]>,
+		): { readonly block: BlockModel; readonly sdata: string }[] => {
+			return asMap(data).map((k, v) => ({ block: plot.getBlock(k), sdata: JSON.serialize(v) }));
+		};
+
+		this.building.updateCustomData.send({
+			plot: plot.instance,
+			datas: getBlocks(newConfigs),
+		});
 	}
 
 	updateConfig({ plot, configs: _configs }: ClientBuildingTypes.UpdateConfigArgs) {

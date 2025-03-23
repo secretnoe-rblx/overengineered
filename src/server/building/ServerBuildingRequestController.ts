@@ -42,6 +42,7 @@ export class ServerBuildingRequestController extends Component {
 		b.logicDisconnect.subscribe((p, arg) => this.logicDisconnect(arg));
 		b.paintBlocks.subscribe((p, arg) => this.paintBlocks(arg));
 		b.updateConfig.subscribe((p, arg) => this.updateConfig(arg));
+		b.updateCustomData.subscribe((p, arg) => this.updateCustomData(arg));
 		b.resetConfig.subscribe((p, arg) => this.resetConfig(arg));
 	}
 
@@ -185,6 +186,18 @@ export class ServerBuildingRequestController extends Component {
 		}
 
 		return this.blocks.updateConfig(request.configs);
+	}
+	private updateCustomData(request: CustomDataUpdateRequest): Response {
+		if (!this.plots.isBuildingAllowed(request.plot, this.playerId)) {
+			return errBuildingNotPermitted;
+		}
+		for (const config of request.datas) {
+			if (!isBlockOnPlot(config.block, request.plot)) {
+				return errBuildingNotPermitted;
+			}
+		}
+
+		return this.blocks.updateCustomData(request.datas);
 	}
 	private resetConfig(request: ConfigResetRequest): Response {
 		if (!this.plots.isBuildingAllowed(request.plot, this.playerId)) {

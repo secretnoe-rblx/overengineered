@@ -66,6 +66,13 @@ declare global {
 			readonly scfg: string;
 		}[];
 	};
+	type CustomDataUpdateRequest = {
+		readonly plot: PlotModel;
+		readonly datas: readonly {
+			readonly block: BlockModel;
+			readonly sdata: string;
+		}[];
+	};
 	type ConfigResetRequest = {
 		readonly plot: PlotModel;
 		readonly blocks: readonly BlockModel[];

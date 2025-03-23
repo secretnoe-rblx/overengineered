@@ -88,6 +88,7 @@ export class BuildingPlot extends ReadonlyPlot {
 		if (data.config && Objects.size(data.config) !== 0) {
 			BlockManager.manager.config.set(model, data.config);
 		}
+		BlockManager.manager.customData.set(model, data.customData);
 
 		BlockManager.manager.scale.set(model, data.scale);
 		BlockManager.manager.uuid.set(model, uuid);
@@ -218,6 +219,13 @@ export class BuildingPlot extends ReadonlyPlot {
 	updateConfig(configs: ConfigUpdateRequest["configs"]): Response {
 		for (const config of configs) {
 			BlockManager.manager.config.set(config.block, JSON.deserialize(config.scfg));
+		}
+
+		return success;
+	}
+	updateCustomData(datas: CustomDataUpdateRequest["datas"]): Response {
+		for (const data of datas) {
+			BlockManager.manager.customData.set(data.block, JSON.deserialize(data.sdata));
 		}
 
 		return success;
