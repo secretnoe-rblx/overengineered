@@ -123,7 +123,7 @@ export const RandomAccessMemoryBlock = {
 	...BlockCreation.defaults,
 	id: "randomaccessmemory",
 	displayName: "RAM",
-	description: `An addressed memory. Allows you to store up to ${size} values`,
+	description: `An addressed memory. Allows you to store up to ${size + 1} values`,
 
 	logic: { definition, ctor: Logic },
 } as const satisfies BlockBuilder;
