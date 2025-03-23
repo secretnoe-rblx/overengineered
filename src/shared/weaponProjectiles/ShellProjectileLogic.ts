@@ -1,4 +1,3 @@
-import { RunService } from "@rbxts/services";
 import { A2SRemoteEvent } from "engine/shared/event/PERemoteEvent";
 import { WeaponProjectile } from "shared/weaponProjectiles/BaseProjectileLogic";
 import type { projectileModifier } from "shared/weaponProjectiles/BaseProjectileLogic";
@@ -28,12 +27,6 @@ export class ShellProjectile extends WeaponProjectile {
 		this.projectilePart.Position = this.projectilePart.CFrame.PointToWorldSpace(
 			new Vector3(0, startedWithSize.Y / 2, 0),
 		);
-
-		//push impcated part
-		//if (!part.Anchored)
-		//part.ApplyImpulse(Vector3.xAxis.mul(1000)); //force.mul(100));
-		print(part);
-		RunService.Heartbeat.Connect(() => part.ApplyImpulse(Vector3.xAxis.mul(100000)));
 		super.onHit(part, point, true);
 	}
 
