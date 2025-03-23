@@ -10,6 +10,7 @@ export type PlayerDataStorageRemotesBuilding = {
 	readonly logicDisconnect: C2S2CRemoteFunction<LogicDisconnectRequest>;
 	readonly paintBlocks: C2S2CRemoteFunction<PaintBlocksRequest>;
 	readonly updateConfig: C2S2CRemoteFunction<ConfigUpdateRequest>;
+	readonly updateCustomData: C2S2CRemoteFunction<CustomDataUpdateRequest>;
 	readonly resetConfig: C2S2CRemoteFunction<ConfigResetRequest>;
 };
 export type PlayerDataStorageRemotesSlots = {
@@ -54,6 +55,7 @@ export namespace PlayerDataRemotes {
 			logicDisconnect: new C2S2CRemoteFunction(get("building_ldisconnect", "RemoteFunction")),
 			paintBlocks: new C2S2CRemoteFunction(get("building_paint", "RemoteFunction")),
 			updateConfig: new C2S2CRemoteFunction(get("building_updatecfg", "RemoteFunction")),
+			updateCustomData: new C2S2CRemoteFunction(get("building_updatecdt", "RemoteFunction")),
 			resetConfig: new C2S2CRemoteFunction(get("building_resetcfg", "RemoteFunction")),
 		}));
 	}

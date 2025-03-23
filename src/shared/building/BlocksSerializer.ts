@@ -55,8 +55,10 @@ interface SerializedBlockV3 extends SerializedBlockV2 {
 interface SerializedBlockV4
 	extends ReplaceWith<SerializedBlockV3, { readonly config?: PlacedBlockConfig | undefined }> {}
 interface SerializedBlockV5 extends ReplaceWith<SerializedBlockV4, { readonly scale?: Vector3 | undefined }> {}
+interface SerializedBlockV6
+	extends ReplaceWith<SerializedBlockV5, { readonly customData?: PlacedBlockData["customData"] | undefined }> {}
 
-export type LatestSerializedBlock = SerializedBlockV5;
+export type LatestSerializedBlock = SerializedBlockV6;
 export type LatestSerializedBlocks = SerializedBlocks<LatestSerializedBlock>;
 
 namespace Filter {
@@ -1569,11 +1571,23 @@ const v31: UpgradableBlocksSerializer<SerializedBlocks<SerializedBlockV4>, typeo
 		};
 	},
 };
+
+// Add customData
+const v32: UpgradableBlocksSerializer<SerializedBlocks<SerializedBlockV5>, typeof v31> = {
+	version: 32,
+
+	upgradeFrom(prev: SerializedBlocks<SerializedBlockV5>): SerializedBlocks<SerializedBlockV6> {
+		return {
+			version: this.version,
+			blocks: prev.blocks,
+		};
+	},
+};
 //
 
 const versions = [
 	...([v4, v5, v6, v7, v8, v9, v10, v11, v12, v13, v14, v15, v16, v17, v18, v19, v20, v21, v22] as const),
-	...([v23, v24, v25, v26, v27, v28, v29, v30, v31] as const),
+	...([v23, v24, v25, v26, v27, v28, v29, v30, v31, v32] as const),
 ] as const;
 const current = versions[versions.size() - 1] as typeof versions extends readonly [...unknown[], infer T] ? T : never;
 
@@ -1610,6 +1624,7 @@ export namespace BlocksSerializer {
 				id: block.id,
 				uuid: block.uuid,
 				config: block.config,
+				customData: block.customData,
 				connections: block.connections,
 
 				loc: Serializer.CFrameSerializer.serialize(block.location),
@@ -1645,6 +1660,7 @@ export namespace BlocksSerializer {
 				id: block.id,
 				uuid: block.uuid,
 				config: block.config,
+				customData: block.customData,
 				connections: block.connections,
 
 				location: Serializer.CFrameSerializer.deserialize(block.loc),
@@ -1689,6 +1705,7 @@ export namespace BlocksSerializer {
 			color: blockData.color ?? Color3.fromRGB(255, 255, 255),
 			material: blockData.material ?? Enum.Material.Plastic,
 			config: blockData.config,
+			customData: blockData.customData,
 			uuid: blockData.uuid,
 			scale: blockData.scale,
 		};
