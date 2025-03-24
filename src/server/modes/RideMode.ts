@@ -40,7 +40,7 @@ export class RideMode implements PlayModeBase {
 		if (hrp.Sit) return;
 
 		const vehicleSeat = this.serverControllers.controllers
-			.get(player)
+			.get(player.UserId)
 			?.plotController.blocks?.getBlocks()
 			?.find((model) => BlockManager.manager.id.get(model) === "vehicleseat")
 			?.FindFirstChild("VehicleSeat") as VehicleSeat | undefined;
@@ -82,7 +82,7 @@ export class RideMode implements PlayModeBase {
 	}
 
 	private rideStart(player: Player): Response {
-		const controller = this.serverControllers.controllers.get(player)?.plotController;
+		const controller = this.serverControllers.controllers.get(player.UserId)?.plotController;
 		if (!controller) throw "what";
 
 		const blocksChildren = controller.blocks.getBlocks();
@@ -143,7 +143,7 @@ export class RideMode implements PlayModeBase {
 		return { success: true };
 	}
 	private rideStop(player: Player): Response {
-		const controller = this.serverControllers.controllers.get(player)?.plotController;
+		const controller = this.serverControllers.controllers.get(player.UserId)?.plotController;
 		if (!controller) throw "what";
 
 		Throttler.forEach(6, controller.blocks.getBlocks(), (b) => b.Destroy());

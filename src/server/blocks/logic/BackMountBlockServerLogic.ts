@@ -1,3 +1,4 @@
+import { Players } from "@rbxts/services";
 import { InstanceComponent } from "engine/shared/component/InstanceComponent";
 import { ServerBlockLogic } from "server/blocks/ServerBlockLogic";
 import { SharedRagdoll } from "shared/SharedRagdoll";
@@ -23,8 +24,12 @@ export class BackMountBlockServerLogic extends ServerBlockLogic<typeof BackMount
 			const c = new InstanceComponent(block);
 			c.event.subscribeMap(
 				playersController.controllers,
-				(player, controller) => {
+				(playerid, controller) => {
 					if (!controller) return;
+
+					const player = Players.GetPlayerByUserId(playerid);
+					if (!player) return;
+
 					logic.events.initClient.send(data, player);
 				},
 				true,

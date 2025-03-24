@@ -1,4 +1,4 @@
-import { ServerStorage } from "@rbxts/services";
+import { Players, ServerStorage } from "@rbxts/services";
 import { ComponentKeyedChildren } from "engine/shared/component/ComponentKeyedChildren";
 import { HostedService } from "engine/shared/di/HostedService";
 import { PlayerWatcher } from "engine/shared/PlayerWatcher";
@@ -22,12 +22,12 @@ export class ServerPlayersController extends HostedService {
 	constructor(@inject players: PlayerDatabase, @inject sharedPlots: SharedPlots, @inject di: DIContainer) {
 		super();
 
-		const controllers = this.parent(new ComponentKeyedChildren<Player, ServerPlayerController>(true));
+		const controllers = this.parent(new ComponentKeyedChildren<number, ServerPlayerController>(true));
 		this.controllers = controllers.children;
 
 		this.event.subscribeRegistration(() =>
 			CustomRemotes.initPlayer.subscribe((player): Response<PlayerInitResponse> => {
-				if (controllers.getAll().has(player)) {
+				if (controllers.getAll().has(player.UserId)) {
 					player.Kick("hi  i like your hair");
 					return { success: false, message: "no" };
 				}
@@ -44,7 +44,7 @@ export class ServerPlayersController extends HostedService {
 				});
 
 				const controller = scope.resolveForeignClass(ServerPlayerController, [player, plot]);
-				controllers.add(player, controller);
+				controllers.add(player.UserId, controller);
 
 				let data;
 				try {
@@ -117,7 +117,7 @@ export class ServerPlayersController extends HostedService {
 					return { success: false, message: "no" };
 				}
 
-				const controller = this.controllers.get(sender);
+				const controller = this.controllers.get(sender.UserId);
 				if (!controller) {
 					return { success: false, message: "you are LITERALLY offline" };
 				}
@@ -157,22 +157,25 @@ export class ServerPlayersController extends HostedService {
 
 		this.event.subscribeRegistration(() =>
 			PlayerWatcher.onQuit((player) => {
-				controllers.get(player)?.destroy();
-				controllers.remove(player);
+				controllers.get(player.UserId)?.destroy();
+				controllers.remove(player.UserId);
 			}),
 		);
 
 		game.BindToClose(() => {
 			$log("Game quit, destroying controllers...");
 
-			for (const [player, controller] of controllers.getAll()) {
-				$log(`Destroying controller of ${player.Name}`);
+			for (const [playerId, controller] of controllers.getAll()) {
+				$log(`Destroying controller of ${playerId}`);
 				controller.destroy();
 			}
 		});
 	}
 
 	getPlayers(): readonly Player[] {
-		return this.controllers.getAll().keys();
+		return this.controllers
+			.getAll()
+			.keys()
+			.mapFiltered((id) => Players.GetPlayerByUserId(id));
 	}
 }
