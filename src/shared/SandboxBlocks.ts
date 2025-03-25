@@ -38,6 +38,7 @@ import { MagnetBlock } from "shared/blocks/blocks/MagnetBlock";
 import { MassSensorBlock } from "shared/blocks/blocks/MassSensorBlock";
 import { MotorBlock } from "shared/blocks/blocks/MotorBlock";
 import { MouseSensorBlock } from "shared/blocks/blocks/MouseSensorBlock";
+import { NonVolatileMemoryBlock } from "shared/blocks/blocks/NonVolatileMemoryBlock";
 import { OwnerCameraLocatorBlock } from "shared/blocks/blocks/OwnerCameraLocatorBlock";
 import { OwnerLocatorBlock } from "shared/blocks/blocks/OwnerLocatorBlock";
 import { PassengerSeatBlock } from "shared/blocks/blocks/PassengerSeatBlock";
@@ -118,6 +119,7 @@ export const CreateSandboxBlocks = (di: DIContainer): BlockList => {
 		CounterBlock,
 		TpsCounterBlock,
 		LogicMemoryBlock,
+		NonVolatileMemoryBlock,
 		LogicMemoryLegacyBlock,
 		RandomAccessMemoryBlock,
 		StackMemoryBlock,
