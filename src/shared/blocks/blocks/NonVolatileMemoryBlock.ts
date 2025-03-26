@@ -116,4 +116,5 @@ export const NonVolatileMemoryBlock = {
 	search: {
 		partialAliases: ["nvmc", "memory", "nonvolatile"],
 	},
+	limit: 128,
 } as const satisfies BlockBuilder;
