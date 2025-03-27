@@ -15,6 +15,11 @@ export class BlockLogicRunner extends Component {
 	private readonly _isRunning = new ObservableValue(false);
 	readonly isRunning = this._isRunning.asReadonly();
 
+	readonly overclock = new ObservableValue<{ type: "speedup" | "slowdown"; multiplier: number }>({
+		type: "speedup",
+		multiplier: 1,
+	});
+
 	onAfterTick(func: (ctx: BlockLogicTickContext) => void): SignalConnection {
 		return this.ticked.Connect(func);
 	}
@@ -47,20 +52,36 @@ export class BlockLogicRunner extends Component {
 		this.tickingLoop = undefined;
 	}
 
+	private ticksSinceLast = 0;
 	tick(overriddenDt?: number) {
-		const ctx = this.getContext(true, overriddenDt);
+		const overclock = this.overclock.get();
 
-		for (const block of this.blocks) {
-			if (!block.isEnabled()) continue;
+		const tick = () => {
+			const ctx = this.getContext(true, overriddenDt);
 
-			try {
-				block.ticc(ctx);
-			} catch (err) {
-				$warn(err);
-				block.disableAndBurn();
+			for (const block of this.blocks) {
+				if (!block.isEnabled()) continue;
+
+				try {
+					block.ticc(ctx);
+				} catch (err) {
+					$warn(err);
+					block.disableAndBurn();
+				}
 			}
-		}
-		this.ticked.Fire(ctx);
+			this.ticked.Fire(ctx);
+		};
+
+		if (overclock.type === "speedup") {
+			for (let i = 0; i < overclock.multiplier; i++) {
+				tick();
+			}
+		} else if (overclock.type === "slowdown") {
+			this.ticksSinceLast = (this.ticksSinceLast + 1) % overclock.multiplier;
+			if (this.ticksSinceLast === 0) {
+				tick();
+			}
+		} else overclock.type satisfies never;
 	}
 
 	add(block: Logic) {
