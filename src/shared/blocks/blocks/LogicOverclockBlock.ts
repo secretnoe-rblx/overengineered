@@ -56,6 +56,7 @@ export const LogicOverclockBlock = {
 	id: "logicoverclock",
 	displayName: "Logic overclock",
 	description: "Speeds up or slows down the logic processing",
+	limit: 1,
 
 	logic: { definition, ctor: Logic },
 	modelSource: {
