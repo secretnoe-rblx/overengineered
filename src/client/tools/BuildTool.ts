@@ -44,7 +44,7 @@ const allowedColor = Colors.blue;
 const forbiddenColor = Colors.red;
 const mouse = Players.LocalPlayer.GetMouse();
 
-const fromModel = (block: Model, cframe?: CFrame): AABB => {
+const fromModel = (block: Model): AABB => {
 	return AABB.combine(
 		block
 			.GetDescendants()
@@ -115,7 +115,7 @@ const getMouseTargetBlockPositionV2 = (
 		return pos.sub(offset);
 	};
 	const addBlockSize = (normal: Vector3, pos: Vector3) => {
-		return pos.add(aabb.getRotatedSize().mul(scale).mul(normal).div(2));
+		return pos.add(aabb.originalSize.mul(scale).mul(normal).div(2));
 	};
 
 	const target = info?.[0] ?? mouse.Target;
