@@ -44,6 +44,15 @@ const allowedColor = Colors.blue;
 const forbiddenColor = Colors.red;
 const mouse = Players.LocalPlayer.GetMouse();
 
+const fromModel = (block: Model): AABB => {
+	return AABB.combine(
+		block
+			.GetDescendants()
+			.filter((c) => c.Parent?.Name !== "moduleMarkers" && c.IsA("BasePart"))
+			.map((b) => AABB.fromPart(b as BasePart)),
+	);
+};
+
 type ModelOnlyBlock = Pick<Block, "model">;
 
 const createBlockGhost = (block: ModelOnlyBlock, scale: Vector3): BlockModel => {
@@ -105,8 +114,8 @@ const getMouseTargetBlockPositionV2 = (
 
 		return pos.sub(offset);
 	};
-	const addBlockSize = (selectedBlock: ModelOnlyBlock, normal: Vector3, pos: Vector3) => {
-		return pos.add(AABB.fromModel(selectedBlock.model, rotation).getSize().mul(scale).mul(normal).div(2));
+	const addBlockSize = (normal: Vector3, pos: Vector3) => {
+		return pos.add(aabb.originalSize.mul(scale).mul(normal).div(2));
 	};
 
 	const target = info?.[0] ?? mouse.Target;
@@ -124,10 +133,19 @@ const getMouseTargetBlockPositionV2 = (
 	DebugLog.named("Normal", `${mouseSurface} ${normal}`);
 	DebugLog.endCategory();
 
+	const aabb = BB.fromBBs(
+		block.model
+			.GetChildren()
+			.mapFiltered((c) =>
+				c.IsA("Folder") ? undefined : c.IsA("Model") || c.IsA("BasePart") ? BB.from(c) : undefined,
+			),
+		rotation,
+	);
+
 	let targetPosition = globalMouseHitPos;
 	targetPosition = addTargetSize(target, normal, targetPosition);
 	targetPosition = offsetBlockPivotToCenter(block, targetPosition);
-	targetPosition = addBlockSize(block, normal, targetPosition);
+	targetPosition = addBlockSize(normal, targetPosition);
 
 	if (gridEnabled) {
 		// костыль of fixing the plots position
