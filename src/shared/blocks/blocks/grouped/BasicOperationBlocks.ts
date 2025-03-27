@@ -279,7 +279,7 @@ const constants = {
 	},
 	pi: {
 		displayName: "Pi",
-		description: `So called "free thinkers" will make a thousand PIe jokes as soon as they'll see the PI constant..`,
+		description: `So called "free thinkers" will make a thousand Pie jokes as soon as they'll see the Pi constant..`,
 		modelSource: autoModel("ConstLogicBlockPrefab", "π", BlockCreation.Categories.other),
 		logic: logic(defs.constnum, () => ({ value: { type: "number", value: math.pi } })),
 	},
@@ -705,7 +705,7 @@ const maths = {
 	},
 	lessthan: {
 		displayName: "Less Than",
-		description: "Returns true if first value less than second",
+		description: "Returns true if first value lesser than second",
 		modelSource: autoModel("DoubleGenericLogicBlockPrefab", "<", categories.math),
 		search: {
 			aliases: ["les", "less"],
@@ -727,7 +727,7 @@ const maths = {
 	},
 	lessthanorequals: {
 		displayName: "Less Than or Equals",
-		description: "Returns true if first value less than or equals to second",
+		description: "Returns true if first value lesser than or equals to second",
 		modelSource: autoModel("DoubleGenericLogicBlockPrefab", "≤", categories.math),
 		logic: logic(defs.num2_bool, ({ value1, value2 }) => ({
 			result: { type: "bool", value: value1 <= value2 },

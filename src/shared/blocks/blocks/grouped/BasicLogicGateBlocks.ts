@@ -280,7 +280,7 @@ namespace Xnor {
 		...BlockCreation.defaults,
 		id: "xnor",
 		displayName: "XNOR Gate",
-		description: "Returns true when both of the the inputs are the same",
+		description: "Returns true when both of the inputs are the same",
 		modelSource: autoModel("DoubleGenericLogicBlockPrefab", "XNOR", BlockCreation.Categories.bool),
 
 		logic: { definition, ctor: Logic },
