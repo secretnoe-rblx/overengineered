@@ -61,7 +61,7 @@ class Logic extends BlockLogic<typeof definition> {
 		});
 	}
 }
-
+//
 export const SingleImpulseBlock = {
 	...BlockCreation.defaults,
 	id: "singleimpulse",
