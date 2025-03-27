@@ -207,35 +207,35 @@ const cornerWedges = {
 const cylinders = {
 	cylinder1x1: {
 		displayName: "Cylinder 1x1",
-		description: "A simple cyllinder",
+		description: "A simple cylinder",
 	},
 	cylinder1x2: {
 		displayName: "Cylinder 1x2",
-		description: "A not-so-simple cyllinder",
+		description: "A not-so-simple cylinder",
 	},
 	cylinder2x1: {
 		displayName: "Cylinder 2x1",
-		description: "A wider sibling of 1x1 cyllinder",
+		description: "A wider sibling of 1x1 cylinder",
 	},
 	cylinder2x2: {
 		displayName: "Cylinder 2x2",
-		description: "A bigger sibling of 2x1 cyllinder",
+		description: "A bigger sibling of 2x1 cylinder",
 	},
 	halfcylinder1x1: {
 		displayName: "Half Cylinder 1x1",
-		description: "A half of a sibling of 1x1 cyllinder",
+		description: "A half of a sibling of 1x1 cylinder",
 	},
 	halfcylinder1x2: {
 		displayName: "Half Cylinder 1x2",
-		description: "A bigger half of a sibling of 1x1 cyllinder",
+		description: "A bigger half of a sibling of 1x1 cylinder",
 	},
 	halfcylinder2x1: {
 		displayName: "Half Cylinder 2x1",
-		description: "Same as 1x2 half cyllinder but wider",
+		description: "Same as 1x2 half cylinder but wider",
 	},
 	halfcylinder2x2: {
 		displayName: "Half Cylinder 2x2",
-		description: "Same as 1x2 half cyllinder but wider and longer",
+		description: "Same as 1x2 half cylinder but wider and longer",
 	},
 } as const satisfies BlockBuildersWithoutIdAndDefaults;
 
