@@ -55,7 +55,6 @@ export class BlockLogicRunner extends Component {
 	private ticksSinceLast = 0;
 	tick(overriddenDt?: number) {
 		const overclock = this.overclock.get();
-		const ctx = this.getContext(true, overriddenDt);
 
 		const tick = (ctx: BlockLogicTickContext) => {
 			for (const block of this.blocks) {
@@ -71,15 +70,16 @@ export class BlockLogicRunner extends Component {
 			this.ticked.Fire(ctx);
 		};
 
+		let realdt = this.getContext(false, overriddenDt).dt;
 		if (overclock.type === "speedup") {
-			ctx.dt /= overclock.multiplier;
+			realdt /= overclock.multiplier;
 			for (let i = 0; i < overclock.multiplier; i++) {
-				tick(ctx);
+				tick(this.getContext(true, realdt));
 			}
 		} else if (overclock.type === "slowdown") {
 			this.ticksSinceLast = (this.ticksSinceLast + 1) % overclock.multiplier;
 			if (this.ticksSinceLast === 0) {
-				tick(ctx);
+				tick(this.getContext(true, realdt));
 			}
 		} else overclock.type satisfies never;
 	}
