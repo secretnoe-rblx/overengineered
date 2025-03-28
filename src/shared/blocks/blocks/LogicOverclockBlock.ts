@@ -22,7 +22,7 @@ const definition = {
 			},
 		},
 		multiplier: {
-			displayName: "Set",
+			displayName: "Multiplier",
 			types: {
 				number: {
 					config: 1,
