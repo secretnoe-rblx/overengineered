@@ -84,7 +84,7 @@ export class ServerPlayersController extends HostedService {
 						const data = err;
 						if (!data.reason.contains("bye bye")) {
 							player.Kick(
-								`You are ${!data.until && "permanently "}banned!\n${data.reason}${data.until && `\n${secondsToText(data.until)}`}`,
+								`You are ${data.until ? undefined : "permanently "}banned!\n${data.reason}${data.until && `\n${secondsToText(data.until)}`}`,
 							);
 							return { success: false, message: "ban haha" };
 						}
