@@ -29,6 +29,10 @@ export class ServerPlayersController extends HostedService {
 			CustomRemotes.initPlayer.subscribe((player): Response<PlayerInitResponse> => {
 				if (controllers.getAll().has(player.UserId)) {
 					player.Kick("hi  i like your hair");
+
+					controllers.get(player.UserId)?.destroy();
+					controllers.remove(player.UserId);
+
 					return { success: false, message: "no" };
 				}
 
