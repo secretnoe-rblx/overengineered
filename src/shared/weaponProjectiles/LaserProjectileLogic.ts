@@ -1,5 +1,5 @@
 import { Workspace } from "@rbxts/services";
-import { A2SRemoteEvent } from "engine/shared/event/PERemoteEvent";
+import { C2CRemoteEvent } from "engine/shared/event/PERemoteEvent";
 import { WeaponProjectile } from "shared/weaponProjectiles/BaseProjectileLogic";
 import type { baseWeaponProjectile, projectileModifier } from "shared/weaponProjectiles/BaseProjectileLogic";
 
@@ -7,11 +7,16 @@ type laserVisualsAmountConstant = 1 | 2 | 3 | 4 | 5;
 type laser = baseWeaponProjectile & Record<`LaserProjectileVisual${laserVisualsAmountConstant}`, BasePart>;
 
 export class LaserProjectile extends WeaponProjectile {
-	static readonly spawn = new A2SRemoteEvent<{
+	static projectileMap = new Map<Instance, LaserProjectile>();
+	static readonly spawnProjectile = new C2CRemoteEvent<{
 		readonly originPart: BasePart;
 		readonly baseDamage: number;
 		readonly modifier: projectileModifier;
 	}>("laser_spawn", "RemoteEvent");
+
+	static readonly destroyProjectile = new C2CRemoteEvent<{
+		readonly originPart: BasePart;
+	}>("laser_destroy", "RemoteEvent");
 
 	private detectionlessSize = new Vector3(1024, this.projectilePart.Size.Y, this.projectilePart.Size.Z);
 	private laserModel: BasePart[] = [];
@@ -80,7 +85,21 @@ export class LaserProjectile extends WeaponProjectile {
 	}
 }
 
-LaserProjectile.spawn.invoked.Connect((player, { originPart, baseDamage, modifier }) => {
+LaserProjectile.spawnProjectile.invoked.Connect(({ originPart, baseDamage, modifier }) => {
 	print("Laser spawned");
-	new LaserProjectile(originPart, baseDamage, modifier);
+	const v = LaserProjectile.projectileMap.get(originPart);
+	if (v !== undefined) {
+		v.destroy();
+		LaserProjectile.projectileMap.delete(originPart);
+	}
+	LaserProjectile.projectileMap.set(originPart, new LaserProjectile(originPart, baseDamage, modifier));
+});
+
+LaserProjectile.destroyProjectile.invoked.Connect(({ originPart }) => {
+	print("Laser destroyed");
+	const v = LaserProjectile.projectileMap.get(originPart);
+	if (v !== undefined) {
+		v.destroy();
+		LaserProjectile.projectileMap.delete(originPart);
+	}
 });

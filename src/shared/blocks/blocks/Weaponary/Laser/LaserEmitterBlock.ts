@@ -48,6 +48,16 @@ class Logic extends InstanceBlockLogic<typeof definition> {
 		const relativeOuts = new Map<BasePart, CFrame>();
 		const module = WeaponModule.allModules[this.instance.Name];
 
+		const destroyProjectile = () => {
+			for (const e of module.parentCollection.calculatedOutputs) {
+				for (const o of e.outputs) {
+					LaserProjectile.destroyProjectile.send({
+						originPart: o.markerInstance,
+					});
+				}
+			}
+		};
+
 		// disable markers
 		module.parentCollection.setMarkersVisibility(false);
 
@@ -68,7 +78,11 @@ class Logic extends InstanceBlockLogic<typeof definition> {
 
 		// fire on button press
 		this.onk(["fireTrigger", "projectileColor"], ({ fireTrigger, projectileColor }) => {
-			if (!fireTrigger) return;
+			if (!fireTrigger) {
+				destroyProjectile();
+				return;
+			}
+
 			for (const e of module.parentCollection.calculatedOutputs) {
 				const mainpart = (e.module.instance as BlockModel & { MainPart: BasePart & { Sound: Sound } }).MainPart;
 				const sound = mainpart.FindFirstChild("Sound") as Sound & {
@@ -78,7 +92,7 @@ class Logic extends InstanceBlockLogic<typeof definition> {
 				if (sound) sound.pitch.Octave = math.random(1000, 1200) / 10000;
 				for (const o of e.outputs) {
 					sound?.Play();
-					LaserProjectile.spawn.send({
+					LaserProjectile.spawnProjectile.send({
 						originPart: o.markerInstance,
 						baseDamage: 0,
 						modifier: e.modifier,

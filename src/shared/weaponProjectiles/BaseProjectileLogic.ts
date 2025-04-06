@@ -116,6 +116,8 @@ export class WeaponProjectile extends InstanceComponent<BasePart> {
 			this.onTick(dt, percentage, reversePercentage);
 		});
 
+		this.onDestroy(() => pmodel.Destroy());
+
 		this.enable();
 		this.recalculateEffects();
 
