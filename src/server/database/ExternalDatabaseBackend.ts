@@ -29,6 +29,10 @@ export class ExternalDatabaseBackendSlots implements DatabaseBackend<BlocksSeria
 	SetAsync(value: BlocksSerializer.JsonSerializedBlocks, [ownerId, slotId]: SlotKeys): void {
 		const url = `${endpoint}/slot?ownerId=${ownerId}&slotIds=${slotId}`;
 		const data = JSON.serialize({ slotId, ownerId, value });
+		if (data.size() > 1 * 1024 * 1024) {
+			throw `Could not save slot data: Data too large (${data.size()})`;
+		}
+
 		$log("Posting", url);
 
 		const response = HttpService.PostAsync(url, data, "ApplicationJson", false, headers);
