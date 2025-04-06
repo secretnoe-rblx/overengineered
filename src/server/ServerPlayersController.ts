@@ -61,7 +61,7 @@ export class ServerPlayersController extends HostedService {
 					};
 				} catch (err) {
 					if (t.typeCheck(err, PlayerBanned)) {
-						const secondsToText = (seconds: number): string => {
+						const secondsToText = (until: number): string => {
 							const intervals = [
 								{ label: "year", seconds: 31536000 },
 								{ label: "month", seconds: 2592000 },
@@ -71,6 +71,7 @@ export class ServerPlayersController extends HostedService {
 								{ label: "second", seconds: 1 },
 							];
 
+							const seconds = (until - DateTime.now().UnixTimestampMillis) / 1000;
 							for (const interval of intervals) {
 								const count = math.floor(seconds / interval.seconds);
 								if (count >= 1) {
