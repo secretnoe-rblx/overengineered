@@ -1,9 +1,9 @@
-import { A2SRemoteEvent } from "engine/shared/event/PERemoteEvent";
+import { C2CRemoteEvent } from "engine/shared/event/PERemoteEvent";
 import { WeaponProjectile } from "shared/weaponProjectiles/BaseProjectileLogic";
 import type { projectileModifier } from "shared/weaponProjectiles/BaseProjectileLogic";
 
 export class BulletProjectile extends WeaponProjectile {
-	static readonly spawn = new A2SRemoteEvent<{
+	static readonly spawnProjectile = new C2CRemoteEvent<{
 		readonly startPosition: Vector3;
 		readonly baseVelocity: Vector3;
 		readonly baseDamage: number;
@@ -32,7 +32,7 @@ export class BulletProjectile extends WeaponProjectile {
 		super.onTick(dt, percentage, reversePercentage);
 	}
 }
-BulletProjectile.spawn.invoked.Connect((player, { startPosition, baseVelocity, baseDamage, modifier }) => {
+BulletProjectile.spawnProjectile.invoked.Connect(({ startPosition, baseVelocity, baseDamage, modifier }) => {
 	print("Bullet spawned");
 	new BulletProjectile(startPosition, baseVelocity, baseDamage, modifier);
 });

@@ -1,6 +1,5 @@
 import { RunService, Workspace } from "@rbxts/services";
 import { InstanceComponent } from "engine/shared/component/InstanceComponent";
-import { A2SRemoteEvent } from "engine/shared/event/PERemoteEvent";
 import { RemoteEvents } from "shared/RemoteEvents";
 import { ReplicatedAssets } from "shared/ReplicatedAssets";
 import { ModuleCollection } from "shared/weaponProjectiles/WeaponModuleSystem";
@@ -43,21 +42,6 @@ export class WeaponProjectile extends InstanceComponent<BasePart> {
 	// 	readonly lifetime?: number; //<--- seconds
 	// 	readonly modifier: projectileModifier; // <------ calculate it yourself!
 	// }>("projectile_spawn", "RemoteEvent");
-
-	static readonly sync_hit = new A2SRemoteEvent<{
-		//todo: finish sync
-		readonly startPosition: Vector3;
-		readonly projectileType: DamageType;
-		readonly projectilePart: BasePart;
-		readonly baseVelocity: Vector3;
-		readonly baseDamage: number;
-		readonly lifetime?: number; //<--- seconds
-	}>("projectile_sync_hit", "RemoteEvent");
-
-	static readonly sync_position = new A2SRemoteEvent<{
-		//todo: finish sync
-		readonly projectile: WeaponProjectile;
-	}>("projectile_sync_position", "RemoteEvent");
 
 	rawModifiers: projectileModifier[] = [];
 	totalEffect: projectileModifier = {};

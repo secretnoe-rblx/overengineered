@@ -9,6 +9,7 @@ type laser = baseWeaponProjectile & Record<`LaserProjectileVisual${laserVisualsA
 export class LaserProjectile extends WeaponProjectile {
 	static projectileMap = new Map<Instance, LaserProjectile>();
 	static readonly spawnProjectile = new C2CRemoteEvent<{
+		readonly color: Color3;
 		readonly originPart: BasePart;
 		readonly baseDamage: number;
 		readonly modifier: projectileModifier;
@@ -26,6 +27,7 @@ export class LaserProjectile extends WeaponProjectile {
 		private originPart: BasePart,
 		baseDamage: number,
 		modifier: projectileModifier,
+		color: Color3,
 	) {
 		super(
 			originPart.CFrame.Position,
@@ -40,8 +42,12 @@ export class LaserProjectile extends WeaponProjectile {
 		this.damage = this.baseDamage;
 		const p = this.originalProjectileModel as laser;
 		for (let i = 1; i <= 5; i++) {
-			this.laserModel.push(p[`LaserProjectileVisual${i as laserVisualsAmountConstant}`]);
+			const pr = p[`LaserProjectileVisual${i as laserVisualsAmountConstant}`];
+			this.laserModel.push(pr);
+			pr.Color = color;
 		}
+
+		(this.instance as unknown as Instance & { Lens: BasePart }).Lens.Color = color;
 	}
 
 	onTick(dt: number, percentage: number, reversePercentage: number): void {
@@ -85,14 +91,14 @@ export class LaserProjectile extends WeaponProjectile {
 	}
 }
 
-LaserProjectile.spawnProjectile.invoked.Connect(({ originPart, baseDamage, modifier }) => {
+LaserProjectile.spawnProjectile.invoked.Connect(({ color, originPart, baseDamage, modifier }) => {
 	print("Laser spawned");
 	const v = LaserProjectile.projectileMap.get(originPart);
 	if (v !== undefined) {
 		v.destroy();
 		LaserProjectile.projectileMap.delete(originPart);
 	}
-	LaserProjectile.projectileMap.set(originPart, new LaserProjectile(originPart, baseDamage, modifier));
+	LaserProjectile.projectileMap.set(originPart, new LaserProjectile(originPart, baseDamage, modifier, color));
 });
 
 LaserProjectile.destroyProjectile.invoked.Connect(({ originPart }) => {

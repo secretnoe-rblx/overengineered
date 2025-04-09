@@ -1,9 +1,9 @@
-import { A2SRemoteEvent } from "engine/shared/event/PERemoteEvent";
+import { C2CRemoteEvent } from "engine/shared/event/PERemoteEvent";
 import { WeaponProjectile } from "shared/weaponProjectiles/BaseProjectileLogic";
 import type { projectileModifier } from "shared/weaponProjectiles/BaseProjectileLogic";
 
 export class ShellProjectile extends WeaponProjectile {
-	static readonly spawn = new A2SRemoteEvent<{
+	static readonly spawnProjectile = new C2CRemoteEvent<{
 		readonly startPosition: Vector3;
 		readonly baseVelocity: Vector3;
 		readonly baseDamage: number;
@@ -15,9 +15,6 @@ export class ShellProjectile extends WeaponProjectile {
 	}
 
 	onHit(part: BasePart, point: Vector3): void {
-		const force = this.projectilePart.AssemblyLinearVelocity.add(this.projectilePart.AssemblyAngularVelocity).mul(
-			this.projectilePart.Mass,
-		);
 		const startedWithSize = this.projectilePart.Size;
 		this.projectilePart.AssemblyLinearVelocity = Vector3.zero;
 		this.projectilePart.Anchored = true;
@@ -27,6 +24,7 @@ export class ShellProjectile extends WeaponProjectile {
 		this.projectilePart.Position = this.projectilePart.CFrame.PointToWorldSpace(
 			new Vector3(0, startedWithSize.Y / 2, 0),
 		);
+
 		super.onHit(part, point, true);
 	}
 
@@ -34,7 +32,7 @@ export class ShellProjectile extends WeaponProjectile {
 		super.onTick(dt, percentage, reversePercentage);
 	}
 }
-ShellProjectile.spawn.invoked.Connect((player, { startPosition, baseVelocity, baseDamage, modifier }) => {
-	print("Bullet spawned");
+ShellProjectile.spawnProjectile.invoked.Connect(({ startPosition, baseVelocity, baseDamage, modifier }) => {
+	print("Shell spawned");
 	new ShellProjectile(startPosition, baseVelocity, baseDamage, modifier);
 });

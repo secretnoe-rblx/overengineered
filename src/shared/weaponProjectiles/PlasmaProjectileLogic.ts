@@ -1,6 +1,6 @@
 import { Workspace } from "@rbxts/services";
 import { Easing } from "engine/shared/component/Easing";
-import { A2SRemoteEvent } from "engine/shared/event/PERemoteEvent";
+import { C2CRemoteEvent } from "engine/shared/event/PERemoteEvent";
 import { WeaponProjectile } from "shared/weaponProjectiles/BaseProjectileLogic";
 import type { modifierValue, projectileModifier } from "shared/weaponProjectiles/BaseProjectileLogic";
 
@@ -9,7 +9,7 @@ type palsmaProjectile = BasePart & { VectorForce: VectorForce };
 export class PlasmaProjectile extends WeaponProjectile {
 	private startSize = this.projectilePart.Size;
 	private readonly vectorForce: VectorForce;
-	static readonly spawn = new A2SRemoteEvent<{
+	static readonly spawnProjectile = new C2CRemoteEvent<{
 		readonly startPosition: Vector3;
 		readonly baseVelocity: Vector3;
 		readonly baseDamage: number;
@@ -93,7 +93,7 @@ export class PlasmaProjectile extends WeaponProjectile {
 	}
 }
 
-PlasmaProjectile.spawn.invoked.Connect((player, { startPosition, baseVelocity, baseDamage, modifier, color }) => {
-	// print("Plasma ball spawned");
+PlasmaProjectile.spawnProjectile.invoked.Connect(({ startPosition, baseVelocity, baseDamage, modifier, color }) => {
+	print("Plasma ball spawned");
 	new PlasmaProjectile(startPosition, baseVelocity, baseDamage, modifier, color);
 });
