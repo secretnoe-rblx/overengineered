@@ -1,9 +1,11 @@
-import { Players } from "@rbxts/services";
+import { Players, ServerStorage } from "@rbxts/services";
 import { ComponentKeyedChildren } from "engine/shared/component/ComponentKeyedChildren";
 import { HostedService } from "engine/shared/di/HostedService";
 import { PlayerWatcher } from "engine/shared/PlayerWatcher";
+import { t } from "engine/shared/t";
 import { isNotAdmin_AutoBanned } from "server/BanAdminExploiter";
 import { ServerSlotRequestController } from "server/building/ServerSlotRequestController";
+import { PlayerBanned } from "server/database/PlayerDatabase";
 import { asPlayerId } from "server/PlayerId";
 import { ServerPlayerController } from "server/ServerPlayerController";
 import { ServerPlayerDataRemotesController } from "server/ServerPlayerDataRemotesController";
@@ -27,6 +29,10 @@ export class ServerPlayersController extends HostedService {
 			CustomRemotes.initPlayer.subscribe((player): Response<PlayerInitResponse> => {
 				if (controllers.getAll().has(player.UserId)) {
 					player.Kick("hi  i like your hair");
+
+					controllers.get(player.UserId)?.destroy();
+					controllers.remove(player.UserId);
+
 					return { success: false, message: "no" };
 				}
 
@@ -44,8 +50,9 @@ export class ServerPlayersController extends HostedService {
 				const controller = scope.resolveForeignClass(ServerPlayerController, [player, plot]);
 				controllers.add(player.UserId, controller);
 
+				let data;
 				try {
-					const data = players.get(player.UserId) ?? {};
+					data = players.get(player.UserId) ?? {};
 					return {
 						success: true,
 						remotes: controller.remotesFolder,
@@ -57,6 +64,53 @@ export class ServerPlayersController extends HostedService {
 						},
 					};
 				} catch (err) {
+					if (t.typeCheck(err, PlayerBanned)) {
+						const secondsToText = (msuntil: number): string => {
+							const intervals = [
+								{ label: "year", seconds: 31536000 },
+								{ label: "month", seconds: 2592000 },
+								{ label: "day", seconds: 86400 },
+								{ label: "hour", seconds: 3600 },
+								{ label: "minute", seconds: 60 },
+								{ label: "second", seconds: 1 },
+							];
+
+							const seconds = (msuntil - DateTime.now().UnixTimestampMillis) / 1000;
+							for (const interval of intervals) {
+								const count = math.floor(seconds / interval.seconds);
+								if (count >= 1) {
+									return `${count} ${interval.label}${count !== 1 ? "s" : ""} left`;
+								}
+							}
+
+							return "ඞ";
+						};
+
+						const data = err;
+						if (!data.reason.contains("bye bye")) {
+							player.Kick(
+								`You are ${data.until ? undefined : "permanently "}banned!\n${data.reason}${data.until && `\n${secondsToText(data.until)}`}`,
+							);
+							return { success: false, message: "ban haha" };
+						}
+
+						// Shadow banning
+						ServerStorage.FindFirstChild("ShadowBan")!.Clone().Parent = (
+							player as unknown as { PlayerGui: PlayerGui }
+						).PlayerGui;
+
+						return {
+							success: true,
+							remotes: controller.remotesFolder,
+							data: {
+								purchasedSlots: undefined,
+								settings: undefined,
+								slots: undefined,
+								data: undefined,
+							},
+						};
+					}
+
 					player.Kick("The server is currently unavailable, try again later.");
 					return { success: false, message: tostring(err) };
 				}

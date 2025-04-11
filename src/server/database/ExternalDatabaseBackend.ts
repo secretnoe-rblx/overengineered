@@ -3,7 +3,7 @@ import { Secrets } from "engine/server/Secrets";
 import { JSON } from "engine/shared/fixes/Json";
 import { Strings } from "engine/shared/fixes/String.propmacro";
 import type { DatabaseBackend } from "engine/server/backend/DatabaseBackend";
-import type { PlayerDatabaseData } from "server/database/PlayerDatabase";
+import type { PlayerBanned, PlayerDatabaseData } from "server/database/PlayerDatabase";
 import type { BlocksSerializer } from "shared/building/BlocksSerializer";
 
 const endpoint = "literal:REDACTED_DOMAIN";
@@ -24,14 +24,53 @@ export class ExternalDatabaseBackendSlots implements DatabaseBackend<BlocksSeria
 			throw `Got HTTP ${result.StatusCode}`;
 		}
 
-		return (JSON.deserialize(result.Body) as { value: BlocksSerializer.JsonSerializedBlocks }[])[0].value;
+		const val = (JSON.deserialize(result.Body) as { value: BlocksSerializer.JsonSerializedBlocks | string }[])[0]
+			.value;
+		if (typeIs(val, "string")) {
+			return JSON.deserialize(val);
+		}
+
+		return val;
 	}
 	SetAsync(value: BlocksSerializer.JsonSerializedBlocks, [ownerId, slotId]: SlotKeys): void {
-		const url = `${endpoint}/slot?ownerId=${ownerId}&slotIds=${slotId}`;
-		const data = JSON.serialize({ slotId, ownerId, value });
-		$log("Posting", url);
+		const maxSize = 1 * 1024 * 1024;
+		const chunkSize = 512 * 1024;
 
+		const serializedVal = JSON.serialize(value);
+		$log(`Saving a slot of ${math.round(serializedVal.size() / 1024)} kb`);
+
+		const url = `${endpoint}/slot?ownerId=${ownerId}&slotIds=${slotId}`;
+		if (serializedVal.size() > maxSize) {
+			const chunks = math.ceil(serializedVal.size() / chunkSize);
+
+			for (let i = 0; i < chunks; i++) {
+				const chunkpos = i * chunkSize;
+				const url = `${endpoint}/slot/chunk?ownerId=${ownerId}&slotIds=${slotId}`;
+				$log(`Posting slot chunk ${i}`, url);
+
+				const postdata = JSON.serialize({
+					slotId,
+					ownerId,
+					chunk: serializedVal.sub(chunkpos + 1, chunkpos + chunkSize),
+					chunkIndex: i,
+					totalChunks: chunks,
+				});
+
+				const response = HttpService.PostAsync(url, postdata, "ApplicationJson", false, headers);
+				$log(`Posting slot chunk ${i}:`, response);
+
+				if (!(JSON.deserialize(response) as { success?: boolean }).success) {
+					throw `Error while saving slot data: ${Strings.pretty(response)}`;
+				}
+			}
+
+			return;
+		}
+
+		const data = JSON.serialize({ slotId, ownerId, value });
+		$log(`Posting the slot`, url);
 		const response = HttpService.PostAsync(url, data, "ApplicationJson", false, headers);
+		$log(`Posting the slot:`, response);
 		if (!(JSON.deserialize(response) as { success?: boolean }).success) {
 			throw `Error while saving slot data: ${Strings.pretty(response)}`;
 		}
@@ -67,7 +106,16 @@ export class ExternalDatabaseBackendPlayers implements DatabaseBackend<PlayerDat
 			throw `Got HTTP ${result.StatusCode}`;
 		}
 
-		return (JSON.deserialize(result.Body) as { value: PlayerDatabaseData }).value;
+		const data = JSON.deserialize(result.Body) as { value: PlayerDatabaseData } | PlayerBanned;
+		if (!("value" in data)) {
+			if ("errorCode" in data) {
+				throw data;
+			}
+
+			throw "Received unknown error from the server.";
+		}
+
+		return data.value;
 	}
 	SetAsync(value: PlayerDatabaseData, [id]: PlayerKeys): void {
 		const url = `${endpoint}/player?id=${id}`;

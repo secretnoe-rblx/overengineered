@@ -50,6 +50,16 @@ class ColorControl extends Control<ConfigControlColorDefinition["Control"]> {
 					colorGui.MouseEnter.Connect(() => (isInside = true));
 					colorGui.MouseLeave.Connect(() => (isInside = false));
 					popup.event.subInput((ih) => {
+						task.delay(0, () => {
+							ih.onTouchTap(() => {
+								const mouse = Interface.mouse;
+								const objects = Interface.getPlayerGui().GetGuiObjectsAtPosition(mouse.X, mouse.Y);
+								if (objects.contains(colorGui)) return;
+
+								popup.destroy();
+							});
+						});
+
 						ih.onMouse1Down(() => {
 							if (isInside) return;
 							popup.destroy();

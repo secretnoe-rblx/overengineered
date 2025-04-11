@@ -1,5 +1,6 @@
 import { Players } from "@rbxts/services";
 import { Db } from "engine/server/Database";
+import { t } from "engine/shared/t";
 import { PlayerConfigUpdater } from "server/PlayerConfigVersioning";
 import type { DatabaseBackend } from "engine/server/backend/DatabaseBackend";
 
@@ -9,6 +10,13 @@ export type PlayerDatabaseData = {
 	readonly slots?: readonly SlotMeta[];
 	readonly data?: Partial<PlayerData>;
 };
+
+export const PlayerBanned = t.interface({
+	errorCode: t.const("playerBanned"),
+	reason: t.string,
+	until: t.number.orUndefined(),
+});
+export type PlayerBanned = t.Type<typeof PlayerBanned>;
 
 export class PlayerDatabase {
 	private readonly onlinePlayers = new Set<number>();
