@@ -1,5 +1,6 @@
 import { HostedService } from "engine/shared/di/HostedService";
 import { PlotsFloatingImageController } from "server/plots/PlotsFloatingImageController";
+import { CustomRemotes } from "shared/Remotes";
 import type { SharedPlot } from "shared/building/SharedPlot";
 import type { SharedPlots } from "shared/building/SharedPlots";
 
@@ -28,19 +29,12 @@ export class ServerPlots extends HostedService {
 			}
 		});
 
-		// TODO:
-		// this.event.subscribe(CustomRemotes.gui.settings.permissions.updateBlacklist.invoked, (player, newBlacklist) => {
-		// 	const plot = this.tryGetControllerByPlayer(player);
-		// 	if (!plot) throw "what";
+		this.event.subscribe(CustomRemotes.gui.settings.permissions.updateBlacklist.invoked, (player, newBlacklist) => {
+			plots.getPlotComponentByOwnerID(player.UserId)?.blacklistedPlayers.set(newBlacklist);
+		});
 
-		// 	plot.plot.blacklistedPlayers.set(newBlacklist);
-		// });
-
-		// this.event.subscribe(CustomRemotes.gui.settings.permissions.isolationMode.invoked, (player, state) => {
-		// 	const plot = this.tryGetControllerByPlayer(player);
-		// 	if (!plot) throw "what";
-
-		// 	plot.plot.isolationMode.set(state);
-		// });
+		this.event.subscribe(CustomRemotes.gui.settings.permissions.isolationMode.invoked, (player, state) => {
+			plots.getPlotComponentByOwnerID(player.UserId)?.isolationMode.set(state);
+		});
 	}
 }
