@@ -24,18 +24,53 @@ export class ExternalDatabaseBackendSlots implements DatabaseBackend<BlocksSeria
 			throw `Got HTTP ${result.StatusCode}`;
 		}
 
-		return (JSON.deserialize(result.Body) as { value: BlocksSerializer.JsonSerializedBlocks }[])[0].value;
-	}
-	SetAsync(value: BlocksSerializer.JsonSerializedBlocks, [ownerId, slotId]: SlotKeys): void {
-		const url = `${endpoint}/slot?ownerId=${ownerId}&slotIds=${slotId}`;
-		const data = JSON.serialize({ slotId, ownerId, value });
-		if (data.size() > 1 * 1024 * 1024) {
-			throw `Could not save slot data: Data too large (${data.size()})`;
+		const val = (JSON.deserialize(result.Body) as { value: BlocksSerializer.JsonSerializedBlocks | string }[])[0]
+			.value;
+		if (typeIs(val, "string")) {
+			return JSON.deserialize(val);
 		}
 
-		$log("Posting", url);
+		return val;
+	}
+	SetAsync(value: BlocksSerializer.JsonSerializedBlocks, [ownerId, slotId]: SlotKeys): void {
+		const maxSize = 1 * 1024 * 1024;
+		const chunkSize = 512 * 1024;
 
+		const serializedVal = JSON.serialize(value);
+		$log(`Saving a slot of ${math.round(serializedVal.size() / 1024)} kb`);
+
+		const url = `${endpoint}/slot?ownerId=${ownerId}&slotIds=${slotId}`;
+		if (serializedVal.size() > maxSize) {
+			const chunks = math.ceil(serializedVal.size() / chunkSize);
+
+			for (let i = 0; i < chunks; i++) {
+				const chunkpos = i * chunkSize;
+				const url = `${endpoint}/slot/chunk?ownerId=${ownerId}&slotIds=${slotId}`;
+				$log(`Posting slot chunk ${i}`, url);
+
+				const postdata = JSON.serialize({
+					slotId,
+					ownerId,
+					chunk: serializedVal.sub(chunkpos + 1, chunkpos + chunkSize),
+					chunkIndex: i,
+					totalChunks: chunks,
+				});
+
+				const response = HttpService.PostAsync(url, postdata, "ApplicationJson", false, headers);
+				$log(`Posting slot chunk ${i}:`, response);
+
+				if (!(JSON.deserialize(response) as { success?: boolean }).success) {
+					throw `Error while saving slot data: ${Strings.pretty(response)}`;
+				}
+			}
+
+			return;
+		}
+
+		const data = JSON.serialize({ slotId, ownerId, value });
+		$log(`Posting the slot`, url);
 		const response = HttpService.PostAsync(url, data, "ApplicationJson", false, headers);
+		$log(`Posting the slot:`, response);
 		if (!(JSON.deserialize(response) as { success?: boolean }).success) {
 			throw `Error while saving slot data: ${Strings.pretty(response)}`;
 		}
