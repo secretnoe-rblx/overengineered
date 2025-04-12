@@ -69,12 +69,23 @@ export class UnreliableRemoteController extends HostedService {
 				serverBreakQueue.clear();
 
 				task.spawn(() => {
+					const toSend = new Map<Player | 0, BasePart[]>();
+
 					for (const block of copy) {
 						impactSoundEffect.send(block, { blocks: [block], index: undefined });
 						ServerPartUtils.BreakJoints(block);
+
+						const owner = block.IsDescendantOf(Workspace) ? block.GetNetworkOwner() : undefined;
+						toSend.getOrSet(owner ?? 0, () => []).push(block);
 					}
+
 					const players = this.playersController.getPlayers();
-					CustomRemotes.physics.normalizeRootparts.send(players, { parts: copy });
+					for (const [player, parts] of toSend) {
+						let sendTo = players;
+						if (player !== 0) sendTo = players.except([player]);
+
+						CustomRemotes.physics.normalizeRootparts.send(sendTo, { parts });
+					}
 				});
 			}
 		});
