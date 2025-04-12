@@ -1,4 +1,4 @@
-import { Workspace } from "@rbxts/services";
+import { Players, Workspace } from "@rbxts/services";
 import { C2CRemoteEvent } from "engine/shared/event/PERemoteEvent";
 import { WeaponProjectile } from "shared/weaponProjectiles/BaseProjectileLogic";
 import type { baseWeaponProjectile, projectileModifier } from "shared/weaponProjectiles/BaseProjectileLogic";
@@ -13,6 +13,7 @@ export class LaserProjectile extends WeaponProjectile {
 		readonly originPart: BasePart;
 		readonly baseDamage: number;
 		readonly modifier: projectileModifier;
+		readonly owner: Player;
 	}>("laser_spawn", "RemoteEvent");
 
 	static readonly destroyProjectile = new C2CRemoteEvent<{
@@ -28,6 +29,7 @@ export class LaserProjectile extends WeaponProjectile {
 		baseDamage: number,
 		modifier: projectileModifier,
 		color: Color3,
+		private owner: Player,
 	) {
 		super(
 			originPart.CFrame.Position,
@@ -46,8 +48,6 @@ export class LaserProjectile extends WeaponProjectile {
 			this.laserModel.push(pr);
 			pr.Color = color;
 		}
-
-		(this.instance as unknown as Instance & { Lens: BasePart }).Lens.Color = color;
 	}
 
 	onTick(dt: number, percentage: number, reversePercentage: number): void {
@@ -83,7 +83,7 @@ export class LaserProjectile extends WeaponProjectile {
 		for (let i = math.min(iter + 1, length - 1); i < length; i++) this.laserModel[i].Transparency = 1;
 
 		//нанести дамаг
-		if (res) {
+		if (res && Players.LocalPlayer === this.owner) {
 			this.baseDamage = this.damage * dt;
 			super.onHit(res.Instance, res.Position);
 		}
@@ -91,14 +91,14 @@ export class LaserProjectile extends WeaponProjectile {
 	}
 }
 
-LaserProjectile.spawnProjectile.invoked.Connect(({ color, originPart, baseDamage, modifier }) => {
+LaserProjectile.spawnProjectile.invoked.Connect(({ color, originPart, baseDamage, modifier, owner }) => {
 	print("Laser spawned");
 	const v = LaserProjectile.projectileMap.get(originPart);
 	if (v !== undefined) {
 		v.destroy();
 		LaserProjectile.projectileMap.delete(originPart);
 	}
-	LaserProjectile.projectileMap.set(originPart, new LaserProjectile(originPart, baseDamage, modifier, color));
+	LaserProjectile.projectileMap.set(originPart, new LaserProjectile(originPart, baseDamage, modifier, color, owner));
 });
 
 LaserProjectile.destroyProjectile.invoked.Connect(({ originPart }) => {

@@ -1,4 +1,4 @@
-import { RunService } from "@rbxts/services";
+import { Players, RunService } from "@rbxts/services";
 import { InstanceBlockLogic } from "shared/blockLogic/BlockLogic";
 import { BlockCreation } from "shared/blocks/BlockCreation";
 import { Colors } from "shared/Colors";
@@ -53,6 +53,10 @@ class Logic extends InstanceBlockLogic<typeof definition> {
 			pitch: PitchShiftSoundEffect;
 		};
 
+		this.onFirstInputs(({ projectileColor }) => {
+			(this.instance.FindFirstChild("Lens") as BasePart).Color = projectileColor;
+		});
+
 		const destroyProjectile = () => {
 			for (const e of module.parentCollection.calculatedOutputs) {
 				for (const o of e.outputs) {
@@ -98,6 +102,7 @@ class Logic extends InstanceBlockLogic<typeof definition> {
 						baseDamage: 1,
 						modifier: e.modifier,
 						color: projectileColor,
+						owner: Players.LocalPlayer,
 					});
 				}
 			}
