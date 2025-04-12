@@ -49,6 +49,12 @@ export namespace SandboxGame {
 			builder.services.registerService(RagdollController);
 		});
 
+		LoadingController.run("Waiting for server", () => {
+			while (!(Workspace.HasTag("GameLoaded") as boolean | undefined)) {
+				task.wait();
+			}
+		});
+
 		LoadingController.run("Pre-pre-init", () => {
 			const result = CustomRemotes.initPlayer.send();
 			if (!result.success) {
@@ -78,12 +84,6 @@ export namespace SandboxGame {
 
 			builder.services.registerSingletonClass(Theme);
 			builder.services.registerService(ThemeAutoSetter);
-		});
-
-		LoadingController.run("Waiting for server", () => {
-			while (!(Workspace.HasTag("GameLoaded") as boolean | undefined)) {
-				task.wait();
-			}
 		});
 
 		builder.services.registerSingletonClass(Keybinds);
