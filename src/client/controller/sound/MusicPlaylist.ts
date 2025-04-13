@@ -12,7 +12,14 @@ export class MusicPlaylist {
 		this.interval = interval;
 	}
 
+	playSpecificByName(name: string) {
+		this.currentSound = this.sounds.find((v) => v.Name === name);
+		if (!this.currentSound) throw `No music with the name "${name}" was found`;
+		this.currentSound.Play();
+	}
+
 	play() {
+		if (this.sounds.isEmpty()) return;
 		this.currentSound = this.sounds[math.random(0, this.sounds.size() - 1)];
 		this.currentSoundEndEvent = this.currentSound.Ended.Once(() => {
 			wait(this.interval);
@@ -24,14 +31,12 @@ export class MusicPlaylist {
 	stop() {
 		this.currentSoundEndEvent?.Disconnect();
 
-		const tweenInfo = new TweenInfo(1);
-		const tweenGoal = { Volume: 0 };
-		const tween = TweenService.Create(this.currentSound!, tweenInfo, tweenGoal);
+		if (this.currentSound) {
+			const tween = TweenService.Create(this.currentSound, new TweenInfo(2), { Volume: 0 });
 
-		tween.Play();
-		tween.Completed.Wait();
-
-		this.currentSound?.Stop();
+			tween.Play();
+			tween.Completed.Connect(this.currentSound?.Stop);
+		}
 		this.currentSound = undefined;
 	}
 }
