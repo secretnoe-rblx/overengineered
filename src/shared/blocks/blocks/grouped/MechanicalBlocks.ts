@@ -13,12 +13,12 @@ const blocks: BlockBuildersWithoutIdAndDefaults = {
 	ballinsocket: {
 		displayName: "Ball in Socket",
 		description: "Ball socket for your mechanical ingenuities",
-		limit: 100,
+		limit: 200,
 	},
 	ballinsocketangled: {
 		displayName: "Ball in Socket (Angled)",
 		description: "Angled ball socket for your mechanical ingenuities",
-		limit: 50,
+		limit: 75,
 	},
 
 	shaft: {
