@@ -66,6 +66,11 @@ class Logic extends InstanceBlockLogic<typeof definition> {
 
 const logic: BlockLogicInfo = { definition, ctor: Logic };
 const list: BlockBuildersWithoutIdAndDefaults = {
+	smallwheel: {
+		displayName: "Small wheel",
+		description: "Who's that teeny-tiny fella?",
+		logic,
+	},
 	wheel: {
 		displayName: "Wheel",
 		description: "circle",
