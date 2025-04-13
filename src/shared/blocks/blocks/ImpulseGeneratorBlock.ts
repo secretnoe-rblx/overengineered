@@ -5,7 +5,7 @@ import type { BlockLogicArgs, BlockLogicFullBothDefinitions } from "shared/block
 import type { BlockBuilder } from "shared/blocks/Block";
 
 const definition = {
-	inputOrder: ["delay", "delay_low", "isInverted", "isSinglePulse"],
+	inputOrder: ["delay", "delay_low", "isInverted", "isSinglePulse", "isInSeconds"],
 	input: {
 		delay: {
 			//не переименовывал чтоб совметимость была
@@ -46,6 +46,15 @@ const definition = {
 				},
 			},
 		},
+		isInSeconds: {
+			displayName: "In Seconds",
+			tooltip: `Make the delay count in seconds instead of ticks. Disables "Single Pulse" option.`,
+			types: {
+				bool: {
+					config: false,
+				},
+			},
+		},
 	},
 	output: {
 		value: {
@@ -60,8 +69,22 @@ class Logic extends BlockLogic<typeof definition> {
 	constructor(block: BlockLogicArgs) {
 		super(definition, block);
 
+		const flip = (isInverted: boolean) => {
+			this.output.value.set("bool", lastState !== !isInverted);
+			lastState = !lastState;
+			isSecondsDelayDone = true;
+		};
+
+		const updateDelay = (highDelay: number, lowDelay: number, isInverted: boolean) => {
+			if (lastState) delayTask = task.delay(highDelay, () => flip(isInverted));
+			else delayTask = task.delay(lowDelay, () => flip(isInverted));
+		};
+
+		let lastState = false;
+		let isSecondsDelayDone = true;
 		let impulseProgress = -1;
-		this.onAlwaysInputs(({ delay, delay_low, isSinglePulse, isInverted }) => {
+		let delayTask: thread | undefined;
+		this.onAlwaysInputs(({ delay, delay_low, isSinglePulse, isInverted, isInSeconds, isInSecondsChanged }) => {
 			if (delay < 0 || delay_low < 0)
 				if (this.instance) {
 					RemoteEvents.Burn.send([this.instance.PrimaryPart as BasePart]);
@@ -69,6 +92,21 @@ class Logic extends BlockLogic<typeof definition> {
 				}
 
 			if (delay + delay_low <= 0) return;
+
+			if (!isInSeconds) {
+				// if just turned on then cancel current delay
+				if (isInSecondsChanged && delayTask) {
+					task.cancel(delayTask);
+					isSecondsDelayDone = true;
+				}
+			} else {
+				//check if the delay is done
+				if (isSecondsDelayDone) {
+					isSecondsDelayDone = false;
+					updateDelay(delay, delay_low, isInverted);
+				}
+				return;
+			}
 
 			const len = delay + delay_low;
 			impulseProgress = ++impulseProgress % len;
