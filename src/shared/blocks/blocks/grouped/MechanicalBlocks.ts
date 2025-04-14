@@ -28,7 +28,7 @@ const blocks: BlockBuildersWithoutIdAndDefaults = {
 	driveshaft: {
 		displayName: "Driveshaft",
 		description: "Kinda like a ball socket but with transmitting rotational force",
-		limit: 50,
+		limit: 100,
 	},
 	bearingshaft: {
 		displayName: "Bearing Shaft",
