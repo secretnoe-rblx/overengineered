@@ -70,6 +70,9 @@ const definition = {
 	output: {},
 } satisfies BlockLogicFullBothDefinitions;
 
+const whiteColor = Color3.fromRGB(255, 255, 255);
+const blackColor = Color3.fromRGB(0, 0, 0);
+
 const update = ({ block, state, color, brightness, range }: UpdateData) => {
 	const part = block.PrimaryPart;
 	if (!part) return;
@@ -78,12 +81,12 @@ const update = ({ block, state, color, brightness, range }: UpdateData) => {
 	if (!light) return;
 
 	if (state) {
-		const commonColor = color ?? Color3.fromRGB(255, 255, 255);
+		const commonColor = color ?? whiteColor;
 		light.Range = range;
-		part.Color = commonColor;
+		part.Color = blackColor.Lerp(commonColor, math.clamp(brightness + 0.2, 0, 1));
 		light.Color = commonColor;
 		part.Material = Enum.Material.Neon;
-		light.Brightness = brightness;
+		light.Brightness = brightness * 10;
 		return;
 	}
 
