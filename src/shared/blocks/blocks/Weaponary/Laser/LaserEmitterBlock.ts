@@ -129,7 +129,7 @@ export const LaserEmitterBlock = {
 			},
 			marker1: {
 				emitsProjectiles: true,
-				allowedBlockIds: ["laserlens", "laseremitter"],
+				allowedBlockIds: ["laserlens"],
 			},
 		},
 	},
