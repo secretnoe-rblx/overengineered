@@ -102,12 +102,10 @@ class Logic extends BlockLogic<typeof definition> {
 		};
 
 		this.onk(["read", "write", "address", "value"], ({ read, write, address, value, valueType }) => {
-			if (read) {
-				readValue(address);
-			} else if (write) {
-				writeValue(address, value, valueType);
-			}
+			if (write) writeValue(address, value, valueType);
+			if (read) readValue(address);
 		});
+
 		this.onk(["clear"], ({ clear, clearChanged }) => {
 			if (clearChanged && clear) {
 				asMap(internalMemory).clear();
