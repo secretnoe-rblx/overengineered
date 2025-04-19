@@ -315,6 +315,7 @@ namespace Not {
 		logic: { definition, ctor: Logic },
 	} as const satisfies BlockBuilder;
 }
+
 namespace Mux {
 	const definitionMuxSmall = {
 		inputOrder: ["value", "truevalue", "falsevalue"],
@@ -334,19 +335,19 @@ namespace Mux {
 				},
 			},
 			truevalue: {
-				displayName: "Value 1",
+				displayName: "Input 1",
 				types: BlockConfigDefinitions.any,
 				group: "1",
 			},
 			falsevalue: {
-				displayName: "Value 2",
+				displayName: "Input 2",
 				types: BlockConfigDefinitions.any,
 				group: "1",
 			},
 		},
 		output: {
 			result: {
-				displayName: "Result",
+				displayName: "Output",
 				types: asMap(BlockConfigDefinitions.any).keys(),
 				group: "1",
 			},
@@ -371,57 +372,57 @@ namespace Mux {
 				},
 			},
 			value1: {
-				displayName: "Value 1",
+				displayName: "Input 1",
 				types: BlockConfigDefinitions.any,
 				group: "1",
 			},
 			value2: {
-				displayName: "Value 2",
+				displayName: "Input 2",
 				types: BlockConfigDefinitions.any,
 				group: "1",
 			},
 			value3: {
-				displayName: "Value 3",
+				displayName: "Input 3",
 				types: BlockConfigDefinitions.any,
 				group: "1",
 			},
 			value4: {
-				displayName: "Value 4",
+				displayName: "Input 4",
 				types: BlockConfigDefinitions.any,
 				group: "1",
 			},
 			value5: {
-				displayName: "Value 5",
+				displayName: "Input 5",
 				types: BlockConfigDefinitions.any,
 				group: "1",
 			},
 			value6: {
-				displayName: "Value 6",
+				displayName: "Input 6",
 				types: BlockConfigDefinitions.any,
 				group: "1",
 			},
 			value7: {
-				displayName: "Value 7",
+				displayName: "Input 7",
 				types: BlockConfigDefinitions.any,
 				group: "1",
 			},
 			value8: {
-				displayName: "Value 8",
+				displayName: "Input 8",
 				types: BlockConfigDefinitions.any,
 				group: "1",
 			},
 		},
 		output: {
 			result: {
-				displayName: "Result",
+				displayName: "Output",
 				types: asMap(BlockConfigDefinitions.any).keys(),
 				group: "1",
 			},
 		},
 	} satisfies BlockLogicFullBothDefinitions;
 
-	const activeInColor = Color3.fromRGB(0, 255, 255);
-	const activeOutColor = Color3.fromRGB(0, 255, 0);
+	const activeColor = Color3.fromRGB(0, 255, 255);
+	// const activeColor = Color3.fromRGB(0, 255, 0);
 	const baseColor = Color3.fromRGB(59, 59, 59);
 	const neonMaterial = Enum.Material.Neon;
 	const baseMaterial = Enum.Material.Glass;
@@ -491,7 +492,7 @@ namespace Mux {
 					block: this.instance!,
 					lamps: muxLamps,
 					index,
-					color: activeInColor,
+					color: activeColor,
 				});
 			};
 
@@ -538,7 +539,7 @@ namespace Mux {
 					block: this.instance!,
 					lamps: muxLamps,
 					index,
-					color: activeInColor,
+					color: activeColor,
 				});
 			};
 
@@ -581,6 +582,278 @@ namespace Mux {
 		},
 	] as const satisfies BlockBuilder[];
 }
+
+namespace Demux {
+	const definitionDemuxSmall = {
+		inputOrder: ["value", "input"],
+		outputOrder: ["falsevalue", "truevalue"],
+		input: {
+			value: {
+				displayName: "State/Index",
+				types: {
+					number: {
+						config: 0,
+					},
+					byte: {
+						config: 0,
+					},
+					bool: {
+						config: false,
+					},
+				},
+			},
+
+			input: {
+				displayName: "Input",
+				types: BlockConfigDefinitions.any,
+			},
+		},
+		output: {
+			truevalue: {
+				displayName: "Output 1",
+				types: asMap(BlockConfigDefinitions.any).keys(),
+				group: "1",
+			},
+			falsevalue: {
+				displayName: "Output 2",
+				types: asMap(BlockConfigDefinitions.any).keys(),
+				group: "1",
+			},
+		},
+	} satisfies BlockLogicFullBothDefinitions;
+
+	const definitionDemuxBig = {
+		inputOrder: ["value", "input"],
+		outputOrder: ["value1", "value2", "value3", "value4", "value5", "value6", "value7", "value8"],
+		input: {
+			value: {
+				displayName: "State/Index",
+				types: {
+					number: {
+						config: 0,
+					},
+					byte: {
+						config: 0,
+					},
+					bool: {
+						config: false,
+					},
+				},
+			},
+
+			input: {
+				displayName: "Input",
+				types: BlockConfigDefinitions.any,
+			},
+		},
+		output: {
+			value1: {
+				displayName: "Output 1",
+				types: asMap(BlockConfigDefinitions.any).keys(),
+				group: "1",
+			},
+			value2: {
+				displayName: "Output 2",
+				types: asMap(BlockConfigDefinitions.any).keys(),
+				group: "1",
+			},
+			value3: {
+				displayName: "Output 3",
+				types: asMap(BlockConfigDefinitions.any).keys(),
+				group: "1",
+			},
+			value4: {
+				displayName: "Output 4",
+				types: asMap(BlockConfigDefinitions.any).keys(),
+				group: "1",
+			},
+			value5: {
+				displayName: "Output 5",
+				types: asMap(BlockConfigDefinitions.any).keys(),
+				group: "1",
+			},
+			value6: {
+				displayName: "Output 6",
+				types: asMap(BlockConfigDefinitions.any).keys(),
+				group: "1",
+			},
+			value7: {
+				displayName: "Output 7",
+				types: asMap(BlockConfigDefinitions.any).keys(),
+				group: "1",
+			},
+			value8: {
+				displayName: "Output 8",
+				types: asMap(BlockConfigDefinitions.any).keys(),
+				group: "1",
+			},
+		},
+	} satisfies BlockLogicFullBothDefinitions;
+
+	const activeColor = Color3.fromRGB(0, 255, 0);
+	const baseColor = Color3.fromRGB(59, 59, 59);
+	const neonMaterial = Enum.Material.Neon;
+	const baseMaterial = Enum.Material.Glass;
+
+	const update = ({ lamps, index, color }: UpdateData) => {
+		if (!lamps) return;
+
+		for (let i = 0; i < lamps.size(); i++) {
+			const part = lamps[i];
+			if (i === index) {
+				part.Color = color;
+				part.Material = neonMaterial;
+				continue;
+			}
+
+			part.Color = baseColor;
+			part.Material = baseMaterial;
+		}
+	};
+
+	const updateEventType = t.interface({
+		block: t.instance("Model").nominal("blockModel").as<BlockModel>(),
+		lamps: t.array(t.instance("BasePart")),
+		index: t.number,
+		color: t.color,
+	});
+	type UpdateData = t.Infer<typeof updateEventType>;
+
+	const events = {
+		update: new BlockSynchronizer("demux_lamp_update", updateEventType, update),
+	} as const;
+
+	type muxLamp = BasePart & {
+		lamp: BasePart;
+	};
+
+	class LogicDemuxSmall extends BlockLogic<typeof definitionDemuxSmall> {
+		constructor(block: BlockLogicArgs) {
+			super(definitionDemuxSmall, block);
+
+			const allMuxLampInstances = this.instance?.FindFirstChild("Leds") as
+				| (Folder & Record<`${number}`, muxLamp>)
+				| undefined;
+			if (!allMuxLampInstances) throw "Vas?";
+
+			const muxLamps: BasePart[] = [];
+			allMuxLampInstances.GetChildren().forEach((v) => {
+				const i = tonumber(v.Name)!;
+				muxLamps[i] = (v as muxLamp).lamp;
+			});
+
+			const outputs = [this.output.falsevalue, this.output.truevalue];
+
+			const demuxValue = (
+				index: number,
+				value: unknown,
+				outputType: "string" | "number" | "bool" | "vector3" | "color" | "byte",
+			) => {
+				const len = outputs.size();
+				if (len === 0) return;
+				index = math.clamp(index, 0, len - 1);
+
+				//set value
+				outputs[index].set(outputType, value as typeof outputType);
+
+				//set color
+				if (muxLamps.isEmpty()) return;
+				events.update.send({
+					block: this.instance!,
+					lamps: muxLamps,
+					index,
+					color: activeColor,
+				});
+			};
+
+			this.onk(["value", "input"], ({ value, valueType, input, inputType }) => {
+				if (valueType === "bool") value = value ? 1 : 0;
+				demuxValue(value as number, input, inputType);
+			});
+		}
+	}
+
+	class LogicDemuxBig extends BlockLogic<typeof definitionDemuxBig> {
+		constructor(block: BlockLogicArgs) {
+			super(definitionDemuxBig, block);
+
+			const allMuxLampInstances = this.instance?.FindFirstChild("Leds") as
+				| (Folder & Record<`${number}`, muxLamp>)
+				| undefined;
+			if (!allMuxLampInstances) throw "Vas?";
+
+			const muxLamps: BasePart[] = [];
+			allMuxLampInstances.GetChildren().forEach((v) => {
+				const i = tonumber(v.Name)!;
+				muxLamps[i] = (v as muxLamp).lamp;
+			});
+
+			const outputs = [
+				this.output.value1,
+				this.output.value2,
+				this.output.value3,
+				this.output.value4,
+				this.output.value5,
+				this.output.value6,
+				this.output.value7,
+				this.output.value8,
+			];
+
+			const demuxValue = (
+				index: number,
+				value: unknown,
+				outputType: "string" | "number" | "bool" | "vector3" | "color" | "byte",
+			) => {
+				const len = outputs.size();
+				if (len === 0) return;
+				index = math.clamp(index, 0, len - 1);
+
+				//set value
+				outputs[index].set(outputType, value as typeof outputType);
+
+				//set color
+				if (muxLamps.isEmpty()) return;
+				events.update.send({
+					block: this.instance!,
+					lamps: muxLamps,
+					index,
+					color: activeColor,
+				});
+			};
+
+			this.onk(["value", "input"], ({ value, valueType, input, inputType }) => {
+				if (valueType === "bool") value = value ? 1 : 0;
+				demuxValue(value as number, input, inputType);
+			});
+		}
+	}
+
+	export const blocks = [
+		{
+			...BlockCreation.defaults,
+			id: "demultiplexer",
+			displayName: "Demultiplexer",
+			description: "Outputs values depending on 'State/Index' input",
+			search: {
+				aliases: ["mux", "demux"],
+			},
+
+			logic: { definition: definitionDemuxSmall, ctor: LogicDemuxSmall },
+		},
+		{
+			...BlockCreation.defaults,
+			id: "bigdemultiplexer",
+			displayName: "Demultiplexer x8",
+			description: "Outputs values depending on 'State/Index' input",
+			search: {
+				aliases: ["mux", "demux"],
+			},
+
+			logic: { definition: definitionDemuxBig, ctor: LogicDemuxBig },
+		},
+	] as const satisfies BlockBuilder[];
+}
+
 export const BasicLogicGateBlocks: readonly BlockBuilder[] = [
 	And.block,
 	Or.block,
@@ -590,4 +863,5 @@ export const BasicLogicGateBlocks: readonly BlockBuilder[] = [
 	Xnor.block,
 	Not.block,
 	...Mux.blocks,
+	...Demux.blocks,
 ];
