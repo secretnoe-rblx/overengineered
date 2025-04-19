@@ -316,7 +316,7 @@ namespace Not {
 	} as const satisfies BlockBuilder;
 }
 namespace Mux {
-	const definition = {
+	const definitionMuxSmall = {
 		inputOrder: ["value", "truevalue", "falsevalue"],
 		input: {
 			value: {
@@ -340,6 +340,73 @@ namespace Mux {
 			},
 			falsevalue: {
 				displayName: "Value 2",
+				types: BlockConfigDefinitions.any,
+				group: "1",
+			},
+		},
+		output: {
+			result: {
+				displayName: "Result",
+				types: asMap(BlockConfigDefinitions.any).keys(),
+				group: "1",
+			},
+		},
+	} satisfies BlockLogicFullBothDefinitions;
+
+	const definitionMuxBig = {
+		inputOrder: ["value", "value1", "value2", "value3", "value4", "value5", "value6", "value7", "value8"],
+		input: {
+			value: {
+				displayName: "State/Index",
+				types: {
+					number: {
+						config: 0,
+					},
+					byte: {
+						config: 0,
+					},
+					bool: {
+						config: false,
+					},
+				},
+			},
+			value1: {
+				displayName: "Value 1",
+				types: BlockConfigDefinitions.any,
+				group: "1",
+			},
+			value2: {
+				displayName: "Value 2",
+				types: BlockConfigDefinitions.any,
+				group: "1",
+			},
+			value3: {
+				displayName: "Value 3",
+				types: BlockConfigDefinitions.any,
+				group: "1",
+			},
+			value4: {
+				displayName: "Value 4",
+				types: BlockConfigDefinitions.any,
+				group: "1",
+			},
+			value5: {
+				displayName: "Value 5",
+				types: BlockConfigDefinitions.any,
+				group: "1",
+			},
+			value6: {
+				displayName: "Value 6",
+				types: BlockConfigDefinitions.any,
+				group: "1",
+			},
+			value7: {
+				displayName: "Value 7",
+				types: BlockConfigDefinitions.any,
+				group: "1",
+			},
+			value8: {
+				displayName: "Value 8",
 				types: BlockConfigDefinitions.any,
 				group: "1",
 			},
@@ -391,11 +458,10 @@ namespace Mux {
 		lamp: BasePart;
 	};
 
-	class Logic extends BlockLogic<typeof definition> {
+	class LogicMuxSmall extends BlockLogic<typeof definitionMuxSmall> {
 		constructor(block: BlockLogicArgs) {
-			super(definition, block);
+			super(definitionMuxSmall, block);
 
-			const nodes = [this.input.falsevalue, this.input.truevalue];
 			const allMuxLampInstances = this.instance?.FindFirstChild("Leds") as
 				| (Folder & Record<`${number}`, muxLamp>)
 				| undefined;
@@ -412,9 +478,9 @@ namespace Mux {
 				values: unknown[],
 				outputType: "string" | "number" | "bool" | "vector3" | "color" | "byte",
 			) => {
-				const len = nodes.size();
+				const len = values.size();
 				if (len === 0) return;
-				index = math.clamp(index, 0, nodes.size() - 1);
+				index = math.clamp(index, 0, len - 1);
 
 				//set value
 				this.output.result.set(outputType, values[index] as typeof outputType);
@@ -439,17 +505,81 @@ namespace Mux {
 		}
 	}
 
-	export const block = {
-		...BlockCreation.defaults,
-		id: "multiplexer",
-		displayName: "Multiplexer",
-		description: "Outputs values depending on 'State' input",
-		search: {
-			aliases: ["mux"],
-		},
+	class LogicMuxBig extends BlockLogic<typeof definitionMuxBig> {
+		constructor(block: BlockLogicArgs) {
+			super(definitionMuxBig, block);
 
-		logic: { definition, ctor: Logic },
-	} as const satisfies BlockBuilder;
+			const allMuxLampInstances = this.instance?.FindFirstChild("Leds") as
+				| (Folder & Record<`${number}`, muxLamp>)
+				| undefined;
+			if (!allMuxLampInstances) throw "Vas?";
+
+			const muxLamps: BasePart[] = [];
+			allMuxLampInstances.GetChildren().forEach((v) => {
+				const i = tonumber(v.Name)!;
+				muxLamps[i] = (v as muxLamp).lamp;
+			});
+
+			const muxValue = (
+				index: number,
+				values: unknown[],
+				outputType: "string" | "number" | "bool" | "vector3" | "color" | "byte",
+			) => {
+				const len = values.size();
+				if (len === 0) return;
+				index = math.clamp(index, 0, len - 1);
+
+				//set value
+				this.output.result.set(outputType, values[index] as typeof outputType);
+
+				//set color
+				if (muxLamps.isEmpty()) return;
+				events.update.send({
+					block: this.instance!,
+					lamps: muxLamps,
+					index,
+					color: activeInColor,
+				});
+			};
+
+			this.onk(
+				["value", "value1", "value2", "value3", "value4", "value5", "value6", "value7", "value8"],
+				({ value, valueType, value1Type, value1, value2, value3, value4, value5, value6, value7, value8 }) => {
+					if (valueType === "bool") value = value ? 1 : 0;
+					muxValue(
+						value as number,
+						[value1, value2, value3, value4, value5, value6, value7, value8],
+						value1Type,
+					);
+				},
+			);
+		}
+	}
+
+	export const blocks = [
+		{
+			...BlockCreation.defaults,
+			id: "multiplexer",
+			displayName: "Multiplexer",
+			description: "Outputs values depending on 'State' input",
+			search: {
+				aliases: ["mux"],
+			},
+
+			logic: { definition: definitionMuxSmall, ctor: LogicMuxSmall },
+		},
+		{
+			...BlockCreation.defaults,
+			id: "bigmultiplexer",
+			displayName: "Multiplexer x8",
+			description: "Outputs values depending on 'State' input",
+			search: {
+				aliases: ["mux"],
+			},
+
+			logic: { definition: definitionMuxBig, ctor: LogicMuxBig },
+		},
+	] as const satisfies BlockBuilder[];
 }
 export const BasicLogicGateBlocks: readonly BlockBuilder[] = [
 	And.block,
@@ -459,5 +589,5 @@ export const BasicLogicGateBlocks: readonly BlockBuilder[] = [
 	Xor.block,
 	Xnor.block,
 	Not.block,
-	Mux.block,
+	...Mux.blocks,
 ];
