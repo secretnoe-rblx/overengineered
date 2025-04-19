@@ -362,9 +362,8 @@ namespace Mux {
 	const update = ({ lamps, index, color }: UpdateData) => {
 		if (!lamps) return;
 
-		const parts = [lamps];
-		for (let i = 0; i < parts.size(); i++) {
-			const part = parts[i];
+		for (let i = 0; i < lamps.size(); i++) {
+			const part = lamps[i];
 			if (i === index) {
 				part.Color = color;
 				part.Material = neonMaterial;
@@ -378,7 +377,7 @@ namespace Mux {
 
 	const updateEventType = t.interface({
 		block: t.instance("Model").nominal("blockModel").as<BlockModel>(),
-		lamps: t.instance("BasePart"),
+		lamps: t.array(t.instance("BasePart")),
 		index: t.number,
 		color: t.color,
 	});
@@ -425,7 +424,7 @@ namespace Mux {
 				if (muxLamps.isEmpty()) return;
 				events.update.send({
 					block: this.instance!,
-					lamps: muxLamps[0],
+					lamps: muxLamps,
 					index,
 					color: activeInColor,
 				});
@@ -446,7 +445,6 @@ namespace Mux {
 		id: "multiplexer",
 		displayName: "Multiplexer",
 		description: "Outputs values depending on 'State' input",
-		// modelSource: autoModel("TripleGenericLogicBlockPrefab", "MUX", BlockCreation.Categories.other),
 		search: {
 			aliases: ["mux"],
 		},
