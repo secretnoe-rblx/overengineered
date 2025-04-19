@@ -500,7 +500,7 @@ namespace Mux {
 				["value", "falsevalue", "truevalue"],
 				({ value, valueType, falsevalue, truevalue, truevalueType }) => {
 					if (valueType === "bool") value = value ? 1 : 0;
-					muxValue(value as number, [falsevalue, truevalue], truevalueType);
+					muxValue(math.floor(value as number), [falsevalue, truevalue], truevalueType);
 				},
 			);
 		}
@@ -548,7 +548,7 @@ namespace Mux {
 				({ value, valueType, value1Type, value1, value2, value3, value4, value5, value6, value7, value8 }) => {
 					if (valueType === "bool") value = value ? 1 : 0;
 					muxValue(
-						value as number,
+						math.floor(value as number),
 						[value1, value2, value3, value4, value5, value6, value7, value8],
 						value1Type,
 					);
@@ -754,7 +754,14 @@ namespace Demux {
 				index = math.clamp(index, 0, len - 1);
 
 				//set value
-				outputs[index].set(outputType, value as typeof outputType);
+				for (let i = 0; i !== len; i++) {
+					const out = outputs[i];
+					if (i !== index) {
+						out.unset();
+						continue;
+					}
+					out.set(outputType, value as typeof outputType);
+				}
 
 				//set color
 				if (muxLamps.isEmpty()) return;
@@ -768,7 +775,7 @@ namespace Demux {
 
 			this.onk(["value", "input"], ({ value, valueType, input, inputType }) => {
 				if (valueType === "bool") value = value ? 1 : 0;
-				demuxValue(value as number, input, inputType);
+				demuxValue(math.floor(value as number), input, inputType);
 			});
 		}
 	}
@@ -809,7 +816,14 @@ namespace Demux {
 				index = math.clamp(index, 0, len - 1);
 
 				//set value
-				outputs[index].set(outputType, value as typeof outputType);
+				for (let i = 0; i !== len; i++) {
+					const out = outputs[i];
+					if (i !== index) {
+						out.unset();
+						continue;
+					}
+					out.set(outputType, value as typeof outputType);
+				}
 
 				//set color
 				if (muxLamps.isEmpty()) return;
@@ -823,7 +837,7 @@ namespace Demux {
 
 			this.onk(["value", "input"], ({ value, valueType, input, inputType }) => {
 				if (valueType === "bool") value = value ? 1 : 0;
-				demuxValue(value as number, input, inputType);
+				demuxValue(math.floor(value as number), input, inputType);
 			});
 		}
 	}
