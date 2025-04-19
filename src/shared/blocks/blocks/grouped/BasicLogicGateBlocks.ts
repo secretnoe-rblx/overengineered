@@ -318,7 +318,7 @@ namespace Not {
 
 namespace Mux {
 	const definitionMuxSmall = {
-		inputOrder: ["value", "truevalue", "falsevalue"],
+		inputOrder: ["value", "falsevalue", "truevalue"],
 		input: {
 			value: {
 				displayName: "State/Index",
@@ -500,6 +500,7 @@ namespace Mux {
 				["value", "falsevalue", "truevalue"],
 				({ value, valueType, falsevalue, truevalue, truevalueType }) => {
 					if (valueType === "bool") value = value ? 1 : 0;
+					print("s", [falsevalue, truevalue][value as number]);
 					muxValue(math.floor(value as number), [falsevalue, truevalue], truevalueType);
 				},
 			);
@@ -547,6 +548,7 @@ namespace Mux {
 				["value", "value1", "value2", "value3", "value4", "value5", "value6", "value7", "value8"],
 				({ value, valueType, value1Type, value1, value2, value3, value4, value5, value6, value7, value8 }) => {
 					if (valueType === "bool") value = value ? 1 : 0;
+					print("b", [value1, value2, value3, value4, value5, value6, value7, value8][value as number]);
 					muxValue(
 						math.floor(value as number),
 						[value1, value2, value3, value4, value5, value6, value7, value8],
