@@ -4,7 +4,7 @@ import { HostedService } from "engine/shared/di/HostedService";
 import { PlayerWatcher } from "engine/shared/PlayerWatcher";
 import { t } from "engine/shared/t";
 import { isNotAdmin_AutoBanned } from "server/BanAdminExploiter";
-import { ServerSlotRequestController } from "server/Building/ServerSlotRequestController";
+import { ServerSlotRequestController } from "server/building/ServerSlotRequestController";
 import { PlayerBanned } from "server/database/PlayerDatabase";
 import { asPlayerId } from "server/PlayerId";
 import { ServerPlayerController } from "server/ServerPlayerController";

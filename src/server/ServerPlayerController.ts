@@ -1,6 +1,6 @@
 import { Component } from "engine/shared/component/Component";
-import { ServerBuildingRequestController } from "server/Building/ServerBuildingRequestController";
-import { ServerSlotRequestController } from "server/Building/ServerSlotRequestController";
+import { ServerBuildingRequestController } from "server/building/ServerBuildingRequestController";
+import { ServerSlotRequestController } from "server/building/ServerSlotRequestController";
 import { asPlayerId } from "server/PlayerId";
 import { ServerPlotController } from "server/plots/ServerPlotController";
 import { ServerPlayerDataRemotesController } from "server/ServerPlayerDataRemotesController";
