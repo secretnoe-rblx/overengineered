@@ -567,7 +567,7 @@ namespace Mux {
 				aliases: ["mux"],
 			},
 
-			logic: { definition: definitionMuxSmall, ctor: LogicMuxSmall },
+			logic: { definition: definitionMuxSmall, ctor: LogicMuxSmall, events },
 		},
 		{
 			...BlockCreation.defaults,
@@ -578,7 +578,7 @@ namespace Mux {
 				aliases: ["mux"],
 			},
 
-			logic: { definition: definitionMuxBig, ctor: LogicMuxBig },
+			logic: { definition: definitionMuxBig, ctor: LogicMuxBig, events },
 		},
 	] as const satisfies BlockBuilder[];
 }
@@ -838,7 +838,7 @@ namespace Demux {
 				aliases: ["mux", "demux"],
 			},
 
-			logic: { definition: definitionDemuxSmall, ctor: LogicDemuxSmall },
+			logic: { definition: definitionDemuxSmall, ctor: LogicDemuxSmall, events },
 		},
 		{
 			...BlockCreation.defaults,
@@ -849,7 +849,7 @@ namespace Demux {
 				aliases: ["mux", "demux"],
 			},
 
-			logic: { definition: definitionDemuxBig, ctor: LogicDemuxBig },
+			logic: { definition: definitionDemuxBig, ctor: LogicDemuxBig, events },
 		},
 	] as const satisfies BlockBuilder[];
 }
