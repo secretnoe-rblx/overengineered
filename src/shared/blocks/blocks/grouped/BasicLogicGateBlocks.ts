@@ -1,5 +1,7 @@
+import { t } from "engine/shared/t";
 import { BlockLogic, CalculatableBlockLogic } from "shared/blockLogic/BlockLogic";
 import { BlockLogicValueResults } from "shared/blockLogic/BlockLogicValueStorage";
+import { BlockSynchronizer } from "shared/blockLogic/BlockSynchronizer";
 import { BlockConfigDefinitions } from "shared/blocks/BlockConfigDefinitions";
 import { BlockCreation } from "shared/blocks/BlockCreation";
 import type {
@@ -318,16 +320,26 @@ namespace Mux {
 		inputOrder: ["value", "truevalue", "falsevalue"],
 		input: {
 			value: {
-				displayName: "State",
-				types: BlockConfigDefinitions.bool,
+				displayName: "State/Index",
+				types: {
+					number: {
+						config: 0,
+					},
+					byte: {
+						config: 0,
+					},
+					bool: {
+						config: false,
+					},
+				},
 			},
 			truevalue: {
-				displayName: "True value",
+				displayName: "Value 1",
 				types: BlockConfigDefinitions.any,
 				group: "1",
 			},
 			falsevalue: {
-				displayName: "False value",
+				displayName: "Value 2",
 				types: BlockConfigDefinitions.any,
 				group: "1",
 			},
@@ -339,45 +351,91 @@ namespace Mux {
 				group: "1",
 			},
 		},
+	} satisfies BlockLogicFullBothDefinitions;
+
+	const activeInColor = Color3.fromRGB(0, 255, 255);
+	const activeOutColor = Color3.fromRGB(0, 255, 0);
+	const baseColor = Color3.fromRGB(59, 59, 59);
+	const neonMaterial = Enum.Material.Neon;
+	const baseMaterial = Enum.Material.Glass;
+
+	const update = ({ lamps, index, color }: UpdateData) => {
+		if (!lamps) return;
+
+		const parts = [lamps];
+		for (let i = 0; i < parts.size(); i++) {
+			const part = parts[i];
+			if (i === index) {
+				part.Color = color;
+				part.Material = neonMaterial;
+				continue;
+			}
+
+			part.Color = baseColor;
+			part.Material = baseMaterial;
+		}
+	};
+
+	const updateEventType = t.interface({
+		block: t.instance("Model").nominal("blockModel").as<BlockModel>(),
+		lamps: t.instance("BasePart"),
+		index: t.number,
+		color: t.color,
+	});
+	type UpdateData = t.Infer<typeof updateEventType>;
+
+	const events = {
+		update: new BlockSynchronizer("b_lamp_update", updateEventType, update),
+	} as const;
+
+	type muxLamp = BasePart & {
+		lamp: BasePart;
 	};
 
 	class Logic extends BlockLogic<typeof definition> {
 		constructor(block: BlockLogicArgs) {
 			super(definition, block);
 
-			const valuecache = this.initializeRecalcInputCache("value");
-			const truevaluecache = this.initializeRecalcInputCache("truevalue");
-			const falsevaluecache = this.initializeRecalcInputCache("falsevalue");
+			const nodes = [this.input.falsevalue, this.input.truevalue];
+			const allMuxLampInstances = this.instance?.FindFirstChild("Leds") as
+				| (Folder & Record<`${number}`, muxLamp>)
+				| undefined;
+			if (!allMuxLampInstances) throw "Vas?";
 
-			this.onkRecalcInputs(
-				[],
-				() => {
-					const value = valuecache.tryGet();
-					if (value === undefined) {
-						return this.output.result.unset();
-					}
+			const muxLamps: BasePart[] = [];
+			allMuxLampInstances.GetChildren().forEach((v) => {
+				const i = tonumber(v.Name)!;
+				const base = muxLamps[i] as muxLamp;
+				muxLamps[i] = base.lamp;
+			});
 
-					if (value) {
-						const ret = truevaluecache.tryGet();
-						const rettype = truevaluecache.tryGetType();
-						if (ret !== undefined && rettype !== undefined) {
-							this.output.result.set(rettype, ret);
-						} else {
-							this.output.result.unset();
-						}
-					} else {
-						const ret = falsevaluecache.tryGet();
-						const rettype = falsevaluecache.tryGetType();
-						if (ret !== undefined && rettype !== undefined) {
-							this.output.result.set(rettype, ret);
-						} else {
-							this.output.result.unset();
-						}
-					}
-				},
-				(result) => {
-					if (result !== BlockLogicValueResults.availableLater) return;
-					this.output.result.unset();
+			const muxValue = (
+				index: number,
+				values: unknown[],
+				outputType: "string" | "number" | "bool" | "vector3" | "color" | "byte",
+			) => {
+				const len = nodes.size();
+				if (len === 0) return;
+				index = math.clamp(index, 0, nodes.size() - 1);
+
+				//set value
+				this.output.result.set(outputType, values[index] as typeof outputType);
+
+				//set color
+				if (muxLamps.isEmpty()) return;
+				events.update.send({
+					block: this.instance!,
+					lamps: muxLamps[0],
+					index,
+					color: activeInColor,
+				});
+			};
+
+			this.onk(
+				["value", "falsevalue", "truevalue"],
+				({ value, valueType, falsevalue, truevalue, truevalueType }) => {
+					if (valueType === "bool") value = value ? 1 : 0;
+					muxValue(value as number, [falsevalue, truevalue], truevalueType);
 				},
 			);
 		}
@@ -388,7 +446,7 @@ namespace Mux {
 		id: "multiplexer",
 		displayName: "Multiplexer",
 		description: "Outputs values depending on 'State' input",
-		modelSource: autoModel("TripleGenericLogicBlockPrefab", "MUX", BlockCreation.Categories.other),
+		// modelSource: autoModel("TripleGenericLogicBlockPrefab", "MUX", BlockCreation.Categories.other),
 		search: {
 			aliases: ["mux"],
 		},
