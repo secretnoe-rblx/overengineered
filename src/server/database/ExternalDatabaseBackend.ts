@@ -39,6 +39,8 @@ export class ExternalDatabaseBackendSlots implements DatabaseBackend<BlocksSeria
 		const serializedVal = JSON.serialize(value);
 		$log(`Saving a slot of ${math.round(serializedVal.size() / 1024)} kb`);
 
+		const reqid = math.random(999999999);
+
 		const url = `${endpoint}/slot?ownerId=${ownerId}&slotIds=${slotId}`;
 		if (serializedVal.size() > maxSize) {
 			const chunks = math.ceil(serializedVal.size() / chunkSize);
@@ -54,6 +56,7 @@ export class ExternalDatabaseBackendSlots implements DatabaseBackend<BlocksSeria
 					chunk: serializedVal.sub(chunkpos + 1, chunkpos + chunkSize),
 					chunkIndex: i,
 					totalChunks: chunks,
+					requestId: reqid,
 				});
 
 				const response = HttpService.PostAsync(url, postdata, "ApplicationJson", false, headers);
