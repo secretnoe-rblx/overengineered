@@ -121,7 +121,7 @@ class Logic extends InstanceBlockLogic<typeof definition, RCSEngineModel> {
 	];
 
 	// Math
-	private readonly basePower = RobloxUnit.Newton_To_Rowton(35_000);
+	private readonly basePower = RobloxUnit.Newton_To_Rowton(35_000 * 2);
 	private readonly maxPower;
 
 	// Const
