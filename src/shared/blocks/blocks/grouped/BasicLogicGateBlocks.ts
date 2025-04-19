@@ -384,7 +384,7 @@ namespace Mux {
 	type UpdateData = t.Infer<typeof updateEventType>;
 
 	const events = {
-		update: new BlockSynchronizer("b_lamp_update", updateEventType, update),
+		update: new BlockSynchronizer("mux_lamp_update", updateEventType, update),
 	} as const;
 
 	type muxLamp = BasePart & {
@@ -404,8 +404,7 @@ namespace Mux {
 			const muxLamps: BasePart[] = [];
 			allMuxLampInstances.GetChildren().forEach((v) => {
 				const i = tonumber(v.Name)!;
-				const base = muxLamps[i] as muxLamp;
-				muxLamps[i] = base.lamp;
+				muxLamps[i] = (v as muxLamp).lamp;
 			});
 
 			const muxValue = (
