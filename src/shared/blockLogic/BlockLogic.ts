@@ -111,6 +111,11 @@ export type AllInputKeysToObject<
 > = AllInputKeysToArgsObject<TDef, TKeys> &
 	AllInputKeysToTypesObject<TDef, TKeys> &
 	AllInputKeysToChangedObject<TDef, TKeys>;
+export type AllInputKeysToObjectAny<TDef extends BlockLogicInputDefs, TKeys extends keyof TDef = keyof TDef> = Partial<
+	AllInputKeysToArgsObject<TDef, TKeys>
+> &
+	Partial<AllInputKeysToTypesObject<TDef, TKeys>> &
+	AllInputKeysToChangedObject<TDef, TKeys>;
 
 export type AllOutputKeysToObject<TDef extends BlockLogicOutputDefs> = {
 	readonly [k in string & keyof TDef]: Omit<TypedLogicValue<TDef[k]["types"][number]>, "changedSinceLastTick">;
@@ -507,6 +512,31 @@ export abstract class BlockLogic<TDef extends BlockLogicBothDefinitions> extends
 		}
 
 		return this.onRecalc((ctx) => this.executeFuncWithValues(ctx, keys, func, true, elseFunc));
+	}
+
+	/** Runs the provided function when another block requests a value from this one, but no more than once per tick, only when any input value changes. */
+	protected onkRecalcInputsAny<const TKeys extends keyof TDef["input"]>(
+		keys: readonly TKeys[],
+		func: (inputs: AllInputKeysToObjectAny<TDef["input"], TKeys>, ctx: BlockLogicTickContext) => void,
+	): SignalConnection {
+		const prev: { [k in string | number | symbol]: { v?: unknown; t?: unknown } } = {};
+		const caches = keys.mapToMap((key) => $tuple(key, this.initializeRecalcInputCache(key)));
+
+		return this.onkRecalcInputs([], (_, ctx) => {
+			const obj: { [k in string | number | symbol]: unknown } = {};
+
+			for (const [k, c] of caches) {
+				const [v, t] = [c.tryGet(), c.tryGetType()];
+
+				obj[k] = v;
+				obj[`${tostring(k)}Type`] = t;
+				obj[`${tostring(k)}Changed`] = prev[k]?.v !== v || prev[k]?.t !== t;
+
+				prev[k] = { v, t };
+			}
+
+			func(obj as never, ctx);
+		});
 	}
 
 	/** Runs the provided function on every tick, but only if all of the input values are available. */
