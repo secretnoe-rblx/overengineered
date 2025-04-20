@@ -335,12 +335,12 @@ namespace Mux {
 				},
 			},
 			truevalue: {
-				displayName: "Input 1",
+				displayName: "True Input",
 				types: BlockConfigDefinitions.any,
 				group: "1",
 			},
 			falsevalue: {
-				displayName: "Input 2",
+				displayName: "False Input",
 				types: BlockConfigDefinitions.any,
 				group: "1",
 			},
@@ -482,25 +482,31 @@ namespace Mux {
 				const len = values.size();
 				if (len === 0) return;
 				index = math.clamp(index, 0, len - 1);
-
 				//set value
+				if (values[index] === undefined) {
+					this.output.result.unset();
+					return;
+				}
 				this.output.result.set(outputType, values[index] as typeof outputType);
-
-				//set color
-				if (muxLamps.isEmpty()) return;
-				events.update.send({
-					block: this.instance!,
-					lamps: muxLamps,
-					index,
-					color: activeColor,
-				});
 			};
 
-			this.onk(
+			this.onkRecalcInputsAny(
 				["value", "falsevalue", "truevalue"],
-				({ value, valueType, falsevalue, truevalue, truevalueType }) => {
+				({ value, valueType, valueChanged, falsevalue, truevalue, truevalueType }) => {
+					if (value === undefined) return;
 					if (valueType === "bool") value = value ? 1 : 0;
-					muxValue(math.floor(value as number), [falsevalue, truevalue], truevalueType);
+
+					//set color
+					if (!muxLamps.isEmpty() && valueChanged) {
+						events.update.send({
+							block: this.instance!,
+							lamps: muxLamps,
+							index: value as number,
+							color: activeColor,
+						});
+					}
+
+					muxValue(math.floor(value as number), [falsevalue, truevalue], truevalueType!);
 				},
 			);
 		}
@@ -529,28 +535,47 @@ namespace Mux {
 				const len = values.size();
 				if (len === 0) return;
 				index = math.clamp(index, 0, len - 1);
-
 				//set value
+				if (values[index] === undefined) {
+					this.output.result.unset();
+					return;
+				}
 				this.output.result.set(outputType, values[index] as typeof outputType);
-
-				//set color
-				if (muxLamps.isEmpty()) return;
-				events.update.send({
-					block: this.instance!,
-					lamps: muxLamps,
-					index,
-					color: activeColor,
-				});
 			};
 
-			this.onk(
+			this.onkRecalcInputsAny(
 				["value", "value1", "value2", "value3", "value4", "value5", "value6", "value7", "value8"],
-				({ value, valueType, value1Type, value1, value2, value3, value4, value5, value6, value7, value8 }) => {
+				({
+					value,
+					valueType,
+					valueChanged,
+					value1Type,
+					value1,
+					value2,
+					value3,
+					value4,
+					value5,
+					value6,
+					value7,
+					value8,
+				}) => {
+					if (value === undefined) return;
 					if (valueType === "bool") value = value ? 1 : 0;
+
+					//set color
+					if (!muxLamps.isEmpty() && valueChanged) {
+						events.update.send({
+							block: this.instance!,
+							lamps: muxLamps,
+							index: value as number,
+							color: activeColor,
+						});
+					}
+
 					muxValue(
 						math.floor(value as number),
 						[value1, value2, value3, value4, value5, value6, value7, value8],
-						value1Type,
+						value1Type!,
 					);
 				},
 			);
@@ -610,12 +635,12 @@ namespace Demux {
 		},
 		output: {
 			truevalue: {
-				displayName: "Output 1",
+				displayName: "True Output",
 				types: asMap(BlockConfigDefinitions.any).keys(),
 				group: "1",
 			},
 			falsevalue: {
-				displayName: "Output 2",
+				displayName: "False Output",
 				types: asMap(BlockConfigDefinitions.any).keys(),
 				group: "1",
 			},
@@ -756,26 +781,28 @@ namespace Demux {
 				//set value
 				for (let i = 0; i !== len; i++) {
 					const out = outputs[i];
-					if (i !== index) {
+					if (i !== index || value === undefined) {
 						out.unset();
 						continue;
 					}
 					out.set(outputType, value as typeof outputType);
 				}
-
-				//set color
-				if (muxLamps.isEmpty()) return;
-				events.update.send({
-					block: this.instance!,
-					lamps: muxLamps,
-					index,
-					color: activeColor,
-				});
 			};
 
-			this.onk(["value", "input"], ({ value, valueType, input, inputType }) => {
+			this.onkRecalcInputsAny(["value", "input"], ({ value, valueType, valueChanged, input, inputType }) => {
+				if (value === undefined) return;
 				if (valueType === "bool") value = value ? 1 : 0;
-				demuxValue(math.floor(value as number), input, inputType);
+
+				if (!muxLamps.isEmpty() && valueChanged) {
+					events.update.send({
+						block: this.instance!,
+						lamps: muxLamps,
+						index: value as number,
+						color: activeColor,
+					});
+				}
+
+				demuxValue(math.floor(value as number), input, inputType!);
 			});
 		}
 	}
@@ -818,26 +845,28 @@ namespace Demux {
 				//set value
 				for (let i = 0; i !== len; i++) {
 					const out = outputs[i];
-					if (i !== index) {
+					if (i !== index || value === undefined) {
 						out.unset();
 						continue;
 					}
 					out.set(outputType, value as typeof outputType);
 				}
-
-				//set color
-				if (muxLamps.isEmpty()) return;
-				events.update.send({
-					block: this.instance!,
-					lamps: muxLamps,
-					index,
-					color: activeColor,
-				});
 			};
 
-			this.onk(["value", "input"], ({ value, valueType, input, inputType }) => {
+			this.onkRecalcInputsAny(["value", "input"], ({ value, valueType, valueChanged, input, inputType }) => {
+				if (value === undefined) return;
 				if (valueType === "bool") value = value ? 1 : 0;
-				demuxValue(math.floor(value as number), input, inputType);
+
+				if (!muxLamps.isEmpty() && valueChanged) {
+					events.update.send({
+						block: this.instance!,
+						lamps: muxLamps,
+						index: value as number,
+						color: activeColor,
+					});
+				}
+
+				demuxValue(math.floor(value as number), input, inputType!);
 			});
 		}
 	}
