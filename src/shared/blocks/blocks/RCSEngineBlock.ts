@@ -16,6 +16,8 @@ const definition = {
 	input: {
 		direction: {
 			displayName: "Direction",
+			tooltip:
+				"Each vector axis represents the direction and force of the each engine. Each axis is clamped between -100 and 100.",
 			unit: "Vector3 unit",
 			types: {
 				vector3: {
@@ -25,6 +27,7 @@ const definition = {
 		},
 		trailLength: {
 			displayName: "Trail length",
+			tooltip: "The length of the burst trail.",
 			types: {
 				number: {
 					config: 1,
@@ -49,6 +52,7 @@ const definition = {
 	output: {
 		maxpower: {
 			displayName: "Max Power (Newtons)",
+			tooltip: "A constant. Shows how much force each engine can output.",
 			types: ["number"],
 		},
 	},
