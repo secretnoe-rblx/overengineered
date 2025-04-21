@@ -79,6 +79,9 @@ export namespace SharedBuilding {
 		material: Enum.Material | undefined,
 		byBuild: boolean = false,
 	) {
+		// fix for blocks with parts that already have CustomPhysicalProperties set having different properties after placing vs after painting
+		byBuild = true;
+
 		for (const block of blocks) {
 			if (material) {
 				BlockManager.manager.material.set(block, material);
