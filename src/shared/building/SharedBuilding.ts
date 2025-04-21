@@ -80,7 +80,7 @@ export namespace SharedBuilding {
 		byBuild: boolean = false,
 	) {
 		// fix for blocks with parts that already have CustomPhysicalProperties set having different properties after placing vs after painting
-		byBuild = true;
+		byBuild = false;
 
 		for (const block of blocks) {
 			if (material) {
