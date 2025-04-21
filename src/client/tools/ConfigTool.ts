@@ -61,9 +61,69 @@ namespace Scene {
 		) {
 			super(gui);
 
-			type cc = GuiObject & { Content: GuiObject & { ScrollingFrame: ScrollingFrame } };
+			type cc = GuiObject & {
+				Content: GuiObject & { ScrollingFrame: ScrollingFrame };
+				Header: GuiObject & { Copy: GuiButton; Paste: GuiButton; Reset: GuiButton };
+			};
 			this.configContainer = this.parentGui(this.mainScreen.registerLeft<cc>("Config"));
 			this.configParent = this.configContainer.parent(new ComponentChild(true));
+
+			let copiedConfig: [BlockId, PlacedBlockConfig] | undefined;
+			this.parent(new Control(this.configContainer.instance.Header.Copy)) //
+				.addButtonAction(() => {
+					const blockmodel = selected.get().first();
+					if (!blockmodel) return;
+
+					const id = BlockManager.manager.id.get(blockmodel)!;
+					const block = this.blockList.blocks[id];
+					if (!block) return undefined!;
+
+					const defs = block.logic?.definition.input;
+					if (!defs) return undefined!;
+
+					copiedConfig = [
+						BlockManager.manager.id.get(blockmodel),
+						BlockConfig.addDefaults(BlockManager.manager.config.get(blockmodel) as PlacedBlockConfig, defs),
+					];
+				});
+			this.parent(new Control(this.configContainer.instance.Header.Paste)) //
+				.addButtonAction(() => {
+					if (!copiedConfig) return;
+
+					const selected = this.tool.selected.get();
+					if (selected.any((c) => BlockManager.manager.id.get(c) !== copiedConfig![0]))
+						$log(`Sending (${selected.size()}) block config values ${JSON.serialize(copiedConfig)}`);
+
+					const response = this.clientBuilding.updateConfigOperation.execute({
+						plot: this.tool.targetPlot.get(),
+						configs: selected.map(
+							(b) =>
+								({
+									block: b,
+									cfg: copiedConfig![1]!,
+								}) satisfies ClientBuildingTypes.UpdateConfigArgs["configs"][number],
+						),
+					});
+					if (!response.success) {
+						LogControl.instance.addLine(response.message, Colors.red);
+						this.updateConfigs([...selected]);
+					}
+
+					this.updateConfigs(this.tool.selected.getArr());
+				});
+			this.parent(new Control(this.configContainer.instance.Header.Reset)) //
+				.addButtonAction(() => {
+					const response = clientBuilding.resetConfigOperation.execute({
+						plot: tool.targetPlot.get(),
+						blocks: selected.getArr(),
+					});
+
+					if (!response.success) {
+						LogControl.instance.addLine(response.message, Colors.red);
+					}
+
+					this.updateConfigs(selected.getArr());
+				});
 
 			const selected = tool.selected;
 			this.event.subscribeCollection(selected, () => {
@@ -78,21 +138,6 @@ namespace Scene {
 
 			this.gui.Bottom.DeselectButton.Activated.Connect(() => {
 				tool.unselectAll();
-			});
-
-			this.gui.Bottom.ResetButton.Activated.Connect(async () => {
-				$log(`Resetting (${selected.get().size()}) block config values`);
-
-				const response = await clientBuilding.resetConfigOperation.execute({
-					plot: tool.targetPlot.get(),
-					blocks: selected.getArr(),
-				});
-
-				if (!response.success) {
-					LogControl.instance.addLine(response.message, Colors.red);
-				}
-
-				this.updateConfigs(selected.getArr());
 			});
 
 			this.onEnable(() => this.updateConfigs([]));
