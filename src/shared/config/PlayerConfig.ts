@@ -38,6 +38,11 @@ declare global {
 		readonly loadDistance: number;
 		readonly water: boolean;
 		readonly snowOnly: boolean;
+		readonly override?: {
+			readonly enabled: boolean;
+			readonly material: Enum.Material["Name"];
+			readonly color: Color4;
+		};
 		readonly triangleAddSandBelowSeaLevel: boolean;
 	};
 	type TutorialConfiguration = {
@@ -175,6 +180,11 @@ export const PlayerConfigDefinition = {
 			water: false as boolean,
 			snowOnly: true as boolean,
 			triangleAddSandBelowSeaLevel: false as boolean,
+			override: {
+				enabled: false as boolean,
+				color: { color: new Color3(1, 1, 1), alpha: 1 },
+				material: Enum.Material.Plastic.Name,
+			},
 		},
 	},
 	tutorial: {

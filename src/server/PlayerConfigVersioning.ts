@@ -87,7 +87,7 @@ const v5: UpdatablePlayerConfigVersion<PlayerConfigV5, PlayerConfigV4> = {
 };
 
 // Added terrain config
-type PlayerConfigV6 = PlayerConfigV5 & { terrain: Omit<TerrainConfiguration, "loadDistance"> };
+type PlayerConfigV6 = PlayerConfigV5 & { terrain: Omit<TerrainConfiguration, "loadDistance" | "override"> };
 const v6: UpdatablePlayerConfigVersion<PlayerConfigV6, PlayerConfigV5> = {
 	version: 6,
 
@@ -104,7 +104,7 @@ const v6: UpdatablePlayerConfigVersion<PlayerConfigV6, PlayerConfigV5> = {
 };
 
 // Added terrain load distance
-type PlayerConfigV7 = PlayerConfigV6 & { terrain: TerrainConfiguration };
+type PlayerConfigV7 = PlayerConfigV6 & { terrain: Omit<TerrainConfiguration, "override"> };
 const v7: UpdatablePlayerConfigVersion<PlayerConfigV7, PlayerConfigV6> = {
 	version: 7,
 
@@ -176,7 +176,24 @@ const v11: UpdatablePlayerConfigVersion<PlayerConfigV10, PlayerConfigV10> = {
 	},
 };
 
-const versions = [v1, v2, v3, v4, v5, v6, v7, v8, v9, v10, v11] as const;
+// Add material, color setting for terrain
+type PlayerConfigV11 = PlayerConfigV10 & { terrain: TerrainConfiguration };
+const v12: UpdatablePlayerConfigVersion<PlayerConfigV10, PlayerConfigV11> = {
+	version: 12,
+
+	update(prev: Partial<PlayerConfigV10>): Partial<PlayerConfigV11> {
+		return {
+			...prev,
+			terrain: {
+				...PlayerConfigDefinition.terrain.config,
+				...prev.terrain!,
+			},
+			version: this.version,
+		};
+	},
+};
+
+const versions = [v1, v2, v3, v4, v5, v6, v7, v8, v9, v10, v11, v12] as const;
 const current = versions[versions.size() - 1] as typeof versions extends readonly [...unknown[], infer T] ? T : never;
 
 export namespace PlayerConfigUpdater {

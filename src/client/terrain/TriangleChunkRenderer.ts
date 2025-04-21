@@ -6,6 +6,7 @@ import type { ChunkGenerator, ChunkRenderer } from "client/terrain/ChunkLoader";
 type config = {
 	readonly addSandBelowSeaLevel: boolean;
 	readonly snowOnly: boolean;
+	readonly override: TerrainConfiguration["override"];
 };
 const parent = Element.create("Folder", { Name: "Triterra", Parent: Workspace.WaitForChild("Obstacles") });
 export const TriangleChunkRenderer = (
@@ -88,7 +89,12 @@ export const TriangleChunkRenderer = (
 		const maxHeight = math.max(xpzp, xpzn, xnzp, xnzn) - GameDefinitions.HEIGHT_OFFSET;
 		const heightDiff = maxHeight - minHeight;
 
-		if (config?.snowOnly) {
+		if (config?.override?.enabled) {
+			for (const wedge of [w11, w12, w21, w22]) {
+				wedge.Material = Enum.Material[config.override.material];
+				wedge.Color = config.override.color.color;
+			}
+		} else if (config?.snowOnly) {
 			for (const wedge of [w11, w12, w21, w22]) {
 				wedge.Material = Enum.Material.Snow;
 				wedge.Color = math.random() > 0.9999 ? new Color3(0.8, 0.8, 0.4) : new Color3(0.8, 0.8, 0.8);

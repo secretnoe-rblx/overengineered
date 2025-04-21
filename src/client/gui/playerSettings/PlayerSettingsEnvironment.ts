@@ -1,4 +1,6 @@
 import { ConfigControlList } from "client/gui/configControls/ConfigControlsList";
+import { Colors } from "engine/shared/Colors";
+import { Observables } from "engine/shared/event/Observables";
 import type {
 	ConfigControlListDefinition,
 	ConfigControlTemplateList,
@@ -51,6 +53,28 @@ export class PlayerSettingsEnvironment extends ConfigControlList {
 			const terrainSnowOnly = this.addToggle("Snow only") //
 				.initToObjectPart(value, ["terrain", "snowOnly"]);
 
+			const terrainOverride = this.addToggle("Override material") //
+				.initToObjectPart(value, ["terrain", "override", "enabled"]);
+
+			const terrainOverrideMaterial = this.addMaterial("Material", Enum.Material.Plastic) //
+				.initToObservable(
+					this.event
+						.addObservable(
+							Observables.createObservableFromObjectProperty<string>(value, [
+								"terrain",
+								"override",
+								"material",
+							]),
+						)
+						.fCreateBased(
+							(c) => Enum.Material[c as never] as Enum.Material,
+							(c) => c.Name,
+						),
+				);
+
+			const terrainOverrideColor = this.addColor("Color", { alpha: 1, color: Colors.white }, false) //
+				.initToObjectPart(value, ["terrain", "override", "color"]);
+
 			this.event
 				.addObservable(value.fReadonlyCreateBased((c) => c.terrain)) //
 				.subscribe(({ kind, snowOnly }) => {
@@ -61,6 +85,7 @@ export class PlayerSettingsEnvironment extends ConfigControlList {
 					classicFoliage.setVisibleAndEnabled(kind === "Classic");
 
 					terrainSnowOnly.setVisibleAndEnabled(kind !== "Water" && kind !== "Lava");
+					terrainOverride.setVisibleAndEnabled(kind === "Triangle" || kind === "Flat");
 				}, true);
 		}
 	}
