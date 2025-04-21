@@ -115,7 +115,7 @@ const getMouseTargetBlockPositionV2 = (
 		return pos.sub(offset);
 	};
 	const addBlockSize = (normal: Vector3, pos: Vector3) => {
-		return pos.add(aabb.originalSize.mul(scale).mul(normal).div(2));
+		return pos.add(aabb.getRotatedSize().mul(scale).mul(normal).div(2));
 	};
 
 	const target = info?.[0] ?? mouse.Target;
@@ -139,8 +139,8 @@ const getMouseTargetBlockPositionV2 = (
 			.mapFiltered((c) =>
 				c.IsA("Folder") ? undefined : c.IsA("Model") || c.IsA("BasePart") ? BB.from(c) : undefined,
 			),
-		rotation,
-	);
+		block.model.GetPivot(),
+	).withCenter((c) => c.mul(rotation));
 
 	let targetPosition = globalMouseHitPos;
 	targetPosition = addTargetSize(target, normal, targetPosition);
