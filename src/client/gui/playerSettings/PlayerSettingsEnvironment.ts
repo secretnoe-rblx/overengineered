@@ -85,7 +85,10 @@ export class PlayerSettingsEnvironment extends ConfigControlList {
 					classicFoliage.setVisibleAndEnabled(kind === "Classic");
 
 					terrainSnowOnly.setVisibleAndEnabled(kind !== "Water" && kind !== "Lava");
+
 					terrainOverride.setVisibleAndEnabled(kind === "Triangle" || kind === "Flat");
+					terrainOverrideMaterial.setVisibleAndEnabled(kind === "Triangle" || kind === "Flat");
+					terrainOverrideColor.setVisibleAndEnabled(kind === "Triangle" || kind === "Flat");
 				}, true);
 		}
 	}
