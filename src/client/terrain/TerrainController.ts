@@ -23,6 +23,7 @@ export class TerrainController extends HostedService {
 				snowOnly: terrain.snowOnly,
 				addSandBelowSeaLevel: terrain.triangleAddSandBelowSeaLevel,
 				isLava: terrain.kind === "Lava",
+				override: terrain.override,
 			};
 
 			switch (terrain.kind) {

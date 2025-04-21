@@ -1,4 +1,4 @@
-import { UserInputService } from "@rbxts/services";
+import { ContextActionService, UserInputService } from "@rbxts/services";
 import { Anim } from "client/gui/Anim";
 import { Color4Chooser } from "client/gui/Color4Chooser";
 import { ColorVisualizerWithAlpha } from "client/gui/ColorVisualizerWithAlpha";
@@ -49,6 +49,16 @@ class ColorControl extends Control<ConfigControlColorDefinition["Control"]> {
 					let isInside = false;
 					colorGui.MouseEnter.Connect(() => (isInside = true));
 					colorGui.MouseLeave.Connect(() => (isInside = false));
+
+					ContextActionService.BindAction(
+						"everything",
+						() => Enum.ContextActionResult.Sink,
+						false,
+						Enum.UserInputType.Keyboard,
+						Enum.UserInputType.Gamepad1,
+					);
+					popup.onDestroy(() => ContextActionService.UnbindAction("everything"));
+
 					popup.event.subInput((ih) => {
 						task.delay(0, () => {
 							ih.onTouchTap(() => {
