@@ -78,6 +78,32 @@ import { PlasmaShotgunMuzzleBlock } from "shared/blocks/blocks/Weaponary/Plasma/
 import type { BlockBuilder } from "shared/blocks/Block";
 
 export const CreateSandboxBlocks = (di: DIContainer): BlockList => {
+	const weapons: BlockBuilder[] = [
+		// PlasmaCoilAcceleratorUpgradeBlock, //todo: remove later
+
+		//laser stuff
+		LaserLensBlock,
+		LaserEmitterBlock,
+
+		//plasma stuff
+		PlasmaShotgunMuzzleBlock,
+		PlasmaSeparatorMuzzleBlock,
+		PlasmaGunBarrelBlock,
+		PlasmaGunBlock,
+
+		//cannon stuff
+		CannonBreech,
+		...CannonBases,
+		...CannonBarrels,
+
+		// machinegun stuff
+		MachineGunLoader,
+		...MachineGunAmmoBlocks,
+		...ArmoredMachineGunBarrels,
+		...MachineGunBarrels,
+		...MachineGunMuzzleBreaks,
+	];
+
 	const blocksArr: BlockBuilder[] = [
 		...BuildingBlocks,
 		...MechanicalBlocks,
@@ -128,30 +154,6 @@ export const CreateSandboxBlocks = (di: DIContainer): BlockList => {
 		RandomBlock,
 		LogicOverclockBlock,
 
-		// PlasmaCoilAcceleratorUpgradeBlock, //todo: remove later
-
-		//laser stuff
-		LaserLensBlock,
-		LaserEmitterBlock,
-
-		//plasma stuff
-		PlasmaShotgunMuzzleBlock,
-		PlasmaSeparatorMuzzleBlock,
-		PlasmaGunBarrelBlock,
-		PlasmaGunBlock,
-
-		//cannon stuff
-		CannonBreech,
-		...CannonBases,
-		...CannonBarrels,
-
-		// machinegun stuff
-		MachineGunLoader,
-		...MachineGunAmmoBlocks,
-		...ArmoredMachineGunBarrels,
-		...MachineGunBarrels,
-		...MachineGunMuzzleBreaks,
-
 		AltimeterBlock,
 		KeySensorBlock,
 		ControllerBlock,
@@ -169,6 +171,13 @@ export const CreateSandboxBlocks = (di: DIContainer): BlockList => {
 		SpeedometerBlock,
 		LaserBlock,
 	];
+
+	const icicle = 89653976414701;
+	if (RunService.IsStudio() || game.PlaceId === icicle) {
+		for (const block of weapons) {
+			blocksArr.push(block);
+		}
+	}
 
 	if (RunService.IsStudio()) {
 		for (const block of TestBlocks) {
