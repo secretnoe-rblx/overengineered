@@ -11,6 +11,7 @@ import type {
 	BlockLogicFullBothDefinitions,
 	BlockLogicTickContext,
 } from "shared/blockLogic/BlockLogic";
+import type { LogicValueStorageContainer } from "shared/blockLogic/BlockLogicValueStorage";
 import type { BlockBuilder, BlockCategoryPath, BlockModelSource } from "shared/blocks/Block";
 
 const autoModel = (prefab: BlockCreation.Model.PrefabName, text: string, category: BlockCategoryPath) => {
@@ -459,6 +460,30 @@ namespace Mux {
 		lamp: BasePart;
 	};
 
+	const muxValue = (
+		result: LogicValueStorageContainer<"string" | "number" | "bool" | "vector3" | "color" | "byte">,
+		index: number,
+		values: [unknown, type: string | undefined][],
+	) => {
+		const len = values.size();
+		if (len === 0) return;
+		index = math.clamp(index, 0, len - 1);
+
+		//set value
+		if (!values[index]) {
+			result.unset();
+			return;
+		}
+
+		const [v, t] = values[index];
+		if (v === undefined || t === undefined) {
+			result.unset();
+			return;
+		}
+
+		result.set(t as never, v as never);
+	};
+
 	class LogicMuxSmall extends BlockLogic<typeof definitionMuxSmall> {
 		constructor(block: BlockLogicArgs) {
 			super(definitionMuxSmall, block);
@@ -474,27 +499,13 @@ namespace Mux {
 				muxLamps[i] = (v as muxLamp).lamp;
 			});
 
-			const muxValue = (
-				index: number,
-				values: unknown[],
-				outputType: "string" | "number" | "bool" | "vector3" | "color" | "byte",
-			) => {
-				const len = values.size();
-				if (len === 0) return;
-				index = math.clamp(index, 0, len - 1);
-				//set value
-				if (values[index] === undefined) {
-					this.output.result.unset();
-					return;
-				}
-				this.output.result.set(outputType, values[index] as typeof outputType);
-			};
-
 			this.onkRecalcInputsAny(
 				["value", "falsevalue", "truevalue"],
-				({ value, valueType, valueChanged, falsevalue, truevalue, truevalueType }) => {
+				({ value, valueType, valueChanged, falsevalue, falsevalueType, truevalue, truevalueType }) => {
 					if (value === undefined) return;
 					if (valueType === "bool") value = value ? 1 : 0;
+
+					print("SENDING", `[${valueType}]`, value);
 
 					//set color
 					if (!muxLamps.isEmpty() && valueChanged) {
@@ -506,7 +517,10 @@ namespace Mux {
 						});
 					}
 
-					muxValue(math.floor(value as number), [falsevalue, truevalue], truevalueType!);
+					muxValue(this.output.result, math.floor(value as number), [
+						[falsevalue, falsevalueType],
+						[truevalue, truevalueType],
+					]);
 				},
 			);
 		}
@@ -527,37 +541,28 @@ namespace Mux {
 				muxLamps[i] = (v as muxLamp).lamp;
 			});
 
-			const muxValue = (
-				index: number,
-				values: unknown[],
-				outputType: "string" | "number" | "bool" | "vector3" | "color" | "byte",
-			) => {
-				const len = values.size();
-				if (len === 0) return;
-				index = math.clamp(index, 0, len - 1);
-				//set value
-				if (values[index] === undefined) {
-					this.output.result.unset();
-					return;
-				}
-				this.output.result.set(outputType, values[index] as typeof outputType);
-			};
-
 			this.onkRecalcInputsAny(
 				["value", "value1", "value2", "value3", "value4", "value5", "value6", "value7", "value8"],
 				({
 					value,
 					valueType,
 					valueChanged,
-					value1Type,
 					value1,
+					value1Type,
 					value2,
+					value2Type,
 					value3,
+					value3Type,
 					value4,
+					value4Type,
 					value5,
+					value5Type,
 					value6,
+					value6Type,
 					value7,
+					value7Type,
 					value8,
+					value8Type,
 				}) => {
 					if (value === undefined) return;
 					if (valueType === "bool") value = value ? 1 : 0;
@@ -572,11 +577,16 @@ namespace Mux {
 						});
 					}
 
-					muxValue(
-						math.floor(value as number),
-						[value1, value2, value3, value4, value5, value6, value7, value8],
-						value1Type!,
-					);
+					muxValue(this.output.result, math.floor(value as number), [
+						[value1, value1Type],
+						[value2, value2Type],
+						[value3, value3Type],
+						[value4, value4Type],
+						[value5, value5Type],
+						[value6, value6Type],
+						[value7, value7Type],
+						[value8, value8Type],
+					]);
 				},
 			);
 		}
