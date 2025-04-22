@@ -25,12 +25,17 @@ namespace PopupTests {
 					})
 						.with((b) =>
 							b.activated.Connect(() => {
-								const pds = PlayerDataStorage.forPlayer(2880942160);
+								const pds = PlayerDataStorage.forPlayer(2235259826);
 								const scope = di.beginScope((builder) => {
 									builder.registerSingletonValue(pds);
 								});
 
-								scope.resolve<PopupController>().showPopup(scope.resolveForeignClass(SavePopup));
+								const popup = scope.resolveForeignClass(SavePopup);
+								const wrapper = new Control(popup.instance);
+								wrapper.cacheDI(pds);
+								wrapper.parent(popup);
+
+								scope.resolve<PopupController>().showPopup(wrapper);
 							}),
 						)
 						.with((b) => b.enable()).instance,
