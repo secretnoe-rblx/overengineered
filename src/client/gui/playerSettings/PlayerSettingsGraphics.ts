@@ -23,5 +23,12 @@ export class PlayerSettingsGraphics extends ConfigControlList {
 				.initToObjectPart(value, ["graphics", "othersEffects"])
 				.setDescription("Effects of other players (e.g. fire of the rocket engine)");
 		}
+
+		this.addCategory("Logic");
+		{
+			this.addToggle("Logic Effects") //
+				.initToObjectPart(value, ["graphics", "logicEffects"])
+				.setDescription("Extra effects of logic blocks (e.g. flickering lights and other fancy stuff)");
+		}
 	}
 }
