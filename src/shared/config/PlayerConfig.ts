@@ -17,6 +17,7 @@ declare global {
 		readonly localShadows: boolean;
 		readonly othersShadows: boolean;
 		readonly othersEffects: boolean;
+		readonly logicEffects: boolean;
 	};
 
 	type VisualsSelectionBox = {
@@ -138,6 +139,7 @@ export const PlayerConfigDefinition = {
 			localShadows: true as boolean,
 			othersShadows: true as boolean,
 			othersEffects: true as boolean,
+			logicEffects: true as boolean,
 		},
 	},
 	music: {
