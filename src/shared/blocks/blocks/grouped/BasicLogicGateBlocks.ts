@@ -322,7 +322,7 @@ namespace Not {
 
 namespace Mux {
 	const definitionMuxSmall = {
-		inputOrder: ["value", "falsevalue", "truevalue"],
+		inputOrder: ["value", "falsevalue", "truevalue"] as const,
 		input: {
 			value: {
 				displayName: "State/Index",
@@ -359,7 +359,7 @@ namespace Mux {
 	} satisfies BlockLogicFullBothDefinitions;
 
 	const definitionMuxBig = {
-		inputOrder: ["value", "value1", "value2", "value3", "value4", "value5", "value6", "value7", "value8"],
+		inputOrder: ["value", "value1", "value2", "value3", "value4", "value5", "value6", "value7", "value8"] as const,
 		input: {
 			value: {
 				displayName: "State/Index",
@@ -490,10 +490,10 @@ namespace Mux {
 		result.set(t as never, v as never);
 	};
 
-	@injectable
-	class LogicMuxSmall extends BlockLogic<typeof definitionMuxSmall> {
-		constructor(block: BlockLogicArgs, playerSettings: PlayerDataStorage) {
-			super(definitionMuxSmall, block);
+	type muxDefinitionTypes = typeof definitionMuxBig;
+	class LogicMux extends BlockLogic<muxDefinitionTypes> {
+		constructor(def: typeof definitionMuxBig, block: BlockLogicArgs, playerSettings?: PlayerDataStorage) {
+			super(def, block);
 
 			const allMuxLampInstances = this.instance?.FindFirstChild("Leds") as
 				| (Folder & Record<`${number}`, muxLamp>)
@@ -505,101 +505,48 @@ namespace Mux {
 				const i = tonumber(v.Name)!;
 				muxLamps[i] = (v as muxLamp).lamp;
 			});
+			const inp: [string, `${string}Type`][] = [];
+			for (const k of this.definition.inputOrder) {
+				if (k === "value") continue;
+				inp.push([k, `${k}Type`]);
+			}
 
-			this.onkRecalcInputsAny(
-				["value", "falsevalue", "truevalue"],
-				({ value, valueType, valueChanged, falsevalue, falsevalueType, truevalue, truevalueType }) => {
-					if (value === undefined) return;
-					if (valueType === "bool") value = value ? 1 : 0;
+			this.onkRecalcInputsAny(this.definition.inputOrder, (inputs) => {
+				if (inputs.value === undefined) return;
+				let value = inputs.value;
+				if (inputs.valueType === "bool") value = value ? 1 : 0;
 
-					print("SENDING", `[${valueType}]`, value);
+				//set color
+				if (!muxLamps.isEmpty() && inputs.valueChanged) {
+					events.update.send({
+						sender: Players.LocalPlayer,
+						block: this.instance!,
+						lamps: muxLamps,
+						index: value as number,
+						color: activeColor,
+						locallyEnabled: playerSettings?.config.get().graphics.logicEffects ?? true,
+					});
+				}
 
-					//set color
-					if (!muxLamps.isEmpty() && valueChanged) {
-						events.update.send({
-							sender: Players.LocalPlayer,
-							block: this.instance!,
-							lamps: muxLamps,
-							index: value as number,
-							color: activeColor,
-							locallyEnabled: playerSettings?.config.get().graphics.logicEffects ?? true,
-						});
-					}
-
-					muxValue(this.output.result, math.floor(value as number), [
-						[falsevalue, falsevalueType],
-						[truevalue, truevalueType],
-					]);
-				},
-			);
+				muxValue(
+					this.output.result,
+					math.floor(value as number),
+					inp.map((v) => [inputs[v[0] as never], inputs[v[1] as never]]),
+				);
+			});
 		}
 	}
 
-	class LogicMuxBig extends BlockLogic<typeof definitionMuxBig> {
-		constructor(block: BlockLogicArgs, playerSettings: PlayerDataStorage) {
-			super(definitionMuxBig, block);
-
-			const allMuxLampInstances = this.instance?.FindFirstChild("Leds") as
-				| (Folder & Record<`${number}`, muxLamp>)
-				| undefined;
-			if (!allMuxLampInstances) throw "Vas?";
-
-			const muxLamps: BasePart[] = [];
-			allMuxLampInstances.GetChildren().forEach((v) => {
-				const i = tonumber(v.Name)!;
-				muxLamps[i] = (v as muxLamp).lamp;
-			});
-
-			this.onkRecalcInputsAny(
-				["value", "value1", "value2", "value3", "value4", "value5", "value6", "value7", "value8"],
-				({
-					value,
-					valueType,
-					valueChanged,
-					value1,
-					value1Type,
-					value2,
-					value2Type,
-					value3,
-					value3Type,
-					value4,
-					value4Type,
-					value5,
-					value5Type,
-					value6,
-					value6Type,
-					value7,
-					value7Type,
-					value8,
-					value8Type,
-				}) => {
-					if (value === undefined) return;
-					if (valueType === "bool") value = value ? 1 : 0;
-
-					//set color
-					if (!muxLamps.isEmpty() && valueChanged) {
-						events.update.send({
-							sender: Players.LocalPlayer,
-							block: this.instance!,
-							lamps: muxLamps,
-							index: value as number,
-							color: activeColor,
-							locallyEnabled: playerSettings?.config.get().graphics.logicEffects ?? true,
-						});
-					}
-
-					muxValue(this.output.result, math.floor(value as number), [
-						[value1, value1Type],
-						[value2, value2Type],
-						[value3, value3Type],
-						[value4, value4Type],
-						[value5, value5Type],
-						[value6, value6Type],
-						[value7, value7Type],
-						[value8, value8Type],
-					]);
-				},
-			);
+	@injectable
+	class BigMux extends LogicMux {
+		constructor(block: BlockLogicArgs, @tryInject playerDataStorage?: PlayerDataStorage) {
+			super(definitionMuxBig, block, playerDataStorage);
+		}
+	}
+	@injectable
+	class SmallMux extends LogicMux {
+		constructor(block: BlockLogicArgs, @tryInject playerDataStorage?: PlayerDataStorage) {
+			super(definitionMuxSmall as never, block, playerDataStorage);
 		}
 	}
 
@@ -613,7 +560,7 @@ namespace Mux {
 				aliases: ["mux"],
 			},
 
-			logic: { definition: definitionMuxSmall, ctor: LogicMuxSmall, events },
+			logic: { definition: definitionMuxSmall, ctor: SmallMux, events },
 		},
 		{
 			...BlockCreation.defaults,
@@ -624,7 +571,7 @@ namespace Mux {
 				aliases: ["mux"],
 			},
 
-			logic: { definition: definitionMuxBig, ctor: LogicMuxBig, events },
+			logic: { definition: definitionMuxBig, ctor: BigMux, events },
 		},
 	] as const satisfies BlockBuilder[];
 }
