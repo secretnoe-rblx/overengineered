@@ -69,7 +69,7 @@ const v4: UpdatablePlayerConfigVersion<PlayerConfigV4, PlayerConfigV3> = {
 };
 
 // Added graphics config
-type PlayerConfigV5 = PlayerConfigV4 & { graphics: GraphicsConfiguration };
+type PlayerConfigV5 = PlayerConfigV4 & { graphics: Omit<GraphicsConfiguration, "logicEffects"> };
 const v5: UpdatablePlayerConfigVersion<PlayerConfigV5, PlayerConfigV4> = {
 	version: 5,
 
@@ -193,7 +193,24 @@ const v12: UpdatablePlayerConfigVersion<PlayerConfigV10, PlayerConfigV11> = {
 	},
 };
 
-const versions = [v1, v2, v3, v4, v5, v6, v7, v8, v9, v10, v11, v12] as const;
+// Add stomehihng
+type PlayerConfigV12 = PlayerConfigV10 & { graphics: GraphicsConfiguration };
+const v13: UpdatablePlayerConfigVersion<PlayerConfigV11, PlayerConfigV12> = {
+	version: 13,
+
+	update(prev: Partial<PlayerConfigV11>): Partial<PlayerConfigV12> {
+		return {
+			...prev,
+			graphics: {
+				...PlayerConfigDefinition.graphics.config,
+				...prev.graphics!,
+			},
+			version: this.version,
+		};
+	},
+};
+
+const versions = [v1, v2, v3, v4, v5, v6, v7, v8, v9, v10, v11, v12, v13] as const;
 const current = versions[versions.size() - 1] as typeof versions extends readonly [...unknown[], infer T] ? T : never;
 
 export namespace PlayerConfigUpdater {

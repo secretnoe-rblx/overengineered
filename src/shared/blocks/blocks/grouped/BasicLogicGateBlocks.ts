@@ -1,14 +1,17 @@
+import { Players } from "@rbxts/services";
 import { t } from "engine/shared/t";
 import { BlockLogic, CalculatableBlockLogic } from "shared/blockLogic/BlockLogic";
 import { BlockLogicValueResults } from "shared/blockLogic/BlockLogicValueStorage";
 import { BlockSynchronizer } from "shared/blockLogic/BlockSynchronizer";
 import { BlockConfigDefinitions } from "shared/blocks/BlockConfigDefinitions";
 import { BlockCreation } from "shared/blocks/BlockCreation";
+import type { PlayerDataStorage } from "client/PlayerDataStorage";
 import type {
 	AllInputKeysToObject,
 	AllOutputKeysToObject,
 	BlockLogicArgs,
 	BlockLogicFullBothDefinitions,
+	BlockLogicOutputDefs,
 	BlockLogicTickContext,
 } from "shared/blockLogic/BlockLogic";
 import type { LogicValueStorageContainer } from "shared/blockLogic/BlockLogicValueStorage";
@@ -657,6 +660,15 @@ namespace Demux {
 		},
 	} satisfies BlockLogicFullBothDefinitions;
 
+	const demuxBigOutputs: Writable<BlockLogicOutputDefs> = {};
+	for (let i = 1; i <= 8; i++) {
+		demuxBigOutputs[`value${i}`] = {
+			displayName: `Output ${i}`,
+			types: asMap(BlockConfigDefinitions.any).keys(),
+			group: "1",
+		};
+	}
+
 	const definitionDemuxBig = {
 		inputOrder: ["value", "input"],
 		outputOrder: ["value1", "value2", "value3", "value4", "value5", "value6", "value7", "value8"],
@@ -681,48 +693,7 @@ namespace Demux {
 				types: BlockConfigDefinitions.any,
 			},
 		},
-		output: {
-			value1: {
-				displayName: "Output 1",
-				types: asMap(BlockConfigDefinitions.any).keys(),
-				group: "1",
-			},
-			value2: {
-				displayName: "Output 2",
-				types: asMap(BlockConfigDefinitions.any).keys(),
-				group: "1",
-			},
-			value3: {
-				displayName: "Output 3",
-				types: asMap(BlockConfigDefinitions.any).keys(),
-				group: "1",
-			},
-			value4: {
-				displayName: "Output 4",
-				types: asMap(BlockConfigDefinitions.any).keys(),
-				group: "1",
-			},
-			value5: {
-				displayName: "Output 5",
-				types: asMap(BlockConfigDefinitions.any).keys(),
-				group: "1",
-			},
-			value6: {
-				displayName: "Output 6",
-				types: asMap(BlockConfigDefinitions.any).keys(),
-				group: "1",
-			},
-			value7: {
-				displayName: "Output 7",
-				types: asMap(BlockConfigDefinitions.any).keys(),
-				group: "1",
-			},
-			value8: {
-				displayName: "Output 8",
-				types: asMap(BlockConfigDefinitions.any).keys(),
-				group: "1",
-			},
-		},
+		output: demuxBigOutputs,
 	} satisfies BlockLogicFullBothDefinitions;
 
 	const activeColor = Color3.fromRGB(0, 255, 0);
@@ -730,7 +701,8 @@ namespace Demux {
 	const neonMaterial = Enum.Material.Neon;
 	const baseMaterial = Enum.Material.Glass;
 
-	const update = ({ lamps, index, color }: UpdateData) => {
+	const update = ({ lamps, index, color, sender, locallyEnabled }: UpdateData) => {
+		if (sender === Players.LocalPlayer && !locallyEnabled) return;
 		if (!lamps) return;
 
 		for (let i = 0; i < lamps.size(); i++) {
@@ -747,10 +719,12 @@ namespace Demux {
 	};
 
 	const updateEventType = t.interface({
+		sender: t.instance("Player"),
 		block: t.instance("Model").nominal("blockModel").as<BlockModel>(),
 		lamps: t.array(t.instance("BasePart")),
 		index: t.number,
 		color: t.color,
+		locallyEnabled: t.boolean,
 	});
 	type UpdateData = t.Infer<typeof updateEventType>;
 
@@ -762,10 +736,9 @@ namespace Demux {
 		lamp: BasePart;
 	};
 
-	class LogicDemuxSmall extends BlockLogic<typeof definitionDemuxSmall> {
-		constructor(block: BlockLogicArgs) {
-			super(definitionDemuxSmall, block);
-
+	abstract class LogicDemux extends BlockLogic<typeof definitionDemuxBig> {
+		constructor(def: typeof definitionDemuxBig, block: BlockLogicArgs, playerSettings?: PlayerDataStorage) {
+			super(def, block);
 			const allMuxLampInstances = this.instance?.FindFirstChild("Leds") as
 				| (Folder & Record<`${number}`, muxLamp>)
 				| undefined;
@@ -777,7 +750,7 @@ namespace Demux {
 				muxLamps[i] = (v as muxLamp).lamp;
 			});
 
-			const outputs = [this.output.falsevalue, this.output.truevalue];
+			const outputs = this.definition.outputOrder.map((v) => this.output[v as keyof typeof this.output]);
 
 			const demuxValue = (
 				index: number,
@@ -805,10 +778,12 @@ namespace Demux {
 
 				if (!muxLamps.isEmpty() && valueChanged) {
 					events.update.send({
+						sender: Players.LocalPlayer,
 						block: this.instance!,
 						lamps: muxLamps,
 						index: value as number,
 						color: activeColor,
+						locallyEnabled: playerSettings?.config.get().graphics.logicEffects ?? true,
 					});
 				}
 
@@ -817,67 +792,16 @@ namespace Demux {
 		}
 	}
 
-	class LogicDemuxBig extends BlockLogic<typeof definitionDemuxBig> {
-		constructor(block: BlockLogicArgs) {
-			super(definitionDemuxBig, block);
-
-			const allMuxLampInstances = this.instance?.FindFirstChild("Leds") as
-				| (Folder & Record<`${number}`, muxLamp>)
-				| undefined;
-			if (!allMuxLampInstances) throw "Vas?";
-
-			const muxLamps: BasePart[] = [];
-			allMuxLampInstances.GetChildren().forEach((v) => {
-				const i = tonumber(v.Name)!;
-				muxLamps[i] = (v as muxLamp).lamp;
-			});
-
-			const outputs = [
-				this.output.value1,
-				this.output.value2,
-				this.output.value3,
-				this.output.value4,
-				this.output.value5,
-				this.output.value6,
-				this.output.value7,
-				this.output.value8,
-			];
-
-			const demuxValue = (
-				index: number,
-				value: unknown,
-				outputType: "string" | "number" | "bool" | "vector3" | "color" | "byte",
-			) => {
-				const len = outputs.size();
-				if (len === 0) return;
-				index = math.clamp(index, 0, len - 1);
-
-				//set value
-				for (let i = 0; i !== len; i++) {
-					const out = outputs[i];
-					if (i !== index || value === undefined) {
-						out.unset();
-						continue;
-					}
-					out.set(outputType, value as typeof outputType);
-				}
-			};
-
-			this.onkRecalcInputsAny(["value", "input"], ({ value, valueType, valueChanged, input, inputType }) => {
-				if (value === undefined) return;
-				if (valueType === "bool") value = value ? 1 : 0;
-
-				if (!muxLamps.isEmpty() && valueChanged) {
-					events.update.send({
-						block: this.instance!,
-						lamps: muxLamps,
-						index: value as number,
-						color: activeColor,
-					});
-				}
-
-				demuxValue(math.floor(value as number), input, inputType!);
-			});
+	@injectable
+	class BigDemux extends LogicDemux {
+		constructor(block: BlockLogicArgs, @tryInject playerDataStorage?: PlayerDataStorage) {
+			super(definitionDemuxBig, block, playerDataStorage);
+		}
+	}
+	@injectable
+	class SmallDemux extends LogicDemux {
+		constructor(block: BlockLogicArgs, @tryInject playerDataStorage?: PlayerDataStorage) {
+			super(definitionDemuxSmall, block, playerDataStorage);
 		}
 	}
 
@@ -891,7 +815,7 @@ namespace Demux {
 				aliases: ["mux", "demux"],
 			},
 
-			logic: { definition: definitionDemuxSmall, ctor: LogicDemuxSmall, events },
+			logic: { definition: definitionDemuxSmall, ctor: SmallDemux, events },
 		},
 		{
 			...BlockCreation.defaults,
@@ -902,7 +826,7 @@ namespace Demux {
 				aliases: ["mux", "demux"],
 			},
 
-			logic: { definition: definitionDemuxBig, ctor: LogicDemuxBig, events },
+			logic: { definition: definitionDemuxBig, ctor: BigDemux, events },
 		},
 	] as const satisfies BlockBuilder[];
 }
