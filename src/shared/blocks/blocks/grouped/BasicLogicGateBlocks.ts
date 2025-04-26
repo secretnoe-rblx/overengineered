@@ -431,7 +431,8 @@ namespace Mux {
 	const neonMaterial = Enum.Material.Neon;
 	const baseMaterial = Enum.Material.Glass;
 
-	const update = ({ lamps, index, color }: UpdateData) => {
+	const update = ({ lamps, index, color, sender, locallyEnabled }: UpdateData) => {
+		if (sender === Players.LocalPlayer && !locallyEnabled) return;
 		if (!lamps) return;
 
 		for (let i = 0; i < lamps.size(); i++) {
@@ -448,10 +449,12 @@ namespace Mux {
 	};
 
 	const updateEventType = t.interface({
+		sender: t.instance("Player"),
 		block: t.instance("Model").nominal("blockModel").as<BlockModel>(),
 		lamps: t.array(t.instance("BasePart")),
 		index: t.number,
 		color: t.color,
+		locallyEnabled: t.boolean,
 	});
 	type UpdateData = t.Infer<typeof updateEventType>;
 
@@ -487,8 +490,9 @@ namespace Mux {
 		result.set(t as never, v as never);
 	};
 
+	@injectable
 	class LogicMuxSmall extends BlockLogic<typeof definitionMuxSmall> {
-		constructor(block: BlockLogicArgs) {
+		constructor(block: BlockLogicArgs, playerSettings: PlayerDataStorage) {
 			super(definitionMuxSmall, block);
 
 			const allMuxLampInstances = this.instance?.FindFirstChild("Leds") as
@@ -513,10 +517,12 @@ namespace Mux {
 					//set color
 					if (!muxLamps.isEmpty() && valueChanged) {
 						events.update.send({
+							sender: Players.LocalPlayer,
 							block: this.instance!,
 							lamps: muxLamps,
 							index: value as number,
 							color: activeColor,
+							locallyEnabled: playerSettings?.config.get().graphics.logicEffects ?? true,
 						});
 					}
 
@@ -530,7 +536,7 @@ namespace Mux {
 	}
 
 	class LogicMuxBig extends BlockLogic<typeof definitionMuxBig> {
-		constructor(block: BlockLogicArgs) {
+		constructor(block: BlockLogicArgs, playerSettings: PlayerDataStorage) {
 			super(definitionMuxBig, block);
 
 			const allMuxLampInstances = this.instance?.FindFirstChild("Leds") as
@@ -573,10 +579,12 @@ namespace Mux {
 					//set color
 					if (!muxLamps.isEmpty() && valueChanged) {
 						events.update.send({
+							sender: Players.LocalPlayer,
 							block: this.instance!,
 							lamps: muxLamps,
 							index: value as number,
 							color: activeColor,
+							locallyEnabled: playerSettings?.config.get().graphics.logicEffects ?? true,
 						});
 					}
 
