@@ -186,7 +186,7 @@ const v12: UpdatablePlayerConfigVersion<PlayerConfigV10, PlayerConfigV11> = {
 			...prev,
 			terrain: {
 				...PlayerConfigDefinition.terrain.config,
-				...prev.terrain!,
+				...(prev.terrain ?? {}),
 			},
 			version: this.version,
 		};
@@ -203,7 +203,7 @@ const v13: UpdatablePlayerConfigVersion<PlayerConfigV11, PlayerConfigV12> = {
 			...prev,
 			graphics: {
 				...PlayerConfigDefinition.graphics.config,
-				...prev.graphics!,
+				...(prev.graphics ?? {}),
 			},
 			version: this.version,
 		};
