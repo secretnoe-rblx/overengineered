@@ -41,7 +41,7 @@ const definition = {
 			displayName: "Free Length",
 			types: {
 				number: {
-					config: 4.5,
+					config: 2.5,
 					clamp: {
 						showAsSlider: true,
 						min: 1,
@@ -55,7 +55,7 @@ const definition = {
 			displayName: "Force",
 			types: {
 				number: {
-					config: 1000,
+					config: 80000,
 					clamp: {
 						showAsSlider: true,
 						min: 1,
@@ -83,25 +83,35 @@ class Logic extends InstanceBlockLogic<typeof definition, SuspensionModel> {
 		const blockScale = BlockManager.manager.scale.get(block.instance) ?? Vector3.one;
 		const scale = blockScale.X * blockScale.Y * blockScale.Z;
 
-		const spring = this.instance.FindFirstChild("SpringSide")?.FindFirstChild("Spring") as
+		const spring = this.instance.FindFirstChild("SpringSide")?.FindFirstChild("SpringConstraint") as
 			| SpringConstraint
 			| undefined;
+
 		if (spring) {
 			spring.Radius *= blockScale.findMin();
 			spring.Thickness *= blockScale.findMin();
 		}
 
-		this.on(({ max_force, damping, stiffness, free_length }) => {
-			const spring = this.instance.FindFirstChild("SpringSide")?.FindFirstChild("Spring") as
-				| SpringConstraint
-				| undefined;
+		const setSpringParameters = ({
+			max_force,
+			damping,
+			stiffness,
+			free_length,
+		}: {
+			max_force: number;
+			damping: number;
+			stiffness: number;
+			free_length: number;
+		}) => {
 			if (!spring) return;
-
 			spring.MaxForce = max_force * scale;
 			spring.Damping = damping * scale;
 			spring.Stiffness = stiffness * scale;
 			spring.FreeLength = free_length * blockScale.Y;
-		});
+		};
+
+		this.onkFirstInputs(["damping", "free_length", "max_force", "stiffness"], setSpringParameters);
+		this.on(setSpringParameters);
 	}
 }
 
@@ -110,6 +120,10 @@ export const SuspensionBlock = {
 	id: "suspensionblock",
 	displayName: "Suspension",
 	description: "Sus pension spring",
+
+	search: {
+		aliases: ["sus", "spring", "coil"],
+	},
 
 	logic: { definition, ctor: Logic },
 } as const satisfies BlockBuilder;
