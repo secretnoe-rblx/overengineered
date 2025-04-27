@@ -180,7 +180,7 @@ export const PlayerConfigDefinition = {
 			foliage: true as boolean,
 			loadDistance: 24 as number,
 			water: false as boolean,
-			snowOnly: true as boolean,
+			snowOnly: false as boolean,
 			triangleAddSandBelowSeaLevel: false as boolean,
 			override: {
 				enabled: false as boolean,
