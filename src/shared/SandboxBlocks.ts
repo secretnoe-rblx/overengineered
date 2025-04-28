@@ -172,7 +172,7 @@ export const CreateSandboxBlocks = (di: DIContainer): BlockList => {
 		LaserBlock,
 	];
 
-	const icicle = 89653976414701;
+	const icicle = 88843175246235;
 	if (RunService.IsStudio() || game.PlaceId === icicle) {
 		for (const block of weapons) {
 			blocksArr.push(block);

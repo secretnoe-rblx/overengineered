@@ -44,14 +44,14 @@ const list: BlockBuildersWithoutIdAndDefaults = {
 	hingeblock: {
 		displayName: "Hinge",
 		description: "A simple hinge. Allows things to rotate in one plane",
-		limit: 50,
+		limit: 250,
 
 		logic,
 	},
 	smallhingeblock: {
 		displayName: "Small hinge",
 		description: "Smaller hinge. La rotación compacta",
-		limit: 50,
+		limit: 250,
 
 		logic,
 	},
