@@ -33,7 +33,7 @@ export class ExternalDatabaseBackendSlots implements DatabaseBackend<BlocksSeria
 		return val;
 	}
 	SetAsync(value: BlocksSerializer.JsonSerializedBlocks, [ownerId, slotId]: SlotKeys): void {
-		const maxSize = 1 * 1024 * 1024;
+		const maxSize = (1 * 1024 * 1024) / 2; // half a megabyte
 		const chunkSize = 512 * 1024;
 
 		const serializedVal = JSON.serialize(value);
