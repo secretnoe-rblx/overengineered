@@ -1,4 +1,3 @@
-import { RobloxUnit } from "engine/shared/RobloxUnit";
 import { InstanceBlockLogic } from "shared/blockLogic/BlockLogic";
 import { BlockCreation } from "shared/blocks/BlockCreation";
 import { BlockManager } from "shared/building/BlockManager";
@@ -91,7 +90,7 @@ class Logic extends InstanceBlockLogic<typeof definition, RocketModel> {
 	private readonly sound;
 
 	// Math
-	private readonly basePower = RobloxUnit.Newton_To_Rowton(1_100_000);
+	private readonly basePower = 180_000;
 	private readonly maxPower;
 
 	// Const
@@ -156,9 +155,7 @@ class Logic extends InstanceBlockLogic<typeof definition, RocketModel> {
 		const strengthPercent = strength / 100;
 
 		// Force
-		this.vectorForce.Force = new Vector3(
-			RobloxUnit.Newton_To_Rowton(this.maxPower * thrustPercent * strengthPercent),
-		);
+		this.vectorForce.Force = new Vector3(this.maxPower * thrustPercent * strengthPercent);
 
 		// Particles
 		const visualize = thrustPercent !== 0;

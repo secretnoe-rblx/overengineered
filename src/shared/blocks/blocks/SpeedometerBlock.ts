@@ -1,4 +1,3 @@
-import { RobloxUnit } from "engine/shared/RobloxUnit";
 import { InstanceBlockLogic } from "shared/blockLogic/BlockLogic";
 import { BlockCreation } from "shared/blocks/BlockCreation";
 import type { BlockLogicFullBothDefinitions, InstanceBlockLogicArgs } from "shared/blockLogic/BlockLogic";
@@ -30,24 +29,14 @@ class Logic extends InstanceBlockLogic<typeof definition> {
 				return;
 			}
 
-			const linearVelocity = this.instance.PrimaryPart.AssemblyLinearVelocity;
 			this.output.linear.set(
 				"vector3",
 				this.instance
 					.GetPivot()
-					.Rotation.ToObjectSpace(
-						new CFrame(
-							new Vector3(
-								RobloxUnit.Studs_To_Meters(linearVelocity.X),
-								RobloxUnit.Studs_To_Meters(linearVelocity.Y),
-								RobloxUnit.Studs_To_Meters(linearVelocity.Z),
-							),
-						),
-					).Position,
+					.Rotation.ToObjectSpace(new CFrame(this.instance.PrimaryPart.AssemblyLinearVelocity)).Position,
 			);
 
-			const angularVelocity = this.instance.PrimaryPart.AssemblyAngularVelocity;
-			this.output.angular.set("vector3", new Vector3(angularVelocity.X, angularVelocity.Y, angularVelocity.Z));
+			this.output.angular.set("vector3", this.instance.PrimaryPart.AssemblyAngularVelocity);
 		});
 	}
 }

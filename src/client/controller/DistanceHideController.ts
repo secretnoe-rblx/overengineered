@@ -1,6 +1,5 @@
 import { Players, Workspace } from "@rbxts/services";
 import { Component } from "engine/shared/component/Component";
-import { RobloxUnit } from "engine/shared/RobloxUnit";
 import { GameDefinitions } from "shared/data/GameDefinitions";
 
 export class DistanceHideController extends Component {
@@ -18,7 +17,7 @@ export class DistanceHideController extends Component {
 			}
 		}
 
-		const maxDistance = RobloxUnit.Meters_To_Studs(1024);
+		const maxDistance = 1024;
 		let visible = true;
 
 		this.event.loop(1, () => {

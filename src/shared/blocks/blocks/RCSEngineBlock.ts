@@ -1,5 +1,4 @@
 import { Workspace } from "@rbxts/services";
-import { RobloxUnit } from "engine/shared/RobloxUnit";
 import { InstanceBlockLogic } from "shared/blockLogic/BlockLogic";
 import { BlockCreation } from "shared/blocks/BlockCreation";
 import { BlockManager } from "shared/building/BlockManager";
@@ -125,7 +124,7 @@ class Logic extends InstanceBlockLogic<typeof definition, RCSEngineModel> {
 	];
 
 	// Math
-	private readonly basePower = RobloxUnit.Newton_To_Rowton(35_000 * 2);
+	private readonly basePower = 15_000;
 	private readonly maxPower;
 
 	// Const
@@ -163,7 +162,7 @@ class Logic extends InstanceBlockLogic<typeof definition, RCSEngineModel> {
 		const setEngineThrust = (engine: singleEngineConfiguration, thrustPercentage: number) => {
 			if (!engine.particleEmitter.Fire) return;
 			// Force
-			engine.vectorForce.Force = new Vector3(RobloxUnit.Newton_To_Rowton(this.maxPower * thrustPercentage));
+			engine.vectorForce.Force = new Vector3(this.maxPower * thrustPercentage);
 
 			// Particles
 			const visualize = thrustPercentage !== 0;

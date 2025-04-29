@@ -1,8 +1,6 @@
 import { RunService } from "@rbxts/services";
-import { RobloxUnit } from "engine/shared/RobloxUnit";
 import { InstanceBlockLogic as InstanceBlockLogic } from "shared/blockLogic/BlockLogic";
 import { BlockCreation } from "shared/blocks/BlockCreation";
-import { VectorUtils } from "shared/utils/VectorUtils";
 import type { BlockLogicFullBothDefinitions, InstanceBlockLogicArgs } from "shared/blockLogic/BlockLogic";
 import type { BlockBuilder } from "shared/blocks/Block";
 
@@ -17,7 +15,7 @@ const definition = {
 					clamp: {
 						showAsSlider: true,
 						min: 1,
-						max: 550,
+						max: 2048,
 					},
 				},
 			},
@@ -102,10 +100,9 @@ class Logic extends InstanceBlockLogic<typeof definition> {
 		this.onk(["visibility"], ({ visibility }) => (view.Transparency = visibility ? 0.8 : 1));
 		this.onk(["relativePositioning"], ({ relativePositioning }) => (this.isRelativePosition = relativePositioning));
 		this.onk(["detectionSize", "maxDistance"], ({ detectionSize, maxDistance }) => {
-			const sizeStuds = RobloxUnit.Meters_To_Studs(maxDistance);
 			const pivo = metalPlate.GetPivot();
-			view.Position = pivo.PointToWorldSpace(Vector3.xAxis.mul(sizeStuds / 2 + 0.5));
-			view.Size = new Vector3(view.Size.X, sizeStuds, view.Size.Z);
+			view.Position = pivo.PointToWorldSpace(Vector3.xAxis.mul(maxDistance / 2 + 0.5));
+			view.Size = new Vector3(view.Size.X, maxDistance, view.Size.Z);
 
 			updateDistance(detectionSize, maxDistance);
 		});
@@ -173,13 +170,8 @@ class Logic extends InstanceBlockLogic<typeof definition> {
 	private getDistanceTo = (part: BasePart) => {
 		if (this.instance === undefined) return Vector3.zero;
 		if (part === undefined) return Vector3.zero;
-		if (this.isRelativePosition)
-			return VectorUtils.apply(this.instance.GetPivot().ToObjectSpace(part.GetPivot()).Position, (v) =>
-				RobloxUnit.Studs_To_Meters(v),
-			);
-		return VectorUtils.apply(part.GetPivot().Position.sub(this.instance.GetPivot().Position), (v) =>
-			RobloxUnit.Studs_To_Meters(v),
-		);
+		if (this.isRelativePosition) return this.instance.GetPivot().ToObjectSpace(part.GetPivot()).Position;
+		return part.GetPivot().Position.sub(this.instance.GetPivot().Position);
 	};
 
 	private findClosestPart(minDist: number) {

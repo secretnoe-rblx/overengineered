@@ -1,4 +1,3 @@
-import { RobloxUnit } from "engine/shared/RobloxUnit";
 import { InstanceBlockLogic } from "shared/blockLogic/BlockLogic";
 import { BlockCreation } from "shared/blocks/BlockCreation";
 import { GameDefinitions } from "shared/data/GameDefinitions";
@@ -21,7 +20,7 @@ class Logic extends InstanceBlockLogic<typeof definition> {
 		super(definition, block);
 
 		this.onRecalcInputs(() => {
-			const result = RobloxUnit.Studs_To_Meters(this.instance.GetPivot().Y - GameDefinitions.HEIGHT_OFFSET);
+			const result = this.instance.GetPivot().Y - GameDefinitions.HEIGHT_OFFSET;
 			this.output.result.set("number", result);
 		});
 	}

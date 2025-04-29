@@ -22,7 +22,6 @@ import { ComponentKeyedChildren } from "engine/shared/component/ComponentKeyedCh
 import { EventHandler } from "engine/shared/event/EventHandler";
 import { ObservableValue } from "engine/shared/event/ObservableValue";
 import { Signal } from "engine/shared/event/Signal";
-import { RobloxUnit } from "engine/shared/RobloxUnit";
 import { BeaconBlock } from "shared/blocks/blocks/BeaconBlock";
 import { RocketBlocks } from "shared/blocks/blocks/RocketEngineBlocks";
 import { VehicleSeatBlock } from "shared/blocks/blocks/VehicleSeatBlock";
@@ -397,16 +396,13 @@ export class RideModeScene extends Control<RideModeSceneDefinition> {
 		};
 
 		{
-			const maxSpdShow = RobloxUnit.getSpeedFromMagnitude(800, "MetersPerSecond");
+			const maxSpdShow = 800 / 3.57;
 
 			init("Speed", "%.1f m/s", this.infoTemplate(), 0, maxSpdShow, 0.1, (control) => {
 				const rootPart = LocalPlayer.rootPart.get();
 				if (!rootPart) return;
 
-				const spd = RobloxUnit.getSpeedFromMagnitude(
-					rootPart.GetVelocityAtPosition(rootPart.Position).Magnitude,
-					"MetersPerSecond",
-				);
+				const spd = rootPart.GetVelocityAtPosition(rootPart.Position).Magnitude / 3.57;
 
 				control.slider.value.set(spd);
 				control.text.value.set(spd);
@@ -437,12 +433,12 @@ export class RideModeScene extends Control<RideModeSceneDefinition> {
 		}
 
 		{
-			const maxAltitude = RobloxUnit.Studs_To_Meters(1500);
+			const maxAltitude = 420;
 			init("Altitude", "%.2f m", this.infoTextTemplate(), 0, maxAltitude, 0.1, (control) => {
 				const rootPart = LocalPlayer.rootPart.get();
 				if (!rootPart) return;
 
-				const alt = RobloxUnit.Studs_To_Meters(LocalPlayerController.getPlayerRelativeHeight());
+				const alt = LocalPlayerController.getPlayerRelativeHeight();
 				control.slider.value.set(alt);
 				control.text.value.set(alt);
 			});
@@ -450,7 +446,7 @@ export class RideModeScene extends Control<RideModeSceneDefinition> {
 
 		{
 			init("Gravity", "%.1f m/s²", this.infoTextTemplate(), 0, 55, 0.1, (control) => {
-				const alt = RobloxUnit.Studs_To_Meters(Workspace.Gravity);
+				const alt = Workspace.Gravity * 0.28;
 
 				control.text.value.set(alt);
 			});
@@ -461,9 +457,7 @@ export class RideModeScene extends Control<RideModeSceneDefinition> {
 				const rootPart = LocalPlayer.rootPart.get();
 				if (!rootPart) return;
 
-				control.text.value.set(
-					`${math.floor(RobloxUnit.Studs_To_Meters(rootPart.Position.X))} ${math.floor(RobloxUnit.Studs_To_Meters(rootPart.Position.Z))}`,
-				);
+				control.text.value.set(`${math.floor(rootPart.Position.X)} ${math.floor(rootPart.Position.Z)}`);
 			});
 		}
 

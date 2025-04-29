@@ -1,4 +1,3 @@
-import { RobloxUnit } from "engine/shared/RobloxUnit";
 import { InstanceBlockLogic } from "shared/blockLogic/BlockLogic";
 import { BlockCreation } from "shared/blocks/BlockCreation";
 import { Physics } from "shared/Physics";
@@ -23,9 +22,7 @@ class Logic extends InstanceBlockLogic<typeof definition> {
 		this.onRecalcInputs(() => {
 			this.output.result.set(
 				"number",
-				RobloxUnit.Studs_To_Meters(
-					Physics.GetGravityOnHeight(Physics.LocalHeight.fromGlobal(this.instance.GetPivot().Y)),
-				),
+				Physics.GetGravityOnHeight(Physics.LocalHeight.fromGlobal(this.instance.GetPivot().Y)),
 			);
 		});
 	}

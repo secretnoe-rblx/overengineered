@@ -1,4 +1,3 @@
-import { RobloxUnit } from "engine/shared/RobloxUnit";
 import { InstanceBlockLogic } from "shared/blockLogic/BlockLogic";
 import { BlockCreation } from "shared/blocks/BlockCreation";
 import type { BlockLogicFullBothDefinitions, InstanceBlockLogicArgs } from "shared/blockLogic/BlockLogic";
@@ -15,7 +14,7 @@ const definition = {
 					clamp: {
 						showAsSlider: true,
 						min: 1,
-						max: 100,
+						max: 300,
 						step: 1,
 					},
 				},
@@ -45,7 +44,7 @@ class Logic extends InstanceBlockLogic<typeof definition> {
 
 			const dist = args.part?.GetPivot().Position.sub(this.instance.GetPivot().Position).Magnitude;
 			if (!dist) return;
-			if (RobloxUnit.Studs_To_Meters(dist) > detectionRadius) return;
+			if (dist > detectionRadius) return;
 			if (this.fireDuration > (args.duration ?? 0)) return;
 
 			this.fireDuration = args.duration ?? 0;

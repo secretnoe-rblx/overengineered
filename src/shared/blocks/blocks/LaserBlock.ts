@@ -1,5 +1,4 @@
 import { Workspace } from "@rbxts/services";
-import { RobloxUnit } from "engine/shared/RobloxUnit";
 import { InstanceBlockLogic as InstanceBlockLogic } from "shared/blockLogic/BlockLogic";
 import { BlockCreation } from "shared/blocks/BlockCreation";
 import type { BlockLogicFullBothDefinitions, InstanceBlockLogicArgs } from "shared/blockLogic/BlockLogic";
@@ -113,7 +112,7 @@ class Logic extends InstanceBlockLogic<typeof definition> {
 
 		this.onAlwaysInputs(({ maxDistance, alwaysEnabled, rayTransparency }) => {
 			const raycastOrigin = this.instance.GetPivot().Position;
-			const raycastDirection = this.instance.GetPivot().UpVector.mul(RobloxUnit.Meters_To_Studs(maxDistance));
+			const raycastDirection = this.instance.GetPivot().UpVector.mul(maxDistance);
 
 			const raycastResult = Workspace.Raycast(raycastOrigin, raycastDirection, raycastParams);
 			const distance = raycastResult?.Distance ?? maxDistance;
@@ -130,10 +129,7 @@ class Logic extends InstanceBlockLogic<typeof definition> {
 					: Vector3.zero,
 			);
 
-			this.output.distance.set(
-				"number",
-				raycastResult?.Distance !== undefined ? RobloxUnit.Studs_To_Meters(raycastResult?.Distance) : -1,
-			);
+			this.output.distance.set("number", raycastResult?.Distance ?? -1);
 
 			if (raycastResult?.Distance !== undefined || alwaysEnabled) {
 				ray.Transparency = rayTransparency;

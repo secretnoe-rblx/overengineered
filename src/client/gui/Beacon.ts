@@ -1,7 +1,6 @@
 import { Players, ReplicatedStorage, RunService, Workspace } from "@rbxts/services";
 import { Interface } from "client/gui/Interface";
 import { InstanceComponent } from "engine/shared/component/InstanceComponent";
-import { RobloxUnit } from "engine/shared/RobloxUnit";
 import { PartUtils } from "shared/utils/PartUtils";
 import { VectorUtils } from "shared/utils/VectorUtils";
 
@@ -36,9 +35,7 @@ export class Beacon extends InstanceComponent<PVInstance> {
 			const character = Players.LocalPlayer.Character;
 			if (!character) return;
 
-			const distance = RobloxUnit.Studs_To_Meters(
-				part.GetPivot().Position.sub(character.GetPivot().Position).Magnitude,
-			);
+			const distance = part.GetPivot().Position.sub(character.GetPivot().Position).Magnitude / 0.28;
 
 			const transparencyMultiplier = 0.8;
 			const transparency = 1 - math.clamp(distance - this.showUpDistance, 0, 1) * transparencyMultiplier;

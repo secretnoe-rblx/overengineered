@@ -1,4 +1,3 @@
-import { RobloxUnit } from "engine/shared/RobloxUnit";
 import { InstanceBlockLogic } from "shared/blockLogic/BlockLogic";
 import { BlockCreation } from "shared/blocks/BlockCreation";
 import { DisconnectBlock } from "shared/blocks/blocks/DisconnectBlock";
@@ -45,9 +44,7 @@ class Logic extends InstanceBlockLogic<typeof definition> {
 
 			this.output.result.set(
 				"number",
-				RobloxUnit.RMU_To_Kilograms(
-					assemblyOnly ? this.instance.PrimaryPart.AssemblyMass : this.getBuildingMass(),
-				),
+				assemblyOnly ? this.instance.PrimaryPart.AssemblyMass : this.getBuildingMass(),
 			);
 		};
 

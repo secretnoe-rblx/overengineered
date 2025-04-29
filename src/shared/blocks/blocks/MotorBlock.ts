@@ -1,4 +1,3 @@
-import { RobloxUnit } from "engine/shared/RobloxUnit";
 import { InstanceBlockLogic } from "shared/blockLogic/BlockLogic";
 import { BlockCreation } from "shared/blocks/BlockCreation";
 import { BlockManager } from "shared/building/BlockManager";
@@ -81,9 +80,7 @@ export class Logic extends InstanceBlockLogic<typeof definition, MotorBlock> {
 			}
 
 			this.instance.Base.HingeConstraint.AngularVelocity = ctx.rotationSpeed;
-			this.instance.Base.HingeConstraint.MotorMaxTorque = RobloxUnit.RowtonStuds_To_NewtonMeters(
-				ctx.max_torque * 1_000_000 * scale,
-			);
+			this.instance.Base.HingeConstraint.MotorMaxTorque = ctx.max_torque * 1_000_000 * scale;
 		});
 
 		this.onTicc(() => {

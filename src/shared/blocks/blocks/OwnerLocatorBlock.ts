@@ -1,5 +1,4 @@
 import { Players } from "@rbxts/services";
-import { RobloxUnit } from "engine/shared/RobloxUnit";
 import { InstanceBlockLogic } from "shared/blockLogic/BlockLogic";
 import { BlockCreation } from "shared/blocks/BlockCreation";
 import type { BlockLogicFullBothDefinitions, InstanceBlockLogicArgs } from "shared/blockLogic/BlockLogic";
@@ -45,14 +44,7 @@ class Logic extends InstanceBlockLogic<typeof definition> {
 
 			this.output.angular.set("vector3", new Vector3(math.deg(xa), math.deg(ya), math.deg(za)));
 
-			this.output.linear.set(
-				"vector3",
-				new Vector3(
-					RobloxUnit.Studs_To_Meters(localPosition.X),
-					RobloxUnit.Studs_To_Meters(localPosition.Y),
-					RobloxUnit.Studs_To_Meters(localPosition.Z),
-				),
-			);
+			this.output.linear.set("vector3", localPosition);
 		});
 	}
 }
