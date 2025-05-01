@@ -124,7 +124,7 @@ class Logic extends InstanceBlockLogic<typeof definition, RCSEngineModel> {
 	];
 
 	// Math
-	private readonly basePower = 15_000;
+	private readonly basePower = 500;
 	private readonly maxPower;
 
 	// Const

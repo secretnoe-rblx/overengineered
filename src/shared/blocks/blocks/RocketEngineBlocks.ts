@@ -90,7 +90,7 @@ class Logic extends InstanceBlockLogic<typeof definition, RocketModel> {
 	private readonly sound;
 
 	// Math
-	private readonly basePower = 180_000;
+	private readonly basePower = 30_000;
 	private readonly maxPower;
 
 	// Const
