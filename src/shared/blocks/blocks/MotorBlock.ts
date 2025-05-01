@@ -44,6 +44,7 @@ const definition = {
 		max_torque: {
 			displayName: "Max Torque",
 			tooltip: "The maximum torque that Motor can apply when trying to reach its desired Angular Speed",
+			unit: "RMU stud²/s²",
 			types: {
 				number: {
 					config: 200,

@@ -8,7 +8,7 @@ const definition = {
 	input: {},
 	output: {
 		result: {
-			displayName: "Acceleration (m/s²)",
+			displayName: "Acceleration (stud/s²)",
 			types: ["number"],
 		},
 	},
@@ -32,7 +32,7 @@ export const GravitySensorBlock = {
 	...BlockCreation.defaults,
 	id: "gravitysensor",
 	displayName: "Gravity Sensor",
-	description: "Returns the current gravity acceleration in m/s²",
+	description: "Returns the current gravity acceleration in stud/s²",
 
 	logic: { definition, ctor: Logic },
 } as const satisfies BlockBuilder;

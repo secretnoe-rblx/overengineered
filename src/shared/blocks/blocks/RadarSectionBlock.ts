@@ -9,6 +9,7 @@ const definition = {
 	input: {
 		maxDistance: {
 			displayName: "Max Distance",
+			unit: "Studs",
 			types: {
 				number: {
 					config: 100,

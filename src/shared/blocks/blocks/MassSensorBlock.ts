@@ -20,7 +20,7 @@ const definition = {
 	},
 	output: {
 		result: {
-			displayName: "Mass (kg)",
+			displayName: "Mass (RMU)",
 			types: ["number"],
 		},
 	},
@@ -71,7 +71,7 @@ export const MassSensorBlock = {
 	...BlockCreation.defaults,
 	id: "masssensor",
 	displayName: "Mass Sensor",
-	description: "Returns the current contraption/assembly mass",
+	description: "Returns the current contraption/assembly mass in RMU",
 
 	logic: { definition, ctor: Logic },
 } as const satisfies BlockBuilder;

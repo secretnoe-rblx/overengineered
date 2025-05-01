@@ -62,7 +62,7 @@ const definition = {
 	output: {
 		maxpower: {
 			displayName: "Force",
-			unit: "Newton",
+			unit: "Rowtons",
 			types: ["number"],
 		},
 	},

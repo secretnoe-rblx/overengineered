@@ -10,7 +10,7 @@ const definition = {
 	output: {
 		linear: {
 			displayName: "Offset",
-			unit: "Meters, relative",
+			unit: "Studs, relative",
 			types: ["vector3"],
 		},
 		angular: {
