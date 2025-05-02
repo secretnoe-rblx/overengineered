@@ -1,3 +1,4 @@
+import { AlertPopup } from "client/gui/popup/AlertPopup";
 import { HostedService } from "engine/shared/di/HostedService";
 import type { PopupController } from "client/gui/PopupController";
 import type { PlayerDataStorage } from "client/PlayerDataStorage";
@@ -8,11 +9,18 @@ export class UpdatePopupController extends HostedService {
 		super();
 
 		this.onEnable(() => {
-			const lastVersion = playerDataStorage.data.get().data.lastLaunchedVersion ?? 0;
-			playerDataStorage.sendPlayerDataValue("lastLaunchedVersion", game.PlaceVersion);
+			const data = playerDataStorage.data.get();
+			playerDataStorage.sendPlayerDataValue("seen1", true);
 
-			if (lastVersion === 0) {
-				return;
+			if (!data.data.seen1) {
+				popupController.showPopup(
+					new AlertPopup(`
+Hi! We're switching to Roblox measurement units. 
+That means, your builds which rely on physics calculations might've got broken.
+We're sorry for the inconvenience.
+Join our community server for more information.
+`),
+				);
 			}
 		});
 	}

@@ -1,4 +1,4 @@
-import { Players, RunService, Workspace } from "@rbxts/services";
+import { Players, Workspace } from "@rbxts/services";
 import { ClientEffectCreator } from "client/ClientEffectCreator";
 import { BeaconController } from "client/controller/BeaconController";
 import { BlurController } from "client/controller/BlurController";
@@ -130,10 +130,7 @@ export namespace SandboxGame {
 			.autoInit()
 			.onInit((c) => c.enable());
 
-		if (!RunService.IsStudio()) {
-			builder.services.registerService(UpdatePopupController);
-		}
-
+		builder.services.registerService(UpdatePopupController);
 		ChatController.initializeAdminPrefix();
 		builder.services.registerService(PopupController);
 	}
