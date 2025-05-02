@@ -153,9 +153,7 @@ class Logic extends InstanceBlockLogic<typeof definition> {
 			},
 		};
 
-		this.on(({ enabled, brightness, lightRange, color, enabledChanged, colorMixing, brightnessAffectsColor }) => {
-			// Send the request only if enabled or enabling
-			if (!enabled && !enabledChanged) return;
+		this.on(({ enabled, brightness, lightRange, color, colorMixing, brightnessAffectsColor }) => {
 			const finalColor = colorFunctions[colorMixing](color, blockColor);
 
 			const data: UpdateData = {
