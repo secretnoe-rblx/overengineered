@@ -1,14 +1,10 @@
-import { RunService } from "@rbxts/services";
 import { Component } from "engine/shared/component/Component";
 import { ComponentChildren } from "engine/shared/component/ComponentChildren";
 import { ObservableValue } from "engine/shared/event/ObservableValue";
 import { ImpactController } from "shared/block/impact/ImpactController";
 import { BlockConfig } from "shared/blockLogic/BlockConfig";
 import { BlockLogicRunner } from "shared/blockLogic/BlockLogicRunner";
-import { VehicleSeatBlock } from "shared/blocks/blocks/VehicleSeatBlock";
-import { GameDefinitions } from "shared/data/GameDefinitions";
 import type { GenericBlockLogic } from "shared/blockLogic/BlockLogic";
-import type { VehicleSeatBlockLogic } from "shared/blocks/blocks/VehicleSeatBlock";
 
 type BlockData = {
 	readonly block: PlacedBlockData;
@@ -55,7 +51,6 @@ export class SharedMachine extends Component {
 		this.enable();
 	}
 	protected initialize(blocks: readonly PlacedBlockData[], startLogicImmediately: boolean) {
-		this.initializeSpeedLimiter();
 		this.initializeBlockConnections(startLogicImmediately);
 
 		const impact = this.createImpactControllerIfNeeded(blocks);
@@ -69,55 +64,6 @@ export class SharedMachine extends Component {
 
 	getImpactController(): ImpactController | undefined {
 		return this.impactController;
-	}
-
-	initializeSpeedLimiter() {
-		const seat = this.blocks.getAll().find((c) => c instanceof VehicleSeatBlock.logic.ctor) as
-			| VehicleSeatBlockLogic
-			| undefined;
-		if (!seat) return;
-
-		this.event.subscribe(RunService.Heartbeat, () => {
-			// Angular speed limit
-			const currentAngularVelocity = seat.vehicleSeat.AssemblyAngularVelocity;
-			seat.vehicleSeat.AssemblyAngularVelocity = new Vector3(
-				math.clamp(
-					currentAngularVelocity.X,
-					-GameDefinitions.MAX_ANGULAR_SPEED,
-					GameDefinitions.MAX_ANGULAR_SPEED,
-				),
-				math.clamp(
-					currentAngularVelocity.Y,
-					-GameDefinitions.MAX_ANGULAR_SPEED,
-					GameDefinitions.MAX_ANGULAR_SPEED,
-				),
-				math.clamp(
-					currentAngularVelocity.Z,
-					-GameDefinitions.MAX_ANGULAR_SPEED,
-					GameDefinitions.MAX_ANGULAR_SPEED,
-				),
-			);
-
-			// Linear speed limit
-			const currentLinearVelocity = seat.vehicleSeat.AssemblyLinearVelocity;
-			seat.vehicleSeat.AssemblyLinearVelocity = new Vector3(
-				math.clamp(
-					currentLinearVelocity.X,
-					-GameDefinitions.MAX_LINEAR_SPEED,
-					GameDefinitions.MAX_LINEAR_SPEED,
-				),
-				math.clamp(
-					currentLinearVelocity.Y,
-					-GameDefinitions.MAX_LINEAR_SPEED,
-					GameDefinitions.MAX_LINEAR_SPEED,
-				),
-				math.clamp(
-					currentLinearVelocity.Z,
-					-GameDefinitions.MAX_LINEAR_SPEED,
-					GameDefinitions.MAX_LINEAR_SPEED,
-				),
-			);
-		});
 	}
 
 	protected initializeBlockConnections(startImmediately: boolean) {
