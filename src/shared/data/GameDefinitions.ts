@@ -6,7 +6,7 @@ export namespace GameDefinitions {
 	export const FREE_SLOTS = 70;
 	export const ADMIN_SLOTS = 100 - FREE_SLOTS;
 
-	export const MAX_LINEAR_SPEED = 1000 / 0.28;
+	export const MAX_LINEAR_SPEED = 1000;
 	export const MAX_ANGULAR_SPEED = 40;
 	export const HEIGHT_OFFSET = -16384;
 

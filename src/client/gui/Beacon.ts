@@ -35,7 +35,7 @@ export class Beacon extends InstanceComponent<PVInstance> {
 			const character = Players.LocalPlayer.Character;
 			if (!character) return;
 
-			const distance = part.GetPivot().Position.sub(character.GetPivot().Position).Magnitude / 0.28;
+			const distance = part.GetPivot().Position.sub(character.GetPivot().Position).Magnitude;
 
 			const transparencyMultiplier = 0.8;
 			const transparency = 1 - math.clamp(distance - this.showUpDistance, 0, 1) * transparencyMultiplier;
@@ -47,7 +47,7 @@ export class Beacon extends InstanceComponent<PVInstance> {
 			if (transparency >= 1) return;
 
 			this.billboard.Distance.Text =
-				distance > 1000 ? `${math.floor(distance / 100) / 10} km` : `${math.floor(distance)} m`;
+				distance > 1000 ? `${math.floor(distance / 100) / 10} kst` : `${math.floor(distance)} st`;
 			const [screenPos, isVisible] = Workspace.CurrentCamera!.WorldToViewportPoint(part.GetPivot().Position);
 			const screenSize = Workspace.CurrentCamera!.ViewportSize;
 			const adjustableOffset =

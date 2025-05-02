@@ -396,13 +396,13 @@ export class RideModeScene extends Control<RideModeSceneDefinition> {
 		};
 
 		{
-			const maxSpdShow = 800 / 3.57;
+			const maxSpdShow = 800;
 
-			init("Speed", "%.1f m/s", this.infoTemplate(), 0, maxSpdShow, 0.1, (control) => {
+			init("Speed", "%.1f st/s", this.infoTemplate(), 0, maxSpdShow, 0.1, (control) => {
 				const rootPart = LocalPlayer.rootPart.get();
 				if (!rootPart) return;
 
-				const spd = rootPart.GetVelocityAtPosition(rootPart.Position).Magnitude / 3.57;
+				const spd = rootPart.GetVelocityAtPosition(rootPart.Position).Magnitude;
 
 				control.slider.value.set(spd);
 				control.text.value.set(spd);
@@ -434,7 +434,7 @@ export class RideModeScene extends Control<RideModeSceneDefinition> {
 
 		{
 			const maxAltitude = 420;
-			init("Altitude", "%.2f m", this.infoTextTemplate(), 0, maxAltitude, 0.1, (control) => {
+			init("Altitude", "%.2f st", this.infoTextTemplate(), 0, maxAltitude, 0.1, (control) => {
 				const rootPart = LocalPlayer.rootPart.get();
 				if (!rootPart) return;
 
@@ -445,8 +445,8 @@ export class RideModeScene extends Control<RideModeSceneDefinition> {
 		}
 
 		{
-			init("Gravity", "%.1f m/s²", this.infoTextTemplate(), 0, 55, 0.1, (control) => {
-				const alt = Workspace.Gravity * 0.28;
+			init("Gravity", "%.1f st/s²", this.infoTextTemplate(), 0, 55, 0.1, (control) => {
+				const alt = Workspace.Gravity;
 
 				control.text.value.set(alt);
 			});
