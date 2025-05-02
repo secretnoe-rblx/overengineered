@@ -13,10 +13,21 @@ const definition = {
 	input: {
 		enabled: {
 			displayName: "Enabled",
+			tooltip: "Turns this lamp on/off",
 			types: BlockConfigDefinitions.bool,
+		},
+		brightnessAffectsColor: {
+			displayName: "Color affects brightness",
+			tooltip: "Enable to make brightness affect the color of the block",
+			types: {
+				bool: {
+					config: true,
+				},
+			},
 		},
 		brightness: {
 			displayName: "Brightness",
+			tooltip: "How bright the light is",
 			types: {
 				number: {
 					clamp: {
@@ -30,6 +41,7 @@ const definition = {
 		},
 		color: {
 			displayName: "Color",
+			tooltip: "The color of the light and the block",
 			types: {
 				color: {
 					config: Colors.white,
@@ -38,6 +50,7 @@ const definition = {
 		},
 		lightRange: {
 			displayName: "Range",
+			tooltip: "Strength of the light source",
 			types: {
 				number: {
 					clamp: {
@@ -73,7 +86,7 @@ const definition = {
 const whiteColor = Color3.fromRGB(255, 255, 255);
 const blackColor = Color3.fromRGB(0, 0, 0);
 
-const update = ({ block, state, color, brightness, range }: UpdateData) => {
+const update = ({ block, state, color, brightness, range, brightnessAffectsColor }: UpdateData) => {
 	const part = block.PrimaryPart;
 	if (!part) return;
 
@@ -81,9 +94,11 @@ const update = ({ block, state, color, brightness, range }: UpdateData) => {
 	if (!light) return;
 
 	if (state) {
-		const commonColor = color ?? whiteColor;
+		let commonColor = color ?? whiteColor;
+		if (brightnessAffectsColor) commonColor = blackColor.Lerp(commonColor, math.clamp(brightness + 0.2, 0, 1));
+
 		light.Range = range;
-		part.Color = blackColor.Lerp(commonColor, math.clamp(brightness + 0.2, 0, 1));
+		part.Color = commonColor;
 		light.Color = commonColor;
 		part.Material = Enum.Material.Neon;
 		light.Brightness = brightness * 10;
@@ -101,6 +116,7 @@ const updateEventType = t.interface({
 	color: t.color.orUndefined(),
 	brightness: t.numberWithBounds(0, 100),
 	range: t.numberWithBounds(0, 100),
+	brightnessAffectsColor: t.boolean,
 });
 type UpdateData = t.Infer<typeof updateEventType>;
 
@@ -137,7 +153,7 @@ class Logic extends InstanceBlockLogic<typeof definition> {
 			},
 		};
 
-		this.on(({ enabled, brightness, lightRange, color, enabledChanged, colorMixing }) => {
+		this.on(({ enabled, brightness, lightRange, color, enabledChanged, colorMixing, brightnessAffectsColor }) => {
 			// Send the request only if enabled or enabling
 			if (!enabled && !enabledChanged) return;
 			const finalColor = colorFunctions[colorMixing](color, blockColor);
@@ -148,6 +164,7 @@ class Logic extends InstanceBlockLogic<typeof definition> {
 				color: finalColor,
 				brightness: brightness * 0.2, // a.k.a. / 100 * 40 and 30% off
 				range: lightRange * 0.6, // a.k.a. / 100 * 60
+				brightnessAffectsColor,
 			};
 
 			events.update.send(data);
