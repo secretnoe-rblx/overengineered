@@ -139,7 +139,10 @@ class Logic extends InstanceBlockLogic<typeof servoDefinition, ServoMotorModel> 
 		this.onk(["stiffness"], ({ stiffness }) => (this.hingeConstraint.AngularResponsiveness = stiffness));
 		this.onk(["speed"], ({ speed }) => (this.hingeConstraint.AngularSpeed = speed));
 		this.onk(["angle"], ({ angle }) => (this.hingeConstraint.TargetAngle = angle));
-		this.onk(["max_torque"], ({ max_torque }) => max_torque * 1_000_000 * scale);
+		this.onk(
+			["max_torque"],
+			({ max_torque }) => (this.hingeConstraint.ServoMaxTorque = max_torque * 1_000_000 * scale),
+		);
 
 		this.onTicc(() => {
 			const base = this.instance.FindFirstChild("Base") as BasePart | undefined;
