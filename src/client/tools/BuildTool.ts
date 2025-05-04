@@ -76,16 +76,9 @@ const getMouseTargetBlockPositionV2 = (
 	info?: [target: BasePart, hit: CFrame, surface: Enum.NormalId],
 ): Vector3 | undefined => {
 	const constrainPositionToGrid = (normal: Vector3, pos: Vector3) => {
-		const from = (coord: number, size: number) => {
-			const offset = (size % 2) / 2;
-
-			coord -= offset;
-			const pos = MathUtils.round(coord, step);
-			return pos + offset;
-		};
+		const from = (coord: number, size: number) => MathUtils.round(coord, step);
 
 		const size = aabb.getRotatedSize().mul(scale);
-
 		return new Vector3(
 			normal.X === 0 ? from(pos.X, size.X) : pos.X,
 			normal.Y === 0 ? from(pos.Y, size.Y) : pos.Y,
