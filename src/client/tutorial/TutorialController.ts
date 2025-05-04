@@ -2,7 +2,6 @@ import { Workspace, Players, RunService } from "@rbxts/services";
 import { LoadingController } from "client/controller/LoadingController";
 import { Interface } from "client/gui/Interface";
 import { ConfirmPopup } from "client/gui/popup/ConfirmPopup";
-import { ClientBuilding } from "client/modes/build/ClientBuilding";
 import { ButtonControl } from "engine/client/gui/Button";
 import { Control } from "engine/client/gui/Control";
 import { Component } from "engine/shared/component/Component";
@@ -19,7 +18,10 @@ import { Colors } from "shared/Colors";
 import { CustomRemotes } from "shared/Remotes";
 import { PartUtils } from "shared/utils/PartUtils";
 import { VectorUtils } from "shared/utils/VectorUtils";
+import type { PopupController } from "client/gui/PopupController";
 import type { BuildingMode } from "client/modes/build/BuildingMode";
+import type { ClientBuilding } from "client/modes/build/ClientBuilding";
+import type { ClientBuildingTypes } from "client/modes/build/ClientBuilding";
 import type { BuildTool } from "client/tools/BuildTool";
 import type { PlacedBlockConfig } from "shared/blockLogic/BlockConfig";
 import type { LatestSerializedBlock, LatestSerializedBlocks } from "shared/building/BlocksSerializer";
@@ -116,35 +118,42 @@ export class TutorialControl extends Control<TutorialControlDefinition> {
 
 		this.add(new ButtonControl(this.gui.Header.Cancel, () => this._onCancel.Fire()));
 		this.add(new ButtonControl(this.gui.Header.Next, () => this._nextPressed.Fire()));
-		this.add(
-			new ButtonControl(this.gui.Header.Skip, () => {
-				if (RunService.IsStudio()) {
-					this._skipPressed.Fire();
-					return;
-				}
 
-				ConfirmPopup.showPopup(
-					"Are you sure you want to skip this step?",
-					"This way you will learn this lesson worse!",
-					() => {
+		this.$onInjectAuto((popupController: PopupController) => {
+			this.add(
+				new ButtonControl(this.gui.Header.Skip, () => {
+					if (RunService.IsStudio()) {
 						this._skipPressed.Fire();
-					},
-					() => {},
-				);
-			}),
-		);
-		this.add(
-			new ButtonControl(this.gui.Header.SkipAll, () => {
-				ConfirmPopup.showPopup(
-					"Are you sure you want to skip the tutorial?",
-					"This way you will learn this lesson worse!",
-					() => {
-						this._skipAllPressed.Fire();
-					},
-					() => {},
-				);
-			}),
-		);
+						return;
+					}
+
+					popupController.showPopup(
+						new ConfirmPopup(
+							"Are you sure you want to skip this step?",
+							"This way you will learn this lesson worse!",
+							() => {
+								this._skipPressed.Fire();
+							},
+							() => {},
+						),
+					);
+				}),
+			);
+			this.add(
+				new ButtonControl(this.gui.Header.SkipAll, () => {
+					popupController.showPopup(
+						new ConfirmPopup(
+							"Are you sure you want to skip the tutorial?",
+							"This way you will learn this lesson worse!",
+							() => {
+								this._skipAllPressed.Fire();
+							},
+							() => {},
+						),
+					);
+				}),
+			);
+		});
 	}
 }
 
@@ -245,48 +254,51 @@ namespace Steps {
 		return { connection: Signal.multiConnection(c1, c2) };
 	}
 
-	export namespace Build {
-		const subscribedBlocks = new Set<LatestSerializedBlocks>();
+	export class Build {
+		private readonly subscribedBlocks = new Set<LatestSerializedBlocks>();
 
-		const middleware = ClientBuilding.placeOperation.addMiddleware((args) => {
-			if (subscribedBlocks.size() === 0) {
-				return { success: true };
-			}
+		constructor(private readonly building: ClientBuilding) {
+			const middleware = this.building.placeOperation.addMiddleware((args) => {
+				if (this.subscribedBlocks.size() === 0) {
+					return { success: true };
+				}
 
-			const empty = {};
-			const bs = args.blocks
-				.map((block): PlaceBlockRequest | {} => {
-					let btp: LatestSerializedBlock | undefined;
-					for (const b of subscribedBlocks) {
-						btp = b.blocks.find(
-							(value) =>
-								value.id === block.id &&
-								VectorUtils.roundVector3(value.location.Position) ===
-									VectorUtils.roundVector3(
-										args.plot.instance.BuildingArea.CFrame.ToObjectSpace(block!.location).Position,
-									),
-						);
+				const empty = {};
+				const bs = args.blocks
+					.map((block): PlaceBlockRequest | {} => {
+						let btp: LatestSerializedBlock | undefined;
+						for (const b of this.subscribedBlocks) {
+							btp = b.blocks.find(
+								(value) =>
+									value.id === block.id &&
+									VectorUtils.roundVector3(value.location.Position) ===
+										VectorUtils.roundVector3(
+											args.plot.instance.BuildingArea.CFrame.ToObjectSpace(block!.location)
+												.Position,
+										),
+							);
 
-						if (btp) break;
-					}
-					if (!btp) return empty;
+							if (btp) break;
+						}
+						if (!btp) return empty;
 
-					return {
-						...block,
-						location: args.plot.instance.BuildingArea.CFrame.ToWorldSpace(btp.location),
-						uuid: btp.uuid,
-					};
-				})
-				.filter((c) => c !== empty) as PlaceBlockRequest[];
+						return {
+							...block,
+							location: args.plot.instance.BuildingArea.CFrame.ToWorldSpace(btp.location),
+							uuid: btp.uuid,
+						};
+					})
+					.filter((c) => c !== empty) as PlaceBlockRequest[];
 
-			if (bs.size() !== args.blocks.size()) {
-				return { success: false, message: "Invalid placement" };
-			}
+				if (bs.size() !== args.blocks.size()) {
+					return { success: false, message: "Invalid placement" };
+				}
 
-			return { success: true, arg: { ...args, blocks: bs } };
-		});
+				return { success: true, arg: { ...args, blocks: bs } };
+			});
+		}
 
-		export function wait(
+		wait(
 			tutorial: TutorialController,
 			blocksToPlace: LatestSerializedBlocks,
 			buildTool: BuildTool,
@@ -294,18 +306,18 @@ namespace Steps {
 			resolve: Resolver,
 		): Reg {
 			const updateTasks = () => {
-				const allBlocksCount = subscribedBlocks.flatmap((x) => x.blocks).size();
-				const builtBlocksCount = subscribedBlocks
+				const allBlocksCount = this.subscribedBlocks.flatmap((x) => x.blocks).size();
+				const builtBlocksCount = this.subscribedBlocks
 					.flatmap((x) => x.blocks)
 					.filter((b) => plot.tryGetBlock(b.uuid) !== undefined)
 					.size();
 				tutorial.setTasks(`Build blocks (${builtBlocksCount}/${allBlocksCount})`);
 			};
 
-			subscribedBlocks.add(blocksToPlace);
-			const c1 = Signal.connection(() => subscribedBlocks.delete(blocksToPlace));
+			this.subscribedBlocks.add(blocksToPlace);
+			const c1 = Signal.connection(() => this.subscribedBlocks.delete(blocksToPlace));
 
-			const c2 = ClientBuilding.placeOperation.executed.Connect(({ plot }) => {
+			const c2 = this.building.placeOperation.executed.Connect(({ plot }) => {
 				buildTool.gui.blockSelector.highlightedBlocks.set([
 					...blocksToPlace.blocks.filter((b) => !plot.tryGetBlock(b.uuid)).mapToSet((b) => b.id),
 				]);
@@ -328,7 +340,7 @@ namespace Steps {
 			return {
 				connection: Signal.multiConnection(c1, c2, c3, c4),
 				autoComplete: () => {
-					ClientBuilding.placeOperation.execute({
+					this.building.placeOperation.execute({
 						plot: plot,
 						blocks: blocksToPlace.blocks
 							.filter((b) => !plot.tryGetBlock(b.uuid))
@@ -338,47 +350,45 @@ namespace Steps {
 			};
 		}
 	}
-	export namespace Delete {
-		const subscribedBlocks = new Set<ReadonlySet<BlockUuid>>();
-		const middleware = ClientBuilding.deleteOperation.addMiddleware((args) => {
-			if (subscribedBlocks.size() === 0) {
-				return { success: true };
-			}
+	export class Delete {
+		private readonly subscribedBlocks = new Set<ReadonlySet<BlockUuid>>();
 
-			const blocks = args.blocks === "all" ? args.plot.getBlocks() : args.blocks;
-			for (const block of blocks) {
-				const blockUuid = BlockManager.manager.uuid.get(block);
+		constructor(private readonly building: ClientBuilding) {
+			const middleware = this.building.deleteOperation.addMiddleware((args) => {
+				if (this.subscribedBlocks.size() === 0) {
+					return { success: true };
+				}
 
-				for (const uuidsToDelete of subscribedBlocks) {
-					const btp = uuidsToDelete.has(blockUuid);
-					if (btp) {
-						return { success: true };
+				const blocks = args.blocks === "all" ? args.plot.getBlocks() : args.blocks;
+				for (const block of blocks) {
+					const blockUuid = BlockManager.manager.uuid.get(block);
+
+					for (const uuidsToDelete of this.subscribedBlocks) {
+						const btp = uuidsToDelete.has(blockUuid);
+						if (btp) {
+							return { success: true };
+						}
 					}
 				}
-			}
 
-			return { success: false, message: "Invalid deletion" };
-		});
+				return { success: false, message: "Invalid deletion" };
+			});
+		}
 
-		export function wait(
-			tutorial: TutorialController,
-			uuidsToDelete: ReadonlySet<BlockUuid>,
-			plot: SharedPlot,
-			resolve: Resolver,
-		) {
-			subscribedBlocks.add(uuidsToDelete);
-			const c1 = Signal.connection(() => subscribedBlocks.delete(uuidsToDelete));
+		wait(tutorial: TutorialController, uuidsToDelete: ReadonlySet<BlockUuid>, plot: SharedPlot, resolve: Resolver) {
+			this.subscribedBlocks.add(uuidsToDelete);
+			const c1 = Signal.connection(() => this.subscribedBlocks.delete(uuidsToDelete));
 
 			const updateTasks = () => {
-				const allBlocksCount = subscribedBlocks.flatmap((b) => [...b]).size();
-				const deletedBlocksCount = subscribedBlocks
+				const allBlocksCount = this.subscribedBlocks.flatmap((b) => [...b]).size();
+				const deletedBlocksCount = this.subscribedBlocks
 					.flatmap((b) => [...b])
 					.filter((b) => !plot.tryGetBlock(b))
 					.size();
 				tutorial.setTasks(`Delete blocks (${deletedBlocksCount}/${allBlocksCount})`);
 			};
 
-			const c2 = ClientBuilding.deleteOperation.executed.Connect(({ plot }) => {
+			const c2 = this.building.deleteOperation.executed.Connect(({ plot }) => {
 				for (const uuidToDelete of uuidsToDelete) {
 					const placed = plot.tryGetBlock(uuidToDelete);
 					if (placed) return;
@@ -393,7 +403,7 @@ namespace Steps {
 			return {
 				connection: Signal.multiConnection(c1, c2, c3),
 				autoComplete: () => {
-					ClientBuilding.deleteOperation.execute({
+					this.building.deleteOperation.execute({
 						plot: plot,
 						blocks: uuidsToDelete
 							.filter((uuid) => plot.tryGetBlock(uuid) !== undefined)
@@ -410,6 +420,7 @@ namespace Steps {
 		readonly value: PartialThrough<PlacedBlockConfig[string]> | undefined;
 	};
 	export function waitForConfigure(
+		building: ClientBuilding,
 		blocksToConfigure: readonly BlockToConfigure[],
 		plot: SharedPlot,
 		blockList: BlockList,
@@ -456,7 +467,7 @@ namespace Steps {
 		// 	blocksToConfigure.mapToMap((b) => $tuple(b.uuid, getRelevantConfig(b.uuid, b.key))),
 		// );
 
-		const c1 = ClientBuilding.updateConfigOperation.addMiddleware((args) => {
+		const c1 = building.updateConfigOperation.addMiddleware((args) => {
 			// for (const { block, cfg: config } of args.configs) {
 			// 	const uuid = BlockManager.manager.uuid.get(block);
 			// 	const savedcfg = savedConfigs[uuid];
@@ -470,7 +481,7 @@ namespace Steps {
 
 			return { success: true, arg: args };
 		});
-		const c2 = ClientBuilding.updateConfigOperation.executed.Connect(({ plot }) => {
+		const c2 = building.updateConfigOperation.executed.Connect(({ plot }) => {
 			for (const { uuid, key, value } of blocksToConfigure) {
 				const block = plot.tryGetBlock(uuid);
 				if (!block) return;
@@ -494,11 +505,11 @@ namespace Steps {
 		return {
 			connection: Signal.multiConnection(c1, c2),
 			autoComplete: () => {
-				ClientBuilding.updateConfigOperation.execute({
+				building.updateConfigOperation.execute({
 					plot: plot,
 					configs: blocksToConfigure
 						.groupBy((b) => b.uuid)
-						.map((uuid, blocks): ClientBuilding.UpdateConfigArgs["configs"][number] => ({
+						.map((uuid, blocks): ClientBuildingTypes.UpdateConfigArgs["configs"][number] => ({
 							block: plot.getBlock(uuid),
 							cfg: (() => {
 								const config = BlockConfig.addDefaults(
@@ -519,15 +530,24 @@ namespace Steps {
 		};
 	}
 
-	export namespace Edit {
-		const { addFunc, connection } = ClientBuilding.editOperation.createMiddlewareCombiner();
+	export type BlockToMove = {
+		readonly uuid: BlockUuid;
+		readonly to: Vector3;
+	};
+	export type BlockToRotate = {
+		readonly uuid: BlockUuid;
+		readonly toRotation: CFrame;
+	};
+	export class Edit {
+		private readonly addFunc;
 
-		export type BlockToMove = {
-			readonly uuid: BlockUuid;
-			readonly to: Vector3;
-		};
-		export function move(blocksToMove: readonly BlockToMove[], plot: SharedPlot, resolve: Resolver): Reg {
-			const c1 = addFunc((arg) => {
+		constructor(private readonly building: ClientBuilding) {
+			const { addFunc, connection } = building.editOperation.createMiddlewareCombiner();
+			this.addFunc = addFunc;
+		}
+
+		move(blocksToMove: readonly BlockToMove[], plot: SharedPlot, resolve: Resolver): Reg {
+			const c1 = this.addFunc((arg) => {
 				for (const { instance, newPosition } of arg.blocks) {
 					if (!newPosition) {
 						return { success: false, message: "Invalid movement" };
@@ -548,7 +568,7 @@ namespace Steps {
 
 				return { success: true };
 			});
-			const c2 = ClientBuilding.editOperation.executed.Connect(({ plot }) => {
+			const c2 = this.building.editOperation.executed.Connect(({ plot }) => {
 				for (const { uuid, to } of blocksToMove) {
 					const block = plot.tryGetBlock(uuid);
 					if (!block) return;
@@ -567,9 +587,9 @@ namespace Steps {
 			return {
 				connection: Signal.multiConnection(c1, c2),
 				autoComplete: () => {
-					ClientBuilding.editOperation.execute({
+					this.building.editOperation.execute({
 						plot: plot,
-						blocks: blocksToMove.map((b): ClientBuilding.EditBlockInfo => {
+						blocks: blocksToMove.map((b): ClientBuildingTypes.EditBlockInfo => {
 							const block = plot.getBlock(b.uuid);
 							const pivot = block.GetPivot();
 
@@ -584,15 +604,11 @@ namespace Steps {
 			};
 		}
 
-		export type BlockToRotate = {
-			readonly uuid: BlockUuid;
-			readonly toRotation: CFrame;
-		};
-		export function rotate(blocksToRotate: readonly BlockToRotate[], plot: SharedPlot, resolve: Resolver): Reg {
-			const c1 = addFunc((arg) => {
+		rotate(blocksToRotate: readonly BlockToRotate[], plot: SharedPlot, resolve: Resolver): Reg {
+			const c1 = this.addFunc((arg) => {
 				return { success: true };
 			});
-			const c2 = ClientBuilding.editOperation.executed.Connect(({ plot }) => {
+			const c2 = this.building.editOperation.executed.Connect(({ plot }) => {
 				for (const { uuid, toRotation } of blocksToRotate) {
 					const block = plot.tryGetBlock(uuid);
 					if (!block) return;
@@ -608,9 +624,9 @@ namespace Steps {
 			return {
 				connection: Signal.multiConnection(c1, c2),
 				autoComplete: () => {
-					ClientBuilding.editOperation.execute({
+					this.building.editOperation.execute({
 						plot: plot,
-						blocks: blocksToRotate.map((b): ClientBuilding.EditBlockInfo => {
+						blocks: blocksToRotate.map((b): ClientBuildingTypes.EditBlockInfo => {
 							const block = plot.getBlock(b.uuid);
 							const pivot = block.GetPivot();
 
@@ -695,6 +711,8 @@ export class TutorialController extends Component {
 
 	canCancel = true;
 
+	private readonly steps;
+
 	constructor(
 		title: string,
 		@inject private readonly sharedPlot: SharedPlot,
@@ -704,6 +722,13 @@ export class TutorialController extends Component {
 		@inject di: DIContainer,
 	) {
 		super();
+
+		const building = buildingMode.building;
+		this.steps = {
+			delete: new Steps.Delete(building),
+			build: new Steps.Build(building),
+			edit: new Steps.Edit(building),
+		};
 
 		this.ui = this.parentGui(new TutorialControl(title));
 
@@ -724,7 +749,7 @@ export class TutorialController extends Component {
 				// empty
 			}
 
-			ClientBuilding.deleteOperation.execute({ plot: sharedPlot, blocks: "all" });
+			building.deleteOperation.execute({ plot: sharedPlot, blocks: "all" });
 		});
 	}
 
@@ -807,7 +832,13 @@ export class TutorialController extends Component {
 	/** Wait for blocks building */
 	partBuild(blocks: LatestSerializedBlocks): TutorialPartRegistration {
 		const hc = this.showBlocks(blocks);
-		const exec = Steps.execute(Steps.Build.wait, this, blocks, this.buildingMode.tools.buildTool, this.sharedPlot);
+		const exec = Steps.execute(
+			this.steps.build.wait.bind(this.steps.build),
+			this,
+			blocks,
+			this.buildingMode.tools.buildTool,
+			this.sharedPlot,
+		);
 
 		return {
 			...exec,
@@ -818,7 +849,7 @@ export class TutorialController extends Component {
 	partDelete(uuids: readonly string[]): TutorialPartRegistration {
 		const hc = this.highlightBlocks(uuids);
 		const exec = Steps.execute(
-			Steps.Delete.wait,
+			this.steps.delete.wait.bind(this.steps.delete),
 			this,
 			new ReadonlySet(uuids as readonly BlockUuid[]),
 			this.sharedPlot,
@@ -830,7 +861,7 @@ export class TutorialController extends Component {
 		};
 	}
 	/** Wait for blocks moving */
-	partMove(blocks: readonly Steps.Edit.BlockToMove[]): TutorialPartRegistration {
+	partMove(blocks: readonly Steps.BlockToMove[]): TutorialPartRegistration {
 		const hc1 = this.showBlocks({
 			version: BlocksSerializer.latestVersion,
 			blocks: blocks.map((b) => {
@@ -845,7 +876,7 @@ export class TutorialController extends Component {
 		});
 		const hc2 = this.highlightBlocks(blocks.map((b) => b.uuid));
 
-		const exec = Steps.execute(Steps.Edit.move, blocks, this.sharedPlot);
+		const exec = Steps.execute(this.steps.edit.move.bind(this.steps.edit), blocks, this.sharedPlot);
 
 		return {
 			...exec,
@@ -853,7 +884,7 @@ export class TutorialController extends Component {
 		};
 	}
 	/** Wait for blocks rotating */
-	partRotate(blocks: readonly Steps.Edit.BlockToRotate[]): TutorialPartRegistration {
+	partRotate(blocks: readonly Steps.BlockToRotate[]): TutorialPartRegistration {
 		const hc1 = this.showBlocks({
 			version: BlocksSerializer.latestVersion,
 			blocks: blocks.map((b) => {
@@ -868,7 +899,7 @@ export class TutorialController extends Component {
 		});
 		const hc2 = this.highlightBlocks(blocks.map((b) => b.uuid));
 
-		const exec = Steps.execute(Steps.Edit.rotate, blocks, this.sharedPlot);
+		const exec = Steps.execute(this.steps.edit.rotate.bind(this.steps.edit), blocks, this.sharedPlot);
 
 		return {
 			...exec,
@@ -878,7 +909,13 @@ export class TutorialController extends Component {
 	/** Wait for blocks configuring */
 	partConfigure(blocks: readonly Steps.BlockToConfigure[]): TutorialPartRegistration {
 		const hc = this.highlightBlocks(blocks.map((b) => b.uuid));
-		const exec = Steps.execute(Steps.waitForConfigure, blocks, this.sharedPlot, this.blockList);
+		const exec = Steps.execute(
+			Steps.waitForConfigure,
+			this.buildingMode.building,
+			blocks,
+			this.sharedPlot,
+			this.blockList,
+		);
 
 		return {
 			...exec,
