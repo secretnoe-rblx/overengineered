@@ -271,10 +271,11 @@ namespace Steps {
 							btp = b.blocks.find(
 								(value) =>
 									value.id === block.id &&
-									VectorUtils.roundVector3(value.location.Position) ===
-										VectorUtils.roundVector3(
+									VectorUtils.roundVector3To(value.location.Position, 0.5) ===
+										VectorUtils.roundVector3To(
 											args.plot.instance.BuildingArea.CFrame.ToObjectSpace(block!.location)
 												.Position,
+											0.5,
 										),
 							);
 

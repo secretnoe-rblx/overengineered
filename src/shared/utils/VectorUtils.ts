@@ -1,3 +1,5 @@
+import { MathUtils } from "engine/shared/fixes/MathUtils";
+
 export namespace VectorUtils {
 	export function apply(vector: Vector3, func: (num: number) => number): Vector3;
 	export function apply(vector: Vector2, func: (num: number) => number): Vector2;
@@ -58,6 +60,13 @@ export namespace VectorUtils {
 		const x = math.round(vector.X);
 		const y = math.round(vector.Y);
 		const z = math.round(vector.Z);
+		return new Vector3(x, y, z);
+	}
+
+	export function roundVector3To(vector: Vector3, step: number): Vector3 {
+		const x = MathUtils.round(vector.X, step);
+		const y = MathUtils.round(vector.Y, step);
+		const z = MathUtils.round(vector.Z, step);
 		return new Vector3(x, y, z);
 	}
 
