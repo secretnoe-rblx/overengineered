@@ -105,7 +105,7 @@ const getMouseTargetBlockPositionV2 = (
 		return pos.sub(offset);
 	};
 	const addBlockSize = (normal: Vector3, pos: Vector3) => {
-		return pos.add(aabb.getRotatedSize().mul(scale).mul(normal).div(2));
+		return pos.add(aabb.getRotatedSize().mul(rotation.mul(scale).apply(math.abs)).mul(normal).div(2));
 	};
 
 	const target = info?.[0] ?? mouse.Target;
