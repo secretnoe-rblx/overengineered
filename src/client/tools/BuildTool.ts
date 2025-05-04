@@ -5,7 +5,6 @@ import { BlockPreviewControl } from "client/gui/buildmode/BlockPreviewControl";
 import { BlockSelectionControl } from "client/gui/buildmode/BlockSelection";
 import { MaterialColorEditControl } from "client/gui/buildmode/MaterialColorEditControl";
 import { MirrorEditorControl } from "client/gui/buildmode/MirrorEditorControl";
-import { DebugLog } from "client/gui/DebugLog";
 import { Interface } from "client/gui/Interface";
 import { ScaleEditorControl } from "client/gui/ScaleEditor";
 import { LogControl } from "client/gui/static/LogControl";
@@ -119,12 +118,6 @@ const getMouseTargetBlockPositionV2 = (
 
 	const globalMouseHitPos = mouseHit.PointToWorldSpace(Vector3.zero);
 	const normal = target.CFrame.Rotation.VectorToWorldSpace(Vector3.FromNormalId(mouseSurface));
-
-	DebugLog.startCategory("BuildTool", true);
-	DebugLog.named("Target", target);
-	DebugLog.named("Hit", mouseHit);
-	DebugLog.named("Normal", `${mouseSurface} ${normal}`);
-	DebugLog.endCategory();
 
 	const aabb = BB.fromBBs(
 		block.model
