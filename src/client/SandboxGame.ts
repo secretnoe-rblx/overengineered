@@ -31,7 +31,13 @@ import { TerrainController } from "client/terrain/TerrainController";
 import { Theme } from "client/Theme";
 import { ThemeAutoSetter } from "client/ThemeAutoSetter";
 import { ToolController } from "client/tools/ToolController";
+import { BasicCarTutorial } from "client/tutorial/tutorials/BasicCarTutorial";
+import { BasicPlaneTutorial } from "client/tutorial/tutorials/BasicPlaneTutorial";
+import { NewBasicPlaneTutorial } from "client/tutorial/tutorials/NewBasicPlaneTutorial";
+import { TestTutorial } from "client/tutorial/tutorials/TestTutorial";
+import { TutorialServiceInitializer } from "client/tutorial/TutorialService";
 import { Keybinds } from "engine/client/Keybinds";
+import { PlayerRank } from "engine/shared/PlayerRank";
 import { ReadonlyPlot } from "shared/building/ReadonlyPlot";
 import { SharedPlots } from "shared/building/SharedPlots";
 import { RemoteEvents } from "shared/RemoteEvents";
@@ -39,6 +45,7 @@ import { CustomRemotes } from "shared/Remotes";
 import { PlayerDataRemotes } from "shared/remotes/PlayerDataRemotes";
 import { CreateSandboxBlocks } from "shared/SandboxBlocks";
 import { WeaponModuleSystem } from "shared/weaponProjectiles/WeaponModuleSystem";
+import type { TutorialDescriber } from "client/tutorial/TutorialController";
 import type { GameHostBuilder } from "engine/shared/GameHostBuilder";
 import type { SharedPlot } from "shared/building/SharedPlot";
 import type { EffectCreator } from "shared/effects/EffectBase";
@@ -133,5 +140,21 @@ export namespace SandboxGame {
 		builder.services.registerService(UpdatePopupController);
 		ChatController.initializeAdminPrefix();
 		builder.services.registerService(PopupController);
+
+		{
+			const tutorials: (new (...args: any[]) => TutorialDescriber)[] = [
+				BasicCarTutorial,
+				NewBasicPlaneTutorial,
+				BasicPlaneTutorial,
+			];
+			if (PlayerRank.isAdmin(Players.LocalPlayer)) {
+				tutorials.push(TestTutorial);
+			}
+
+			TutorialServiceInitializer.initialize(builder, {
+				tutorials,
+				tutorialToRunWhenNoSlots: NewBasicPlaneTutorial,
+			});
+		}
 	}
 }
