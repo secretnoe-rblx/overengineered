@@ -281,11 +281,6 @@ export const BasicCarTutorialDiffs = {
 				value: {
 					controlConfig: {
 						enabled: true,
-						mode: {
-							type: "instant",
-							instant: { mode: "onRelease" },
-							smooth: { speed: 5, mode: "stopOnRelease" },
-						},
 						keys: [
 							{ key: "W", value: 15 },
 							{ key: "S", value: -15 },
@@ -301,11 +296,6 @@ export const BasicCarTutorialDiffs = {
 				value: {
 					controlConfig: {
 						enabled: true,
-						mode: {
-							type: "instant",
-							instant: { mode: "onRelease" },
-							smooth: { speed: 5, mode: "stopOnRelease" },
-						},
 						keys: [
 							{ key: "W", value: 15 },
 							{ key: "S", value: -15 },
@@ -323,14 +313,9 @@ export const BasicCarTutorialDiffs = {
 				value: {
 					controlConfig: {
 						enabled: true,
-						mode: {
-							type: "instant",
-							instant: { mode: "onRelease" },
-							smooth: { speed: 5, mode: "stopOnRelease" },
-						},
 						keys: [
-							{ key: "W", value: -15 },
 							{ key: "S", value: 15 },
+							{ key: "W", value: -15 },
 						],
 						startValue: 0,
 					},
@@ -343,14 +328,9 @@ export const BasicCarTutorialDiffs = {
 				value: {
 					controlConfig: {
 						enabled: true,
-						mode: {
-							type: "instant",
-							instant: { mode: "onRelease" },
-							smooth: { speed: 5, mode: "stopOnRelease" },
-						},
 						keys: [
-							{ key: "W", value: -15 },
 							{ key: "S", value: 15 },
+							{ key: "W", value: -15 },
 						],
 						startValue: 0,
 					},
@@ -365,11 +345,6 @@ export const BasicCarTutorialDiffs = {
 				value: {
 					controlConfig: {
 						enabled: true,
-						mode: {
-							type: "instant",
-							instant: { mode: "onRelease" },
-							smooth: { speed: 5, mode: "stopOnRelease" },
-						},
 						keys: [
 							{ key: "A", value: 45 },
 							{ key: "D", value: -45 },
@@ -385,11 +360,6 @@ export const BasicCarTutorialDiffs = {
 				value: {
 					controlConfig: {
 						enabled: true,
-						mode: {
-							type: "instant",
-							instant: { mode: "onRelease" },
-							smooth: { speed: 5, mode: "stopOnRelease" },
-						},
 						keys: [
 							{ key: "A", value: 45 },
 							{ key: "D", value: -45 },

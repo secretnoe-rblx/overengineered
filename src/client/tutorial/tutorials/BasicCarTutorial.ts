@@ -154,8 +154,8 @@ export class BasicCarTutorial implements TutorialDescriber {
 				t.hintsPart(
 					"Select the config tool",
 					"Select left side motors",
-					"Set the first key to D",
-					"Set the second key to A",
+					"Set the first key to A",
+					"Set the second key to D",
 				),
 			],
 
