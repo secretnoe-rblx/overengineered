@@ -27,6 +27,7 @@ class TutorialsService extends HostedService {
 		}
 
 		const controller = this.di.resolveForeignClass(TutorialController, [tutorial.name]);
+		this.tryProvideDIToChild(controller);
 		if (config) {
 			controller.canCancel = config.allowClosing;
 		}
