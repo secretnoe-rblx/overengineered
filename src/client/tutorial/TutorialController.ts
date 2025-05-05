@@ -7,6 +7,7 @@ import { Control } from "engine/client/gui/Control";
 import { Component } from "engine/shared/component/Component";
 import { ComponentChildren } from "engine/shared/component/ComponentChildren";
 import { ComponentInstance } from "engine/shared/component/ComponentInstance";
+import { Element } from "engine/shared/Element";
 import { ArgsSignal, Signal } from "engine/shared/event/Signal";
 import { Objects } from "engine/shared/fixes/Objects";
 import { Localization } from "engine/shared/Localization";
@@ -56,8 +57,19 @@ export class TutorialPlot extends Component {
 
 		for (const block of this.plot.getBlocks()) {
 			PartUtils.ghostModel(block, Colors.white);
+
+			Element.create("SelectionBox", {
+				Color3: Color3.fromRGB(0, 255, 255),
+				LineThickness: 0.05,
+				Adornee: block,
+				Parent: block,
+			});
 		}
 	}
+	remove(uuid: BlockUuid) {
+		this.plot.getBlock(uuid).Destroy();
+	}
+
 	highlight(uuids: readonly BlockUuid[]): SignalConnection {
 		const highlights: Instance[] = [];
 
@@ -257,7 +269,10 @@ namespace Steps {
 	export class Build {
 		private readonly subscribedBlocks = new Set<LatestSerializedBlocks>();
 
-		constructor(private readonly building: ClientBuilding) {
+		constructor(
+			private readonly building: ClientBuilding,
+			plot: TutorialPlot,
+		) {
 			const middleware = this.building.placeOperation.addMiddleware((args) => {
 				if (this.subscribedBlocks.size() === 0) {
 					return { success: true };
@@ -293,6 +308,11 @@ namespace Steps {
 
 				if (bs.size() !== args.blocks.size()) {
 					return { success: false, message: "Invalid placement" };
+				}
+
+				for (const { uuid } of bs) {
+					if (!uuid) continue;
+					plot.remove(uuid);
 				}
 
 				return { success: true, arg: { ...args, blocks: bs } };
@@ -725,11 +745,6 @@ export class TutorialController extends Component {
 		super();
 
 		const building = buildingMode.building;
-		this.steps = {
-			delete: new Steps.Delete(building),
-			build: new Steps.Build(building),
-			edit: new Steps.Edit(building),
-		};
 
 		this.ui = this.parentGui(new TutorialControl(title));
 
@@ -737,6 +752,12 @@ export class TutorialController extends Component {
 		this.uiTasks.instance.Visible = true;
 
 		this.ghostPlot = di.resolveForeignClass(TutorialPlot, [plot]);
+
+		this.steps = {
+			delete: new Steps.Delete(building),
+			build: new Steps.Build(building, this.ghostPlot),
+			edit: new Steps.Edit(building),
+		};
 
 		this.event.subscribeObservable(LoadingController.isLoading, (isloading) => {
 			this.ui.setVisibleAndEnabled(!isloading);
