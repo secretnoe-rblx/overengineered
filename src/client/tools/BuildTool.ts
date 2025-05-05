@@ -5,6 +5,7 @@ import { BlockPreviewControl } from "client/gui/buildmode/BlockPreviewControl";
 import { BlockSelectionControl } from "client/gui/buildmode/BlockSelection";
 import { MaterialColorEditControl } from "client/gui/buildmode/MaterialColorEditControl";
 import { MirrorEditorControl } from "client/gui/buildmode/MirrorEditorControl";
+import { DebugLog } from "client/gui/DebugLog";
 import { Interface } from "client/gui/Interface";
 import { ScaleEditorControl } from "client/gui/ScaleEditor";
 import { LogControl } from "client/gui/static/LogControl";
@@ -43,13 +44,15 @@ const allowedColor = Colors.blue;
 const forbiddenColor = Colors.red;
 const mouse = Players.LocalPlayer.GetMouse();
 
-const fromModel = (block: Model): AABB => {
-	return AABB.combine(
+const fromModelBB = (block: Model, additionalRotation?: CFrame): BB => {
+	return BB.fromBBs(
 		block
-			.GetDescendants()
-			.filter((c) => c.Parent?.Name !== "moduleMarkers" && c.IsA("BasePart"))
-			.map((b) => AABB.fromPart(b as BasePart)),
-	);
+			.GetChildren()
+			.mapFiltered((c) =>
+				c.IsA("Folder") ? undefined : c.IsA("Model") || c.IsA("BasePart") ? BB.from(c) : undefined,
+			),
+		block.GetPivot(),
+	).withCenter((c) => c.mul(additionalRotation ?? CFrame.identity));
 };
 
 type ModelOnlyBlock = Pick<Block, "model">;
@@ -89,11 +92,13 @@ const getMouseTargetBlockPositionV2 = (
 		const block = BlockManager.tryGetBlockModelByPart(target);
 		if (block) {
 			position = block.GetPivot().Position;
-			size = fromModel(block).getSize();
+			size = fromModelBB(block).getRotatedSize();
 		} else {
 			position = target.Position;
 			size = AABB.fromPart(target).getSize();
 		}
+
+		DebugLog.multiNamed({ Y: size.Y });
 
 		return pos.sub(pos.sub(position).mul(VectorUtils.apply(normal, math.abs))).add(size.div(2).mul(normal));
 	};
@@ -117,19 +122,17 @@ const getMouseTargetBlockPositionV2 = (
 	const globalMouseHitPos = mouseHit.PointToWorldSpace(Vector3.zero);
 	const normal = target.CFrame.Rotation.VectorToWorldSpace(Vector3.FromNormalId(mouseSurface));
 
-	const aabb = BB.fromBBs(
-		block.model
-			.GetChildren()
-			.mapFiltered((c) =>
-				c.IsA("Folder") ? undefined : c.IsA("Model") || c.IsA("BasePart") ? BB.from(c) : undefined,
-			),
-		block.model.GetPivot(),
-	).withCenter((c) => c.mul(rotation));
-
+	const aabb = fromModelBB(block.model, rotation);
 	let targetPosition = globalMouseHitPos;
-	targetPosition = addTargetSize(target, normal, targetPosition);
-	targetPosition = offsetBlockPivotToCenter(block, targetPosition);
-	targetPosition = addBlockSize(normal, targetPosition);
+	const a = targetPosition;
+	const b = (targetPosition = addTargetSize(target, normal, targetPosition));
+	const c = (targetPosition = offsetBlockPivotToCenter(block, targetPosition));
+	const d = (targetPosition = addBlockSize(normal, targetPosition));
+
+	DebugLog.named("a", a.Y);
+	DebugLog.named("b", b.Y);
+	DebugLog.named("c", c.Y);
+	DebugLog.named("d", d.Y);
 
 	if (gridEnabled) {
 		// костыль of fixing the plots position
@@ -789,12 +792,9 @@ namespace MultiPlaceController {
 				return this.oldPositions;
 			}
 
-			const aabb = fromModel(part);
+			const aabb = fromModelBB(part, this.blockRotation.Rotation);
 			const baseBlockSize = BB.from(part).originalSize;
-			const blockSize = aabb
-				.withCenter(this.blockRotation.Rotation.add(aabb.getCenter()))
-				.getSize()
-				.mul(this.blockScale);
+			const blockSize = aabb.getRotatedSize().mul(this.blockScale);
 			const diff = to.sub(from);
 
 			const trg = diff.Abs().Min(baseBlockSize.mul(this.blockScale).mul(this.blocksFillLimit).apply(math.floor));
