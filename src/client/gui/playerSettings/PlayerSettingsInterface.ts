@@ -11,7 +11,7 @@ export class PlayerSettingsInterface extends ConfigControlList {
 
 		this.addCategory("Interface");
 		{
-			this.addSlider("UI Scale", { min: 0.5, max: 1.5, inputStep: 0.01 }) //
+			this.addSlider("UI Scale", { min: 0.5, max: 2, inputStep: 0.01 }) //
 				.initToObjectPart(value, ["uiScale"]);
 		}
 
