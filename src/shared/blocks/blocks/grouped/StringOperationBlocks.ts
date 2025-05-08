@@ -335,8 +335,12 @@ namespace StringSearch {
 			},
 		},
 		output: {
-			result: {
-				displayName: "Result",
+			startIndex: {
+				displayName: "Start index",
+				types: ["number"],
+			},
+			endIndex: {
+				displayName: "End index",
 				types: ["number"],
 			},
 		},
@@ -346,8 +350,17 @@ namespace StringSearch {
 		constructor(block: BlockLogicArgs) {
 			super(definition, block);
 
+			const f = () => {
+				this.output.startIndex.set("number", -1);
+				this.output.endIndex.set("number", -1);
+			};
+
 			this.on(({ lookingFor, value }) => {
-				this.output.result.set("number", -1); //todo: aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+				if (value.size() < lookingFor.size()) return f();
+				const [i1, i2] = value.find(lookingFor);
+				if (i1 === undefined || i2 === undefined) return f();
+				this.output.startIndex.set("number", i1 - 1);
+				this.output.endIndex.set("number", i2 - 1);
 			});
 		}
 	}
