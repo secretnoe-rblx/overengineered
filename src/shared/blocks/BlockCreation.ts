@@ -149,6 +149,7 @@ export namespace BlockCreation {
 		bool: ["Logic", "Gate"],
 		memory: ["Logic", "Memory"],
 		sensor: ["Logic", "Sensor"],
+		string: ["Logic", "String"],
 	} as const satisfies { [k in string]: BlockCategoryPath };
 
 	export namespace MarkerPositions {
