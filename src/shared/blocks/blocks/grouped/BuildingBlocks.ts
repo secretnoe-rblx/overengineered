@@ -290,6 +290,21 @@ const wedges = {
 	},
 } as const satisfies BlockBuildersWithoutIdAndDefaults;
 
+const trainWheels = {
+	largeoldtrainwheel: {
+		displayName: "Large Old Train Wheel",
+		description: "A large old train wheel",
+	},
+	smallnewtrainwheel: {
+		displayName: "Small Modern Train Wheel",
+		description: "A modern small train wheel",
+	},
+	smalloldtrainwheel: {
+		displayName: "Small Old Train Wheel",
+		description: "A small cousin of the old train wheel",
+	},
+} as const satisfies BlockBuildersWithoutIdAndDefaults;
+
 //
 
 const list: BlockBuildersWithoutIdAndDefaults = {
@@ -298,5 +313,6 @@ const list: BlockBuildersWithoutIdAndDefaults = {
 	...cornerWedges,
 	...cylinders,
 	...wedges,
+	...trainWheels,
 };
 export const BuildingBlocks = BlockCreation.arrayFromObject(list);
