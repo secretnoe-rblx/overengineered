@@ -31,7 +31,7 @@ export namespace BlockWeldInitializer {
 
 	function createAutomaticWelds(model: BlockModel, parent: Model, autoWeldShape: AutoWeldColliderBlockShape): void {
 		const createRegions = (): readonly Region3[] | undefined => {
-			const offset = 0.2;
+			const offset = 0.05;
 
 			if (
 				(model.GetChildren().size() === 1 &&
