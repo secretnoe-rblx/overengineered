@@ -1,5 +1,8 @@
 interface Workspace {
 	Atmosphere: Model & {
-		Surface: BasePart;
+		Surface: BasePart & {
+			Crowns: Folder;
+			Mesh: SpecialMesh;
+		};
 	};
 }
