@@ -120,7 +120,7 @@ namespace StringConcat {
 	export const block = {
 		...BlockCreation.defaults,
 		id: "stringconcat",
-		displayName: "String concatination",
+		displayName: "String concatenation",
 		description: 'Adds two given strings together. Example: "Ab" + "Cd" = "AbCd".',
 		modelSource: autoModel("DoubleGenericLogicBlockPrefab", "concat", BlockCreation.Categories.string),
 
