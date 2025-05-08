@@ -31,7 +31,7 @@ export class TestTutorial implements TutorialDescriber {
 					});
 				}),
 				t.partNextButton(),
-				t.partText("Welcome to Plane Engineers!\nThis tutorial will teach you the basics of the game."),
+				t.partText("Welcome to OverEngineered!\nThis tutorial will teach you the basics of the game."),
 			],
 
 			() => [
@@ -104,7 +104,7 @@ export class TestTutorial implements TutorialDescriber {
 			() => [
 				t.funcPart(() => toolController.enabledTools.disableAll()),
 				t.partNextButton(),
-				t.partText("You are now the maks gaming of plane engineers."),
+				t.partText("You are now the maks gaming of OverEngineered!."),
 				t.hintsPart("Important tip: This is a car"),
 			],
 		];

@@ -145,6 +145,7 @@ export namespace BlockCreation {
 		converterByte: ["Logic", "Converter", "Byte"],
 		converterVector: ["Logic", "Converter", "Vector"],
 		converterColor: ["Logic", "Converter", "Color"],
+		converterUnits: ["Logic", "Converter", "Units"],
 		other: ["Logic", "Other"],
 		bool: ["Logic", "Gate"],
 		memory: ["Logic", "Memory"],

@@ -33,7 +33,7 @@ export class BasicCarTutorial implements TutorialDescriber {
 				t.partText(
 					"Welcome to",
 					" ",
-					"Plane Engineers",
+					"OverEngineered!",
 					"!",
 					"\n",
 					"This tutorial will teach you the basics of the game.",

@@ -1494,6 +1494,93 @@ const byte = {
 	},
 } as const satisfies BlockBuildersWithoutIdAndDefaults;
 
+const units = {
+	studstometers: {
+		displayName: "Studs to Meters",
+		description: "Converts studs to meters.",
+		modelSource: autoModel("ConstLogicBlockPrefab", "ST -> M", categories.converterUnits),
+		logic: logic(
+			{
+				input: {
+					value: defpartsf.number("Value"),
+				},
+				output: {
+					result: {
+						displayName: "Result",
+						types: ["number"],
+					},
+				},
+			},
+			({ value }) => ({
+				result: { type: "number", value: value * 0.28 },
+			}),
+		),
+	},
+	meterstostuds: {
+		displayName: "Meters to Studs",
+		description: "Converts meters to studs.",
+		modelSource: autoModel("ConstLogicBlockPrefab", "M -> ST", categories.converterUnits),
+		logic: logic(
+			{
+				input: {
+					value: defpartsf.number("Value"),
+				},
+				output: {
+					result: {
+						displayName: "Result",
+						types: ["number"],
+					},
+				},
+			},
+			({ value }) => ({
+				result: { type: "number", value: value / 0.28 },
+			}),
+		),
+	},
+	rmustokg: {
+		displayName: "RMU to KG",
+		description: "Converts Roblox Mass Units to Kilogramms.",
+		modelSource: autoModel("ConstLogicBlockPrefab", "RMU -> KG", categories.converterUnits),
+		logic: logic(
+			{
+				input: {
+					value: defpartsf.number("Value"),
+				},
+				output: {
+					result: {
+						displayName: "Result",
+						types: ["number"],
+					},
+				},
+			},
+			({ value }) => ({
+				result: { type: "number", value: value * 21.952 },
+			}),
+		),
+	},
+	kgtormu: {
+		displayName: "KG to RMU",
+		description: "Converts Kilogramms to Roblox Mass Units.",
+		modelSource: autoModel("ConstLogicBlockPrefab", "KG -> RMU", categories.converterUnits),
+		logic: logic(
+			{
+				input: {
+					value: defpartsf.number("Value"),
+				},
+				output: {
+					result: {
+						displayName: "Result",
+						types: ["number"],
+					},
+				},
+			},
+			({ value }) => ({
+				result: { type: "number", value: value / 21.952 },
+			}),
+		),
+	},
+};
+
 const other = {
 	buffer: {
 		displayName: "Buffer",
