@@ -1002,10 +1002,10 @@ const vec3 = {
 		),
 	},
 
-	vec3dotproduct: {
-		displayName: "Vector3 Cross Dot",
+	vec3crossproduct: {
+		displayName: "Vector3 Dot product",
 		description: "Calculates the cross product of the two vectors",
-		modelSource: autoModel("TripleGenericLogicBlockPrefab", "VEC3 NORM", categories.converterVector),
+		modelSource: autoModel("TripleGenericLogicBlockPrefab", "VEC3 CROSS", categories.converterVector),
 		search: {
 			aliases: ["unit"],
 		},
@@ -1024,6 +1024,32 @@ const vec3 = {
 			},
 			({ value1, value2 }) => ({
 				result: { type: "vector3", value: value1.Cross(value2) },
+			}),
+		),
+	},
+
+	vec3dotproduct: {
+		displayName: "Vector3 Cross product",
+		description: "Calculates the dot product of the given vector",
+		modelSource: autoModel("TripleGenericLogicBlockPrefab", "VEC3 DOT", categories.converterVector),
+		search: {
+			aliases: ["unit"],
+		},
+		logic: logic(
+			{
+				input: {
+					value1: defpartsf.vector3("Value1"),
+					value2: defpartsf.vector3("Value2"),
+				},
+				output: {
+					result: {
+						displayName: "Normalized",
+						types: ["number"],
+					},
+				},
+			},
+			({ value1, value2 }) => ({
+				result: { type: "number", value: value1.Dot(value2) },
 			}),
 		),
 	},
@@ -1715,6 +1741,7 @@ const list: BlockBuildersWithoutIdAndDefaults = {
 	...color,
 	...byte,
 	...other,
+	...units,
 	...test,
 };
 export const BasicOperationBlocks = BlockCreation.arrayFromObject(list);
