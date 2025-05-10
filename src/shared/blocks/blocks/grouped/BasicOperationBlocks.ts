@@ -675,6 +675,53 @@ const maths = {
 		),
 	},
 
+	min: {
+		displayName: "Min",
+		description: "Outputs the smallest input from the two given ones.",
+		modelSource: autoModel("DoubleGenericLogicBlockPrefab", "MIN", categories.math),
+		logic: logic(
+			{
+				inputOrder: ["value", "min"],
+				input: {
+					value1: defpartsf.number("Value"),
+					value2: defpartsf.number("Value"),
+				},
+				output: {
+					result: {
+						displayName: "Result",
+						types: ["number"],
+					},
+				},
+			},
+			({ value1, value2 }) => {
+				return { result: { type: "number", value: math.min(value1, value2) } };
+			},
+		),
+	},
+	max: {
+		displayName: "Max",
+		description: "Outputs the biggest input from the two given ones.",
+		modelSource: autoModel("DoubleGenericLogicBlockPrefab", "MAKS", categories.math),
+		logic: logic(
+			{
+				inputOrder: ["value", "max"],
+				input: {
+					value1: defpartsf.number("Value"),
+					value2: defpartsf.number("Value"),
+				},
+				output: {
+					result: {
+						displayName: "Result",
+						types: ["number"],
+					},
+				},
+			},
+			({ value1, value2 }) => {
+				return { result: { type: "number", value: math.max(value1, value2) } };
+			},
+		),
+	},
+
 	equals: {
 		displayName: "Equals",
 		description: "Returns true if inputs are the same",
