@@ -567,6 +567,10 @@ namespace SinglePlaceController {
 		}
 
 		async place() {
+			if (Interface.isCursorOnVisibleGui()) {
+				return;
+			}
+
 			const selected = this.selectedBlock.get();
 			if (!selected) {
 				return;
@@ -859,6 +863,10 @@ namespace MultiPlaceController {
 		}
 
 		async place() {
+			if (Interface.isCursorOnVisibleGui()) {
+				return;
+			}
+
 			let locations = [
 				...this.blockMirrorer.blocks.get().map(({ id, model }) => ({ id, pos: model.GetPivot() })),
 				...asMap(this.blockMirrorer.getMirroredModels()).flatmap((id, models) =>
