@@ -77,7 +77,7 @@ class Logic extends InstanceBlockLogic<typeof definition> {
 		prepare: new A2SRemoteEvent<{
 			readonly block: BlockModel;
 			readonly baseColor: Color3;
-		}>("leddisplay_prepare"), // TODO: fix this shit crap
+		}>("leddisplay_prepare", "RemoteEvent"), // TODO: fix this shit crap
 		update: new A2SRemoteEvent<{
 			readonly block: BlockModel;
 			readonly color: Color3;
