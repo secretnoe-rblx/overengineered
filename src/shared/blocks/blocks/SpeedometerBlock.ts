@@ -4,15 +4,22 @@ import type { BlockLogicFullBothDefinitions, InstanceBlockLogicArgs } from "shar
 import type { BlockBuilder } from "shared/blocks/Block";
 
 const definition = {
-	outputOrder: ["linear", "angular"],
 	input: {},
 	output: {
 		linear: {
-			displayName: "Linear",
+			displayName: "Linear Velocity",
 			types: ["vector3"],
 		},
 		angular: {
-			displayName: "Angular",
+			displayName: "Angular Velocity",
+			types: ["vector3"],
+		},
+		linearAcceleration: {
+			displayName: "Linear Acceleration",
+			types: ["vector3"],
+		},
+		angularAcceleration: {
+			displayName: "Angular Acceleration",
 			types: ["vector3"],
 		},
 	},
@@ -23,20 +30,27 @@ class Logic extends InstanceBlockLogic<typeof definition> {
 	constructor(block: InstanceBlockLogicArgs) {
 		super(definition, block);
 
+		const getLocalPos = (pos: Vector3) => this.instance.GetPivot().Rotation.ToObjectSpace(new CFrame(pos)).Position;
+
+		const localVelocity = {
+			linear: Vector3.zero,
+			angular: Vector3.zero,
+		};
+
 		this.onRecalcInputs(() => {
 			if (!this.instance.PrimaryPart) {
 				this.disable();
 				return;
 			}
 
-			this.output.linear.set(
-				"vector3",
-				this.instance
-					.GetPivot()
-					.Rotation.ToObjectSpace(new CFrame(this.instance.PrimaryPart.AssemblyLinearVelocity)).Position,
-			);
+			const l1 = getLocalPos(this.instance.PrimaryPart.AssemblyLinearVelocity);
+			const l2 = getLocalPos(this.instance.PrimaryPart.AssemblyAngularVelocity);
 
-			this.output.angular.set("vector3", this.instance.PrimaryPart.AssemblyAngularVelocity);
+			this.output.linearAcceleration.set("vector3", l1.sub(localVelocity.linear));
+			this.output.angularAcceleration.set("vector3", l2.sub(localVelocity.angular));
+
+			this.output.linear.set("vector3", (localVelocity.linear = l1));
+			this.output.angular.set("vector3", (localVelocity.angular = l2));
 		});
 	}
 }
@@ -45,7 +59,8 @@ export const SpeedometerBlock = {
 	...BlockCreation.defaults,
 	id: "speedometer",
 	displayName: "Speedometer",
-	description: "Returns the current velocity",
+	description:
+		"Returns the current velocity and acceleration. Yes I know, there should've been a separate accelerometer block. It was.",
 
 	logic: { definition, ctor: Logic },
 } as const satisfies BlockBuilder;
