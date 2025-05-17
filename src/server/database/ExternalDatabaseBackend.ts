@@ -79,14 +79,12 @@ export class ExternalDatabaseBackendSlots implements DatabaseBackend<BlocksSeria
 		}
 	}
 	RemoveAsync([ownerId, slotId]: SlotKeys): void {
-		const url = `${endpoint}/slot`;
-		const data = JSON.serialize({ ownerId, slotId });
-		$log("Deleting", url, data);
+		const url = `${endpoint}/slot?ownerId=${ownerId}&slotId=${slotId}`;
+		$log("Deleting", url);
 
 		const response = HttpService.RequestAsync({
 			Method: "DELETE",
 			Url: url,
-			Body: data,
 			Headers: headersWithContentType,
 		});
 		if (!(JSON.deserialize(response.Body) as { success?: boolean }).success) {
