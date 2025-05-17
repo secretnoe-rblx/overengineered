@@ -1,7 +1,6 @@
 import { Players } from "@rbxts/services";
 import { t } from "engine/shared/t";
 import { BlockLogic, CalculatableBlockLogic } from "shared/blockLogic/BlockLogic";
-import { BlockLogicValueResults } from "shared/blockLogic/BlockLogicValueStorage";
 import { BlockSynchronizer } from "shared/blockLogic/BlockSynchronizer";
 import { BlockConfigDefinitions } from "shared/blocks/BlockConfigDefinitions";
 import { BlockCreation } from "shared/blocks/BlockCreation";
@@ -14,6 +13,7 @@ import type {
 	BlockLogicOutputDefs,
 	BlockLogicTickContext,
 } from "shared/blockLogic/BlockLogic";
+import type { BlockLogicValueResults } from "shared/blockLogic/BlockLogicValueStorage";
 import type { LogicValueStorageContainer } from "shared/blockLogic/BlockLogicValueStorage";
 import type { BlockBuilder, BlockCategoryPath, BlockModelSource } from "shared/blocks/Block";
 
@@ -69,27 +69,16 @@ namespace And {
 			const value1cache = this.initializeRecalcInputCache("value1");
 			const value2cache = this.initializeRecalcInputCache("value2");
 
-			this.onkRecalcInputs(
-				[],
-				() => {
-					const value1 = value1cache.tryGet();
-					const value2 = value2cache.tryGet();
+			this.on(({ value1, value2 }) => this.output.result.set("bool", value1 && value2));
 
-					if (value1 === false || value2 === false) {
-						return this.output.result.set("bool", false);
-					}
+			this.onEnable(() => {
+				const value1 = value1cache.tryGet();
+				const value2 = value2cache.tryGet();
 
-					if (value1 === undefined || value2 === undefined) {
-						return this.output.result.unset();
-					}
-
-					this.output.result.set("bool", value1 && value2);
-				},
-				(result) => {
-					if (result !== BlockLogicValueResults.availableLater) return;
-					this.output.result.unset();
-				},
-			);
+				if (value1 === undefined || value2 === undefined) {
+					return this.output.result.unset();
+				}
+			});
 		}
 	}
 
@@ -114,27 +103,16 @@ namespace Or {
 			const value1cache = this.initializeRecalcInputCache("value1");
 			const value2cache = this.initializeRecalcInputCache("value2");
 
-			this.onkRecalcInputs(
-				[],
-				() => {
-					const value1 = value1cache.tryGet();
-					const value2 = value2cache.tryGet();
+			this.on(({ value1, value2 }) => this.output.result.set("bool", value1 || value2));
 
-					if (value1 === true || value2 === true) {
-						return this.output.result.set("bool", true);
-					}
+			this.onEnable(() => {
+				const value1 = value1cache.tryGet();
+				const value2 = value2cache.tryGet();
 
-					if (value1 === undefined || value2 === undefined) {
-						return this.output.result.unset();
-					}
-
-					this.output.result.set("bool", value1 || value2);
-				},
-				(result) => {
-					if (result !== BlockLogicValueResults.availableLater) return;
-					this.output.result.unset();
-				},
-			);
+				if (value1 === undefined || value2 === undefined) {
+					return this.output.result.unset();
+				}
+			});
 		}
 	}
 
@@ -159,27 +137,16 @@ namespace Nand {
 			const value1cache = this.initializeRecalcInputCache("value1");
 			const value2cache = this.initializeRecalcInputCache("value2");
 
-			this.onkRecalcInputs(
-				[],
-				() => {
-					const value1 = value1cache.tryGet();
-					const value2 = value2cache.tryGet();
+			this.on(({ value1, value2 }) => this.output.result.set("bool", !(value1 && value2)));
 
-					if (value1 === false || value2 === false) {
-						return this.output.result.set("bool", true);
-					}
+			this.onEnable(() => {
+				const value1 = value1cache.tryGet();
+				const value2 = value2cache.tryGet();
 
-					if (value1 === undefined || value2 === undefined) {
-						return this.output.result.unset();
-					}
-
-					this.output.result.set("bool", !(value1 && value2));
-				},
-				(result) => {
-					if (result !== BlockLogicValueResults.availableLater) return;
-					this.output.result.unset();
-				},
-			);
+				if (value1 === undefined || value2 === undefined) {
+					return this.output.result.unset();
+				}
+			});
 		}
 	}
 
@@ -204,27 +171,16 @@ namespace Nor {
 			const value1cache = this.initializeRecalcInputCache("value1");
 			const value2cache = this.initializeRecalcInputCache("value2");
 
-			this.onkRecalcInputs(
-				[],
-				() => {
-					const value1 = value1cache.tryGet();
-					const value2 = value2cache.tryGet();
+			this.on(({ value1, value2 }) => this.output.result.set("bool", !(value1 || value2)));
 
-					if (value1 === true || value2 === true) {
-						return this.output.result.set("bool", false);
-					}
+			this.onEnable(() => {
+				const value1 = value1cache.tryGet();
+				const value2 = value2cache.tryGet();
 
-					if (value1 === undefined || value2 === undefined) {
-						return this.output.result.unset();
-					}
-
-					this.output.result.set("bool", !(value1 || value2));
-				},
-				(result) => {
-					if (result !== BlockLogicValueResults.availableLater) return;
-					this.output.result.unset();
-				},
-			);
+				if (value1 === undefined || value2 === undefined) {
+					return this.output.result.unset();
+				}
+			});
 		}
 	}
 
