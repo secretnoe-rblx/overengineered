@@ -7,12 +7,14 @@ export class DistanceHideController extends Component {
 		super();
 
 		const parts = [Workspace.WaitForChild("Obstacles")];
+		let updated = false;
 
 		const transparencies = new Map<Instance & { Transparency: number }, number>();
 		for (const part of parts.map((p) => [p, ...p.GetDescendants()])) {
 			for (const p of part) {
 				if (p.IsA("BasePart") || p.IsA("Decal") || p.IsA("Texture")) {
 					transparencies.set(p, p.Transparency);
+					updated = true;
 				}
 			}
 		}
@@ -25,12 +27,14 @@ export class DistanceHideController extends Component {
 				(new Vector3(0, GameDefinitions.HEIGHT_OFFSET, 0).sub(
 					Players.LocalPlayer.Character?.GetPivot().Position ?? Vector3.zero,
 				).Magnitude ?? 0) < maxDistance;
-			if (visible === newVisible) return;
+
+			if (visible === newVisible && !updated) return;
 
 			visible = newVisible;
 
 			for (const [part, transparency] of transparencies) {
 				part.Transparency = visible ? (transparency ?? 0) : 1;
+				updated = false;
 			}
 		});
 	}
