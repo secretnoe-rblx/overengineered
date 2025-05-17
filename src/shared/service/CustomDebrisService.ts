@@ -2,7 +2,7 @@ import { RunService } from "@rbxts/services";
 
 let active = true;
 if (!RunService.IsClient() && game.PrivateServerOwnerId !== 0) {
-	$warn("Private server detected, disabling");
+	$log("Private server detected, disabling");
 	active = false;
 }
 
