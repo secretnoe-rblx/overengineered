@@ -48,19 +48,14 @@ class Logic extends BlockLogic<typeof definition> {
 	constructor(block: BlockLogicArgs) {
 		super(definition, block);
 
-		this.onk(["defaultValue"], ({ defaultValue, defaultValueType, defaultValueChanged }) => {
-			if (!defaultValueChanged) return;
-			this.output.result.set(defaultValueType, defaultValue);
-		});
 		this.onk(["value", "set"], ({ value, valueType, set }) => {
 			if (!set) return;
 			this.output.result.set(valueType, value);
 		});
 
-		this.onk(["reset", "defaultValue"], ({ reset, resetChanged, defaultValue, defaultValueType }) => {
-			if (resetChanged && reset) {
-				this.output.result.set(defaultValueType, defaultValue);
-			}
+		this.onk(["reset", "defaultValue"], ({ reset, defaultValue, defaultValueType }) => {
+			if (!reset) return;
+			this.output.result.set(defaultValueType, defaultValue);
 		});
 	}
 }
