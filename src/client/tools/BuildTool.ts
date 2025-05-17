@@ -45,6 +45,13 @@ const forbiddenColor = Colors.red;
 const mouse = Players.LocalPlayer.GetMouse();
 
 const fromModelBB = (block: Model, additionalRotation?: CFrame): BB => {
+	const colbox = (block.FindFirstChild("ColBox") ??
+		block.FindFirstChild("Colbox") ??
+		block.FindFirstChild("colbox")) as Part | undefined;
+	if (colbox) {
+		return BB.fromPart(colbox).withCenter((c) => c.mul(additionalRotation ?? CFrame.identity));
+	}
+
 	return BB.fromBBs(
 		block
 			.GetChildren()
