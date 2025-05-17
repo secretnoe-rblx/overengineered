@@ -27,7 +27,7 @@ export class ServerSlotRequestController extends Component {
 
 	private saveSlot(request: PlayerSaveSlotRequest): SaveSlotResponse {
 		if (SlotsMeta.isReadonly(request.index)) {
-			throw "Slot is readonly";
+			throw `Slot is readonly while saving ${this.playerId} ${request.index}`;
 		}
 
 		$log(`Saving ${this.playerId}'s slot ${request.index}`);
@@ -61,7 +61,7 @@ export class ServerSlotRequestController extends Component {
 	}
 	private deleteSlot(request: PlayerDeleteSlotRequest): Response {
 		if (SlotsMeta.isReadonly(request.index) && !SlotsMeta.isTestSlot(request.index)) {
-			throw "Slot is readonly";
+			throw `Slot is readonly while deleting ${this.playerId} ${request.index}`;
 		}
 
 		$log(`Deleting ${this.playerId}'s slot ${request.index}`);
