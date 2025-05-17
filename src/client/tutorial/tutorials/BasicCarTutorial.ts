@@ -163,7 +163,7 @@ export class BasicCarTutorial implements TutorialDescriber {
 				t.funcPart(() => toolController.enabledTools.disableAll()),
 				t.partNextButton(),
 				t.partText(
-					"Your car is ready! After this message, press the green triangle button on the top of your screen to start your car. Good luck!",
+					"Your car is ready! After this message, press the triangle button on the top of your screen to start your car. Good luck!",
 				),
 			],
 		];
