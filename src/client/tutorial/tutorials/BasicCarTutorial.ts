@@ -109,7 +109,7 @@ export class BasicCarTutorial implements TutorialDescriber {
 			() => [
 				t.funcPart(() => toolController.enabledTools.enableOnly(this.buildingMode.tools.buildTool)),
 				t.processDiff(diffs.c7seat, saveVersion),
-				t.partText("Now, the main peace - the vehicle seat."),
+				t.partText("Now, the main piece - the vehicle seat."),
 			],
 
 			() => [
