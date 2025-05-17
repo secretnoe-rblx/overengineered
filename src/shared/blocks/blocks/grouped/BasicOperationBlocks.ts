@@ -683,8 +683,8 @@ const maths = {
 			{
 				inputOrder: ["value", "min"],
 				input: {
-					value1: defpartsf.number("Value"),
-					value2: defpartsf.number("Value"),
+					value: defpartsf.number("Value"),
+					min: defpartsf.number("Minimum"),
 				},
 				output: {
 					result: {
@@ -693,8 +693,8 @@ const maths = {
 					},
 				},
 			},
-			({ value1, value2 }) => {
-				return { result: { type: "number", value: math.min(value1, value2) } };
+			({ value, min }) => {
+				return { result: { type: "number", value: math.min(value, min) } };
 			},
 		),
 	},
@@ -706,8 +706,8 @@ const maths = {
 			{
 				inputOrder: ["value", "max"],
 				input: {
-					value1: defpartsf.number("Value"),
-					value2: defpartsf.number("Value"),
+					value: defpartsf.number("Value"),
+					max: defpartsf.number("Maximum"),
 				},
 				output: {
 					result: {
@@ -716,8 +716,8 @@ const maths = {
 					},
 				},
 			},
-			({ value1, value2 }) => {
-				return { result: { type: "number", value: math.max(value1, value2) } };
+			({ value, max }) => {
+				return { result: { type: "number", value: math.max(value, max) } };
 			},
 		),
 	},
