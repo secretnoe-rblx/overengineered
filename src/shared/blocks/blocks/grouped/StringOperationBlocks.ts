@@ -214,7 +214,7 @@ namespace StringSub {
 		...BlockCreation.defaults,
 		id: "stringsub",
 		displayName: "Substing",
-		description: "Returns a character of the given string at specified index.",
+		description: "Returns a string of the given string at specific start and end indexes.",
 		modelSource: autoModel("DoubleGenericLogicBlockPrefab", "strsub", BlockCreation.Categories.string),
 
 		search: {
@@ -381,6 +381,47 @@ namespace StringSearch {
 	} as const satisfies BlockBuilder;
 }
 
+namespace StringCast {
+	const definition = {
+		input: {
+			value: {
+				displayName: "Value",
+				types: BlockConfigDefinitions.any,
+				tooltip: "The input data that will be converted to text string",
+			},
+		},
+		output: {
+			result: {
+				displayName: "Result",
+				types: ["string"],
+			},
+		},
+	} satisfies BlockLogicFullBothDefinitions;
+
+	class Logic extends BlockLogic<typeof definition> {
+		constructor(block: BlockLogicArgs) {
+			super(definition, block);
+
+			this.on(({ value }) => this.output.result.set("string", `${value}`));
+		}
+	}
+
+	export const block = {
+		...BlockCreation.defaults,
+		id: "tostring",
+		displayName: "To String",
+		description: "Returns the given value represented as a text string",
+		modelSource: autoModel("DoubleGenericLogicBlockPrefab", "tostr", BlockCreation.Categories.string),
+
+		search: {
+			aliases: ["text", "str"],
+			partialAliases: ["tostring"],
+		},
+
+		logic: { definition, ctor: Logic },
+	} as const satisfies BlockBuilder;
+}
+
 export const StringOperationBlocks = [
 	StringSub.block,
 	StringChar.block,
@@ -390,4 +431,5 @@ export const StringOperationBlocks = [
 	StringSearch.block,
 	StringUpperCase.block,
 	StringLowerCase.block,
+	StringCast.block,
 ];
