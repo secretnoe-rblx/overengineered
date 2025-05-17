@@ -574,10 +574,6 @@ namespace SinglePlaceController {
 		}
 
 		async place() {
-			if (Interface.isCursorOnVisibleGui()) {
-				return;
-			}
-
 			const selected = this.selectedBlock.get();
 			if (!selected) {
 				return;
@@ -625,7 +621,13 @@ namespace SinglePlaceController {
 			state.subscribeSomethingToCurrentPlot(this, () => this.updateBlockPosition());
 			this.event.subscribe(mouse.Move, () => this.updateBlockPosition());
 			this.event.subInput((ih) => {
-				ih.onMouse1Up(() => this.place(), false);
+				ih.onMouse1Up(() => {
+					if (Interface.isCursorOnVisibleGui()) {
+						return;
+					}
+
+					this.place();
+				}, false);
 				const pick = () => {
 					state.pickBlock();
 					this.updateBlockPosition();
@@ -870,10 +872,6 @@ namespace MultiPlaceController {
 		}
 
 		async place() {
-			if (Interface.isCursorOnVisibleGui()) {
-				return;
-			}
-
 			let locations = [
 				...this.blockMirrorer.blocks.get().map(({ id, model }) => ({ id, pos: model.GetPivot() })),
 				...asMap(this.blockMirrorer.getMirroredModels()).flatmap((id, models) =>
