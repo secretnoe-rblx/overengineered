@@ -43,7 +43,7 @@ export const CreateSpawnVehicle = () =>
 				config: {
 					density: {
 						type: "number",
-						config: 0.71,
+						config: 0.2,
 					},
 				},
 			},
