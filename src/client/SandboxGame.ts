@@ -5,7 +5,6 @@ import { BlurController } from "client/controller/BlurController";
 import { CameraController } from "client/controller/CameraController";
 import { ChatController } from "client/controller/ChatController";
 import { DayCycleController } from "client/controller/DayCycleController";
-import { DistanceHideController } from "client/controller/DistanceHideController";
 import { EnvBlacklistsController } from "client/controller/EnvBlacklistsController";
 import { GameEnvironmentController } from "client/controller/GameEnvironmentController";
 import { GraphicsSettingsController } from "client/controller/GraphicsSettingsController";
@@ -116,7 +115,6 @@ export namespace SandboxGame {
 		builder.services.registerService(GameEnvironmentController);
 		builder.services.registerService(EnvBlacklistsController);
 		SoundController.initializeAll(builder);
-		builder.services.registerService(DistanceHideController);
 		builder.services.registerService(ObstaclesController);
 		AdminGui.initializeIfAdminOrStudio(builder);
 
