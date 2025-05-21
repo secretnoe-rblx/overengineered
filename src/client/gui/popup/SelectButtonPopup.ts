@@ -59,13 +59,13 @@ class _SelectButtonPopup<TAllowCustomString extends boolean> extends Control<Sel
 
 		const keys = Enum.KeyCode.GetEnumItems().filter((value) => {
 			// numbers
-			if (value.Value > 48 && value.Value <= 57) return true;
+			if (value.Value >= 48 && value.Value <= 57) return true;
 
 			// a-z
-			if (value.Value > 97 && value.Value <= 122) return true;
+			if (value.Value >= 97 && value.Value <= 122) return true;
 
 			// gamepad
-			if (value.Value > 1000 && value.Value <= 1017) return true;
+			if (value.Value >= 1000 && value.Value <= 1017) return true;
 
 			return false;
 		});
