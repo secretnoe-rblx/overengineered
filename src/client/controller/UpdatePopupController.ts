@@ -10,9 +10,12 @@ export class UpdatePopupController extends HostedService {
 
 		this.onEnable(() => {
 			const data = playerDataStorage.data.get();
-			playerDataStorage.sendPlayerDataValue("seen1", true);
+			const lastJoin = data.data.lastJoin;
 
-			if (!data.data.seen1) {
+			playerDataStorage.sendPlayerDataValue("lastJoin", DateTime.now().UnixTimestamp);
+			if (!lastJoin) return;
+
+			if (lastJoin < DateTime.fromUniversalTime(2025, 5, 9, 4, 38).UnixTimestamp) {
 				popupController.showPopup(
 					new AlertPopup(`
 Hi! We're switching to Roblox measurement units. 
