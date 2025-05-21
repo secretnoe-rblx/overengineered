@@ -3,6 +3,10 @@ import type { PlayModeBase } from "server/modes/PlayModeBase";
 @injectable
 export class BuildMode implements PlayModeBase {
 	onTransitionFrom(player: Player, prevmode: PlayModes | undefined): Response | undefined {
+		if (prevmode === "build") {
+			return { success: true };
+		}
+
 		if (prevmode === undefined || prevmode === "ride") {
 			const humanoid = player.Character?.FindFirstChildOfClass("Humanoid");
 			if (humanoid !== undefined) humanoid.Health = humanoid.MaxHealth;
@@ -14,6 +18,10 @@ export class BuildMode implements PlayModeBase {
 		}
 	}
 	onTransitionTo(player: Player, nextmode: PlayModes | undefined): Response | undefined {
+		if (nextmode === "build") {
+			return { success: true };
+		}
+
 		if (nextmode === undefined || nextmode === "ride") {
 			return { success: true };
 		}
