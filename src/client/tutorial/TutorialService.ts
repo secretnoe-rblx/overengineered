@@ -3,6 +3,7 @@ import { AlertPopup } from "client/gui/popup/AlertPopup";
 import { TutorialController } from "client/tutorial/TutorialController";
 import { HostedService } from "engine/shared/di/HostedService";
 import type { PopupController } from "client/gui/PopupController";
+import type { PlayerDataStorage } from "client/PlayerDataStorage";
 import type { TutorialDescriber } from "client/tutorial/TutorialController";
 import type { GameHostBuilder } from "engine/shared/GameHostBuilder";
 
@@ -84,12 +85,11 @@ export namespace TutorialServiceInitializer {
 
 		if (config.tutorialToRunWhenNoSlots) {
 			reg.onInit((service, di) => {
-				// // di.resolve<PlayModeController>().mo
-				// const playerData = di.resolve<PlayerDataStorage>();
-				// service.onEnable(() => {
-				// 	if (playerData.slots.get().any((t) => t.blocks !== 0)) return;
-				// 	service.run(di.resolveForeignClass(config.tutorialToRunWhenNoSlots!), { allowClosing: false });
-				// });
+				const playerData = di.resolve<PlayerDataStorage>();
+				service.onEnable(() => {
+					if (asMap(playerData.slots.get()).any((k, s) => s.blocks !== 0)) return;
+					service.run(di.resolveForeignClass(config.tutorialToRunWhenNoSlots!), { allowClosing: false });
+				});
 			});
 		}
 	}
