@@ -101,7 +101,7 @@ export class PlayerDataStorage {
 		if (d) {
 			this._data.set({
 				...d,
-				slots: SlotsMeta.withSlot(d.slots, req.index, req),
+				slots: SlotsMeta.withSlot(d.slots, req.index, { ...req, saveTime: DateTime.now().UnixTimestampMillis }),
 			});
 		}
 
