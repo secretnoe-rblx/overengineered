@@ -144,6 +144,7 @@ class SaveItem extends PartialControl<SaveItemParts, SaveItemDefinition> impleme
 
 				this.delete.subscribe(() => {
 					const del = () => {
+						current.set(undefined);
 						playerData.deletePlayerSlot({ index: slot.index });
 					};
 
