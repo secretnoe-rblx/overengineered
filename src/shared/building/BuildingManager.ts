@@ -183,8 +183,7 @@ export namespace BuildingManager {
 				pos: new CFrame(mirrorCFrame.ToWorldSpace(new CFrame(pos.X, pos.Y, -pos.Z)).Position).mul(
 					rotated.Rotation,
 				),
-				scale: block.scale,
-				// scale: block.pos.Rotation.ToObjectSpace(rotated.Rotation).mul(block.scale).Abs(),
+				scale: block.pos.Rotation.ToObjectSpace(rotated.Rotation).mul(block.scale).Abs(),
 			};
 		};
 
