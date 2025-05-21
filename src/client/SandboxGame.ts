@@ -1,4 +1,5 @@
 import { Players, Workspace } from "@rbxts/services";
+import { AdminMessageController } from "client/AdminMessageController";
 import { ClientEffectCreator } from "client/ClientEffectCreator";
 import { BeaconController } from "client/controller/BeaconController";
 import { BlurController } from "client/controller/BlurController";
@@ -24,8 +25,10 @@ import { MainScene } from "client/gui/MainScene";
 import { MainScreenLayout } from "client/gui/MainScreenLayout";
 import { PopupController } from "client/gui/PopupController";
 import { RainbowGuiController } from "client/gui/RainbowGuiController";
+import { LogControl } from "client/gui/static/LogControl";
 import { PlayModeController } from "client/modes/PlayModeController";
 import { PlayerDataStorage } from "client/PlayerDataStorage";
+import { ServerRestartController } from "client/ServerRestartController";
 import { TerrainController } from "client/terrain/TerrainController";
 import { Theme } from "client/Theme";
 import { ThemeAutoSetter } from "client/ThemeAutoSetter";
@@ -35,14 +38,17 @@ import { BasicPlaneTutorial } from "client/tutorial/tutorials/BasicPlaneTutorial
 import { NewBasicPlaneTutorial } from "client/tutorial/tutorials/NewBasicPlaneTutorial";
 import { TestTutorial } from "client/tutorial/tutorials/TestTutorial";
 import { TutorialServiceInitializer } from "client/tutorial/TutorialService";
+import { InputController } from "engine/client/InputController";
 import { Keybinds } from "engine/client/Keybinds";
 import { PlayerRank } from "engine/shared/PlayerRank";
 import { ReadonlyPlot } from "shared/building/ReadonlyPlot";
 import { SharedPlots } from "shared/building/SharedPlots";
+import { Colors } from "shared/Colors";
 import { RemoteEvents } from "shared/RemoteEvents";
 import { CustomRemotes } from "shared/Remotes";
 import { PlayerDataRemotes } from "shared/remotes/PlayerDataRemotes";
 import { CreateSandboxBlocks } from "shared/SandboxBlocks";
+import { SlotsMeta } from "shared/SlotsMeta";
 import { WeaponModuleSystem } from "shared/weaponProjectiles/WeaponModuleSystem";
 import type { TutorialDescriber } from "client/tutorial/TutorialController";
 import type { GameHostBuilder } from "engine/shared/GameHostBuilder";
@@ -138,6 +144,29 @@ export namespace SandboxGame {
 		builder.services.registerService(UpdatePopupController);
 		ChatController.initializeAdminPrefix();
 		builder.services.registerService(PopupController);
+
+		builder.enabled.Connect((di) => {
+			LogControl.instance.enable();
+
+			InputController.inputType.subscribe((newInputType) =>
+				LogControl.instance.addLine("New input type set to " + newInputType, Colors.yellow),
+			);
+			RemoteEvents.initialize();
+			AdminMessageController.initialize();
+			ServerRestartController.initialize();
+			// Atmosphere.initialize();
+
+			{
+				const playerData = di.resolve<PlayerDataStorage>();
+				if (
+					playerData.config.get().autoLoad &&
+					playerData.slots.get()[SlotsMeta.quitSlotIndex] &&
+					playerData.slots.get()[SlotsMeta.quitSlotIndex].blocks !== 0
+				) {
+					playerData.loadPlayerSlot(SlotsMeta.quitSlotIndex, "Loading the autosave");
+				}
+			}
+		});
 
 		{
 			const tutorials: (new (...args: any[]) => TutorialDescriber)[] = [

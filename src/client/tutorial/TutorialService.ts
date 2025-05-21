@@ -79,16 +79,20 @@ export namespace TutorialServiceInitializer {
 	};
 
 	export function initialize(host: GameHostBuilder, config: InitializeConfiguration): void {
-		const reg = host.services
+		host.services
 			.registerService(TutorialsService)
 			.withArgs((di) => [config.tutorials.map((t) => di.resolveForeignClass(t) as TutorialDescriber)]);
 
 		if (config.tutorialToRunWhenNoSlots) {
-			reg.onInit((service, di) => {
+			host.enabled.Connect((di) => {
 				const playerData = di.resolve<PlayerDataStorage>();
+				const service = di.resolve<TutorialsService>();
 				service.onEnable(() => {
 					if (asMap(playerData.slots.get()).any((k, s) => s.blocks !== 0)) return;
-					service.run(di.resolveForeignClass(config.tutorialToRunWhenNoSlots!), { allowClosing: false });
+
+					task.delay(0, () =>
+						service.run(di.resolveForeignClass(config.tutorialToRunWhenNoSlots!), { allowClosing: false }),
+					);
 				});
 			});
 		}

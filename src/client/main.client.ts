@@ -1,24 +1,16 @@
 import { ContentProvider, Players, ReplicatedStorage, RunService, Workspace } from "@rbxts/services";
-import { AdminMessageController } from "client/AdminMessageController";
 import { LoadingController } from "client/controller/LoadingController";
 import { Anim } from "client/gui/Anim";
 import { BSOD } from "client/gui/BSOD";
 import { Interface } from "client/gui/Interface";
-import { LogControl } from "client/gui/static/LogControl";
 import { SandboxGame } from "client/SandboxGame";
-import { ServerRestartController } from "client/ServerRestartController";
-import { InputController } from "engine/client/InputController";
 import { LocalPlayer } from "engine/client/LocalPlayer";
 import { Transforms } from "engine/shared/component/Transforms";
 import { Instances } from "engine/shared/fixes/Instances";
 import { Objects } from "engine/shared/fixes/Objects";
 import { GameHostBuilder } from "engine/shared/GameHostBuilder";
 import { TestFramework } from "engine/shared/TestFramework";
-import { Colors } from "shared/Colors";
 import { gameInfo } from "shared/GameInfo";
-import { RemoteEvents } from "shared/RemoteEvents";
-import { SlotsMeta } from "shared/SlotsMeta";
-import type { PlayerDataStorage } from "client/PlayerDataStorage";
 import type { TransformProps } from "engine/shared/component/Transform";
 
 LocalPlayer.character.waitOnceFor(
@@ -28,6 +20,11 @@ LocalPlayer.character.waitOnceFor(
 			Instances.waitForChild<SpawnLocation>(Workspace, "Map", "SpawnLocation").CFrame.add(new Vector3(0, 1, 0)),
 		),
 );
+
+task.spawn(() => {
+	const allSoundIDs = ReplicatedStorage.Assets.GetDescendants().filter((value) => value.IsA("Sound"));
+	ContentProvider.PreloadAsync(allSoundIDs);
+});
 
 const host = LoadingController.run("Initializing", () => {
 	Interface.getGameUI<{ VERSION: TextLabel }>().VERSION.Text =
@@ -43,36 +40,6 @@ const host = LoadingController.run("Initializing", () => {
 
 	const host = LoadingController.run("Initializing services", () => builder.build());
 	LoadingController.run("Starting services", () => host.run());
-
-	task.spawn(() => {
-		const allSoundIDs = ReplicatedStorage.Assets.GetDescendants().filter((value) => value.IsA("Sound"));
-		ContentProvider.PreloadAsync(allSoundIDs);
-	});
-
-	LoadingController.run("Loading the rest", () => {
-		LogControl.instance.enable();
-
-		InputController.inputType.subscribe((newInputType) =>
-			LogControl.instance.addLine("New input type set to " + newInputType, Colors.yellow),
-		);
-		RemoteEvents.initialize();
-		AdminMessageController.initialize();
-		ServerRestartController.initialize();
-		// Atmosphere.initialize();
-
-		$log("Client loaded.");
-	});
-
-	{
-		const playerData = host.services.resolve<PlayerDataStorage>();
-		if (
-			playerData.config.get().autoLoad &&
-			playerData.slots.get()[SlotsMeta.quitSlotIndex] &&
-			playerData.slots.get()[SlotsMeta.quitSlotIndex].blocks !== 0
-		) {
-			playerData.loadPlayerSlot(SlotsMeta.quitSlotIndex, "Loading the autosave");
-		}
-	}
 
 	return host;
 });
