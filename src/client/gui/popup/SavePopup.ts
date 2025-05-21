@@ -101,7 +101,7 @@ class SaveItem extends PartialControl<SaveItemParts, SaveItemDefinition> impleme
 					if (plot.getBlocks().size() === 0) {
 						load();
 					} else {
-						popupController.showPopup(new ConfirmPopup("Load this slot?", "ඞ", load));
+						popupController.showPopup(new ConfirmPopup("Load this slot?", "you might regret this", load));
 					}
 				});
 

@@ -7,6 +7,7 @@ import { RotateGrid } from "client/tools/additional/Grid";
 import { Action } from "engine/client/Action";
 import { InputController } from "engine/client/InputController";
 import { Keybinds } from "engine/client/Keybinds";
+import { LocalPlayer } from "engine/client/LocalPlayer";
 import { Component } from "engine/shared/component/Component";
 import { ComponentChild } from "engine/shared/component/ComponentChild";
 import { ComponentInstance } from "engine/shared/component/ComponentInstance";
@@ -848,7 +849,17 @@ export class BlockEditor extends Component {
 		});
 
 		let prevCameraState: Enum.CameraType | undefined;
+		const grabCamera = () => {
+			LocalPlayer.getPlayerModule().GetControls().Disable();
+
+			const camera = Workspace.CurrentCamera;
+			if (!camera) return;
+
+			prevCameraState = camera.CameraType;
+			camera.CameraType = Enum.CameraType.Scriptable;
+		};
 		const releaseCamera = () => {
+			LocalPlayer.getPlayerModule().GetControls().Enable();
 			if (!prevCameraState) return;
 
 			const camera = Workspace.CurrentCamera;
@@ -877,16 +888,7 @@ export class BlockEditor extends Component {
 					return;
 				}
 
-				return [
-					handles.MouseButton1Down.Connect(() => {
-						const camera = Workspace.CurrentCamera;
-						if (!camera) return;
-
-						prevCameraState = camera.CameraType;
-						camera.CameraType = Enum.CameraType.Scriptable;
-					}),
-					handles.MouseButton1Up.Connect(releaseCamera),
-				];
+				return [handles.MouseButton1Down.Connect(grabCamera), handles.MouseButton1Up.Connect(releaseCamera)];
 			});
 			this.event.subInput((ih) => {
 				ih.onInputEnded((b) => {
