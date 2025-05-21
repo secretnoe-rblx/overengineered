@@ -41,6 +41,9 @@ export namespace SlotsMeta {
 		return def;
 	}
 
+	export function getSpecialNoTest(index: number): SpecialSlotInfo | undefined {
+		return specialSlots[index];
+	}
 	export function getSpecial(index: number): SpecialSlotInfo | undefined {
 		index = index >= testSlotStart ? index - testSlotOffset : index;
 		return specialSlots[index];

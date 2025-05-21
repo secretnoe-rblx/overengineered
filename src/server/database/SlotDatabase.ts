@@ -115,7 +115,7 @@ export class SlotDatabase {
 		this.blocksdb.set([userId, index], this.getBlocks(userId, indexfrom));
 
 		const meta = [...this.getMeta(userId)];
-		SlotsMeta.set(meta, { ...SlotsMeta.get(meta, indexfrom), index });
+		SlotsMeta.set(meta, { ...SlotsMeta.get(meta, indexfrom), ...(SlotsMeta.getSpecialNoTest(index) ?? {}), index });
 		this.setMeta(userId, meta);
 	}
 
