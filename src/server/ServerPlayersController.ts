@@ -105,17 +105,7 @@ export class ServerPlayersController extends HostedService {
 						ServerStorage.FindFirstChild("ShadowBan")!.Clone().Parent = (
 							player as unknown as { PlayerGui: PlayerGui }
 						).PlayerGui;
-
-						return {
-							success: true,
-							remotes: controller.remotesFolder,
-							data: {
-								purchasedSlots: undefined,
-								settings: undefined,
-								slots: undefined,
-								data: undefined,
-							},
-						};
+						return { success: false, message: "no" };
 					}
 
 					player.Kick("The server is currently unavailable, try again later.");
