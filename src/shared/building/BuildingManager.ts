@@ -132,6 +132,8 @@ export namespace BuildingManager {
 		filterSamePositions = false,
 	): readonly MirroredBlock[] {
 		const reflect = (block: MirroredBlock, mode: "x" | "y" | "z", mirrorCFrame: CFrame): MirroredBlock => {
+			let outScale = block.scale;
+
 			function rotate(cframe: CFrame): CFrame {
 				function normalRotation(cframe: CFrame) {
 					const [X, Y, Z, R00, R01, R02, R10, R11, R12, R20, R21, R22] = mirrorCFrame
@@ -168,8 +170,12 @@ export namespace BuildingManager {
 
 						throw "Unknown mode";
 					}
-					case "tetra":
-						return normalRotation(cframe.mul(CFrame.fromEulerAnglesYXZ(0, 0, math.pi * 1.5)));
+					case "tetra": {
+						const rot = normalRotation(cframe.mul(CFrame.fromEulerAnglesYXZ(0, 0, math.pi * 1.5)));
+						outScale = CFrame.fromOrientation(0, 0, math.rad(90)).mul(outScale).apply(math.abs);
+
+						return rot;
+					}
 					case "innertetra":
 						return normalRotation(cframe.mul(CFrame.fromEulerAnglesYXZ(0, 0, math.pi * 0.5)));
 				}
@@ -183,7 +189,7 @@ export namespace BuildingManager {
 				pos: new CFrame(mirrorCFrame.ToWorldSpace(new CFrame(pos.X, pos.Y, -pos.Z)).Position).mul(
 					rotated.Rotation,
 				),
-				scale: block.pos.Rotation.ToObjectSpace(rotated.Rotation).mul(block.scale).Abs(),
+				scale: outScale,
 			};
 		};
 
