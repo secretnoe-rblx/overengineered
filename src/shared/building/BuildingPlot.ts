@@ -7,7 +7,6 @@ import { Operation } from "engine/shared/Operation";
 import { BlockManager } from "shared/building/BlockManager";
 import { ReadonlyPlot } from "shared/building/ReadonlyPlot";
 import { SharedBuilding } from "shared/building/SharedBuilding";
-import { VectorUtils } from "shared/utils/VectorUtils";
 
 const err = (message: string): ErrorResponse => ({ success: false, message });
 const success: SuccessResponse = { success: true };
@@ -73,14 +72,6 @@ export class BuildingPlot extends ReadonlyPlot {
 		const block = this.blockList.blocks[data.id];
 		if (!block) {
 			return { success: false, message: `Unknown block id ${data.id}` };
-		}
-
-		const roundedpos = VectorUtils.roundVector3To(data.location.Position, 0.3);
-		for (const block of this.getBlocks()) {
-			const pos = VectorUtils.roundVector3To(block.GetPivot().Position, 0.3);
-			if (pos === roundedpos) {
-				return err(`Can't place blocks in blocks`);
-			}
 		}
 
 		const placed = this.getBlocks().count((placed_block) => BlockManager.manager.id.get(placed_block) === data.id);
