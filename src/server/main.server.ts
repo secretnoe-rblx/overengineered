@@ -91,6 +91,6 @@ LaserProjectile;
 
 Players.PlayerAdded.Connect((plr) => {
 	if (!RunService.IsStudio() && plr.AccountAge < 10) {
-		// plr.Kick("Your account is too young, due to security reasons you must wait 10 days before you can play.");
+		plr.Kick("Your account is too young, due to security reasons you must wait 10 days before you can play.");
 	}
 });

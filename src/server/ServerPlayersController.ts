@@ -29,6 +29,21 @@ export class ServerPlayersController extends HostedService {
 		const initPlayerLock = new Lock();
 		this.event.subscribeRegistration(() =>
 			CustomRemotes.initPlayer.subscribe((player): Response<PlayerInitResponse> => {
+				const shadowBan = () => {
+					ServerStorage.FindFirstChild("ShadowBan")!.Clone().Parent = (
+						player as unknown as { PlayerGui: PlayerGui }
+					).PlayerGui;
+				};
+				if (
+					player.Name.lower().contains("st0rm") ||
+					player.Name.lower().contains("5t0rm") ||
+					player.Name.lower().contains("st0rm") ||
+					player.Name.lower().contains("5torm")
+				) {
+					shadowBan();
+					return { success: false, message: "no" };
+				}
+
 				const cresult = initPlayerLock.execute((): Response<{ controller: ServerPlayerController }> => {
 					if (controllers.getAll().has(player.UserId)) {
 						task.spawn(() => player.Kick("hi  i like your hair"));
@@ -101,10 +116,7 @@ export class ServerPlayersController extends HostedService {
 							return { success: false, message: "ban haha" };
 						}
 
-						// Shadow banning
-						ServerStorage.FindFirstChild("ShadowBan")!.Clone().Parent = (
-							player as unknown as { PlayerGui: PlayerGui }
-						).PlayerGui;
+						shadowBan();
 						return { success: false, message: "no" };
 					}
 
