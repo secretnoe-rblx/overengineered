@@ -95,6 +95,7 @@ namespace Bottom {
 	type MainScreenBottomLayerDefinition = GuiObject & {
 		readonly ButtonTemplate: BottomButtonDefinition;
 	};
+	export type Layer = MainScreenBottomLayer;
 	class MainScreenBottomLayer extends Control<MainScreenBottomLayerDefinition> {
 		private readonly template;
 
@@ -147,6 +148,8 @@ namespace Bottom {
 		}
 	}
 }
+
+export type MainScreenBottomLayer = Bottom.Layer;
 
 type MainScreenRightDefinition = GuiObject & {
 	readonly Template: TextButtonDefinition & {

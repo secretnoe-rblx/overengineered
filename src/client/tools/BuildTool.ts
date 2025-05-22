@@ -139,15 +139,9 @@ const getMouseTargetBlockPositionV2 = (
 
 	const aabb = fromModelBB(block.model, rotation);
 	let targetPosition = globalMouseHitPos;
-	const a = targetPosition;
-	const b = (targetPosition = addTargetSize(target, normal, targetPosition));
-	const c = (targetPosition = offsetBlockPivotToCenter(block, targetPosition));
-	const d = (targetPosition = addBlockSize(normal, targetPosition));
-
-	DebugLog.named("a", a.Y);
-	DebugLog.named("b", b.Y);
-	DebugLog.named("c", c.Y);
-	DebugLog.named("d", d.Y);
+	targetPosition = addTargetSize(target, normal, targetPosition);
+	targetPosition = offsetBlockPivotToCenter(block, targetPosition);
+	targetPosition = addBlockSize(normal, targetPosition);
 
 	if (gridEnabled) {
 		// костыль of fixing the plots position

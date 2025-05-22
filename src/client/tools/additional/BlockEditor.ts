@@ -24,10 +24,10 @@ import { BlockManager } from "shared/building/BlockManager";
 import { SharedBuilding } from "shared/building/SharedBuilding";
 import { Colors } from "shared/Colors";
 import { ReplicatedAssets } from "shared/ReplicatedAssets";
-import type { MainScreenLayout } from "client/gui/MainScreenLayout";
+import type { MainScreenBottomLayer, MainScreenLayout } from "client/gui/MainScreenLayout";
 import type { ClientBuildingTypes } from "client/modes/build/ClientBuilding";
 import type { PlayerDataStorage } from "client/PlayerDataStorage";
-import type { Theme, ThemeColorKey } from "client/Theme";
+import type { Theme } from "client/Theme";
 import type { Control } from "engine/client/gui/Control";
 import type { KeybindDefinition } from "engine/client/Keybinds";
 import type { ReadonlyObservableValue } from "engine/shared/event/ObservableValue";
@@ -224,36 +224,35 @@ const formatVecForFloatingText = (vec: Vector3): string => {
 
 interface b {
 	readonly iconId?: string;
-	readonly background?: ThemeColorKey;
 	readonly state: OverlayValueStorage<boolean>;
 }
-const createButtonList = <K extends string>(
+const createButtonSwitchList = <K extends string>(
 	parent: Component,
 	mainScreen: MainScreenLayout,
 	theme: Theme,
 	buttons: { readonly [k in K]: b },
-): { readonly [k in K]: Control } => {
+): LuaTuple<[{ readonly [k in K]: Control }, MainScreenBottomLayer]> => {
 	const layer = parent.parentGui(mainScreen.bottom.push());
 
 	const ret: { [k in K]?: Control } = {};
-	for (const [k, { iconId, background, state }] of pairs(buttons)) {
+	for (const [k, { iconId, state }] of pairs(buttons)) {
 		const kb = new ObservableValue(state.get());
 
 		const btn = layer
-			.addButton(k.upper(), iconId, background)
+			.addButton(k.upper(), iconId, "buttonInactive")
 			.addButtonAction(() => state.and("kb", kb.toggle()))
 			.initializeSimpleTransform("BackgroundColor3")
 			.themeButton(
 				theme,
 				parent.event.addObservable(
-					state.fReadonlyCreateBased((enabled) => (enabled ? "buttonActive" : "buttonNormal")),
+					state.fReadonlyCreateBased((enabled) => (enabled ? "buttonActive" : "buttonInactive")),
 				),
 			);
 
 		ret[k] = btn;
 	}
 
-	return ret as { [k in K]: Control };
+	return $tuple(ret as { [k in K]: Control }, layer);
 };
 
 // #region Move
@@ -313,8 +312,29 @@ class MoveComponent extends Component implements EditComponent {
 			sideways.and("kb", value);
 			updateFromCurrentMovement();
 		});
-		createButtonList(this, mainScreen, theme, { sideways: { state: sideways } });
+		const [, buttons] = createButtonSwitchList(this, mainScreen, theme, { sideways: { state: sideways } });
 		// #endregion
+		buttons
+			.addButton("Snap to grid") //
+			.addButtonAction(() => {
+				bb = BB.fromPart(handles);
+				let targetPosition = bb.center.Position;
+
+				// костыль of fixing the plots position
+				targetPosition = targetPosition.add(new Vector3(0, 0.5, 0.5));
+
+				const sizeOffset = bb.getRotatedSize().apply((v) => (v % 2) / 2);
+				targetPosition = targetPosition.sub(sizeOffset);
+				targetPosition = grid.get().constrain(CFrame.identity, targetPosition);
+				targetPosition = targetPosition.add(sizeOffset);
+
+				// targetPosition = constrainPositionToGrid(targetPosition, 1);
+				targetPosition = targetPosition.sub(new Vector3(0, 0.5, 0.5));
+
+				handles.PivotTo(bb.center.Rotation.add(targetPosition));
+				reposition(blocks, originalBB, (bb = BB.fromPart(handles)));
+				updateFloatingText();
+			});
 
 		const createVisualizer = () => {
 			const instance = ReplicatedAssets.get<{
@@ -402,6 +422,8 @@ class RotateComponent extends Component implements EditComponent {
 		blocks: readonly EditingBlock[],
 		originalBB: BB,
 		grid: ReadonlyObservableValue<RotateGrid>,
+		@inject theme: Theme,
+		@inject mainScreen: MainScreenLayout,
 	) {
 		super();
 
@@ -439,6 +461,28 @@ class RotateComponent extends Component implements EditComponent {
 		};
 
 		this.event.subscribeObservable(grid, updateFromCurrentRotation);
+
+		const [, buttons] = createButtonSwitchList(this, mainScreen, theme, {});
+		buttons
+			.addButton("Snap to grid") //
+			.addButtonAction(() => {
+				bb = BB.fromPart(handles);
+
+				const [x, y, z] = handles.CFrame.Rotation.ToObjectSpace(startbb.center.Rotation).ToOrientation();
+				handles.PivotTo(
+					new CFrame(bb.center.Position).mul(
+						CFrame.fromOrientation(
+							grid.get().constrain(x),
+							grid.get().constrain(y),
+							grid.get().constrain(z),
+						),
+					),
+				);
+				handles.Rotate.Center.PivotTo(handles.GetPivot());
+
+				reposition(blocks, originalBB, (bb = BB.fromPart(handles)));
+				updateFloatingText();
+			});
 
 		const sub = (handle: ArcHandles) => {
 			this.event.subscribe(handle.MouseDrag, (axis, relativeAngle, deltaRadius) => {
@@ -615,11 +659,28 @@ class ScaleComponent extends Component implements EditComponent {
 			});
 		});
 
-		const { centered, uniform } = createButtonList(this, mainScreen, theme, {
+		const [{ centered, uniform }, buttons] = createButtonSwitchList(this, mainScreen, theme, {
 			centered: { state: centerBased },
 			uniform: { state: sameSize },
 		});
 		const sameSizeErr = (uniform as Control<ControlWithErrorDefinition>).getComponent(ControlWithError);
+
+		buttons
+			.addButton("Snap to grid") //
+			.addButtonAction(() => {
+				bb = BB.fromPart(handles);
+				let target = bb.originalSize;
+
+				target = grid
+					.get()
+					.constrain(Vector3.xAxis, CFrame.identity, new Vector3(target.X, 0, 0))
+					.add(grid.get().constrain(Vector3.yAxis, CFrame.identity, new Vector3(0, target.Y, 0)))
+					.add(grid.get().constrain(Vector3.zAxis, CFrame.identity, new Vector3(0, 0, target.Z)));
+
+				handles.Size = target;
+				reposition(blocks, originalBB, (bb = BB.fromPart(handles)));
+				updateFloatingText();
+			});
 
 		// #region Block rotation check
 		const areRotations90DegreesApart = (cframeA: CFrame, cframeB: CFrame): boolean => {

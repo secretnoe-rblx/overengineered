@@ -475,7 +475,9 @@ export class EditTool extends ToolBase {
 		} as const;
 
 		for (const [k, action] of pairs(actions)) {
-			action.initKeybind(keybinds.fromDefinition(editKeybinds[k]));
+			if (k in editKeybinds) {
+				action.initKeybind(keybinds.fromDefinition(editKeybinds[k as never]));
+			}
 		}
 
 		const someBlocksSelected = this.selected.createBased((blocks) => blocks.size() !== 0);
