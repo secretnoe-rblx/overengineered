@@ -118,6 +118,7 @@ class Logic extends InstanceBlockLogic<typeof definition, SuspensionModel> {
 export const SuspensionBlock = {
 	...BlockCreation.defaults,
 	id: "suspensionblock",
+	limit: 150,
 	displayName: "Suspension",
 	description: "Sus pension spring",
 
