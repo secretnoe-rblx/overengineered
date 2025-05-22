@@ -74,6 +74,11 @@ export class BuildingPlot extends ReadonlyPlot {
 			return { success: false, message: `Unknown block id ${data.id}` };
 		}
 
+		const placed = this.getBlocks().count((placed_block) => BlockManager.manager.id.get(placed_block) === data.id);
+		if (placed > block.limit) {
+			return err(`Type limit exceeded for ${data.id}`);
+		}
+
 		const uuid = data.uuid ?? (HttpService.GenerateGUID(false) as BlockUuid);
 		if (this.tryGetBlock(uuid)) {
 			throw `Block with uuid ${uuid} already exists`;
