@@ -1,6 +1,7 @@
 import { Players, ServerStorage } from "@rbxts/services";
 import { ComponentKeyedChildren } from "engine/shared/component/ComponentKeyedChildren";
 import { HostedService } from "engine/shared/di/HostedService";
+import { Lock } from "engine/shared/fixes/Lock";
 import { PlayerWatcher } from "engine/shared/PlayerWatcher";
 import { t } from "engine/shared/t";
 import { isNotAdmin_AutoBanned } from "server/BanAdminExploiter";
@@ -25,28 +26,36 @@ export class ServerPlayersController extends HostedService {
 		const controllers = this.parent(new ComponentKeyedChildren<number, ServerPlayerController>(true));
 		this.controllers = controllers.children;
 
+		const initPlayerLock = new Lock();
 		this.event.subscribeRegistration(() =>
 			CustomRemotes.initPlayer.subscribe((player): Response<PlayerInitResponse> => {
-				if (controllers.getAll().has(player.UserId)) {
-					player.Kick("hi  i like your hair");
-					controllers.remove(player.UserId);
+				const cresult = initPlayerLock.execute((): Response<{ controller: ServerPlayerController }> => {
+					if (controllers.getAll().has(player.UserId)) {
+						task.spawn(() => player.Kick("hi  i like your hair"));
+						controllers.remove(player.UserId);
 
-					return { success: false, message: "no" };
-				}
+						return { success: false, message: "no" };
+					}
 
-				const plot = sharedPlots.plots.find((p) => p.ownerId.get() === undefined);
-				if (!plot) {
-					return { success: false, message: "No free plot found, try again later." };
-				}
+					const plot = sharedPlots.plots.find((p) => p.ownerId.get() === undefined);
+					if (!plot) {
+						return { success: false, message: "No free plot found, try again later." };
+					}
 
-				const scope = di.beginScope((builder) => {
-					builder.registerSingletonValue(player);
-					builder.registerSingletonValue(plot);
-					builder.registerSingletonClass(ServerPlayerController);
+					const scope = di.beginScope((builder) => {
+						builder.registerSingletonValue(player);
+						builder.registerSingletonValue(plot);
+						builder.registerSingletonClass(ServerPlayerController);
+					});
+
+					const controller = scope.resolveForeignClass(ServerPlayerController, [player, plot]);
+					controllers.add(player.UserId, controller);
+
+					return { success: true, controller };
 				});
 
-				const controller = scope.resolveForeignClass(ServerPlayerController, [player, plot]);
-				controllers.add(player.UserId, controller);
+				if (!cresult.success) return cresult;
+				const controller = cresult.controller;
 
 				let data;
 				try {
