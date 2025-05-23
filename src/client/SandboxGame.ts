@@ -1,4 +1,4 @@
-import { Players, Workspace } from "@rbxts/services";
+import { Players, RunService, Workspace } from "@rbxts/services";
 import { AdminMessageController } from "client/AdminMessageController";
 import { ClientEffectCreator } from "client/ClientEffectCreator";
 import { BeaconController } from "client/controller/BeaconController";
@@ -38,6 +38,7 @@ import { BasicPlaneTutorial } from "client/tutorial/tutorials/BasicPlaneTutorial
 import { NewBasicPlaneTutorial } from "client/tutorial/tutorials/NewBasicPlaneTutorial";
 import { TestTutorial } from "client/tutorial/tutorials/TestTutorial";
 import { TutorialServiceInitializer } from "client/tutorial/TutorialService";
+import { TestTutorial as TestTutorial2 } from "client/tutorial2/TestTutorial";
 import { InputController } from "engine/client/InputController";
 import { Keybinds } from "engine/client/Keybinds";
 import { PlayerRank } from "engine/shared/PlayerRank";
@@ -181,6 +182,13 @@ export namespace SandboxGame {
 			TutorialServiceInitializer.initialize(builder, {
 				tutorials,
 				tutorialToRunWhenNoSlots: NewBasicPlaneTutorial,
+			});
+		}
+
+		if (RunService.IsStudio()) {
+			builder.enabled.Connect((di, host) => {
+				const tutorial = di.resolveForeignClass(TestTutorial2);
+				host.parent(tutorial);
 			});
 		}
 	}

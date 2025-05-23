@@ -196,6 +196,7 @@ export class MainScreenLayout extends Component {
 	readonly top: Top.MainScreenTop;
 	readonly bottom: Bottom.MainScreenBottom;
 	readonly right: MainScreenRight;
+	readonly hotbar;
 
 	constructor(@inject di: DIContainer) {
 		super();
@@ -207,26 +208,29 @@ export class MainScreenLayout extends Component {
 		this.bottom = this.parentGui(new Bottom.MainScreenBottom(this.instance.Bottom));
 		this.right = this.parentGui(new MainScreenRight(this.instance.Right));
 
-		const initHotbar = () => {
-			const hotbar = this.parent(
+		{
+			this.hotbar = this.parent(
 				di.resolveForeignClass(HotbarControl, [
 					Interface.getInterface<{ Hotbar: HotbarControlDefinition }>().Hotbar,
 				]),
 			);
 
 			const visibilityFunction = Transforms.boolStateMachine(
-				hotbar.instance,
+				this.hotbar.instance,
 				TransformService.commonProps.quadOut02,
 				{ AnchorPoint: new Vector2(0.5, 1) },
 				{ AnchorPoint: new Vector2(0.5, 0) },
-				(tr, enabled) => (enabled ? tr.show(hotbar.instance) : 0),
-				(tr, enabled) => (enabled ? 0 : tr.hide(hotbar.instance)),
+				(tr, enabled) => (enabled ? tr.show(this.hotbar.instance) : 0),
+				(tr, enabled) => (enabled ? 0 : tr.hide(this.hotbar.instance)),
 			);
-			hotbar.onEnabledStateChange(visibilityFunction);
+			this.hotbar.onEnabledStateChange(visibilityFunction);
 
-			this.event.subscribeObservable(LoadingController.isLoading, (loading) => hotbar.setEnabled(!loading), true);
-		};
-		initHotbar();
+			this.event.subscribeObservable(
+				LoadingController.isLoading,
+				(loading) => this.hotbar.setEnabled(!loading),
+				true,
+			);
+		}
 
 		const forEachChild = (parent: Instance, callback: (child: GuiObject) => void) => {
 			for (const child of parent.GetChildren()) {

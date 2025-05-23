@@ -88,7 +88,12 @@ export class ToolController extends Component {
 			tool?.enable();
 		});
 		this.enabledTools = new ComponentDisabler<ToolBase>();
-		this.enabledTools.updated.Connect(() => this.selectedTool.set(undefined));
+		this.enabledTools.updated.Connect(() => {
+			const selected = this.selectedTool.get();
+			if (selected && !this.enabledTools.isEnabled(selected)) {
+				this.selectedTool.set(undefined);
+			}
+		});
 		this.tools.subscribe(() => this.selectedTool.set(undefined));
 
 		let prevTool: ToolBase | undefined = undefined;
