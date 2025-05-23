@@ -125,6 +125,7 @@ export class PlotWelder extends Component {
 			);
 		};
 
+		const weldedTo = new Set<BasePart>();
 		for (const collider of colliders.GetChildren()) {
 			if (!collider.IsA("BasePart")) {
 				$err("Found a non-BasePart in a collider!!!");
@@ -136,6 +137,8 @@ export class PlotWelder extends Component {
 
 			const targetPart = getTarget(collider);
 			if (!targetPart) continue;
+			if (weldedTo.has(targetPart)) continue;
+			weldedTo.add(targetPart);
 
 			for (const anotherCollider of touchingWith) {
 				const anotherTargetPart = getTarget(anotherCollider);
