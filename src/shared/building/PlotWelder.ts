@@ -137,12 +137,15 @@ export class PlotWelder extends Component {
 
 			const targetPart = getTarget(collider);
 			if (!targetPart) continue;
-			if (weldedTo.has(targetPart)) continue;
-			weldedTo.add(targetPart);
 
 			for (const anotherCollider of touchingWith) {
 				const anotherTargetPart = getTarget(anotherCollider);
 				if (!anotherTargetPart) continue;
+
+				if (weldedTo.has(anotherTargetPart)) {
+					continue;
+				}
+				weldedTo.add(anotherTargetPart);
 
 				this.makeJoints(targetPart, anotherTargetPart);
 			}
