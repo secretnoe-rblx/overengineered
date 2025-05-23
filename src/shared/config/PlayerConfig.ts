@@ -118,6 +118,10 @@ export const PlayerConfigDefinition = {
 		type: "bool",
 		config: true as boolean,
 	},
+	autoPlotTeleport: {
+		type: "bool",
+		config: true as boolean,
+	},
 	sprintSpeed: {
 		type: "clampedNumber",
 		min: 20,

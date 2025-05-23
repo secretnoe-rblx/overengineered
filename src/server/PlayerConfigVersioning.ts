@@ -210,7 +210,21 @@ const v13: UpdatablePlayerConfigVersion<PlayerConfigV11, PlayerConfigV12> = {
 	},
 };
 
-const versions = [v1, v2, v3, v4, v5, v6, v7, v8, v9, v10, v11, v12, v13] as const;
+// Add autoPlotTeleport
+type PlayerConfigV13 = PlayerConfigV12 & { autoPlotTeleport: boolean };
+const v14: UpdatablePlayerConfigVersion<PlayerConfigV12, PlayerConfigV13> = {
+	version: 14,
+
+	update(prev: Partial<PlayerConfigV12>): Partial<PlayerConfigV13> {
+		return {
+			autoPlotTeleport: PlayerConfigDefinition.autoPlotTeleport.config,
+			...prev,
+			version: this.version,
+		};
+	},
+};
+
+const versions = [v1, v2, v3, v4, v5, v6, v7, v8, v9, v10, v11, v12, v13, v14] as const;
 const current = versions[versions.size() - 1] as typeof versions extends readonly [...unknown[], infer T] ? T : never;
 
 export namespace PlayerConfigUpdater {

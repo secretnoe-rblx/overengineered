@@ -18,6 +18,10 @@ export class PlayerSettingsGeneral extends ConfigControlList {
 			this.addToggle("Automatic slot loading") //
 				.initToObjectPart(value, ["autoLoad"])
 				.setDescription("Automatically load 'Last Exit' slot on join");
+
+			this.addToggle("Automatic teleport to plot") //
+				.initToObjectPart(value, ["autoPlotTeleport"])
+				.setDescription("Automatically teleport to plot after despawning your vehicle");
 		}
 	}
 }

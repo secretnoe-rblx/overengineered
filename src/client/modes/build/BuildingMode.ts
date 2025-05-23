@@ -119,7 +119,7 @@ export class BuildingMode extends PlayMode {
 		@inject plot: SharedPlot,
 		@inject private readonly toolController: ToolController,
 		@inject popupController: PopupController,
-		@inject playerData: PlayerDataStorage,
+		@inject private readonly playerData: PlayerDataStorage,
 		@inject di: DIContainer,
 	) {
 		super();
@@ -275,6 +275,10 @@ export class BuildingMode extends PlayMode {
 		}
 
 		const tp = () => {
+			if (!this.playerData.config.get().autoPlotTeleport) {
+				return;
+			}
+
 			const rootPart = LocalPlayer.rootPart.get();
 			if (!rootPart) return;
 
