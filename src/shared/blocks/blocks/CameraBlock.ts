@@ -1,4 +1,4 @@
-import { Lighting, RunService, Workspace } from "@rbxts/services";
+import { Lighting, Players, RunService, Workspace } from "@rbxts/services";
 import { Component } from "engine/shared/component/Component";
 import { Element } from "engine/shared/Element";
 import { A2SRemoteEvent } from "engine/shared/event/PERemoteEvent";
@@ -10,7 +10,7 @@ import type { BlockLogicFullBothDefinitions, InstanceBlockLogicArgs } from "shar
 import type { BlockBuilder } from "shared/blocks/Block";
 
 const definition = {
-	inputOrder: ["enabled", "fov", "saturation", "brightness", "contrast", "tint"],
+	inputOrder: ["enabled", "controllable", "fov", "saturation", "brightness", "contrast", "tint"],
 	input: {
 		enabled: {
 			displayName: "Enabled",
@@ -29,6 +29,11 @@ const definition = {
 					},
 				},
 			},
+		},
+		controllable: {
+			displayName: "Controllable",
+			connectorHidden: true,
+			types: { bool: { config: false } },
 		},
 		fov: {
 			displayName: "Field Of View",
@@ -148,19 +153,41 @@ class Logic extends InstanceBlockLogic<typeof definition> {
 		});
 
 		const fovCache = this.initializeInputCache("fov");
+		const controllableCache = this.initializeInputCache("controllable");
+
+		let cameraSub: SignalConnection | undefined = undefined;
+		this.onDisable(() => cameraSub?.Disconnect());
 
 		const disable = () => {
-			enabledCameras.delete(this);
-			Workspace.CurrentCamera =
-				(Objects.firstKey(enabledCameras)?.instance.FindFirstChild("Camera") as Camera | undefined) ??
-				defaultCamera;
+			cameraSub?.Disconnect();
+			if (controllableCache.tryGet()) {
+				defaultCamera!.CameraSubject = Players.LocalPlayer.Character?.FindFirstChild("Humanoid") as
+					| Humanoid
+					| undefined;
+			} else {
+				enabledCameras.delete(this);
+				Workspace.CurrentCamera =
+					(Objects.firstKey(enabledCameras)?.instance.FindFirstChild("Camera") as Camera | undefined) ??
+					defaultCamera;
+			}
 		};
 
 		this.onk(["enabled"], ({ enabled }) => {
 			if (enabled) {
-				enabledCameras.add(this);
-				Workspace.CurrentCamera = camera;
-				camera.FieldOfView = fovCache.tryGet() ?? definition.input.fov.types.number.config;
+				if (controllableCache.tryGet()) {
+					cameraSub = defaultCamera?.GetPropertyChangedSignal("CameraSubject").Connect(() => {
+						const subject = defaultCamera!.CameraSubject;
+						if (subject?.Name !== "Target") {
+							defaultCamera!.CameraSubject = target;
+						}
+					});
+
+					defaultCamera!.CameraSubject = target;
+				} else {
+					enabledCameras.add(this);
+					Workspace.CurrentCamera = camera;
+					camera.FieldOfView = fovCache.tryGet() ?? definition.input.fov.types.number.config;
+				}
 			} else {
 				disable();
 			}
