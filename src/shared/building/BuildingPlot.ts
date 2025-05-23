@@ -83,7 +83,7 @@ export class BuildingPlot extends ReadonlyPlot {
 
 			const pos = VectorUtils.roundVector3To(block.GetPivot().Position, 0.1);
 			if (pos === roundedpos) {
-				return err(`Can't place blocks in blocks`);
+				return err(`Unable to place block in another`);
 			}
 		}
 
