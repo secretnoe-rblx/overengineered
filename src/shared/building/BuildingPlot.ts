@@ -75,8 +75,8 @@ export class BuildingPlot extends ReadonlyPlot {
 		}
 
 		const placed = this.getBlocks().count((placed_block) => BlockManager.manager.id.get(placed_block) === data.id);
-		if (placed > block.limit) {
-			return err(`Type limit exceeded for ${data.id}`);
+		if (placed > block.limit && game.PrivateServerOwnerId === 0) {
+			return err(`Type limit exceeded for ${data.id}. Maybe you should play on a private server?`);
 		}
 
 		const uuid = data.uuid ?? (HttpService.GenerateGUID(false) as BlockUuid);
