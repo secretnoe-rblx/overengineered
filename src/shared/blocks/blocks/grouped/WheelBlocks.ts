@@ -44,9 +44,6 @@ class Logic extends InstanceBlockLogic<typeof definition> {
 			const collider = this.instance.FindFirstChild("Collider") as BasePart | undefined;
 			if (!collider) return;
 
-			const props = collider.CustomPhysicalProperties;
-			if (!props) return;
-
 			const frictionMagic = 2; // hardcoded
 			const elasticityMagic = 1; // hardcoded
 
@@ -54,11 +51,11 @@ class Logic extends InstanceBlockLogic<typeof definition> {
 			const elasticityModifier = elasticity / 100;
 
 			collider.CustomPhysicalProperties = new PhysicalProperties(
-				props.Density,
+				7.5,
 				frictionModifier * frictionMagic,
 				elasticityModifier * elasticityMagic,
-				props.FrictionWeight,
-				props.ElasticityWeight,
+				100,
+				0.4,
 			);
 		});
 	}
