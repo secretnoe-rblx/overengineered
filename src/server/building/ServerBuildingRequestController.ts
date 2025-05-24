@@ -99,8 +99,10 @@ export class ServerBuildingRequestController extends Component {
 
 			const placed = bplot.getBlocks().count((placed_block) => BlockManager.manager.id.get(placed_block) === id);
 
-			if (placed + count > regblock.limit && game.PrivateServerOwnerId === 0) {
-				return err(`Type limit exceeded for ${id}. Maybe you should play on a private server?`);
+			if (placed + count > regblock.limit && game.PrivateServerOwnerId === 0 && regblock.limit !== 1) {
+				return err(
+					`Type limit exceeded for ${regblock.id}. ${regblock.limit !== 1 ? "Maybe you should play on a private server?" : "Even a private server can't help you."}`,
+				);
 			}
 		}
 
