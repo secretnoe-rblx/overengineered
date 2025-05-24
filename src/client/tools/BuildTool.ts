@@ -86,7 +86,7 @@ const getMouseTargetBlockPositionV2 = (
 ): Vector3 | undefined => {
 	const constrainPositionToGrid = (normal: Vector3, pos: Vector3) => {
 		const from = (coord: number, size: number) => {
-			const offset = (size % 2) / 2;
+			const offset = size < 0.5 ? 0 : (size % 2) / 2;
 
 			coord -= offset;
 			const pos = MathUtils.round(coord, step);
