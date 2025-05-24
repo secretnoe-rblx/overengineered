@@ -110,7 +110,7 @@ export const MotorBlock = {
 	...BlockCreation.defaults,
 	id: "motorblock",
 	displayName: "Motor",
-	description: "Rotates attached blocks",
+	description: "Rotates attached blocks. For unpowered rotation, use the Hinge block.",
 	limit: 100,
 
 	logic: { definition, ctor: Logic },
