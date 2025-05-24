@@ -518,14 +518,17 @@ namespace Mux {
 
 				//set color
 				if (!muxLamps.isEmpty() && inputs.valueChanged) {
-					events.update.send({
-						sender: Players.LocalPlayer,
-						block: this.instance!,
-						lamps: muxLamps,
-						index: value as number,
-						color: activeColor,
-						locallyEnabled: playerSettings?.config.get().graphics.logicEffects ?? true,
-					});
+					events.update.sendOrBurn(
+						{
+							sender: Players.LocalPlayer,
+							block: this.instance!,
+							lamps: muxLamps,
+							index: value as number,
+							color: activeColor,
+							locallyEnabled: playerSettings?.config.get().graphics.logicEffects ?? true,
+						},
+						this,
+					);
 				}
 
 				muxValue(
@@ -732,14 +735,17 @@ namespace Demux {
 				if (valueType === "bool") value = value ? 1 : 0;
 
 				if (!muxLamps.isEmpty() && valueChanged) {
-					events.update.send({
-						sender: Players.LocalPlayer,
-						block: this.instance!,
-						lamps: muxLamps,
-						index: value as number,
-						color: activeColor,
-						locallyEnabled: playerSettings?.config.get().graphics.logicEffects ?? true,
-					});
+					events.update.sendOrBurn(
+						{
+							sender: Players.LocalPlayer,
+							block: this.instance!,
+							lamps: muxLamps,
+							index: value as number,
+							color: activeColor,
+							locallyEnabled: playerSettings?.config.get().graphics.logicEffects ?? true,
+						},
+						this,
+					);
 				}
 
 				demuxValue(math.floor(value as number), input, inputType!);

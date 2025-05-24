@@ -156,16 +156,17 @@ class Logic extends InstanceBlockLogic<typeof definition> {
 		this.on(({ enabled, brightness, lightRange, color, colorMixing, brightnessAffectsColor }) => {
 			const finalColor = colorFunctions[colorMixing](color, blockColor);
 
-			const data: UpdateData = {
-				block: this.instance,
-				state: enabled,
-				color: finalColor,
-				brightness: brightness * 0.2, // a.k.a. / 100 * 40 and 30% off
-				range: lightRange * 0.6, // a.k.a. / 100 * 60
-				brightnessAffectsColor,
-			};
-
-			events.update.send(data);
+			events.update.sendOrBurn(
+				{
+					block: this.instance,
+					state: enabled,
+					color: finalColor,
+					brightness: brightness * 0.2, // a.k.a. / 100 * 40 and 30% off
+					range: lightRange * 0.6, // a.k.a. / 100 * 60
+					brightnessAffectsColor,
+				},
+				this,
+			);
 		});
 	}
 }
