@@ -10,6 +10,8 @@ import type { UnitTests } from "engine/shared/TestFramework";
 
 namespace PopupTests {
 	export function show(di: DIContainer) {
+		let idtb: TextBox;
+
 		return new Control(
 			Element.create(
 				"Frame",
@@ -19,13 +21,17 @@ namespace PopupTests {
 				},
 				{
 					list: Element.create("UIListLayout", { FillDirection: Enum.FillDirection.Vertical }),
+					idtb: (idtb = Element.create("TextBox", {
+						Text: "2235259826",
+						Size: new UDim2(0, 200, 0, 30),
+					})),
 					b5123: TextButtonControl.create({
-						Text: "Saves MAKS",
+						Text: "Saves from id",
 						Size: new UDim2(0, 200, 0, 30),
 					})
 						.with((b) =>
 							b.activated.Connect(() => {
-								const pds = PlayerDataStorage.forPlayer(2235259826);
+								const pds = PlayerDataStorage.forPlayer(tonumber(idtb.Text)!);
 								const scope = di.beginScope((builder) => {
 									builder.registerSingletonValue(pds);
 								});
@@ -34,6 +40,7 @@ namespace PopupTests {
 								const wrapper = new Control(popup.instance);
 								wrapper.cacheDI(pds);
 								wrapper.parent(popup);
+								popup.onDisable(() => wrapper.destroy());
 
 								scope.resolve<PopupController>().showPopup(wrapper);
 							}),
