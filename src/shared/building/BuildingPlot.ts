@@ -75,7 +75,7 @@ export class BuildingPlot extends ReadonlyPlot {
 		}
 
 		const placed = this.getBlocks().count((placed_block) => BlockManager.manager.id.get(placed_block) === data.id);
-		if (placed > block.limit && game.PrivateServerOwnerId === 0 && block.limit !== 1) {
+		if (block.limit === 1 || (placed > block.limit && game.PrivateServerOwnerId === 0)) {
 			return err(
 				`Type limit exceeded for ${data.id}. ${block.limit !== 1 ? "Maybe you should play on a private server?" : "Even a private server can't help you."}`,
 			);
