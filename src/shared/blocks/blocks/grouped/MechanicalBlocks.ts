@@ -30,10 +30,6 @@ const blocks: BlockBuildersWithoutIdAndDefaults = {
 		description: "Kinda like a ball socket but with transmitting rotational force",
 		limit: 100,
 	},
-	bearingshaft: {
-		displayName: "Bearing Shaft",
-		description: "A free spinning shaft with a bearing",
-	},
 
 	smallgear: {
 		displayName: "Small Gear",
