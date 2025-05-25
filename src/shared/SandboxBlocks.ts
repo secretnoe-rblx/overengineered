@@ -160,6 +160,7 @@ export const CreateSandboxBlocks = (di: DIContainer): BlockList => {
 
 		AltimeterBlock,
 		KeySensorBlock,
+		// ButtonBlock,
 		ControllerBlock,
 		AngleSensorBlock,
 		GPSSensorBlock,
