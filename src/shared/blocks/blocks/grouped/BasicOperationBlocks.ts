@@ -1100,6 +1100,60 @@ const vec3 = {
 			}),
 		),
 	},
+
+	vec3rottodirection: {
+		displayName: "Orientation To Direction",
+		description: "Calculates the direction vector from an orientation",
+		modelSource: autoModel("DoubleGenericLogicBlockPrefab", "ROT->DIR", categories.converterVector),
+		search: {
+			partialAliases: ["rotation"],
+		},
+		logic: logic(
+			{
+				input: {
+					rotation: defpartsf.vector3("Orientation", { unit: "Radians" }),
+				},
+				output: {
+					result: {
+						displayName: "Direction",
+						types: ["vector3"],
+					},
+				},
+			},
+			({ rotation }) => ({
+				result: {
+					type: "vector3",
+					value: CFrame.fromOrientation(rotation.X, rotation.Y, rotation.Z).LookVector,
+				},
+			}),
+		),
+	},
+
+	vec3directiontorot: {
+		displayName: "Direction To Orientation",
+		description: "Calculates the orientation vector from a direction",
+		modelSource: autoModel("DoubleGenericLogicBlockPrefab", "DIR->ROT", categories.converterVector),
+		search: {
+			partialAliases: ["rotation"],
+		},
+		logic: logic(
+			{
+				input: {
+					direction: defpartsf.vector3("Direction", { unit: "Normal Vector" }),
+				},
+				output: {
+					result: {
+						displayName: "Orientation",
+						types: ["vector3"],
+					},
+				},
+			},
+			({ direction }) => {
+				const [x, y, z] = CFrame.lookAlong(new Vector3(), direction).ToOrientation();
+				return { result: { type: "vector3", value: new Vector3(x, y, z) } };
+			},
+		),
+	},
 } as const satisfies BlockBuildersWithoutIdAndDefaults;
 
 const color = {
