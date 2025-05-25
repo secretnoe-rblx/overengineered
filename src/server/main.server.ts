@@ -90,7 +90,7 @@ BulletProjectile;
 LaserProjectile;
 
 Players.PlayerAdded.Connect((plr) => {
-	if (!RunService.IsStudio() && plr.AccountAge < 10) {
+	if (!RunService.IsStudio() && plr.AccountAge < 10 && game.CreatorId !== plr.UserId) {
 		plr.Kick("Your account is too young, due to security reasons you must wait 10 days before you can play.");
 	}
 });
