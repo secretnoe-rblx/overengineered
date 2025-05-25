@@ -213,7 +213,7 @@ namespace StringSub {
 	export const block = {
 		...BlockCreation.defaults,
 		id: "stringsub",
-		displayName: "Substing",
+		displayName: "Substring",
 		description: "Returns a string of the given string at specific start and end indexes.",
 		modelSource: autoModel("DoubleGenericLogicBlockPrefab", "strsub", BlockCreation.Categories.string),
 
