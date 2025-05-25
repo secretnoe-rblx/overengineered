@@ -91,7 +91,7 @@ export class BlockSynchronizer<TArg extends { readonly block: BlockModel }> {
 
 		this.send(arg);
 	}
-	private send(arg: TArg): void {
+	send(arg: TArg): void {
 		if (RunService.IsServer()) {
 			if (this.serverMiddleware) {
 				for (const func of this.serverMiddleware) {
