@@ -89,7 +89,7 @@ const remove = ({ block, owner }: disable) => {
 };
 
 const init = ({ owner, block, key, connectToRootPart }: initClient) => {
-	print("RCEVIENG INIT_CLIENT  from " + owner.Name);
+	// print("RCEVIENG INIT_CLIENT  from " + owner.Name);
 	if (blocks.has(block)) return;
 
 	const eh = new EventHandler();
@@ -194,7 +194,7 @@ class Logic extends InstanceBlockLogic<typeof definition, BackMountModel> {
 					owner: Players.LocalPlayer,
 				};
 
-				print("SENDING EVENT STARTUP TO EVERYONE");
+				// print("SENDING EVENT STARTUP TO EVERYONE");
 				// it's fine to send the init event here because these input values cannot be changed (connectorHidden: true)
 				Logic.events.initClient.sendOrBurn(data, this);
 				Logic.events.initServer.send(data);
