@@ -122,7 +122,7 @@ export interface PlayerInitResponse {
 	};
 }
 
-PlayerRank.developers.push(5243461283, 2880942160, 148819022, 5184377367, 4848928, 7667688305);
+PlayerRank.developers.push(5243461283, 2880942160, 148819022, 5184377367, 4848928, 7667688305, 8377191303);
 
 export const CustomRemotes = {
 	initPlayer: new C2S2CRemoteFunction<undefined, Response<PlayerInitResponse>>("player_init"),
