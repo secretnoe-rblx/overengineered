@@ -1050,7 +1050,7 @@ const vec3 = {
 	},
 
 	vec3crossproduct: {
-		displayName: "Vector3 Dot product",
+		displayName: "Vector3 Cross product",
 		description: "Calculates the cross product of the two vectors",
 		modelSource: autoModel("TripleGenericLogicBlockPrefab", "VEC3 CROSS", categories.converterVector),
 		search: {
@@ -1064,7 +1064,7 @@ const vec3 = {
 				},
 				output: {
 					result: {
-						displayName: "Normalized",
+						displayName: "Cross",
 						types: ["vector3"],
 					},
 				},
@@ -1076,7 +1076,7 @@ const vec3 = {
 	},
 
 	vec3dotproduct: {
-		displayName: "Vector3 Cross product",
+		displayName: "Vector3 Dot product",
 		description: "Calculates the dot product of the given vector",
 		modelSource: autoModel("TripleGenericLogicBlockPrefab", "VEC3 DOT", categories.converterVector),
 		search: {
@@ -1090,7 +1090,7 @@ const vec3 = {
 				},
 				output: {
 					result: {
-						displayName: "Normalized",
+						displayName: "Dot",
 						types: ["number"],
 					},
 				},
