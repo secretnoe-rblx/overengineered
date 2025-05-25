@@ -1,8 +1,10 @@
-import { Players, RunService, UserInputService } from "@rbxts/services";
+import { Players, UserInputService } from "@rbxts/services";
 import { EventHandler } from "engine/shared/event/EventHandler";
-import { A2SRemoteEvent, C2CRemoteEvent } from "engine/shared/event/PERemoteEvent";
+import { A2SRemoteEvent } from "engine/shared/event/PERemoteEvent";
 import { Keys } from "engine/shared/fixes/Keys";
+import { t } from "engine/shared/t";
 import { InstanceBlockLogic } from "shared/blockLogic/BlockLogic";
+import { BlockSynchronizer } from "shared/blockLogic/BlockSynchronizer";
 import { BlockCreation } from "shared/blocks/BlockCreation";
 import { BuildingManager } from "shared/building/BuildingManager";
 import type { BlockLogicFullBothDefinitions, InstanceBlockLogicArgs } from "shared/blockLogic/BlockLogic";
@@ -73,7 +75,7 @@ export type { Logic as BackMountBlockLogic };
 
 const blocks = new Map<BackMountModel, EventHandler>();
 
-const remove = (block: BackMountModel, owner: Player) => {
+const remove = ({ block, owner }: disable) => {
 	const eh = blocks.get(block);
 	if (!eh) return;
 
@@ -85,17 +87,9 @@ const remove = (block: BackMountModel, owner: Player) => {
 		detach(block, owner);
 	}
 };
-const init = ({
-	owner,
-	block,
-	key,
-	connectToRootPart,
-}: {
-	readonly owner: Player;
-	readonly block: BackMountModel;
-	readonly connectToRootPart: boolean;
-	readonly key: KeyCode;
-}) => {
+
+const init = ({ owner, block, key, connectToRootPart }: initClient) => {
+	// print("RCEVIENG INIT_CLIENT  from " + owner.Name);
 	if (blocks.has(block)) return;
 
 	const eh = new EventHandler();
@@ -117,7 +111,7 @@ const init = ({
 		Logic.events.weldMountToPlayer.send({ block, connectToRootPart });
 	});
 
-	block.Destroying.Connect(() => remove(block, owner));
+	block.Destroying.Connect(() => remove({ block, owner }));
 
 	const humanoid = Players.LocalPlayer.Character?.FindFirstChild("Humanoid") as Humanoid | undefined;
 	if (humanoid) {
@@ -131,14 +125,31 @@ const init = ({
 		detach(block, owner);
 	});
 
-	block.ProximityPrompt.Enabled = !block.PlayerWeldConstraint.Enabled;
-	eh.subscribe(block.PlayerWeldConstraint.GetPropertyChangedSignal("Enabled"), () => {
-		block.ProximityPrompt.Enabled = !block.PlayerWeldConstraint.Enabled;
-	});
+	const isEnabled = () => {
+		// if (Players.LocalPlayer === owner && block.PlayerWeldConstraint.Enabled) return true;
+		return !block.PlayerWeldConstraint.Enabled;
+	};
+	pp.Enabled = isEnabled();
+	eh.subscribe(block.PlayerWeldConstraint.GetPropertyChangedSignal("Enabled"), () => (pp.Enabled = isEnabled()));
 };
+
 const detach = (block: BackMountModel, owner: Player) => {
 	Logic.events.unweldMountFromPlayer.send({ block, owner });
 };
+
+const initClientType = t.interface({
+	block: t.instance("Model").nominal("blockModel").as<BackMountModel>(),
+	owner: t.any.as<Player>(),
+	connectToRootPart: t.boolean,
+	key: t.any.as<KeyCode>(),
+});
+const disableType = t.interface({
+	block: t.instance("Model").nominal("blockModel").as<BackMountModel>(),
+	owner: t.any.as<Player>(),
+});
+
+type initClient = t.Infer<typeof initClientType>;
+type disable = t.Infer<typeof disableType>;
 
 class Logic extends InstanceBlockLogic<typeof definition, BackMountModel> {
 	static readonly events = {
@@ -156,24 +167,10 @@ class Logic extends InstanceBlockLogic<typeof definition, BackMountModel> {
 			readonly owner: Player;
 			readonly block: BackMountModel;
 		}>("backmount_unweld", "RemoteEvent"),
-		initClient: new C2CRemoteEvent<{
-			readonly owner: Player;
-			readonly block: BackMountModel;
-			readonly connectToRootPart: boolean;
-			readonly key: KeyCode;
-		}>("backmount_init", "RemoteEvent"),
-		disable: new C2CRemoteEvent<{
-			readonly owner: Player;
-			readonly block: BackMountModel;
-		}>("backmount_disable", "RemoteEvent"),
-	} as const;
 
-	static {
-		if (RunService.IsClient()) {
-			this.events.initClient.invoked.Connect(init);
-			this.events.disable.invoked.Connect(({ block, owner }) => remove(block, owner));
-		}
-	}
+		initClient: new BlockSynchronizer("backmount_init", initClientType, init),
+		disable: new BlockSynchronizer("backmount_disable", disableType, remove),
+	} as const;
 
 	constructor(block: InstanceBlockLogicArgs) {
 		super(definition, block);
@@ -197,8 +194,9 @@ class Logic extends InstanceBlockLogic<typeof definition, BackMountModel> {
 					owner: Players.LocalPlayer,
 				};
 
+				// print("SENDING EVENT STARTUP TO EVERYONE");
 				// it's fine to send the init event here because these input values cannot be changed (connectorHidden: true)
-				Logic.events.initClient.send(data);
+				Logic.events.initClient.sendOrBurn(data, this);
 				Logic.events.initServer.send(data);
 			} else {
 				init({ block: this.instance, key: detachKey, connectToRootPart, owner: Players.LocalPlayer });
@@ -211,7 +209,7 @@ class Logic extends InstanceBlockLogic<typeof definition, BackMountModel> {
 		});
 
 		this.onDisable(() => {
-			Logic.events.disable.send({ block: this.instance, owner: Players.LocalPlayer });
+			Logic.events.disable.sendOrBurn({ block: this.instance, owner: Players.LocalPlayer }, this);
 			Logic.events.unweldMountFromPlayer.send({ block: this.instance, owner: Players.LocalPlayer });
 			this.output.mounted.set("bool", false);
 		});

@@ -1,6 +1,7 @@
 import { Players } from "@rbxts/services";
 import { InstanceComponent } from "engine/shared/component/InstanceComponent";
 import { ServerBlockLogic } from "server/blocks/ServerBlockLogic";
+import { BuildingManager } from "shared/building/BuildingManager";
 import { SharedRagdoll } from "shared/SharedRagdoll";
 import type { PlayModeController } from "server/modes/PlayModeController";
 import type { ServerPlayersController } from "server/ServerPlayersController";
@@ -30,7 +31,7 @@ export class BackMountBlockServerLogic extends ServerBlockLogic<typeof BackMount
 					const player = Players.GetPlayerByUserId(playerid);
 					if (!player) return;
 
-					logic.events.initClient.send(data, player);
+					logic.events.initClient.send(data);
 				},
 				true,
 			);
@@ -40,6 +41,16 @@ export class BackMountBlockServerLogic extends ServerBlockLogic<typeof BackMount
 		logic.events.weldMountToPlayer.invoked.Connect((player, { block, connectToRootPart }) => {
 			if (!this.isValidBlock(block, player, false, false)) return;
 			if (!block.FindFirstChild("PlayerWeldConstraint")) return;
+
+			// fix teleporting to 000; todo make a better fix later
+			for (const b of BuildingManager.getMachineBlocks(block)) {
+				for (const child of b.GetDescendants()) {
+					if (!child.IsA("BasePart")) continue;
+
+					child.FindFirstChild("_AlignPosition")?.Destroy();
+					child.FindFirstChild("_AlignOrientation")?.Destroy();
+				}
+			}
 
 			const humanoid = player?.Character?.FindFirstChild("Humanoid") as Humanoid | undefined;
 			if (!humanoid) return;

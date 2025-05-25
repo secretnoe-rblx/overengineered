@@ -1,4 +1,4 @@
-import { MessagingService, Players, RunService, Workspace } from "@rbxts/services";
+import { Players, RunService, Workspace } from "@rbxts/services";
 import { HostedService } from "engine/shared/di/HostedService";
 import { isNotAdmin_AutoBanned } from "server/BanAdminExploiter";
 import { ServerPartUtils } from "server/plots/ServerPartUtils";
@@ -18,13 +18,13 @@ export class ServerRestartController extends HostedService {
 		super();
 
 		this.onEnable(() => {
-			task.spawn(() => {
-				this.event.eventHandler.register(
-					MessagingService.SubscribeAsync("Restart", (restart) =>
-						this.restart(true, restart.Data as boolean),
-					),
-				);
-			});
+			// task.spawn(() => {
+			// 	this.event.eventHandler.register(
+			// 		MessagingService.SubscribeAsync("Restart", (restart) =>
+			// 			this.restart(true, restart.Data as boolean),
+			// 		),
+			// 	);
+			// });
 
 			CustomRemotes.admin.restart.invoked.Connect((player, restart) => {
 				if (isNotAdmin_AutoBanned(player, "restart")) {
@@ -38,9 +38,9 @@ export class ServerRestartController extends HostedService {
 
 	restart(networkReceived: boolean, restart: boolean) {
 		if (!networkReceived && !RunService.IsStudio()) {
-			task.spawn(() => {
-				MessagingService.PublishAsync("Restart", restart);
-			});
+			// task.spawn(() => {
+			// 	MessagingService.PublishAsync("Restart", restart);
+			// });
 		}
 
 		const maxTime = 30;

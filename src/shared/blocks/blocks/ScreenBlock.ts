@@ -72,12 +72,15 @@ class Logic extends InstanceBlockLogic<typeof definition, ScreenBlock> {
 			return tostring(data);
 		};
 		this.on(({ data, textColor }) => {
-			events.update.send({
-				block: this.instance,
-				color: textColor,
-				text: dataToString(data),
-				translate: typeIs(data, "string"),
-			});
+			events.update.sendOrBurn(
+				{
+					block: this.instance,
+					color: textColor,
+					text: dataToString(data),
+					translate: typeIs(data, "string"),
+				},
+				this,
+			);
 		});
 	}
 }

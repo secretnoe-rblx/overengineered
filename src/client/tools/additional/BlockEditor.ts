@@ -323,7 +323,7 @@ class MoveComponent extends Component implements EditComponent {
 				// костыль of fixing the plots position
 				targetPosition = targetPosition.add(new Vector3(0, 0.5, 0.5));
 
-				const sizeOffset = bb.getRotatedSize().apply((v) => (v % 2) / 2);
+				const sizeOffset = bb.getRotatedSize().apply((v) => (v < 0.5 ? 0 : (v % 2) / 2));
 				targetPosition = targetPosition.sub(sizeOffset);
 				targetPosition = grid.get().constrain(CFrame.identity, targetPosition);
 				targetPosition = targetPosition.add(sizeOffset);

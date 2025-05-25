@@ -3,6 +3,7 @@ import { BidirectionalRemoteEvent } from "engine/shared/event/PERemoteEvent";
 import { ArgsSignal } from "engine/shared/event/Signal";
 import { t } from "engine/shared/t";
 import type { CreatableRemoteEvents } from "engine/shared/event/PERemoteEvent";
+import type { BlockLogic, BlockLogicBothDefinitions } from "shared/blockLogic/BlockLogic";
 
 /**
  * Remote event which:
@@ -23,7 +24,7 @@ export class BlockSynchronizer<TArg extends { readonly block: BlockModel }> {
 
 	constructor(
 		private readonly name: string,
-		ttype: t.Type<TArg>,
+		private readonly ttype: t.Type<TArg>,
 		func?: NoInfer<(arg: TArg) => void>,
 		eventType: CreatableRemoteEvents = "UnreliableRemoteEvent",
 	) {
@@ -79,6 +80,17 @@ export class BlockSynchronizer<TArg extends { readonly block: BlockModel }> {
 		return this;
 	}
 
+	/**
+	 * Check the type of arg, burn the block if wrong. Send the event if correct.
+	 */
+	sendOrBurn<TDef extends BlockLogicBothDefinitions>(arg: TArg, block: BlockLogic<TDef>): void {
+		if (!t.typeCheck(arg, this.ttype)) {
+			block.disableAndBurn();
+			return;
+		}
+
+		this.send(arg);
+	}
 	send(arg: TArg): void {
 		if (RunService.IsServer()) {
 			if (this.serverMiddleware) {
