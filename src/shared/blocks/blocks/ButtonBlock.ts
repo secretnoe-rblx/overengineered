@@ -1,10 +1,10 @@
-import { Players } from "@rbxts/services";
+import { Players, RunService } from "@rbxts/services";
+import { A2OCRemoteEvent } from "engine/shared/event/PERemoteEvent";
 import { t } from "engine/shared/t";
-import { BlockLogic } from "shared/blockLogic/BlockLogic";
+import { InstanceBlockLogic } from "shared/blockLogic/BlockLogic";
 import { BlockSynchronizer } from "shared/blockLogic/BlockSynchronizer";
 import { BlockCreation } from "shared/blocks/BlockCreation";
-import { RemoteEvents } from "shared/RemoteEvents";
-import type { BlockLogicArgs, BlockLogicFullBothDefinitions } from "shared/blockLogic/BlockLogic";
+import type { BlockLogicFullBothDefinitions, InstanceBlockLogicArgs } from "shared/blockLogic/BlockLogic";
 import type { BlockBuilder } from "shared/blocks/Block";
 
 const definition = {
@@ -99,20 +99,24 @@ const updateButtonStuff = ({ block, LEDcolor, buttonColor, buttonState, text }: 
 };
 
 const init = ({ block, owner }: initButton) => {
-	block.Button.ClickDetector.MouseClick.Connect((WhoClicked) => {});
+	block.Button.ClickDetector.MaxActivationDistance = math.huge;
+	block.Button.ClickDetector.MouseClick.Connect(() => {
+		events.click.send(owner, block);
+	});
 };
 
 const events = {
 	update: new BlockSynchronizer("b_button_data_update", updateDataType, updateButtonStuff),
 	init: new BlockSynchronizer("b_button_init", initButtonType, init),
+	click: new A2OCRemoteEvent<buttonType>("b_button_click", "RemoteEvent"),
 } as const;
 
 export type { Logic as ButtonBlockLogic };
-class Logic extends BlockLogic<typeof definition> {
-	constructor(block: BlockLogicArgs) {
+class Logic extends InstanceBlockLogic<typeof definition, buttonType> {
+	constructor(block: InstanceBlockLogicArgs) {
 		super(definition, block);
 
-		const inst = this.instance as buttonType | undefined;
+		const inst = this.instance;
 		if (!inst) return;
 		const button = inst.Button;
 		const led = inst.LED;
@@ -122,22 +126,9 @@ class Logic extends BlockLogic<typeof definition> {
 		const cachedSharedMode = this.initializeInputCache("sharedMode");
 
 		const pc = inst.PrismaticConstraint;
-		const detector = button.ClickDetector;
 		const maxLengthMagicNumber = (pc.UpperLimit = 0.3);
 		let UpdateOnNextTick = false;
 		let isPressed = false;
-
-		this.onEnable(() => {
-			// temporary fix of buttons being in the main game on accident
-			// (we *really* don't want to remove existing blocks, this breaks stuff)
-			RemoteEvents.Explode.send({
-				part: this.instance!.PrimaryPart!,
-				pressure: 1,
-				isFlammable: true,
-				radius: 5,
-			});
-			this.disableAndBurn();
-		});
 
 		const upd = () => {
 			events.update.sendOrBurn(
@@ -176,9 +167,18 @@ class Logic extends BlockLogic<typeof definition> {
 			UpdateOnNextTick = true;
 		};
 
+		// we should probably add server support but noone cares
+		if (RunService.IsClient()) {
+			this.event.subscribe(events.click.invoked, (block, whoPressed) => {
+				if (this.instance !== block) return;
+				if (!whoPressed) return;
+				pressButton(whoPressed);
+			});
+		}
+
 		this.onk(["sharedMode"], ({ sharedMode }) => {
-			if (!sharedMode) return;
-			events.init.sendOrBurn({ block: inst, owner: Players.LocalPlayer }, this);
+			if (!sharedMode) init({ block: inst, owner: Players.LocalPlayer });
+			else events.init.sendOrBurn({ block: inst, owner: Players.LocalPlayer }, this);
 		});
 
 		this.onk(["buttonColor", "text"], ({ buttonColor, text }) => {
@@ -199,9 +199,8 @@ class Logic extends BlockLogic<typeof definition> {
 export const ButtonBlock = {
 	...BlockCreation.defaults,
 	id: "button",
-	displayName: "Button (NOT WORKING YET)",
-	description: "DOES NOTHING GO AWAY",
-	// description: "Returns true when the button is clicked or tapped. Can be activated by other players.",
+	displayName: "Button",
+	description: "Returns true when the button is clicked or tapped. Can be activated by other players if configured.",
 
 	logic: { definition, ctor: Logic },
 } as const satisfies BlockBuilder;
