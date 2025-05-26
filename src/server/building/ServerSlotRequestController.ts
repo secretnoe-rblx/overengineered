@@ -1,4 +1,5 @@
 import { Component } from "engine/shared/component/Component";
+import { ExternalDatabaseBackendSlots } from "server/database/ExternalDatabaseBackend";
 import { BlocksSerializer } from "shared/building/BlocksSerializer";
 import { SlotsMeta } from "shared/SlotsMeta";
 import type { PlayerDatabase } from "server/database/PlayerDatabase";
@@ -23,6 +24,8 @@ export class ServerSlotRequestController extends Component {
 		slotRemotes.load.subscribe((p, arg) => this.loadSlot(arg));
 		slotRemotes.save.subscribe((p, arg) => this.saveSlot(arg));
 		slotRemotes.delete.subscribe((p, arg) => this.deleteSlot(arg));
+		slotRemotes.loadHistory.subscribe((p, arg) => this.loadSlotHistory(arg));
+		slotRemotes.loadFromHistory.subscribe((p, arg) => this.loadSlotFromHistory(arg));
 	}
 
 	private saveSlot(request: PlayerSaveSlotRequest): SaveSlotResponse {
@@ -85,6 +88,35 @@ export class ServerSlotRequestController extends Component {
 		$log(`Loading ${userid}'s slot ${index}`);
 		const dblocks = BlocksSerializer.deserializeFromObject(blocks, this.blocks, this.blockList);
 		$log(`Loaded ${userid} slot ${index} in ${os.clock() - start}`);
+
+		return { success: true, isEmpty: dblocks === 0 };
+	}
+
+	private loadSlotHistory({ index }: PlayerLoadSlotRequest): LoadSlotHistoryResponse {
+		const dbid = ExternalDatabaseBackendSlots.getDatabaseIdFromSlotId(this.playerId, index);
+		const history = ExternalDatabaseBackendSlots.loadHistoryList(this.playerId, dbid);
+
+		return { success: true, history };
+	}
+	private loadSlotFromHistory({ databaseId, historyId }: PlayerLoadSlotFromHistoryRequest): LoadSlotResponse {
+		const userid = this.playerId;
+
+		const start = os.clock();
+		const blocks = BlocksSerializer.jsonToObject(
+			ExternalDatabaseBackendSlots.loadSlotFromHistory(userid, databaseId, historyId) ?? {
+				blocks: [],
+				version: 0,
+			},
+		);
+
+		this.blocks.deleteOperation.execute("all");
+		if (blocks.blocks.size() === 0) {
+			return { success: true, isEmpty: true };
+		}
+
+		$log(`Loading ${userid}'s slot D${databaseId} H${historyId}`);
+		const dblocks = BlocksSerializer.deserializeFromObject(blocks, this.blocks, this.blockList);
+		$log(`Loaded ${userid} slot D${databaseId} H${historyId} in ${os.clock() - start}`);
 
 		return { success: true, isEmpty: dblocks === 0 };
 	}

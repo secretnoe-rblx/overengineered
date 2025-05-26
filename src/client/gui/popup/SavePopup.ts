@@ -1,4 +1,7 @@
+import { LoadingController } from "client/controller/LoadingController";
+import { AlertPopup } from "client/gui/popup/AlertPopup";
 import { ConfirmPopup } from "client/gui/popup/ConfirmPopup";
+import { SaveHistoryPopup } from "client/gui/popup/SaveHistory";
 import { Action } from "engine/client/Action";
 import { ButtonControl } from "engine/client/gui/Button";
 import { Control } from "engine/client/gui/Control";
@@ -9,6 +12,7 @@ import { ComponentKeyedChildren } from "engine/shared/component/ComponentKeyedCh
 import { Transforms } from "engine/shared/component/Transforms";
 import { Observables } from "engine/shared/event/Observables";
 import { ObservableValue } from "engine/shared/event/ObservableValue";
+import { Strings } from "engine/shared/fixes/String.propmacro";
 import { Colors } from "shared/Colors";
 import { GameDefinitions } from "shared/data/GameDefinitions";
 import { Serializer } from "shared/Serializer";
@@ -32,6 +36,7 @@ interface CurrentItem {
 	readonly save: Action;
 	readonly load: Action;
 	readonly delete: Action;
+	readonly openHistory: Action;
 
 	readonly setColor: Action<[color: Color3]>;
 	readonly setName: Action<[name: string]>;
@@ -63,6 +68,7 @@ class SaveItem extends PartialControl<SaveItemParts, SaveItemDefinition> impleme
 	readonly save: Action;
 	readonly load: Action;
 	readonly delete: Action;
+	readonly openHistory: Action;
 	readonly setColor: Action<[color: Color3]>;
 	readonly setName: Action<[name: string]>;
 	readonly meta: ObservableValue<SlotMeta>;
@@ -83,6 +89,10 @@ class SaveItem extends PartialControl<SaveItemParts, SaveItemDefinition> impleme
 				can: this.event.addObservable(
 					meta.fReadonlyCreateBased((c) => isWritable(c) || SlotsMeta.isTestSlot(c.index)),
 				),
+			});
+		this.openHistory = this.parent(new Action()) //
+			.subCanExecuteFrom({
+				can: this.event.addObservable(meta.fReadonlyCreateBased((c) => !SlotsMeta.isTestSlot(c.index))),
 			});
 		this.setColor = this.parent(new Action<[Color3]>()) //
 			.subCanExecuteFrom({ can: this.event.addObservable(meta.fReadonlyCreateBased(isWritable)) });
@@ -157,6 +167,19 @@ class SaveItem extends PartialControl<SaveItemParts, SaveItemDefinition> impleme
 						);
 					}
 				});
+
+				this.openHistory.subscribe(() => {
+					popup.hide();
+					LoadingController.run(`Loading history for slot ${meta.get().index}`, () => {
+						const history = playerData.loadPlayerSlotHistory(meta.get().index);
+						if (!history.success) {
+							popupController.showPopup(new AlertPopup(history.message));
+							return;
+						}
+
+						popupController.showPopup(new SaveHistoryPopup(history.history));
+					});
+				});
 			},
 		);
 
@@ -187,25 +210,6 @@ class SaveItem extends PartialControl<SaveItemParts, SaveItemDefinition> impleme
 			true,
 		);
 
-		const secondsToText = (seconds: number): string => {
-			const intervals = [
-				{ label: "year", seconds: 31536000 },
-				{ label: "month", seconds: 2592000 },
-				{ label: "day", seconds: 86400 },
-				{ label: "hour", seconds: 3600 },
-				{ label: "minute", seconds: 60 },
-				{ label: "second", seconds: 1 },
-			];
-
-			for (const interval of intervals) {
-				const count = math.floor(seconds / interval.seconds);
-				if (count >= 1) {
-					return `${count} ${interval.label}${count !== 1 ? "s" : ""} ago`;
-				}
-			}
-
-			return "just now";
-		};
 		const updateTime = () => {
 			const m = meta.get();
 			if (!m.saveTime) {
@@ -214,7 +218,7 @@ class SaveItem extends PartialControl<SaveItemParts, SaveItemDefinition> impleme
 			}
 
 			const sec = (DateTime.now().UnixTimestampMillis - m.saveTime) / 1000;
-			this.parts.DateText.Text = secondsToText(sec);
+			this.parts.DateText.Text = Strings.prettySecondsAgo(sec);
 		};
 		this.event.loop(1, updateTime);
 		this.onEnable(updateTime);
@@ -226,6 +230,7 @@ class NewSaveItem extends Control<GuiButton> implements CurrentItem {
 	readonly save: Action;
 	readonly load: Action;
 	readonly delete: Action;
+	readonly openHistory: Action;
 	readonly setColor: Action<[color: Color3]>;
 	readonly setName: Action<[name: string]>;
 
@@ -236,6 +241,8 @@ class NewSaveItem extends Control<GuiButton> implements CurrentItem {
 		this.load = this.parent(new Action()) //
 			.subCanExecuteFrom({ can: new ObservableValue(false) });
 		this.delete = this.parent(new Action()) //
+			.subCanExecuteFrom({ can: new ObservableValue(false) });
+		this.openHistory = this.parent(new Action()) //
 			.subCanExecuteFrom({ can: new ObservableValue(false) });
 		this.setColor = this.parent(new Action<[Color3]>());
 		this.setName = this.parent(new Action<[string]>());
@@ -306,6 +313,7 @@ export type SaveBottomDefinition = GuiObject & {
 		};
 		readonly ImageLabel: ImageLabel;
 		readonly Delete: GuiButton;
+		readonly History: GuiButton;
 	};
 	readonly Colors: GuiObject;
 };
@@ -317,6 +325,11 @@ export class SaveBottom extends Control<SaveBottomDefinition> {
 			.subscribeActionObservable(this.event.addObservable(current.fReadonlyCreateBased((c) => c?.delete)));
 		this.parent(new Control(gui.Head.Delete)) //
 			.subscribeToAction(deleteAction);
+
+		const openHistoryAction = this.parent(new Action()) //
+			.subscribeActionObservable(this.event.addObservable(current.fReadonlyCreateBased((c) => c?.openHistory)));
+		this.parent(new Control(gui.Head.History)) //
+			.subscribeToAction(openHistoryAction);
 
 		const name = this.parent(new TextBoxControl(gui.Head.Frame.SlotName.SlotNameTextBox));
 		this.event.subscribe(name.submitted, (name) => current.get()?.setName.execute(name));

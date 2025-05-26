@@ -17,6 +17,8 @@ export type PlayerDataStorageRemotesSlots = {
 	readonly load: C2S2CRemoteFunction<PlayerLoadSlotRequest, LoadSlotResponse>;
 	readonly save: C2S2CRemoteFunction<PlayerSaveSlotRequest, SaveSlotResponse>;
 	readonly delete: C2S2CRemoteFunction<PlayerDeleteSlotRequest, Response>;
+	readonly loadHistory: C2S2CRemoteFunction<PlayerLoadSlotRequest, LoadSlotHistoryResponse>;
+	readonly loadFromHistory: C2S2CRemoteFunction<PlayerLoadSlotFromHistoryRequest, LoadSlotResponse>;
 };
 export type PlayerDataStorageRemotesPlayer = {
 	readonly updateSettings: C2SRemoteEvent<PlayerUpdateSettingsRequest>;
@@ -35,6 +37,8 @@ export namespace PlayerDataRemotes {
 			load: new C2S2CRemoteFunction(get("slots_load", "RemoteFunction")),
 			save: new C2S2CRemoteFunction(get("slots_save", "RemoteFunction")),
 			delete: new C2S2CRemoteFunction(get("slots_delete", "RemoteFunction")),
+			loadHistory: new C2S2CRemoteFunction(get("slots_loadHistory", "RemoteFunction")),
+			loadFromHistory: new C2S2CRemoteFunction(get("slots_loadFromHistory", "RemoteFunction")),
 		}));
 	}
 	export function createPlayer(folder: Instance): PlayerDataStorageRemotesPlayer {

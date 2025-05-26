@@ -96,6 +96,10 @@ declare global {
 	type PlayerLoadSlotRequest = {
 		readonly index: number;
 	};
+	type PlayerLoadSlotFromHistoryRequest = {
+		readonly databaseId: string;
+		readonly historyId: string;
+	};
 	type PlayerLoadAdminSlotRequest = PlayerLoadSlotRequest & {
 		readonly userid: number;
 	};

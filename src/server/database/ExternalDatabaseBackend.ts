@@ -91,6 +91,57 @@ export class ExternalDatabaseBackendSlots implements DatabaseBackend<BlocksSeria
 			throw `Error while saving slot data: ${Strings.pretty(response)}`;
 		}
 	}
+
+	static getDatabaseIdFromSlotId(ownerId: number, slotId: number): string {
+		const url = `${endpoint}/slot?ownerId=${ownerId}&slotIds=${slotId}`;
+		$log("Fetching", url);
+
+		const result = HttpService.RequestAsync({ Method: "GET", Url: url, Headers: headers });
+		if (result.StatusCode !== 200) {
+			throw `Got HTTP ${result.StatusCode}`;
+		}
+
+		return (JSON.deserialize(result.Body) as { id: string }[])[0].id;
+	}
+	static loadHistoryList(ownerId: number, databaseSlotId: string): SlotHistory {
+		const url = `${endpoint}/slot/history/list?ownerId=${ownerId}&slotId=${databaseSlotId}`;
+		$log("Fetching", url);
+
+		const result = HttpService.RequestAsync({ Method: "GET", Url: url, Headers: headers });
+		if (result.StatusCode !== 200) {
+			throw `Got HTTP ${result.StatusCode}`;
+		}
+
+		const val = JSON.deserialize(result.Body) as SlotHistory["history"] | undefined;
+		if (!val) {
+			throw "Got empty history";
+		}
+
+		return {
+			databaseSlotId,
+			history: val,
+		};
+	}
+	static loadSlotFromHistory(
+		ownerId: number,
+		databaseSlotId: string,
+		historyId: string,
+	): BlocksSerializer.JsonSerializedBlocks | undefined {
+		const url = `${endpoint}/slot/history?ownerId=${ownerId}&slotId=${databaseSlotId}&historyId=${historyId}`;
+		$log("Fetching", url);
+
+		const result = HttpService.RequestAsync({ Method: "GET", Url: url, Headers: headers });
+		if (result.StatusCode !== 200) {
+			throw `Got HTTP ${result.StatusCode}`;
+		}
+
+		const val = (JSON.deserialize(result.Body) as { value: BlocksSerializer.JsonSerializedBlocks | string }).value;
+		if (typeIs(val, "string")) {
+			return JSON.deserialize(val);
+		}
+
+		return val;
+	}
 }
 
 type PlayerKeys = [id: number];

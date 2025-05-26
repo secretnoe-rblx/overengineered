@@ -155,4 +155,24 @@ export class PlayerDataStorage {
 			return response;
 		});
 	}
+
+	loadPlayerSlotHistory(index: number) {
+		return this.slotRemotes.loadHistory.send({ index });
+	}
+	loadPlayerSlotFromHistory(databaseSlotId: string, historyId: string, message?: string) {
+		$log(`Loading slot D${databaseSlotId} H${historyId}`);
+		this._slotLoading.Fire();
+
+		return LoadingController.run(message ?? `Loading slot D${databaseSlotId} H${historyId}`, () => {
+			const response = this.slotRemotes.loadFromHistory.send({ databaseId: databaseSlotId, historyId });
+			if (response.success && !response.isEmpty) {
+				this.loadedSlot.set(undefined);
+			} else if (!response.success) {
+				LogControl.instance.addLine("Error while loading a slot", Colors.red);
+				$warn(response.message);
+			}
+
+			return response;
+		});
+	}
 }

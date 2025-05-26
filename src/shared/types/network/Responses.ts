@@ -13,6 +13,20 @@ declare global {
 		readonly isEmpty: boolean;
 	}>;
 
+	type SlotHistoryPart = {
+		readonly id: string;
+		readonly slotId: string;
+		readonly ownerId: string;
+		readonly createdAt: string;
+	};
+	type SlotHistory = {
+		readonly databaseSlotId: string;
+		readonly history: readonly SlotHistoryPart[];
+	};
+	type LoadSlotHistoryResponse = Response<{
+		readonly history: SlotHistory;
+	}>;
+
 	type FetchSlotsResponse = Response<{
 		readonly purchasedSlots: number;
 		readonly slots: readonly SlotMeta[];
