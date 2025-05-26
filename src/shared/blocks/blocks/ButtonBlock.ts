@@ -84,16 +84,27 @@ const updateDataType = t.interface({
 	buttonColor: t.color,
 	text: t.string,
 });
-type updateData = t.Infer<typeof updateDataType>;
+const initButtonType = t.interface({
+	block: t.any.as<buttonType>(),
+	owner: t.any.as<Player>(),
+});
 
-function updateButtonStuff({ block, LEDcolor, buttonColor, buttonState, text }: updateData) {
+type updateData = t.Infer<typeof updateDataType>;
+type initButton = t.Infer<typeof initButtonType>;
+
+const updateButtonStuff = ({ block, LEDcolor, buttonColor, buttonState, text }: updateData) => {
 	block.LED.Color = buttonState ? LEDcolor : baseLEDColor;
 	block.Button.Color = buttonColor;
 	block.Button.SurfaceGui.TextLabel.Text = text;
-}
+};
+
+const init = ({ block, owner }: initButton) => {
+	block.Button.ClickDetector.MouseClick.Connect((WhoClicked) => {});
+};
 
 const events = {
 	update: new BlockSynchronizer("b_button_data_update", updateDataType, updateButtonStuff),
+	init: new BlockSynchronizer("b_button_init", initButtonType, init),
 } as const;
 
 export type { Logic as ButtonBlockLogic };
@@ -142,7 +153,7 @@ class Logic extends BlockLogic<typeof definition> {
 			this.output.result.set("bool", isPressed);
 		};
 
-		this.event.subscribe(detector.MouseClick, (playerWhoClicked) => {
+		const pressButton = (playerWhoClicked: Player) => {
 			if (!cachedSharedMode.get() && Players.LocalPlayer !== playerWhoClicked) return;
 
 			const isSwitch = cachedSwitchMode.get();
@@ -163,9 +174,14 @@ class Logic extends BlockLogic<typeof definition> {
 			});
 			upd();
 			UpdateOnNextTick = true;
+		};
+
+		this.onk(["sharedMode"], ({ sharedMode }) => {
+			if (!sharedMode) return;
+			events.init.sendOrBurn({ block: inst, owner: Players.LocalPlayer }, this);
 		});
 
-		this.on(({ buttonColor, text }) => {
+		this.onk(["buttonColor", "text"], ({ buttonColor, text }) => {
 			button.Color = buttonColor;
 			button.SurfaceGui.TextLabel.Text = text;
 			upd();
