@@ -101,7 +101,7 @@ export class ServerBuildingRequestController extends Component {
 
 			if (placed + count > regblock.limit && (game.PrivateServerOwnerId === 0 || regblock.limit === 1)) {
 				return err(
-					`Type limit exceeded for ${regblock.id}. ${regblock.limit !== 1 ? "Maybe you should play on a private server?" : "Even a private server can't help you."}`,
+					`Type limit exceeded for ${regblock.id}. ${regblock.limit !== 1 ? " Maybe you should play on a private server?" : ""}`,
 				);
 			}
 		}
