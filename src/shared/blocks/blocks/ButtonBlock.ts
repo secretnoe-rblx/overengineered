@@ -3,6 +3,7 @@ import { t } from "engine/shared/t";
 import { BlockLogic } from "shared/blockLogic/BlockLogic";
 import { BlockSynchronizer } from "shared/blockLogic/BlockSynchronizer";
 import { BlockCreation } from "shared/blocks/BlockCreation";
+import { RemoteEvents } from "shared/RemoteEvents";
 import type { BlockLogicArgs, BlockLogicFullBothDefinitions } from "shared/blockLogic/BlockLogic";
 import type { BlockBuilder } from "shared/blocks/Block";
 
@@ -115,6 +116,18 @@ class Logic extends BlockLogic<typeof definition> {
 		let UpdateOnNextTick = false;
 		let isPressed = false;
 
+		this.onEnable(() => {
+			// temporary fix of buttons being in the main game on accident
+			// (we *really* don't want to remove existing blocks, this breaks stuff)
+			RemoteEvents.Explode.send({
+				part: this.instance!.PrimaryPart!,
+				pressure: 1,
+				isFlammable: true,
+				radius: 5,
+			});
+			this.disableAndBurn();
+		});
+
 		const upd = () => {
 			events.update.sendOrBurn(
 				{
@@ -170,8 +183,9 @@ class Logic extends BlockLogic<typeof definition> {
 export const ButtonBlock = {
 	...BlockCreation.defaults,
 	id: "button",
-	displayName: "Button",
-	description: "Returns true when the button is clicked or tapped. Can be activated by other players.",
+	displayName: "Button (NOT WORKING YET)",
+	description: "DOES NOTHING GO AWAY",
+	// description: "Returns true when the button is clicked or tapped. Can be activated by other players.",
 
 	logic: { definition, ctor: Logic },
 } as const satisfies BlockBuilder;
