@@ -439,7 +439,7 @@ export class EditTool extends ToolBase {
 		@inject readonly mode: BuildingMode,
 		@inject private readonly blockList: BlockList,
 		@inject keybinds: Keybinds,
-		@inject actionController: ActionController,
+		@inject private readonly actionController: ActionController,
 		@inject mainScreen: MainScreenLayout,
 		@inject private readonly clientBuilding: ClientBuilding,
 		@inject private readonly di: DIContainer,
@@ -607,9 +607,13 @@ export class EditTool extends ToolBase {
 			};
 		});
 
+		this.actionController.startCombineStack("Mirroring blocks");
+
 		this.clientBuilding.deleteOperation.execute({ plot: this.targetPlot.get(), blocks: selected });
 		task.wait();
 		this.clientBuilding.placeOperation.execute({ plot: this.targetPlot.get(), blocks: mirrored });
+
+		this.actionController.endCombineStack();
 	}
 
 	getDisplayName(): string {

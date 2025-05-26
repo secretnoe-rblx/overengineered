@@ -23,6 +23,8 @@ export class ActionController extends Component {
 	private readonly history = new ObservableCollectionArr<Operation>();
 	private readonly redoHistory = new ObservableCollectionArr<Operation>();
 
+	private readonly combineStack: { readonly description: string | undefined; readonly items: Operation[] }[] = [];
+
 	constructor(@inject mainScreen: MainScreenLayout) {
 		super();
 
@@ -65,13 +67,46 @@ export class ActionController extends Component {
 		this.redoHistory.push(operation);
 	}
 	appendOperation(operation: Operation): void {
-		this.history.push(operation);
+		const combineStack = this.combineStack[this.combineStack.size() - 1];
+		if (combineStack) combineStack.items.push(operation);
+		else this.history.push(operation);
+
 		this.redoHistory.clear();
 	}
 
 	clearHistory(): void {
 		this.history.clear();
 		this.redoHistory.clear();
+	}
+
+	startCombineStack(description?: string): void {
+		this.combineStack.push({ description, items: [] });
+	}
+	endCombineStack(): void {
+		const stack = this.combineStack.remove(this.combineStack.size() - 1);
+		if (!stack) return;
+
+		this.appendOperation({
+			description: stack.description ?? stack.items.map((c) => c.description).join(" + "),
+			undo: () => {
+				for (let i = stack.items.size() - 1; i >= 0; i--) {
+					const op = stack.items[i];
+
+					const resp = op.undo();
+					if (typeIs(resp, "table") && !resp.success) {
+						return resp;
+					}
+				}
+			},
+			redo: () => {
+				for (const op of stack.items) {
+					const resp = op.redo();
+					if (typeIs(resp, "table") && !resp.success) {
+						return resp;
+					}
+				}
+			},
+		});
 	}
 
 	private redo(): void {
