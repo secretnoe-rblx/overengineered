@@ -19,10 +19,10 @@ type AlertPopupDefinition = GuiObject & {
 export class AlertPopup extends Control<AlertPopupDefinition> {
 	private readonly okButton;
 
-	constructor(text: string, okFunc?: () => void) {
-		const gui = Interface.getGameUI<{
-			Popup: { Crossplatform: { Alert: AlertPopupDefinition } };
-		}>().Popup.Crossplatform.Alert.Clone();
+	constructor(text: string, okFunc?: () => void, delayBeforeInteractable = 3) {
+		const gui = Interface.getInterface<{
+			Popups: { Crossplatform: { Alert: AlertPopupDefinition } };
+		}>().Popups.Crossplatform.Alert.Clone();
 		super(gui);
 
 		this.okButton = this.parent(new Control(gui.Content.Buttons.OkButton));
@@ -40,7 +40,7 @@ export class AlertPopup extends Control<AlertPopupDefinition> {
 
 		this.okButton.setButtonInteractable(false);
 		closeButton.setButtonInteractable(false);
-		task.delay(3, () => {
+		task.delay(delayBeforeInteractable, () => {
 			this.okButton.setButtonInteractable(true);
 			closeButton.setButtonInteractable(true);
 		});
