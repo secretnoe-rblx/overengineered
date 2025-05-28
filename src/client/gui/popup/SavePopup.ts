@@ -173,7 +173,13 @@ class SaveItem extends PartialControl<SaveItemParts, SaveItemDefinition> impleme
 					LoadingController.run(`Loading history for slot ${meta.get().index}`, () => {
 						const history = playerData.loadPlayerSlotHistory(meta.get().index);
 						if (!history.success) {
-							popupController.showPopup(new AlertPopup(history.message));
+							popupController.showPopup(
+								new AlertPopup(
+									"This slot doesn't have a saved history\n(The slot history is only saved up to a month)",
+									undefined,
+									0,
+								),
+							);
 							return;
 						}
 
