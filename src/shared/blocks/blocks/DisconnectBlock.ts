@@ -40,9 +40,14 @@ class Logic extends InstanceBlockLogic<typeof definition> {
 		this.on(({ disconnect }) => {
 			if (disconnect) {
 				Logic.events.disconnect.send({ block: this.instance });
+				Logic.disconnect(this.instance);
 				this.disable();
 			}
 		});
+	}
+
+	static disconnect(block: BlockModel) {
+		(block.FindFirstChild("Ejector") as Part | undefined)?.Destroy();
 	}
 }
 

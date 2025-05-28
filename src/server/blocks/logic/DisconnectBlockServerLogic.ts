@@ -9,8 +9,7 @@ export class DisconnectBlockServerLogic extends ServerBlockLogic<typeof Disconne
 
 		logic.events.disconnect.invoked.Connect((player, { block }) => {
 			if (!this.isValidBlock(block, player)) return;
-
-			(block.FindFirstChild("Ejector") as Part | undefined)?.Destroy();
+			logic.disconnect(block);
 		});
 	}
 }
