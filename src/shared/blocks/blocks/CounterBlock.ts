@@ -75,7 +75,7 @@ export const CounterBlock = {
 
 	logic: { definition, ctor: Logic },
 	modelSource: {
-		model: BlockCreation.Model.fAutoCreated("x4GenericLogicBlockPrefab", "COUNTER"),
+		model: BlockCreation.Model.fAutoCreated("x4GenericLogicBlockPrefab", "COUNT"),
 		category: () => BlockCreation.Categories.other,
 	},
 } as const satisfies BlockBuilder;
