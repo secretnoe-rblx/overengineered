@@ -171,13 +171,13 @@ export namespace BuildingManager {
 						throw "Unknown mode";
 					}
 					case "tetra": {
-						const rot = normalRotation(cframe.mul(CFrame.fromEulerAnglesYXZ(0, 0, math.pi * 1.5)));
 						outScale = CFrame.fromOrientation(0, 0, math.rad(90)).mul(outScale).apply(math.abs);
-
-						return rot;
+						return normalRotation(cframe.mul(CFrame.fromEulerAnglesYXZ(0, 0, math.pi * 1.5)));
 					}
-					case "innertetra":
+					case "innertetra": {
+						outScale = CFrame.fromOrientation(0, 0, math.rad(90)).mul(outScale).apply(math.abs);
 						return normalRotation(cframe.mul(CFrame.fromEulerAnglesYXZ(0, 0, math.pi * 0.5)));
+					}
 				}
 			}
 
