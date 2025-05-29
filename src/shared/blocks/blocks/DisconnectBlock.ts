@@ -41,7 +41,6 @@ class Logic extends InstanceBlockLogic<typeof definition> {
 			if (disconnect) {
 				Logic.events.disconnect.send({ block: this.instance });
 				Logic.disconnect(this.instance);
-				this.disable();
 			}
 		});
 	}
