@@ -151,6 +151,7 @@ export namespace BlockCreation {
 		memory: ["Logic", "Memory"],
 		sensor: ["Logic", "Sensor"],
 		string: ["Logic", "String"],
+		sound: ["Logic", "Sound"],
 	} as const satisfies { [k in string]: BlockCategoryPath };
 
 	export namespace MarkerPositions {

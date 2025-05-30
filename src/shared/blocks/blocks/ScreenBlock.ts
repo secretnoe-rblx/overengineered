@@ -70,7 +70,7 @@ class Logic extends InstanceBlockLogic<typeof definition, ScreenBlock> {
 				}
 			}
 			if (typeIs(data, "table") && "id" in data) {
-				return `Sound ${data.id}\n${data.effects?.size() ?? 0} effeects`;
+				return `Sound ${data.id}\n[${data.effects?.size() ?? 0} effects]`;
 			}
 
 			return tostring(data);

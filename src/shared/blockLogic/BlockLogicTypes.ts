@@ -1,5 +1,6 @@
 import type { PlacedBlockConfig } from "shared/blockLogic/BlockConfig";
 import type { BlockLogicFullInputDef } from "shared/blockLogic/BlockLogic";
+import type { SoundLogic } from "shared/blockLogic/SoundLogic";
 
 type LEnum<T extends string> = {
 	readonly config: NoInfer<T>;
@@ -118,9 +119,7 @@ export namespace BlockLogicTypes {
 		readonly elements: { readonly [k in T]: EnumElement };
 	};
 
-	export type SoundEffect<
-		T extends keyof Instances & `${string}SoundEffect` = keyof Instances & `${string}SoundEffect`,
-	> = {
+	export type SoundEffect<T extends SoundLogic.Instances = SoundLogic.Instances> = {
 		readonly type: T;
 		readonly properties: Partial<Instances[T]>;
 	};
