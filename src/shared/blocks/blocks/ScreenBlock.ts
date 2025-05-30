@@ -5,6 +5,7 @@ import { BlockSynchronizer } from "shared/blockLogic/BlockSynchronizer";
 import { BlockConfigDefinitions } from "shared/blocks/BlockConfigDefinitions";
 import { BlockCreation } from "shared/blocks/BlockCreation";
 import type { BlockLogicFullBothDefinitions, InstanceBlockLogicArgs } from "shared/blockLogic/BlockLogic";
+import type { BlockLogicTypes } from "shared/blockLogic/BlockLogicTypes";
 import type { BlockBuilder } from "shared/blocks/Block";
 
 const definition = {
@@ -55,7 +56,7 @@ class Logic extends InstanceBlockLogic<typeof definition, ScreenBlock> {
 	constructor(block: InstanceBlockLogicArgs) {
 		super(definition, block);
 
-		const dataToString = (data: unknown): string => {
+		const dataToString = (data: BlockLogicTypes.TypeListOfType<typeof definition.input.data.types>): string => {
 			if (typeIs(data, "Vector3")) {
 				return `${dataToString(data.X)}x\n${dataToString(data.Y)}y\n${dataToString(data.Z)}z`;
 			}
@@ -67,6 +68,9 @@ class Logic extends InstanceBlockLogic<typeof definition, ScreenBlock> {
 				if (isHighPrecision) {
 					return `${Strings.prettyNumber(data, 0.001)}..`;
 				}
+			}
+			if (typeIs(data, "table") && "id" in data) {
+				return `Sound ${data.id}\n${data.effects?.size() ?? 0} effeects`;
 			}
 
 			return tostring(data);

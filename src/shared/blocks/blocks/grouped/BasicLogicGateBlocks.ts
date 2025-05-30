@@ -14,6 +14,7 @@ import type {
 	BlockLogicOutputDefs,
 	BlockLogicTickContext,
 } from "shared/blockLogic/BlockLogic";
+import type { BlockLogicTypes } from "shared/blockLogic/BlockLogicTypes";
 import type { LogicValueStorageContainer } from "shared/blockLogic/BlockLogicValueStorage";
 import type { BlockBuilder, BlockCategoryPath, BlockModelSource } from "shared/blocks/Block";
 
@@ -467,7 +468,7 @@ namespace Mux {
 	};
 
 	const muxValue = (
-		result: LogicValueStorageContainer<"string" | "number" | "bool" | "vector3" | "color" | "byte">,
+		result: LogicValueStorageContainer<BlockLogicTypes.IdListOfType<typeof BlockConfigDefinitions.any>>,
 		index: number,
 		values: [unknown, type: string | undefined][],
 	) => {
@@ -713,7 +714,7 @@ namespace Demux {
 			const demuxValue = (
 				index: number,
 				value: unknown,
-				outputType: "string" | "number" | "bool" | "vector3" | "color" | "byte",
+				outputType: BlockLogicTypes.IdListOfType<typeof BlockConfigDefinitions.any>,
 			) => {
 				const len = outputs.size();
 				if (len === 0) return;

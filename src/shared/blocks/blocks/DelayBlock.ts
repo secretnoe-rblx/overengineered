@@ -7,6 +7,7 @@ import type {
 	BlockLogicFullBothDefinitions,
 	BlockLogicTickContext,
 } from "shared/blockLogic/BlockLogic";
+import type { BlockLogicTypes } from "shared/blockLogic/BlockLogicTypes";
 import type { BlockBuilder } from "shared/blocks/Block";
 
 const definition = {
@@ -44,8 +45,8 @@ const definition = {
 
 type Wait = {
 	left: number;
-	readonly value: string | number | boolean | Vector3 | Color3;
-	readonly valueType: "string" | "number" | "bool" | "vector3" | "byte" | "color";
+	readonly value: BlockLogicTypes.TypeListOfType<typeof definition.input.value.types>;
+	readonly valueType: BlockLogicTypes.IdListOfType<typeof definition.input.value.types>;
 	readonly tickBased: boolean;
 };
 

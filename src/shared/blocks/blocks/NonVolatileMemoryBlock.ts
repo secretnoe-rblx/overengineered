@@ -5,6 +5,7 @@ import { BlockCreation } from "shared/blocks/BlockCreation";
 import { BlockManager } from "shared/building/BlockManager";
 import type { RideToBuildModeSlotScheduler } from "client/modes/ride/RideToBuildModeSlotScheduler";
 import type { BlockLogicArgs, BlockLogicFullBothDefinitions } from "shared/blockLogic/BlockLogic";
+import type { BlockLogicTypes } from "shared/blockLogic/BlockLogicTypes";
 import type { BlockBuilder } from "shared/blocks/Block";
 
 const definition = {
@@ -54,11 +55,11 @@ class Logic extends BlockLogic<typeof definition> {
 		// get
 		let storedValue = (
 			BlockManager.manager.customData.get(block.instance!) as { storedValue?: unknown } | undefined
-		)?.storedValue;
+		)?.storedValue as BlockLogicTypes.TypeListOfType<typeof definition.input.value.types>;
 
 		let dataType = (
 			BlockManager.manager.customData.get(block.instance!) as
-				| { dataType?: keyof typeof BlockConfigDefinitions.any | undefined }
+				| { dataType?: BlockLogicTypes.IdListOfType<typeof definition.input.value.types> | undefined }
 				| undefined
 		)?.dataType;
 
@@ -80,8 +81,7 @@ class Logic extends BlockLogic<typeof definition> {
 		});
 
 		this.onkFirstInputs([], () => {
-			if (dataType !== undefined)
-				this.output.result.set(dataType, storedValue as string | number | boolean | Vector3 | Color3);
+			if (dataType !== undefined) this.output.result.set(dataType, storedValue);
 		});
 
 		this.onk(["defaultValue"], ({ defaultValue, defaultValueType, defaultValueChanged }) => {

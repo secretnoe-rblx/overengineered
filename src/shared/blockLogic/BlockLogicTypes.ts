@@ -1,4 +1,5 @@
 import type { PlacedBlockConfig } from "shared/blockLogic/BlockConfig";
+import type { BlockLogicFullInputDef } from "shared/blockLogic/BlockLogic";
 
 type LEnum<T extends string> = {
 	readonly config: NoInfer<T>;
@@ -9,6 +10,16 @@ type LEnum<T extends string> = {
 export const inferEnumLogicType = <const T extends string>(value: LEnum<T>): LEnum<T> => value;
 
 export namespace BlockLogicTypes {
+	export type IdListOfType<T extends BlockLogicFullInputDef["types"]> = keyof T;
+	export type TypeListOfType<T extends BlockLogicFullInputDef["types"]> = TypeListOfOutputTypea<
+		keyof T & keyof Primitives
+	>;
+
+	export type IdListOfOutputType<T extends readonly (keyof Primitives)[]> = T[number];
+	export type TypeListOfOutputType<T extends readonly (keyof Primitives)[]> = TypeListOfOutputTypea<T[number]>;
+
+	type TypeListOfOutputTypea<T extends keyof Primitives> = Primitives[T]["config"];
+
 	type BCType<TDefault, TConfig> = {
 		readonly config: TConfig;
 
@@ -107,6 +118,18 @@ export namespace BlockLogicTypes {
 		readonly elements: { readonly [k in T]: EnumElement };
 	};
 
+	export type SoundEffect<
+		T extends keyof Instances & `${string}SoundEffect` = keyof Instances & `${string}SoundEffect`,
+	> = {
+		readonly type: T;
+		readonly properties: Partial<Instances[T]>;
+	};
+	export type SoundValue = {
+		readonly id: string;
+		readonly effects?: readonly SoundEffect[];
+	};
+	export type Sound = BCPrimitive<SoundValue>;
+
 	//
 
 	export type Primitives = {
@@ -122,6 +145,7 @@ export namespace BlockLogicTypes {
 		readonly byte: Byte;
 		readonly bytearray: ByteArray;
 		readonly enum: Enum;
+		readonly sound: Sound;
 	};
 
 	export type Controls = {

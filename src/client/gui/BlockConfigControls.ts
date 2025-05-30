@@ -11,6 +11,7 @@ import { ConfigControlMulti } from "client/gui/configControls/ConfigControlMulti
 import { ConfigControlMultiKeys } from "client/gui/configControls/ConfigControlMultiKeys";
 import { ConfigControlNumber } from "client/gui/configControls/ConfigControlNumber";
 import { ConfigControlSlider } from "client/gui/configControls/ConfigControlSlider";
+import { ConfigControlSound } from "client/gui/configControls/ConfigControlSound";
 import { ConfigControlString } from "client/gui/configControls/ConfigControlString";
 import { ConfigControlSwitch } from "client/gui/configControls/ConfigControlSwitch";
 import { ConfigControlVector3 } from "client/gui/configControls/ConfigControlVector3";
@@ -489,6 +490,22 @@ namespace Controls {
 			}
 		}
 
+		export class sound extends Base<TextBoxControlDefinition, "sound"> {
+			constructor(
+				templates: templates,
+				definition: MiniPrimitives["sound"],
+				config: ConfigParts<"sound">,
+				args: Args,
+			) {
+				super(templates.Text());
+
+				const control = this.parent(new TextBoxControl(this.control));
+				control.text.set(sameOrUndefined(config)?.id ?? "");
+
+				control.submitted.Connect((v) => this.submitted.Fire((config = map(config, (_) => ({ id: v })))));
+			}
+		}
+
 		//
 
 		export class KeyBool extends Base<GuiObject, "bool"> {
@@ -848,6 +865,7 @@ namespace Controls {
 		color: (templates, definition, config, parent) => new Controls.color(templates, definition, config),
 		vector3: (templates, definition, config, parent) => new Controls.vector3(templates, definition, config, parent),
 		enum: (templates, definition, config, parent) => new Controls._enum(templates, definition, config),
+		sound: (templates, definition, config, parent) => new Controls.sound(templates, definition, config, parent),
 	} satisfies Controls.controls as Controls.genericControls;
 
 	export const extendedControls = {
@@ -1359,6 +1377,13 @@ class ConfigAutoValueWrapper extends Control<ConfigValueWrapperDefinition> {
 						if (!def) return;
 
 						return new ConfigControlByteArray(clone(templates.Edit), blockdef.displayName, def.lengthLimit) //
+							.setValues(values);
+					},
+					sound: (values, blockdef, stype) => {
+						const def = definition.types[stype];
+						if (!def) return;
+
+						return new ConfigControlSound(clone(templates.Sound), blockdef.displayName) //
 							.setValues(values);
 					},
 				} satisfies {

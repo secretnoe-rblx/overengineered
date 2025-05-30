@@ -71,8 +71,8 @@ class Logic extends BlockLogic<typeof definition> {
 	}
 
 	setOutput(
-		valueType: (typeof definition.output.value.types)[number],
-		value: BlockLogicTypes.Primitives[(typeof definition.output.value.types)[number]]["default"],
+		valueType: BlockLogicTypes.IdListOfOutputType<typeof definition.output.value.types>,
+		value: BlockLogicTypes.TypeListOfOutputType<typeof definition.output.value.types>,
 	) {
 		this.output.value.set(valueType, value);
 	}

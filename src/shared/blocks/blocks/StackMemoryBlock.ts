@@ -59,10 +59,11 @@ class Logic extends BlockLogic<typeof definition> {
 	constructor(block: BlockLogicArgs) {
 		super(definition, block);
 
-		type PrimitiveKeys = keyof BlockLogicTypes.Primitives;
-		const internalMemory: { readonly value: unknown; readonly type: PrimitiveKeys }[] = [];
+		type PrimitiveValues = BlockLogicTypes.TypeListOfOutputType<typeof definition.output.result.types>;
+		type PrimitiveKeys = BlockLogicTypes.IdListOfOutputType<typeof definition.output.result.types>;
+		const internalMemory: { readonly value: PrimitiveValues; readonly type: PrimitiveKeys }[] = [];
 
-		const pushValue = (value: unknown, valueType: PrimitiveKeys) => {
+		const pushValue = (value: PrimitiveValues, valueType: PrimitiveKeys) => {
 			if (internalMemory.size() >= size) {
 				this.disableAndBurn();
 				return;

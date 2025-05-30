@@ -32,14 +32,12 @@ const definition = {
 	output: {},
 } satisfies BlockLogicFullBothDefinitions;
 
-type Any = keyof typeof BlockConfigDefinitions.any;
-
 export type { Logic as RadioTransmitterBlockLogic };
 class Logic extends BlockLogic<typeof definition> {
 	static readonly sendEvent = new C2CRemoteEvent<{
 		readonly frequency: number;
-		readonly valueType: Exclude<Any, "unset" | "wire">;
-		readonly value: BlockLogicTypes.Primitives[Any]["config"];
+		readonly valueType: BlockLogicTypes.IdListOfType<typeof definition.input.value.types>;
+		readonly value: BlockLogicTypes.TypeListOfType<typeof definition.input.value.types>;
 	}>("b_radio_transmitter_send", "UnreliableRemoteEvent");
 
 	private readonly colorFade = Color3.fromRGB(0, 0, 0);

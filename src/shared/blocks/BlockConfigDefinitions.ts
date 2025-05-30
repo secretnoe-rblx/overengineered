@@ -2,24 +2,25 @@ import type { BlockLogicFullInputDef } from "shared/blockLogic/BlockLogic";
 
 export const BlockConfigDefinitions = {
 	any: {
-		bool: { config: false },
-		number: { config: 0 },
+		bool: { config: false as boolean },
+		number: { config: 0 as number },
 		vector3: { config: Vector3.zero },
-		string: { config: "" },
-		byte: { config: 0 },
+		string: { config: "" as string },
+		byte: { config: 0 as number },
 		color: { config: new Color3(0, 0, 0) },
+		sound: { config: { id: "" as string } },
 	},
 	number: {
-		number: { config: 0 },
+		number: { config: 0 as number },
 	},
 	string: {
-		string: { config: "" },
+		string: { config: "" as string },
 	},
 	bool: {
-		bool: { config: false },
+		bool: { config: false as boolean },
 	},
 	byte: {
-		byte: { config: 0 },
+		byte: { config: 0 as number },
 	},
 	vector3: {
 		vector3: { config: new Vector3(0, 0, 0) },

@@ -18,15 +18,16 @@ export namespace BlockWireManager {
 	};
 
 	export const types: { readonly [k in DataType]: { readonly color: Color3 } } = {
-		bool: { color: Colors.yellow },
-		vector3: { color: Colors.pink },
-		number: { color: Colors.green },
-		string: { color: Colors.purple },
-		key: { color: Colors.orange },
-		color: { color: Colors.red },
+		bool: { color: Color3.fromRGB(252, 252, 105) },
+		vector3: { color: Color3.fromRGB(244, 142, 255) },
+		number: { color: Color3.fromRGB(48, 173, 85) },
+		string: { color: Color3.fromRGB(120, 18, 120) },
+		key: { color: Color3.fromRGB(237, 184, 51) },
+		color: { color: Color3.fromRGB(255, 73, 76) },
 		byte: { color: Color3.fromRGB(97, 138, 255) },
 		bytearray: { color: Color3.fromRGB(15, 69, 217) },
 		enum: { color: Color3.fromRGB(100, 100, 100) },
+		sound: { color: Color3.fromRGB(61, 217, 227) },
 		unset: { color: Colors.white },
 		wire: { color: Colors.white },
 	};
