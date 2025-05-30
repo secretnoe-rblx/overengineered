@@ -1,4 +1,3 @@
-import { Strings } from "engine/shared/fixes/String.propmacro";
 import { InstanceBlockLogic } from "shared/blockLogic/BlockLogic";
 import { SoundLogic } from "shared/blockLogic/SoundLogic";
 import { BlockCreation } from "shared/blocks/BlockCreation";
@@ -111,7 +110,6 @@ export namespace SoundEffectBlockCreator {
 				super(definition, block);
 
 				this.onk(["sound", ...(keys.map((c) => c.lower()) as never)], (arg) => {
-					print("arg", Strings.pretty(arg));
 					this.output.output.set("sound", {
 						...arg.sound,
 						effects: [
