@@ -132,6 +132,7 @@ export const SpeakerBlock = {
 	id: "speaker",
 	displayName: "Speaker",
 	description: "Definitely speaks something, but only to you. Schizofrenia?",
+	limit: 50,
 
 	logic: { definition, ctor: Logic },
 } as const satisfies BlockBuilder;
