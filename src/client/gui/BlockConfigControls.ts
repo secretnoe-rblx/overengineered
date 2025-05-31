@@ -1,4 +1,3 @@
-import { ColorChooser } from "client/gui/ColorChooser";
 import { ConfigControlButton } from "client/gui/configControls/ConfigControlButton";
 import { ConfigControlByte } from "client/gui/configControls/ConfigControlByte";
 import { ConfigControlByteArray } from "client/gui/configControls/ConfigControlByteArray";
@@ -14,16 +13,10 @@ import { ConfigControlSound } from "client/gui/configControls/ConfigControlSound
 import { ConfigControlString } from "client/gui/configControls/ConfigControlString";
 import { ConfigControlSwitch } from "client/gui/configControls/ConfigControlSwitch";
 import { ConfigControlVector3 } from "client/gui/configControls/ConfigControlVector3";
-import { ByteEditor } from "client/gui/controls/ByteEditorControl";
 import { CheckBoxControl } from "client/gui/controls/CheckBoxControl";
 import { DropdownList } from "client/gui/controls/DropdownList";
-import { KeyOrStringChooserControl } from "client/gui/controls/KeyChooserControl";
-import { NumberTextBoxControlNullable } from "client/gui/controls/NumberTextBoxControl";
-import { SliderControlNullable } from "client/gui/controls/SliderControl";
 import { Interface } from "client/gui/Interface";
-import { MemoryEditorPopup } from "client/gui/popup/MemoryEditorPopup";
 import { Control } from "engine/client/gui/Control";
-import { TextBoxControl } from "engine/client/gui/TextBoxControl";
 import { ComponentChild } from "engine/shared/component/ComponentChild";
 import { ComponentChildren } from "engine/shared/component/ComponentChildren";
 import { Observables } from "engine/shared/event/Observables";
@@ -33,18 +26,11 @@ import { Objects } from "engine/shared/fixes/Objects";
 import { BlockConfig } from "shared/blockLogic/BlockConfig";
 import { BlockWireManager } from "shared/blockLogic/BlockWireManager";
 import { Colors } from "shared/Colors";
-import type { ColorChooserDefinition } from "client/gui/ColorChooser";
 import type { ConfigControlMultiDefinition } from "client/gui/configControls/ConfigControlMulti";
 import type { ConfigControlTemplateList } from "client/gui/configControls/ConfigControlsList";
-import type { ByteEditorDefinitionParts } from "client/gui/controls/ByteEditorControl";
 import type { CheckBoxControlDefinition } from "client/gui/controls/CheckBoxControl";
 import type { DropdownListDefinition } from "client/gui/controls/DropdownList";
-import type { KeyChooserControlDefinition } from "client/gui/controls/KeyChooserControl";
-import type { NumberTextBoxControlDefinition } from "client/gui/controls/NumberTextBoxControl";
 import type { SwitchControlItem } from "client/gui/controls/SwitchControl";
-import type { MultiKeyNumberControlDefinition } from "client/gui/MultiKeyNumberControl";
-import type { PopupController } from "client/gui/PopupController";
-import type { TextBoxControlDefinition } from "engine/client/gui/TextBoxControl";
 import type { FakeObservableValue } from "engine/shared/event/FakeObservableValue.propmacro";
 import type { BlockConfigPart } from "shared/blockLogic/BlockConfig";
 import type { BlockLogicWithConfigDefinitionTypes } from "shared/blockLogic/BlockLogic";
@@ -56,13 +42,9 @@ type PrimitiveKeys = keyof Primitives;
 type Controls = BlockLogicTypes.Controls;
 type ControlKeys = keyof Controls;
 
-type MiniPrimitives = { readonly [k in PrimitiveKeys]: Omit<Primitives[k], "default"> };
-type WithoutDefaultPrimitives = { readonly [k in PrimitiveKeys]: Omit<Primitives[k], "default"> };
-type WithoutDefaultControls = { readonly [k in ControlKeys]: WithoutDefaultPrimitives[k] };
-
 type OfBlocks<T> = object & { readonly [k in BlockUuid]: T };
 
-export type VisualBlockConfigDefinition = {
+type VisualBlockConfigDefinition = {
 	readonly displayName: string;
 	readonly tooltip?: string;
 	readonly unit?: string;
@@ -75,51 +57,9 @@ export type VisualBlockConfigDefinitions = {
 	readonly [k in string]: VisualBlockConfigDefinition;
 };
 
-type ConfigPart<TKey extends PrimitiveKeys> = Primitives[TKey]["config"];
-type ConfigParts<TKey extends PrimitiveKeys> = OfBlocks<ConfigPart<TKey>>;
-
-type ControlDefinition<TKey extends PrimitiveKeys> = Primitives[TKey & keyof BlockLogicTypes.Controls]["control"] &
-	defined;
-type ControlConfigPart<TKey extends PrimitiveKeys> = ControlDefinition<TKey>["config"];
-type ControlConfigParts<TKey extends PrimitiveKeys> = OfBlocks<ControlConfigPart<TKey>>;
-
 type TypedConfigPart<K extends PrimitiveKeys = PrimitiveKeys> = BlockConfigPart<K>;
 type BlocksConfigPart<K extends PrimitiveKeys = PrimitiveKeys> = OfBlocks<TypedConfigPart<K>>;
 type BlocksConfig = OfBlocks<{ readonly [k in string]: TypedConfigPart }>;
-
-/** Return the value if all of them are the same; Returns undefined otherwise */
-const sameOrUndefined = <T>(configs: OfBlocks<T>, comparer?: (left: T, right: T) => boolean) => {
-	let value: T | undefined;
-	for (const [_, config] of pairs(configs)) {
-		if (value !== undefined && !(comparer?.(value, config) ?? value === config)) {
-			value = undefined;
-			break;
-		}
-
-		value = config;
-	}
-
-	return value;
-};
-const sameOrUndefinedBy = <T, U>(config: OfBlocks<T>, func: (value: T) => U) => {
-	if (Objects.size(config) === 1) {
-		const first = firstValue(config)!;
-		return func(first);
-	}
-
-	const mapped: Writable<OfBlocks<U>> = {};
-	for (const [uuid, v] of pairs(config)) {
-		const value = func(v);
-		if (value === undefined) {
-			return undefined;
-		}
-
-		mapped[uuid] = value;
-	}
-
-	const same = sameOrUndefined(mapped);
-	return same;
-};
 
 /** Map the config values, leaving the keys as is */
 const map = <T, TOut extends defined>(
@@ -136,533 +76,24 @@ const template = Interface.getInterface<{
 }>().Main.Left.Config.Content.ScrollingFrame.Template;
 template.Visible = false;
 
-const setWrapperColor = (wrapper: ConfigValueWrapper, valueType: PrimitiveKeys) => {
-	wrapper.typeColor.set(BlockWireManager.types[valueType].color);
-};
-const setWrapperName = (control: Control<GuiObject & { readonly HeadingLabel: TextLabel }>, name: string) => {
-	control.instance.HeadingLabel.Text = name;
-};
-const initTooltip = (
-	control: Control<GuiObject & { readonly HeadingLabel: TextLabel }>,
-	definition: Pick<VisualBlockConfigDefinition, "tooltip" | "unit">,
-) => {
-	if (!definition.tooltip) return;
-
-	let tooltip = definition.tooltip;
-	if (definition.unit) tooltip += ` (${definition.unit})`;
-
-	control.parent(new Control(control.instance.HeadingLabel)).setTooltipText(tooltip);
-};
-
-namespace Controls {
-	type SliderControlDefinition = GuiObject & {
-		readonly TextBox: TextBox;
-		readonly Control: GuiObject & {
-			readonly Filled: GuiObject;
-			readonly Knob: GuiObject;
-		};
-	};
-	type ByteControlDefinition = GuiObject & {
-		readonly Bottom: GuiObject & {
-			readonly Buttons: ByteEditorDefinitionParts["Buttons"] & defined;
-		};
-		readonly Top: GuiObject & {
-			readonly TextBox: ByteEditorDefinitionParts["TextBox"] & defined;
-		};
-	};
-
-	export type Templates = {
-		readonly Unset: ConfigValueDefinition<GuiObject>;
-		readonly Redirect: ConfigValueDefinition<GuiButton>;
-
-		readonly Checkbox: ConfigValueDefinition<CheckBoxControlDefinition>;
-		readonly Number: ConfigValueDefinition<NumberTextBoxControlDefinition>;
-		readonly Text: ConfigValueDefinition<TextBoxControlDefinition>;
-		readonly Slider: ConfigValueDefinition<SliderControlDefinition>;
-		readonly Byte: ConfigValueDefinition<ByteControlDefinition>;
-		readonly ByteArray: ConfigValueDefinition<GuiButton>;
-		readonly Key: ConfigValueDefinition<KeyChooserControlDefinition>;
-		readonly Color: ConfigValueDefinition<ColorChooserDefinition>;
-		readonly Dropdown: ConfigValueDefinition<DropdownListDefinition>;
-		readonly Multi: ConfigValueDefinition<GuiObject>;
-
-		readonly MultiKeys: MultiKeyNumberControlDefinition;
-	};
-	type templates = {
-		readonly [k in keyof Templates]: () => Templates[k];
-	};
-	export const templates: templates = {
-		Unset: Control.asTemplateWithMemoryLeak(template.Content.Unset, true),
-		Redirect: Control.asTemplateWithMemoryLeak(template.Content.Redirect, true),
-
-		Checkbox: Control.asTemplateWithMemoryLeak(template.Content.Checkbox, true),
-		Number: Control.asTemplateWithMemoryLeak(template.Content.Number, true),
-		Text: Control.asTemplateWithMemoryLeak(template.Content.Text, true),
-		Slider: Control.asTemplateWithMemoryLeak(template.Content.Slider, true),
-		Byte: Control.asTemplateWithMemoryLeak(template.Content.Byte, true),
-		ByteArray: Control.asTemplateWithMemoryLeak(template.Content.ByteArray, true),
-		Key: Control.asTemplateWithMemoryLeak(template.Content.Key, true),
-		Color: Control.asTemplateWithMemoryLeak(template.Content.Color, true),
-		Dropdown: Control.asTemplateWithMemoryLeak(template.Content.Dropdown, true),
-		Multi: Control.asTemplateWithMemoryLeak(template.Content.Multi, true),
-
-		MultiKeys: Control.asTemplateWithMemoryLeak(template.Content.MultiKeys, true),
-	};
-
-	namespace Controls {
-		const addSingleTypeWrapper = <T extends Control>(
-			parent: Control<GuiObject> & { readonly control: GuiObject },
-			control: T,
-			parentTo?: Control,
-		) => {
-			const wrapper = new ConfigValueWrapper(template.Clone());
-			wrapper.dropdown.hide();
-			wrapper.controls.hide();
-			wrapper.content.set(control);
-
-			wrapper.instance.Parent = parent.control;
-			(parentTo ?? parent).parent(wrapper);
-			return $tuple(wrapper, control);
-		};
-		const addSingleTypeWrapperAuto = <TKey extends PrimitiveKeys>(
-			parent: Control<GuiObject> & { readonly control: GuiObject },
-			displayName: string,
-			def: MiniPrimitives[TKey] & { readonly type: TKey } & Pick<VisualBlockConfigDefinition, "tooltip" | "unit">,
-			configs: ConfigParts<TKey>,
-			args: Args,
-			parentTo?: Control,
-		) => {
-			const ctor = controls[def.type];
-			if (!ctor) throw `No ctor for block config visual type ${def.type}`;
-
-			const control = ctor(templates, def as WithoutDefaultPrimitives[PrimitiveKeys], configs, args, undefined!);
-			setWrapperName(control, displayName);
-
-			const [wrapper] = addSingleTypeWrapper(parent, control, parentTo);
-			setWrapperColor(wrapper, def.type);
-
-			initTooltip(control, def);
-
-			return $tuple(wrapper, control as Control as Control & Submittable<TKey>);
-		};
-
-		type Submittable<TKey extends PrimitiveKeys> = {
-			readonly submitted: ReadonlyArgsSignal<[value: ConfigParts<TKey>]>;
-		};
-		export abstract class Base<T extends GuiObject, TKey extends PrimitiveKeys> extends Control<
-			ConfigValueDefinition<T>
-		> {
-			readonly submitted = new ArgsSignal<[value: ConfigParts<TKey>]>();
-			readonly submittedControl = new ArgsSignal<[value: ControlConfigParts<TKey>]>();
-			readonly control: T;
-
-			constructor(gui: ConfigValueDefinition<T>) {
-				super(gui);
-				this.control = gui.Control;
-			}
-		}
-
-		export class unset extends Base<GuiObject, "unset"> {
-			constructor(templates: templates) {
-				super(templates.Unset());
-			}
-		}
-		export class wire extends Base<GuiButton, "wire"> {
-			constructor(
-				templates: templates,
-				definition: MiniPrimitives["wire"],
-				config: ConfigParts<"wire">,
-				args: Args,
-			) {
-				super(templates.Redirect());
-
-				const btn = this.parent(new Control(this.gui.Control)).addButtonAction(() =>
-					args.travelTo(firstValue(config)!.blockUuid),
-				);
-
-				if (asMap(config).size() !== 1) {
-					btn.setButtonInteractable(false);
-				}
-			}
-		}
-
-		export class bool extends Base<CheckBoxControlDefinition, "bool"> {
-			constructor(templates: templates, definition: MiniPrimitives["bool"], config: ConfigParts<"bool">) {
-				super(templates.Checkbox());
-
-				const control = this.parent(new CheckBoxControl(this.control));
-				control.value.set(sameOrUndefined(config));
-
-				control.submitted.Connect((v) => this.submitted.Fire((config = map(config, (_) => v))));
-			}
-		}
-
-		export class Number extends Base<NumberTextBoxControlDefinition, "number"> {
-			constructor(templates: templates, definition: MiniPrimitives["number"], config: ConfigParts<"number">) {
-				super(templates.Number());
-
-				const gui = this.control as NumberTextBoxControlDefinition;
-
-				const control = this.parent(
-					definition.clamp
-						? new NumberTextBoxControlNullable(
-								gui,
-								definition.clamp.min,
-								definition.clamp.max,
-								definition.clamp.step,
-							)
-						: new NumberTextBoxControlNullable(gui),
-				);
-				control.value.set(sameOrUndefined(config));
-
-				control.submitted.Connect((v) => this.submitted.Fire((config = map(config, (_) => v))));
-			}
-		}
-		export class ClampedNumber extends Base<SliderControlDefinition, "number"> {
-			constructor(
-				templates: templates,
-				definition: MakeRequired<MiniPrimitives["number"], "clamp">,
-				config: ConfigParts<"number">,
-			) {
-				super(templates.Slider());
-
-				const gui = this.control as SliderControlDefinition;
-				const clamp = definition.clamp;
-
-				const control = this.parent(
-					new SliderControlNullable(gui, clamp, {
-						Knob: gui.Control.Knob,
-						Filled: gui.Control.Filled,
-						Hitbox: gui.Control,
-					}),
-				);
-				control.value.set(sameOrUndefined(config));
-
-				control.submitted.Connect((v) => this.submitted.Fire((config = map(config, (_) => v))));
-			}
-		}
-
-		export class _string extends Base<TextBoxControlDefinition, "string"> {
-			constructor(templates: templates, definition: MiniPrimitives["string"], config: ConfigParts<"string">) {
-				super(templates.Text());
-
-				const control = this.parent(new TextBoxControl(this.control));
-				control.text.set(sameOrUndefined(config) ?? "");
-
-				control.submitted.Connect((v) => this.submitted.Fire((config = map(config, (_) => v))));
-			}
-		}
-		export class byte extends Base<ByteControlDefinition, "byte"> {
-			constructor(templates: templates, definition: MiniPrimitives["byte"], config: ConfigParts<"byte">) {
-				super(templates.Byte());
-
-				const control = this.parent(new ByteEditor(this.control));
-				control.value.set(sameOrUndefined(config) ?? 0);
-
-				control.submitted.Connect((v) => this.submitted.Fire((config = map(config, (_) => v))));
-			}
-		}
-		export class key extends Base<KeyChooserControlDefinition, "key"> {
-			readonly keyChooser;
-
-			constructor(templates: templates, definition: MiniPrimitives["key"], config: ConfigParts<"key">) {
-				super(templates.Key());
-
-				this.keyChooser = this.parent(new KeyOrStringChooserControl(this.control));
-				this.keyChooser.value.set(sameOrUndefined(config) ?? "");
-
-				this.keyChooser.submitted.Connect((v) => this.submitted.Fire((config = map(config, (_) => v))));
-			}
-		}
-		export class bytearray extends Base<GuiButton, "bytearray"> {
-			constructor(
-				templates: templates,
-				definition: MiniPrimitives["bytearray"],
-				config: ConfigParts<"bytearray">,
-			) {
-				super(templates.ByteArray());
-
-				const value = () =>
-					sameOrUndefined(config, (left, right) => {
-						if (left.size() !== right.size()) {
-							return false;
-						}
-
-						for (let i = 0; i < left.size(); i++) {
-							if (left[i] !== right[i]) {
-								return false;
-							}
-						}
-
-						return true;
-					});
-
-				this.onInject((di) => {
-					const popupController = di.resolve<PopupController>();
-
-					const control = this.parent(new Control(this.control)).addButtonAction(() => {
-						popupController.showPopup(
-							new MemoryEditorPopup(definition.lengthLimit, [...(value() ?? [])], (v) =>
-								this.submitted.Fire((config = map(config, (_) => v))),
-							),
-						);
-					});
-
-					if (!value()) {
-						control.setButtonInteractable(false);
-					}
-				});
-			}
-		}
-		export class color extends Base<ColorChooserDefinition, "color"> {
-			constructor(templates: templates, definition: MiniPrimitives["color"], config: ConfigParts<"color">) {
-				super(templates.Color());
-
-				const control = this.parent(new ColorChooser(this.control));
-				control.value.set(sameOrUndefined(config) ?? Colors.white);
-
-				control.value.submitted.Connect((v) => this.submitted.Fire((config = map(config, (_) => v))));
-			}
-		}
-
-		export class vector3 extends Base<GuiObject, "vector3"> {
-			constructor(
-				templates: templates,
-				definition: MiniPrimitives["vector3"],
-				config: ConfigParts<"vector3">,
-				args: Args,
-			) {
-				super(templates.Multi());
-
-				const [, cx] = addSingleTypeWrapperAuto(
-					this,
-					"X",
-					{ type: "number", config: 0 },
-					map(config, (c) => c.X),
-					args,
-				);
-				const [, cy] = addSingleTypeWrapperAuto(
-					this,
-					"Y",
-					{ type: "number", config: 0 },
-					map(config, (c) => c.Y),
-					args,
-				);
-				const [, cz] = addSingleTypeWrapperAuto(
-					this,
-					"Z",
-					{ type: "number", config: 0 },
-					map(config, (c) => c.Z),
-					args,
-				);
-
-				const vec = (parts: OfBlocks<number>, axis: "X" | "Y" | "Z") => {
-					if (axis === "X") return map(config, (c, uuid) => new Vector3(parts[uuid], c.Y, c.Z));
-					if (axis === "Y") return map(config, (c, uuid) => new Vector3(c.X, parts[uuid], c.Z));
-					if (axis === "Z") return map(config, (c, uuid) => new Vector3(c.X, c.Y, parts[uuid]));
-
-					throw "what";
-				};
-
-				cx.submitted.Connect((n) => this.submitted.Fire((config = vec(n, "X"))));
-				cy.submitted.Connect((n) => this.submitted.Fire((config = vec(n, "Y"))));
-				cz.submitted.Connect((n) => this.submitted.Fire((config = vec(n, "Z"))));
-			}
-		}
-
-		export class _enum extends Base<DropdownListDefinition, "enum"> {
-			constructor(templates: templates, definition: MiniPrimitives["enum"], config: ConfigParts<"enum">) {
-				super(templates.Dropdown());
-
-				const control = this.parent(new DropdownList<string>(this.control));
-				for (const value of definition.elementOrder) {
-					const { displayName, tooltip } = definition.elements[value];
-
-					const item = control.addItem(value, displayName);
-					if (tooltip) {
-						item.setTooltipText(tooltip);
-					}
-				}
-
-				control.selectedItem.set(sameOrUndefined(config));
-				control.submitted.Connect((v) => this.submitted.Fire((config = map(config, (_) => v))));
-			}
-		}
-
-		export class sound extends Base<TextBoxControlDefinition, "sound"> {
-			constructor(
-				templates: templates,
-				definition: MiniPrimitives["sound"],
-				config: ConfigParts<"sound">,
-				args: Args,
-			) {
-				super(templates.Text());
-
-				const control = this.parent(new TextBoxControl(this.control));
-				control.text.set(sameOrUndefined(config)?.id ?? "");
-
-				control.submitted.Connect((v) => this.submitted.Fire((config = map(config, (_) => ({ id: v })))));
-			}
-		}
-
-		//
-
-		export class KeyBool extends Base<GuiObject, "bool"> {
-			constructor(
-				templates: templates,
-				definition: ControlDefinition<"bool">,
-				config: ControlConfigParts<"bool">,
-				args: Args,
-			) {
-				super(templates.Multi());
-
-				const defcfg = definition.config;
-
-				const [, ckey] = addSingleTypeWrapperAuto(
-					this,
-					"Key",
-					{ type: "key", config: defcfg.key },
-					map(config, (c) => c.key),
-					args,
-				);
-				ckey.submitted.Connect((v) =>
-					this.submittedControl.Fire((config = map(config, (c, uuid) => ({ ...c, key: v[uuid] })))),
-				);
-
-				if (definition.canBeSwitch) {
-					const [, cswitch] = addSingleTypeWrapperAuto(
-						this,
-						"Switch",
-						{ type: "bool", config: defcfg.switch },
-						map(config, (c) => c.switch),
-						args,
-					);
-					cswitch.submitted.Connect((v) =>
-						this.submittedControl.Fire((config = map(config, (c, uuid) => ({ ...c, switch: v[uuid] })))),
-					);
-				}
-
-				if (definition.canBeReversed) {
-					const [, creversed] = addSingleTypeWrapperAuto(
-						this,
-						"Reversed",
-						{ type: "bool", config: defcfg.reversed },
-						map(config, (c) => c.reversed),
-						args,
-					);
-					creversed.submitted.Connect((v) =>
-						this.submittedControl.Fire((config = map(config, (c, uuid) => ({ ...c, reversed: v[uuid] })))),
-					);
-				}
-			}
-		}
-
-		export type controls = {
-			readonly [k in PrimitiveKeys]: (
-				templates: templates,
-				definition: WithoutDefaultPrimitives[k],
-				config: ConfigParts<k>,
-				parent: Args,
-				fullConfig: BlocksConfigPart<k>,
-			) => Base<GuiObject, k>;
-		};
-		export type genericControls = {
-			readonly [k in PrimitiveKeys]: (
-				templates: templates,
-				definition: WithoutDefaultPrimitives[PrimitiveKeys],
-				config: ConfigParts<PrimitiveKeys>,
-				parent: Args,
-				fullConfig: BlocksConfigPart<PrimitiveKeys>,
-			) => Base<GuiObject, PrimitiveKeys>;
-		};
-
-		export type extendedControls = {
-			readonly [k in ControlKeys]?: (
-				templates: templates,
-				definition: MakeRequired<WithoutDefaultControls[k] & { control?: unknown }, "control">,
-				config: BlocksConfigPart<k>,
-				parent: Args,
-			) => Base<GuiObject, k>;
-		};
-		export type extendedGenericControls = {
-			readonly [k in ControlKeys]?: (
-				templates: templates,
-				definition: MakeRequired<WithoutDefaultControls[ControlKeys], "control">,
-				config: BlocksConfigPart<PrimitiveKeys>,
-				parent: Args,
-			) => Base<GuiObject, ControlKeys>;
-		};
-	}
-
-	export type Base<T extends GuiObject = GuiObject, TKey extends PrimitiveKeys = PrimitiveKeys> = Controls.Base<
-		T,
-		TKey
-	>;
-	export type Args = {
-		travelTo(uuid: BlockUuid): void;
-	};
-
-	export const controls = {
-		unset: (templates, definition, config, parent) => new Controls.unset(templates),
-		wire: (templates, definition, config, parent) => new Controls.wire(templates, definition, config, parent),
-		bool: (templates, definition, config, parent) => new Controls.bool(templates, definition, config),
-		number: (templates, definition, config) => {
-			if (definition.clamp?.showAsSlider) {
-				return new Controls.ClampedNumber(
-					templates,
-					definition as MakeRequired<typeof definition, "clamp">,
-					config,
-				);
-			}
-
-			return new Controls.Number(templates, definition, config);
-		},
-		string: (templates, definition, config, parent) => new Controls._string(templates, definition, config),
-		byte: (templates, definition, config, parent) => new Controls.byte(templates, definition, config),
-		key: (templates, definition, config, parent) => new Controls.key(templates, definition, config),
-		bytearray: (templates, definition, config, parent) => new Controls.bytearray(templates, definition, config),
-		color: (templates, definition, config, parent) => new Controls.color(templates, definition, config),
-		vector3: (templates, definition, config, parent) => new Controls.vector3(templates, definition, config, parent),
-		enum: (templates, definition, config, parent) => new Controls._enum(templates, definition, config),
-		sound: (templates, definition, config, parent) => new Controls.sound(templates, definition, config, parent),
-	} satisfies Controls.controls as Controls.genericControls;
-
-	export const extendedControls = {
-		bool: (templates, definition, config, parent) =>
-			new Controls.KeyBool(
-				templates,
-				definition.control,
-				map(config, (c) => c.controlConfig!),
-				parent,
-			),
-	} satisfies Controls.extendedControls as Controls.extendedGenericControls;
-}
-
-type ConfigValueDefinition<T> = GuiObject & {
-	readonly HeadingLabel: TextLabel;
-	readonly Control: T;
-};
-
 type ConfigValueWrapperDefinition = GuiObject & {
 	readonly TypeLine: Frame;
-	readonly Content: GuiObject &
-		Controls.Templates & {
-			readonly TypeDropdown: DropdownListDefinition;
-			readonly TypeControllable: GuiObject & {
-				readonly Controllable: GuiObject & {
-					readonly Control: CheckBoxControlDefinition;
-				};
+	readonly Content: GuiObject & {
+		readonly TypeDropdown: DropdownListDefinition;
+		readonly TypeControllable: GuiObject & {
+			readonly Controllable: GuiObject & {
+				readonly Control: CheckBoxControlDefinition;
 			};
 		};
-	readonly ContentNew: GuiObject &
-		Controls.Templates & {
-			readonly TypeDropdown: DropdownListDefinition;
-			readonly TypeControllable: GuiObject & {
-				readonly Controllable: GuiObject & {
-					readonly Control: CheckBoxControlDefinition;
-				};
+	};
+	readonly ContentNew: GuiObject & {
+		readonly TypeDropdown: DropdownListDefinition;
+		readonly TypeControllable: GuiObject & {
+			readonly Controllable: GuiObject & {
+				readonly Control: CheckBoxControlDefinition;
 			};
 		};
+	};
 };
 type m = "[multi]";
 type mk = PrimitiveKeys | m;
@@ -916,6 +347,9 @@ namespace ControllableControls {
 	}
 }
 
+type Args = {
+	travelTo(uuid: BlockUuid): void;
+};
 class ConfigAutoValueWrapper extends Control<ConfigValueWrapperDefinition> {
 	private readonly _submitted = new ArgsSignal<[config: BlocksConfigPart]>();
 	readonly submitted = this._submitted.asReadonly();
@@ -924,7 +358,7 @@ class ConfigAutoValueWrapper extends Control<ConfigValueWrapperDefinition> {
 		gui: ConfigValueWrapperDefinition,
 		definition: VisualBlockConfigDefinition,
 		configs: BlocksConfigPart,
-		args: Controls.Args,
+		args: Args,
 		key: string,
 		wireTypes: WireTypes,
 	) {
@@ -1024,7 +458,7 @@ class ConfigAutoValueWrapper extends Control<ConfigValueWrapperDefinition> {
 			if (stype === "[multi]") stype = "unset";
 			if (stype !== "unset" && stype !== "wire" && !(stype in definition.types)) return;
 
-			setWrapperColor(control, stype);
+			control.typeColor.set(BlockWireManager.types[stype].color);
 
 			// initializing the top `Controllable` bar
 			const initControls = () => {
@@ -1067,277 +501,233 @@ class ConfigAutoValueWrapper extends Control<ConfigValueWrapperDefinition> {
 			};
 			initControls();
 
-			if (true as boolean) {
-				const templates: ConfigControlTemplateList = Interface.getInterface<{
-					Popups: {
-						Crossplatform: {
-							Settings: {
-								Content: { Content: { ScrollingFrame: GuiObject & ConfigControlTemplateList } };
-							};
+			const templates: ConfigControlTemplateList = Interface.getInterface<{
+				Popups: {
+					Crossplatform: {
+						Settings: {
+							Content: { Content: { ScrollingFrame: GuiObject & ConfigControlTemplateList } };
 						};
 					};
-				}>().Popups.Crossplatform.Settings.Content.Content.ScrollingFrame.Clone();
-
-				interface ConfigControl extends Control {
-					submitted(func: (value: OfBlocks<prims[keys]["config"]>) => void): void;
-					setDescription(text: string | undefined): void;
-				}
-
-				type prims = BlockLogicTypes.Primitives;
-				type keys = keyof prims;
-
-				type retf<k extends keys> = (
-					values: OfBlocks<prims[k]["config"]>,
-					blockdef: VisualBlockConfigDefinition,
-					stype: k,
-				) => ConfigControl;
-				const controls = {
-					unset: (values, blockdef) => {
-						return new ConfigControlEmpty(clone(templates.Empty), blockdef.displayName);
-					},
-					wire: (values, blockdef) => {
-						const size = Objects.size(values);
-						if (size === 1) {
-							const { blockUuid } = firstValue(values)!;
-
-							return new ConfigControlButton(clone(templates.Button), blockdef.displayName, () => {
-								args.travelTo(blockUuid);
-							}).with((b) => b.button.setButtonText("→"));
-						}
-
-						return new ConfigControlButton(clone(templates.Button), blockdef.displayName, () => {}) //
-							.with((b) => b.button.setButtonText("→"))
-							.with((b) => b.button.setButtonInteractable(false));
-					},
-
-					number: (values, blockdef, stype) => {
-						const def = definition.types[stype];
-						if (!def) throw "what";
-
-						if (def.clamp?.showAsSlider) {
-							return new ConfigControlSlider(clone(templates.Slider), blockdef.displayName, {
-								min: def.clamp.min,
-								max: def.clamp.max,
-								step: def.clamp.step,
-							}).setValues(values);
-						}
-
-						return new ConfigControlNumber(
-							clone(templates.Number),
-							blockdef.displayName,
-							def.clamp?.min,
-							def.clamp?.max,
-							def.clamp?.step,
-						).setValues(values);
-					},
-					string: (values, blockdef) => {
-						return new ConfigControlString(clone(templates.String), blockdef.displayName) //
-							.setValues(values);
-					},
-					bool: (values, blockdef) => {
-						return new ConfigControlCheckbox(clone(templates.Checkbox), blockdef.displayName) //
-							.setValues(values);
-					},
-					color: (values, blockdef) => {
-						return new ConfigControlColor3(clone(templates.Color), blockdef.displayName, Colors.white) //
-							.setValues(values);
-					},
-					key: (values, blockdef) => {
-						return new ConfigControlKeyOrString(clone(templates.Key), blockdef.displayName) //
-							.setValues(values);
-					},
-					vector3: (values, blockdef) => {
-						return new ConfigControlVector3(clone(templates.Vector3), blockdef.displayName) //
-							.setValues(values);
-					},
-					enum: (values, blockdef, stype) => {
-						const def = definition.types[stype];
-						if (!def) throw "what";
-
-						const items = def.elementOrder.map((k) => {
-							const e = def.elements[k];
-							const item = { name: e.displayName, description: e.tooltip } satisfies SwitchControlItem;
-
-							return [k, item] as const;
-						});
-
-						return new ConfigControlSwitch(clone(templates.Switch), blockdef.displayName, items) //
-							.setValues(values);
-					},
-					byte: (values, blockdef) => {
-						return new ConfigControlByte(clone(templates.Byte), blockdef.displayName) //
-							.setValues(values);
-					},
-					bytearray: (values, blockdef, stype) => {
-						const def = definition.types[stype];
-						if (!def) throw "what";
-
-						return new ConfigControlByteArray(clone(templates.Edit), blockdef.displayName, def.lengthLimit) //
-							.setValues(values);
-					},
-					sound: (values, blockdef, stype) => {
-						const def = definition.types[stype];
-						if (!def) throw "what";
-
-						return new ConfigControlSound(clone(templates.Sound), blockdef.displayName) //
-							.setValues(values);
-					},
-				} satisfies { readonly [k in keys]: retf<k> } as { readonly [k in keys]: retf<keys> };
-
-				interface controlConfigControl extends Control {
-					submitted(func: (value: OfBlocks<controlPrims[controlKeys]["config"]>) => void): void;
-					setDescription(text: string | undefined): void;
-				}
-
-				type controlPrims = Controls;
-				type controlKeys = keyof controlPrims;
-				type controlRetf<k extends controlKeys> = (
-					values: OfBlocks<controlPrims[k]["config"]>,
-					blockdef: VisualBlockConfigDefinition,
-					def: Omit<prims[k], "default">,
-				) => controlConfigControl | undefined;
-
-				const controlsControl = {
-					bool: (values, blockdef, def) => {
-						return new ControllableControls.Bool(
-							clone(templates.Multi),
-							blockdef.displayName,
-							templates,
-							values,
-							blockdef,
-							def,
-						);
-					},
-					number: (values, blockdef, def) => {
-						return new ControllableControls.Number(
-							clone(templates.Multi),
-							blockdef.displayName,
-							templates,
-							values,
-							blockdef,
-							def,
-						);
-					},
-				} satisfies {
-					readonly [k in controlKeys]: controlRetf<k> | undefined;
-				} as {
-					readonly [k in controlKeys]: controlRetf<controlKeys> | undefined;
 				};
+			}>().Popups.Crossplatform.Settings.Content.Content.ScrollingFrame.Clone();
 
-				//
-
-				const cg = () => {
-					const isControllable = control.controllable.value.get();
-					if (isControllable === undefined) {
-						// TODO: [mixed] message or somethin
-						return;
-					}
-
-					if (!isControllable) {
-						const ctor = controls[stype];
-						const control = ctor(
-							map(configs, (c) => c.config),
-							definition,
-							stype,
-						);
-
-						if (definition.tooltip) {
-							control.setDescription(definition.tooltip);
-						}
-
-						control.submitted((values) => {
-							this._submitted.Fire(
-								(configs = map(configs, (c, uuid) => ({
-									...c,
-									type: stype,
-									config: values[uuid],
-								}))),
-							);
-						});
-						return control;
-					} else {
-						const ctor = controlsControl[stype as controlKeys];
-						if (!ctor) return;
-
-						const def = definition.types[stype as controlKeys];
-						if (!def) return;
-
-						const control = ctor(
-							map(configs, (c) => c.controlConfig!),
-							definition,
-							def,
-						);
-						if (!control) return;
-
-						if (definition.tooltip) {
-							control.setDescription(definition.tooltip);
-						}
-
-						control.submitted((values) => {
-							this._submitted.Fire(
-								(configs = map(configs, (c, uuid) => ({
-									...c,
-									type: stype,
-									controlConfig: values[uuid],
-								}))),
-							);
-						});
-						return control;
-					}
-				};
-
-				const cfgcontrol = cg();
-				if (cfgcontrol) {
-					control.content.set(cfgcontrol);
-					return;
-				}
+			interface ConfigControl extends Control {
+				submitted(func: (value: OfBlocks<prims[keys]["config"]>) => void): void;
+				setDescription(text: string | undefined): void;
 			}
 
-			const createGui = (): Controls.Base | undefined => {
-				const def = definition.types[stype];
-				if (!def) return;
+			type prims = BlockLogicTypes.Primitives;
+			type keys = keyof prims;
 
+			type retf<k extends keys> = (
+				values: OfBlocks<prims[k]["config"]>,
+				blockdef: VisualBlockConfigDefinition,
+				stype: k,
+			) => ConfigControl;
+			const controls = {
+				unset: (values, blockdef) => {
+					return new ConfigControlEmpty(clone(templates.Empty), blockdef.displayName);
+				},
+				wire: (values, blockdef) => {
+					const size = Objects.size(values);
+					if (size === 1) {
+						const { blockUuid } = firstValue(values)!;
+
+						return new ConfigControlButton(clone(templates.Button), blockdef.displayName, () => {
+							args.travelTo(blockUuid);
+						}).with((b) => b.button.setButtonText("→"));
+					}
+
+					return new ConfigControlButton(clone(templates.Button), blockdef.displayName, () => {}) //
+						.with((b) => b.button.setButtonText("→"))
+						.with((b) => b.button.setButtonInteractable(false));
+				},
+
+				number: (values, blockdef, stype) => {
+					const def = definition.types[stype];
+					if (!def) throw "what";
+
+					if (def.clamp?.showAsSlider) {
+						return new ConfigControlSlider(clone(templates.Slider), blockdef.displayName, {
+							min: def.clamp.min,
+							max: def.clamp.max,
+							step: def.clamp.step,
+						}).setValues(values);
+					}
+
+					return new ConfigControlNumber(
+						clone(templates.Number),
+						blockdef.displayName,
+						def.clamp?.min,
+						def.clamp?.max,
+						def.clamp?.step,
+					).setValues(values);
+				},
+				string: (values, blockdef) => {
+					return new ConfigControlString(clone(templates.String), blockdef.displayName) //
+						.setValues(values);
+				},
+				bool: (values, blockdef) => {
+					return new ConfigControlCheckbox(clone(templates.Checkbox), blockdef.displayName) //
+						.setValues(values);
+				},
+				color: (values, blockdef) => {
+					return new ConfigControlColor3(clone(templates.Color), blockdef.displayName, Colors.white) //
+						.setValues(values);
+				},
+				key: (values, blockdef) => {
+					return new ConfigControlKeyOrString(clone(templates.Key), blockdef.displayName) //
+						.setValues(values);
+				},
+				vector3: (values, blockdef) => {
+					return new ConfigControlVector3(clone(templates.Vector3), blockdef.displayName) //
+						.setValues(values);
+				},
+				enum: (values, blockdef, stype) => {
+					const def = definition.types[stype];
+					if (!def) throw "what";
+
+					const items = def.elementOrder.map((k) => {
+						const e = def.elements[k];
+						const item = { name: e.displayName, description: e.tooltip } satisfies SwitchControlItem;
+
+						return [k, item] as const;
+					});
+
+					return new ConfigControlSwitch(clone(templates.Switch), blockdef.displayName, items) //
+						.setValues(values);
+				},
+				byte: (values, blockdef) => {
+					return new ConfigControlByte(clone(templates.Byte), blockdef.displayName) //
+						.setValues(values);
+				},
+				bytearray: (values, blockdef, stype) => {
+					const def = definition.types[stype];
+					if (!def) throw "what";
+
+					return new ConfigControlByteArray(clone(templates.Edit), blockdef.displayName, def.lengthLimit) //
+						.setValues(values);
+				},
+				sound: (values, blockdef, stype) => {
+					const def = definition.types[stype];
+					if (!def) throw "what";
+
+					return new ConfigControlSound(clone(templates.Sound), blockdef.displayName) //
+						.setValues(values);
+				},
+			} satisfies { readonly [k in keys]: retf<k> } as { readonly [k in keys]: retf<keys> };
+
+			interface controlConfigControl extends Control {
+				submitted(func: (value: OfBlocks<controlPrims[controlKeys]["config"]>) => void): void;
+				setDescription(text: string | undefined): void;
+			}
+
+			type controlPrims = Controls;
+			type controlKeys = keyof controlPrims;
+			type controlRetf<k extends controlKeys> = (
+				values: OfBlocks<controlPrims[k]["config"]>,
+				blockdef: VisualBlockConfigDefinition,
+				def: Omit<prims[k], "default">,
+			) => controlConfigControl | undefined;
+
+			const controlsControl = {
+				bool: (values, blockdef, def) => {
+					return new ControllableControls.Bool(
+						clone(templates.Multi),
+						blockdef.displayName,
+						templates,
+						values,
+						blockdef,
+						def,
+					);
+				},
+				number: (values, blockdef, def) => {
+					return new ControllableControls.Number(
+						clone(templates.Multi),
+						blockdef.displayName,
+						templates,
+						values,
+						blockdef,
+						def,
+					);
+				},
+			} satisfies {
+				readonly [k in controlKeys]: controlRetf<k> | undefined;
+			} as {
+				readonly [k in controlKeys]: controlRetf<controlKeys> | undefined;
+			};
+
+			//
+
+			const cg = () => {
 				const isControllable = control.controllable.value.get();
-
 				if (isControllable === undefined) {
 					// TODO: [mixed] message or somethin
 					return;
 				}
 
-				if (!isControllable) return;
+				const setDescription = (control: ConfigControl | controlConfigControl) => {
+					if (definition.tooltip && definition.unit) {
+						control.setDescription(`${definition.tooltip} (${definition.unit})`);
+					} else if (definition.tooltip) {
+						control.setDescription(`${definition.tooltip}`);
+					} else if (definition.unit) {
+						control.setDescription(`${definition.unit}`);
+					}
+				};
 
-				if (!(stype in Controls.extendedControls)) return;
+				if (!isControllable) {
+					const ctor = controls[stype];
+					const control = ctor(
+						map(configs, (c) => c.config),
+						definition,
+						stype,
+					);
+					setDescription(control);
 
-				const ctor = Controls.extendedControls[stype as ControlKeys];
-				if (!ctor) return;
+					control.submitted((values) => {
+						this._submitted.Fire(
+							(configs = map(configs, (c, uuid) => ({
+								...c,
+								type: stype,
+								config: values[uuid],
+							}))),
+						);
+					});
+					return control;
+				} else {
+					const ctor = controlsControl[stype as controlKeys];
+					if (!ctor) return;
 
-				return ctor(
-					Controls.templates,
-					def as MakeRequired<MiniPrimitives["number"], "control">,
-					configs,
-					args,
-				);
+					const def = definition.types[stype as controlKeys];
+					if (!def) return;
+
+					const control = ctor(
+						map(configs, (c) => c.controlConfig!),
+						definition,
+						def,
+					);
+					if (!control) return;
+					setDescription(control);
+
+					control.submitted((values) => {
+						this._submitted.Fire(
+							(configs = map(configs, (c, uuid) => ({
+								...c,
+								type: stype,
+								controlConfig: values[uuid],
+							}))),
+						);
+					});
+					return control;
+				}
 			};
-			const cfgcontrol = createGui();
-			if (!cfgcontrol) return;
 
-			setWrapperName(cfgcontrol, definition.displayName);
-			initTooltip(cfgcontrol, definition);
-
-			cfgcontrol.submitted.Connect((v) =>
-				this._submitted.Fire((configs = map(configs, (c, uuid) => ({ ...c, type: stype, config: v[uuid] })))),
-			);
-			cfgcontrol.submittedControl.Connect((v) =>
-				this._submitted.Fire(
-					(configs = map(configs, (c, uuid) => ({
-						...c,
-						type: stype,
-						controlConfig: v[uuid],
-					}))),
-				),
-			);
-
-			control.content.set(cfgcontrol);
+			const cfgcontrol = cg();
+			if (cfgcontrol) {
+				control.content.set(cfgcontrol);
+				return;
+			}
 		};
 
 		this.event.subscribe(control.controllable.submitted, (enabled) => {
@@ -1358,7 +748,7 @@ type WireTypes = ReadonlyMap<
 	ReadonlyMap<string, BlockWireManager.Markers.Input | BlockWireManager.Markers.Output>
 >;
 @injectable
-export class MultiBlockConfigControl extends Control implements Controls.Args {
+export class MultiBlockConfigControl extends Control implements Args {
 	private readonly _travelledTo = new ArgsSignal<[uuid: BlockUuid]>();
 	readonly travelledTo = this._travelledTo.asReadonly();
 

@@ -1,11 +1,11 @@
 import { ConfigControlBase } from "client/gui/configControls/ConfigControlBase";
-import { MultiKeyNumberControl2 } from "client/gui/MultiKeyNumberControl2";
+import { MultiKeyNumberControl } from "client/gui/MultiKeyNumberControl";
 import { Objects } from "engine/shared/fixes/Objects";
 import type {
 	ConfigControlBaseDefinition,
 	ConfigControlBaseDefinitionParts,
 } from "client/gui/configControls/ConfigControlBase";
-import type { MultiKeyNumberControlDefinition, MultiKeyPart } from "client/gui/MultiKeyNumberControl";
+import type { MultiKeyPart } from "client/gui/MultiKeyNumberControl";
 
 declare module "client/gui/configControls/ConfigControlsList" {
 	export interface ConfigControlTemplateList {
@@ -17,7 +17,7 @@ export type ConfigControlMultiKeysParts = ConfigControlBaseDefinitionParts & {
 	readonly AddButton: GuiButton;
 };
 export type ConfigControlMultiKeysDefinition = ConfigControlBaseDefinition & {
-	readonly Buttons: MultiKeyNumberControlDefinition;
+	readonly Buttons: GuiObject;
 };
 
 export class ConfigControlMultiKeys extends ConfigControlBase<
@@ -35,7 +35,7 @@ export class ConfigControlMultiKeys extends ConfigControlBase<
 		super(gui, name);
 
 		const control = this.parent(
-			new MultiKeyNumberControl2(gui.Buttons, defaultValue, min, max, { AddButton: this.parts.AddButton }),
+			new MultiKeyNumberControl(gui.Buttons, defaultValue, min, max, { AddButton: this.parts.AddButton }),
 		);
 
 		this.initFromMultiWithDefault(control.v.value, () => Objects.empty);

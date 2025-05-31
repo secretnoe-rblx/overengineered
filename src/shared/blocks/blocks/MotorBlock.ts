@@ -9,7 +9,7 @@ const definition = {
 	input: {
 		rotationSpeed: {
 			displayName: "Angular Speed",
-			unit: "radians/second",
+			unit: "Radians/second",
 			types: {
 				number: {
 					config: 0,
