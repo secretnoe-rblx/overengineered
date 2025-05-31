@@ -7,7 +7,7 @@ import type { BlockLogicTypes } from "shared/blockLogic/BlockLogicTypes";
 import type { BlockBuilder } from "shared/blocks/Block";
 
 const definition = {
-	inputOrder: ["sound", "play", "volume"],
+	inputOrder: ["sound", "play", "volume", "loop"],
 	input: {
 		sound: {
 			displayName: "Sound",
@@ -34,6 +34,13 @@ const definition = {
 						max: 10,
 					},
 				},
+			},
+		},
+		loop: {
+			displayName: "Loop",
+			tooltip: "Whether to loop the sound while Play input is true",
+			types: {
+				bool: { config: false },
 			},
 		},
 	},
@@ -85,13 +92,22 @@ class Logic extends InstanceBlockLogic<typeof definition> {
 			currentSound.Volume = volume;
 			currentSound.RollOffMaxDistance = 10_000 * volume;
 		};
+		const updateLoop = (loop: boolean) => {
+			if (!currentSound) return;
+			currentSound.Looped = loop;
+		};
 		const volumeCache = this.initializeInputCache("volume");
+		const loopCache = this.initializeInputCache("loop");
 
 		this.onk(["sound"], ({ sound }) => (nextSoundUpdate = sound));
 
 		this.onk(["volume"], ({ volume }) => updateVolume(volume));
+		this.onk(["loop"], ({ loop }) => updateLoop(loop));
 		this.onk(["play"], ({ play }) => {
-			if (!play) return;
+			if (!play) {
+				updateLoop(false);
+				return;
+			}
 
 			if (nextSoundUpdate) {
 				currentSound?.Destroy();
@@ -105,6 +121,7 @@ class Logic extends InstanceBlockLogic<typeof definition> {
 				updateVolume(volumeCache.tryGet() ?? 1);
 			}
 
+			updateLoop(loopCache.tryGet() ?? false);
 			currentSound?.Play();
 		});
 	}
