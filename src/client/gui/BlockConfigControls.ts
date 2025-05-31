@@ -1,3 +1,4 @@
+import { RunService } from "@rbxts/services";
 import { ColorChooser } from "client/gui/ColorChooser";
 import { ConfigControlButton } from "client/gui/configControls/ConfigControlButton";
 import { ConfigControlByte } from "client/gui/configControls/ConfigControlByte";
@@ -21,6 +22,7 @@ import { KeyOrStringChooserControl } from "client/gui/controls/KeyChooserControl
 import { NumberTextBoxControlNullable } from "client/gui/controls/NumberTextBoxControl";
 import { SliderControlNullable } from "client/gui/controls/SliderControl";
 import { Interface } from "client/gui/Interface";
+import { MultiKeyNumberControl } from "client/gui/MultiKeyNumberControl";
 import { MemoryEditorPopup } from "client/gui/popup/MemoryEditorPopup";
 import { Control } from "engine/client/gui/Control";
 import { TextBoxControl } from "engine/client/gui/TextBoxControl";
@@ -42,10 +44,9 @@ import type { DropdownListDefinition } from "client/gui/controls/DropdownList";
 import type { KeyChooserControlDefinition } from "client/gui/controls/KeyChooserControl";
 import type { NumberTextBoxControlDefinition } from "client/gui/controls/NumberTextBoxControl";
 import type { SwitchControlItem } from "client/gui/controls/SwitchControl";
-import type { MultiKeyNumberControlDefinition } from "client/gui/MultiKeyNumberControl";
+import type { MultiKeyNumberControlDefinition, MultiKeyPart } from "client/gui/MultiKeyNumberControl";
 import type { PopupController } from "client/gui/PopupController";
 import type { TextBoxControlDefinition } from "engine/client/gui/TextBoxControl";
-import type { FakeObservableValue } from "engine/shared/event/FakeObservableValue.propmacro";
 import type { BlockConfigPart } from "shared/blockLogic/BlockConfig";
 import type { BlockLogicWithConfigDefinitionTypes } from "shared/blockLogic/BlockLogic";
 import type { BlockLogicTypes } from "shared/blockLogic/BlockLogicTypes";
@@ -556,6 +557,246 @@ namespace Controls {
 				}
 			}
 		}
+		export class NumberExtendedControl extends Base<GuiObject, "number"> {
+			constructor(
+				templates: templates,
+				definition: MakeRequired<MiniPrimitives["number"], "control">,
+				config: BlocksConfigPart<"number">,
+				args: Args,
+			) {
+				super(templates.Multi());
+
+				let controlConfig = map(config, (c) => c.controlConfig!);
+
+				const keysConfig = map(controlConfig, (c) => c.keys);
+				const firstval = firstValue(keysConfig);
+
+				let keys: readonly MultiKeyPart[];
+				if (!firstval) {
+					keys = [];
+				} else {
+					const allEquals = asMap(keysConfig).all((k, v) => Objects.deepEquals(firstval, v));
+					if (!allEquals) keys = [];
+					else keys = firstval;
+				}
+
+				const [wKeys, cKeys] = addSingleTypeWrapper(
+					this,
+					new MultiKeyNumberControl(
+						templates.MultiKeys(),
+						keys,
+						definition.config,
+						definition.clamp?.min,
+						definition.clamp?.max,
+					),
+				);
+				wKeys.typeColor.set(Colors.red);
+				cKeys.submitted.Connect((v) =>
+					this.submittedControl.Fire((controlConfig = map(controlConfig, (c) => ({ ...c, keys: v })))),
+				);
+
+				const createSmoothStuff = (redrawMode: () => void) => {
+					const def = definition.control.config.mode.smooth;
+
+					const [wMode, cMode] = addSingleTypeWrapperAuto(
+						this,
+						"Mode",
+						{
+							type: "enum",
+							config: def.mode,
+							elementOrder: [
+								"stopOnRelease",
+								"instantResetOnDoublePress",
+								"stopOnDoublePress",
+								"resetOnRelease",
+								"instantResetOnRelease",
+								"resetOnDoublePress",
+								"never",
+							],
+							elements: {
+								stopOnRelease: {
+									displayName: "Stop on release",
+									tooltip: "Stops upon releasing the key",
+								},
+								stopOnDoublePress: {
+									displayName: "Stop on double press",
+									tooltip: "Stops upon pressing the same key twice",
+								},
+								resetOnRelease: {
+									displayName: "Reset on release",
+									tooltip: "Smoothly resets upon releasing the key",
+								},
+								instantResetOnRelease: {
+									displayName: "Instant reset on release",
+									tooltip: "Resets upon releasing the key",
+								},
+								resetOnDoublePress: {
+									displayName: "Reset on double press",
+									tooltip: "Smoothly resets upon pressing the same key twice",
+								},
+								instantResetOnDoublePress: {
+									displayName: "Instant reset on double press",
+									tooltip: "Resets upon pressing the same key twice",
+								},
+								never: {
+									displayName: "Never",
+									tooltip: "Never stops or resets",
+								},
+							},
+							tooltip: "Mode of stopping",
+						} satisfies Omit<
+							BlockLogicTypes.Enum<BlockLogicTypes.NumberControlModesSmoothMode>,
+							"default"
+						> & {
+							readonly type: "enum";
+						} & Pick<VisualBlockConfigDefinition, "tooltip" | "unit">,
+						map(controlConfig, (c) => c.mode.smooth.mode),
+						args,
+					);
+					dropdownContent.push(wMode);
+					cMode.submitted.Connect((v) => {
+						this.submittedControl.Fire(
+							(controlConfig = map(controlConfig, (c, uuid): BlockLogicTypes.NumberControl["config"] => ({
+								...c,
+								mode: {
+									...c.mode,
+									smooth: {
+										...c.mode.smooth,
+										mode: v[uuid] as BlockLogicTypes.NumberControlModesSmoothMode,
+									},
+								},
+							}))),
+						);
+
+						redrawMode();
+					});
+
+					const [wSpeed, cSpeed] = addSingleTypeWrapperAuto(
+						this,
+						"Speed",
+						{
+							type: "number",
+							config: def.speed,
+							clamp: !definition.clamp
+								? undefined
+								: {
+										showAsSlider: true,
+										min: 0,
+										max: definition.clamp.max - definition.clamp.min,
+									},
+						},
+						map(controlConfig, (c) => c.mode.smooth.speed),
+						args,
+					);
+					dropdownContent.push(wSpeed);
+					cSpeed.submitted.Connect((v) =>
+						this.submittedControl.Fire(
+							(controlConfig = map(controlConfig, (c, uuid): BlockLogicTypes.NumberControl["config"] => ({
+								...c,
+								mode: {
+									...c.mode,
+									smooth: { ...c.mode.smooth, speed: v[uuid] },
+								},
+							}))),
+						),
+					);
+				};
+				const createInstantStuff = (redrawMode: () => void) => {
+					const def = definition.control.config.mode.instant;
+
+					const [wStopMode, cStopMode] = addSingleTypeWrapperAuto(
+						this,
+						"Reset mode",
+						{
+							type: "enum",
+							config: def.mode,
+							elementOrder: ["onRelease", "onDoublePress", "never"],
+							elements: {
+								onRelease: {
+									displayName: "On release",
+									tooltip: "Resets upon releasing the key",
+								},
+								onDoublePress: {
+									displayName: "On double press",
+									tooltip: "Resets upon pressing the same key twice",
+								},
+								never: {
+									displayName: "Never",
+									tooltip: "Does not reset",
+								},
+							},
+							tooltip: "Mode of stopping",
+						} satisfies Omit<
+							BlockLogicTypes.Enum<BlockLogicTypes.NumberControlModesResetMode>,
+							"default"
+						> & {
+							readonly type: "enum";
+						} & Pick<VisualBlockConfigDefinition, "tooltip" | "unit">,
+						map(controlConfig, (c) => c.mode.instant.mode),
+						args,
+					);
+					dropdownContent.push(wStopMode);
+					cStopMode.submitted.Connect((v) => {
+						this.submittedControl.Fire(
+							(controlConfig = map(controlConfig, (c, uuid): BlockLogicTypes.NumberControl["config"] => ({
+								...c,
+								mode: {
+									...c.mode,
+									instant: {
+										...c.mode.instant,
+										mode: v[uuid] as BlockLogicTypes.NumberControlModesResetMode,
+									},
+								},
+							}))),
+						);
+
+						redrawMode();
+					});
+				};
+
+				const dropdownContent: Control[] = [];
+				const createModeDropdown = () => {
+					const redrawMode = () => {
+						for (const control of dropdownContent) {
+							control.destroy();
+						}
+						dropdownContent.clear();
+
+						const mode = sameOrUndefinedBy(controlConfig, (c) => c.mode.type);
+						if (mode === "smooth") {
+							createSmoothStuff(redrawMode);
+						} else if (mode === "instant") {
+							createInstantStuff(redrawMode);
+						}
+					};
+
+					const [wSmooth, cSmooth] = addSingleTypeWrapperAuto(
+						this,
+						"Smooth change",
+						{
+							type: "bool",
+							config: definition.control.config.mode.type === "smooth",
+							tooltip: "Slowly changed the value to the target instead of an instantaneous change",
+						},
+						map(controlConfig, (c) => c.mode.type === "smooth"),
+						args,
+					);
+					cSmooth.submitted.Connect((v) => {
+						this.submittedControl.Fire(
+							(controlConfig = map(controlConfig, (c, uuid): BlockLogicTypes.NumberControl["config"] => ({
+								...c,
+								mode: { ...c.mode, type: v[uuid] ? "smooth" : "instant" },
+							}))),
+						);
+
+						redrawMode();
+					});
+
+					redrawMode();
+				};
+				createModeDropdown();
+			}
+		}
 
 		export type controls = {
 			readonly [k in PrimitiveKeys]: (
@@ -635,6 +876,8 @@ namespace Controls {
 				map(config, (c) => c.controlConfig!),
 				parent,
 			),
+		number: (templates, definition, config, parent) =>
+			new Controls.NumberExtendedControl(templates, definition, config, parent),
 	} satisfies Controls.extendedControls as Controls.extendedGenericControls;
 }
 
@@ -702,44 +945,6 @@ namespace ControllableControls {
 		blockdef: VisualBlockConfigDefinition,
 		def: Omit<Primitives[k], "default">,
 	];
-
-	export class Bool extends ConfigControlMulti<Controls["bool"]["config"]> {
-		constructor(
-			gui: ConfigControlMultiDefinition,
-			name: string,
-			templates: ConfigControlTemplateList,
-			...[values, blockdef, def]: args<"bool">
-		) {
-			type t = Controls["bool"]["config"];
-			super(gui, name);
-			this.setValues(values);
-
-			const ov = Objects.mapValues(values, (k, v) => new ObservableValue(v));
-			for (const [, observable] of pairs(ov)) {
-				observable.subscribe(() => this.submit(map(ov, (v, k) => v.get())));
-			}
-
-			const fromPath = <const TPath extends Objects.PathsOf<t>>(...path: TPath) => {
-				type ret = { readonly [k in BlockUuid]: FakeObservableValue<Objects.ValueOf<t, TPath>> };
-				return Objects.mapValues(ov, (k, ov) =>
-					Observables.createObservableFromObjectPropertyTyped(ov, path),
-				) as ret;
-			};
-
-			this.parent(new ConfigControlKeyOrString(clone(templates.Key), "Key")) //
-				.initToObservables(fromPath("key"));
-
-			if (def.control?.canBeSwitch) {
-				this.parent(new ConfigControlCheckbox(clone(templates.Checkbox), "Switch")) //
-					.initToObservables(fromPath("switch"));
-			}
-
-			if (def.control?.canBeReversed) {
-				this.parent(new ConfigControlCheckbox(clone(templates.Checkbox), "Reversed")) //
-					.initToObservables(fromPath("reversed"));
-			}
-		}
-	}
 
 	export class Number extends ConfigControlMulti<Controls["number"]["config"]> {
 		constructor(
@@ -1080,7 +1285,6 @@ class ConfigAutoValueWrapper extends Control<ConfigValueWrapperDefinition> {
 
 				interface ConfigControl extends Control {
 					submitted(func: (value: OfBlocks<prims[keys]["config"]>) => void): void;
-					setDescription(text: string | undefined): void;
 				}
 
 				type prims = BlockLogicTypes.Primitives;
@@ -1090,7 +1294,7 @@ class ConfigAutoValueWrapper extends Control<ConfigValueWrapperDefinition> {
 					values: OfBlocks<prims[k]["config"]>,
 					blockdef: VisualBlockConfigDefinition,
 					stype: k,
-				) => ConfigControl;
+				) => ConfigControl | undefined;
 				const controls = {
 					unset: (values, blockdef) => {
 						return new ConfigControlEmpty(clone(templates.Empty), blockdef.displayName);
@@ -1112,7 +1316,7 @@ class ConfigAutoValueWrapper extends Control<ConfigValueWrapperDefinition> {
 
 					number: (values, blockdef, stype) => {
 						const def = definition.types[stype];
-						if (!def) throw "what";
+						if (!def) return;
 
 						if (def.clamp?.showAsSlider) {
 							return new ConfigControlSlider(clone(templates.Slider), blockdef.displayName, {
@@ -1152,7 +1356,7 @@ class ConfigAutoValueWrapper extends Control<ConfigValueWrapperDefinition> {
 					},
 					enum: (values, blockdef, stype) => {
 						const def = definition.types[stype];
-						if (!def) throw "what";
+						if (!def) return;
 
 						const items = def.elementOrder.map((k) => {
 							const e = def.elements[k];
@@ -1170,23 +1374,26 @@ class ConfigAutoValueWrapper extends Control<ConfigValueWrapperDefinition> {
 					},
 					bytearray: (values, blockdef, stype) => {
 						const def = definition.types[stype];
-						if (!def) throw "what";
+						if (!def) return;
 
 						return new ConfigControlByteArray(clone(templates.Edit), blockdef.displayName, def.lengthLimit) //
 							.setValues(values);
 					},
 					sound: (values, blockdef, stype) => {
 						const def = definition.types[stype];
-						if (!def) throw "what";
+						if (!def) return;
 
 						return new ConfigControlSound(clone(templates.Sound), blockdef.displayName) //
 							.setValues(values);
 					},
-				} satisfies { readonly [k in keys]: retf<k> } as { readonly [k in keys]: retf<keys> };
+				} satisfies {
+					readonly [k in keys]: retf<k> | undefined;
+				} as {
+					readonly [k in keys]: retf<keys> | undefined;
+				};
 
 				interface controlConfigControl extends Control {
 					submitted(func: (value: OfBlocks<controlPrims[controlKeys]["config"]>) => void): void;
-					setDescription(text: string | undefined): void;
 				}
 
 				type controlPrims = Controls;
@@ -1198,16 +1405,7 @@ class ConfigAutoValueWrapper extends Control<ConfigValueWrapperDefinition> {
 				) => controlConfigControl | undefined;
 
 				const controlsControl = {
-					bool: (values, blockdef, def) => {
-						return new ControllableControls.Bool(
-							clone(templates.Multi),
-							blockdef.displayName,
-							templates,
-							values,
-							blockdef,
-							def,
-						);
-					},
+					bool: undefined,
 					number: (values, blockdef, def) => {
 						return new ControllableControls.Number(
 							clone(templates.Multi),
@@ -1235,15 +1433,14 @@ class ConfigAutoValueWrapper extends Control<ConfigValueWrapperDefinition> {
 
 					if (!isControllable) {
 						const ctor = controls[stype];
+						if (!ctor) return;
+
 						const control = ctor(
 							map(configs, (c) => c.config),
 							definition,
 							stype,
 						);
-
-						if (definition.tooltip) {
-							control.setDescription(definition.tooltip);
-						}
+						if (!control) return;
 
 						control.submitted((values) => {
 							this._submitted.Fire(
@@ -1255,7 +1452,7 @@ class ConfigAutoValueWrapper extends Control<ConfigValueWrapperDefinition> {
 							);
 						});
 						return control;
-					} else {
+					} else if ((false as boolean) && RunService.IsStudio()) {
 						const ctor = controlsControl[stype as controlKeys];
 						if (!ctor) return;
 
@@ -1268,10 +1465,6 @@ class ConfigAutoValueWrapper extends Control<ConfigValueWrapperDefinition> {
 							def,
 						);
 						if (!control) return;
-
-						if (definition.tooltip) {
-							control.setDescription(definition.tooltip);
-						}
 
 						control.submitted((values) => {
 							this._submitted.Fire(
