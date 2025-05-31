@@ -9,7 +9,7 @@ const definition = {
 	output: {
 		result: {
 			displayName: "Global Position",
-			unit: "Studs",
+			unit: "Coordinates",
 			types: ["vector3"],
 		},
 	},

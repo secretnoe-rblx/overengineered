@@ -9,7 +9,7 @@ const servoDefinition = {
 	input: {
 		speed: {
 			displayName: "Angular Speed",
-			unit: "Radians/second",
+			unit: "radians/second",
 			types: {
 				number: {
 					config: 15,

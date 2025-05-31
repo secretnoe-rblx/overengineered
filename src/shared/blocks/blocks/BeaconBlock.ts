@@ -12,6 +12,7 @@ const definition = {
 		enabled: {
 			displayName: "Enabled",
 			tooltip: "Enable/disable beacon visibility.",
+			unit: "state",
 			types: {
 				bool: {
 					config: true,
@@ -30,7 +31,7 @@ const definition = {
 		showUpDistance: {
 			displayName: "Show Up Distance",
 			tooltip: "The distance at which you can see the marker.",
-			unit: "Studs",
+			unit: "meters",
 			types: {
 				number: {
 					config: 0,
