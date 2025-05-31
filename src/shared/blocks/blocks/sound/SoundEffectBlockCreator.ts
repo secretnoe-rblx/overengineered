@@ -93,7 +93,6 @@ export namespace SoundEffectBlockCreator {
 					types: {
 						sound: { config: { id: "" } },
 					},
-					configHidden: true,
 				},
 				...asObject(keys.mapToMap((k) => $tuple(k.lower(), maker.makeConfig(k as never, pascalCaseToName(k))))),
 			},
