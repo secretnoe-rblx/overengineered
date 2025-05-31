@@ -1,4 +1,3 @@
-import { RunService } from "@rbxts/services";
 import { BlockListBuilder } from "shared/blocks/BlockListBuilder";
 import { AltimeterBlock } from "shared/blocks/blocks/AltimeterBlock";
 import { AngleSensorBlock } from "shared/blocks/blocks/AngleSensorBlock";
@@ -25,7 +24,6 @@ import { LampBlocks } from "shared/blocks/blocks/grouped/LampBlocks";
 import { MechanicalBlocks } from "shared/blocks/blocks/grouped/MechanicalBlocks";
 import { ServoMotorBlocks } from "shared/blocks/blocks/grouped/ServoMotorBlocks";
 import { StringOperationBlocks } from "shared/blocks/blocks/grouped/StringOperationBlocks";
-import { TestBlocks } from "shared/blocks/blocks/grouped/TestBlocks";
 import { TNTBlocks } from "shared/blocks/blocks/grouped/TNTBlocks";
 import { WheelBlocks } from "shared/blocks/blocks/grouped/WheelBlocks";
 import { WingBlocks } from "shared/blocks/blocks/grouped/WingsBlocks";
@@ -80,6 +78,7 @@ import { PlasmaGunBarrelBlock } from "shared/blocks/blocks/Weaponary/Plasma/Plas
 import { PlasmaGunBlock } from "shared/blocks/blocks/Weaponary/Plasma/PlasmaGunBlock";
 import { PlasmaSeparatorMuzzleBlock } from "shared/blocks/blocks/Weaponary/Plasma/PlasmaSeparatorMuzzleBlock";
 import { PlasmaShotgunMuzzleBlock } from "shared/blocks/blocks/Weaponary/Plasma/PlasmaShotgunMuzzleBlock";
+import { GameDefinitions } from "shared/data/GameDefinitions";
 import type { BlockBuilder } from "shared/blocks/Block";
 
 export const CreateSandboxBlocks = (di: DIContainer): BlockList => {
@@ -141,9 +140,6 @@ export const CreateSandboxBlocks = (di: DIContainer): BlockList => {
 		CameraBlock,
 		BeaconBlock,
 
-		SpeakerBlock,
-		...SoundEffectBlockCreator.all,
-
 		VehicleSeatBlock,
 		PassengerSeatBlock,
 		BackMountBlock,
@@ -183,15 +179,16 @@ export const CreateSandboxBlocks = (di: DIContainer): BlockList => {
 		LaserBlock,
 	];
 
-	const icicle = 88843175246235;
-	if (RunService.IsStudio() || game.PlaceId === icicle) {
-		for (const block of weapons) {
-			blocksArr.push(block);
-		}
-	}
+	if (GameDefinitions.isTesting) {
+		const testBlocks: readonly BlockBuilder[] = [
+			//
+			...weapons,
 
-	if (RunService.IsStudio()) {
-		for (const block of TestBlocks) {
+			SpeakerBlock,
+			...SoundEffectBlockCreator.all,
+		];
+
+		for (const block of testBlocks) {
 			blocksArr.push(block);
 		}
 	}

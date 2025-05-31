@@ -9,6 +9,9 @@ export namespace GameDefinitions {
 	export const MAX_ANGULAR_SPEED = 40;
 	export const HEIGHT_OFFSET = -16384;
 
+	const icicle = 88843175246235;
+	export const isTesting = RunService.IsStudio() || game.PlaceId === icicle;
+
 	export function getMaxSlots(player: Player, additional: number) {
 		let max = FREE_SLOTS + additional;
 		if (PlayerRank.isAdmin(player)) max += ADMIN_SLOTS;
