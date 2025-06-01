@@ -27,6 +27,10 @@ class Logic extends BlockLogic<typeof definition> {
 			if (tps === math.huge || tps === -math.huge || tps !== tps) {
 				tps = 0;
 			}
+			if (tps === 0) {
+				this.output.fps.unset();
+				return;
+			}
 
 			this.output.fps.set("number", tps);
 		});
