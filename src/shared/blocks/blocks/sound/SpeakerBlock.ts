@@ -133,6 +133,9 @@ export const SpeakerBlock = {
 	displayName: "Speaker",
 	description: "Definitely speaks something, but only to you. Schizofrenia?",
 	limit: 50,
+	search: {
+		partialAliases: ["sound"],
+	},
 
 	logic: { definition, ctor: Logic },
 } as const satisfies BlockBuilder;
