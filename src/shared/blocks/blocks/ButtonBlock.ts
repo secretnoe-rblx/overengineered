@@ -4,6 +4,7 @@ import { t } from "engine/shared/t";
 import { InstanceBlockLogic } from "shared/blockLogic/BlockLogic";
 import { BlockSynchronizer } from "shared/blockLogic/BlockSynchronizer";
 import { BlockCreation } from "shared/blocks/BlockCreation";
+import type { PlayerDataStorage } from "client/PlayerDataStorage";
 import type { BlockLogicFullBothDefinitions, InstanceBlockLogicArgs } from "shared/blockLogic/BlockLogic";
 import type { BlockBuilder } from "shared/blocks/Block";
 
@@ -112,8 +113,9 @@ const events = {
 } as const;
 
 export type { Logic as ButtonBlockLogic };
+@injectable
 class Logic extends InstanceBlockLogic<typeof definition, buttonType> {
-	constructor(block: InstanceBlockLogicArgs) {
+	constructor(block: InstanceBlockLogicArgs, @tryInject playerDataStorage?: PlayerDataStorage) {
 		super(definition, block);
 
 		const inst = this.instance;
@@ -141,7 +143,6 @@ class Logic extends InstanceBlockLogic<typeof definition, buttonType> {
 				},
 				this,
 			);
-			this.output.result.set("bool", isPressed);
 		};
 
 		const pressButton = (playerWhoClicked: Player) => {
@@ -150,20 +151,20 @@ class Logic extends InstanceBlockLogic<typeof definition, buttonType> {
 			const isSwitch = cachedSwitchMode.get();
 
 			if (isSwitch) {
-				isPressed = !isPressed;
+				this.output.result.set("bool", (isPressed = !isPressed));
 				pc.UpperLimit = isPressed ? 0.1 : maxLengthMagicNumber;
 				upd();
 				return;
 			}
 
-			isPressed = true;
+			this.output.result.set("bool", (isPressed = true));
 			pc.UpperLimit = 0.1;
-			led.Color = cachedLEDColor.get();
-			task.delay(0.2, () => {
-				pc.UpperLimit = maxLengthMagicNumber;
+			const triggerLamp = playerDataStorage?.config.get().graphics.logicEffects === true;
+			if (triggerLamp) {
+				led.Color = cachedLEDColor.get();
 				upd();
-			});
-			upd();
+			}
+			task.delay(0.2, () => (pc.UpperLimit = maxLengthMagicNumber));
 			UpdateOnNextTick = true;
 		};
 
@@ -191,6 +192,7 @@ class Logic extends InstanceBlockLogic<typeof definition, buttonType> {
 			if (UpdateOnNextTick) return (UpdateOnNextTick = false);
 			if (!switchMode && isPressed) {
 				this.output.result.set("bool", (isPressed = false));
+				upd();
 			}
 		});
 	}
