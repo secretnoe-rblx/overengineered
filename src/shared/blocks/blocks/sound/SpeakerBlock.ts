@@ -1,4 +1,3 @@
-import { Element } from "engine/shared/Element";
 import { InstanceBlockLogic } from "shared/blockLogic/BlockLogic";
 import { SoundLogic } from "shared/blockLogic/SoundLogic";
 import { BlockCreation } from "shared/blocks/BlockCreation";
@@ -52,54 +51,73 @@ const definition = {
 	},
 } satisfies BlockLogicFullBothDefinitions;
 
-const createSound = (sound: BlockLogicTypes.SoundValue): Sound | undefined => {
+const updateSound = (instance: Sound, sound: BlockLogicTypes.SoundValue) => {
 	if (!sound.id || sound.id.size() === 0) {
+		instance.SoundId = "";
 		return;
 	}
 
 	if (sound.effects) {
 		for (const effect of sound.effects) {
 			if (!SoundLogic.typeCheck(effect)) {
+				instance.SoundId = "";
 				return;
 			}
 		}
 	}
 
-	const instance = Element.create("Sound", {
-		SoundId: `rbxassetid://${sound.id}`,
-	});
-	if (sound.effects) {
+	instance.SoundId = `rbxassetid://${sound.id}`;
+
+	if (!sound.effects || sound.effects.size() === 0) {
+		instance.ClearAllChildren();
+	} else {
+		const existingEffects = instance.GetChildren().toSet();
+
 		let idx = 0;
 		for (const effect of sound.effects) {
-			const effinstance = Element.create(effect.type, effect.properties);
+			let effinstance = existingEffects.find((c) => c.ClassName === effect.type) as SoundEffect | undefined;
+			if (effinstance) {
+				existingEffects.delete(effinstance);
+			} else {
+				effinstance = new Instance(effect.type, instance);
+			}
+
+			for (const [k, v] of pairs(effect.properties)) {
+				effinstance[k as "Priority"] = v as number;
+			}
+
 			effinstance.Priority = --idx;
-			effinstance.Parent = instance;
+		}
+
+		for (const child of existingEffects) {
+			child.Destroy();
 		}
 	}
-
-	return instance;
 };
 
 class Logic extends InstanceBlockLogic<typeof definition> {
 	constructor(block: InstanceBlockLogicArgs) {
 		super(definition, block);
 
-		let currentSound: Sound | undefined;
+		const soundInstance = new Instance("Sound", this.instance.PrimaryPart);
 		let nextSoundUpdate: BlockLogicTypes.SoundValue | undefined;
 
 		const updateVolume = (volume: number) => {
-			if (!currentSound) return;
-			currentSound.Volume = volume;
-			currentSound.RollOffMaxDistance = 10_000 * volume;
+			soundInstance.Volume = volume;
+			soundInstance.RollOffMaxDistance = 10_000 * volume;
 		};
-		const updateLoop = (loop: boolean) => {
-			if (!currentSound) return;
-			currentSound.Looped = loop;
-		};
+		const updateLoop = (loop: boolean) => (soundInstance.Looped = loop);
 		const volumeCache = this.initializeInputCache("volume");
 		const loopCache = this.initializeInputCache("loop");
 
-		this.onk(["sound"], ({ sound }) => (nextSoundUpdate = sound));
+		this.onk(["sound"], ({ sound }) => {
+			if (!soundInstance.IsPlaying) {
+				nextSoundUpdate = sound;
+				return;
+			}
+
+			updateSound(soundInstance, sound);
+		});
 
 		this.onk(["volume"], ({ volume }) => updateVolume(volume));
 		this.onk(["loop"], ({ loop }) => updateLoop(loop));
@@ -110,19 +128,17 @@ class Logic extends InstanceBlockLogic<typeof definition> {
 			}
 
 			if (nextSoundUpdate) {
-				currentSound?.Destroy();
-				currentSound = createSound(nextSoundUpdate);
+				updateSound(soundInstance, nextSoundUpdate);
 				nextSoundUpdate = undefined;
-				if (!currentSound) return;
 
-				currentSound.Parent = this.instance!.PrimaryPart!;
-				currentSound.Played.Connect(() => this.output.isPlaying.set("bool", true));
-				currentSound.Ended.Connect(() => this.output.isPlaying.set("bool", false));
+				soundInstance.Parent = this.instance!.PrimaryPart!;
+				soundInstance.Played.Connect(() => this.output.isPlaying.set("bool", true));
+				soundInstance.Ended.Connect(() => this.output.isPlaying.set("bool", false));
 				updateVolume(volumeCache.tryGet() ?? 1);
 			}
 
 			updateLoop(loopCache.tryGet() ?? false);
-			currentSound?.Play();
+			soundInstance.Play();
 		});
 	}
 }
