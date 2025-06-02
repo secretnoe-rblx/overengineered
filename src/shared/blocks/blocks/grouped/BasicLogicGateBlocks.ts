@@ -516,6 +516,7 @@ namespace Mux {
 				if (inputs.value === undefined) return;
 				let value = inputs.value;
 				if (inputs.valueType === "bool") value = value ? 1 : 0;
+				else value = math.floor(value as number);
 
 				//set color
 				if (!muxLamps.isEmpty() && inputs.valueChanged) {
@@ -534,7 +535,7 @@ namespace Mux {
 
 				muxValue(
 					this.output.result,
-					math.floor(value as number),
+					value,
 					inp.map((v) => [inputs[v[0] as never], inputs[v[1] as never]]),
 				);
 			});
