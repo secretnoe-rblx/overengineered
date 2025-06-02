@@ -60,7 +60,7 @@ export namespace SoundEffectBlockCreator {
 			description,
 
 			modelSource: {
-				model: BlockCreation.Model.fAutoCreated("DoubleGenericLogicBlockPrefab", `SOUND ${name.upper()}`),
+				model: BlockCreation.Model.fAutoCreated("SoundLogicBlockPrefab", `SOUND ${name.upper()}`),
 				category: () => BlockCreation.Categories.sound,
 			},
 		});
