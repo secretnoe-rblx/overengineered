@@ -854,9 +854,23 @@ const trigonometry = {
 		displayName: "Logarithm",
 		description: "Calculates a logarithm of the input value with selected base",
 		modelSource: autoModel("GenericLogicBlockPrefab", "LOG", categories.trigonometry),
-		logic: logic(defs.num1_num, ({ value }) => ({
-			result: { type: "number", value: math.log(value) },
-		})),
+		logic: logic(
+			{
+				input: {
+					value: defpartsf.number("Value"),
+					base: defpartsf.number("Base"),
+				},
+				output: {
+					result: {
+						displayName: "Result",
+						types: ["number"],
+					},
+				},
+			},
+			({ value, base }) => ({
+				result: { type: "number", value: math.log(value, base) },
+			}),
+		),
 	},
 	log10: {
 		displayName: "Logarithm (10 base)",
@@ -871,7 +885,7 @@ const trigonometry = {
 		description: "Returns a natural Logarithm of inputed value. Unlike it's evil artificial counterparts..",
 		modelSource: autoModel("GenericLogicBlockPrefab", "LOG(E)", categories.trigonometry),
 		logic: logic(defs.num1_num, ({ value }) => ({
-			result: { type: "number", value: math.log(value, 2.718281828459) },
+			result: { type: "number", value: math.log(value) },
 		})),
 	},
 
