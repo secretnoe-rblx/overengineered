@@ -1,5 +1,7 @@
 import { ClientBlockControls } from "client/blocks/ClientBlockControls";
 import { LogicVisualizer } from "client/blocks/LogicVisuaizer";
+import { LogControl } from "client/gui/static/LogControl";
+import { Colors } from "engine/shared/Colors";
 import { ComponentChildren } from "engine/shared/component/ComponentChildren";
 import { BlockConfig } from "shared/blockLogic/BlockConfig";
 import { SharedMachine } from "shared/blockLogic/SharedMachine";
@@ -60,6 +62,11 @@ export class ClientMachine extends SharedMachine {
 					| ILogicValueStorage<keyof BlockLogicTypes.Primitives>;
 				if (!input) {
 					$warn(`Found nil input key ${k} for logic ${block.id}`);
+					LogControl.instance.addLine(
+						`Found nil input key ${k} for logic ${block.id}. Place re-place your ${block.id}`,
+						Colors.red,
+					);
+					continue;
 				}
 
 				if (!("set" in input)) continue;
