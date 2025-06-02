@@ -735,6 +735,7 @@ namespace Demux {
 			this.onkRecalcInputsAny(["value", "input"], ({ value, valueType, valueChanged, input, inputType }) => {
 				if (value === undefined) return;
 				if (valueType === "bool") value = value ? 1 : 0;
+				else value = math.floor(value as number);
 
 				if (!muxLamps.isEmpty() && valueChanged) {
 					events.update.sendOrBurn(
@@ -750,7 +751,7 @@ namespace Demux {
 					);
 				}
 
-				demuxValue(math.floor(value as number), input, inputType!);
+				demuxValue(value, input, inputType!);
 			});
 		}
 	}
