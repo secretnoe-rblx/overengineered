@@ -1372,6 +1372,30 @@ const color = {
 	},
 } as const satisfies BlockBuildersWithoutIdAndDefaults;
 
+const bool = {
+	numbertobool: {
+		displayName: "Number to Bool",
+		description: "Converts 0 into false and everything else into true",
+		modelSource: autoModel("GenericLogicBlockPrefab", "NUM TO BOOL", categories.converter),
+		logic: logic(
+			{
+				input: {
+					value: defpartsf.number("Value"),
+				},
+				output: {
+					result: {
+						displayName: "Result",
+						types: ["bool"],
+					},
+				},
+			},
+			({ value }) => ({
+				result: { type: "bool", value: value !== 0 },
+			}),
+		),
+	},
+} as const satisfies BlockBuildersWithoutIdAndDefaults;
+
 const byte = {
 	numbertobyte: {
 		displayName: "Number to Byte",
@@ -1840,6 +1864,7 @@ const list: BlockBuildersWithoutIdAndDefaults = {
 	...trigonometry,
 	...vec3,
 	...color,
+	...bool,
 	...byte,
 	...other,
 	...units,

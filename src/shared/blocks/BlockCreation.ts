@@ -142,6 +142,7 @@ export namespace BlockCreation {
 		math: ["Logic", "Math"],
 		trigonometry: ["Logic", "Math", "Trigonometry"],
 		byte: ["Logic", "Math", "Byte"],
+		converter: ["Logic", "Converter"],
 		converterByte: ["Logic", "Converter", "Byte"],
 		converterVector: ["Logic", "Converter", "Vector"],
 		converterColor: ["Logic", "Converter", "Color"],
