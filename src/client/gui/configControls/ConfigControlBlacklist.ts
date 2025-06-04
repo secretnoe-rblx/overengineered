@@ -16,7 +16,7 @@ export class ConfigControlBlacklist extends ConfigControlBase<ConfigControlBlack
 		super(gui, name);
 
 		const control = this.parent(new PlayerSelectorColumnControl(gui));
-		this.initFromMultiWithDefault(control.value.asArray(), () => Objects.empty);
+		this.initFromMultiWithDefault(control.publicValue.asArray(), () => Objects.empty);
 		this.event.subscribe(control.submitted, (value) => this.submit(this.multiMap(() => [...value])));
 	}
 }

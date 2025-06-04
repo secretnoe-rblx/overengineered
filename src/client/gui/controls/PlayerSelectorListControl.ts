@@ -4,6 +4,7 @@ import { Control } from "engine/client/gui/Control";
 import { ComponentKeyedChildren } from "engine/shared/component/ComponentKeyedChildren";
 import { Transforms } from "engine/shared/component/Transforms";
 import { ObservableCollectionSet } from "engine/shared/event/ObservableCollection";
+import { ObservableValue } from "engine/shared/event/ObservableValue";
 import { ArgsSignal } from "engine/shared/event/Signal";
 import { PlayerRank } from "engine/shared/PlayerRank";
 
@@ -59,7 +60,9 @@ export class PlayerSelectorColumnControl extends Control<PlayerSelectorColumnCon
 	private readonly leftControl;
 	private readonly rightControl;
 
-	readonly value = new ObservableCollectionSet<number>();
+	private updating = false;
+	readonly publicValue = new ObservableValue<ReadonlySet<number>>(new ReadonlySet<number>());
+	private readonly value = new ObservableCollectionSet<number>();
 	readonly submitted = new ArgsSignal<[players: ReadonlySet<number>]>();
 
 	constructor(gui: PlayerSelectorColumnControlDefinition) {
@@ -74,6 +77,11 @@ export class PlayerSelectorColumnControl extends Control<PlayerSelectorColumnCon
 		);
 
 		this.onEnable(() => this.updateOnlinePlayers());
+		this.publicValue.changed.Connect((v) => {
+			if (this.updating) return;
+			this.value.set(v);
+			this.updateOnlinePlayers();
+		});
 		this.event.subscribe(Players.PlayerAdded, (player) => this.addPlayer(player));
 		this.event.subscribe(Players.PlayerRemoving, (player) => this.removePlayer(player));
 	}
@@ -131,7 +139,11 @@ export class PlayerSelectorColumnControl extends Control<PlayerSelectorColumnCon
 
 					this.removePlayer(player);
 					this.addPlayer(player);
+
+					this.updating = true;
+					this.publicValue.set(this.value.get());
 					this.submitted.Fire(this.value.get());
+					this.updating = false;
 				});
 			})
 			.run(instance);
