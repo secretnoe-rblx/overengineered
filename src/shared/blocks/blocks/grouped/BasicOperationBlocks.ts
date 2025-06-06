@@ -1390,7 +1390,7 @@ const bool = {
 	numbertobool: {
 		displayName: "Number to Bool",
 		description: "Converts 0 into false and everything else into true",
-		modelSource: autoModel("GenericLogicBlockPrefab", "NUM TO BOOL", categories.converter),
+		modelSource: autoModel("GenericLogicBlockPrefab", "NUM -> BOOL", categories.converter),
 		logic: logic(
 			{
 				input: {
@@ -1405,6 +1405,27 @@ const bool = {
 			},
 			({ value }) => ({
 				result: { type: "bool", value: value !== 0 },
+			}),
+		),
+	},
+	booltonumber: {
+		displayName: "Bool to Number",
+		description: "Converts true into 1 and false into 0",
+		modelSource: autoModel("GenericLogicBlockPrefab", "BOOL -> NUM", categories.converter),
+		logic: logic(
+			{
+				input: {
+					value: defpartsf.bool("Value"),
+				},
+				output: {
+					result: {
+						displayName: "Result",
+						types: ["number"],
+					},
+				},
+			},
+			({ value }) => ({
+				result: { type: "number", value: value ? 1 : 0 },
 			}),
 		),
 	},
