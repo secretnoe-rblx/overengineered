@@ -18,11 +18,11 @@ const definition = {
 			displayName: "Max distance",
 			types: {
 				number: {
-					config: 200 as number,
+					config: 2048 as number,
 					clamp: {
 						showAsSlider: true,
 						min: 0.1,
-						max: 600,
+						max: 2048,
 					},
 				},
 			},
