@@ -1,6 +1,7 @@
 import { StarterGui, Workspace } from "@rbxts/services";
 import { MusicPlaylist } from "client/controller/sound/MusicPlaylist";
 import { HostedService } from "engine/shared/di/HostedService";
+import type { PlayModeController } from "client/modes/PlayModeController";
 import type { PlayerDataStorage } from "client/PlayerDataStorage";
 
 @injectable
@@ -12,7 +13,7 @@ export class MusicController extends HostedService {
 					Music: Folder &
 						Record<string, Folder> & {
 							Space: Folder;
-							Background: Folder;
+							BuildingBackground: Folder;
 						};
 				};
 			};
@@ -20,30 +21,48 @@ export class MusicController extends HostedService {
 	).GameUI.Sounds.Music;
 
 	private readonly spacePlaylist = new MusicPlaylist(this.musicFolder.Space.GetChildren() as Sound[], 15);
-	private readonly backgroundPlaylist = new MusicPlaylist(this.musicFolder.Background.GetChildren() as Sound[], 25);
-	private readonly allPlaylists: MusicPlaylist[] = [this.spacePlaylist, this.backgroundPlaylist];
+	private readonly buildingBackgroundPlaylist = new MusicPlaylist(
+		this.musicFolder.BuildingBackground.GetChildren() as Sound[],
+		25,
+	);
+	private readonly allPlaylists: MusicPlaylist[] = [this.spacePlaylist, this.buildingBackgroundPlaylist];
 
 	readonly stopAll = () => this.allPlaylists.forEach((v) => v.stop());
+	readonly setVolume = () => this.allPlaylists.forEach((v) => v.stop());
 
-	constructor(@inject playerData: PlayerDataStorage) {
+	constructor(@inject playerData: PlayerDataStorage, @inject playerMode: PlayModeController) {
 		super();
 
-		this.event.subscribe(Workspace.GetPropertyChangedSignal("Gravity"), () => {
-			if (!playerData.config.get().music) return;
-
-			if (Workspace.Gravity <= 0 && !this.spacePlaylist.currentSound) {
-				this.stopAll();
-				this.spacePlaylist.play();
-				return;
-			}
-
-			if (Workspace.Gravity > 0 && this.spacePlaylist.currentSound) {
-				this.spacePlaylist.stop();
-				this.backgroundPlaylist.play();
-				return;
-			}
+		this.event.subscribe(playerData.config.changed, (name) => {
+			this.allPlaylists.forEach((v) => v.setVolume(name.music));
 		});
 
-		this.onDisable(this.stopAll);
+		this.event.subscribe(playerMode.playmode.changed, (mode) => {
+			this.stopAll();
+			if (mode === "build") this.buildingBackgroundPlaylist.play();
+		});
+
+		const gotInSpace = () => {
+			if (this.spacePlaylist.currentSound) return;
+			this.stopAll();
+			this.spacePlaylist.play();
+		};
+
+		const gotFromSpace = () => {
+			if (!this.spacePlaylist.currentSound) return;
+			this.stopAll();
+		};
+
+		let grav = Workspace.Gravity;
+		this.event.subscribe(Workspace.GetPropertyChangedSignal("Gravity"), () => {
+			const newGrav = Workspace.Gravity;
+			if (grav !== newGrav) {
+				if (newGrav <= 0) gotInSpace();
+				else gotFromSpace();
+			}
+			grav = newGrav;
+		});
+
+		this.onDisable(() => this.stopAll());
 	}
 }
