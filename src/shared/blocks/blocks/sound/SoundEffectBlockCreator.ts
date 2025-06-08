@@ -19,7 +19,7 @@ export namespace SoundEffectBlockCreator {
 		ezcreate({
 			id: "DistortionSoundEffect",
 			name: "Distortion",
-			description: "TODO: very long description and important to understand",
+			description: "A distortion sound effect. Burns your sounds to a crisp.",
 		}),
 		ezcreate({
 			id: "EchoSoundEffect",
