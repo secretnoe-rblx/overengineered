@@ -9,7 +9,7 @@ export namespace SoundEffectBlockCreator {
 		ezcreate({
 			id: "ChorusSoundEffect",
 			name: "Chorus",
-			description: "TODO: very long description and important to understand",
+			description: "A chorus sound effect. Speaks for itself, doesn't it?",
 		}),
 		ezcreate({
 			id: "CompressorSoundEffect",
@@ -91,7 +91,7 @@ export namespace SoundEffectBlockCreator {
 				sound: {
 					displayName: "Sound",
 					types: {
-						sound: { config: { id: "" } },
+						sound: { config: { id: "584691395" } },
 					},
 				},
 				...asObject(keys.mapToMap((k) => $tuple(k.lower(), maker.makeConfig(k as never, pascalCaseToName(k))))),
