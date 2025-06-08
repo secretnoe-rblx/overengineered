@@ -160,6 +160,29 @@ const defs = {
 			},
 		},
 	},
+	numOrVec1_numOrVec: {
+		input: {
+			value: {
+				displayName: "Value",
+				group: "1",
+				types: {
+					vector3: {
+						config: Vector3.zero,
+					},
+					number: {
+						config: 0,
+					},
+				},
+			},
+		},
+		output: {
+			result: {
+				displayName: "Result",
+				group: "1",
+				types: ["number", "vector3"],
+			},
+		},
+	},
 	num2_num: {
 		inputOrder: ["value1", "value2"],
 		input: {
@@ -328,8 +351,11 @@ const maths = {
 		displayName: "Absolute",
 		description: "Removes the minus from your number",
 		modelSource: autoModel("GenericLogicBlockPrefab", "ABS", categories.math),
-		logic: logic(defs.num1_num, ({ value }) => ({
-			result: { type: "number", value: math.abs(value) },
+		logic: logic(defs.numOrVec1_numOrVec, ({ value, valueType }) => ({
+			result: {
+				type: valueType,
+				value: valueType === "number" ? math.deg(value as number) : (value as Vector3).Abs(),
+			},
 		})),
 	},
 	round: {
@@ -838,16 +864,22 @@ const trigonometry = {
 		displayName: "To degrees",
 		description: "Converts input value given in radians, into degrees",
 		modelSource: autoModel("GenericLogicBlockPrefab", "DEG", categories.trigonometry),
-		logic: logic(defs.num1_num, ({ value }) => ({
-			result: { type: "number", value: math.deg(value) },
+		logic: logic(defs.numOrVec1_numOrVec, ({ value, valueType }) => ({
+			result: {
+				type: valueType,
+				value: valueType === "number" ? math.deg(value as number) : (value as Vector3).apply(math.deg),
+			},
 		})),
 	},
 	rad: {
 		displayName: "To radians",
 		description: "Converts input value given in degreees, into radians",
 		modelSource: autoModel("GenericLogicBlockPrefab", "RAD", categories.trigonometry),
-		logic: logic(defs.num1_num, ({ value }) => ({
-			result: { type: "number", value: math.rad(value) },
+		logic: logic(defs.numOrVec1_numOrVec, ({ value, valueType }) => ({
+			result: {
+				type: valueType,
+				value: valueType === "number" ? math.rad(value as number) : (value as Vector3).apply(math.rad),
+			},
 		})),
 	},
 	log: {
