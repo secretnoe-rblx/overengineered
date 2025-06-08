@@ -150,7 +150,7 @@ export const SpeakerBlock = {
 	description: "Definitely speaks something, but only to you. Schizofrenia?",
 	limit: 50,
 	search: {
-		partialAliases: ["sound"],
+		partialAliases: ["sound", "music", "speaker", "play"],
 	},
 
 	logic: { definition, ctor: Logic },
