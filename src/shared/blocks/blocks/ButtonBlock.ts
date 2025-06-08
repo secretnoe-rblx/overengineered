@@ -177,6 +177,8 @@ class Logic extends InstanceBlockLogic<typeof definition, buttonType> {
 			});
 		}
 
+		this.onEnable(() => this.output.result.set("bool", false));
+
 		this.onk(["sharedMode"], ({ sharedMode }) => {
 			if (!sharedMode) init({ block: inst, owner: Players.LocalPlayer });
 			else events.init.sendOrBurn({ block: inst, owner: Players.LocalPlayer }, this);
