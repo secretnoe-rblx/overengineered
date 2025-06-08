@@ -76,17 +76,18 @@ export namespace SoundEffectBlockCreator {
 
 		const pascalCaseToName = (str: string) => {
 			let ret = "";
-			for (let i = 0; i < str.size(); i++) {
+			for (let i = 1; i <= str.size(); i++) {
 				const char = str.sub(i, i);
-				if (i !== 0 && char.upper() === char) {
+				if (i !== 1 && char.upper() === char) {
 					ret += ` ${char}`;
-				} else {
-					ret += char;
+					continue;
 				}
+				ret += char;
 			}
 
 			return ret;
 		};
+
 		const definition = {
 			input: {
 				sound: {
