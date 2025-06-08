@@ -14,7 +14,7 @@ export namespace SoundEffectBlockCreator {
 		ezcreate({
 			id: "CompressorSoundEffect",
 			name: "Compressor",
-			description: "TODO: very long description and important to understand",
+			description: "A compressor sound effect. Makes higher notes disappear.",
 		}),
 		ezcreate({
 			id: "DistortionSoundEffect",
@@ -24,32 +24,33 @@ export namespace SoundEffectBlockCreator {
 		ezcreate({
 			id: "EchoSoundEffect",
 			name: "Echo",
-			description: "TODO: very long description and important to understand",
+			description: "An echo sound effect. Makes your ears bleed and fall off.",
 		}),
 		ezcreate({
 			id: "EqualizerSoundEffect",
 			name: "Equalizer",
-			description: "TODO: very long description and important to understand",
+			description:
+				"An equalizer sound effect. Allows you to adjust the low, middle and high frequencies of the sound.",
 		}),
 		ezcreate({
 			id: "FlangeSoundEffect",
 			name: "Flange",
-			description: "TODO: very long description and important to understand",
+			description: "A flange sound effect. Makes you feel like someone glued the speaker to a spring.",
 		}),
 		ezcreate({
 			id: "PitchShiftSoundEffect",
 			name: "Pitch",
-			description: "uh like you can make nightcore or something, or play piano",
+			description: "A pitch shift effect. Sometimes makes the music unlistenable.",
 		}),
 		ezcreate({
 			id: "ReverbSoundEffect",
 			name: "Reverb",
-			description: "TODO: very long description and important to understand",
+			description: "A reverberation sound effect. Applies the effect of being in a big room.",
 		}),
 		ezcreate({
 			id: "TremoloSoundEffect",
 			name: "Tremolo",
-			description: "TODO: very long description and important to understand",
+			description: "A tremolo sound effect. Sounds like a reverse sound.",
 		}),
 	];
 
