@@ -13,7 +13,7 @@ export class PlayerSettingsGeneral extends ConfigControlList {
 		{
 			this.addToggle("Music") //
 				.initToObjectPart(value, ["music"])
-				.setDescription("Music. Space only, for now.");
+				.setDescription("Music. Bilding and space only themes, for now.");
 
 			this.addToggle("Automatic slot loading") //
 				.initToObjectPart(value, ["autoLoad"])

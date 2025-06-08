@@ -148,8 +148,11 @@ export const PlayerConfigDefinition = {
 		},
 	},
 	music: {
-		type: "bool",
-		config: true as boolean,
+		type: "clampedNumber",
+		min: 0,
+		max: 100,
+		config: 70 as number,
+		step: 1,
 	},
 	beacons: {
 		type: "beacons",

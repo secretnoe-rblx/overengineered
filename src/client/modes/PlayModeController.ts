@@ -11,7 +11,7 @@ import type { GameHostBuilder } from "engine/shared/GameHostBuilder";
 
 @injectable
 export class PlayModeController extends HostedService {
-	private readonly playmode = new ObservableValue<PlayModes | undefined>(undefined);
+	readonly playmode = new ObservableValue<PlayModes | undefined>(undefined);
 	private readonly modes;
 
 	static initialize(host: GameHostBuilder) {
