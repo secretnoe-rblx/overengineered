@@ -41,7 +41,7 @@ export class MusicPlaylist {
 			const tween = TweenService.Create(this.currentSound, new TweenInfo(2), { Volume: 0 });
 
 			tween.Play();
-			tween.Completed.Connect(this.currentSound?.Stop);
+			tween.Completed.Connect(() => this.currentSound?.Stop());
 		}
 		this.currentSound = undefined;
 	}
