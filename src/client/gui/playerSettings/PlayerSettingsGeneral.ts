@@ -13,7 +13,7 @@ export class PlayerSettingsGeneral extends ConfigControlList {
 		this.addCategory("General");
 		{
 			this.addSlider("Music volume", PlayerConfigDefinition.music) //
-				.initToObjectPart(value, ["music"])
+				.initToObjectPart(value, ["music"], "value")
 				.setDescription("Music while building and space-ing.");
 
 			this.addToggle("Automatic slot loading") //
