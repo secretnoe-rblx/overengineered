@@ -224,7 +224,21 @@ const v14: UpdatablePlayerConfigVersion<PlayerConfigV12, PlayerConfigV13> = {
 	},
 };
 
-const versions = [v1, v2, v3, v4, v5, v6, v7, v8, v9, v10, v11, v12, v13, v14] as const;
+// Add autoPlotTeleport
+type PlayerConfigV14 = PlayerConfigV13 & { music: number };
+const v15: UpdatablePlayerConfigVersion<PlayerConfigV13, PlayerConfigV14> = {
+	version: 15,
+
+	update(prev: Partial<PlayerConfigV13>): Partial<PlayerConfigV14> {
+		return {
+			...prev,
+			music: prev.music ? 70 : 0,
+			version: this.version,
+		};
+	},
+};
+
+const versions = [v1, v2, v3, v4, v5, v6, v7, v8, v9, v10, v11, v12, v13, v14, v15] as const;
 const current = versions[versions.size() - 1] as typeof versions extends readonly [...unknown[], infer T] ? T : never;
 
 export namespace PlayerConfigUpdater {

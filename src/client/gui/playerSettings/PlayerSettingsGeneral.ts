@@ -1,4 +1,5 @@
 import { ConfigControlList } from "client/gui/configControls/ConfigControlsList";
+import { PlayerConfigDefinition } from "shared/config/PlayerConfig";
 import type {
 	ConfigControlListDefinition,
 	ConfigControlTemplateList,
@@ -11,9 +12,9 @@ export class PlayerSettingsGeneral extends ConfigControlList {
 
 		this.addCategory("General");
 		{
-			this.addToggle("Music") //
+			this.addSlider("Music volume", PlayerConfigDefinition.music) //
 				.initToObjectPart(value, ["music"])
-				.setDescription("Music. Bilding and space only themes, for now.");
+				.setDescription("Music while building and space-ing.");
 
 			this.addToggle("Automatic slot loading") //
 				.initToObjectPart(value, ["autoLoad"])
