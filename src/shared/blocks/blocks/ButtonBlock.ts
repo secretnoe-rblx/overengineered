@@ -102,15 +102,15 @@ const updateButtonStuff = ({ block, LEDcolor, buttonColor, buttonState, text }: 
 const init = ({ block, owner }: initButton) => {
 	block.Button.ClickDetector.MaxActivationDistance = math.huge;
 	block.Button.ClickDetector.MouseClick.Connect(() => {
-		events.click.send(owner, block);
+		clickEvent.send(owner, block);
 	});
 };
 
 const events = {
 	update: new BlockSynchronizer("b_button_data_update", updateDataType, updateButtonStuff),
 	init: new BlockSynchronizer("b_button_init", initButtonType, init),
-	click: new A2OCRemoteEvent<buttonType>("b_button_click", "RemoteEvent"),
 } as const;
+const clickEvent = new A2OCRemoteEvent<buttonType>("b_button_click", "RemoteEvent");
 
 export type { Logic as ButtonBlockLogic };
 @injectable
@@ -170,7 +170,7 @@ class Logic extends InstanceBlockLogic<typeof definition, buttonType> {
 
 		// we should probably add server support but noone cares
 		if (RunService.IsClient()) {
-			this.event.subscribe(events.click.invoked, (block, whoPressed) => {
+			this.event.subscribe(clickEvent.invoked, (block, whoPressed) => {
 				if (this.instance !== block) return;
 				if (!whoPressed) return;
 				pressButton(whoPressed);
@@ -206,5 +206,5 @@ export const ButtonBlock = {
 	displayName: "Button",
 	description: "Returns true when the button is clicked or tapped. Can be activated by other players if configured.",
 
-	logic: { definition, ctor: Logic },
+	logic: { definition, ctor: Logic, events },
 } as const satisfies BlockBuilder;
