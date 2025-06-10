@@ -36,7 +36,7 @@ export class BlockSynchronizer<TArg extends { readonly block: BlockModel }> {
 
 			event.c2s.invoked.Connect((invoker, arg) => {
 				if (!t.typeCheck(arg, ttype)) {
-					invoker.Kick("Network error");
+					invoker.Kick(`Network error at ${name}`);
 					return;
 				}
 
