@@ -1,3 +1,4 @@
+import { t } from "engine/shared/t";
 import type { PlacedBlockConfig } from "shared/blockLogic/BlockConfig";
 import type { BlockLogicFullInputDef } from "shared/blockLogic/BlockLogic";
 import type { SoundLogic } from "shared/blockLogic/SoundLogic";
@@ -150,4 +151,34 @@ export namespace BlockLogicTypes {
 	export type Controls = {
 		readonly [k in ExtractKeys<Primitives, { readonly control?: unknown }>]: Primitives[k]["control"] & defined;
 	};
+
+	export namespace T {
+		export const soundEffect = t.interface({
+			type: t.string,
+			properties: t.mappedInterfaceKV(t.string, t.any),
+		}) as t.Type<SoundEffect>;
+
+		export const primitives: { [k in keyof Primitives]?: t.Type<Primitives[k]["config"]> } = {
+			bool: t.boolean,
+			number: t.number,
+			string: t.string,
+			key: t.string,
+			byte: t.numberWithBounds(0, 255),
+			bytearray: t.array(t.numberWithBounds(0, 255)),
+			enum: t.string,
+			vector3: t.vector3,
+			color: t.color,
+			sound: t.interface({
+				id: t.string,
+				effects: t.array(soundEffect).orUndefined(),
+			}),
+		};
+
+		export const fromBlockConfigDefinition = <T extends BlockLogicFullInputDef["types"]>(def: T) => {
+			type ret = ReturnType<typeof t.union<readonly t.Type<Primitives[keyof T & keyof Primitives]["config"]>[]>>;
+
+			const v = asMap(def).map((k, v) => primitives[k as keyof BlockLogicTypes.Primitives]!);
+			return t.union(...v) as ret;
+		};
+	}
 }

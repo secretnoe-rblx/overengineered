@@ -11,7 +11,7 @@ import type { BlockLogic, BlockLogicBothDefinitions } from "shared/blockLogic/Bl
  * Upon sending the value from the client, locally executes the callback and sends it to every other player.
  * Upon a player join, sends the value to that player from the server.
  */
-export class BlockSynchronizer<TArg extends { readonly block: BlockModel }> {
+export class BlockSynchronizer<TArg extends { readonly block: BlockModel; reqid?: number }> {
 	/** @client */
 	private readonly _invoked = new ArgsSignal<[value: TArg]>();
 	/** @client */
@@ -21,6 +21,9 @@ export class BlockSynchronizer<TArg extends { readonly block: BlockModel }> {
 	private serverMiddleware?: (<T extends TArg>(invoker: Player | undefined, arg: T) => ObjectResponse<TArg>)[];
 
 	private readonly event;
+
+	/** If true, sends the event to the block owner. Useful for execting server-only middlewares like text censoring. */
+	sendBackToOwner = false;
 
 	constructor(
 		private readonly name: string,
@@ -55,7 +58,14 @@ export class BlockSynchronizer<TArg extends { readonly block: BlockModel }> {
 				currentArg = arg;
 
 				for (const player of Players.GetPlayers()) {
-					if (player === invoker) continue;
+					if (player === invoker) {
+						if (!this.sendBackToOwner) continue;
+
+						print("sending to owner", arg.reqid, arg);
+						event.s2c.send(player, { ...arg, reqid: arg.reqid ?? 0 });
+						return;
+					}
+
 					event.s2c.send(player, arg);
 				}
 			});
@@ -65,11 +75,29 @@ export class BlockSynchronizer<TArg extends { readonly block: BlockModel }> {
 				event.s2c.send(player, currentArg);
 			});
 		} else if (RunService.IsClient()) {
-			event.s2c.invoked.Connect((arg) => this._invoked.Fire(arg));
+			event.s2c.invoked.Connect((arg) => {
+				if (this.sendBackToOwner && "reqid" in arg && arg.reqid) {
+					// reqid is being sent to owner only
+
+					const existingState =
+						(arg.block.GetAttribute(this.reqidAttributeName()) as number | undefined) ?? 0;
+					print("amongus", existingState, arg.reqid);
+					if (existingState > arg.reqid) {
+						// skip invoking if the request is too old
+						return;
+					}
+				}
+
+				this._invoked.Fire(arg);
+			});
 			if (func) {
 				this._invoked.Connect(func);
 			}
 		}
+	}
+
+	private reqidAttributeName() {
+		return `reqid_${this.name}`;
 	}
 
 	addServerMiddleware(middleware: (invoker: Player | undefined, arg: TArg) => ObjectResponse<TArg>): this {
@@ -107,6 +135,12 @@ export class BlockSynchronizer<TArg extends { readonly block: BlockModel }> {
 
 			this.event.s2c.send("everyone", arg);
 		} else if (RunService.IsClient()) {
+			if (this.sendBackToOwner) {
+				const name = this.reqidAttributeName();
+				arg.reqid = ((arg.block.GetAttribute(name) as number | undefined) ?? 0) + 1;
+				arg.block.SetAttribute(name, arg.reqid);
+			}
+
 			this._invoked.Fire(arg);
 			this.event.c2s.send(arg);
 		}
