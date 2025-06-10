@@ -23,6 +23,8 @@ import { EventHandler } from "engine/shared/event/EventHandler";
 import { NumberObservableValue } from "engine/shared/event/NumberObservableValue";
 import { ObservableValue } from "engine/shared/event/ObservableValue";
 import { Objects } from "engine/shared/fixes/Objects";
+import { BlockCreation } from "shared/blocks/BlockCreation";
+import { BlockManager } from "shared/building/BlockManager";
 import { SharedRagdoll } from "shared/SharedRagdoll";
 import type { MainScreenLayout } from "client/gui/MainScreenLayout";
 import type { PopupController } from "client/gui/PopupController";
@@ -120,6 +122,7 @@ export class BuildingMode extends PlayMode {
 		@inject private readonly toolController: ToolController,
 		@inject popupController: PopupController,
 		@inject private readonly playerData: PlayerDataStorage,
+		@inject private readonly blockList: BlockList,
 		@inject di: DIContainer,
 	) {
 		super();
@@ -193,6 +196,17 @@ export class BuildingMode extends PlayMode {
 		this.actionController = this.parent(di.resolve<ActionController>());
 		const sl = playerData.slotLoading.Connect(() => this.actionController.clearHistory());
 		this.onDestroy(() => sl.Disconnect());
+
+		const sl2 = plot.instance.WaitForChild("Blocks").ChildAdded.Connect((child) => {
+			if (!BlockManager.isBlockModel(child)) return;
+			BlockCreation.runImmediateFrom(child, blockList);
+		});
+		// playerData.slotLoaded.Connect(() => {
+		// 	for (const block of plot.getBlocks()) {
+		// 		BlockCreation.runImmediateFrom(block, blockList);
+		// 	}
+		// });
+		this.onDestroy(() => sl2.Disconnect());
 
 		this.parent(di.resolve<GridController>());
 		this.parent(di.resolve<CenterOfMassController>());
@@ -269,6 +283,10 @@ export class BuildingMode extends PlayMode {
 	onSwitchToNext(mode: PlayModes | undefined) {}
 	onSwitchFromPrev(prev: PlayModes | undefined) {
 		const plot = this.targetPlot.get();
+
+		for (const block of plot.getBlocks()) {
+			BlockCreation.runImmediateFrom(block, this.blockList);
+		}
 
 		if (prev === "ride") {
 			RideMode.buildModeScheduler.execute(this.building, plot);

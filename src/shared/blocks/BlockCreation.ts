@@ -3,13 +3,18 @@ import { Element } from "engine/shared/Element";
 import { Instances } from "engine/shared/fixes/Instances";
 import { Lazy } from "engine/shared/Lazy";
 import { BlockWeldInitializer } from "shared/blocks/BlockWeldInitializer";
+import { BlockManager } from "shared/building/BlockManager";
 import { ReplicatedAssets } from "shared/ReplicatedAssets";
+import type { BlockConfigPart } from "shared/blockLogic/BlockConfig";
+import type { BlockLogicBothDefinitions } from "shared/blockLogic/BlockLogic";
+import type { BlockLogicTypes } from "shared/blockLogic/BlockLogicTypes";
 import type {
 	BlockBuilder,
 	BlockBuilderWithoutIdAndDefaults,
 	BlockCategoryPath,
 	BlockMarkerPositions,
 	BlockWeldRegions,
+	LogicImmediateUpdate,
 } from "shared/blocks/Block";
 
 export type AutoWeldColliderBlockShape = "none" | "cube";
@@ -202,5 +207,36 @@ export namespace BlockCreation {
 		readonly [k in string]: BlockBuilderWithoutIdAndDefaults;
 	}): BlockBuilder[] {
 		return asMap(builders).map((id, b): BlockBuilder => ({ ...BlockCreation.defaults, id, ...b }));
+	}
+
+	type DefinitionToConfig<TDef extends BlockLogicBothDefinitions> = {
+		[k in keyof TDef["input"]]?: BlockConfigPart<
+			keyof BlockLogicTypes.Primitives & keyof TDef["input"][k]["types"]
+		>;
+	};
+	export function immediate<TDef extends BlockLogicBothDefinitions, T extends BlockModel>(
+		definition: TDef,
+		func: (block: T, config: DefinitionToConfig<TDef>) => void,
+	): LogicImmediateUpdate {
+		return (block) => {
+			// const config = BlockConfig.addDefaults(
+			// 	BlockManager.manager.config.get(block),
+			// 	definition.input,
+			// 	true,
+			// ) as unknown as DefinitionToConfig<TDef>;
+
+			const config = BlockManager.manager.config.get(block) as DefinitionToConfig<TDef>;
+			func(block as T, config);
+		};
+	}
+
+	export function runImmediateFrom(model: BlockModel, blockList: BlockList) {
+		const block = blockList.blocks[BlockManager.manager.id.get(model)];
+		if (block) {
+			runImmediate(model, block);
+		}
+	}
+	export function runImmediate(model: BlockModel, block: Block) {
+		block.logic?.immediate?.(model);
 	}
 }

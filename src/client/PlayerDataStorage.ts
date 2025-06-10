@@ -47,6 +47,9 @@ export class PlayerDataStorage {
 	private readonly _slotLoading = new ArgsSignal();
 	readonly slotLoading = this._slotLoading.asReadonly();
 
+	private readonly _slotLoaded = new ArgsSignal();
+	readonly slotLoaded = this._slotLoaded.asReadonly();
+
 	private readonly _data;
 	readonly data;
 
@@ -147,6 +150,7 @@ export class PlayerDataStorage {
 			const response = this.slotRemotes.load.send({ index });
 			if (response.success && !response.isEmpty) {
 				this.loadedSlot.set(index);
+				this._slotLoaded.Fire();
 			} else if (!response.success) {
 				LogControl.instance.addLine("Error while loading a slot", Colors.red);
 				$warn(response.message);
@@ -167,6 +171,7 @@ export class PlayerDataStorage {
 			const response = this.slotRemotes.loadFromHistory.send({ databaseId: databaseSlotId, historyId });
 			if (response.success && !response.isEmpty) {
 				this.loadedSlot.set(undefined);
+				this._slotLoaded.Fire();
 			} else if (!response.success) {
 				LogControl.instance.addLine("Error while loading a slot", Colors.red);
 				$warn(response.message);

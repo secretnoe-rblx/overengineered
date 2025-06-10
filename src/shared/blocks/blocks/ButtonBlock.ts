@@ -1,5 +1,6 @@
 import { Players, RunService } from "@rbxts/services";
 import { A2OCRemoteEvent } from "engine/shared/event/PERemoteEvent";
+import { Instances } from "engine/shared/fixes/Instances";
 import { t } from "engine/shared/t";
 import { InstanceBlockLogic } from "shared/blockLogic/BlockLogic";
 import { BlockSynchronizer } from "shared/blockLogic/BlockSynchronizer";
@@ -216,11 +217,22 @@ class Logic extends InstanceBlockLogic<typeof definition, buttonType> {
 	}
 }
 
+const immediate = BlockCreation.immediate(definition, (block: buttonType, config) => {
+	const btn = Instances.waitForChild(block, "Button");
+	Instances.waitForChild(btn, "SurfaceGui", "TextLabel");
+
+	updateButtonText({
+		block,
+		buttonColor: config.buttonColor?.config ?? definition.input.buttonColor.types.color.config,
+		text: config.text?.config ?? definition.input.text.types.string.config,
+	});
+});
+
 export const ButtonBlock = {
 	...BlockCreation.defaults,
 	id: "button",
 	displayName: "Button",
 	description: "Returns true when the button is clicked or tapped. Can be activated by other players if configured.",
 
-	logic: { definition, ctor: Logic, events },
+	logic: { definition, ctor: Logic, events, immediate },
 } as const satisfies BlockBuilder;

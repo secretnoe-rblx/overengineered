@@ -4,10 +4,12 @@ import type { BlockCreation, BlockMirrorBehaviour } from "shared/blocks/BlockCre
 import type { projectileModifier } from "shared/weaponProjectiles/BaseProjectileLogic";
 
 export type BlockCategoryPath = readonly string[];
+export type LogicImmediateUpdate = (block: BlockModel) => void;
 export type BlockLogicInfo = {
 	readonly definition: BlockLogicFullBothDefinitions;
 	readonly ctor: GenericBlockLogicCtor;
 	readonly events?: { readonly [k in string]?: BlockSynchronizer<{ readonly block: BlockModel }> };
+	readonly immediate?: LogicImmediateUpdate;
 };
 export type BlockModelSource = {
 	readonly model: (self: BlockBuilder) => BlockModel;

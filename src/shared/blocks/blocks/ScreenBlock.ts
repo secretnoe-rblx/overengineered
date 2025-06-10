@@ -1,3 +1,4 @@
+import { Instances } from "engine/shared/fixes/Instances";
 import { Strings } from "engine/shared/fixes/String.propmacro";
 import { t } from "engine/shared/t";
 import { InstanceBlockLogic as InstanceBlockLogic } from "shared/blockLogic/BlockLogic";
@@ -87,11 +88,21 @@ class Logic extends InstanceBlockLogic<typeof definition, ScreenBlock> {
 	}
 }
 
+const immediate = BlockCreation.immediate(definition, (block: ScreenBlock, config) => {
+	Instances.waitForChild(block, "Part", "SurfaceGui", "TextLabel");
+
+	update({
+		block,
+		color: config.textColor?.config ?? definition.input.textColor.types.color.config,
+		data: config.data?.config ?? "[Screen]",
+	});
+});
+
 export const ScreenBlock = {
 	...BlockCreation.defaults,
 	id: "screen",
 	displayName: "Screen",
 	description: "Display all your data for everyone to see!",
 
-	logic: { definition, ctor: Logic, events },
+	logic: { definition, ctor: Logic, events, immediate },
 } as const satisfies BlockBuilder;

@@ -15,6 +15,7 @@ import { Objects } from "engine/shared/fixes/Objects";
 import { Localization } from "engine/shared/Localization";
 import { BlockConfig } from "shared/blockLogic/BlockConfig";
 import { BlockWireManager } from "shared/blockLogic/BlockWireManager";
+import { BlockCreation } from "shared/blocks/BlockCreation";
 import { BlockManager } from "shared/building/BlockManager";
 import { Colors } from "shared/Colors";
 import { VectorUtils } from "shared/utils/VectorUtils";
@@ -238,6 +239,10 @@ namespace Scene {
 					if (!response.success) {
 						LogControl.instance.addLine(response.message, Colors.red);
 						this.updateConfigs([...selected]);
+					}
+
+					for (const model of selected) {
+						BlockCreation.runImmediateFrom(model, this.blockList);
 					}
 				});
 			} catch (err) {
