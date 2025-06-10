@@ -34,7 +34,7 @@ export class MusicController extends HostedService {
 		super();
 
 		this.event.subscribe(playerData.config.changed, (name) => {
-			this.allPlaylists.forEach((v) => v.setVolume(name.music));
+			this.allPlaylists.forEach((v) => v.setVolume(name.music / 100));
 		});
 
 		this.event.subscribe(playerMode.playmode.changed, (mode) => {
