@@ -61,7 +61,6 @@ export class BlockSynchronizer<TArg extends { readonly block: BlockModel; reqid?
 					if (player === invoker) {
 						if (!this.sendBackToOwner) continue;
 
-						print("sending to owner", arg.reqid, arg);
 						event.s2c.send(player, { ...arg, reqid: arg.reqid ?? 0 });
 						return;
 					}
@@ -81,7 +80,6 @@ export class BlockSynchronizer<TArg extends { readonly block: BlockModel; reqid?
 
 					const existingState =
 						(arg.block.GetAttribute(this.reqidAttributeName()) as number | undefined) ?? 0;
-					print("amongus", existingState, arg.reqid);
 					if (existingState > arg.reqid) {
 						// skip invoking if the request is too old
 						return;
@@ -114,6 +112,13 @@ export class BlockSynchronizer<TArg extends { readonly block: BlockModel; reqid?
 	sendOrBurn<TDef extends BlockLogicBothDefinitions>(arg: TArg, block: BlockLogic<TDef>): void {
 		if (!t.typeCheck(arg, this.ttype)) {
 			block.disableAndBurn();
+
+			try {
+				t.typeCheckWithThrow(arg, this.ttype);
+			} catch (ex) {
+				$err(ex);
+			}
+
 			return;
 		}
 
