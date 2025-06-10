@@ -78,25 +78,32 @@ type buttonType = BlockModel & {
 	LED: BasePart;
 };
 const baseLEDColor = Color3.fromRGB(17, 17, 17);
-const updateDataType = t.interface({
+const updateTextDataType = t.interface({
+	block: t.instance("Model").as<buttonType>(),
+	buttonColor: t.color,
+	text: t.string,
+});
+const updateStateDataType = t.interface({
 	block: t.instance("Model").as<buttonType>(),
 	LEDcolor: t.color,
 	buttonState: t.boolean,
-	buttonColor: t.color,
-	text: t.string,
 });
 const initButtonType = t.interface({
 	block: t.instance("Model").as<buttonType>(),
 	owner: t.instance("Player"),
 });
 
-type updateData = t.Infer<typeof updateDataType>;
+type updateTextData = t.Infer<typeof updateTextDataType>;
+type updateStateData = t.Infer<typeof updateStateDataType>;
 type initButton = t.Infer<typeof initButtonType>;
 
-const updateButtonStuff = ({ block, LEDcolor, buttonColor, buttonState, text }: updateData) => {
-	block.LED.Color = buttonState ? LEDcolor : baseLEDColor;
-	block.Button.Color = buttonColor;
+const updateButtonText = ({ block, buttonColor, text }: updateTextData) => {
 	block.Button.SurfaceGui.TextLabel.Text = text;
+	block.Button.Color = buttonColor;
+};
+
+const updateButtonState = ({ block, LEDcolor, buttonState }: updateStateData) => {
+	block.LED.Color = buttonState ? LEDcolor : baseLEDColor;
 };
 
 const init = ({ block, owner }: initButton) => {
@@ -107,9 +114,12 @@ const init = ({ block, owner }: initButton) => {
 };
 
 const events = {
-	update: new BlockSynchronizer("b_button_data_update", updateDataType, updateButtonStuff),
+	updateText: new BlockSynchronizer("b_button_data_update_text", updateTextDataType, updateButtonText),
+	updateState: new BlockSynchronizer("b_button_data_update_state", updateStateDataType, updateButtonState),
 	init: new BlockSynchronizer("b_button_init", initButtonType, init),
 } as const;
+events.updateText.sendBackToOwner = true;
+
 const clickEvent = new A2OCRemoteEvent<buttonType>("b_button_click", "RemoteEvent");
 
 export type { Logic as ButtonBlockLogic };
@@ -133,13 +143,11 @@ class Logic extends InstanceBlockLogic<typeof definition, buttonType> {
 		let isPressed = false;
 
 		const upd = () => {
-			events.update.sendOrBurn(
+			events.updateState.sendOrBurn(
 				{
 					block: inst,
 					buttonState: isPressed,
 					LEDcolor: cachedLEDColor.get(),
-					buttonColor: button.Color,
-					text: button.SurfaceGui.TextLabel.Text,
 				},
 				this,
 			);
@@ -187,7 +195,15 @@ class Logic extends InstanceBlockLogic<typeof definition, buttonType> {
 		this.onk(["buttonColor", "text"], ({ buttonColor, text }) => {
 			button.Color = buttonColor;
 			button.SurfaceGui.TextLabel.Text = text;
-			upd();
+
+			events.updateText.sendOrBurn(
+				{
+					block: inst,
+					text: button.SurfaceGui.TextLabel.Text,
+					buttonColor: buttonColor,
+				},
+				this,
+			);
 		});
 
 		this.onAlwaysInputs(({ switchMode }) => {

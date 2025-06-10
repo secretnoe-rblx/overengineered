@@ -2,6 +2,7 @@ import { HostedService } from "engine/shared/di/HostedService";
 import { BackMountBlockServerLogic } from "server/blocks/logic/BackMountBlockServerLogic";
 import { BeaconServerLogic } from "server/blocks/logic/BeaconBlockServerLogic";
 import { BracedShaftServerLogic } from "server/blocks/logic/BracedShaftServerLogic";
+import { ButtonServerLogic } from "server/blocks/logic/ButtonServerLogic";
 import { CameraBlockServerLogic } from "server/blocks/logic/CameraBlockServerLogic";
 import { DisconnectBlockServerLogic } from "server/blocks/logic/DisconnectBlockServerLogic";
 import { LEDDisplayServerLogic } from "server/blocks/logic/LEDDisplayServerLogic";
@@ -48,6 +49,7 @@ export class ServerBlockLogicController extends HostedService {
 			disconnectblock: DisconnectBlockServerLogic,
 			leddisplay: LEDDisplayServerLogic,
 			screen: ScreenServerLogic,
+			button: ButtonServerLogic,
 			piston: PistonBlockServerLogic,
 			sevensegmentdisplay: SevenSegmentDisplayServerLogic,
 			bracedshaft: BracedShaftServerLogic,
