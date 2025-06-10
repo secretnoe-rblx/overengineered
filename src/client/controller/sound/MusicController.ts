@@ -26,9 +26,7 @@ export class MusicController extends HostedService {
 		25,
 	);
 	private readonly allPlaylists: MusicPlaylist[] = [this.spacePlaylist, this.buildingBackgroundPlaylist];
-
 	readonly stopAll = () => this.allPlaylists.forEach((v) => v.stop());
-	readonly setVolume = () => this.allPlaylists.forEach((v) => v.stop());
 
 	constructor(@inject playerData: PlayerDataStorage, @inject playerMode: PlayModeController) {
 		super();
