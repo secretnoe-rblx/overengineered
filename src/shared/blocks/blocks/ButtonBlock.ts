@@ -79,15 +79,15 @@ type buttonType = BlockModel & {
 };
 const baseLEDColor = Color3.fromRGB(17, 17, 17);
 const updateDataType = t.interface({
-	block: t.any.as<buttonType>(),
+	block: t.instance("Model").as<buttonType>(),
 	LEDcolor: t.color,
 	buttonState: t.boolean,
 	buttonColor: t.color,
 	text: t.string,
 });
 const initButtonType = t.interface({
-	block: t.any.as<buttonType>(),
-	owner: t.any.as<Player>(),
+	block: t.instance("Model").as<buttonType>(),
+	owner: t.instance("Player"),
 });
 
 type updateData = t.Infer<typeof updateDataType>;
