@@ -102,7 +102,7 @@ export class Logic extends InstanceBlockLogic<typeof definition, Piston> {
 
 			this.instance.Bottom.PrismaticConstraint.Speed = speed;
 			this.instance.Bottom.PrismaticConstraint.TargetPosition = ctx.extend;
-			this.instance.Bottom.PrismaticConstraint.ServoMaxForce = ctx.maxforce * 1000;
+			this.instance.Bottom.PrismaticConstraint.ServoMaxForce = ctx.maxforce * 100000;
 			this.instance.Bottom.PrismaticConstraint.LinearResponsiveness = ctx.responsiveness;
 
 			Logic.events.update.send({
