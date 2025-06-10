@@ -10,17 +10,23 @@ export class ScreenServerLogic extends ServerBlockLogic<typeof ScreenBlockLogic>
 		super(logic, playModeController);
 
 		ScreenBlock.logic.events.update.addServerMiddleware((player, arg) => {
-			if (player && arg.translate) {
-				return {
-					success: true,
-					value: {
-						...arg,
-						text: TextService.FilterStringAsync(
-							arg.text,
-							player.UserId,
-						).GetNonChatStringForBroadcastAsync(),
-					},
-				};
+			const needsTranslating = () => {
+				const data = arg.data;
+				if (typeIs(data, "string")) return true;
+				if (typeIs(data, "table")) return true;
+
+				return false;
+			};
+
+			const translate = player && needsTranslating();
+			if (player && translate) {
+				const data = TextService.FilterStringAsync(
+					logic.dataToString(arg.data),
+					player.UserId,
+					"PublicChat",
+				).GetNonChatStringForUserAsync(player.UserId);
+
+				return { success: true, value: { ...arg, data } };
 			}
 
 			return { success: true, value: arg };
