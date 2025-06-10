@@ -1,4 +1,4 @@
-import { Players, RunService, TextService } from "@rbxts/services";
+import { Players, RunService } from "@rbxts/services";
 import { A2OCRemoteEvent } from "engine/shared/event/PERemoteEvent";
 import { t } from "engine/shared/t";
 import { InstanceBlockLogic } from "shared/blockLogic/BlockLogic";
@@ -80,7 +80,6 @@ type buttonType = BlockModel & {
 const baseLEDColor = Color3.fromRGB(17, 17, 17);
 const updateDataType = t.interface({
 	block: t.any.as<buttonType>(),
-	owner: t.any.as<Player>(),
 	LEDcolor: t.color,
 	buttonState: t.boolean,
 	buttonColor: t.color,
@@ -94,13 +93,10 @@ const initButtonType = t.interface({
 type updateData = t.Infer<typeof updateDataType>;
 type initButton = t.Infer<typeof initButtonType>;
 
-const updateButtonStuff = ({ block, owner, LEDcolor, buttonColor, buttonState, text }: updateData) => {
+const updateButtonStuff = ({ block, LEDcolor, buttonColor, buttonState, text }: updateData) => {
 	block.LED.Color = buttonState ? LEDcolor : baseLEDColor;
 	block.Button.Color = buttonColor;
-	block.Button.SurfaceGui.TextLabel.Text = TextService.FilterStringAsync(
-		text,
-		owner.UserId,
-	).GetNonChatStringForBroadcastAsync();
+	block.Button.SurfaceGui.TextLabel.Text = text;
 };
 
 const init = ({ block, owner }: initButton) => {
@@ -140,7 +136,6 @@ class Logic extends InstanceBlockLogic<typeof definition, buttonType> {
 			events.update.sendOrBurn(
 				{
 					block: inst,
-					owner: Players.LocalPlayer,
 					buttonState: isPressed,
 					LEDcolor: cachedLEDColor.get(),
 					buttonColor: button.Color,
