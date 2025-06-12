@@ -11,7 +11,7 @@ const definition = {
 			displayName: "Damping",
 			types: {
 				number: {
-					config: 250,
+					config: 10,
 					clamp: {
 						showAsSlider: true,
 						min: 0,
@@ -26,7 +26,7 @@ const definition = {
 			displayName: "Stiffness",
 			types: {
 				number: {
-					config: 75_000,
+					config: 20_000,
 					clamp: {
 						showAsSlider: true,
 						min: 0,
@@ -55,7 +55,7 @@ const definition = {
 			displayName: "Force",
 			types: {
 				number: {
-					config: 80000,
+					config: 5000,
 					clamp: {
 						showAsSlider: true,
 						min: 1,
@@ -70,8 +70,8 @@ const definition = {
 
 type SuspensionModel = BlockModel & {
 	readonly SpringSide: BasePart & {
-		readonly Spring: SpringConstraint;
-		readonly Beam: Beam;
+		readonly SpringConstraint: SpringConstraint;
+		readonly PrismaticConstraint: PrismaticConstraint;
 	};
 };
 
@@ -80,17 +80,15 @@ class Logic extends InstanceBlockLogic<typeof definition, SuspensionModel> {
 	constructor(block: InstanceBlockLogicArgs) {
 		super(definition, block);
 
+		const springSide = this.instance.SpringSide;
+		if (!springSide) return;
+		const spring = springSide.SpringConstraint;
+
 		const blockScale = BlockManager.manager.scale.get(block.instance) ?? Vector3.one;
 		const scale = blockScale.X * blockScale.Y * blockScale.Z;
 
-		const spring = this.instance.FindFirstChild("SpringSide")?.FindFirstChild("SpringConstraint") as
-			| SpringConstraint
-			| undefined;
-
-		if (spring) {
-			spring.Radius *= blockScale.findMin();
-			spring.Thickness *= blockScale.findMin();
-		}
+		spring.Radius *= blockScale.findMin();
+		spring.Thickness *= blockScale.findMin();
 
 		const setSpringParameters = ({
 			max_force,
@@ -104,10 +102,12 @@ class Logic extends InstanceBlockLogic<typeof definition, SuspensionModel> {
 			free_length: number;
 		}) => {
 			if (!spring) return;
+			const len = free_length * blockScale.Y;
 			spring.MaxForce = max_force * scale;
 			spring.Damping = damping * scale;
 			spring.Stiffness = stiffness * scale;
-			spring.FreeLength = free_length * blockScale.Y;
+			spring.FreeLength = len;
+			spring.MaxLength = len * 2;
 		};
 
 		this.onkFirstInputs(["damping", "free_length", "max_force", "stiffness"], setSpringParameters);
