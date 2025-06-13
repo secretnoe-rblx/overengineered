@@ -177,15 +177,15 @@ export const CreateSandboxBlocks = (di: DIContainer): BlockList => {
 		RadarSectionBlock,
 		SpeedometerBlock,
 		LaserBlock,
+
+		SpeakerBlock,
+		...SoundEffectBlockCreator.all,
 	];
 
 	if (GameDefinitions.isTesting) {
 		const testBlocks: readonly BlockBuilder[] = [
 			//
 			...weapons,
-
-			SpeakerBlock,
-			...SoundEffectBlockCreator.all,
 		];
 
 		for (const block of testBlocks) {
