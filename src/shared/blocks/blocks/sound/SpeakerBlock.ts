@@ -7,6 +7,7 @@ import type { BlockBuilder } from "shared/blocks/Block";
 
 const definition = {
 	inputOrder: ["sound", "play", "volume", "loop"],
+	outputOrder: ["isPlaying", "progress"],
 	input: {
 		sound: {
 			displayName: "Sound",
@@ -47,6 +48,11 @@ const definition = {
 		isPlaying: {
 			displayName: "Is playing",
 			types: ["bool"],
+		},
+		progress: {
+			displayName: "Progress",
+			unit: "seconds",
+			types: ["number"],
 		},
 	},
 } satisfies BlockLogicFullBothDefinitions;
@@ -140,6 +146,10 @@ class Logic extends InstanceBlockLogic<typeof definition> {
 
 			updateLoop(loopCache.tryGet() ?? false);
 			soundInstance.Play();
+		});
+
+		this.event.loop(0, () => {
+			this.output.progress.set("number", soundInstance?.TimePosition ?? 0);
 		});
 	}
 }
