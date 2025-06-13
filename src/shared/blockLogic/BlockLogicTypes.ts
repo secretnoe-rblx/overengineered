@@ -127,6 +127,7 @@ export namespace BlockLogicTypes {
 	export type SoundValue = {
 		readonly id: string;
 		readonly effects?: readonly SoundEffect[];
+		readonly speed?: number;
 	};
 	export type Sound = BCPrimitive<SoundValue>;
 

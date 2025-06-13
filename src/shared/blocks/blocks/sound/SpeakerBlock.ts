@@ -67,6 +67,7 @@ const updateSound = (instance: Sound, sound: BlockLogicTypes.SoundValue) => {
 	}
 
 	instance.SoundId = `rbxassetid://${sound.id}`;
+	instance.PlaybackSpeed = sound.speed ?? 1;
 
 	if (!sound.effects || sound.effects.size() === 0) {
 		instance.ClearAllChildren();
