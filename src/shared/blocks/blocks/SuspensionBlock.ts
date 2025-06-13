@@ -11,7 +11,7 @@ const definition = {
 			displayName: "Damping",
 			types: {
 				number: {
-					config: 10,
+					config: 250,
 					clamp: {
 						showAsSlider: true,
 						min: 0,
@@ -26,7 +26,7 @@ const definition = {
 			displayName: "Stiffness",
 			types: {
 				number: {
-					config: 20_000,
+					config: 7_500,
 					clamp: {
 						showAsSlider: true,
 						min: 0,
@@ -41,7 +41,7 @@ const definition = {
 			displayName: "Free Length",
 			types: {
 				number: {
-					config: 2.5,
+					config: 2,
 					clamp: {
 						showAsSlider: true,
 						min: 0.1,
@@ -55,7 +55,7 @@ const definition = {
 			displayName: "Force",
 			types: {
 				number: {
-					config: 5000,
+					config: 25_000,
 					clamp: {
 						showAsSlider: true,
 						min: 1,
@@ -108,6 +108,7 @@ class Logic extends InstanceBlockLogic<typeof definition, SuspensionModel> {
 			spring.Stiffness = stiffness * scale;
 			spring.FreeLength = len;
 			spring.MaxLength = len * 2;
+			spring.MinLength = 0.1;
 		};
 
 		this.onkFirstInputs(["damping", "free_length", "max_force", "stiffness"], setSpringParameters);
