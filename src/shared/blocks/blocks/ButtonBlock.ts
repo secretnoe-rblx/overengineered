@@ -223,8 +223,8 @@ const immediate = BlockCreation.immediate(definition, (block: buttonType, config
 
 	updateButtonText({
 		block,
-		buttonColor: config.buttonColor?.config ?? definition.input.buttonColor.types.color.config,
-		text: config.text?.config ?? definition.input.text.types.string.config,
+		buttonColor: config?.buttonColor?.config ?? definition.input.buttonColor.types.color.config,
+		text: config?.text?.config ?? definition.input.text.types.string.config,
 	});
 });
 

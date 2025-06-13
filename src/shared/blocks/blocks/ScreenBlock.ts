@@ -93,8 +93,8 @@ const immediate = BlockCreation.immediate(definition, (block: ScreenBlock, confi
 
 	update({
 		block,
-		color: config.textColor?.config ?? definition.input.textColor.types.color.config,
-		data: config.data?.config ?? "[Screen]",
+		color: config?.textColor?.config ?? definition.input.textColor.types.color.config,
+		data: config?.data?.config ?? "[Screen]",
 	});
 });
 

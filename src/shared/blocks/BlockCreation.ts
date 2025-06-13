@@ -216,7 +216,7 @@ export namespace BlockCreation {
 	};
 	export function immediate<TDef extends BlockLogicBothDefinitions, T extends BlockModel>(
 		definition: TDef,
-		func: (block: T, config: DefinitionToConfig<TDef>) => void,
+		func: (block: T, config: DefinitionToConfig<TDef> | undefined) => void,
 	): LogicImmediateUpdate {
 		return (block) => {
 			// const config = BlockConfig.addDefaults(
