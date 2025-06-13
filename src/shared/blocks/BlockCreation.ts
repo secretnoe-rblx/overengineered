@@ -211,7 +211,7 @@ export namespace BlockCreation {
 
 	type DefinitionToConfig<TDef extends BlockLogicBothDefinitions> = {
 		[k in keyof TDef["input"]]?: BlockConfigPart<
-			keyof BlockLogicTypes.Primitives & keyof TDef["input"][k]["types"]
+			(keyof BlockLogicTypes.Primitives & keyof TDef["input"][k]["types"]) | "unset" | "wire"
 		>;
 	};
 	export function immediate<TDef extends BlockLogicBothDefinitions, T extends BlockModel>(
@@ -228,6 +228,17 @@ export namespace BlockCreation {
 			const config = BlockManager.manager.config.get(block) as DefinitionToConfig<TDef>;
 			func(block as T, config);
 		};
+	}
+
+	export function defaultIfWiredUnset<T extends keyof BlockLogicTypes.Primitives>(
+		item: BlockConfigPart<T> | undefined,
+		def: BlockLogicTypes.Primitives[Exclude<T, "wire" | "unset">]["config"],
+	): BlockLogicTypes.Primitives[Exclude<T, "wire" | "unset">]["config"] {
+		if (!item || item.type === "wire" || item.type === "unset") {
+			return def;
+		}
+
+		return item.config as never;
 	}
 
 	export function runImmediateFrom(model: BlockModel, blockList: BlockList) {
