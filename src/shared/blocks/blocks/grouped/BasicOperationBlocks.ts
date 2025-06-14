@@ -354,7 +354,7 @@ const maths = {
 		logic: logic(defs.numOrVec1_numOrVec, ({ value, valueType }) => ({
 			result: {
 				type: valueType,
-				value: valueType === "number" ? math.deg(value as number) : (value as Vector3).Abs(),
+				value: valueType === "number" ? math.abs(value as number) : (value as Vector3).Abs(),
 			},
 		})),
 	},
