@@ -55,7 +55,8 @@ class Logic extends BlockLogic<typeof definition> {
 		super(definition, block);
 
 		let currentValue = 0;
-		this.onFirstInputs(({ newvalue }) => {
+
+		this.onk(["newvalue"], ({ newvalue }) => {
 			this.output.value.set("number", (currentValue = newvalue));
 		});
 
