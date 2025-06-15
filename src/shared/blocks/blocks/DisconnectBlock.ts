@@ -28,7 +28,7 @@ const definition = {
 	output: {},
 } satisfies BlockLogicFullBothDefinitions;
 
-type disconnectorBlock = BlockModel & {
+export type disconnectorBlock = BlockModel & {
 	BottomPart: Part;
 	TopPart: Part;
 };
