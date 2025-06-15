@@ -1,3 +1,4 @@
+import { RunService } from "@rbxts/services";
 import { InstanceBlockLogic } from "shared/blockLogic/BlockLogic";
 import { BlockCreation } from "shared/blocks/BlockCreation";
 import type { BlockLogicFullBothDefinitions, InstanceBlockLogicArgs } from "shared/blockLogic/BlockLogic";
@@ -37,7 +38,7 @@ class Logic extends InstanceBlockLogic<typeof definition> {
 			angular: Vector3.zero,
 		};
 
-		this.onRecalcInputs(() => {
+		this.event.subscribe(RunService.Heartbeat, () => {
 			if (!this.instance.PrimaryPart) {
 				this.disable();
 				return;

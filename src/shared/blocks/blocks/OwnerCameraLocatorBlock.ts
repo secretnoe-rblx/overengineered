@@ -1,4 +1,4 @@
-import { Workspace } from "@rbxts/services";
+import { RunService, Workspace } from "@rbxts/services";
 import { BlockLogic } from "shared/blockLogic/BlockLogic";
 import { BlockCreation } from "shared/blocks/BlockCreation";
 import { GameDefinitions } from "shared/data/GameDefinitions";
@@ -29,7 +29,7 @@ class Logic extends BlockLogic<typeof definition> {
 	constructor(block: BlockLogicArgs) {
 		super(definition, block);
 
-		this.onRecalcInputs(() => {
+		this.event.subscribe(RunService.Heartbeat, () => {
 			const camera = Workspace.CurrentCamera;
 			if (!camera) return;
 
