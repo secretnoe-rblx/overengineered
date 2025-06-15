@@ -28,20 +28,24 @@ const definition = {
 	output: {},
 } satisfies BlockLogicFullBothDefinitions;
 
+type disconnectorBlock = BlockModel & {
+	BottomPart: Part;
+	TopPart: Part;
+};
+
 export type { Logic as DisconnectBlockLogic };
-class Logic extends InstanceBlockLogic<typeof definition> {
+class Logic extends InstanceBlockLogic<typeof definition, disconnectorBlock> {
 	static readonly events = {
-		disconnect: new A2SRemoteEvent<{ readonly block: BlockModel }>("b_disconnectblock_disconnect"),
+		disconnect: new A2SRemoteEvent<{ readonly block: disconnectorBlock }>("b_disconnectblock_disconnect"),
 	} as const;
 
 	constructor(block: InstanceBlockLogicArgs) {
 		super(definition, block);
 
-		this.on(({ disconnect }) => {
-			if (disconnect) {
-				Logic.events.disconnect.send({ block: this.instance });
-				this.disable();
-			}
+		this.onk(["disconnect"], ({ disconnect }) => {
+			if (!disconnect) return;
+			Logic.events.disconnect.send({ block: this.instance });
+			this.disable();
 		});
 	}
 

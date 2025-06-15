@@ -10,6 +10,11 @@ export class DisconnectBlockServerLogic extends ServerBlockLogic<typeof Disconne
 		logic.events.disconnect.invoked.Connect((player, { block }) => {
 			if (!this.isValidBlock(block, player)) return;
 			logic.disconnect(block);
+			for (const d of [block.BottomPart, block.TopPart]) {
+				if (!d.AssemblyRootPart?.Anchored) {
+					d.SetNetworkOwner(player);
+				}
+			}
 		});
 	}
 }
