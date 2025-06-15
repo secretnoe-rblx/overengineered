@@ -158,49 +158,49 @@ const cornerWedges = {
 		displayName: "Half Corner Wedge 1x1",
 		description: "A corner wedge 1x1, but it's.. half.. the size?",
 
-		mirror: { behaviour: "offset270", replacementId: "halfcornerwedge1x1mirrored" },
+		mirror: { behaviour: "normal", replacementId: "halfcornerwedge1x1mirrored" },
 	},
 	halfcornerwedge2x1: {
 		displayName: "Half Corner Wedge 2x1",
 		description: "A corner wedge 2x1, but it's.. half.. the size?",
 
-		mirror: { behaviour: "offset270", replacementId: "halfcornerwedge2x1mirrored" },
+		mirror: { behaviour: "normal", replacementId: "halfcornerwedge2x1mirrored" },
 	},
 	halfcornerwedge3x1: {
 		displayName: "Half Corner Wedge 3x1",
 		description: "A corner wedge 3x1, but it's.. half.. the size?",
 
-		mirror: { behaviour: "offset270", replacementId: "halfcornerwedge3x1mirrored" },
+		mirror: { behaviour: "normal", replacementId: "halfcornerwedge3x1mirrored" },
 	},
 	halfcornerwedge4x1: {
 		displayName: "Half Corner Wedge 4x1",
 		description: "It stopped making any sense..",
 
-		mirror: { behaviour: "offset270", replacementId: "halfcornerwedge4x1mirrored" },
+		mirror: { behaviour: "normal", replacementId: "halfcornerwedge4x1mirrored" },
 	},
 	halfcornerwedge1x1mirrored: {
 		displayName: "Half Corner Wedge 1x1 (Mirrored)",
 		description: "Same halved corner wedge, but mirrored!",
 
-		mirror: { behaviour: "offset270", replacementId: "halfcornerwedge1x1" },
+		mirror: { behaviour: "normal", replacementId: "halfcornerwedge1x1" },
 	},
 	halfcornerwedge2x1mirrored: {
 		displayName: "Half Corner Wedge 2x1 (Mirrored)",
 		description: "Same halved corner wedge, but mirrored!",
 
-		mirror: { behaviour: "offset270", replacementId: "halfcornerwedge2x1" },
+		mirror: { behaviour: "normal", replacementId: "halfcornerwedge2x1" },
 	},
 	halfcornerwedge3x1mirrored: {
 		displayName: "Half Corner Wedge 3x1 (Mirrored)",
 		description: "Same halved corner wedge, but mirrored!",
 
-		mirror: { behaviour: "offset270", replacementId: "halfcornerwedge3x1" },
+		mirror: { behaviour: "normal", replacementId: "halfcornerwedge3x1" },
 	},
 	halfcornerwedge4x1mirrored: {
 		displayName: "Half Corner Wedge 4x1 (Mirrored)",
 		description: "Same halved corner wedge, but mirrored!",
 
-		mirror: { behaviour: "offset270", replacementId: "halfcornerwedge4x1" },
+		mirror: { behaviour: "normal", replacementId: "halfcornerwedge4x1" },
 	},
 } as const satisfies BlockBuildersWithoutIdAndDefaults;
 
