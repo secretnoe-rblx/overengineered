@@ -97,6 +97,14 @@ const defpartsf = {
 		types: BlockConfigDefinitions.color,
 		...(rest ?? {}),
 	}),
+	numberOrByte: (name: string, rest?: BLFID) => ({
+		displayName: name,
+		types: {
+			...BlockConfigDefinitions.number,
+			...BlockConfigDefinitions.byte,
+		},
+		...(rest ?? {}),
+	}),
 } as const satisfies {
 	readonly [k in string]: (name: string, rest?: BLFID) => BlockLogicFullInputDef;
 };
@@ -1211,9 +1219,9 @@ const color = {
 			{
 				inputOrder: ["value_r", "value_g", "value_b"],
 				input: {
-					value_r: defpartsf.number("R"),
-					value_g: defpartsf.number("G"),
-					value_b: defpartsf.number("B"),
+					value_r: defpartsf.numberOrByte("R"),
+					value_g: defpartsf.numberOrByte("G"),
+					value_b: defpartsf.numberOrByte("B"),
 				},
 				output: {
 					result: {
