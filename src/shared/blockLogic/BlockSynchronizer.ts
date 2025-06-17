@@ -18,7 +18,16 @@ export class BlockSynchronizer<TArg extends { readonly block: BlockModel; reqid?
 	readonly invoked = this._invoked.asReadonly();
 
 	/** @server */
-	private serverMiddleware?: (<T extends TArg>(invoker: Player | undefined, arg: T) => ObjectResponse<TArg>)[];
+	private serverMiddleware?: (<T extends TArg>(
+		invoker: Player | undefined,
+		arg: T,
+	) => "dontsend" | ObjectResponse<TArg>)[];
+	/** @server */
+	private serverMiddlewarePerPlayer?: (<T extends TArg>(
+		invoker: Player | undefined,
+		target: Player,
+		arg: T,
+	) => "dontsend" | ObjectResponse<TArg>)[];
 
 	private readonly event;
 
@@ -49,6 +58,8 @@ export class BlockSynchronizer<TArg extends { readonly block: BlockModel; reqid?
 				if (this.serverMiddleware) {
 					for (const func of this.serverMiddleware) {
 						const result = func(invoker, arg);
+						if (result === "dontsend") return;
+
 						if (!result.success) {
 							$err(`Error invoking synchronizer remote ${name}: ${result.message}`);
 							return;
@@ -68,7 +79,28 @@ export class BlockSynchronizer<TArg extends { readonly block: BlockModel; reqid?
 						return;
 					}
 
-					event.s2c.send(player, arg);
+					let parg = arg;
+					let send = true;
+					if (this.serverMiddlewarePerPlayer) {
+						for (const func of this.serverMiddlewarePerPlayer) {
+							const result = func(invoker, player, arg);
+							if (result === "dontsend") {
+								send = false;
+								continue;
+							}
+
+							if (!result.success) {
+								$err(`Error invoking synchronizer remote ${name}: ${result.message}`);
+								send = false;
+								continue;
+							}
+
+							parg = result.value;
+						}
+					}
+					if (!send) continue;
+
+					event.s2c.send(player, parg);
 				}
 			});
 
@@ -101,11 +133,22 @@ export class BlockSynchronizer<TArg extends { readonly block: BlockModel; reqid?
 		return `reqid_${this.name}`;
 	}
 
-	addServerMiddleware(middleware: (invoker: Player | undefined, arg: TArg) => ObjectResponse<TArg>): this {
+	addServerMiddleware(
+		middleware: (invoker: Player | undefined, arg: TArg) => "dontsend" | ObjectResponse<TArg>,
+	): this {
 		if (!RunService.IsServer()) return this;
 
 		this.serverMiddleware ??= [];
 		this.serverMiddleware.push(middleware);
+		return this;
+	}
+	addServerMiddlewarePerPlayer(
+		middleware: (invoker: Player | undefined, target: Player, arg: TArg) => "dontsend" | ObjectResponse<TArg>,
+	): this {
+		if (!RunService.IsServer()) return this;
+
+		this.serverMiddlewarePerPlayer ??= [];
+		this.serverMiddlewarePerPlayer.push(middleware);
 		return this;
 	}
 
@@ -132,6 +175,8 @@ export class BlockSynchronizer<TArg extends { readonly block: BlockModel; reqid?
 			if (this.serverMiddleware) {
 				for (const func of this.serverMiddleware) {
 					const result = func(undefined, arg);
+					if (result === "dontsend") return;
+
 					if (!result.success) {
 						$err(`Error invoking synchronizer remote ${this.name}: ${result.message}`);
 						return;
@@ -141,7 +186,30 @@ export class BlockSynchronizer<TArg extends { readonly block: BlockModel; reqid?
 				}
 			}
 
-			this.event.s2c.send("everyone", arg);
+			for (const player of Players.GetPlayers()) {
+				let parg = arg;
+				let send = true;
+				if (this.serverMiddlewarePerPlayer) {
+					for (const func of this.serverMiddlewarePerPlayer) {
+						const result = func(undefined, player, arg);
+						if (result === "dontsend") {
+							send = false;
+							continue;
+						}
+
+						if (!result.success) {
+							$err(`Error invoking synchronizer remote ${this.name}: ${result.message}`);
+							send = false;
+							continue;
+						}
+
+						parg = result.value;
+					}
+				}
+				if (!send) continue;
+
+				this.event.s2c.send(player, parg);
+			}
 		} else if (RunService.IsClient()) {
 			if (this.sendBackToOwner) {
 				const name = this.reqidAttributeName();

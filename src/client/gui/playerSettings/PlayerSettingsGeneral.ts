@@ -23,6 +23,10 @@ export class PlayerSettingsGeneral extends ConfigControlList {
 			this.addToggle("Automatic teleport to plot") //
 				.initToObjectPart(value, ["autoPlotTeleport"])
 				.setDescription("Automatically teleport to plot after despawning your vehicle");
+
+			this.addToggle("Public speakers") //
+				.initToObjectPart(value, ["publicSpeakers"])
+				.setDescription("Allow others to hear your speaker block and hear speakers of others");
 		}
 	}
 }

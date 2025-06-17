@@ -4,6 +4,7 @@ import { InstanceBlockLogic } from "shared/blockLogic/BlockLogic";
 import { BlockSynchronizer } from "shared/blockLogic/BlockSynchronizer";
 import { SoundLogic } from "shared/blockLogic/SoundLogic";
 import { BlockCreation } from "shared/blocks/BlockCreation";
+import type { PlayerDatabase } from "server/database/PlayerDatabase";
 import type { BlockLogicFullBothDefinitions, InstanceBlockLogicArgs } from "shared/blockLogic/BlockLogic";
 import type { BlockLogicTypes } from "shared/blockLogic/BlockLogicTypes";
 import type { BlockBuilder } from "shared/blocks/Block";
@@ -252,7 +253,7 @@ class Logic extends InstanceBlockLogic<typeof definition> {
 	}
 }
 
-export const SpeakerBlock = {
+const block = {
 	...BlockCreation.defaults,
 	id: "speaker",
 	displayName: "Speaker",
@@ -264,3 +265,30 @@ export const SpeakerBlock = {
 
 	logic: { definition, ctor: Logic, events },
 } as const satisfies BlockBuilder;
+
+export namespace SpeakerBlock {
+	export function get(di: DIContainer) {
+		events.update.addServerMiddleware((invoker, arg) => {
+			if (!invoker) return { success: true, value: arg };
+
+			const database = di.resolve<PlayerDatabase>();
+			const pdata = database.get(invoker.UserId);
+			if (!pdata?.settings?.publicSpeakers) {
+				return "dontsend";
+			}
+
+			return { success: true, value: arg };
+		});
+		events.update.addServerMiddlewarePerPlayer((invoker, player, arg) => {
+			const database = di.resolve<PlayerDatabase>();
+			const pdata = database.get(player.UserId);
+			if (!pdata?.settings?.publicSpeakers) {
+				return "dontsend";
+			}
+
+			return { success: true, value: arg };
+		});
+
+		return block;
+	}
+}

@@ -118,6 +118,10 @@ export const PlayerConfigDefinition = {
 		type: "bool",
 		config: true as boolean,
 	},
+	publicSpeakers: {
+		type: "bool",
+		config: false as boolean,
+	},
 	autoPlotTeleport: {
 		type: "bool",
 		config: true as boolean,
