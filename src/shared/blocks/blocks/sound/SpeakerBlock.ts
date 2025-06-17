@@ -74,6 +74,10 @@ const updateSound = (instance: Sound, sound: BlockLogicTypes.SoundValue) => {
 
 	instance.SoundId = `rbxassetid://${sound.id}`;
 	instance.PlaybackSpeed = sound.speed ?? 1;
+	instance.PlaybackRegionsEnabled = sound.start !== undefined || sound.length !== undefined;
+	if (instance.PlaybackRegionsEnabled) {
+		instance.PlaybackRegion = new NumberRange(sound.start ?? 0, (sound.start ?? 0) + (sound.length ?? 999));
+	}
 
 	if (!sound.effects || sound.effects.size() === 0) {
 		instance.ClearAllChildren();

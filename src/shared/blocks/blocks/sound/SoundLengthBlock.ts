@@ -47,9 +47,8 @@ class Logic extends InstanceBlockLogic<typeof definition> {
 export const SoundLengthBlock = {
 	...BlockCreation.defaults,
 	id: "soundlength",
-	displayName: "Sound length",
+	displayName: "Sound Length",
 	description: "Returns the length of the sound, in seconds.",
-	limit: 50,
 	search: {
 		partialAliases: ["sound"],
 	},

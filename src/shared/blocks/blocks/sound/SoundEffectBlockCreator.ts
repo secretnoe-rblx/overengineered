@@ -57,9 +57,70 @@ export namespace SoundEffectBlockCreator {
 			logic: { definition, ctor: Logic },
 		};
 	}
+	namespace SoundCutEffect {
+		const definition = {
+			input: {
+				sound: {
+					displayName: "Sound",
+					types: {
+						sound: { config: { id: "584691395" } },
+					},
+				},
+				start: {
+					displayName: "Start",
+					unit: "seconds",
+					types: {
+						number: { config: 0 },
+					},
+				},
+				length: {
+					displayName: "Length",
+					unit: "seconds",
+					types: {
+						number: { config: 1 },
+					},
+				},
+			},
+			output: {
+				output: {
+					displayName: "Output sound",
+					types: ["sound"],
+				},
+			},
+		} satisfies BlockLogicFullBothDefinitions;
+
+		class Logic extends InstanceBlockLogic<typeof definition> {
+			constructor(block: InstanceBlockLogicArgs) {
+				super(definition, block);
+
+				this.onk(["sound", "start", "length"], (arg) => {
+					this.output.output.set("sound", {
+						...arg.sound,
+						start: arg.start,
+						length: arg.length,
+					});
+				});
+			}
+		}
+
+		export const Block = {
+			...BlockCreation.defaults,
+			displayName: `Sound Cut`,
+			description: "Cuts the sound",
+
+			modelSource: {
+				model: BlockCreation.Model.fAutoCreated("SoundLogicBlockPrefab", `SOUND CUT`),
+				category: () => BlockCreation.Categories.sound,
+			},
+			id: `soundeff_cut`,
+
+			logic: { definition, ctor: Logic },
+		};
+	}
 
 	export const all: readonly BlockBuilder[] = [
 		SpeedEffect.Block,
+		SoundCutEffect.Block,
 		ezcreate({
 			id: "ChorusSoundEffect",
 			name: "Chorus",
