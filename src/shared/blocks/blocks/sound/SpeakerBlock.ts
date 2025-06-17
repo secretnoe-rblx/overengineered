@@ -1,4 +1,7 @@
+import { Objects } from "engine/shared/fixes/Objects";
+import { t } from "engine/shared/t";
 import { InstanceBlockLogic } from "shared/blockLogic/BlockLogic";
+import { BlockSynchronizer } from "shared/blockLogic/BlockSynchronizer";
 import { SoundLogic } from "shared/blockLogic/SoundLogic";
 import { BlockCreation } from "shared/blocks/BlockCreation";
 import type { BlockLogicFullBothDefinitions, InstanceBlockLogicArgs } from "shared/blockLogic/BlockLogic";
@@ -106,20 +109,94 @@ const updateSound = (instance: Sound, sound: BlockLogicTypes.SoundValue) => {
 	}
 };
 
+const tSound = t.intersection(
+	t.interface({
+		id: t.string,
+	}),
+	t.partial({
+		effects: t.array(t.union(...Objects.values(SoundLogic.effects))),
+		speed: t.number,
+		start: t.number,
+		length: t.number,
+	}),
+) satisfies t.Type<BlockLogicTypes.SoundValue>;
+
+const updateType = t.intersection(
+	t.interface({
+		block: t.instance("Model").nominal("blockModel"),
+		play: t.boolean,
+		sound: tSound.orUndefined(),
+	}),
+	t.partial({
+		progress: t.number,
+		volume: t.numberWithBounds(0, 10),
+		loop: t.boolean,
+	}),
+);
+type UpdateType = t.Infer<typeof updateType>;
+
+const remoteUpdate = (arg: UpdateType) => {
+	const sound = arg.block.PrimaryPart?.FindFirstChildOfClass("Sound") ?? new Instance("Sound", arg.block.PrimaryPart);
+
+	if (arg.volume) S.updateVolume(sound, arg.volume);
+	if (arg.loop) S.updateLoop(sound, arg.loop);
+	if (arg.sound) updateSound(sound, arg.sound);
+
+	if (arg.play) sound.Play();
+};
+
+namespace S {
+	export function updateVolume(sound: Sound, volume: number) {
+		sound.Volume = volume;
+		sound.RollOffMaxDistance = 10_000 * volume;
+	}
+	export function updateLoop(sound: Sound, loop: boolean) {
+		sound.Looped = loop;
+	}
+}
+
+const propsOfSound = (sound: Sound) => {
+	if (!sound.Playing) {
+		return { play: false };
+	}
+
+	return {
+		play: sound.Playing,
+		progress: sound.TimePosition,
+		volume: sound.Volume,
+		loop: sound.Looped,
+	};
+};
+
+const events = {
+	update: new BlockSynchronizer("b_speaker_update", updateType, remoteUpdate),
+};
+events.update.getExisting = (stored) => {
+	const sound = stored.block.PrimaryPart?.FindFirstChildOfClass("Sound");
+	if (!sound) return stored;
+
+	return { ...stored, ...propsOfSound(sound) };
+};
+
 class Logic extends InstanceBlockLogic<typeof definition> {
 	constructor(block: InstanceBlockLogicArgs) {
 		super(definition, block);
 
+		const sendUpdate = (sound?: BlockLogicTypes.SoundValue) => {
+			events.update.send({
+				block: block.instance,
+				sound: sound as never,
+				...propsOfSound(soundInstance),
+			});
+		};
+
 		const soundInstance = new Instance("Sound", this.instance.PrimaryPart);
 		let nextSoundUpdate: BlockLogicTypes.SoundValue | undefined;
 
-		const updateVolume = (volume: number) => {
-			soundInstance.Volume = volume;
-			soundInstance.RollOffMaxDistance = 10_000 * volume;
-		};
-		const updateLoop = (loop: boolean) => (soundInstance.Looped = loop);
-		const volumeCache = this.initializeInputCache("volume");
-		const loopCache = this.initializeInputCache("loop");
+		const updateVolume = (volume: number) => S.updateVolume(soundInstance, volume);
+		const updateLoop = (loop: boolean) => S.updateLoop(soundInstance, loop);
+		// const volumeCache = this.initializeInputCache("volume");
+		// const loopCache = this.initializeInputCache("loop");
 
 		this.onk(["sound"], ({ sound }) => {
 			if (!soundInstance.IsPlaying) {
@@ -128,15 +205,31 @@ class Logic extends InstanceBlockLogic<typeof definition> {
 			}
 
 			updateSound(soundInstance, sound);
+			sendUpdate();
 		});
 
-		this.onk(["volume"], ({ volume }) => updateVolume(volume));
-		this.onk(["loop"], ({ loop }) => updateLoop(loop));
+		this.onk(["volume"], ({ volume }) => {
+			updateVolume(volume);
+
+			if (soundInstance.Playing) {
+				sendUpdate();
+			}
+		});
+		this.onk(["loop"], ({ loop }) => {
+			updateLoop(loop);
+
+			if (soundInstance.Playing) {
+				sendUpdate();
+			}
+		});
 		this.onk(["play"], ({ play }) => {
 			if (!play) {
 				updateLoop(false);
+				sendUpdate();
 				return;
 			}
+
+			const update = nextSoundUpdate;
 
 			if (nextSoundUpdate) {
 				updateSound(soundInstance, nextSoundUpdate);
@@ -145,11 +238,12 @@ class Logic extends InstanceBlockLogic<typeof definition> {
 				soundInstance.Parent = this.instance!.PrimaryPart!;
 				soundInstance.Played.Connect(() => this.output.isPlaying.set("bool", true));
 				soundInstance.Ended.Connect(() => this.output.isPlaying.set("bool", false));
-				updateVolume(volumeCache.tryGet() ?? 1);
+				// updateVolume(volumeCache.tryGet() ?? 1);
 			}
 
-			updateLoop(loopCache.tryGet() ?? false);
+			// updateLoop(loopCache.tryGet() ?? false);
 			soundInstance.Play();
+			sendUpdate(update);
 		});
 
 		this.event.loop(0, () => {
@@ -168,5 +262,5 @@ export const SpeakerBlock = {
 		partialAliases: ["sound", "music", "speaker", "play"],
 	},
 
-	logic: { definition, ctor: Logic },
+	logic: { definition, ctor: Logic, events },
 } as const satisfies BlockBuilder;

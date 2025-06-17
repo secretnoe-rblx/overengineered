@@ -25,6 +25,9 @@ export class BlockSynchronizer<TArg extends { readonly block: BlockModel; reqid?
 	/** If true, sends the event to the block owner. Useful for execting server-only middlewares like text censoring. */
 	sendBackToOwner = false;
 
+	/** If set, specifies the value that's being sent to a newly joined player. */
+	getExisting?: <T extends TArg = TArg>(stored: T) => TArg;
+
 	constructor(
 		private readonly name: string,
 		private readonly ttype: t.Type<TArg>,
@@ -71,7 +74,7 @@ export class BlockSynchronizer<TArg extends { readonly block: BlockModel; reqid?
 
 			Players.PlayerAdded.Connect((player) => {
 				if (currentArg === undefined) return;
-				event.s2c.send(player, currentArg);
+				event.s2c.send(player, (currentArg = this.getExisting?.(currentArg) ?? currentArg));
 			});
 		} else if (RunService.IsClient()) {
 			event.s2c.invoked.Connect((arg) => {
