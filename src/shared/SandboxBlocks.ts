@@ -58,6 +58,7 @@ import { ScreenBlock } from "shared/blocks/blocks/ScreenBlock";
 import { SevenSegmentDisplayBlock } from "shared/blocks/blocks/SevenSegmentDisplayBlock";
 import { SingleImpulseBlock } from "shared/blocks/blocks/SingleImpulseBlock";
 import { SoundEffectBlockCreator } from "shared/blocks/blocks/sound/SoundEffectBlockCreator";
+import { SoundFromIdBlock } from "shared/blocks/blocks/sound/SoundFromIdBlock";
 import { SoundLengthBlock } from "shared/blocks/blocks/sound/SoundLengthBlock";
 import { SpeakerBlock } from "shared/blocks/blocks/sound/SpeakerBlock";
 import { SpeedometerBlock } from "shared/blocks/blocks/SpeedometerBlock";
@@ -181,6 +182,7 @@ export const CreateSandboxBlocks = (di: DIContainer): BlockList => {
 
 		SpeakerBlock,
 		SoundLengthBlock,
+		SoundFromIdBlock,
 		...SoundEffectBlockCreator.all,
 	];
 
