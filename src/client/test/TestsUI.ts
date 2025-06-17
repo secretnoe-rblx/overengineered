@@ -37,6 +37,8 @@ export class TestsUI extends InstanceComponent<TestsUIDefinition> {
 		type Test = { readonly name: string; test: UnitTest };
 		const testListList: { [k in string]: Test[] } = {};
 
+		testListList["close"] = [{ name: "close", test: () => this.destroy() }];
+
 		for (const testScript of TestFramework.findAllTestScripts()) {
 			for (const [k, tests] of pairs(TestFramework.loadTestsFromScript(testScript))) {
 				const list = (testListList[k] ??= []);
