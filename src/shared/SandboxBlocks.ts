@@ -180,7 +180,7 @@ export const CreateSandboxBlocks = (di: DIContainer): BlockList => {
 		SpeedometerBlock,
 		LaserBlock,
 
-		SpeakerBlock.get(di),
+		SpeakerBlock,
 		SoundLengthBlock,
 		SoundFromIdBlock,
 		...SoundEffectBlockCreator.all,

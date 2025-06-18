@@ -4,7 +4,6 @@ import { InstanceBlockLogic } from "shared/blockLogic/BlockLogic";
 import { BlockSynchronizer } from "shared/blockLogic/BlockSynchronizer";
 import { SoundLogic } from "shared/blockLogic/SoundLogic";
 import { BlockCreation } from "shared/blocks/BlockCreation";
-import type { PlayerDatabase } from "server/database/PlayerDatabase";
 import type { BlockLogicFullBothDefinitions, InstanceBlockLogicArgs } from "shared/blockLogic/BlockLogic";
 import type { BlockLogicTypes } from "shared/blockLogic/BlockLogicTypes";
 import type { BlockBuilder } from "shared/blocks/Block";
@@ -120,15 +119,15 @@ const tSound = t.intersection(
 		start: t.number,
 		length: t.number,
 	}),
-) satisfies t.Type<BlockLogicTypes.SoundValue>;
+) satisfies t.Type<BlockLogicTypes.SoundValue> as t.Type<BlockLogicTypes.SoundValue>;
 
 const updateType = t.intersection(
 	t.interface({
 		block: t.instance("Model").nominal("blockModel"),
 		play: t.boolean,
-		sound: tSound.orUndefined(),
 	}),
 	t.partial({
+		sound: tSound,
 		progress: t.number,
 		volume: t.numberWithBounds(0, 10),
 		loop: t.boolean,
@@ -136,32 +135,31 @@ const updateType = t.intersection(
 );
 type UpdateType = t.Infer<typeof updateType>;
 
-const remoteUpdate = (arg: UpdateType) => {
-	const sound = arg.block.PrimaryPart?.FindFirstChildOfClass("Sound") ?? new Instance("Sound", arg.block.PrimaryPart);
+const update = ({ block, play, sound, loop, progress, volume }: UpdateType) => {
+	const instance = block.PrimaryPart?.FindFirstChildOfClass("Sound") ?? new Instance("Sound", block.PrimaryPart);
 
-	if (arg.volume) S.updateVolume(sound, arg.volume);
-	if (arg.loop) S.updateLoop(sound, arg.loop);
-	if (arg.sound) updateSound(sound, arg.sound);
+	instance.Looped = (play ?? false) && (loop ?? false);
+	if (volume) {
+		instance.Volume = volume;
+		instance.RollOffMaxDistance = 10_000 * volume;
+	}
+	if (sound) updateSound(instance, sound);
 
-	if (arg.play) sound.Play();
+	if (progress) instance.TimePosition = progress;
+	if (play) instance.Play();
 };
 
-namespace S {
-	export function updateVolume(sound: Sound, volume: number) {
-		sound.Volume = volume;
-		sound.RollOffMaxDistance = 10_000 * volume;
-	}
-	export function updateLoop(sound: Sound, loop: boolean) {
-		sound.Looped = loop;
-	}
-}
-
-const propsOfSound = (sound: Sound) => {
-	if (!sound.Playing) {
-		return { play: false };
-	}
+const events = {
+	update: new BlockSynchronizer("b_speaker_update", updateType, update),
+};
+events.update.getExisting = (stored): UpdateType => {
+	const sound = stored.block.PrimaryPart?.FindFirstChildOfClass("Sound");
+	if (!sound) return stored;
 
 	return {
+		block: stored.block,
+		sound: stored.sound,
+
 		play: sound.Playing,
 		progress: sound.TimePosition,
 		volume: sound.Volume,
@@ -169,35 +167,16 @@ const propsOfSound = (sound: Sound) => {
 	};
 };
 
-const events = {
-	update: new BlockSynchronizer("b_speaker_update", updateType, remoteUpdate),
-};
-events.update.getExisting = (stored) => {
-	const sound = stored.block.PrimaryPart?.FindFirstChildOfClass("Sound");
-	if (!sound) return stored;
-
-	return { ...stored, ...propsOfSound(sound) };
-};
-
+export type { Logic as SpeakerBlockLogic };
 class Logic extends InstanceBlockLogic<typeof definition> {
 	constructor(block: InstanceBlockLogicArgs) {
 		super(definition, block);
 
-		const sendUpdate = (sound?: BlockLogicTypes.SoundValue) => {
-			events.update.send({
-				block: block.instance,
-				sound: sound as never,
-				...propsOfSound(soundInstance),
-			});
-		};
-
 		const soundInstance = new Instance("Sound", this.instance.PrimaryPart);
-		let nextSoundUpdate: BlockLogicTypes.SoundValue | undefined;
+		soundInstance.Played.Connect(() => this.output.isPlaying.set("bool", true));
+		soundInstance.Ended.Connect(() => this.output.isPlaying.set("bool", false));
 
-		const updateVolume = (volume: number) => S.updateVolume(soundInstance, volume);
-		const updateLoop = (loop: boolean) => S.updateLoop(soundInstance, loop);
-		// const volumeCache = this.initializeInputCache("volume");
-		// const loopCache = this.initializeInputCache("loop");
+		let nextSoundUpdate: BlockLogicTypes.SoundValue | undefined;
 
 		this.onk(["sound"], ({ sound }) => {
 			if (!soundInstance.IsPlaying) {
@@ -205,46 +184,34 @@ class Logic extends InstanceBlockLogic<typeof definition> {
 				return;
 			}
 
-			updateSound(soundInstance, sound);
-			sendUpdate();
+			events.update.send({ block: block.instance, play: true, sound });
 		});
 
 		this.onk(["volume"], ({ volume }) => {
-			updateVolume(volume);
-
-			if (soundInstance.Playing) {
-				sendUpdate();
-			}
+			if (!soundInstance.Playing) return;
+			events.update.send({ block: block.instance, play: true, volume });
 		});
 		this.onk(["loop"], ({ loop }) => {
-			updateLoop(loop);
-
-			if (soundInstance.Playing) {
-				sendUpdate();
-			}
+			if (!soundInstance.Playing) return;
+			events.update.send({ block: block.instance, play: true, loop });
 		});
+
+		const volumeCache = this.initializeInputCache("volume");
+		const loopCache = this.initializeInputCache("loop");
 		this.onk(["play"], ({ play }) => {
 			if (!play) {
-				updateLoop(false);
-				sendUpdate();
+				events.update.send({ block: block.instance, play: false });
 				return;
 			}
 
-			const update = nextSoundUpdate;
-
-			if (nextSoundUpdate) {
-				updateSound(soundInstance, nextSoundUpdate);
-				nextSoundUpdate = undefined;
-
-				soundInstance.Parent = this.instance!.PrimaryPart!;
-				soundInstance.Played.Connect(() => this.output.isPlaying.set("bool", true));
-				soundInstance.Ended.Connect(() => this.output.isPlaying.set("bool", false));
-				// updateVolume(volumeCache.tryGet() ?? 1);
-			}
-
-			// updateLoop(loopCache.tryGet() ?? false);
-			soundInstance.Play();
-			sendUpdate(update);
+			events.update.send({
+				block: block.instance,
+				sound: nextSoundUpdate,
+				play: true,
+				loop: loopCache.tryGet() ?? false,
+				volume: volumeCache.tryGet() ?? 0,
+			});
+			nextSoundUpdate = undefined;
 		});
 
 		this.event.loop(0, () => {
@@ -253,7 +220,7 @@ class Logic extends InstanceBlockLogic<typeof definition> {
 	}
 }
 
-const block = {
+export const SpeakerBlock = {
 	...BlockCreation.defaults,
 	id: "speaker",
 	displayName: "Speaker",
@@ -265,30 +232,3 @@ const block = {
 
 	logic: { definition, ctor: Logic, events },
 } as const satisfies BlockBuilder;
-
-export namespace SpeakerBlock {
-	export function get(di: DIContainer) {
-		events.update.addServerMiddleware((invoker, arg) => {
-			if (!invoker) return { success: true, value: arg };
-
-			const database = di.resolve<PlayerDatabase>();
-			const pdata = database.get(invoker.UserId);
-			if (!pdata?.settings?.publicSpeakers) {
-				return "dontsend";
-			}
-
-			return { success: true, value: arg };
-		});
-		events.update.addServerMiddlewarePerPlayer((invoker, player, arg) => {
-			const database = di.resolve<PlayerDatabase>();
-			const pdata = database.get(player.UserId);
-			if (!pdata?.settings?.publicSpeakers) {
-				return "dontsend";
-			}
-
-			return { success: true, value: arg };
-		});
-
-		return block;
-	}
-}
