@@ -1,4 +1,4 @@
-import { Players, ServerStorage } from "@rbxts/services";
+import { Players, RunService, ServerStorage, TeleportService } from "@rbxts/services";
 import { ComponentKeyedChildren } from "engine/shared/component/ComponentKeyedChildren";
 import { HostedService } from "engine/shared/di/HostedService";
 import { Lock } from "engine/shared/fixes/Lock";
@@ -75,6 +75,18 @@ export class ServerPlayersController extends HostedService {
 				let data;
 				try {
 					data = players.get(player.UserId) ?? {};
+
+					if (
+						!RunService.IsStudio() &&
+						game.PlaceId !== 88843175246235 &&
+						(data as { placeId?: number }).placeId !== game.PlaceId
+					) {
+						const placeId = (data! as { placeId: number }).placeId;
+						task.spawn(() => {
+							TeleportService.TeleportAsync(placeId, [player]);
+						});
+					}
+
 					return {
 						success: true,
 						remotes: controller.remotesFolder,
