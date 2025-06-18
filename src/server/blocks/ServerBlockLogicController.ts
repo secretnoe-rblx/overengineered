@@ -9,6 +9,7 @@ import { LEDDisplayServerLogic } from "server/blocks/logic/LEDDisplayServerLogic
 import { PistonBlockServerLogic } from "server/blocks/logic/PistonBlockServerLogic";
 import { ScreenServerLogic } from "server/blocks/logic/ScreenServerLogic";
 import { SevenSegmentDisplayServerLogic } from "server/blocks/logic/SevenSegmentDisplayServerLogic";
+import { SpeakerServerLogic } from "server/blocks/logic/SpeakerBlockServerLogic";
 import { ServerBlockLogic } from "server/blocks/ServerBlockLogic";
 import type { PlayModeController } from "server/modes/PlayModeController";
 import type { GenericBlockLogicCtor } from "shared/blockLogic/BlockLogic";
@@ -50,6 +51,7 @@ export class ServerBlockLogicController extends HostedService {
 			leddisplay: LEDDisplayServerLogic,
 			screen: ScreenServerLogic,
 			button: ButtonServerLogic,
+			speaker: SpeakerServerLogic,
 			piston: PistonBlockServerLogic,
 			sevensegmentdisplay: SevenSegmentDisplayServerLogic,
 			bracedshaft: BracedShaftServerLogic,
