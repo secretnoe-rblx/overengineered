@@ -28,11 +28,11 @@ const servoDefinition = {
 			types: {
 				number: {
 					config: 0,
-					clamp: {
-						showAsSlider: false,
-						min: -180,
-						max: 180,
-					},
+					// clamp: {
+					// 	showAsSlider: false,
+					// 	min: -180,
+					// 	max: 180,
+					// },
 					control: {
 						config: {
 							enabled: true,
@@ -99,11 +99,11 @@ const sidewaysServoDefinition = {
 				...servoDefinition.input.angle.types,
 				number: {
 					...servoDefinition.input.angle.types.number,
-					clamp: {
-						...servoDefinition.input.angle.types.number.clamp,
-						min: -90,
-						max: 90,
-					},
+					// clamp: {
+					// 	...servoDefinition.input.angle.types.number.clamp,
+					// 	min: -90,
+					// 	max: 90,
+					// },
 				},
 			},
 		},
@@ -138,7 +138,11 @@ class Logic extends InstanceBlockLogic<typeof servoDefinition, ServoMotorModel> 
 
 		this.onk(["stiffness"], ({ stiffness }) => (this.hingeConstraint.AngularResponsiveness = stiffness));
 		this.onk(["speed"], ({ speed }) => (this.hingeConstraint.AngularSpeed = speed));
-		this.onk(["angle"], ({ angle }) => (this.hingeConstraint.TargetAngle = angle));
+		this.onk(["angle"], ({ angle }) => {
+			angle = math.fmod(angle, 360);
+			if (math.abs(angle) > 180) angle -= math.sign(angle) * 360;
+			this.hingeConstraint.TargetAngle = angle;
+		});
 		this.onk(
 			["max_torque"],
 			({ max_torque }) => (this.hingeConstraint.ServoMaxTorque = max_torque * 1_000_000 * scale),
