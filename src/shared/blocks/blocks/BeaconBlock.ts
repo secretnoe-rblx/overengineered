@@ -94,7 +94,7 @@ class Logic extends InstanceBlockLogic<typeof definition> {
 			Logic.events.update.send(data);
 		};
 
-		this.event.subscribe(RunService.Heartbeat, (seconds) => {
+		this.event.subscribe(RunService.PreSimulation, (seconds) => {
 			//апдейт минимальной дистанции срабатывания маяка
 			if (this.beaconInstance !== undefined) {
 				this.beaconInstance.showUpDistance = dst.get();

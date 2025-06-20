@@ -38,7 +38,7 @@ class Logic extends InstanceBlockLogic<typeof definition> {
 			angular: Vector3.zero,
 		};
 
-		this.event.subscribe(RunService.Heartbeat, () => {
+		this.event.subscribe(RunService.PreSimulation, () => {
 			if (!this.instance.PrimaryPart) {
 				this.disable();
 				return;
