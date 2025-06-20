@@ -3,6 +3,7 @@ import { SpeakerBlock } from "shared/blocks/blocks/sound/SpeakerBlock";
 import type { PlayerDatabase } from "server/database/PlayerDatabase";
 import type { PlayModeController } from "server/modes/PlayModeController";
 import type { SpeakerBlockLogic } from "shared/blocks/blocks/sound/SpeakerBlock";
+import type { SharedPlots } from "shared/building/SharedPlots";
 
 @injectable
 export class SpeakerServerLogic extends ServerBlockLogic<typeof SpeakerBlockLogic> {
@@ -10,6 +11,7 @@ export class SpeakerServerLogic extends ServerBlockLogic<typeof SpeakerBlockLogi
 		logic: typeof SpeakerBlockLogic,
 		@inject playModeController: PlayModeController,
 		@inject database: PlayerDatabase,
+		@inject plots: SharedPlots,
 	) {
 		super(logic, playModeController);
 
@@ -17,16 +19,20 @@ export class SpeakerServerLogic extends ServerBlockLogic<typeof SpeakerBlockLogi
 		events.update.addServerMiddleware((invoker, arg) => {
 			if (!invoker) return { success: true, value: arg };
 
-			const pdata = database.get(invoker.UserId);
-			if (!pdata?.settings?.publicSpeakers) {
+			if (!database.get(invoker.UserId)?.settings?.publicSpeakers) {
 				return "dontsend";
 			}
 
 			return { success: true, value: arg };
 		});
 		events.update.addServerMiddlewarePerPlayer((invoker, player, arg) => {
-			const pdata = database.get(player.UserId);
-			if (!pdata?.settings?.publicSpeakers) {
+			if (!database.get(player.UserId)?.settings?.publicSpeakers) {
+				return "dontsend";
+			}
+			if (invoker && plots.getPlotComponentByOwnerID(invoker.UserId).isBlacklisted(player)) {
+				return "dontsend";
+			}
+			if (invoker && plots.getPlotComponentByOwnerID(player.UserId).isBlacklisted(invoker)) {
 				return "dontsend";
 			}
 
