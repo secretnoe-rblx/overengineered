@@ -36,6 +36,7 @@ import { LedDisplayBlock } from "shared/blocks/blocks/LedDisplayBlock";
 import { LogicMemoryBlock } from "shared/blocks/blocks/LogicMemoryBlock";
 import { LogicMemoryLegacyBlock } from "shared/blocks/blocks/LogicMemoryOldBlock";
 import { LogicOverclockBlock } from "shared/blocks/blocks/LogicOverclockBlock";
+import { LuaCircuitBlock } from "shared/blocks/blocks/LuaCircuitBlock";
 import { MagnetBlock } from "shared/blocks/blocks/MagnetBlock";
 import { MassSensorBlock } from "shared/blocks/blocks/MassSensorBlock";
 import { MotorBlock } from "shared/blocks/blocks/MotorBlock";
@@ -161,6 +162,7 @@ export const CreateSandboxBlocks = (di: DIContainer): BlockList => {
 		ReadonlyMemoryBlock,
 		RandomBlock,
 		LogicOverclockBlock,
+		LuaCircuitBlock,
 
 		AltimeterBlock,
 		KeySensorBlock,
