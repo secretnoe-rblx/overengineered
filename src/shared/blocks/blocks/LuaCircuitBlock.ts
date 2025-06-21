@@ -217,7 +217,7 @@ export const LuaCircuitBlock = {
 	id: "luacircuit",
 	displayName: "Lua Circuit",
 	description: "indev",
-	limit: 1,
+	limit: 4,
 	devOnly: true,
 
 	logic: { definition, ctor: Logic },
