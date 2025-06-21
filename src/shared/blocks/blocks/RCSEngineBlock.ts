@@ -221,6 +221,12 @@ class Logic extends InstanceBlockLogic<typeof definition, RCSEngineModel> {
 
 		this.event.subscribe(Workspace.GetPropertyChangedSignal("Gravity"), update);
 		this.onk(["direction"], ({ direction }) => {
+			//nan check
+			if (typeIs(direction.X, "number") && direction.X !== direction.X) return;
+			if (typeIs(direction.Y, "number") && direction.Y !== direction.Y) return;
+			if (typeIs(direction.Z, "number") && direction.Z !== direction.Z) return;
+
+			//the code
 			this.thrust = direction;
 			update();
 		});
