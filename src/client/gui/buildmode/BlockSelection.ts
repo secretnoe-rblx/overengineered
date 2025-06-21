@@ -1,4 +1,4 @@
-import { ContentProvider, GuiService, Players } from "@rbxts/services";
+import { ContentProvider, GuiService, Players, RunService } from "@rbxts/services";
 import { BlockPreviewControl } from "client/gui/buildmode/BlockPreviewControl";
 import { BlockPipetteButton } from "client/gui/controls/BlockPipetteButton";
 import { GuiAnimator } from "client/gui/GuiAnimator";
@@ -8,6 +8,7 @@ import { Control } from "engine/client/gui/Control";
 import { ComponentChildren } from "engine/shared/component/ComponentChildren";
 import { ObservableValue } from "engine/shared/event/ObservableValue";
 import { Localization } from "engine/shared/Localization";
+import { PlayerRank } from "engine/shared/PlayerRank";
 import type { Theme } from "client/Theme";
 import type { InstanceComponent } from "engine/shared/component/InstanceComponent";
 import type { BlockCategoryPath } from "shared/blocks/Block";
@@ -363,6 +364,7 @@ export class BlockSelectionControl extends Control<BlockSelectionControlDefiniti
 
 		const processBlock = (block: Block) => {
 			if (block.hidden) return;
+			if (block.devOnly && (!RunService.IsStudio() || !PlayerRank.isAdmin(Players.LocalPlayer))) return;
 
 			const button = createBlockButton(block, () => {
 				if (this.gui.Content.SearchTextBox.Text !== "") {
