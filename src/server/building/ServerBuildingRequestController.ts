@@ -64,7 +64,7 @@ export class ServerBuildingRequestController extends Component {
 			const b = this.blockList.blocks[block.id];
 			if (!b) return err("Unknown block id");
 
-			if (b.devOnly && (!RunService.IsStudio() || !PlayerRank.isAdminById(this.playerId))) {
+			if (b.devOnly && !RunService.IsStudio() && !PlayerRank.isAdminById(this.playerId)) {
 				return err(`Unknown block id ${b.id}`);
 			}
 

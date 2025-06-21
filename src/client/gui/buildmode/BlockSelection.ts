@@ -364,7 +364,7 @@ export class BlockSelectionControl extends Control<BlockSelectionControlDefiniti
 
 		const processBlock = (block: Block) => {
 			if (block.hidden) return;
-			if (block.devOnly && (!RunService.IsStudio() || !PlayerRank.isAdmin(Players.LocalPlayer))) return;
+			if (block.devOnly && !RunService.IsStudio() && !PlayerRank.isAdmin(Players.LocalPlayer)) return;
 
 			const button = createBlockButton(block, () => {
 				if (this.gui.Content.SearchTextBox.Text !== "") {
