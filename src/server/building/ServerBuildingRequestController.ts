@@ -1,4 +1,6 @@
+import { RunService } from "@rbxts/services";
 import { Component } from "engine/shared/component/Component";
+import { PlayerRank } from "engine/shared/PlayerRank";
 import { BlockManager } from "shared/building/BlockManager";
 import { BuildingManager } from "shared/building/BuildingManager";
 import type { PlayerId } from "server/PlayerId";
@@ -61,6 +63,10 @@ export class ServerBuildingRequestController extends Component {
 		for (const block of blocks) {
 			const b = this.blockList.blocks[block.id];
 			if (!b) return err("Unknown block id");
+
+			if (b.devOnly && (!RunService.IsStudio() || !PlayerRank.isAdminById(this.playerId))) {
+				return err(`Unknown block id ${b.id}`);
+			}
 
 			if (
 				!BuildingManager.serverBlockCanBePlacedAt(

@@ -201,6 +201,7 @@ export namespace BlockCreation {
 		mirror: {
 			behaviour: "normal" as BlockMirrorBehaviour,
 		},
+		devOnly: false,
 	} as const satisfies Partial<BlockBuilder>;
 
 	export function arrayFromObject(builders: {

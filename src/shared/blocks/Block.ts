@@ -54,6 +54,7 @@ export type BlockBuilder = {
 		readonly replacementId?: string;
 	};
 
+	readonly devOnly: boolean;
 	readonly search?: BlockSearchInfo;
 
 	/** @server */
