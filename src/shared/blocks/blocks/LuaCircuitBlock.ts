@@ -1,7 +1,9 @@
 import { ReplicatedStorage } from "@rbxts/services";
+import { Colors } from "engine/shared/Colors";
 import { Objects } from "engine/shared/fixes/Objects";
 import { BlockLogic } from "shared/blockLogic/BlockLogic";
 import { BlockCreation } from "shared/blocks/BlockCreation";
+import { BlockManager } from "shared/building/BlockManager";
 import type { BlockLogicArgs, BlockLogicFullBothDefinitions } from "shared/blockLogic/BlockLogic";
 import type { BlockBuilder } from "shared/blocks/Block";
 import type { ExplosionEffect } from "shared/effects/ExplosionEffect";
@@ -106,6 +108,54 @@ class Logic extends BlockLogic<typeof definition> {
 	constructor(block: BlockLogicArgs, @inject explode: ExplosionEffect) {
 		super(definition, block);
 
+		const initConsole = () => {
+			if (!block.instance) {
+				return () => {};
+			}
+
+			const console = block.instance
+				.WaitForChild("Console")
+				.WaitForChild("SurfaceGui")
+				.WaitForChild("Frame") as ScrollingFrame;
+			const consoleTemplate = this.asTemplate(console.WaitForChild("TextLabel") as TextLabel);
+
+			type ConsoleStack = {
+				readonly item: TextLabel;
+				prev?: ConsoleStack;
+			};
+			let consoleStack: ConsoleStack | undefined;
+			let consoleStackEnd: ConsoleStack | undefined;
+			let consoleStackCount = 0;
+			let idx = 0;
+
+			const blockScale = BlockManager.manager.scale.get(block.instance) ?? Vector3.one;
+
+			return (text: string, color: Color3 = Colors.white) => {
+				if (consoleStackEnd && consoleStackCount > 14 * blockScale.X * blockScale.Y * blockScale.Z) {
+					consoleStackEnd.item.Destroy();
+					consoleStackEnd = consoleStackEnd.prev;
+					consoleStackCount--;
+				}
+
+				const txt = consoleTemplate();
+				txt.Text = text;
+				txt.LayoutOrder = ++idx;
+				txt.TextColor3 = color;
+				txt.Visible = true;
+				txt.Parent = console;
+				console.CanvasPosition = new Vector2(0, 999999999999);
+
+				if (consoleStack) {
+					consoleStack.prev = { item: txt };
+					consoleStack = consoleStack.prev;
+				} else {
+					consoleStackEnd = consoleStack = { item: txt };
+				}
+				consoleStackCount++;
+			};
+		};
+		const printToConsole = initConsole();
+
 		const inputCaches = {
 			[1]: this.initializeInputCache("input1"),
 			[2]: this.initializeInputCache("input2"),
@@ -118,7 +168,13 @@ class Logic extends BlockLogic<typeof definition> {
 		};
 
 		const baseEnv = {
-			print,
+			print: (...args: unknown[]) => {
+				for (let i = 0; i < args.size(); i++) {
+					args[i] ??= "nil";
+				}
+
+				printToConsole((args as defined[]).join(" "));
+			},
 			table,
 			pcall,
 			math,
@@ -135,10 +191,10 @@ class Logic extends BlockLogic<typeof definition> {
 			buffer,
 			utf8,
 
-			onTick: (func: (dt: number) => void): void => {
+			onTick: (func: (dt: number, tick: number) => void): void => {
 				this.onTicc((ctx) => {
 					try {
-						func(ctx.dt);
+						func(ctx.dt, ctx.tick);
 					} catch (err) {
 						this.disableAndBurn();
 						error(err, 2);
@@ -197,6 +253,7 @@ class Logic extends BlockLogic<typeof definition> {
 						explode.send(block.instance.PrimaryPart, { part: block.instance.PrimaryPart });
 					}
 
+					printToConsole(tostring(err), Colors.red);
 					this.disableAndBurn();
 					print(err);
 					return;
@@ -204,8 +261,9 @@ class Logic extends BlockLogic<typeof definition> {
 
 				bytecode();
 			} catch (err) {
+				printToConsole(tostring(err), Colors.red);
 				this.disableAndBurn();
-				error(err, 2);
+				print(err);
 			}
 		});
 	}
@@ -215,7 +273,7 @@ export const LuaCircuitBlock = {
 	...BlockCreation.defaults,
 	id: "luacircuit",
 	displayName: "Lua Circuit",
-	description: "indev",
+	description: "The best decal spawner",
 	limit: 4,
 	devOnly: true,
 
