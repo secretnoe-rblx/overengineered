@@ -65,7 +65,7 @@ class Logic extends InstanceBlockLogic<typeof definition, HeliumModel> {
 			);
 		};
 
-		this.event.subscribe(RunService.PreSimulation, f);
+		this.event.subscribe(RunService.PostSimulation, f);
 	}
 }
 

@@ -22,7 +22,7 @@ class Logic extends InstanceBlockLogic<typeof definition> {
 		super(definition, block);
 
 		const offset = new Vector3(0, -GameDefinitions.HEIGHT_OFFSET, 0);
-		this.event.subscribe(RunService.PreSimulation, () => {
+		this.event.subscribe(RunService.PostSimulation, () => {
 			this.output.result.set("vector3", offset.add(block.instance.GetPivot().Position));
 		});
 	}

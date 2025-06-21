@@ -36,7 +36,7 @@ class Logic extends BlockLogic<typeof definition> {
 	constructor(block: BlockLogicArgs) {
 		super(definition, block);
 
-		this.event.subscribe(RunService.PreSimulation, () => {
+		this.event.subscribe(RunService.PostSimulation, () => {
 			const mousePos = UserInputService.GetMouseLocation();
 			const relaPos = mousePos.div(Workspace.CurrentCamera!.ViewportSize);
 

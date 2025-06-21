@@ -90,7 +90,7 @@ export class WeaponProjectile extends InstanceComponent<BasePart> {
 			if (part.CollisionGroup === this.projectilePart.CollisionGroup) return;
 			this.onHit(part, this.projectilePart?.Position ?? part.Position);
 		});
-		this.event.subscribe(RunService.PreSimulation, (dt) => {
+		this.event.subscribe(RunService.PostSimulation, (dt) => {
 			const percentage = this.modifiedLifetime === undefined ? 0 : this.currentLifetime / this.modifiedLifetime;
 			const reversePercentage = 1 - percentage;
 			if (percentage >= 1) return this.destroy();

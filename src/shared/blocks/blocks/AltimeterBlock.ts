@@ -20,7 +20,7 @@ class Logic extends InstanceBlockLogic<typeof definition> {
 	constructor(block: InstanceBlockLogicArgs) {
 		super(definition, block);
 
-		this.event.subscribe(RunService.PreSimulation, () => {
+		this.event.subscribe(RunService.PostSimulation, () => {
 			const result = this.instance.GetPivot().Y - GameDefinitions.HEIGHT_OFFSET;
 			this.output.result.set("number", result);
 		});
