@@ -9,7 +9,7 @@ import type { ExplosionEffect } from "shared/effects/ExplosionEffect";
 const loadstring = require(ReplicatedStorage.vLua) as (
 	code: string,
 	env: unknown,
-) => ((...args: unknown[]) => void) | undefined;
+) => LuaTuple<[((...args: unknown[]) => void) | undefined, error: unknown | undefined]>;
 
 const definitionPart = {
 	types: {
@@ -103,8 +103,6 @@ const definition = {
 export type { Logic as LuaCircuitBlockLogic };
 @injectable
 class Logic extends BlockLogic<typeof definition> {
-	private bytecode: ((...args: unknown[]) => void) | undefined;
-
 	constructor(block: BlockLogicArgs, @inject explode: ExplosionEffect) {
 		super(definition, block);
 
@@ -193,17 +191,18 @@ class Logic extends BlockLogic<typeof definition> {
 
 		this.onkFirstInputs(["code"], ({ code }) => {
 			try {
-				this.bytecode = loadstring(code, safeEnv);
-				if (!this.bytecode) {
+				const [bytecode, err] = loadstring(code, safeEnv);
+				if (!bytecode) {
 					if (block.instance?.PrimaryPart) {
 						explode.send(block.instance.PrimaryPart, { part: block.instance.PrimaryPart });
 					}
 
 					this.disableAndBurn();
+					print(err);
 					return;
 				}
 
-				this.bytecode();
+				bytecode();
 			} catch (err) {
 				this.disableAndBurn();
 				error(err, 2);
