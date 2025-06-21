@@ -74,7 +74,7 @@ class Logic extends InstanceBlockLogic<typeof definition, particleEmitter> {
 	constructor(block: InstanceBlockLogicArgs) {
 		super(definition, block);
 
-		this.onDisable(() => (this.instance.Body.ParticleEmitter.Enabled ??= false));
+		this.onDisable(() => (this.instance.Body.ParticleEmitter.Enabled = false));
 	}
 }
 

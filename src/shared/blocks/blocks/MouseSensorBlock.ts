@@ -1,4 +1,4 @@
-import { RunService, UserInputService, Workspace } from "@rbxts/services";
+import { UserInputService, Workspace } from "@rbxts/services";
 import { BlockLogic } from "shared/blockLogic/BlockLogic";
 import { BlockCreation } from "shared/blocks/BlockCreation";
 import type { BlockLogicArgs, BlockLogicFullBothDefinitions } from "shared/blockLogic/BlockLogic";
@@ -36,7 +36,7 @@ class Logic extends BlockLogic<typeof definition> {
 	constructor(block: BlockLogicArgs) {
 		super(definition, block);
 
-		this.event.subscribe(RunService.PreSimulation, () => {
+		const f = () => {
 			const mousePos = UserInputService.GetMouseLocation();
 			const relaPos = mousePos.div(Workspace.CurrentCamera!.ViewportSize);
 
@@ -51,7 +51,9 @@ class Logic extends BlockLogic<typeof definition> {
 				this.output.direction.set("vector3", ray.Direction);
 				this.output.angle3d.set("vector3", new Vector3(x, y, z));
 			}
-		});
+		};
+
+		this.onRecalcInputs(f);
 	}
 }
 

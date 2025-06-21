@@ -1,4 +1,3 @@
-import { RunService } from "@rbxts/services";
 import { InstanceBlockLogic } from "shared/blockLogic/BlockLogic";
 import { BlockCreation } from "shared/blocks/BlockCreation";
 import type { BlockLogicFullBothDefinitions, InstanceBlockLogicArgs } from "shared/blockLogic/BlockLogic";
@@ -22,10 +21,12 @@ class Logic extends InstanceBlockLogic<typeof definition> {
 
 		const initialRotation = this.instance.GetPivot().Rotation;
 
-		this.event.subscribe(RunService.PreSimulation, () => {
+		const f = () => {
 			const [x, y, z] = initialRotation.ToObjectSpace(this.instance.GetPivot().Rotation).ToEulerAnglesYXZ();
 			this.output.result.set("vector3", new Vector3(x, y, z));
-		});
+		};
+
+		this.onRecalcInputs(f);
 	}
 }
 
