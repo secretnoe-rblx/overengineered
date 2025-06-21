@@ -174,7 +174,7 @@ class Logic extends BlockLogic<typeof definition> {
 					error(`Invalid object type ${typeOf(value)}`, 2);
 				}
 
-				this.output.output1.set(retType as never, value as never);
+				this.output[`output${output}` as "output1"].set(retType as never, value as never);
 			},
 		};
 
