@@ -51,7 +51,7 @@ class Logic extends InstanceBlockLogic<typeof definition, HeliumModel> {
 		const scale = blockScale.X * blockScale.Y * blockScale.Z;
 
 		const densityCache = this.initializeInputCache("density");
-		const update = () => {
+		const f = () => {
 			const density = densityCache.tryGet();
 			if (!density) return;
 
@@ -64,7 +64,8 @@ class Logic extends InstanceBlockLogic<typeof definition, HeliumModel> {
 				0,
 			);
 		};
-		this.event.subscribe(RunService.PreSimulation, update);
+
+		this.event.subscribe(RunService.PreSimulation, f);
 	}
 }
 
