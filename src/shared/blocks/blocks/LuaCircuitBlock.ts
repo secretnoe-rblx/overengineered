@@ -245,6 +245,15 @@ class Logic extends BlockLogic<typeof definition> {
 			},
 		);
 
+		const replace = (text: string, str: string) => {
+			const idx = text.find(str)[0];
+			if (idx) {
+				return `${text.sub(1, idx - 1)}script${text.sub(idx + str.size())}`;
+			}
+
+			return text;
+		};
+
 		this.onkFirstInputs(["code"], ({ code }) => {
 			try {
 				const [bytecode, err] = loadstring(code, safeEnv);
@@ -253,7 +262,9 @@ class Logic extends BlockLogic<typeof definition> {
 						explode.send(block.instance.PrimaryPart, { part: block.instance.PrimaryPart });
 					}
 
-					printToConsole(tostring(err), Colors.red);
+					const errstr = replace(tostring(err), "ReplicatedStorage.vLua.Yueliang");
+					printToConsole(`Compilation error: ${errstr}`, Colors.red);
+
 					this.disableAndBurn();
 					print(err);
 					return;
@@ -261,7 +272,9 @@ class Logic extends BlockLogic<typeof definition> {
 
 				bytecode();
 			} catch (err) {
-				printToConsole(tostring(err), Colors.red);
+				const errstr = replace(tostring(err), "ReplicatedStorage.vLua.FiOne");
+				printToConsole(errstr, Colors.red);
+
 				this.disableAndBurn();
 				print(err);
 			}
