@@ -1,6 +1,7 @@
-import { Lighting, Players, RunService, Workspace } from "@rbxts/services";
+import { Lighting, Players, RunService, UserInputService, Workspace } from "@rbxts/services";
 import { Component } from "engine/shared/component/Component";
 import { Element } from "engine/shared/Element";
+import { ObservableValue } from "engine/shared/event/ObservableValue";
 import { A2SRemoteEvent } from "engine/shared/event/PERemoteEvent";
 import { Objects } from "engine/shared/fixes/Objects";
 import { InstanceBlockLogic } from "shared/blockLogic/BlockLogic";
@@ -160,6 +161,9 @@ class Logic extends InstanceBlockLogic<typeof definition> {
 
 		const disable = () => {
 			cameraSub?.Disconnect();
+			cameraModeSub?.Disconnect();
+			isFirstPerson.set(false);
+
 			if (controllableCache.tryGet()) {
 				defaultCamera!.CameraSubject = Players.LocalPlayer.Character?.FindFirstChild("Humanoid") as
 					| Humanoid
@@ -172,6 +176,21 @@ class Logic extends InstanceBlockLogic<typeof definition> {
 			}
 		};
 
+		let cameraModeSub: SignalConnection | undefined;
+		this.onDisable(() => cameraModeSub?.Disconnect());
+
+		const localTargetPos = this.instance.GetPivot().PointToObjectSpace(target.Position);
+		const isFirstPerson = new ObservableValue<boolean>(false);
+		isFirstPerson.subscribe((fp) => {
+			if (fp) {
+				target.Position = this.instance
+					.GetPivot()
+					.PointToWorldSpace(localTargetPos.add(new Vector3(0, 0.35, 0)));
+			} else {
+				target.Position = this.instance.GetPivot().PointToWorldSpace(localTargetPos);
+			}
+		});
+
 		this.onk(["enabled"], ({ enabled }) => {
 			if (enabled) {
 				if (controllableCache.tryGet()) {
@@ -181,6 +200,10 @@ class Logic extends InstanceBlockLogic<typeof definition> {
 							defaultCamera!.CameraSubject = target;
 						}
 					});
+
+					cameraModeSub = this.event.loop(0, () =>
+						isFirstPerson.set(UserInputService.MouseBehavior === Enum.MouseBehavior.LockCenter),
+					);
 
 					defaultCamera!.CameraSubject = target;
 				} else {
