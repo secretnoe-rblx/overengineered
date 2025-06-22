@@ -134,6 +134,13 @@ export namespace BlockLogicTypes {
 	export type Sound = BCPrimitive<SoundValue>;
 
 	//
+	export type ParticleValue = {
+		readonly id: string;
+		// readonly effects?: readonly SoundEffect[];
+		readonly lifetime?: number;
+	};
+
+	export type Particle = BCPrimitive<ParticleValue>;
 
 	export type Primitives = {
 		readonly unset: Unset;
@@ -149,6 +156,7 @@ export namespace BlockLogicTypes {
 		readonly bytearray: ByteArray;
 		readonly enum: Enum;
 		readonly sound: Sound;
+		readonly particle: Particle;
 	};
 
 	export type Controls = {
@@ -174,6 +182,9 @@ export namespace BlockLogicTypes {
 			sound: t.interface({
 				id: t.string,
 				effects: t.array(soundEffect).orUndefined(),
+			}),
+			particle: t.interface({
+				id: t.string,
 			}),
 		};
 

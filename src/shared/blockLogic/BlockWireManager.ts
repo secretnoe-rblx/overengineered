@@ -30,6 +30,7 @@ export namespace BlockWireManager {
 		sound: { color: Color3.fromRGB(61, 217, 227) },
 		unset: { color: Colors.white },
 		wire: { color: Colors.white },
+		particle: { color: Color3.fromRGB(110, 237, 26) },
 	};
 
 	export function intersectTypes(types: readonly (readonly DataType[])[]): readonly DataType[] {
