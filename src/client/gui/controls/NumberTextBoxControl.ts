@@ -36,7 +36,7 @@ class _NumberTextBoxControl<TAllowNull extends boolean = false> extends Control<
 		gui: NumberTextBoxControlDefinition,
 		min?: number | ObservableValue<ToNum<TAllowNull>>,
 		max?: number,
-		step?: number,
+		private readonly step?: number,
 	) {
 		super(gui);
 
@@ -78,7 +78,7 @@ class _NumberTextBoxControl<TAllowNull extends boolean = false> extends Control<
 				.run(this.instance);
 
 			if (byLostFocus) {
-				this.gui.Text = tostring(this.value.get() ?? "");
+				this.gui.Text = Strings.prettyNumber(this.value.get() ?? 0, this.step);
 				return;
 			}
 
@@ -89,7 +89,7 @@ class _NumberTextBoxControl<TAllowNull extends boolean = false> extends Control<
 
 		this.value.set(num);
 		this.submitted.Fire(this.value.get()!);
-		this.gui.Text = tostring(this.value.get());
+		this.gui.Text = Strings.prettyNumber(this.value.get() ?? 0, this.step);
 	}
 
 	destroy() {
