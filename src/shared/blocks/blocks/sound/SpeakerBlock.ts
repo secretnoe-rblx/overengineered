@@ -1,4 +1,5 @@
 import { Objects } from "engine/shared/fixes/Objects";
+import { Strings } from "engine/shared/fixes/String.propmacro";
 import { t } from "engine/shared/t";
 import { InstanceBlockLogic } from "shared/blockLogic/BlockLogic";
 import { BlockSynchronizer } from "shared/blockLogic/BlockSynchronizer";
@@ -60,22 +61,31 @@ const definition = {
 	},
 } satisfies BlockLogicFullBothDefinitions;
 
-const updateSound = (instance: Sound, sound: BlockLogicTypes.SoundValue) => {
+const updateSound = (instance: Sound, sound: BlockLogicTypes.SoundValue): boolean => {
 	if (!sound.id || sound.id.size() === 0) {
 		instance.SoundId = "";
-		return;
+		return false;
 	}
 
 	if (sound.effects) {
 		for (const effect of sound.effects) {
 			if (!SoundLogic.typeCheck(effect)) {
 				instance.SoundId = "";
-				return;
+				return false;
 			}
 		}
 	}
 
-	instance.SoundId = `rbxassetid://${sound.id}`;
+	let restart;
+
+	const newId = `rbxassetid://${sound.id}`;
+	if (instance.SoundId === newId) {
+		restart = false;
+	} else {
+		restart = true;
+		instance.SoundId = newId;
+	}
+
 	instance.PlaybackSpeed = sound.speed ?? 1;
 	instance.PlaybackRegionsEnabled = sound.start !== undefined || sound.length !== undefined;
 	if (instance.PlaybackRegionsEnabled) {
@@ -107,6 +117,8 @@ const updateSound = (instance: Sound, sound: BlockLogicTypes.SoundValue) => {
 			child.Destroy();
 		}
 	}
+
+	return restart;
 };
 
 const tSound = t.intersection(
@@ -138,15 +150,27 @@ type UpdateType = t.Infer<typeof updateType>;
 const update = ({ block, play, sound, loop, progress, volume }: UpdateType) => {
 	const instance = block.PrimaryPart?.FindFirstChildOfClass("Sound") ?? new Instance("Sound", block.PrimaryPart);
 
+	print("Updating to", Strings.pretty({ play, loop }));
 	instance.Looped = (play ?? false) && (loop ?? false);
 	if (volume) {
 		instance.Volume = volume;
 		instance.RollOffMaxDistance = 10_000 * volume;
 	}
-	if (sound) updateSound(instance, sound);
+
+	let restart = false;
+	if (sound) restart = updateSound(instance, sound);
 
 	if (progress) instance.TimePosition = progress;
-	if (play) instance.Play();
+
+	if (instance.IsPlaying) {
+		if (restart) {
+			instance.Play();
+		}
+	} else {
+		if (play) {
+			instance.Play();
+		}
+	}
 };
 
 const events = {
@@ -184,7 +208,12 @@ class Logic extends InstanceBlockLogic<typeof definition> {
 				return;
 			}
 
-			events.update.send({ block: block.instance, play: true, sound });
+			events.update.send({
+				block: block.instance,
+				play: true,
+				loop: loopCache.tryGet() ?? false,
+				sound,
+			});
 		});
 
 		this.onk(["volume"], ({ volume }) => {
