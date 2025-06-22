@@ -109,8 +109,8 @@ export class BuildingMode extends PlayMode {
 	readonly targetPlot;
 	readonly mirrorVisualizer;
 	readonly gridEnabled = new ObservableValue(true);
-	readonly moveGrid = new NumberObservableValue<number>(1, 0, 256, 0.001);
-	readonly rotateGrid = new NumberObservableValue<number>(90, 0, 360, 0.001);
+	readonly moveGrid = new NumberObservableValue<number>(1, 0, 256);
+	readonly rotateGrid = new NumberObservableValue<number>(90, 0, 360);
 	readonly editMode = new ObservableValue<EditMode>("global");
 	readonly tools;
 
