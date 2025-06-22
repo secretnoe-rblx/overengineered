@@ -2,47 +2,19 @@ import { t } from "engine/shared/t";
 import { InstanceBlockLogic } from "shared/blockLogic/BlockLogic";
 import { BlockSynchronizer } from "shared/blockLogic/BlockSynchronizer";
 import { BlockCreation } from "shared/blocks/BlockCreation";
-import { Colors } from "shared/Colors";
 import type { BlockLogicFullBothDefinitions, InstanceBlockLogicArgs } from "shared/blockLogic/BlockLogic";
 import type { BlockBuilder } from "shared/blocks/Block";
 
 const definition = {
 	input: {
 		enabled: {
-			displayName: "Enabled",
-			tooltip: "Enable/disable beacon visibility.",
-			unit: "state",
+			displayName: "id",
+			unit: "Asset",
 			types: {
-				bool: {
-					config: true,
-				},
-			},
-		},
-		text: {
-			displayName: "Text",
-			tooltip: "The text that will appear under the beacon's marker.",
-			types: {
-				string: {
-					config: "New Beacon",
-				},
-			},
-		},
-		showUpDistance: {
-			displayName: "Show Up Distance",
-			tooltip: "The distance at which you can see the marker.",
-			unit: "meters",
-			types: {
-				number: {
-					config: 0,
-				},
-			},
-		},
-		markerColor: {
-			displayName: "Marker Color",
-			tooltip: "The color of the marker.",
-			types: {
-				color: {
-					config: Colors.green,
+				particle: {
+					config: {
+						id: "the Various Particle™",
+					},
 				},
 			},
 		},
@@ -59,8 +31,6 @@ type particleEmitter = BlockModel & {
 const updateDataType = t.interface({
 	block: t.instance("Model").nominal("blockModel").as<particleEmitter>(),
 	owner: t.any.as<Player>(),
-	connectToRootPart: t.boolean,
-	key: t.any.as<KeyCode>(),
 });
 
 type UpdateData = t.Infer<typeof updateDataType>;
@@ -78,10 +48,10 @@ class Logic extends InstanceBlockLogic<typeof definition, particleEmitter> {
 	}
 }
 
-export const BeaconBlock = {
+export const ParticleEmitter = {
 	...BlockCreation.defaults,
-	id: "particlespawner",
-	displayName: "Beacon",
+	id: "particleemitter",
+	displayName: "Particle emitter",
 	description: "Spawns various particles.",
 
 	limit: 20,

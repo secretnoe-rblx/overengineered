@@ -229,4 +229,5 @@ export const LogicValueStorages: {
 	bytearray: NewPrimitiveLogicValueStorage("bytearray"),
 	enum: NewPrimitiveLogicValueStorage("enum"),
 	sound: NewPrimitiveLogicValueStorage("sound"),
+	particle: NewPrimitiveLogicValueStorage("particle"),
 };

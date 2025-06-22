@@ -136,8 +136,8 @@ export namespace BlockLogicTypes {
 	//
 	export type ParticleValue = {
 		readonly id: string;
-		// readonly effects?: readonly SoundEffect[];
-		readonly lifetime?: number;
+		readonly size?: number;
+		readonly speed?: number;
 	};
 
 	export type Particle = BCPrimitive<ParticleValue>;
