@@ -13,8 +13,8 @@ class NumberControl extends Control<NumberControlDefinition> {
 	constructor(gui: NumberControlDefinition, value: ObservableValue<number>) {
 		super(gui);
 
-		this.add(new ButtonControl(gui.AddButton, () => value.set(value.get() + 1)));
-		this.add(new ButtonControl(gui.SubButton, () => value.set(value.get() - 1)));
+		this.add(new ButtonControl(gui.AddButton, () => value.set(value.get() * 2)));
+		this.add(new ButtonControl(gui.SubButton, () => value.set(value.get() / 2)));
 		this.add(new NumberTextBoxControl(gui.ValueTextBox, value));
 	}
 }
