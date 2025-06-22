@@ -18,13 +18,31 @@ export class Color4TextBox extends Control<Color4TextBoxDefinition> {
 		this.value = value;
 
 		const tb = this.getComponent(TextBoxComponent);
-		this.event.subscribeObservable(value.value, (v) => tb.text.set(`#${Color4.toHex(v).upper()}`), true);
+		this.event.subscribeObservable(
+			value.value,
+			(v) => {
+				if (allowAlpha) {
+					tb.text.set(`#${Color4.toHex(v).upper()}`);
+				} else {
+					tb.text.set(`#${v.color.ToHex().upper()}`);
+				}
+			},
+			true,
+		);
 
 		this.event.subscribe(tb.submitted, (hex) => {
 			try {
-				value.submit(Color4.fromHex(hex));
+				if (allowAlpha) {
+					value.submit(Color4.fromHex(hex));
+				} else {
+					value.submit({ ...Color4.fromHex(hex), alpha: 1 });
+				}
 			} catch {
-				tb.text.set(`#${Color4.toHex(value.get()).upper()}`);
+				if (allowAlpha) {
+					tb.text.set(`#${Color4.toHex(value.get()).upper()}`);
+				} else {
+					tb.text.set(`#${value.get().color.ToHex().upper()}`);
+				}
 
 				Transforms.create() //
 					.flashColor(this.instance, Colors.red)

@@ -110,7 +110,7 @@ class ColorChooserInputs extends Control<Color4ChooserDefinition["Inputs"]> {
 	private readonly _value = SubmittableValue.from<Color4>({ alpha: 1, color: Colors.white });
 	readonly value = this._value.asHalfReadonly();
 
-	constructor(gui: Color4ChooserDefinition["Inputs"]) {
+	constructor(gui: Color4ChooserDefinition["Inputs"], allowAlpha: boolean) {
 		super(gui);
 
 		const getColorFromRgbTextBoxes = () => ({
@@ -127,7 +127,7 @@ class ColorChooserInputs extends Control<Color4ChooserDefinition["Inputs"]> {
 		this.event.subscribe(gtext.submitted, submitFromRgb);
 		this.event.subscribe(btext.submitted, submitFromRgb);
 
-		this.parent(new Color4TextBox(this.gui.ManualHex, this._value));
+		this.parent(new Color4TextBox(this.gui.ManualHex, this._value, allowAlpha));
 
 		this.value.value.subscribe((value) => {
 			rtext.value.set(math.floor(value.color.R * 255));
@@ -185,7 +185,7 @@ export class Color4Chooser extends Control<Color4ChooserDefinition> {
 			value.submit(c);
 		});
 
-		const inputs = this.parent(new ColorChooserInputs(gui.Inputs));
+		const inputs = this.parent(new ColorChooserInputs(gui.Inputs, allowAlpha));
 		inputs.value.submitted.Connect((v) => {
 			value.set(v);
 			sliders.value.set(v.color);
