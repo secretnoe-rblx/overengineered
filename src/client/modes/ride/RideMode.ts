@@ -14,7 +14,7 @@ export class RideMode extends PlayMode {
 	static runWithoutLogicThisTime = false;
 
 	private currentMachine?: ClientMachine;
-	private readonly rideModeScene;
+	readonly rideModeScene;
 
 	static readonly buildModeScheduler = new RideToBuildModeSlotScheduler();
 

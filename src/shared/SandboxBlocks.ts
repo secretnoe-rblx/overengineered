@@ -27,6 +27,8 @@ import { StringOperationBlocks } from "shared/blocks/blocks/grouped/StringOperat
 import { TNTBlocks } from "shared/blocks/blocks/grouped/TNTBlocks";
 import { WheelBlocks } from "shared/blocks/blocks/grouped/WheelBlocks";
 import { WingBlocks } from "shared/blocks/blocks/grouped/WingsBlocks";
+import { GuiImageBlock } from "shared/blocks/blocks/gui/GuiImageBlock";
+import { GuiTextBlock } from "shared/blocks/blocks/gui/GuiTextBlock";
 import { HeliumBlock } from "shared/blocks/blocks/HeliumBlock";
 import { ImpulseExtenderBlock } from "shared/blocks/blocks/ImpulseExtenderBlock";
 import { ImpulseGeneratorBlock } from "shared/blocks/blocks/ImpulseGeneratorBlock";
@@ -186,6 +188,9 @@ export const CreateSandboxBlocks = (di: DIContainer): BlockList => {
 		SoundLengthBlock,
 		SoundFromIdBlock,
 		...SoundEffectBlockCreator.all,
+
+		GuiTextBlock,
+		GuiImageBlock,
 	];
 
 	if (GameDefinitions.isTesting) {

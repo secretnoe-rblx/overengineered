@@ -52,7 +52,7 @@ const events = {
 } as const;
 events.update.sendBackToOwner = true;
 
-const dataToString = (data: t.Infer<typeof updateEventType.props.data>): string => {
+export const dataToString = (data: t.Infer<typeof updateEventType.props.data>): string => {
 	if (typeIs(data, "string")) {
 		return data;
 	}

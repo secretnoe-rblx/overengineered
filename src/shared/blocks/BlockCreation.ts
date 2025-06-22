@@ -110,7 +110,8 @@ export namespace BlockCreation {
 			| "x4GenericLogicBlockPrefab"
 			| "ByteLogicBlockPrefab"
 			| "DoubleByteLogicBlockPrefab"
-			| "SoundLogicBlockPrefab";
+			| "SoundLogicBlockPrefab"
+			| "x4GenericGuiLogicBlockPrefab";
 		const blockPrefabs = Instances.waitForChild<{ readonly [k in string]: BlockModel }>(
 			ReplicatedAssets.assets,
 			"Prefabs",
@@ -154,6 +155,7 @@ export namespace BlockCreation {
 		converterColor: ["Logic", "Converter", "Color"],
 		converterUnits: ["Logic", "Converter", "Units"],
 		other: ["Logic", "Other"],
+		gui: ["Logic", "GUI"],
 		bool: ["Logic", "Gate"],
 		memory: ["Logic", "Memory"],
 		sensor: ["Logic", "Sensor"],
