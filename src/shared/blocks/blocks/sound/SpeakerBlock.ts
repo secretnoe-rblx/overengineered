@@ -1,5 +1,4 @@
 import { Objects } from "engine/shared/fixes/Objects";
-import { Strings } from "engine/shared/fixes/String.propmacro";
 import { t } from "engine/shared/t";
 import { InstanceBlockLogic } from "shared/blockLogic/BlockLogic";
 import { BlockSynchronizer } from "shared/blockLogic/BlockSynchronizer";
@@ -150,7 +149,6 @@ type UpdateType = t.Infer<typeof updateType>;
 const update = ({ block, play, sound, loop, progress, volume }: UpdateType) => {
 	const instance = block.PrimaryPart?.FindFirstChildOfClass("Sound") ?? new Instance("Sound", block.PrimaryPart);
 
-	print("Updating to", Strings.pretty({ play, loop }));
 	instance.Looped = (play ?? false) && (loop ?? false);
 	if (volume) {
 		instance.Volume = volume;
