@@ -3,7 +3,6 @@ import { Colors } from "engine/shared/Colors";
 import { Objects } from "engine/shared/fixes/Objects";
 import { BlockLogic } from "shared/blockLogic/BlockLogic";
 import { BlockCreation } from "shared/blocks/BlockCreation";
-import { BlockManager } from "shared/building/BlockManager";
 import type { BlockLogicArgs, BlockLogicFullBothDefinitions } from "shared/blockLogic/BlockLogic";
 import type { BlockBuilder } from "shared/blocks/Block";
 import type { ExplosionEffect } from "shared/effects/ExplosionEffect";
@@ -107,56 +106,17 @@ const definition = {
 export type { Logic as LuaCircuitBlockLogic };
 @injectable
 class Logic extends BlockLogic<typeof definition> {
+	private greenLED: BasePart = undefined!;
+	private redLED: BasePart = undefined!;
+
 	constructor(block: BlockLogicArgs, @inject explode: ExplosionEffect) {
 		super(definition, block);
 
-		const initConsole = () => {
-			if (!block.instance) {
-				return () => {};
-			}
+		this.greenLED = block.instance?.FindFirstChild("GreenLED") as BasePart;
+		this.redLED = block.instance?.FindFirstChild("RedLED") as BasePart;
 
-			const console = block.instance
-				.WaitForChild("Console")
-				.WaitForChild("SurfaceGui")
-				.WaitForChild("Frame") as ScrollingFrame;
-			const consoleTemplate = this.asTemplate(console.WaitForChild("TextLabel") as TextLabel);
-
-			type ConsoleStack = {
-				readonly item: TextLabel;
-				prev?: ConsoleStack;
-			};
-			let consoleStack: ConsoleStack | undefined;
-			let consoleStackEnd: ConsoleStack | undefined;
-			let consoleStackCount = 0;
-			let idx = 0;
-
-			const blockScale = BlockManager.manager.scale.get(block.instance) ?? Vector3.one;
-
-			return (text: string, color: Color3 = Colors.white) => {
-				if (consoleStackEnd && consoleStackCount > 14 * blockScale.X * blockScale.Y * blockScale.Z) {
-					consoleStackEnd.item.Destroy();
-					consoleStackEnd = consoleStackEnd.prev;
-					consoleStackCount--;
-				}
-
-				const txt = consoleTemplate();
-				txt.Text = text;
-				txt.LayoutOrder = ++idx;
-				txt.TextColor3 = color;
-				txt.Visible = true;
-				txt.Parent = console;
-				console.CanvasPosition = new Vector2(0, 999999999999);
-
-				if (consoleStack) {
-					consoleStack.prev = { item: txt };
-					consoleStack = consoleStack.prev;
-				} else {
-					consoleStackEnd = consoleStack = { item: txt };
-				}
-				consoleStackCount++;
-			};
-		};
-		const printToConsole = initConsole();
+		this.greenLED.Material = Enum.Material.Neon;
+		this.greenLED.Color = Colors.green;
 
 		const inputCaches = {
 			[1]: this.initializeInputCache("input1"),
@@ -175,7 +135,7 @@ class Logic extends BlockLogic<typeof definition> {
 					args[i] ??= "nil";
 				}
 
-				printToConsole((args as defined[]).join(" "));
+				print((args as defined[]).join(" "));
 			},
 			table,
 			pcall,
@@ -255,17 +215,23 @@ class Logic extends BlockLogic<typeof definition> {
 						explode.send(block.instance.PrimaryPart, { part: block.instance.PrimaryPart });
 					}
 
-					printToConsole(`Compilation error: ${tostring(err)}`, Colors.red);
+					print(`Compilation error: ${tostring(err)}`, Colors.red);
 
-					this.disableAndBurn();
+					// this.disableAndBurn();
 					return;
 				}
 
 				bytecode();
 			} catch (err) {
-				printToConsole(tostring(err), Colors.red);
+				print(tostring(err), Colors.red);
 
-				this.disableAndBurn();
+				this.event.loop(0.1, () => {
+					this.redLED.Color = this.redLED.Color === Colors.red ? new Color3(91, 93, 105) : Colors.red;
+					this.redLED.Material =
+						this.redLED.Material === Enum.Material.Neon ? Enum.Material.SmoothPlastic : Enum.Material.Neon;
+				});
+
+				// this.disableAndBurn();
 			}
 		});
 	}
