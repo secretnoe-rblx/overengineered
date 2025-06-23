@@ -5,7 +5,6 @@ import { BlockLogic } from "shared/blockLogic/BlockLogic";
 import { BlockCreation } from "shared/blocks/BlockCreation";
 import type { BlockLogicArgs, BlockLogicFullBothDefinitions } from "shared/blockLogic/BlockLogic";
 import type { BlockBuilder } from "shared/blocks/Block";
-import type { ExplosionEffect } from "shared/effects/ExplosionEffect";
 
 const vLuau = require(ReplicatedStorage.vLuau) as {
 	luau_execute: (
@@ -109,7 +108,7 @@ class Logic extends BlockLogic<typeof definition> {
 	private greenLED: BasePart = undefined!;
 	private redLED: BasePart = undefined!;
 
-	constructor(block: BlockLogicArgs, @inject explode: ExplosionEffect) {
+	constructor(block: BlockLogicArgs) {
 		super(definition, block);
 
 		this.greenLED = block.instance?.FindFirstChild("GreenLED") as BasePart;
@@ -129,13 +128,30 @@ class Logic extends BlockLogic<typeof definition> {
 			[8]: this.initializeInputCache("input8"),
 		};
 
+		const log = function (text: string, level: "info" | "warn"): void {
+			const newtext = `[Lua Circuit] ${text}`;
+
+			if (level === "warn") {
+				warn(newtext);
+			} else {
+				print(newtext);
+			}
+		};
+
 		const baseEnv = {
 			print: (...args: unknown[]) => {
 				for (let i = 0; i < args.size(); i++) {
 					args[i] ??= "nil";
 				}
 
-				print((args as defined[]).join(" "));
+				log((args as defined[]).join(" "), "info");
+			},
+			warn: (...args: unknown[]) => {
+				for (let i = 0; i < args.size(); i++) {
+					args[i] ??= "nil";
+				}
+
+				log((args as defined[]).join(" "), "warn");
 			},
 			table,
 			pcall,
@@ -211,11 +227,7 @@ class Logic extends BlockLogic<typeof definition> {
 			try {
 				const [bytecode, err] = vLuau.luau_execute(code, safeEnv);
 				if (!bytecode) {
-					if (block.instance?.PrimaryPart) {
-						explode.send(block.instance.PrimaryPart, { part: block.instance.PrimaryPart });
-					}
-
-					print(`Compilation error: ${tostring(err)}`, Colors.red);
+					log(`Compilation error: ${tostring(err)}`, "warn");
 
 					// this.disableAndBurn();
 					return;
@@ -223,7 +235,7 @@ class Logic extends BlockLogic<typeof definition> {
 
 				bytecode();
 			} catch (err) {
-				print(tostring(err), Colors.red);
+				log(`Runtime error: ${tostring(err)}`, "warn");
 
 				this.event.loop(0.1, () => {
 					this.redLED.Color = this.redLED.Color === Colors.red ? new Color3(91, 93, 105) : Colors.red;
