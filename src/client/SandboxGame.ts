@@ -144,6 +144,7 @@ export namespace SandboxGame {
 		builder.services.registerService(UpdatePopupController);
 		ChatController.initializeAdminPrefix();
 		builder.services.registerService(PopupController);
+		builder.services.registerSingletonValue(LogControl.instance);
 
 		builder.enabled.Connect((di) => {
 			LogControl.instance.enable();
