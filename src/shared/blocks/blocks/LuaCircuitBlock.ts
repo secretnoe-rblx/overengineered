@@ -8,10 +8,12 @@ import type { BlockLogicArgs, BlockLogicFullBothDefinitions } from "shared/block
 import type { BlockBuilder } from "shared/blocks/Block";
 import type { ExplosionEffect } from "shared/effects/ExplosionEffect";
 
-const loadstring = require(ReplicatedStorage.vLua) as (
-	code: string,
-	env: unknown,
-) => LuaTuple<[((...args: unknown[]) => void) | undefined, error: unknown | undefined]>;
+const vLuau = require(ReplicatedStorage.vLuau) as {
+	luau_execute: (
+		code: string,
+		env: unknown,
+	) => LuaTuple<[((...args: unknown[]) => void) | undefined, error: unknown | undefined]>;
+};
 
 const definitionPart = {
 	types: {
@@ -245,25 +247,15 @@ class Logic extends BlockLogic<typeof definition> {
 			},
 		);
 
-		const replace = (text: string, str: string) => {
-			const idx = text.find(str)[0];
-			if (idx) {
-				return `${text.sub(1, idx - 1)}script${text.sub(idx + str.size())}`;
-			}
-
-			return text;
-		};
-
 		this.onkFirstInputs(["code"], ({ code }) => {
 			try {
-				const [bytecode, err] = loadstring(code, safeEnv);
+				const [bytecode, err] = vLuau.luau_execute(code, safeEnv);
 				if (!bytecode) {
 					if (block.instance?.PrimaryPart) {
 						explode.send(block.instance.PrimaryPart, { part: block.instance.PrimaryPart });
 					}
 
-					const errstr = replace(tostring(err), "ReplicatedStorage.vLua.Yueliang");
-					printToConsole(`Compilation error: ${errstr}`, Colors.red);
+					printToConsole(`Compilation error: ${tostring(err)}`, Colors.red);
 
 					this.disableAndBurn();
 					print(err);
@@ -272,8 +264,7 @@ class Logic extends BlockLogic<typeof definition> {
 
 				bytecode();
 			} catch (err) {
-				const errstr = replace(tostring(err), "ReplicatedStorage.vLua.FiOne");
-				printToConsole(errstr, Colors.red);
+				printToConsole(tostring(err), Colors.red);
 
 				this.disableAndBurn();
 				print(err);
