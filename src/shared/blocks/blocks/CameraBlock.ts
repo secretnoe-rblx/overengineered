@@ -185,7 +185,7 @@ class Logic extends InstanceBlockLogic<typeof definition> {
 			if (fp) {
 				target.Position = this.instance
 					.GetPivot()
-					.PointToWorldSpace(localTargetPos.add(new Vector3(0, 0.35, 0)));
+					.PointToWorldSpace(localTargetPos.add(new Vector3(0, 0.6, 0)));
 			} else {
 				target.Position = this.instance.GetPivot().PointToWorldSpace(localTargetPos);
 			}
