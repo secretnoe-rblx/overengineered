@@ -3,6 +3,7 @@ import { Colors } from "engine/shared/Colors";
 import { Objects } from "engine/shared/fixes/Objects";
 import { BlockLogic } from "shared/blockLogic/BlockLogic";
 import { BlockCreation } from "shared/blocks/BlockCreation";
+import type { LogControl } from "client/gui/static/LogControl";
 import type { BlockLogicArgs, BlockLogicFullBothDefinitions } from "shared/blockLogic/BlockLogic";
 import type { BlockBuilder } from "shared/blocks/Block";
 
@@ -108,7 +109,7 @@ class Logic extends BlockLogic<typeof definition> {
 	private greenLED: BasePart = undefined!;
 	private redLED: BasePart = undefined!;
 
-	constructor(block: BlockLogicArgs) {
+	constructor(block: BlockLogicArgs, @tryInject logControl: LogControl | undefined) {
 		super(definition, block);
 
 		this.greenLED = block.instance?.FindFirstChild("GreenLED") as BasePart;
@@ -128,13 +129,18 @@ class Logic extends BlockLogic<typeof definition> {
 			[8]: this.initializeInputCache("input8"),
 		};
 
-		const log = function (text: string, level: "info" | "warn"): void {
+		const log = function (text: string, level: "info" | "warn" | "error"): void {
 			const newtext = `[Lua Circuit] ${text}`;
 
 			if (level === "warn") {
-				warn(newtext);
+				warn("[Lua Circuit]", newtext);
+				logControl?.addLine(newtext, Colors.yellow);
+			} else if (level === "error") {
+				warn("[Lua Circuit]", newtext);
+				logControl?.addLine(newtext, Colors.red);
 			} else {
-				print(newtext);
+				print("[Lua Circuit]", newtext);
+				logControl?.addLine(newtext);
 			}
 		};
 
@@ -152,6 +158,13 @@ class Logic extends BlockLogic<typeof definition> {
 				}
 
 				log((args as defined[]).join(" "), "warn");
+			},
+			error: (...args: unknown[]) => {
+				for (let i = 0; i < args.size(); i++) {
+					args[i] ??= "nil";
+				}
+
+				log((args as defined[]).join(" "), "error");
 			},
 			table,
 			pcall,
