@@ -258,7 +258,6 @@ class Logic extends BlockLogic<typeof definition> {
 					printToConsole(`Compilation error: ${tostring(err)}`, Colors.red);
 
 					this.disableAndBurn();
-					print(err);
 					return;
 				}
 
@@ -267,7 +266,6 @@ class Logic extends BlockLogic<typeof definition> {
 				printToConsole(tostring(err), Colors.red);
 
 				this.disableAndBurn();
-				print(err);
 			}
 		});
 	}
