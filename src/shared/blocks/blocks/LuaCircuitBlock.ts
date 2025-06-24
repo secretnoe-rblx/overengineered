@@ -27,16 +27,16 @@ const definition = {
 			displayName: "Code",
 			types: {
 				code: {
-					config: `-- Read your inputs using "getInput(number)"
--- Write values to outputs using "setOutput(number, data)"
--- You are limited to 8 kilobytes. If you need more, use the minifer tools.
+					config: `-- Read your inputs using "getInput(index)"
+-- Write values to outputs using "setOutput(index, value)"
+-- You are limited to 8 kilobytes of code. If you're short, use minifers.
 
-onTick(function(deltaTime)
-    -- The code here is executed once per tick.
-    -- The deltaTime shows how much time has elapsed since the previous tick.    
+onTick(function(deltaTime, tick)
+    -- The code here is executed every tick.
+    -- deltaTime shows how much time has elapsed since the previous tick. tick shows the current tick number.
     -- Remember that it makes no sense to change the same output several times here.
 
-    -- Key Sensor & Screen Example
+    -- Key Sensor -> Screen example
     local keyPressed = getInput(1) -- Key sensor
     if keyPressed then
         setOutput(1, "Key pressed") -- Screen
@@ -207,7 +207,6 @@ class Logic extends BlockLogic<typeof definition> {
 						log(`Ticking error: ${tostring(err)}`, "error");
 						this.close();
 						blinkRedLEDLoop();
-						// this.disableAndBurn();
 					}
 				});
 			},
