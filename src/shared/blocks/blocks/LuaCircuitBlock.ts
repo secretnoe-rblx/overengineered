@@ -8,10 +8,7 @@ import type { BlockLogicArgs, BlockLogicFullBothDefinitions } from "shared/block
 import type { BlockBuilder } from "shared/blocks/Block";
 
 const vLuau = require(ReplicatedStorage.vLuau) as {
-	luau_execute: (
-		code: string,
-		env: unknown,
-	) => LuaTuple<[((...args: unknown[]) => void) | undefined, error: unknown | undefined]>;
+	luau_execute: (code: string, env: unknown) => LuaTuple<[start: () => void, close: () => void]>;
 };
 
 const definitionPart = {
@@ -127,6 +124,7 @@ print("Hello, OverEngineered!")`,
 export type { Logic as LuaCircuitBlockLogic };
 @injectable
 class Logic extends BlockLogic<typeof definition> {
+	private close: () => void = undefined!;
 	private greenLED: BasePart = undefined!;
 	private redLED: BasePart = undefined!;
 
@@ -206,8 +204,10 @@ class Logic extends BlockLogic<typeof definition> {
 					try {
 						func(ctx.dt, ctx.tick);
 					} catch (err) {
-						this.disableAndBurn();
-						error(err, 2);
+						log(`Ticking error: ${tostring(err)}`, "error");
+						this.close();
+						blinkRedLEDLoop();
+						// this.disableAndBurn();
 					}
 				});
 			},
@@ -255,27 +255,31 @@ class Logic extends BlockLogic<typeof definition> {
 			},
 		);
 
+		const blinkRedLEDLoop = () => {
+			this.event.loop(0.1, () => {
+				this.redLED.Color = this.redLED.Color === Colors.red ? new Color3(91, 93, 105) : Colors.red;
+				this.redLED.Material =
+					this.redLED.Material === Enum.Material.Neon ? Enum.Material.SmoothPlastic : Enum.Material.Neon;
+			});
+		};
+
 		this.onkFirstInputs(["code"], ({ code }) => {
+			let bytecode: () => void;
+
 			try {
-				const [bytecode, err] = vLuau.luau_execute(code, safeEnv);
-				if (!bytecode) {
-					log(`Compilation error: ${tostring(err)}`, "error");
+				[bytecode, this.close] = vLuau.luau_execute(code, safeEnv);
+			} catch (err) {
+				log(`Compilation error: ${tostring(err)}`, "error");
+				blinkRedLEDLoop();
 
-					// this.disableAndBurn();
-					return;
-				}
+				return;
+			}
 
+			try {
 				bytecode();
 			} catch (err) {
-				log(`Error: ${tostring(err)}`, "error");
-
-				this.event.loop(0.1, () => {
-					this.redLED.Color = this.redLED.Color === Colors.red ? new Color3(91, 93, 105) : Colors.red;
-					this.redLED.Material =
-						this.redLED.Material === Enum.Material.Neon ? Enum.Material.SmoothPlastic : Enum.Material.Neon;
-				});
-
-				// this.disableAndBurn();
+				log(`Runtime error: ${tostring(err)}`, "error");
+				blinkRedLEDLoop();
 			}
 		});
 	}
