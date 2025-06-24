@@ -542,9 +542,11 @@ namespace Controls {
 				super(templates.Text());
 
 				const control = this.parent(new TextBoxControl(this.control));
-				control.text.set(sameOrUndefined(config)?.id ?? "");
+				control.text.set(sameOrUndefined(config)?.particleID ?? "");
 
-				control.submitted.Connect((v) => this.submitted.Fire((config = map(config, (_) => ({ id: v })))));
+				control.submitted.Connect((v) =>
+					this.submitted.Fire((config = map(config, (_) => ({ particleID: v })))),
+				);
 			}
 		}
 

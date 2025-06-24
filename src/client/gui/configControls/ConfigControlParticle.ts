@@ -27,12 +27,12 @@ export class ConfigControlParticle extends ConfigControlBase<
 		this.initFromMultiWithDefault(
 			this.event.addObservable(
 				control.text.fCreateBased(
-					(c): BlockLogicTypes.ParticleValue => ({ id: c }),
-					(c) => c.id,
+					(c): BlockLogicTypes.ParticleValue => ({ particleID: c }),
+					(c) => c.particleID,
 				),
 			),
-			() => ({ id: "" }),
+			() => ({ particleID: "" }),
 		);
-		this.event.subscribe(control.submitted, (value) => this.submit(this.multiMap(() => ({ id: value }))));
+		this.event.subscribe(control.submitted, (value) => this.submit(this.multiMap(() => ({ particleID: value }))));
 	}
 }

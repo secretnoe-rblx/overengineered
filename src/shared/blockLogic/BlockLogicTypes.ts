@@ -138,9 +138,14 @@ export namespace BlockLogicTypes {
 
 	//
 	export type ParticleValue = {
-		readonly id: string;
-		readonly size?: number;
-		readonly speed?: number;
+		readonly particleID: string;
+		readonly acceleration?: Vector3;
+		readonly rotationSpeed?: number;
+		readonly transparency?: number;
+		readonly rotation?: number;
+		readonly lifetime?: number;
+		readonly squash?: number;
+		readonly color?: number;
 	};
 
 	export type Particle = BCPrimitive<ParticleValue>;
@@ -189,7 +194,7 @@ export namespace BlockLogicTypes {
 				effects: t.array(soundEffect).orUndefined(),
 			}),
 			particle: t.interface({
-				id: t.string,
+				particleID: t.string,
 			}),
 		};
 

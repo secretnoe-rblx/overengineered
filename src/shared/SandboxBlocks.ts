@@ -47,8 +47,6 @@ import { MouseSensorBlock } from "shared/blocks/blocks/MouseSensorBlock";
 import { NonVolatileMemoryBlock } from "shared/blocks/blocks/NonVolatileMemoryBlock";
 import { OwnerCameraLocatorBlock } from "shared/blocks/blocks/OwnerCameraLocatorBlock";
 import { OwnerLocatorBlock } from "shared/blocks/blocks/OwnerLocatorBlock";
-import { ParticleConfigBlocks } from "shared/blocks/blocks/particle/ParticleEffectBlockCreator";
-import { ParticleEmitter } from "shared/blocks/blocks/particle/ParticleEmitterBlock";
 import { PassengerSeatBlock } from "shared/blocks/blocks/PassengerSeatBlock";
 import { PistonBlock } from "shared/blocks/blocks/PistonBlock";
 import { RadarSectionBlock } from "shared/blocks/blocks/RadarSectionBlock";
@@ -198,7 +196,7 @@ export const CreateSandboxBlocks = (di: DIContainer): BlockList => {
 	];
 
 	if (GameDefinitions.isTesting) {
-		const testBlocks: readonly BlockBuilder[] = [...ParticleConfigBlocks, ParticleEmitter, ...weapons];
+		const testBlocks: readonly BlockBuilder[] = [...weapons];
 
 		for (const block of testBlocks) {
 			blocksArr.push(block);
