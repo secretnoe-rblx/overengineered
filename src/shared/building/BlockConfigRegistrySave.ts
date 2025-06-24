@@ -18,6 +18,9 @@ namespace BlockConfigTypes {
 	export type ByteArray = BlockConfigPrimitiveType<"bytearray", readonly number[]> & {
 		readonly lengthLimit: number;
 	};
+	export type Code = BlockConfigPrimitiveType<"code", string> & {
+		readonly lengthLimit: number;
+	};
 
 	export type MultiKey<TKeys extends string = string> = BlockConfigPrimitiveType<
 		"multikey",
@@ -142,6 +145,7 @@ namespace BlockConfigTypes {
 		readonly controllableNumber: ControllableNumber;
 		readonly byte: Byte;
 		readonly bytearray: ByteArray;
+		readonly code: Code
 	}
 }
 

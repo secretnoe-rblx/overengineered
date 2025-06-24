@@ -29,7 +29,28 @@ const definition = {
 		code: {
 			displayName: "Code",
 			types: {
-				string: { config: `print("Hello, OverEngineered!")` },
+				code: {
+					config: `-- Read your inputs using "getInput(number)"
+-- Write values to outputs using "setOutput(number, data)"
+-- You are limited to 8 kilobytes. If you need more, use the minifer tools.
+
+onTick(function(deltaTime)
+    -- The code here is executed once per tick.
+    -- The deltaTime shows how much time has elapsed since the previous tick.    
+    -- Remember that it makes no sense to change the same output several times here.
+
+    -- Key Sensor & Screen Example
+    local keyPressed = getInput(1) -- Key sensor
+    if keyPressed then
+        setOutput(1, "Key pressed") -- Screen
+    else
+        setOutput(1, "Key is not pressed") -- Screen
+    end
+end)
+
+print("Hello, OverEngineered!")`,
+					lengthLimit: 8192,
+				},
 			},
 			tooltip: "Lua code to run.",
 			connectorHidden: true,
@@ -109,7 +130,7 @@ class Logic extends BlockLogic<typeof definition> {
 	private greenLED: BasePart = undefined!;
 	private redLED: BasePart = undefined!;
 
-	constructor(block: BlockLogicArgs, @tryInject logControl: LogControl | undefined) {
+	constructor(block: BlockLogicArgs, @tryInject logControl?: LogControl) {
 		super(definition, block);
 
 		this.greenLED = block.instance?.FindFirstChild("GreenLED") as BasePart;
@@ -130,17 +151,15 @@ class Logic extends BlockLogic<typeof definition> {
 		};
 
 		const log = function (text: string, level: "info" | "warn" | "error"): void {
-			const newtext = `[Lua Circuit] ${text}`;
-
 			if (level === "warn") {
-				warn("[Lua Circuit]", newtext);
-				logControl?.addLine(newtext, Colors.yellow);
+				warn("[Lua Circuit]", text);
+				logControl?.addLine(text, Colors.yellow);
 			} else if (level === "error") {
-				warn("[Lua Circuit]", newtext);
-				logControl?.addLine(newtext, Colors.red);
+				warn("[Lua Circuit]", text);
+				logControl?.addLine(text, Colors.red);
 			} else {
-				print("[Lua Circuit]", newtext);
-				logControl?.addLine(newtext);
+				print("[Lua Circuit]", text);
+				logControl?.addLine(text);
 			}
 		};
 
@@ -240,7 +259,7 @@ class Logic extends BlockLogic<typeof definition> {
 			try {
 				const [bytecode, err] = vLuau.luau_execute(code, safeEnv);
 				if (!bytecode) {
-					log(`Compilation error: ${tostring(err)}`, "warn");
+					log(`Compilation error: ${tostring(err)}`, "error");
 
 					// this.disableAndBurn();
 					return;
@@ -248,7 +267,7 @@ class Logic extends BlockLogic<typeof definition> {
 
 				bytecode();
 			} catch (err) {
-				log(`Runtime error: ${tostring(err)}`, "warn");
+				log(`Runtime error: ${tostring(err)}`, "error");
 
 				this.event.loop(0.1, () => {
 					this.redLED.Color = this.redLED.Color === Colors.red ? new Color3(91, 93, 105) : Colors.red;
@@ -266,8 +285,8 @@ export const LuaCircuitBlock = {
 	...BlockCreation.defaults,
 	id: "luacircuit",
 	displayName: "Lua Circuit",
-	description: "The best decal spawner",
-	limit: 4,
+	description: "Allows you to run Lua code to program your buildings. If the code is too large, use a minifier.",
+	limit: 1,
 	devOnly: true,
 
 	logic: { definition, ctor: Logic },

@@ -4,6 +4,7 @@ import { ConfigControlButton } from "client/gui/configControls/ConfigControlButt
 import { ConfigControlByte } from "client/gui/configControls/ConfigControlByte";
 import { ConfigControlByteArray } from "client/gui/configControls/ConfigControlByteArray";
 import { ConfigControlCheckbox } from "client/gui/configControls/ConfigControlCheckbox";
+import { ConfigControlCode } from "client/gui/configControls/ConfigControlCode";
 import { ConfigControlColor3 } from "client/gui/configControls/ConfigControlColor";
 import { ConfigControlEmpty } from "client/gui/configControls/ConfigControlEmpty";
 import { ConfigControlKeyOrString } from "client/gui/configControls/ConfigControlKey";
@@ -24,6 +25,7 @@ import { NumberTextBoxControlNullable } from "client/gui/controls/NumberTextBoxC
 import { SliderControlNullable } from "client/gui/controls/SliderControl";
 import { Interface } from "client/gui/Interface";
 import { MultiKeyNumberControl } from "client/gui/MultiKeyNumberControl";
+import IDEPopup from "client/gui/popup/IDEPopup";
 import { MemoryEditorPopup } from "client/gui/popup/MemoryEditorPopup";
 import { Control } from "engine/client/gui/Control";
 import { TextBoxControl } from "engine/client/gui/TextBoxControl";
@@ -183,6 +185,7 @@ namespace Controls {
 		readonly Slider: ConfigValueDefinition<SliderControlDefinition>;
 		readonly Byte: ConfigValueDefinition<ByteControlDefinition>;
 		readonly ByteArray: ConfigValueDefinition<GuiButton>;
+		readonly Code: ConfigValueDefinition<GuiButton>;
 		readonly Key: ConfigValueDefinition<KeyChooserControlDefinition>;
 		readonly Color: ConfigValueDefinition<ColorChooserDefinition>;
 		readonly Dropdown: ConfigValueDefinition<DropdownListDefinition>;
@@ -203,6 +206,7 @@ namespace Controls {
 		Slider: Control.asTemplateWithMemoryLeak(template.Content.Slider, true),
 		Byte: Control.asTemplateWithMemoryLeak(template.Content.Byte, true),
 		ByteArray: Control.asTemplateWithMemoryLeak(template.Content.ByteArray, true),
+		Code: Control.asTemplateWithMemoryLeak(template.Content.Code, true),
 		Key: Control.asTemplateWithMemoryLeak(template.Content.Key, true),
 		Color: Control.asTemplateWithMemoryLeak(template.Content.Color, true),
 		Dropdown: Control.asTemplateWithMemoryLeak(template.Content.Dropdown, true),
@@ -374,6 +378,27 @@ namespace Controls {
 				this.keyChooser.value.set(sameOrUndefined(config) ?? "");
 
 				this.keyChooser.submitted.Connect((v) => this.submitted.Fire((config = map(config, (_) => v))));
+			}
+		}
+		export class code extends Base<GuiButton, "code"> {
+			constructor(templates: templates, definition: MiniPrimitives["code"], config: ConfigParts<"code">) {
+				super(templates.Code());
+
+				this.onInject((di) => {
+					const popupController = di.resolve<PopupController>();
+
+					const control = this.parent(new Control(this.control)).addButtonAction(() => {
+						popupController.showPopup(
+							new IDEPopup(definition.lengthLimit, sameOrUndefined(config) ?? "", (v) =>
+								this.submitted.Fire((config = map(config, (_) => v))),
+							),
+						);
+					});
+
+					if (!sameOrUndefined(config)) {
+						control.setButtonInteractable(false);
+					}
+				});
 			}
 		}
 		export class bytearray extends Base<GuiButton, "bytearray"> {
@@ -879,6 +904,7 @@ namespace Controls {
 		byte: (templates, definition, config, parent) => new Controls.byte(templates, definition, config),
 		key: (templates, definition, config, parent) => new Controls.key(templates, definition, config),
 		bytearray: (templates, definition, config, parent) => new Controls.bytearray(templates, definition, config),
+		code: (templates, definition, config, parent) => new Controls.code(templates, definition, config),
 		color: (templates, definition, config, parent) => new Controls.color(templates, definition, config),
 		vector3: (templates, definition, config, parent) => new Controls.vector3(templates, definition, config, parent),
 		enum: (templates, definition, config, parent) => new Controls._enum(templates, definition, config),
@@ -1396,6 +1422,13 @@ class ConfigAutoValueWrapper extends Control<ConfigValueWrapperDefinition> {
 						if (!def) return;
 
 						return new ConfigControlByteArray(clone(templates.Edit), blockdef.displayName, def.lengthLimit) //
+							.setValues(values);
+					},
+					code: (values, blockdef, stype) => {
+						const def = definition.types[stype];
+						if (!def) return;
+
+						return new ConfigControlCode(clone(templates.Edit), blockdef.displayName, def.lengthLimit) //
 							.setValues(values);
 					},
 					sound: (values, blockdef, stype) => {

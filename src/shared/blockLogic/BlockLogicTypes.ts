@@ -110,6 +110,9 @@ export namespace BlockLogicTypes {
 	export type ByteArray = BCPrimitive<readonly number[]> & {
 		readonly lengthLimit: number;
 	};
+	export type Code = BCPrimitive<string> & {
+		readonly lengthLimit: number;
+	};
 
 	type EnumElement = {
 		readonly displayName: string;
@@ -154,6 +157,7 @@ export namespace BlockLogicTypes {
 		readonly color: Color;
 		readonly byte: Byte;
 		readonly bytearray: ByteArray;
+		readonly code: Code;
 		readonly enum: Enum;
 		readonly sound: Sound;
 		readonly particle: Particle;
@@ -176,6 +180,7 @@ export namespace BlockLogicTypes {
 			key: t.string,
 			byte: t.numberWithBounds(0, 255),
 			bytearray: t.array(t.numberWithBounds(0, 255)),
+			code: t.string,
 			enum: t.string,
 			vector3: t.vector3,
 			color: t.color,
