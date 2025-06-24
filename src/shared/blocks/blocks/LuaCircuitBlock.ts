@@ -267,7 +267,7 @@ class Logic extends BlockLogic<typeof definition> {
 
 				bytecode();
 			} catch (err) {
-				log(`Runtime error: ${tostring(err)}`, "error");
+				log(`Error: ${tostring(err)}`, "error");
 
 				this.event.loop(0.1, () => {
 					this.redLED.Color = this.redLED.Color === Colors.red ? new Color3(91, 93, 105) : Colors.red;
