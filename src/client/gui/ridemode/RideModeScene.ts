@@ -288,8 +288,8 @@ export class RideModeScene extends Control<RideModeSceneDefinition> {
 	private readonly controls;
 	private readonly info;
 
-	private readonly infoTemplate;
-	private readonly infoTextTemplate;
+	readonly infoTemplate;
+	readonly infoTextTemplate;
 
 	private readonly logicVisible = new ObservableValue(false);
 
@@ -493,6 +493,13 @@ export class RideModeScene extends Control<RideModeSceneDefinition> {
 				beacon.updateData(beacon.definition.input.text.displayName, true);
 			}
 		}
+	}
+
+	addMeter(gui: RideModeInfoControlDefinition & { Title: TextLabel }) {
+		const control = new RideModeInfoControl(gui, 0, 1, 0);
+		this.info.add(control);
+
+		return control;
 	}
 
 	private initLogicController(machine: ClientMachine, runLogic: boolean) {

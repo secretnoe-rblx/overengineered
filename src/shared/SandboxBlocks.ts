@@ -28,6 +28,7 @@ import { TNTBlocks } from "shared/blocks/blocks/grouped/TNTBlocks";
 import { WheelBlocks } from "shared/blocks/blocks/grouped/WheelBlocks";
 import { WingBlocks } from "shared/blocks/blocks/grouped/WingsBlocks";
 import { GuiImageBlock } from "shared/blocks/blocks/gui/GuiImageBlock";
+import { GuiStatBlock } from "shared/blocks/blocks/gui/GuiStatBlock";
 import { GuiTextBlock } from "shared/blocks/blocks/gui/GuiTextBlock";
 import { HeliumBlock } from "shared/blocks/blocks/HeliumBlock";
 import { ImpulseExtenderBlock } from "shared/blocks/blocks/ImpulseExtenderBlock";
@@ -193,6 +194,7 @@ export const CreateSandboxBlocks = (di: DIContainer): BlockList => {
 
 		GuiTextBlock,
 		GuiImageBlock,
+		GuiStatBlock,
 	];
 
 	if (GameDefinitions.isTesting) {
