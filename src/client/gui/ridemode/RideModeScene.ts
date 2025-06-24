@@ -19,7 +19,6 @@ import { Component } from "engine/shared/component/Component";
 import { ComponentChild } from "engine/shared/component/ComponentChild";
 import { ComponentChildren } from "engine/shared/component/ComponentChildren";
 import { ComponentKeyedChildren } from "engine/shared/component/ComponentKeyedChildren";
-import { Element } from "engine/shared/Element";
 import { EventHandler } from "engine/shared/event/EventHandler";
 import { ObservableValue } from "engine/shared/event/ObservableValue";
 import { Signal } from "engine/shared/event/Signal";
@@ -294,8 +293,6 @@ export class RideModeScene extends Control<RideModeSceneDefinition> {
 
 	private readonly logicVisible = new ObservableValue(false);
 
-	readonly guiScreen;
-
 	constructor(
 		gui: RideModeSceneDefinition,
 		@inject readonly mode: RideMode,
@@ -305,13 +302,6 @@ export class RideModeScene extends Control<RideModeSceneDefinition> {
 		@inject theme: Theme,
 	) {
 		super(gui);
-
-		this.guiScreen = Element.create(
-			"ScreenGui",
-			{ Parent: gui },
-			{ scale: Element.create("UIScale", { Scale: 8 }) },
-		);
-		this.onDestroy(() => this.guiScreen.Destroy());
 
 		const controlsEditMode = new ObservableValue(false);
 		const notControlsEditMode = controlsEditMode.fReadonlyCreateBased((b) => !b);

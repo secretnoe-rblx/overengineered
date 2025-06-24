@@ -1,3 +1,4 @@
+import type { Component } from "engine/shared/component/Component";
 import type { BlockLogicFullBothDefinitions, GenericBlockLogicCtor } from "shared/blockLogic/BlockLogic";
 import type { BlockSynchronizer } from "shared/blockLogic/BlockSynchronizer";
 import type { BlockCreation, BlockMirrorBehaviour } from "shared/blocks/BlockCreation";
@@ -10,6 +11,7 @@ export type BlockLogicInfo = {
 	readonly ctor: GenericBlockLogicCtor;
 	readonly events?: { readonly [k in string]?: BlockSynchronizer<{ readonly block: BlockModel }> };
 	readonly immediate?: LogicImmediateUpdate;
+	readonly preview?: ConstructorOf<Component, [block: BlockModel]>;
 };
 export type BlockModelSource = {
 	readonly model: (self: BlockBuilder) => BlockModel;

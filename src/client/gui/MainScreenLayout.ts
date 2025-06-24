@@ -7,6 +7,7 @@ import { Component } from "engine/shared/component/Component";
 import { ComponentInstance } from "engine/shared/component/ComponentInstance";
 import { Transforms } from "engine/shared/component/Transforms";
 import { TransformService } from "engine/shared/component/TransformService";
+import { Element } from "engine/shared/Element";
 import type { HotbarControlDefinition } from "client/gui/buildmode/HotbarControl";
 import type { Theme, ThemeColorKey } from "client/Theme";
 import type { TextButtonDefinition } from "engine/client/gui/Button";
@@ -197,12 +198,19 @@ export class MainScreenLayout extends Component {
 	readonly bottom: Bottom.MainScreenBottom;
 	readonly right: MainScreenRight;
 	readonly hotbar;
+	readonly fullScreenScaled8: ScreenGui;
 
 	constructor(@inject di: DIContainer) {
 		super();
 
 		this.instance = Interface.getInterface<{ Main: MainScreenLayoutDefinition }>().Main;
 		ComponentInstance.init(this, this.instance);
+
+		this.fullScreenScaled8 = Element.create(
+			"ScreenGui",
+			{ Parent: this.instance, ZIndexBehavior: Enum.ZIndexBehavior.Sibling, DisplayOrder: -2 },
+			{ scale: Element.create("UIScale", { Scale: 8 }) },
+		);
 
 		this.top = this.parentGui(new Top.MainScreenTop(this.instance.Top));
 		this.bottom = this.parentGui(new Bottom.MainScreenBottom(this.instance.Bottom));

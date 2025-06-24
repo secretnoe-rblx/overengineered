@@ -1,5 +1,6 @@
 import { Players } from "@rbxts/services";
 import { MultiBlockConfigControl } from "client/gui/BlockConfigControls";
+import { ToggleControl } from "client/gui/controls/ToggleControl";
 import { GuiAnimator } from "client/gui/GuiAnimator";
 import { ReportSubmitPopup } from "client/gui/popup/ReportSubmitPopup";
 import { LogControl } from "client/gui/static/LogControl";
@@ -8,6 +9,7 @@ import { SelectedBlocksHighlighter } from "client/tools/highlighters/SelectedBlo
 import { ToolBase } from "client/tools/ToolBase";
 import { Control } from "engine/client/gui/Control";
 import { InputController } from "engine/client/InputController";
+import { Component } from "engine/shared/component/Component";
 import { ComponentChild } from "engine/shared/component/ComponentChild";
 import { ObservableCollectionSet } from "engine/shared/event/ObservableCollection";
 import { JSON } from "engine/shared/fixes/Json";
@@ -19,6 +21,7 @@ import { BlockCreation } from "shared/blocks/BlockCreation";
 import { BlockManager } from "shared/building/BlockManager";
 import { Colors } from "shared/Colors";
 import { VectorUtils } from "shared/utils/VectorUtils";
+import type { ToggleControlDefinition } from "client/gui/controls/ToggleControl";
 import type { MainScreenLayout } from "client/gui/MainScreenLayout";
 import type { PopupController } from "client/gui/PopupController";
 import type { ActionController } from "client/modes/build/ActionController";
@@ -63,7 +66,10 @@ namespace Scene {
 			super(gui);
 
 			type cc = GuiObject & {
-				Content: GuiObject & { ScrollingFrame: ScrollingFrame };
+				Content: GuiObject & {
+					ScrollingFrame: ScrollingFrame;
+					PreviewButton: GuiButton & { Toggle: ToggleControlDefinition };
+				};
 				Header: GuiObject & { Copy: GuiButton; Paste: GuiButton; Reset: GuiButton };
 			};
 			this.configContainer = this.parentGui(this.mainScreen.registerLeft<cc>("Config"));
@@ -140,6 +146,45 @@ namespace Scene {
 			this.gui.Bottom.DeselectButton.Activated.Connect(() => {
 				tool.unselectAll();
 			});
+
+			let previewComponent: Component | undefined;
+			this.onDisable(() => {
+				previewComponent?.destroy();
+				previewComponent = undefined;
+			});
+			const previewToggle = this.parent(
+				new ToggleControl(this.configContainer.instance.Content.PreviewButton.Toggle),
+			);
+			previewToggle.value.subscribe((c) => {
+				if (!c) {
+					previewComponent?.destroy();
+					previewComponent = undefined;
+					return;
+				}
+
+				previewComponent = new Component();
+				this.tryProvideDIToChild(previewComponent);
+
+				for (const block of selected.get()) {
+					const preview = blockList.blocks[BlockManager.manager.id.get(block)]?.logic?.preview;
+					if (!preview) continue;
+
+					previewComponent.parent(new preview(block));
+				}
+
+				previewComponent.enable();
+			});
+			this.parent(new Control(this.configContainer.instance.Content.PreviewButton)) //
+				.addButtonAction(() => previewToggle.value.set(!previewToggle.value.get()));
+			this.event.subscribeObservable(
+				selected,
+				(c) =>
+					(this.configContainer.instance.Content.PreviewButton.Visible =
+						!c.isEmpty() &&
+						blockList.blocks[BlockManager.manager.id.get(c.first()!)]?.logic?.preview !== undefined),
+				true,
+			);
+			this.event.subscribeObservable(selected, () => previewToggle.value.set(false), true);
 
 			this.onEnable(() => this.updateConfigs([]));
 			this.event.onPrepare((inputType) => {
