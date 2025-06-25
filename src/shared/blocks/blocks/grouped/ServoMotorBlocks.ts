@@ -1,5 +1,7 @@
 import { TweenService } from "@rbxts/services";
+import { t } from "engine/shared/t";
 import { InstanceBlockLogic as InstanceBlockLogic } from "shared/blockLogic/BlockLogic";
+import { BlockSynchronizer } from "shared/blockLogic/BlockSynchronizer";
 import { BlockCreation } from "shared/blocks/BlockCreation";
 import { BlockManager } from "shared/building/BlockManager";
 import { RemoteEvents } from "shared/RemoteEvents";
@@ -153,6 +155,52 @@ type ServoMotorModel = BlockModel & {
 	readonly Attach: Part;
 };
 
+const updateEventType = t.interface({
+	block: t.instance("Model").nominal("blockModel").as<ServoMotorModel>(),
+	angle: t.number,
+	currentCFrame: t.custom((value): value is CFrame => typeIs(value, "CFrame")),
+	speed: t.number,
+});
+type CFrameUpdateData = t.Infer<typeof updateEventType>;
+
+const cframe_update = ({ block, angle, currentCFrame, speed }: CFrameUpdateData) => {
+	if (!block.Base.Weld.Enabled) {
+		block.Base.Weld.Enabled = true;
+	}
+
+	// Get current angle from C0 (Y rotation component)
+	const [, currentAngleRad] = currentCFrame.ToEulerAnglesYXZ();
+	const currentAngle = -math.deg(currentAngleRad);
+
+	// Calculate shortest angular distance
+	let angleDiff = angle - currentAngle;
+	if (angleDiff > 180) angleDiff -= 360;
+	if (angleDiff < -180) angleDiff += 360;
+
+	const absAngleDiff = math.abs(angleDiff);
+
+	// Calculate tween duration based on angular speed
+	const angularSpeedDegrees = math.deg(math.clamp(speed, 0, 20));
+	const duration = angularSpeedDegrees > 0 ? absAngleDiff / angularSpeedDegrees : 0;
+
+	if (duration > 0.01 && absAngleDiff > 0.1) {
+		// Only tween for significant changes
+		const targetCFrame = CFrame.Angles(0, -math.rad(angle), 0);
+		const tweenInfo = new TweenInfo(duration, Enum.EasingStyle.Linear);
+
+		TweenService.Create(block.Base.Weld, tweenInfo, {
+			C0: targetCFrame,
+		}).Play();
+	} else {
+		block.Base.Weld.C0 = CFrame.Angles(0, -math.rad(angle), 0);
+	}
+};
+
+const events = {
+	cframe_update: new BlockSynchronizer("servo_cframe_update", updateEventType, cframe_update),
+} as const;
+// events.update.sendBackToOwner = true;
+
 export type { Logic as ServoMotorLogic };
 class Logic extends InstanceBlockLogic<typeof servoDefinition, ServoMotorModel> {
 	private readonly rotationWeld;
@@ -207,36 +255,13 @@ class Logic extends InstanceBlockLogic<typeof servoDefinition, ServoMotorModel> 
 
 		this.onk(["angle"], ({ angle }) => {
 			if (this.rotationWeld.Enabled) {
-				// Get current angle from C0 (Y rotation component)
-				const currentCFrame = this.rotationWeld.C0;
-				const [, currentAngleRad] = currentCFrame.ToEulerAnglesYXZ();
-				const currentAngle = math.deg(currentAngleRad);
-
-				// Calculate shortest angular distance
-				let angleDiff = angle - currentAngle;
-				if (angleDiff > 180) angleDiff -= 360;
-				if (angleDiff < -180) angleDiff += 360;
-
-				const absAngleDiff = math.abs(angleDiff);
-
-				// Calculate tween duration based on angular speed
-				const angularSpeedDegrees = math.deg(math.clamp(this.hingeConstraint.AngularSpeed, 0, 20));
-				const duration = angularSpeedDegrees > 0 ? absAngleDiff / angularSpeedDegrees : 0;
-
-				if (duration > 0.01 && absAngleDiff > 0.1) {
-					// Only tween for significant changes
-					const targetCFrame = CFrame.Angles(0, -math.rad(angle), 0);
-					const tweenInfo = new TweenInfo(duration, Enum.EasingStyle.Linear);
-
-					TweenService.Create(this.rotationWeld, tweenInfo, {
-						C0: targetCFrame,
-					}).Play();
-				} else {
-					this.rotationWeld.C0 = CFrame.Angles(0, -math.rad(angle), 0);
-				}
+				events.cframe_update.send({
+					angle,
+					currentCFrame: this.rotationWeld.C0,
+					speed: this.hingeConstraint.AngularSpeed,
+					block: this.instance,
+				} as CFrameUpdateData);
 			} else {
-				angle = math.fmod(angle, 360);
-				if (math.abs(angle) > 180) angle -= math.sign(angle) * 360;
 				this.hingeConstraint.TargetAngle = angle;
 			}
 		});
@@ -265,6 +290,7 @@ const list: BlockBuildersWithoutIdAndDefaults = {
 					super(servoDefinition, block);
 				}
 			},
+			events,
 		},
 	},
 	sidewaysservo: {
