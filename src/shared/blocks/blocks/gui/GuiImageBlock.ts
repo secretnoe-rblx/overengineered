@@ -180,7 +180,7 @@ export const GuiImageBlock = {
 
 	logic: { definition, ctor: Logic, preview: PreviewComponent },
 	modelSource: {
-		model: BlockCreation.Model.fAutoCreated("x4GenericGuiLogicBlockPrefab", "IMAGE"),
+		model: BlockCreation.Model.fAutoCreated("x4GuiLogicBlockPrefab", "IMAGE"),
 		category: () => BlockCreation.Categories.gui,
 	},
 } as const satisfies BlockBuilder;

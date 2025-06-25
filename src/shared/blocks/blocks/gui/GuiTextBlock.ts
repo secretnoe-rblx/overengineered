@@ -230,7 +230,7 @@ export const GuiTextBlock = {
 
 	logic: { definition, ctor: Logic, preview: PreviewComponent },
 	modelSource: {
-		model: BlockCreation.Model.fAutoCreated("x4GenericGuiLogicBlockPrefab", "TEXT"),
+		model: BlockCreation.Model.fAutoCreated("x4GuiLogicBlockPrefab", "TEXT"),
 		category: () => BlockCreation.Categories.gui,
 	},
 } as const satisfies BlockBuilder;

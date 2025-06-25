@@ -111,7 +111,8 @@ export namespace BlockCreation {
 			| "ByteLogicBlockPrefab"
 			| "DoubleByteLogicBlockPrefab"
 			| "SoundLogicBlockPrefab"
-			| "x4GenericGuiLogicBlockPrefab";
+			| "DoubleGuiLogicBlockPrefab"
+			| "x4GuiLogicBlockPrefab";
 		const blockPrefabs = Instances.waitForChild<{ readonly [k in string]: BlockModel }>(
 			ReplicatedAssets.assets,
 			"Prefabs",
