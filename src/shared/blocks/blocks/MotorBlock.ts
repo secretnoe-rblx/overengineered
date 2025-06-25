@@ -62,7 +62,7 @@ const definition = {
 		max_torque: {
 			displayName: "Max Torque",
 			tooltip:
-				"The maximum torque that Motor can apply when trying to reach its desired Angular Speed. Does not affect the operation of CFrame version.",
+				"The maximum torque that Motor can apply when trying to reach its desired Angular Speed. Does not affect the operation of infinite torque version.",
 			unit: "RMU stud²/s²",
 			types: {
 				number: {
@@ -76,7 +76,7 @@ const definition = {
 			},
 		},
 		cframe: {
-			displayName: "CFrame-powered",
+			displayName: "Infinite torque",
 			tooltip: "May break something, use with caution.",
 			types: {
 				bool: {

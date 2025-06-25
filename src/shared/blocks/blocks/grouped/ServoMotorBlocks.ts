@@ -11,7 +11,7 @@ const servoDefinition = {
 		speed: {
 			displayName: "Angular Speed",
 			tooltip:
-				"Specifies the speed of the servo motor in radians per second. It feels different when working with the CFrame version.",
+				"Specifies the speed of the servo motor in radians per second. It feels different when working with the infinite torque version.",
 			unit: "radians/second",
 			types: {
 				number: {
@@ -61,7 +61,7 @@ const servoDefinition = {
 		},
 		clutch_release: {
 			displayName: "Clutch release",
-			tooltip: "Allows you to disable the speed controller. Not compatible with CFrame version.",
+			tooltip: "Allows you to disable the speed controller. Not compatible with infinite torque version.",
 			types: {
 				bool: {
 					config: false,
@@ -79,7 +79,7 @@ const servoDefinition = {
 			},
 		},
 		cframe: {
-			displayName: "CFrame-powered",
+			displayName: "Infinite torque",
 			tooltip: "Not compatible with aircraft control surfaces when using realistic aerodynamics.",
 			types: {
 				bool: {
@@ -91,7 +91,7 @@ const servoDefinition = {
 		stiffness: {
 			displayName: "Responsiveness",
 			tooltip:
-				"Specifies the sharpness of the servo motor in reaching the Target Angle. Does not affect the operation of CFrame version.",
+				"Specifies the sharpness of the servo motor in reaching the Target Angle. Does not affect the operation of infinite torque version.",
 			types: {
 				number: {
 					config: 45,
@@ -108,7 +108,7 @@ const servoDefinition = {
 		max_torque: {
 			displayName: "Max Torque",
 			tooltip:
-				"Specifies the maximum torque of the servo motor. Does not affect the operation of CFrame version.",
+				"Specifies the maximum torque of the servo motor. Does not affect the operation of infinite torque version.",
 			types: {
 				number: {
 					config: 200,
