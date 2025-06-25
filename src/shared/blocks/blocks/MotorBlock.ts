@@ -41,6 +41,24 @@ const definition = {
 				},
 			},
 		},
+		clutch_release: {
+			displayName: "Clutch release",
+			types: {
+				bool: {
+					config: false,
+					control: {
+						config: {
+							enabled: false,
+							key: "Y",
+							switch: false,
+							reversed: false,
+						},
+						canBeSwitch: true,
+						canBeReversed: true,
+					},
+				},
+			},
+		},
 		max_torque: {
 			displayName: "Max Torque",
 			tooltip: "The maximum torque that Motor can apply when trying to reach its desired Angular Speed",
@@ -83,6 +101,13 @@ export class Logic extends InstanceBlockLogic<typeof definition, MotorBlock> {
 			this.instance.Base.HingeConstraint.AngularVelocity = ctx.rotationSpeed;
 			this.instance.Base.HingeConstraint.MotorMaxTorque = ctx.max_torque * 1_000_000 * scale;
 		});
+
+		this.onk(
+			["clutch_release"],
+			({ clutch_release }) =>
+				(this.instance.Base.HingeConstraint.ActuatorType =
+					Enum.ActuatorType[clutch_release ? "None" : "Motor"]),
+		);
 
 		this.onTicc(() => {
 			const base = this.instance.FindFirstChild("Base") as BasePart | undefined;

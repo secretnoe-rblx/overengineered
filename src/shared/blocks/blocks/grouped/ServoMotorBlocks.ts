@@ -56,6 +56,24 @@ const servoDefinition = {
 				},
 			},
 		},
+		clutch_release: {
+			displayName: "Clutch release",
+			types: {
+				bool: {
+					config: false,
+					control: {
+						config: {
+							enabled: false,
+							key: "Y",
+							switch: false,
+							reversed: false,
+						},
+						canBeSwitch: true,
+						canBeReversed: true,
+					},
+				},
+			},
+		},
 		stiffness: {
 			displayName: "Responsiveness",
 			tooltip: "Specifies the sharpness of the servo motor in reaching the Target Angle",
@@ -136,6 +154,11 @@ class Logic extends InstanceBlockLogic<typeof servoDefinition, ServoMotorModel> 
 			desc.CustomPhysicalProperties = newPhysProp;
 		});
 
+		this.onk(
+			["clutch_release"],
+			({ clutch_release }) =>
+				(this.hingeConstraint.ActuatorType = Enum.ActuatorType[clutch_release ? "None" : "Servo"]),
+		);
 		this.onk(["stiffness"], ({ stiffness }) => (this.hingeConstraint.AngularResponsiveness = stiffness));
 		this.onk(["speed"], ({ speed }) => (this.hingeConstraint.AngularSpeed = speed));
 		this.onk(["angle"], ({ angle }) => {
