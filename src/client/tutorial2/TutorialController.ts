@@ -33,9 +33,15 @@ type ProgressDefinition = GuiObject & {
 	};
 };
 class Progress extends Control<ProgressDefinition> {
+	private stopAction = () => {};
+
 	constructor(gui: ProgressDefinition) {
 		super(gui);
 		this.gui.Progress.Size = new UDim2(new UDim(0, 0), this.gui.Progress.Size.Y);
+
+		this.gui.Content.Buttons.Stop.Visible = false;
+		this.parent(new Control(gui.Content.Buttons.Stop)) //
+			.addButtonAction(() => this.stopAction());
 	}
 
 	/** Sets the title */
@@ -45,6 +51,14 @@ class Progress extends Control<ProgressDefinition> {
 	/** Sets the text */
 	setText(text: string) {
 		this.gui.Content.TextLabel.Text = text;
+	}
+
+	/** Sets the Stop button action */
+	setStopAction(func: (original: () => void) => void) {
+		this.gui.Content.Buttons.Stop.Visible = true;
+
+		const prev = this.stopAction;
+		this.stopAction = () => func(prev);
 	}
 
 	/**

@@ -64,7 +64,7 @@ export class PopupController extends HostedService {
 	private readonly _isShown;
 	readonly isShown: ReadonlyObservableValue<boolean>;
 	private readonly children;
-	private readonly screen: ScreenGui;
+	readonly screen: ScreenGui;
 
 	constructor(@inject blur: BlurController) {
 		super();
