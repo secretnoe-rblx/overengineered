@@ -9,7 +9,6 @@ import { InstanceComponent } from "engine/shared/component/InstanceComponent";
 import { Transforms } from "engine/shared/component/Transforms";
 import { Element } from "engine/shared/Element";
 
-type DialogDefinition = {};
 const prefab = Interface.getInterface<{
 	Help: {
 		Tutorial: GuiObject & {
@@ -39,13 +38,19 @@ class Progress extends Control<ProgressDefinition> {
 		this.gui.Progress.Size = new UDim2(new UDim(0, 0), this.gui.Progress.Size.Y);
 	}
 
+	/** Sets the title */
 	setTitle(text: string) {
 		this.gui.Header.Text = text;
 	}
+	/** Sets the text */
 	setText(text: string) {
 		this.gui.Content.TextLabel.Text = text;
 	}
 
+	/**
+	 * Sets the progress
+	 * @argument progress The new progress, 0-1
+	 */
 	setProgress(progress: number) {
 		Transforms.create() //
 			.flashColor(this.gui.Progress, new Color3(1, 1, 1))
@@ -94,24 +99,25 @@ class HelpText extends Control<HelpTextDefinition> {
 		gui.Buttons.Skip.Visible = gui.Buttons.Next.Visible = false;
 	}
 
-	withPositionAround(instance: GuiObject, side: "right" | "up" | "down" | "left", border: number = 16): this {
-		border *= 2;
+	/** Positions this gui around {@link instance}, on its {@link side} with a {@link margin} */
+	withPositionAround(instance: GuiObject, side: "right" | "up" | "down" | "left", margin: number = 16): this {
+		margin *= 2;
 
 		this.event.loop(0, () => {
 			let pos = new Vector2();
 
 			const absolutePos = instance.AbsolutePosition;
 			if (side === "right") {
-				pos = absolutePos.add(new Vector2(instance.AbsoluteSize.X + border, instance.AbsoluteSize.Y / 2));
+				pos = absolutePos.add(new Vector2(instance.AbsoluteSize.X + margin, instance.AbsoluteSize.Y / 2));
 				this.instance.AnchorPoint = new Vector2(0, 0.5);
 			} else if (side === "left") {
-				pos = absolutePos.add(new Vector2(-border, instance.AbsoluteSize.Y / 2));
+				pos = absolutePos.add(new Vector2(-margin, instance.AbsoluteSize.Y / 2));
 				this.instance.AnchorPoint = new Vector2(1, 0.5);
 			} else if (side === "down") {
-				pos = absolutePos.add(new Vector2(instance.AbsoluteSize.X / 2, instance.AbsoluteSize.Y + border));
+				pos = absolutePos.add(new Vector2(instance.AbsoluteSize.X / 2, instance.AbsoluteSize.Y + margin));
 				this.instance.AnchorPoint = new Vector2(0.5, 0);
 			} else if (side === "up") {
-				pos = absolutePos.add(new Vector2(instance.AbsoluteSize.X / 2, -border));
+				pos = absolutePos.add(new Vector2(instance.AbsoluteSize.X / 2, -margin));
 				this.instance.AnchorPoint = new Vector2(0.5, 1);
 			}
 
@@ -125,11 +131,17 @@ class HelpText extends Control<HelpTextDefinition> {
 
 		return this;
 	}
+	/**
+	 * Moves this gui to a new position
+	 * @argument x New position X, relative to the screen
+	 * @argument y New position Y, relative to the screen
+	 */
 	withRelativePosition(x: number, y: number): this {
 		this.instance.Position = new UDim2(x, 0, y, 0);
 		return this;
 	}
 
+	/** Adds a text line */
 	withText(text: string): this {
 		const control = this.parent(new LabelControl(this.textTemplate()));
 		control.value.set(text);
@@ -137,6 +149,7 @@ class HelpText extends Control<HelpTextDefinition> {
 		return this;
 	}
 
+	/** Enables the Next button, which invokes {@link func} upon pressing */
 	withNext(func: () => void): this {
 		const btnn = this.parent(new Control(this.gui.Buttons.Next)) //
 			.addButtonAction(func);
@@ -159,6 +172,7 @@ class TutorialControllerGui extends InstanceComponent<ScreenGui> {
 		this.progress = this.parentGui(new Progress(prefab.Progress.Clone()));
 	}
 
+	/** Creates a fullscreen fade control */
 	createFullScreenFade() {
 		const frame = Element.create("Frame", {
 			ZIndex: -9999,
@@ -172,7 +186,8 @@ class TutorialControllerGui extends InstanceComponent<ScreenGui> {
 
 		return new Control(frame);
 	}
-	createFullScreenFadeWithHoleAround(gui: GuiObject, borders: Vector2 = new Vector2(16, 16)) {
+	/** Creates a fullscreen fade control with a hole around {@link gui} + additional margin */
+	createFullScreenFadeWithHoleAround(gui: GuiObject, margin: Vector2 = new Vector2(16, 16)) {
 		const overlay = new InstanceComponent(
 			Element.create("ScreenGui", {
 				Name: "overlay",
@@ -206,8 +221,8 @@ class TutorialControllerGui extends InstanceComponent<ScreenGui> {
 		const framesOutline = [addFrame(color, 0), addFrame(color, 0), addFrame(color, 0), addFrame(color, 0)];
 
 		this.event.loop(0, () => {
-			let min = gui.AbsolutePosition.sub(borders);
-			let max = gui.AbsolutePosition.add(gui.AbsoluteSize).add(borders.mul(2));
+			let min = gui.AbsolutePosition.sub(margin);
+			let max = gui.AbsolutePosition.add(gui.AbsoluteSize).add(margin.mul(2));
 
 			min = min.sub(overlay.instance.AbsolutePosition);
 			max = max.sub(overlay.instance.AbsolutePosition);
@@ -231,6 +246,7 @@ class TutorialControllerGui extends InstanceComponent<ScreenGui> {
 		return overlay;
 	}
 
+	/** Creates a floating window with ability to add text, or a Next button */
 	createText() {
 		return this.parent(new HelpText(prefab.Text.Clone(), this.scaled));
 	}
@@ -254,14 +270,15 @@ export class TutorialController extends Component {
 		);
 	}
 
-	disableAllInput(except?: readonly Enum.KeyCode[]): Component {
+	/** Creates a component which disables user input of the provided {@link types} and enables back upon destroy */
+	disableInput(types: readonly (Enum.KeyCode | Enum.PlayerActions | Enum.UserInputType)[]): Component {
 		const component = new Component();
 		ContextActionService.BindActionAtPriority(
 			"sink@tutorial",
 			() => Enum.ContextActionResult.Sink,
 			false,
 			math.huge,
-			...[...Enum.KeyCode.GetEnumItems(), ...Enum.PlayerActions.GetEnumItems()].except(except ?? []),
+			...types,
 		);
 		component.onDestroy(() => ContextActionService.UnbindAction("sink@tutorial"));
 
@@ -271,6 +288,22 @@ export class TutorialController extends Component {
 		return component;
 	}
 
+	private static readonly allInputTypes: readonly (Enum.KeyCode | Enum.PlayerActions)[] = [
+		...Enum.KeyCode.GetEnumItems(),
+		...Enum.PlayerActions.GetEnumItems(),
+	];
+
+	/** Creates a component which disables user input and enables back upon destroy */
+	disableAllInput(): Component {
+		return this.disableInput(TutorialController.allInputTypes);
+	}
+
+	/** Creates a component which disables user input except the provided ones and enables back upon destroy */
+	disableAllInputExcept(except: readonly Enum.KeyCode[]): Component {
+		return this.disableInput(TutorialController.allInputTypes.except(except));
+	}
+
+	/** Creates a component which waits until {@link func} returns `true`, then calls {@link thenfunc} */
 	waitFor(func: () => boolean | undefined, thenfunc: () => void) {
 		const component = new Component();
 		component.event.loop(0, () => {
