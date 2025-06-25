@@ -168,7 +168,7 @@ class Logic extends InstanceBlockLogic<typeof servoDefinition, ServoMotorModel> 
 		});
 		this.onk(
 			["max_torque"],
-			({ max_torque }) => (this.hingeConstraint.ServoMaxTorque = max_torque * 1_000_000 * scale),
+			({ max_torque }) => (this.hingeConstraint.ServoMaxTorque = max_torque * 1_000_000 * math.max(1, scale)),
 		);
 
 		this.onTicc(() => {

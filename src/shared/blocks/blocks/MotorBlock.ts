@@ -99,7 +99,7 @@ export class Logic extends InstanceBlockLogic<typeof definition, MotorBlock> {
 			}
 
 			this.instance.Base.HingeConstraint.AngularVelocity = ctx.rotationSpeed;
-			this.instance.Base.HingeConstraint.MotorMaxTorque = ctx.max_torque * 1_000_000 * scale;
+			this.instance.Base.HingeConstraint.MotorMaxTorque = ctx.max_torque * 1_000_000 * math.max(1, scale);
 		});
 
 		this.onk(
