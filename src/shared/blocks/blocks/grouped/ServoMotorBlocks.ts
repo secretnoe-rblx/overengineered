@@ -225,14 +225,14 @@ class Logic extends InstanceBlockLogic<typeof servoDefinition, ServoMotorModel> 
 
 				if (duration > 0.01 && absAngleDiff > 0.1) {
 					// Only tween for significant changes
-					const targetCFrame = CFrame.Angles(0, math.rad(angle), 0);
+					const targetCFrame = CFrame.Angles(0, -math.rad(angle), 0);
 					const tweenInfo = new TweenInfo(duration, Enum.EasingStyle.Linear);
 
 					TweenService.Create(this.rotationWeld, tweenInfo, {
 						C0: targetCFrame,
 					}).Play();
 				} else {
-					this.rotationWeld.C0 = CFrame.Angles(0, math.rad(angle), 0);
+					this.rotationWeld.C0 = CFrame.Angles(0, -math.rad(angle), 0);
 				}
 			} else {
 				angle = math.fmod(angle, 360);

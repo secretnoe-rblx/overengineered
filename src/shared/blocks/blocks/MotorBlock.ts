@@ -122,7 +122,7 @@ export class Logic extends InstanceBlockLogic<typeof definition, MotorBlock> {
 					const RunService = game.GetService("RunService");
 					this.event.eventHandler.subscribe(RunService.Heartbeat, (deltaTime) => {
 						this.currentRotation += rotationSpeed * deltaTime;
-						this.rotationWeld.C0 = new CFrame().mul(CFrame.Angles(this.currentRotation, 0, 0));
+						this.rotationWeld.C0 = new CFrame().mul(CFrame.Angles(-this.currentRotation, 0, 0));
 					});
 				}
 			} else {
