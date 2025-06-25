@@ -1,4 +1,7 @@
+import { RunService } from "@rbxts/services";
+import { t } from "engine/shared/t";
 import { InstanceBlockLogic } from "shared/blockLogic/BlockLogic";
+import { BlockSynchronizer } from "shared/blockLogic/BlockSynchronizer";
 import { BlockCreation } from "shared/blocks/BlockCreation";
 import { BlockManager } from "shared/building/BlockManager";
 import { RemoteEvents } from "shared/RemoteEvents";
@@ -97,11 +100,47 @@ type MotorBlock = BlockModel & {
 	readonly Attach: Part;
 };
 
+const updateEventType = t.interface({
+	block: t.instance("Model").nominal("blockModel").as<MotorBlock>(),
+	rotationSpeed: t.number,
+	currentCFrame: t.custom((value): value is CFrame => typeIs(value, "CFrame")),
+});
+type CFrameUpdateData = t.Infer<typeof updateEventType>;
+
+const cframe_update_signals: Map<Weld, RBXScriptConnection> = new Map(); // TODO: possibly fix this shit somehow
+const cframe_update = ({ block, rotationSpeed, currentCFrame }: CFrameUpdateData) => {
+	if (!block.Base.Weld.Enabled) {
+		block.Base.Weld.Enabled = true;
+	}
+
+	const weld = block.Base.Weld;
+	weld.C0 = currentCFrame;
+
+	if (cframe_update_signals.has(weld)) {
+		cframe_update_signals.get(weld)!.Disconnect();
+	}
+
+	if (rotationSpeed !== 0) {
+		cframe_update_signals.set(
+			weld,
+			RunService.Heartbeat.Connect((deltaTime) => {
+				if (!weld) {
+					cframe_update_signals.get(weld)!.Disconnect();
+				}
+				weld.C0 = weld.C0.mul(CFrame.Angles(-rotationSpeed * deltaTime, 0, 0));
+			}),
+		);
+	}
+};
+
+const events = {
+	cframe_update: new BlockSynchronizer("motor_cframe_update", updateEventType, cframe_update),
+} as const;
+
 export type { Logic as MotorBlockLogic };
 export class Logic extends InstanceBlockLogic<typeof definition, MotorBlock> {
 	private readonly hingeConstraint;
 	private readonly rotationWeld;
-	private currentRotation = 0;
 
 	constructor(block: InstanceBlockLogicArgs) {
 		super(definition, block);
@@ -114,17 +153,11 @@ export class Logic extends InstanceBlockLogic<typeof definition, MotorBlock> {
 
 		this.onk(["rotationSpeed"], ({ rotationSpeed }) => {
 			if (this.rotationWeld.Enabled) {
-				// Clean up existing connection
-				this.event.eventHandler.unsubscribeAll();
-
-				// Only create connection if rotation speed is not zero
-				if (rotationSpeed !== 0) {
-					const RunService = game.GetService("RunService");
-					this.event.eventHandler.subscribe(RunService.Heartbeat, (deltaTime) => {
-						this.currentRotation += rotationSpeed * deltaTime;
-						this.rotationWeld.C0 = new CFrame().mul(CFrame.Angles(-this.currentRotation, 0, 0));
-					});
-				}
+				events.cframe_update.send({
+					rotationSpeed,
+					currentCFrame: this.rotationWeld.C0,
+					block: this.instance,
+				} as CFrameUpdateData);
 			} else {
 				this.hingeConstraint.AngularVelocity = rotationSpeed;
 			}
@@ -173,7 +206,6 @@ export class Logic extends InstanceBlockLogic<typeof definition, MotorBlock> {
 			if (this.instance.FindFirstChild("Base")?.FindFirstChild("HingeConstraint")) {
 				this.hingeConstraint.AngularVelocity = 0;
 			}
-			this.event.eventHandler.unsubscribeAll();
 		});
 	}
 }
@@ -185,5 +217,5 @@ export const MotorBlock = {
 	description: "Rotates attached blocks. For unpowered rotation, use the Hinge block.",
 	limit: 100,
 
-	logic: { definition, ctor: Logic },
+	logic: { definition, ctor: Logic, events },
 } as const satisfies BlockBuilder;
