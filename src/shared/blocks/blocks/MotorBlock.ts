@@ -103,7 +103,7 @@ type MotorBlock = BlockModel & {
 const updateEventType = t.interface({
 	block: t.instance("Model").nominal("blockModel").as<MotorBlock>(),
 	rotationSpeed: t.number,
-	currentCFrame: t.custom((value): value is CFrame => typeIs(value, "CFrame")),
+	currentCFrame: t.cframe,
 });
 type CFrameUpdateData = t.Infer<typeof updateEventType>;
 
@@ -115,18 +115,18 @@ const cframe_update = ({ block, rotationSpeed, currentCFrame }: CFrameUpdateData
 
 	const weld = block.Base.Weld;
 	weld.C0 = currentCFrame;
-
-	if (cframe_update_signals.has(weld)) {
-		cframe_update_signals.get(weld)!.Disconnect();
-	}
+	cframe_update_signals.get(weld)?.Disconnect();
+	cframe_update_signals.delete(weld);
 
 	if (rotationSpeed !== 0) {
 		cframe_update_signals.set(
 			weld,
 			RunService.Heartbeat.Connect((deltaTime) => {
 				if (!weld) {
-					cframe_update_signals.get(weld)!.Disconnect();
+					cframe_update_signals.get(weld)?.Disconnect();
+					cframe_update_signals.delete(weld);
 				}
+
 				weld.C0 = weld.C0.mul(CFrame.Angles(-rotationSpeed * deltaTime, 0, 0));
 			}),
 		);
