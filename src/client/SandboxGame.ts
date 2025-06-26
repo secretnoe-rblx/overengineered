@@ -39,7 +39,7 @@ import { NewBasicPlaneTutorial } from "client/tutorial/tutorials/NewBasicPlaneTu
 import { TestTutorial } from "client/tutorial/tutorials/TestTutorial";
 import { TutorialServiceInitializer } from "client/tutorial/TutorialService";
 import { testTutorial } from "client/tutorial2/TestTutorial";
-import { Tutorial } from "client/tutorial2/Tutorial";
+import { TutorialStarter } from "client/tutorial2/TutorialStarter";
 import { InputController } from "engine/client/InputController";
 import { Keybinds } from "engine/client/Keybinds";
 import { PlayerRank } from "engine/shared/PlayerRank";
@@ -189,7 +189,9 @@ export namespace SandboxGame {
 
 		if (RunService.IsStudio() && Players.LocalPlayer.Name === "hyprlandd") {
 			builder.enabled.Connect((di, host) => {
-				host.parent(Tutorial.create((tc, sc) => testTutorial(tc, sc, true)));
+				const stepController = new TutorialStarter();
+				testTutorial(stepController, true);
+				host.parent(stepController);
 			});
 		}
 	}

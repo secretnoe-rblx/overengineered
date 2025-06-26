@@ -163,7 +163,7 @@ class HelpText extends Control<HelpTextDefinition> {
 		return this;
 	}
 
-	/** Enables the Next button, which invokes {@link func} upon pressing */
+	/** Enables the Next button, sets it to invoke {@link func} upon pressing */
 	withNext(func: () => void): this {
 		const btnn = this.parent(new Control(this.gui.Buttons.Next)) //
 			.addButtonAction(func);
@@ -266,6 +266,10 @@ class TutorialControllerGui extends InstanceComponent<ScreenGui> {
 	}
 }
 
+const allInputTypes: readonly (Enum.KeyCode | Enum.PlayerActions)[] = [
+	...Enum.KeyCode.GetEnumItems(),
+	...Enum.PlayerActions.GetEnumItems(),
+];
 export class TutorialController extends Component {
 	readonly gui;
 
@@ -302,19 +306,14 @@ export class TutorialController extends Component {
 		return component;
 	}
 
-	private static readonly allInputTypes: readonly (Enum.KeyCode | Enum.PlayerActions)[] = [
-		...Enum.KeyCode.GetEnumItems(),
-		...Enum.PlayerActions.GetEnumItems(),
-	];
-
 	/** Creates a component which disables user input and enables back upon destroy */
 	disableAllInput(): Component {
-		return this.disableInput(TutorialController.allInputTypes);
+		return this.disableInput(allInputTypes);
 	}
 
 	/** Creates a component which disables user input except the provided ones and enables back upon destroy */
 	disableAllInputExcept(except: readonly Enum.KeyCode[]): Component {
-		return this.disableInput(TutorialController.allInputTypes.except(except));
+		return this.disableInput(allInputTypes.except(except));
 	}
 
 	/** Creates a component which waits until {@link func} returns `true`, then calls {@link thenfunc} */

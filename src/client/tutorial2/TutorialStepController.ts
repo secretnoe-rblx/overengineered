@@ -1,12 +1,11 @@
 import { Component } from "engine/shared/component/Component";
-import type { TutorialController } from "client/tutorial2/TutorialController";
 import type { ComponentParentConfig } from "engine/shared/component/Component";
 
 /**
- * A component which gets created upon (sub-)step start and gets destroyed upon its completion.
+ * A component which gets created upon every step start and gets destroyed upon its completion.
  * Used for parenting step-only components, starting remporary tasks or resolving objects from DI
  */
-class TutorialStepComponent extends Component {
+export class TutorialStepComponent extends Component {
 	/** Immediately runs {@link init}. Runs {@link clear} upon destroy */
 	parentFunc(init: () => void, clear: () => void) {
 		init();
@@ -25,114 +24,158 @@ class TutorialStepComponent extends Component {
 	}
 }
 
-/** A tutorial step. */
-interface Step {
-	/** Returns sub-step count for calculating progress */
-	readonly getCount?: () => number;
+export interface TutorialStepContext {
+	/** Sets the progress for the current step sequence */
+	readonly setProgress: (percent: number) => void;
+}
+
+/**
+ * Tutorial step with a condition which gets evaluated every frame (when in a sequence), and if false prevents
+ */
+interface TutorialConditionalStep {
+	/** Condition to be checked. **Evaluates every frame when this (or any further) sub-step is active.** */
+	readonly condition: () => boolean;
 
 	/**
 	 * Function which is invoked when this step starts
-	 * @param controller The step controller
-	 * @param parent A component which will get destroyed upon this step completion
+	 * @param parent A component which will get destroyed upon this sub-step completion
+	 * @param ctx Step context
 	 */
-	readonly start: (controller: TutorialStepController, parent: TutorialStepComponent) => void;
+	readonly run: (parent: TutorialStepComponent, ctx: TutorialStepContext) => void;
 }
-export class TutorialStepController extends Component {
-	private steps: Step[] = [];
-	private currentIndex = -1;
-	private current?: TutorialStepComponent;
 
-	constructor(private readonly controller: TutorialController) {
-		super();
-		controller.gui.progress.setStopAction(() => this.stop());
-		this.onDestroy(() => this.stop());
+/**
+ * Tutorial step. Runs its function and destroys itself upon `complete()`.
+ * Emulates {@link TutorialConditionalStep.condition}, with it returning `true` after the step has been completed.
+ */
+interface TutorialStep {
+	/**
+	 * Function which is invoked when this step starts
+	 * @param parent A component which will get destroyed upon this step completion
+	 * @param complete Function which completes this step
+	 * @param ctx Step context
+	 */
+	readonly run: (parent: TutorialStepComponent, complete: () => void, ctx: TutorialStepContext) => void;
+}
+const tutorialStepToConditional = (step: TutorialStep | TutorialStep["run"]): TutorialConditionalStep => {
+	if (typeIs(step, "function")) {
+		step = { run: step };
 	}
 
-	/** Stops the tutorial and destroys itself */
-	stop() {
-		this.controller.destroy();
-		this.current?.destroy();
-		this.destroy();
+	let finished = false;
+	return {
+		condition: () => finished,
+		run: (parent, ctx) => step.run(parent, () => (finished = true), { ...ctx }),
+	};
+};
+
+class ExecutorBase {
+	protected readonly steps: TutorialConditionalStep[] = [];
+
+	/** Create and add a {@link TutorialStep} step */
+	step(step: TutorialStep | TutorialStep["run"]): this {
+		return this.conditional(tutorialStepToConditional(step));
 	}
 
-	/** Adds a normal step */
-	step(step: Step) {
+	/** Create and add a {@link TutorialConditionalStep} step */
+	conditional(step: TutorialConditionalStep): this {
 		this.steps.push(step);
+		return this;
 	}
 
-	/** Creates a multi-step, in which every sub-step gets sequentially executed until every condition is true */
-	multiStep() {
-		/** Tutorial sub-step */
-		interface SubStep {
-			/** Condition to be checked. **Evaluates every frame when this (or any further) sub-step is active.** */
-			readonly condition: () => boolean;
+	/** Create and add a {@link TutorialSequentialExecutor} step */
+	sequence(): TutorialSequentialExecutor {
+		const ret = new TutorialSequentialExecutor();
+		this.step(ret);
 
-			/**
-			 * Function which is invoked when this {@link condition} is false (but every previous sub-step condition is true).
-			 * Basically {@link Step.start} but for sub-steps
-			 * @param parent A component which will get destroyed upon this sub-step completion
-			 */
-			readonly ifnot: (parent: TutorialStepComponent) => void;
+		return ret;
+	}
+
+	/** Create and add a {@link TutorialParallelExecutor} step. Be careful with this one. */
+	parallel(): TutorialParallelExecutor {
+		const ret = new TutorialParallelExecutor();
+		this.step(ret);
+
+		return ret;
+	}
+}
+
+/**
+ * Executes every step at the same time until all of them return true in {@link TutorialConditionalStep.condition}.
+ * Evaluates the step conditions every frame.
+ */
+export class TutorialParallelExecutor extends ExecutorBase implements TutorialStep {
+	readonly run: TutorialStep["run"] = (parent, complete, ctx) => {
+		let completed = 0;
+
+		const nextCtx: TutorialStepContext = {
+			...ctx,
+			setProgress: (progress) => ctx.setProgress((completed + progress) / this.steps.size()),
+		};
+
+		for (const step of this.steps) {
+			if (step.condition()) continue;
+
+			const p = parent.parent(new TutorialStepComponent());
+			step.run(p, nextCtx);
 		}
-		class MultiStep {
-			readonly requires: SubStep[] = [];
 
-			getCount(): number {
-				return this.requires.size();
+		const sub = parent.event.loop(0, () => {
+			completed = 0;
+			for (const step of this.steps) {
+				if (step.condition()) {
+					completed++;
+					continue;
+				}
+
+				return;
 			}
 
-			/** Add a sub-step */
-			subStep(req: SubStep): this {
-				this.requires.push(req);
-				return this;
-			}
-		}
+			sub.Disconnect();
 
-		const ms = new MultiStep();
-		this.steps.push({
-			getCount: () => ms.getCount(),
-			start: (controller, parent) => {
-				let currentReq: SubStep | undefined;
-				let p: TutorialStepComponent | undefined;
-
-				const sub = parent.event.loop(0, () => {
-					for (const req of ms.requires) {
-						if (req.condition()) continue;
-
-						if (currentReq !== req) {
-							p?.destroy();
-							p = parent.parent(new TutorialStepComponent());
-							req.ifnot(p);
-						}
-						currentReq = req;
-
-						return;
-					}
-
-					p?.destroy();
-					sub.Disconnect();
-
-					controller.next();
-				});
-			},
+			ctx.setProgress(1);
+			complete();
 		});
+	};
+}
 
-		return ms;
-	}
+/**
+ * Executes every step sequentially until all of them return true in {@link TutorialConditionalStep.condition}.
+ *
+ * Evaluates the step conditions every frame sequentially until finds a `false`, upon which starts that step.
+ * If any previous step condition starts returning `false`, destroys the current step and starts that one.
+ */
+export class TutorialSequentialExecutor extends ExecutorBase implements TutorialStep {
+	readonly run: TutorialStep["run"] = (parent, complete, ctx) => {
+		let currentReq: TutorialConditionalStep | undefined;
+		let p: TutorialStepComponent | undefined;
 
-	/** Moves to the next step */
-	next() {
-		this.current?.destroy();
+		const sub = parent.event.loop(0, () => {
+			for (let i = 0; i < this.steps.size(); i++) {
+				const step = this.steps[i];
+				if (step.condition()) continue;
 
-		this.currentIndex++;
-		this.controller.gui.progress.setProgress(this.currentIndex / this.steps.size());
-		if (this.currentIndex >= this.steps.size()) {
-			this.stop();
-			return;
-		}
+				if (currentReq !== step) {
+					p?.destroy();
+					ctx.setProgress(i / this.steps.size());
+					p = parent.parent(new TutorialStepComponent());
 
-		this.current = new TutorialStepComponent();
-		this.parent(this.current);
-		this.steps[this.currentIndex].start(this, this.current);
-	}
+					const nextCtx: TutorialStepContext = {
+						...ctx,
+						setProgress: (progress) => ctx.setProgress((i + progress) / this.steps.size()),
+					};
+					step.run(p, nextCtx);
+				}
+				currentReq = step;
+
+				return;
+			}
+
+			p?.destroy();
+			sub.Disconnect();
+
+			ctx.setProgress(1);
+			complete();
+		});
+	};
 }
