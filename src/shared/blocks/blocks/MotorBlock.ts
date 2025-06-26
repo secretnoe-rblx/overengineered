@@ -9,6 +9,7 @@ import type { BlockLogicFullBothDefinitions, InstanceBlockLogicArgs } from "shar
 import type { BlockBuilder } from "shared/blocks/Block";
 
 const definition = {
+	inputOrder: ["rotationSpeed", "clutch_release", "max_torque", "cframe"],
 	input: {
 		rotationSpeed: {
 			displayName: "Angular Speed",
@@ -111,6 +112,16 @@ const cframe_update_signals: Map<Weld, RBXScriptConnection> = new Map(); // TODO
 const cframe_update = ({ block, rotationSpeed, currentCFrame }: CFrameUpdateData) => {
 	if (!block.Base.Weld.Enabled) {
 		block.Base.Weld.Enabled = true;
+
+		const blockScale = BlockManager.manager.scale.get(block) ?? Vector3.one;
+		const rotationWeld = block.Base.Weld;
+
+		rotationWeld.Enabled = true;
+		block.Base.HingeConstraint.Enabled = false;
+
+		rotationWeld.C1 = new CFrame(
+			new Vector3(-block.Base.CFrame.ToObjectSpace(block.Attach.CFrame).Position.X * blockScale.Y, 0, 0),
+		);
 	}
 
 	const weld = block.Base.Weld;
@@ -172,9 +183,6 @@ export class Logic extends InstanceBlockLogic<typeof definition, MotorBlock> {
 		});
 
 		this.onk(["cframe"], ({ cframe }) => {
-			this.rotationWeld.Enabled = cframe;
-			this.hingeConstraint.Enabled = !cframe;
-
 			// Security check to prevent issues
 			if (!cframe) {
 				this.onTicc(() => {

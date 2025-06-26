@@ -9,6 +9,7 @@ import type { BlockLogicFullBothDefinitions, InstanceBlockLogicArgs } from "shar
 import type { BlockBuildersWithoutIdAndDefaults } from "shared/blocks/Block";
 
 const servoDefinition = {
+	inputOrder: ["speed", "angle", "stiffness", "clutch_release", "max_torque", "cframe"],
 	input: {
 		speed: {
 			displayName: "Angular Speed",
@@ -166,6 +167,16 @@ type CFrameUpdateData = t.Infer<typeof updateEventType>;
 const cframe_update = ({ block, angle, currentCFrame, speed }: CFrameUpdateData) => {
 	if (!block.Base.Weld.Enabled) {
 		block.Base.Weld.Enabled = true;
+
+		const blockScale = BlockManager.manager.scale.get(block) ?? Vector3.one;
+		const rotationWeld = block.Base.Weld;
+
+		rotationWeld.Enabled = true;
+		block.Base.HingeConstraint.Enabled = false;
+
+		rotationWeld.C1 = new CFrame(
+			new Vector3(-block.Base.CFrame.ToObjectSpace(block.Attach.CFrame).Position.X * blockScale.Y, 0, 0),
+		);
 	}
 
 	// Get current angle from C0 (Y rotation component)
@@ -199,7 +210,6 @@ const cframe_update = ({ block, angle, currentCFrame, speed }: CFrameUpdateData)
 const events = {
 	cframe_update: new BlockSynchronizer("servo_cframe_update", updateEventType, cframe_update),
 } as const;
-// events.update.sendBackToOwner = true;
 
 export type { Logic as ServoMotorLogic };
 class Logic extends InstanceBlockLogic<typeof servoDefinition, ServoMotorModel> {
@@ -224,9 +234,6 @@ class Logic extends InstanceBlockLogic<typeof servoDefinition, ServoMotorModel> 
 		});
 
 		this.onk(["cframe"], ({ cframe }) => {
-			this.rotationWeld.Enabled = cframe;
-			this.hingeConstraint.Enabled = !cframe;
-
 			// Security check to prevent issues
 			if (!cframe) {
 				this.onTicc(() => {
