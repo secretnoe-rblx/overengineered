@@ -1,3 +1,4 @@
+import { RunService } from "@rbxts/services";
 import { A2SRemoteEvent } from "engine/shared/event/PERemoteEvent";
 import { InstanceBlockLogic as InstanceBlockLogic } from "shared/blockLogic/BlockLogic";
 import { BlockCreation } from "shared/blocks/BlockCreation";
@@ -71,6 +72,11 @@ const definition = {
 	output: {},
 } satisfies BlockLogicFullBothDefinitions;
 
+type cachedChange = {
+	readonly frame: Frame;
+	color: Color3;
+};
+
 export type { Logic as LedDisplayBlockLogic };
 class Logic extends InstanceBlockLogic<typeof definition> {
 	static readonly events = {
@@ -80,8 +86,7 @@ class Logic extends InstanceBlockLogic<typeof definition> {
 		}>("leddisplay_prepare", "RemoteEvent"), // TODO: fix this shit crap
 		update: new A2SRemoteEvent<{
 			readonly block: BlockModel;
-			readonly color: Color3;
-			readonly frame: Frame;
+			readonly changes: cachedChange[];
 		}>("leddisplay_update"),
 		fill: new A2SRemoteEvent<{
 			readonly block: BlockModel;
@@ -93,6 +98,7 @@ class Logic extends InstanceBlockLogic<typeof definition> {
 	constructor(block: InstanceBlockLogicArgs) {
 		super(definition, block);
 
+		const cachedChanges: cachedChange[] = [];
 		const baseColor = this.definition.input.color.types.color.config;
 
 		Logic.events.prepare.send({ block: block.instance, baseColor: baseColor });
@@ -106,18 +112,38 @@ class Logic extends InstanceBlockLogic<typeof definition> {
 			}
 		}
 
-		this.on(({ posx, posy, color, update }) => {
+		this.event.subscribe(RunService.Heartbeat, () => {
+			if (cachedChanges.isEmpty()) return;
+
+			Logic.events.update.send({
+				block: block.instance,
+				changes: cachedChanges,
+			});
+			cachedChanges.clear();
+		});
+
+		this.on(({ posx, posy, color, update, colorChanged }) => {
 			if (!update) return;
 
 			if (typeIs(color, "Vector3")) {
 				color = Color3.fromRGB(color.X, color.Y, color.Z);
 			}
 
-			Logic.events.update.send({
-				block: block.instance,
-				color,
-				frame: display[posx][posy],
-			});
+			const frame = display[posx][posy];
+			let isInList = false;
+			for (const v of cachedChanges) {
+				if (v.frame !== frame) continue;
+				v.color = color;
+				isInList = true;
+				break;
+			}
+
+			if (!isInList) {
+				cachedChanges.push({
+					frame,
+					color,
+				});
+			}
 		});
 
 		this.on(({ reset }) => {

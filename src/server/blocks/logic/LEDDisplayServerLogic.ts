@@ -26,14 +26,15 @@ export class LEDDisplayServerLogic extends ServerBlockLogic<typeof LedDisplayBlo
 			gui.Enabled = true;
 		});
 
-		logic.events.update.invoked.Connect((player, { block, color, frame }) => {
+		logic.events.update.invoked.Connect((player, { block, changes }) => {
 			if (!this.isValidBlock(block, player)) return;
 			const gui = block.WaitForChild("Screen").WaitForChild("SurfaceGui");
-			if (!frame.IsDescendantOf(gui)) {
-				return player?.Kick("ban forev");
+			for (const f of changes) {
+				if (!f.frame.IsDescendantOf(gui)) {
+					return player?.Kick("ban forev");
+				}
+				f.frame.BackgroundColor3 = f.color;
 			}
-
-			frame.BackgroundColor3 = color;
 		});
 
 		logic.events.fill.invoked.Connect((player, { block, color, frames }) => {
