@@ -86,7 +86,7 @@ class Logic extends InstanceBlockLogic<typeof definition> {
 		}>("leddisplay_prepare", "RemoteEvent"), // TODO: fix this shit crap
 		update: new A2SRemoteEvent<{
 			readonly block: BlockModel;
-			readonly changes: cachedChange[];
+			readonly changes: Map<Frame, cachedChange>;
 		}>("leddisplay_update"),
 		fill: new A2SRemoteEvent<{
 			readonly block: BlockModel;
@@ -98,7 +98,7 @@ class Logic extends InstanceBlockLogic<typeof definition> {
 	constructor(block: InstanceBlockLogicArgs) {
 		super(definition, block);
 
-		const cachedChanges: cachedChange[] = [];
+		const cachedChanges: Map<Frame, cachedChange> = new Map();
 		const baseColor = this.definition.input.color.types.color.config;
 
 		Logic.events.prepare.send({ block: block.instance, baseColor: baseColor });
@@ -122,7 +122,7 @@ class Logic extends InstanceBlockLogic<typeof definition> {
 			cachedChanges.clear();
 		});
 
-		this.on(({ posx, posy, color, update, colorChanged }) => {
+		this.on(({ posx, posy, color, update }) => {
 			if (!update) return;
 
 			if (typeIs(color, "Vector3")) {
@@ -130,20 +130,7 @@ class Logic extends InstanceBlockLogic<typeof definition> {
 			}
 
 			const frame = display[posx][posy];
-			let isInList = false;
-			for (const v of cachedChanges) {
-				if (v.frame !== frame) continue;
-				v.color = color;
-				isInList = true;
-				break;
-			}
-
-			if (!isInList) {
-				cachedChanges.push({
-					frame,
-					color,
-				});
-			}
+			cachedChanges.set(frame, { frame, color });
 		});
 
 		this.on(({ reset }) => {

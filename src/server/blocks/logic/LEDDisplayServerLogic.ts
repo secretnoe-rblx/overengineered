@@ -29,11 +29,11 @@ export class LEDDisplayServerLogic extends ServerBlockLogic<typeof LedDisplayBlo
 		logic.events.update.invoked.Connect((player, { block, changes }) => {
 			if (!this.isValidBlock(block, player)) return;
 			const gui = block.WaitForChild("Screen").WaitForChild("SurfaceGui");
-			for (const f of changes) {
-				if (!f.frame.IsDescendantOf(gui)) {
+			for (const [_, change] of changes) {
+				if (!change.frame.IsDescendantOf(gui)) {
 					return player?.Kick("ban forev");
 				}
-				f.frame.BackgroundColor3 = f.color;
+				change.frame.BackgroundColor3 = change.color;
 			}
 		});
 
