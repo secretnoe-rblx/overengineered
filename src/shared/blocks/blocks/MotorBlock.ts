@@ -183,11 +183,13 @@ export class Logic extends InstanceBlockLogic<typeof definition, MotorBlock> {
 		});
 
 		this.onk(["cframe"], ({ cframe }) => {
-			events.cframe_update.send({
-				rotationSpeed: 0,
-				currentCFrame: this.rotationWeld.C0,
-				block: this.instance,
-			} as CFrameUpdateData);
+			if (cframe) {
+				events.cframe_update.send({
+					rotationSpeed: 0,
+					currentCFrame: this.rotationWeld.C0,
+					block: this.instance,
+				} as CFrameUpdateData);
+			}
 
 			// Security check to prevent issues
 			if (!cframe) {

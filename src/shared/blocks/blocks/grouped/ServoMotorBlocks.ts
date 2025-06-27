@@ -183,6 +183,10 @@ const cframe_update = ({ block, angle, currentCFrame, speed }: CFrameUpdateData)
 		);
 	}
 
+	// Fix angle for sideways servo
+	const isSidewaysServo = block.Base.Weld.C1.Z !== 0;
+	angle = isSidewaysServo ? -angle : angle;
+
 	// Get current angle from C0 (Y rotation component)
 	const [, currentAngleRad] = currentCFrame.ToEulerAnglesYXZ();
 	const currentAngle = -math.deg(currentAngleRad);
@@ -238,12 +242,14 @@ class Logic extends InstanceBlockLogic<typeof servoDefinition, ServoMotorModel> 
 		});
 
 		this.onk(["cframe"], ({ cframe }) => {
-			events.cframe_update.send({
-				angle: 0,
-				currentCFrame: this.rotationWeld.C0,
-				speed: this.hingeConstraint.AngularSpeed,
-				block: this.instance,
-			} as CFrameUpdateData);
+			if (cframe) {
+				events.cframe_update.send({
+					angle: 0,
+					currentCFrame: this.rotationWeld.C0,
+					speed: this.hingeConstraint.AngularSpeed,
+					block: this.instance,
+				} as CFrameUpdateData);
+			}
 
 			// Security check to prevent issues
 			if (!cframe) {
