@@ -187,7 +187,7 @@ export const PlayerConfigDefinition = {
 	terrain: {
 		type: "terrain",
 		config: {
-			kind: "Classic" as TerrainConfiguration["kind"],
+			kind: "Triangle" as TerrainConfiguration["kind"],
 			resolution: 8 as number,
 			foliage: true as boolean,
 			loadDistance: 24 as number,
