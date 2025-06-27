@@ -238,6 +238,8 @@ class Logic extends InstanceBlockLogic<typeof servoDefinition, ServoMotorModel> 
 		});
 
 		this.onk(["cframe"], ({ cframe }) => {
+			this.rotationWeld.Enabled = cframe;
+
 			// Security check to prevent issues
 			if (!cframe) {
 				this.onTicc(() => {

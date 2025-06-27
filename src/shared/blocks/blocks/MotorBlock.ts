@@ -183,6 +183,8 @@ export class Logic extends InstanceBlockLogic<typeof definition, MotorBlock> {
 		});
 
 		this.onk(["cframe"], ({ cframe }) => {
+			this.rotationWeld.Enabled = cframe;
+
 			// Security check to prevent issues
 			if (!cframe) {
 				this.onTicc(() => {
