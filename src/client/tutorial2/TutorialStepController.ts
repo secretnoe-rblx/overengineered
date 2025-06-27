@@ -18,6 +18,13 @@ export class TutorialStepComponent extends Component {
 		return connection;
 	}
 
+	/** Parents multiple components to this step part */
+	multiParent(...children: readonly Component[]) {
+		for (const child of children) {
+			this.parent(child);
+		}
+	}
+
 	/** Parents a component to this step part, destroying it when the step finishes */
 	override parent<T extends Component>(child: T, config?: ComponentParentConfig): T {
 		return super.parent(child, config);

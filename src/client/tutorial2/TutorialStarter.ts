@@ -19,7 +19,6 @@ export class TutorialStarter extends Component {
 		const sparent = this.parent(new TutorialStepComponent());
 
 		const complete = () => {
-			print("finshed");
 			this.destroy();
 		};
 		const ctx: TutorialStepContext = {

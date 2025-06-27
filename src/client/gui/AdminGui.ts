@@ -1,139 +1,187 @@
-import { Players, RunService, UserInputService } from "@rbxts/services";
+import { Players } from "@rbxts/services";
 import { AdminMessageController } from "client/AdminMessageController";
-import { TabControl } from "client/gui/controls/TabControl";
-import { Interface } from "client/gui/Interface";
+import { SavePopup } from "client/gui/popup/SavePopup";
 import IntegrityChecker from "client/IntegrityChecker";
+import { PlayerDataStorage } from "client/PlayerDataStorage";
 import { ServerRestartController } from "client/ServerRestartController";
 import { TestRunner } from "client/test/TestRunner";
-import { TutorialCreator } from "client/tutorial/TutorialCreator";
+import { BuildingDiffer } from "client/tutorial2/BuildingDiffer";
 import { TextButtonControl } from "engine/client/gui/Button";
 import { Control } from "engine/client/gui/Control";
+import { Interface } from "engine/client/gui/Interface";
 import { InputController } from "engine/client/InputController";
+import { ComponentInstance } from "engine/shared/component/ComponentInstance";
 import { InstanceComponent } from "engine/shared/component/InstanceComponent";
 import { HostedService } from "engine/shared/di/HostedService";
 import { Element } from "engine/shared/Element";
 import { PlayerRank } from "engine/shared/PlayerRank";
+import type { PopupController } from "client/gui/PopupController";
 import type { TutorialsService } from "client/tutorial/TutorialService";
+import type { Component } from "engine/shared/component/Component";
+import type { InstanceComponentParentConfig } from "engine/shared/component/InstanceComponent";
 import type { GameHostBuilder } from "engine/shared/GameHostBuilder";
 import type { Switches } from "engine/shared/Switches";
 import type { ReadonlyPlot } from "shared/building/ReadonlyPlot";
 
+class VerticalList extends Control {
+	constructor() {
+		const gui = Element.create(
+			"Frame",
+			{
+				BackgroundTransparency: 1,
+				BorderSizePixel: 0,
+				Size: new UDim2(0, 200, 0, 0),
+				AutomaticSize: Enum.AutomaticSize.Y,
+			},
+			{ list: Element.create("UIListLayout", { FillDirection: Enum.FillDirection.Vertical }) },
+		);
+		super(gui);
+	}
+
+	override parent<T extends Component>(child: T, config?: InstanceComponentParentConfig): T {
+		const isControl = (component: Component): component is InstanceComponent<GuiObject> => {
+			return child instanceof InstanceComponent && (child.instance as Instance).IsA("GuiObject");
+		};
+
+		if (
+			isControl(child) &&
+			child.instance.Size.X.Scale === 0 &&
+			child.instance.Size.X.Offset === 0 &&
+			child.instance.Size.Y.Scale === 0 &&
+			child.instance.Size.Y.Offset === 0
+		) {
+			child.instance.Size = new UDim2(1, 0, 0, 30);
+		}
+
+		return super.parent(child, config);
+	}
+
+	addLabel(): Control<TextLabel> {
+		return this.parent(new Control(Element.create("TextLabel", { AutomaticSize: Enum.AutomaticSize.Y })));
+	}
+	addTextBox(placeholder: string, text?: string): Control<TextBox> {
+		return this.parent(
+			new Control(
+				Element.create("TextBox", {
+					PlaceholderText: placeholder,
+					Text: text ?? undefined,
+					ClearTextOnFocus: false,
+				}),
+			),
+		);
+	}
+	addButton(text: string, action: () => void): TextButtonControl {
+		return this.parent(TextButtonControl.create({ Text: text }, action));
+	}
+}
+
 @injectable
 export class AdminGui extends HostedService {
 	static initializeIfAdminOrStudio(host: GameHostBuilder) {
-		const enabled =
-			RunService.IsStudio() ||
-			PlayerRank.isAdmin(Players.LocalPlayer) ||
-			PlayerRank.isRobloxEngineer(Players.LocalPlayer);
-		if (!enabled) return;
-
+		if (!PlayerRank.isAdmin(Players.LocalPlayer)) return;
 		host.services.registerService(this);
 	}
 
 	constructor(@inject di: DIContainer) {
 		super();
 
-		let destroy: (() => void) | undefined;
-		const create = () => {
-			const parent = new InstanceComponent(
-				Element.create("ScreenGui", {
-					AutoLocalize: false,
-					Name: "TestScreenGui",
-					Parent: Interface.getPlayerGui(),
-				}),
-			);
-			IntegrityChecker.whitelist.add(parent.instance);
+		const screen = Element.create("ScreenGui", { Name: "Admin", Enabled: false, Parent: Interface.getPlayerGui() });
+		ComponentInstance.init(this, screen);
+		IntegrityChecker.whitelist.add(screen);
 
-			const tabs = TabControl.create();
-			parent.parent(tabs);
-
-			const wrapNonVisual = (
-				name: string,
-				tests: Readonly<Record<string, (di: DIContainer, button: TextButtonControl) => void>>,
-			): readonly [name: string, test: Control] => {
-				const frame = Element.create(
-					"Frame",
-					{
-						Size: new UDim2(1, 0, 1, 0),
-						BackgroundTransparency: 1,
-					},
-					{
-						list: Element.create("UIListLayout", {
-							FillDirection: Enum.FillDirection.Vertical,
-						}),
-					},
-				);
-				const control = new Control(frame);
-
-				for (const [name, test] of pairs(tests)) {
-					const button = TextButtonControl.create({
-						Text: name,
-						AutomaticSize: Enum.AutomaticSize.XY,
-						TextSize: 16,
-					});
-					button.activated.Connect(() => test(di, button));
-
-					control.add(button);
-				}
-
-				return [name, control];
-			};
-
-			const closebtn = tabs.addButton();
-			closebtn.text.set("Close");
-			closebtn.activated.Connect(() => destroy?.());
-
-			const tests: readonly (readonly [name: string, test: Control])[] = [
-				["Global message", AdminMessageController.createControl()],
-				wrapNonVisual("Tutorial creator", {
-					...asObject(
-						di
-							.resolve<TutorialsService>()
-							.allTutorials.mapToMap((t) =>
-								$tuple(`run '${t.name}'`, () => di.resolve<TutorialsService>().run(t)),
-							),
-					),
-
-					setBefore: (di) => TutorialCreator.setBefore(di.resolve<ReadonlyPlot>()),
-					printDiff: (di) => print(TutorialCreator.serializeDiffToTsCode(di.resolve<ReadonlyPlot>())),
-					print: (di) => print(TutorialCreator.serializePlotToTsCode(di.resolve<ReadonlyPlot>())),
-				}),
-				wrapNonVisual("Restart", {
-					startMeteors: () => ServerRestartController.sendToServer(false),
-					restart: () => ServerRestartController.sendToServer(true),
-				}),
-				wrapNonVisual("TESTS", { open: TestRunner.create }),
-				wrapNonVisual(
-					"Switches",
-					asObject(
-						asMap(di.resolve<Switches>().registered).mapToMap((k, v) =>
-							$tuple(k + " " + (v.get() ? "+" : "-"), (di: DIContainer, btn: TextButtonControl) => {
-								v.set(!v.get());
-								btn.text.set(k + " " + (v.get() ? "+" : "-"));
-							}),
-						),
-					),
-				),
-			];
-			for (const [name, content] of tests) {
-				content.hide();
-				tabs.addTab(name, content);
-			}
-
-			parent.enable();
-			destroy = () => {
-				destroy = undefined;
-				parent.destroy();
-			};
-		};
-
-		this.event.subscribe(UserInputService.InputBegan, (input) => {
+		this.event.onInputBegin((input) => {
 			if (input.UserInputType !== Enum.UserInputType.Keyboard) return;
 			if (input.KeyCode !== Enum.KeyCode.F7) return;
 			if (!InputController.isShiftPressed()) return;
 
-			if (destroy) destroy();
-			else create();
+			screen.Enabled = !screen.Enabled;
 		});
+
+		const list = this.parent(new VerticalList());
+		list.instance.Parent = screen;
+		list.addButton("[Hide]", () => (screen.Enabled = false));
+
+		const subframe = Element.create("Frame", {
+			BackgroundTransparency: 1,
+			BorderSizePixel: 0,
+			Size: new UDim2(0, 200, 0, 0),
+			AutomaticSize: Enum.AutomaticSize.Y,
+			Position: new UDim2(0, 200, 0, 0),
+		});
+		subframe.Parent = screen;
+		ComponentInstance.init(this, subframe);
+
+		const openSub = (control: Control) => {
+			subframe.ClearAllChildren();
+			this.parent(control);
+			control.instance.Parent = subframe;
+		};
+		const openVertical = (setup: (control: VerticalList) => void) => {
+			const sub = new VerticalList();
+			setup(sub);
+
+			openSub(sub);
+		};
+
+		//
+
+		list.addButton("Global message", () => openSub(AdminMessageController.createControl()));
+		list.addButton("Restart", () => {
+			openVertical((sub) => {
+				sub.addButton("startMeteors", () => ServerRestartController.sendToServer(false));
+				sub.addButton("restart", () => ServerRestartController.sendToServer(true));
+			});
+		});
+		list.addButton("Switches", () => {
+			openVertical((sub) => {
+				const map = asMap(di.resolve<Switches>().registered).mapToMap((k, v) =>
+					$tuple(k + " " + (v.get() ? "+" : "-"), (di: DIContainer, btn: TextButtonControl) => {
+						v.set(!v.get());
+						btn.text.set(k + " " + (v.get() ? "+" : "-"));
+					}),
+				);
+				for (const [k, v] of map) {
+					const btn = sub.addButton(k, () => v(di, btn));
+				}
+			});
+		});
+
+		list.addButton("Load slot", () => {
+			openVertical((sub) => {
+				const tb = sub.addTextBox("Player ID", "238427763");
+				sub.addButton("Open saves", () => {
+					const pds = PlayerDataStorage.forPlayer(tonumber(tb.instance.Text)!);
+					const scope = di.beginScope((builder) => {
+						builder.registerSingletonValue(pds);
+					});
+
+					const popup = scope.resolveForeignClass(SavePopup);
+					const wrapper = new Control(popup.instance);
+					wrapper.cacheDI(pds);
+					wrapper.parent(popup);
+					popup.onDisable(() => wrapper.destroy());
+
+					scope.resolve<PopupController>().showPopup(wrapper);
+				});
+			});
+		});
+
+		list.addButton("Tutorials", () => {
+			openVertical((sub) => {
+				sub.addButton("Set BEFORE", () => BuildingDiffer.setBefore(di.resolve<ReadonlyPlot>()));
+				sub.addButton("Print DIFF", () =>
+					print(BuildingDiffer.serializeDiffToTsCode(di.resolve<ReadonlyPlot>())),
+				);
+				sub.addButton("Print FULL", () =>
+					print(BuildingDiffer.serializePlotToTsCode(di.resolve<ReadonlyPlot>())),
+				);
+
+				for (const tutorial of di.resolve<TutorialsService>().allTutorials) {
+					sub.addButton(`run '${tutorial.name}'`, () => di.resolve<TutorialsService>().run(tutorial));
+				}
+			});
+		});
+
+		list.addButton("Tests", () => TestRunner.create(di));
 	}
 }

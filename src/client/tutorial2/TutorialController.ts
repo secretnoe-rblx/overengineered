@@ -53,7 +53,10 @@ class Progress extends Control<ProgressDefinition> {
 		this.gui.Content.TextLabel.Text = text;
 	}
 
-	/** Sets the Stop button action */
+	/**
+	 * Sets the Stop button action
+	 * @param func New Stop action. Accepts previous Stop action as `original` parameter
+	 */
 	setStopAction(func: (original: () => void) => void) {
 		this.gui.Content.Buttons.Stop.Visible = true;
 

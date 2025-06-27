@@ -6,10 +6,11 @@ import { BlocksSerializer } from "shared/building/BlocksSerializer";
 import { BuildingPlot } from "shared/building/BuildingPlot";
 import { Colors } from "shared/Colors";
 import { PartUtils } from "shared/utils/PartUtils";
+import { VectorUtils } from "shared/utils/VectorUtils";
 import type { BuildingMode } from "client/modes/build/BuildingMode";
 import type { ClientBuilding } from "client/modes/build/ClientBuilding";
 import type { BuildTool } from "client/tools/BuildTool";
-import type { LatestSerializedBlocks } from "shared/building/BlocksSerializer";
+import type { LatestSerializedBlock, LatestSerializedBlocks } from "shared/building/BlocksSerializer";
 import type { ReadonlyPlot } from "shared/building/ReadonlyPlot";
 
 @injectable
@@ -95,7 +96,46 @@ class Build extends Component {
 
 		this.event.subscribeRegistration(() =>
 			this.building.placeOperation.addMiddleware((arg) => {
-				//
+				if (this.subscribed.size() === 0) {
+					return { success: true, arg };
+				}
+
+				const empty = {};
+				const bs = arg.blocks
+					.map((block): PlaceBlockRequest | {} => {
+						let btp: LatestSerializedBlock | undefined;
+						for (const b of this.subscribed) {
+							btp = b.blocks.find(
+								(value) =>
+									value.id === block.id &&
+									VectorUtils.roundVector3To(value.location.Position, 0.5) ===
+										VectorUtils.roundVector3To(
+											arg.plot.instance.BuildingArea.CFrame.ToObjectSpace(block!.location)
+												.Position,
+											0.5,
+										),
+							);
+
+							if (btp) break;
+						}
+						if (!btp) return empty;
+
+						return {
+							...block,
+							location: arg.plot.instance.BuildingArea.CFrame.ToWorldSpace(btp.location),
+							uuid: btp.uuid,
+						};
+					})
+					.filter((c) => c !== empty) as PlaceBlockRequest[];
+
+				if (bs.size() !== arg.blocks.size()) {
+					return { success: false, message: "Invalid placement" };
+				}
+
+				for (const { uuid } of bs) {
+					if (!uuid) continue;
+					plot.remove(uuid);
+				}
 
 				return { success: true, arg };
 			}),
@@ -105,7 +145,11 @@ class Build extends Component {
 	waitForBuild(blocks: LatestSerializedBlocks): Component {
 		const ret = new Component();
 
-		//
+		this.plot.build(blocks);
+		this.onDestroy(() => this.plot.clearBlocks());
+
+		this.subscribed.add(blocks);
+		this.onDestroy(() => this.subscribed.delete(blocks));
 
 		return ret;
 	}

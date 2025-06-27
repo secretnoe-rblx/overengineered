@@ -36,13 +36,11 @@ import { ToolController } from "client/tools/ToolController";
 import { BasicCarTutorial } from "client/tutorial/tutorials/BasicCarTutorial";
 import { BasicPlaneTutorial } from "client/tutorial/tutorials/BasicPlaneTutorial";
 import { NewBasicPlaneTutorial } from "client/tutorial/tutorials/NewBasicPlaneTutorial";
-import { TestTutorial } from "client/tutorial/tutorials/TestTutorial";
 import { TutorialServiceInitializer } from "client/tutorial/TutorialService";
-import { testTutorial } from "client/tutorial2/TestTutorial";
+import { TestTutorial } from "client/tutorial2/TestTutorial";
 import { TutorialStarter } from "client/tutorial2/TutorialStarter";
 import { InputController } from "engine/client/InputController";
 import { Keybinds } from "engine/client/Keybinds";
-import { PlayerRank } from "engine/shared/PlayerRank";
 import { ReadonlyPlot } from "shared/building/ReadonlyPlot";
 import { SharedPlots } from "shared/building/SharedPlots";
 import { Colors } from "shared/Colors";
@@ -178,9 +176,6 @@ export namespace SandboxGame {
 				NewBasicPlaneTutorial,
 				BasicPlaneTutorial,
 			];
-			if (PlayerRank.isAdmin(Players.LocalPlayer)) {
-				tutorials.push(TestTutorial);
-			}
 
 			TutorialServiceInitializer.initialize(builder, {
 				tutorials,
@@ -191,7 +186,7 @@ export namespace SandboxGame {
 		if (RunService.IsStudio() && Players.LocalPlayer.Name === "hyprlandd") {
 			builder.enabled.Connect((di, host) => {
 				const stepController = new TutorialStarter();
-				testTutorial(stepController, true);
+				TestTutorial.start(stepController, true);
 				host.parent(stepController);
 			});
 		}

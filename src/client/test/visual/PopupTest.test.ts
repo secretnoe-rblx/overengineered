@@ -1,7 +1,5 @@
 import { ControlsPopup } from "client/gui/popup/ControlsPopup";
-import { SavePopup } from "client/gui/popup/SavePopup";
 import { WikiPopup } from "client/gui/popup/WikiPopup";
-import { PlayerDataStorage } from "client/PlayerDataStorage";
 import { TextButtonControl } from "engine/client/gui/Button";
 import { Control } from "engine/client/gui/Control";
 import { Element } from "engine/shared/Element";
@@ -25,27 +23,6 @@ namespace PopupTests {
 						Text: "2235259826",
 						Size: new UDim2(0, 200, 0, 30),
 					})),
-					b5123: TextButtonControl.create({
-						Text: "Saves from id",
-						Size: new UDim2(0, 200, 0, 30),
-					})
-						.with((b) =>
-							b.activated.Connect(() => {
-								const pds = PlayerDataStorage.forPlayer(tonumber(idtb.Text)!);
-								const scope = di.beginScope((builder) => {
-									builder.registerSingletonValue(pds);
-								});
-
-								const popup = scope.resolveForeignClass(SavePopup);
-								const wrapper = new Control(popup.instance);
-								wrapper.cacheDI(pds);
-								wrapper.parent(popup);
-								popup.onDisable(() => wrapper.destroy());
-
-								scope.resolve<PopupController>().showPopup(wrapper);
-							}),
-						)
-						.with((b) => b.enable()).instance,
 					b6: TextButtonControl.create({
 						Text: "Wiki",
 						Size: new UDim2(0, 200, 0, 30),
