@@ -120,7 +120,7 @@ const cframe_update = ({ block, rotationSpeed, currentCFrame }: CFrameUpdateData
 		block.Base.HingeConstraint.Enabled = false;
 
 		rotationWeld.C1 = new CFrame(
-			new Vector3(-block.Base.CFrame.ToObjectSpace(block.Attach.CFrame).Position.X * blockScale.Y, 0, 0),
+			new Vector3(-(block.Base.CFrame.ToObjectSpace(block.Attach.CFrame).Position.X * blockScale.Y), 0, 0),
 		);
 	}
 
@@ -183,7 +183,11 @@ export class Logic extends InstanceBlockLogic<typeof definition, MotorBlock> {
 		});
 
 		this.onk(["cframe"], ({ cframe }) => {
-			this.rotationWeld.Enabled = cframe;
+			events.cframe_update.send({
+				rotationSpeed: 0,
+				currentCFrame: this.rotationWeld.C0,
+				block: this.instance,
+			} as CFrameUpdateData);
 
 			// Security check to prevent issues
 			if (!cframe) {

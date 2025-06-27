@@ -176,8 +176,8 @@ const cframe_update = ({ block, angle, currentCFrame, speed }: CFrameUpdateData)
 
 		rotationWeld.C1 = new CFrame(
 			new Vector3(
-				-block.Base.CFrame.ToObjectSpace(block.Attach.CFrame).Position.X * blockScale.Y,
 				0,
+				-(block.Base.CFrame.ToObjectSpace(block.Attach.CFrame).Position.Y * blockScale.Y),
 				rotationWeld.C1.Z * blockScale.X, // Fix for sideways servo
 			),
 		);
@@ -238,7 +238,12 @@ class Logic extends InstanceBlockLogic<typeof servoDefinition, ServoMotorModel> 
 		});
 
 		this.onk(["cframe"], ({ cframe }) => {
-			this.rotationWeld.Enabled = cframe;
+			events.cframe_update.send({
+				angle: 0,
+				currentCFrame: this.rotationWeld.C0,
+				speed: this.hingeConstraint.AngularSpeed,
+				block: this.instance,
+			} as CFrameUpdateData);
 
 			// Security check to prevent issues
 			if (!cframe) {
