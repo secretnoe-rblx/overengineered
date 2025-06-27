@@ -175,7 +175,11 @@ const cframe_update = ({ block, angle, currentCFrame, speed }: CFrameUpdateData)
 		block.Base.HingeConstraint.Enabled = false;
 
 		rotationWeld.C1 = new CFrame(
-			new Vector3(-block.Base.CFrame.ToObjectSpace(block.Attach.CFrame).Position.X * blockScale.Y, 0, 0),
+			new Vector3(
+				-block.Base.CFrame.ToObjectSpace(block.Attach.CFrame).Position.X * blockScale.Y,
+				0,
+				rotationWeld.C1.Z * blockScale.X, // Fix for sideways servo
+			),
 		);
 	}
 
