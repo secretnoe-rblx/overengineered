@@ -112,17 +112,17 @@ namespace ParticleCreator {
 			},
 			rotation: {
 				displayName: "Rotation",
-				tooltip: "",
+				tooltip: "The rotation offset of the particle",
 				...defaultNum,
 			},
 			rotationSpeed: {
 				displayName: "Rotation Speed",
-				tooltip: "",
+				tooltip: "How fast the particle will rotate",
 				...defaultNum,
 			},
 			transparency: {
 				displayName: "Transparency",
-				tooltip: "",
+				tooltip: "The oposite of opaque-ness",
 				types: {
 					number: {
 						config: 0,
@@ -137,24 +137,28 @@ namespace ParticleCreator {
 			},
 			color: {
 				displayName: "Color",
-				tooltip: "",
+				tooltip: "The color. Speaks for itself.",
 				types: { color: { config: Colors.white } },
 			},
 			squash: {
 				displayName: "Squash",
-				tooltip: "",
+				tooltip: "Flat-ness of the particle",
 				...defaultNum,
 			},
 
 			lifetime: {
 				displayName: "Lifetime",
-				tooltip: "",
-				...defaultNum,
+				tooltip: "How long you'll particle will exist in seconds",
+				types: {
+					number: {
+						config: 0,
+					},
+				},
 			},
 
 			acceleration: {
 				displayName: "Acceleration",
-				tooltip: "",
+				tooltip: "Where will the particle go after being spawned",
 				types: {
 					vector3: {
 						config: Vector3.zero,
@@ -163,6 +167,7 @@ namespace ParticleCreator {
 			},
 			speed: {
 				displayName: "Particle speed",
+				tooltip: "The speed. Ka-Chau.",
 				types: {
 					number: {
 						config: 2,
