@@ -1,4 +1,5 @@
 import { ContextActionService, Players } from "@rbxts/services";
+import IntegrityChecker from "client/IntegrityChecker";
 import { InputController } from "engine/client/InputController";
 import { LocalPlayer } from "engine/client/LocalPlayer";
 import { HostedService } from "engine/shared/di/HostedService";
@@ -96,6 +97,9 @@ class SetCameraMaxZoomDistance extends HostedService {
 export namespace LocalPlayerController {
 	export function initializeDisablingFluidForces(host: GameHostBuilder): void {
 		host.services.registerService(DisableFluidForces);
+	}
+	export function initializeIntegrityChecker(host: GameHostBuilder): void {
+		host.services.registerService(IntegrityChecker);
 	}
 	export function initializeSprintLogic(host: GameHostBuilder): void {
 		host.services.registerService(SprintLogic).withArgs((di) => {

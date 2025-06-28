@@ -168,4 +168,5 @@ export const CustomRemotes = {
 		restart: new C2SRemoteEvent<boolean>("adm_restart"),
 	},
 	restartProgress: new S2CRemoteEvent<Remotes.ServerRestartProgressArgs>("restartprogress"),
+	integrityViolation: new C2SRemoteEvent<string>("integrity_violation"),
 } as const;
