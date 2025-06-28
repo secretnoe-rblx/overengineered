@@ -51,6 +51,8 @@ namespace ParticleEmitter {
 
 		emitter.Enabled = enabled;
 		emitter.Texture = `rbxassetid://${properties.particleID}`;
+
+		if (properties.rate) emitter.Rate = properties.rate;
 		if (properties.flipbookLayout)
 			emitter.FlipbookLayout = Enum.ParticleFlipbookLayout[properties.flipbookLayout as never];
 		if (properties.speed) emitter.Speed = new NumberRange(properties.speed);

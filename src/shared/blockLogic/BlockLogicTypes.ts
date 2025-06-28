@@ -148,6 +148,7 @@ export namespace BlockLogicTypes {
 		readonly squash?: number;
 		readonly color?: Color3;
 		readonly flipbookLayout?: string;
+		readonly rate?: number;
 	};
 
 	export type Particle = BCPrimitive<ParticleValue>;
