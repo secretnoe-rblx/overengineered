@@ -2,6 +2,7 @@ import { Players, RunService, UserInputService } from "@rbxts/services";
 import { AdminMessageController } from "client/AdminMessageController";
 import { TabControl } from "client/gui/controls/TabControl";
 import { Interface } from "client/gui/Interface";
+import IntegrityChecker from "client/IntegrityChecker";
 import { ServerRestartController } from "client/ServerRestartController";
 import { TestRunner } from "client/test/TestRunner";
 import { TutorialCreator } from "client/tutorial/TutorialCreator";
@@ -41,6 +42,7 @@ export class AdminGui extends HostedService {
 					Parent: Interface.getPlayerGui(),
 				}),
 			);
+			IntegrityChecker.whitelist.add(parent.instance);
 
 			const tabs = TabControl.create();
 			parent.parent(tabs);

@@ -1,4 +1,5 @@
 import { Interface } from "client/gui/Interface";
+import IntegrityChecker from "client/IntegrityChecker";
 import { AutoUIScaledComponent } from "engine/client/gui/AutoUIScaledControl";
 import { Control } from "engine/client/gui/Control";
 import { LocalPlayer } from "engine/client/LocalPlayer";
@@ -18,6 +19,8 @@ class Popup extends InstanceComponent<ScreenGui> {
 
 	constructor(readonly control: InstanceComponent<GuiObject>) {
 		const gui = Element.create("ScreenGui", { Name: `popup_${control.instance.Name}`, IgnoreGuiInset: true });
+		IntegrityChecker.whitelist.add(gui);
+
 		super(gui);
 
 		this.parentGui(control);
