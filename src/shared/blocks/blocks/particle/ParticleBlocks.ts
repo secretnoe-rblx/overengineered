@@ -165,7 +165,11 @@ namespace ParticleCreator {
 			lifetime: {
 				displayName: "Lifetime",
 				tooltip: "How long will your particle exist until despawning",
-				...defaultNum,
+				types: {
+					number: {
+						config: 5,
+					},
+				},
 			},
 
 			acceleration: {
