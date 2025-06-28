@@ -7,6 +7,7 @@ import type { BlockLogicFullBothDefinitions, InstanceBlockLogicArgs } from "shar
 import type { BlockLogicTypes } from "shared/blockLogic/BlockLogicTypes";
 import type { BlockBuilder } from "shared/blocks/Block";
 
+const defaultParticleID = "14198353638";
 namespace ParticleEmitter {
 	const definition = {
 		input: {
@@ -15,7 +16,7 @@ namespace ParticleEmitter {
 				types: {
 					particle: {
 						config: {
-							particleID: "some id",
+							particleID: defaultParticleID,
 						},
 					},
 				},
@@ -120,22 +121,24 @@ namespace ParticleCreator {
 				displayName: "Particle",
 				tooltip: "ID of the particle.",
 				types: {
-					particle: { config: { particleID: "584691395" } },
+					string: {
+						config: defaultParticleID,
+					},
 				},
 			},
 			rotation: {
 				displayName: "Rotation",
-				tooltip: "",
+				tooltip: "The rotation. Speaks for itself.",
 				...defaultNum,
 			},
 			rotationSpeed: {
 				displayName: "Rotation Speed",
-				tooltip: "",
+				tooltip: "How fast your particles will rotate",
 				...defaultNum,
 			},
 			transparency: {
 				displayName: "Transparency",
-				tooltip: "",
+				tooltip: "It's like opaque-ness but the other way around",
 				types: {
 					number: {
 						config: 0,
@@ -150,24 +153,24 @@ namespace ParticleCreator {
 			},
 			color: {
 				displayName: "Color",
-				tooltip: "",
+				tooltip: "The color of the spawned particles",
 				types: { color: { config: Colors.white } },
 			},
 			squash: {
 				displayName: "Squash",
-				tooltip: "",
+				tooltip: "How squashed will the particles be",
 				...defaultNum,
 			},
 
 			lifetime: {
-				displayName: "Squash",
-				tooltip: "",
+				displayName: "Lifetime",
+				tooltip: "How long will your particle exist until despawning",
 				...defaultNum,
 			},
 
 			acceleration: {
-				displayName: "Squash",
-				tooltip: "",
+				displayName: "Acceleration",
+				tooltip: "The acceleration of the spawned partice",
 				types: {
 					vector3: {
 						config: Vector3.zero,
@@ -228,10 +231,7 @@ namespace ParticleCreator {
 				for (const [k, v] of pairs(this.definition.input)) {
 					res[k] = arg[k];
 				}
-				this.output.output.set("particle", {
-					...arg.particleID,
-					...res,
-				} as BlockLogicTypes.ParticleValue);
+				this.output.output.set("particle", res as BlockLogicTypes.ParticleValue);
 			});
 		}
 	}
