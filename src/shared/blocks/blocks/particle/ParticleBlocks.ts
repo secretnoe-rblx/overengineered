@@ -84,16 +84,6 @@ namespace ParticleEmitter {
 		}
 	}
 
-	// const immediate = BlockCreation.immediate(definition, (block: ScreenBlock, config) => {
-	// 	Instances.waitForChild(block, "Body", "ParticleEmitter");
-
-	// 	update({
-	// 		block,
-	// 		color: BlockCreation.defaultIfWiredUnset(config?.enabled , definition.input.enabled.types.bool.config),
-	// 		data: BlockCreation.defaultIfWiredUnset(config?.enabled, true),
-	// 	});
-	// });
-
 	export const Block = {
 		...BlockCreation.defaults,
 		id: "particleemitter",
