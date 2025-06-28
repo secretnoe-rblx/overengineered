@@ -7,6 +7,8 @@ import type { BlockLogicFullBothDefinitions, InstanceBlockLogicArgs } from "shar
 import type { BlockLogicTypes } from "shared/blockLogic/BlockLogicTypes";
 import type { BlockBuilder } from "shared/blocks/Block";
 
+const defaultParticleID = "14198353638";
+
 namespace ParticleEmitter {
 	const definition = {
 		input: {
@@ -15,7 +17,7 @@ namespace ParticleEmitter {
 				types: {
 					particle: {
 						config: {
-							particleID: "some id",
+							particleID: defaultParticleID,
 						},
 					},
 				},
@@ -33,14 +35,22 @@ namespace ParticleEmitter {
 	type UpdateData = t.Infer<typeof updateDataType>;
 	const updateDataType = t.interface({
 		block: t.instance("Model").nominal("blockModel").as<particleEmitter>(),
-		particle: t.any.as<BlockLogicTypes.ParticleValue>(),
+		properties: t.any.as<BlockLogicTypes.ParticleValue>(),
 	});
 
-	const updateStates = (particle: UpdateData) => {
-		const block = particle.block;
-		for (const [k, v] of pairs(particle.particle)) {
-			// block.Body.ParticleEmitter[k] = v;
-		}
+	const updateStates = ({ properties, block }: UpdateData) => {
+		const emitter = block.Body.ParticleEmitter;
+
+		emitter.Texture = `rbxassetid://${properties.particleID}`;
+		if (properties.speed) emitter.Speed = new NumberRange(properties.speed);
+		if (properties.acceleration) emitter.Acceleration = properties.acceleration;
+		if (properties.color) emitter.Color = new ColorSequence(properties.color);
+		if (properties.lifetime)
+			emitter.Lifetime = new NumberRange(properties.lifetime * 0.95, properties.lifetime * 1.05);
+		if (properties.rotation) emitter.Rotation = new NumberRange(properties.rotation);
+		if (properties.rotationSpeed) emitter.RotSpeed = new NumberRange(properties.rotationSpeed);
+		if (properties.squash) emitter.Squash = new NumberSequence(properties.squash);
+		if (properties.transparency) emitter.Transparency = new NumberSequence(properties.transparency);
 	};
 
 	class Logic extends InstanceBlockLogic<typeof definition, particleEmitter> {
@@ -54,7 +64,7 @@ namespace ParticleEmitter {
 				Logic.events.update.sendOrBurn(
 					{
 						block: this.instance,
-						particle,
+						properties: particle,
 					},
 					this,
 				),
@@ -81,12 +91,23 @@ namespace ParticleCreator {
 	};
 
 	const definition = {
+		inputOrder: [
+			"particleID",
+			"speed",
+			"color",
+			"rotation",
+			"rotationSpeed",
+			"transparency",
+			"squash",
+			"lifetime",
+			"acceleration",
+		],
 		input: {
 			particleID: {
 				displayName: "Particle",
 				tooltip: "ID of the particle.",
 				types: {
-					particle: { config: { particleID: "584691395" } },
+					string: { config: defaultParticleID },
 				},
 			},
 			rotation: {
@@ -126,17 +147,25 @@ namespace ParticleCreator {
 			},
 
 			lifetime: {
-				displayName: "Squash",
+				displayName: "Lifetime",
 				tooltip: "",
 				...defaultNum,
 			},
 
 			acceleration: {
-				displayName: "Squash",
+				displayName: "Acceleration",
 				tooltip: "",
 				types: {
 					vector3: {
 						config: Vector3.zero,
+					},
+				},
+			},
+			speed: {
+				displayName: "Particle speed",
+				types: {
+					number: {
+						config: 2,
 					},
 				},
 			},
@@ -155,13 +184,10 @@ namespace ParticleCreator {
 
 			this.on((arg) => {
 				const res = {} as Record<string, unknown>;
-				for (const [k, v] of pairs(this.definition.input)) {
+				for (const [k] of pairs(this.definition.input)) {
 					res[k] = arg[k];
 				}
-				this.output.output.set("particle", {
-					...arg.particleID,
-					...res,
-				} as BlockLogicTypes.ParticleValue);
+				this.output.output.set("particle", res as BlockLogicTypes.ParticleValue);
 			});
 		}
 	}
