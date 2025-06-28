@@ -11,12 +11,20 @@ namespace ParticleEmitter {
 	const definition = {
 		input: {
 			particle: {
-				displayName: "Configured Particle",
+				displayName: "Configured particle",
 				types: {
 					particle: {
 						config: {
 							particleID: "some id",
 						},
+					},
+				},
+			},
+			enabled: {
+				displayName: "Enabled",
+				types: {
+					bool: {
+						config: true,
 					},
 				},
 			},
@@ -33,14 +41,26 @@ namespace ParticleEmitter {
 	type UpdateData = t.Infer<typeof updateDataType>;
 	const updateDataType = t.interface({
 		block: t.instance("Model").nominal("blockModel").as<particleEmitter>(),
-		particle: t.any.as<BlockLogicTypes.ParticleValue>(),
+		properties: t.any.as<BlockLogicTypes.ParticleValue>(),
+		enabled: t.boolean,
 	});
 
-	const updateStates = (particle: UpdateData) => {
-		const block = particle.block;
-		for (const [k, v] of pairs(particle.particle)) {
-			// block.Body.ParticleEmitter[k] = v;
-		}
+	const updateStates = ({ properties, block, enabled }: UpdateData) => {
+		const emitter = block.Body.ParticleEmitter;
+
+		emitter.Enabled = enabled;
+		emitter.Texture = `rbxassetid://${properties.particleID}`;
+		if (properties.flipbookLayout)
+			emitter.FlipbookLayout = Enum.ParticleFlipbookLayout[properties.flipbookLayout as never];
+		if (properties.speed) emitter.Speed = new NumberRange(properties.speed);
+		if (properties.acceleration) emitter.Acceleration = properties.acceleration;
+		if (properties.color) emitter.Color = new ColorSequence(properties.color);
+		if (properties.lifetime)
+			emitter.Lifetime = new NumberRange(properties.lifetime * 0.95, properties.lifetime * 1.05);
+		if (properties.rotation) emitter.Rotation = new NumberRange(properties.rotation);
+		if (properties.rotationSpeed) emitter.RotSpeed = new NumberRange(properties.rotationSpeed);
+		if (properties.squash) emitter.Squash = new NumberSequence(properties.squash);
+		if (properties.transparency) emitter.Transparency = new NumberSequence(properties.transparency);
 	};
 
 	class Logic extends InstanceBlockLogic<typeof definition, particleEmitter> {
@@ -50,11 +70,12 @@ namespace ParticleEmitter {
 
 		constructor(block: InstanceBlockLogicArgs) {
 			super(definition, block);
-			this.onk(["particle"], ({ particle }) =>
+			this.on(({ particle, enabled }) =>
 				Logic.events.update.sendOrBurn(
 					{
 						block: this.instance,
-						particle,
+						properties: particle,
+						enabled,
 					},
 					this,
 				),
@@ -62,6 +83,16 @@ namespace ParticleEmitter {
 			this.onDisable(() => (this.instance.Body.ParticleEmitter.Enabled ??= false));
 		}
 	}
+
+	// const immediate = BlockCreation.immediate(definition, (block: ScreenBlock, config) => {
+	// 	Instances.waitForChild(block, "Body", "ParticleEmitter");
+
+	// 	update({
+	// 		block,
+	// 		color: BlockCreation.defaultIfWiredUnset(config?.enabled , definition.input.enabled.types.bool.config),
+	// 		data: BlockCreation.defaultIfWiredUnset(config?.enabled, true),
+	// 	});
+	// });
 
 	export const Block = {
 		...BlockCreation.defaults,
@@ -81,6 +112,19 @@ namespace ParticleCreator {
 	};
 
 	const definition = {
+		inputOrder: [
+			"particleID",
+			"speed",
+			"color",
+			"rate",
+			"rotation",
+			"rotationSpeed",
+			"transparency",
+			"squash",
+			"lifetime",
+			"acceleration",
+			"flipbookLayout",
+		],
 		input: {
 			particleID: {
 				displayName: "Particle",
@@ -140,7 +184,43 @@ namespace ParticleCreator {
 					},
 				},
 			},
+			speed: {
+				displayName: "Particle speed",
+				tooltip: "The speed. Ka-Chau.",
+				types: {
+					number: {
+						config: 2,
+					},
+				},
+			},
+
+			flipbookLayout: {
+				displayName: "Flipbook layout",
+				tooltip: "idk ask the internet",
+				types: {
+					enum: {
+						config: "None",
+						elements: {
+							None: { displayName: "None" },
+							Grid2x2: { displayName: "Grid 2x2" },
+							Grid4x4: { displayName: "Grid 4x4" },
+							Grid8x8: { displayName: "Grid 8x8" },
+						},
+						elementOrder: ["None", "Grid2x2", "Grid4x4", "Grid8x8"],
+					},
+				},
+			},
+			rate: {
+				displayName: "Spawn rate",
+				tooltip: "How often the particles will spawn",
+				types: {
+					number: {
+						config: 5,
+					},
+				},
+			},
 		},
+
 		output: {
 			output: {
 				displayName: "Output particle",
