@@ -1,7 +1,7 @@
 /// <reference types="../../node_modules/@rbxts/types/include/generated/PluginSecurity.d.ts" />
 declare const plugin: Plugin;
 
-if (RunService.IsRunning()) {
+if (game.GetService("RunService").IsRunning()) {
 	new Instance("BindableEvent").Event.Wait();
 }
 
@@ -9,7 +9,7 @@ declare const TS: { import: (context: LuaSourceContainer, module: Instance, ...p
 const previmport = TS.import;
 const selfplugin = script;
 TS.import = (mscript, module, ...path) => {
-	if (module === ReplicatedStorage) {
+	if (module === game.GetService("ReplicatedStorage")) {
 		module = selfplugin.Parent!;
 	}
 
@@ -27,10 +27,10 @@ const copyScripts = (parent: Instance, parentTo: Instance) => {
 		}
 	}
 };
-copyScripts(StarterPlayer.WaitForChild("StarterPlayerScripts").WaitForChild("TS"), script.Parent!);
-copyScripts(ReplicatedStorage, script.Parent!);
+copyScripts(game.GetService("StarterPlayer").WaitForChild("StarterPlayerScripts").WaitForChild("TS"), script.Parent!);
+copyScripts(game.GetService("ReplicatedStorage"), script.Parent!);
 
-import { ReplicatedStorage, RunService, StarterGui, StarterPlayer } from "@rbxts/services";
+import { StarterGui } from "@rbxts/services";
 import { LabelControl } from "client/gui/controls/LabelControl";
 import { NumberTextBoxControl } from "client/gui/controls/NumberTextBoxControl";
 import { ButtonControl, TextButtonControl } from "engine/client/gui/Button";

@@ -1,7 +1,5 @@
 /// <reference types="../../node_modules/@rbxts/types/include/generated/PluginSecurity.d.ts" />
-
-import { CollectionService, HttpService, RunService } from "@rbxts/services";
-if (RunService.IsRunning()) {
+if (game.GetService("RunService").IsRunning()) {
 	new Instance("BindableEvent").Event.Wait();
 }
 
@@ -10,6 +8,7 @@ const log = (...args: unknown[]) => print("[AWMP]", ...args);
 
 log("Initializing");
 
+import { CollectionService, HttpService } from "@rbxts/services";
 import { LabelControl } from "client/gui/controls/LabelControl";
 import { TextButtonControl } from "engine/client/gui/Button";
 import { Control } from "engine/client/gui/Control";
