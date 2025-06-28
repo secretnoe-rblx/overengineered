@@ -1,7 +1,7 @@
 import { Players } from "@rbxts/services";
 import { AdminMessageController } from "client/AdminMessageController";
 import { SavePopup } from "client/gui/popup/SavePopup";
-import IntegrityChecker from "client/IntegrityChecker";
+import { IntegrityChecker } from "client/IntegrityChecker";
 import { PlayerDataStorage } from "client/PlayerDataStorage";
 import { ServerRestartController } from "client/ServerRestartController";
 import { TestRunner } from "client/test/TestRunner";

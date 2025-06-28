@@ -1,4 +1,4 @@
-import { HttpService, Players } from "@rbxts/services";
+import { Players } from "@rbxts/services";
 import { Component } from "engine/shared/component/Component";
 import { ComponentInstance } from "engine/shared/component/ComponentInstance";
 import { PlayerDataController } from "server/PlayerDataController";
@@ -16,7 +16,7 @@ export class ServerPlayerDataRemotesController extends Component {
 
 		const remotesFolder = new Instance("ScreenGui", player.WaitForChild("PlayerGui"));
 		remotesFolder.ResetOnSpawn = false;
-		remotesFolder.Name = HttpService.GenerateGUID(true);
+		remotesFolder.Name = "Remotes";
 
 		return di.resolveForeignClass(ServerPlayerDataRemotesController, [playerId, remotesFolder]);
 	}

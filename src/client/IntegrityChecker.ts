@@ -13,7 +13,6 @@ import {
 } from "@rbxts/services";
 import { Interface } from "engine/client/gui/Interface";
 import { LocalPlayer } from "engine/client/LocalPlayer";
-import { HostedService } from "engine/shared/di/HostedService";
 import { Objects } from "engine/shared/fixes/Objects";
 import { PlayerRank } from "engine/shared/PlayerRank";
 import { CustomRemotes } from "shared/Remotes";
@@ -22,8 +21,8 @@ import { CustomRemotes } from "shared/Remotes";
 const scriptInstances: string[] = ["LocalScript", "Script", "ModuleScript"];
 
 // Services
-const protectedServices = [StarterPlayer, StarterPack, ReplicatedStorage];
-const protectedServicesTypes: string[] = [
+const protectedServices = [StarterPlayer, StarterPack, ReplicatedStorage, ReplicatedFirst];
+const protectedServicesClasses: string[] = [
 	"Folder",
 	"RemoteEvent",
 	"BindableEvent",
@@ -35,6 +34,9 @@ const protectedServicesTypes: string[] = [
 	...scriptInstances,
 ];
 const forbiddenServices = ["MessagingService", "AnimationFromVideoCreatorService", "VirtualInputManager"];
+
+// StarterGui
+const starterGuiProtectedClasses = ["ScreenGui", ...scriptInstances];
 
 // Player
 const forbiddenCharacterClassNames: string[] = [
@@ -72,13 +74,11 @@ const forbiddenLogPrefixes = [
 ];
 
 /** Anti-exploit system */
-export default class IntegrityChecker extends HostedService {
+export class IntegrityChecker {
 	static readonly whitelist = new Set<Instance>();
-	static readonly globalsAllowedKeys: string[] = [];
+	private readonly globalsAllowedKeys: string[] = [];
 
 	constructor() {
-		super();
-
 		// Protect logging
 		LogService.MessageOut.Connect((message, _) => {
 			for (const prefix of forbiddenLogPrefixes) {
@@ -101,32 +101,37 @@ export default class IntegrityChecker extends HostedService {
 		this.initializeServicesProtection();
 		this.initializeCharacterProtection();
 		this.initializeGUIProtection();
+		this.initializeStarterGUIProtection();
 
-		this.event.loop(1, () => {
-			// Forbidden services checking
-			for (const serviceName of forbiddenServices) {
-				if (this.findService(serviceName)) {
-					this.handle(`forbidden service found: ${serviceName}`);
+		task.spawn(() => {
+			while (wait(1)[0]) {
+				// Forbidden services checking
+				for (const serviceName of forbiddenServices) {
+					if (this.findService(serviceName)) {
+						this.handle(`forbidden service found: ${serviceName}`);
+					}
 				}
-			}
 
-			// Globals checking
-			this.scanGlobals();
+				// Globals checking
+				this.scanGlobals();
 
-			// TESTME: Check for game:HttpGet existence
-			const [success, _] = pcall(() => game["HttpGet" as never] !== undefined);
-			if (success) {
-				this.handle("game:HttpGet exists");
-			}
-
-			// TESTME: Block assets loading
-			// Detections: Dex detection, Infinite yield, JJSploit and more
-			ContentProvider.PreloadAsync([game.GetService("CoreGui")], (assetId, _) => {
-				const assetID = assetId.gsub("rbxassetid://", "")[0].gsub("http://www.roblox.com/asset/?id=", "")[0];
-				if (["137842439297855", "1204397029", "2764171053", "1352543873"].includes(assetID)) {
-					this.handle(`asset loaded: ${assetId}`);
+				// TESTME: Check for game:HttpGet existence
+				const [success, _] = pcall(() => game["HttpGet" as never] !== undefined);
+				if (success) {
+					this.handle("game:HttpGet exists");
 				}
-			});
+
+				// TESTME: Block assets loading
+				// Detections: Dex detection, Infinite yield, JJSploit and more
+				ContentProvider.PreloadAsync([game.GetService("CoreGui")], (assetId, _) => {
+					const assetID = assetId
+						.gsub("rbxassetid://", "")[0]
+						.gsub("http://www.roblox.com/asset/?id=", "")[0];
+					if (["137842439297855", "1204397029", "2764171053", "1352543873"].includes(assetID)) {
+						this.handle(`asset loaded: ${assetId}`);
+					}
+				});
+			}
 		});
 
 		// Protect service itself
@@ -138,7 +143,7 @@ export default class IntegrityChecker extends HostedService {
 	scanGlobals() {
 		const globals = Objects.keys(_G);
 		for (const key of globals) {
-			if (IntegrityChecker.globalsAllowedKeys.includes(key)) {
+			if (this.globalsAllowedKeys.includes(key)) {
 				continue;
 			}
 
@@ -146,12 +151,12 @@ export default class IntegrityChecker extends HostedService {
 
 			// Basically a check for Promise and import, which are used by the engine and should not be considered as a violation
 			if (type(data) === "table" && data.Promise !== undefined && data.import !== undefined) {
-				IntegrityChecker.globalsAllowedKeys.push(key);
+				this.globalsAllowedKeys.push(key);
 				continue;
 			}
 
 			this.handle(`global variable found: ${key}`);
-			IntegrityChecker.globalsAllowedKeys.push(key);
+			this.globalsAllowedKeys.push(key);
 		}
 	}
 
@@ -213,11 +218,37 @@ export default class IntegrityChecker extends HostedService {
 		return false;
 	}
 
+	initializeStarterGUIProtection() {
+		StarterGui.DescendantAdded.Connect((desc) => {
+			task.wait();
+
+			if (this.isWhitelisted(desc)) {
+				return;
+			}
+
+			if (starterGuiProtectedClasses.includes(desc.ClassName)) {
+				this.handle(`${desc.ClassName} added to StarterGui: ${desc.GetFullName()}`);
+			}
+		});
+
+		StarterGui.DescendantRemoving.Connect((desc) => {
+			task.wait();
+
+			if (this.isWhitelisted(desc)) {
+				return;
+			}
+
+			if (starterGuiProtectedClasses.includes(desc.ClassName)) {
+				this.handle(`${desc.ClassName} removed from StarterGui: ${desc.GetFullName()}`);
+			}
+		});
+	}
+
 	/** Protection against modification of player GUI */
 	// TODO: implement protection against other modifications of PlayerGui
 	initializeGUIProtection() {
 		const starterGuiInstances = StarterGui.GetChildren().map((child) => child.Name);
-		const guiNamesWhitelist = ["ContextActionGui", "Sun", "TouchGui", "RbxCameraUI"];
+		const guiNamesWhitelist = ["ContextActionGui", "Sun", "TouchGui", "RbxCameraUI", "Remotes"];
 
 		Interface.getPlayerGui().ChildAdded.Connect((desc) => {
 			task.wait();
@@ -244,33 +275,29 @@ export default class IntegrityChecker extends HostedService {
 
 	/** Protection against character modification (e.g. adding BodyMovers for flying) */
 	initializeCharacterProtection() {
-		this.event.subscribeObservable(
-			LocalPlayer.character,
-			(character) => {
-				if (!character) return;
+		LocalPlayer.character.subscribe((character) => {
+			if (!character) return;
 
-				character.DescendantAdded.Connect((desc) => {
-					task.wait();
+			character.DescendantAdded.Connect((desc) => {
+				task.wait();
 
-					if (this.isWhitelisted(desc)) {
+				if (this.isWhitelisted(desc)) {
+					return;
+				}
+
+				if (forbiddenCharacterClassNames.includes(desc.ClassName)) {
+					this.handle(`${desc.ClassName} added to character`);
+				}
+
+				if (scriptInstances.includes(desc.ClassName)) {
+					if (desc.Name === "Animate" || desc.Name === "Health") {
 						return;
 					}
 
-					if (forbiddenCharacterClassNames.includes(desc.ClassName)) {
-						this.handle(`${desc.ClassName} added to character`);
-					}
-
-					if (scriptInstances.includes(desc.ClassName)) {
-						if (desc.Name === "Animate" || desc.Name === "Health") {
-							return;
-						}
-
-						this.handle(`${desc.ClassName} added to character: ${desc.GetFullName()}`);
-					}
-				});
-			},
-			true,
-		);
+					this.handle(`${desc.ClassName} added to character: ${desc.GetFullName()}`);
+				}
+			});
+		}, true);
 	}
 
 	/** Protection against modification of protected services */
@@ -278,7 +305,7 @@ export default class IntegrityChecker extends HostedService {
 		for (const service of protectedServices) {
 			// Service name changed
 			service.GetPropertyChangedSignal("Name").Connect(() => {
-				if (protectedServicesTypes.includes(service.ClassName)) {
+				if (protectedServicesClasses.includes(service.ClassName)) {
 					this.handle(`${service.ClassName} renamed: ${service.Name}`);
 				}
 			});
@@ -300,16 +327,16 @@ export default class IntegrityChecker extends HostedService {
 
 			// Protect instance property changes
 			for (const instance of instances) {
-				if (!protectedServicesTypes.includes(instance.ClassName)) continue;
+				if (!protectedServicesClasses.includes(instance.ClassName)) continue;
 
 				instance.GetPropertyChangedSignal("Name").Connect(() => {
-					if (protectedServicesTypes.includes(instance.ClassName)) {
+					if (protectedServicesClasses.includes(instance.ClassName)) {
 						this.handle(`${instance.ClassName} renamed in ${service.Name}: ${instance.Name}`);
 					}
 				});
 
 				instance.GetPropertyChangedSignal("Parent").Connect(() => {
-					if (protectedServicesTypes.includes(instance.ClassName)) {
+					if (protectedServicesClasses.includes(instance.ClassName)) {
 						this.handle(
 							`${instance.ClassName} moved or deleted in ${service.Name}: ${instance.GetFullName()}`,
 						);

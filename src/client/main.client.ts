@@ -3,6 +3,7 @@ import { LoadingController } from "client/controller/LoadingController";
 import { Anim } from "client/gui/Anim";
 import { BSOD } from "client/gui/BSOD";
 import { Interface } from "client/gui/Interface";
+import { IntegrityChecker } from "client/IntegrityChecker";
 import { SandboxGame } from "client/SandboxGame";
 import { LocalPlayer } from "engine/client/LocalPlayer";
 import { Transforms } from "engine/shared/component/Transforms";
@@ -12,6 +13,8 @@ import { GameHostBuilder } from "engine/shared/GameHostBuilder";
 import { TestFramework } from "engine/shared/TestFramework";
 import { gameInfo } from "shared/GameInfo";
 import type { TransformProps } from "engine/shared/component/Transform";
+
+new IntegrityChecker();
 
 LocalPlayer.character.waitOnceFor(
 	(character) => character !== undefined,
