@@ -2,9 +2,11 @@ import { ConfirmPopup } from "client/gui/popup/ConfirmPopup";
 import type { MainScreenLayout } from "client/gui/MainScreenLayout";
 import type { PopupController } from "client/gui/PopupController";
 import type { BuildingMode } from "client/modes/build/BuildingMode";
+import type { ToolBase } from "client/tools/ToolBase";
 import type { ToolController } from "client/tools/ToolController";
 import type { TutorialDescription } from "client/tutorial2/TutorialDescription";
 import type { TutorialStarter } from "client/tutorial2/TutorialStarter";
+import type { TutorialStepComponent } from "client/tutorial2/TutorialStepController";
 
 const start = (tutorial: TutorialStarter, firstTime: boolean) => {
 	tutorial.$onInjectAuto(
@@ -20,6 +22,13 @@ const start = (tutorial: TutorialStarter, firstTime: boolean) => {
 
 			const gui = tc.gui;
 			const tools = buildingMode.tools;
+
+			const enableOnlyTools = (parent: TutorialStepComponent, ...tools: readonly ToolBase[]) => {
+				parent.parentFunc(
+					() => toolController.enabledTools.enableOnly(...tools),
+					() => toolController.enabledTools.enableAll(),
+				);
+			};
 
 			if (firstTime) {
 				gui.progress.setStopAction((stop) => {
@@ -38,6 +47,10 @@ const start = (tutorial: TutorialStarter, firstTime: boolean) => {
 			// intro
 			step.step((parent, finish) => {
 				parent.parent(tc.disableAllInput());
+				parent.parentFunc(
+					() => toolController.enabledTools.disableAll(),
+					() => toolController.enabledTools.enableAll(),
+				);
 				parent.parent(gui.createFullScreenFade());
 				parent.parent(
 					gui
@@ -49,16 +62,15 @@ const start = (tutorial: TutorialStarter, firstTime: boolean) => {
 				);
 			});
 
-			// select Block in build tool
+			// place block
 			step.sequence()
+				.withOnStart(() => toolController.enabledTools.enableOnly(buildingMode.tools.buildTool))
+				.withOnEnd(() => toolController.enabledTools.enableAll)
+
 				.conditional({
 					condition: () => toolController.selectedTool.get() === buildingMode.tools.buildTool,
 					run: (parent) => {
 						parent.parent(tc.disableAllInputExcept([Enum.KeyCode.One]));
-						parent.parentFunc(
-							() => toolController.enabledTools.enableOnly(buildingMode.tools.buildTool),
-							() => toolController.enabledTools.enableAll(),
-						);
 						parent.parent(gui.createFullScreenFadeWithHoleAround(mainScreen.hotbar.instance, Vector2.zero));
 						parent.parent(
 							gui
@@ -104,23 +116,83 @@ const start = (tutorial: TutorialStarter, firstTime: boolean) => {
 								.withText("select bock BLOCK"),
 						);
 					},
+				})
+				.step((parent, finish) => {
+					parent.parentFunc(
+						() => toolController.enabledTools.enableOnly(buildingMode.tools.buildTool),
+						() => toolController.enabledTools.enableAll,
+					);
+					parent.parent(
+						gui
+							.createText() //
+							.withText(
+								"Now using your BUILD TOOL and your BLOCKS.BLOCK, place a BLOCK in the HIGHGLITH",
+							),
+					);
+
+					parent.parent(
+						plot.processDiff(
+							{
+								version: 32,
+								added: [
+									{ uuid: "0" as BlockUuid, id: "block", location: new CFrame(0, 1.5, 0) },
+									{ uuid: "1" as BlockUuid, id: "block", location: new CFrame(2, 1.5, 0) },
+								],
+							},
+							finish,
+						),
+					);
 				});
 
-			// place block
-			step.step((parent, finish) => {
-				parent.parent(
-					gui
-						.createText() //
-						.withText("Now using your BUILD TOOL and your BLOCKS.BLOCK, place a BLOCK in the HIGHGLITH"),
-				);
+			// delete block
+			step.sequence()
+				.conditional({
+					condition: () => toolController.selectedTool.get() === buildingMode.tools.deleteTool,
+					run: (parent) => {
+						parent.parentFunc(
+							() =>
+								toolController.enabledTools.enableOnly(
+									buildingMode.tools.buildTool,
+									buildingMode.tools.deleteTool,
+								),
+							() => toolController.enabledTools.enableAll,
+						);
+						parent.parent(tc.disableAllInputExcept([Enum.KeyCode.One, Enum.KeyCode.Three]));
+						parent.parent(gui.createFullScreenFadeWithHoleAround(mainScreen.hotbar.instance, Vector2.zero));
+						parent.parent(
+							gui
+								.createText() //
+								.withText("WRONG. you are WRONG")
+								.withText("THIS IS DELETE TOOL")
+								.withText("SELECT TOOL"),
+						);
+					},
+				})
+				.step((parent, finish) => {
+					parent.parentFunc(
+						() =>
+							toolController.enabledTools.enableOnly(
+								buildingMode.tools.buildTool,
+								buildingMode.tools.deleteTool,
+							),
+						() => toolController.enabledTools.enableAll,
+					);
+					parent.parent(
+						gui
+							.createText() //
+							.withText("destroy the IMPOSTER"),
+					);
 
-				parent.parent(
-					plot.build.waitForBuild({
-						version: 32,
-						blocks: [{ id: "block", location: new CFrame(0, 1.5, 0), uuid: "0" as BlockUuid }],
-					}),
-				);
-			});
+					parent.parent(
+						plot.processDiff(
+							{
+								version: 32,
+								removed: ["0" as BlockUuid],
+							},
+							finish,
+						),
+					);
+				});
 
 			tutorial.start();
 		},

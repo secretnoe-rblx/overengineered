@@ -52,17 +52,17 @@ interface TutorialConditionalStep {
 }
 
 /**
- * Tutorial step. Runs its function and destroys itself upon `complete()`.
- * Emulates {@link TutorialConditionalStep.condition}, with it returning `true` after the step has been completed.
+ * Tutorial step. Runs its function and destroys itself upon `finish()`.
+ * Emulates {@link TutorialConditionalStep.condition}, with it returning `true` after the step has been finished.
  */
 interface TutorialStep {
 	/**
 	 * Function which is invoked when this step starts
 	 * @param parent A component which will get destroyed upon this step completion
-	 * @param complete Function which completes this step
+	 * @param finish Function which finishes this step
 	 * @param ctx Step context
 	 */
-	readonly run: (parent: TutorialStepComponent, complete: () => void, ctx: TutorialStepContext) => void;
+	readonly run: (parent: TutorialStepComponent, finish: () => void, ctx: TutorialStepContext) => void;
 }
 const tutorialStepToConditional = (step: TutorialStep | TutorialStep["run"]): TutorialConditionalStep => {
 	if (typeIs(step, "function")) {
@@ -105,6 +105,18 @@ class ExecutorBase {
 
 		return ret;
 	}
+
+	protected readonly onStart: (() => void)[] = [];
+	protected readonly onEnd: (() => void)[] = [];
+
+	withOnStart(func: () => void): this {
+		this.onStart.push(func);
+		return this;
+	}
+	withOnEnd(func: () => void): this {
+		this.onEnd.push(func);
+		return this;
+	}
 }
 
 /**
@@ -112,7 +124,8 @@ class ExecutorBase {
  * Evaluates the step conditions every frame.
  */
 export class TutorialParallelExecutor extends ExecutorBase implements TutorialStep {
-	readonly run: TutorialStep["run"] = (parent, complete, ctx) => {
+	readonly run: TutorialStep["run"] = (parent, finish, ctx) => {
+		for (const func of this.onStart) func();
 		let completed = 0;
 
 		const nextCtx: TutorialStepContext = {
@@ -141,7 +154,8 @@ export class TutorialParallelExecutor extends ExecutorBase implements TutorialSt
 			sub.Disconnect();
 
 			ctx.setProgress(1);
-			complete();
+			for (const func of this.onEnd) func();
+			finish();
 		});
 	};
 }
@@ -153,7 +167,8 @@ export class TutorialParallelExecutor extends ExecutorBase implements TutorialSt
  * If any previous step condition starts returning `false`, destroys the current step and starts that one.
  */
 export class TutorialSequentialExecutor extends ExecutorBase implements TutorialStep {
-	readonly run: TutorialStep["run"] = (parent, complete, ctx) => {
+	readonly run: TutorialStep["run"] = (parent, finish, ctx) => {
+		for (const func of this.onStart) func();
 		let currentReq: TutorialConditionalStep | undefined;
 		let p: TutorialStepComponent | undefined;
 
@@ -182,7 +197,8 @@ export class TutorialSequentialExecutor extends ExecutorBase implements Tutorial
 			sub.Disconnect();
 
 			ctx.setProgress(1);
-			complete();
+			for (const func of this.onEnd) func();
+			finish();
 		});
 	};
 }

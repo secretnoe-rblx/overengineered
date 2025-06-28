@@ -3,35 +3,43 @@ import type { PlacedBlockConfig } from "shared/blockLogic/BlockConfig";
 import type { LatestSerializedBlock, LatestSerializedBlocks } from "shared/building/BlocksSerializer";
 import type { ReadonlyPlot } from "shared/building/ReadonlyPlot";
 
-export type DiffBlock = Replace<LatestSerializedBlock, "uuid", string>;
+export type DiffBlock = LatestSerializedBlock;
 
 type Added = {
 	readonly id: BlockId;
-	readonly uuid: string;
+	readonly uuid: BlockUuid;
 	readonly location: CFrame;
 };
-type Removed = string;
+type Removed = BlockUuid;
 type ConfigChanged = {
-	readonly uuid: string;
+	readonly uuid: BlockUuid;
 	readonly key: string;
 	readonly value: PartialThrough<PlacedBlockConfig[string]> | undefined;
 };
 type Moved = {
-	readonly uuid: string;
+	readonly uuid: BlockUuid;
 	readonly to: Vector3;
 };
 type Rotated = {
-	readonly uuid: string;
+	readonly uuid: BlockUuid;
 	readonly to: CFrame;
 };
 
 export type BuildingDiffChange = {
+	readonly version: number;
 	readonly added?: readonly Added[];
 	readonly removed?: readonly Removed[];
 	readonly configChanged?: readonly ConfigChanged[];
 	readonly moved?: readonly Moved[];
 	readonly rotated?: readonly Rotated[];
 };
+const arrKeys = [
+	"added",
+	"removed",
+	"configChanged",
+	"moved",
+	"rotated",
+] as const satisfies (keyof BuildingDiffChange)[];
 
 export namespace BuildingDiffer {
 	let before: LatestSerializedBlocks | undefined;
@@ -89,7 +97,7 @@ export namespace BuildingDiffer {
 	}
 	export function serializeDiffToTsCode(plot: ReadonlyPlot): string {
 		const serialized = BlocksSerializer.serializeToObject(plot);
-		const ret = diff((before ?? { version: serialized.version, blocks: [] }).blocks, serialized.blocks);
+		const ret = diff(before?.blocks ?? [], serialized.blocks, serialized.version);
 
 		return toTsCode(ret);
 	}
@@ -128,12 +136,21 @@ export namespace BuildingDiffer {
 		return left === right;
 	}
 
-	export function diff(before: readonly DiffBlock[], after: readonly DiffBlock[]): BuildingDiffChange {
+	export function diff(
+		before: readonly DiffBlock[],
+		after: readonly DiffBlock[],
+		version: number,
+	): BuildingDiffChange {
 		const beforeMap = before.mapToMap((block) => $tuple(block.uuid, block));
 		const afterMap = after.mapToMap((block) => $tuple(block.uuid, block));
 
-		type changes = { -readonly [k in keyof BuildingDiffChange]?: Writable<BuildingDiffChange[k]> };
-		const changes: changes = {};
+		type changes = {
+			-readonly [k in keyof BuildingDiffChange]?: Writable<BuildingDiffChange[k]>;
+		} & {
+			readonly version: number;
+		};
+
+		const changes: changes = { version };
 		for (const [uuid, before] of beforeMap) {
 			const after = afterMap.get(uuid);
 			if (!after) {
@@ -187,8 +204,11 @@ export namespace BuildingDiffer {
 				const block: Added = { id: after.id, location: after.location, uuid: after.uuid };
 				(changes.added ??= []).push(block);
 
-				for (const [k, v] of pairs(diff([block], [after]))) {
-					for (const item of v) {
+				const diff2 = diff([block], [after], version);
+				for (const k of arrKeys) {
+					if (!diff2[k]) continue;
+
+					for (const item of diff2[k]) {
 						(changes[k] ??= []).push(item as never);
 					}
 				}
