@@ -1,4 +1,5 @@
 import {
+	ContentProvider,
 	HttpService,
 	LogService,
 	Players,
@@ -111,6 +112,21 @@ export default class IntegrityChecker extends HostedService {
 
 			// Globals checking
 			this.scanGlobals();
+
+			// TESTME: Check for game:HttpGet existence
+			const [success, _] = pcall(() => game["HttpGet" as never] !== undefined);
+			if (success) {
+				this.handle("game:HttpGet exists");
+			}
+
+			// TESTME: Block assets loading
+			// Detections: Dex detection, Infinite yield, JJSploit and more
+			ContentProvider.PreloadAsync([game.GetService("CoreGui")], (assetId, _) => {
+				const assetID = assetId.gsub("rbxassetid://", "")[0].gsub("http://www.roblox.com/asset/?id=", "")[0];
+				if (["137842439297855", "1204397029", "2764171053", "1352543873"].includes(assetID)) {
+					this.handle(`asset loaded: ${assetId}`);
+				}
+			});
 		});
 
 		// Protect service itself
