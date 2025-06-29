@@ -3,11 +3,16 @@ import { InstanceBlockLogic } from "shared/blockLogic/BlockLogic";
 import { BlockSynchronizer } from "shared/blockLogic/BlockSynchronizer";
 import { BlockCreation } from "shared/blocks/BlockCreation";
 import { Colors } from "shared/Colors";
-import type { BlockLogicFullBothDefinitions, InstanceBlockLogicArgs } from "shared/blockLogic/BlockLogic";
+import type {
+	BlockLogicFullBothDefinitions,
+	BlockLogicFullInputDef,
+	InstanceBlockLogicArgs,
+} from "shared/blockLogic/BlockLogic";
 import type { BlockLogicTypes } from "shared/blockLogic/BlockLogicTypes";
 import type { BlockBuilder } from "shared/blocks/Block";
 
 const defaultParticleID = "14198353638";
+
 namespace ParticleEmitter {
 	const definition = {
 		input: {
@@ -20,6 +25,7 @@ namespace ParticleEmitter {
 						},
 					},
 				},
+				configHidden: true,
 			},
 			enabled: {
 				displayName: "Enabled",
@@ -51,7 +57,6 @@ namespace ParticleEmitter {
 
 		emitter.Enabled = enabled;
 		emitter.Texture = `rbxassetid://${properties.particleID}`;
-
 		if (properties.rate) emitter.Rate = properties.rate;
 		if (properties.flipbookLayout)
 			emitter.FlipbookLayout = Enum.ParticleFlipbookLayout[properties.flipbookLayout as never];
@@ -64,6 +69,15 @@ namespace ParticleEmitter {
 		if (properties.rotationSpeed) emitter.RotSpeed = new NumberRange(properties.rotationSpeed);
 		if (properties.squash) emitter.Squash = new NumberSequence(properties.squash);
 		if (properties.transparency) emitter.Transparency = new NumberSequence(properties.transparency);
+		if (properties.spreadAngle)
+			emitter.SpreadAngle = new Vector2(properties.spreadAngle.X, properties.spreadAngle.Y);
+		if (properties.velocityInheritance) emitter.VelocityInheritance = properties.velocityInheritance;
+		if (properties.lockedToPart) emitter.LockedToPart = properties.lockedToPart;
+		if (properties.orientation) emitter.Orientation = Enum.ParticleOrientation[properties.orientation as never];
+		if (properties.brightness) emitter.Brightness = properties.brightness;
+		if (properties.timeScale) emitter.TimeScale = properties.timeScale;
+		if (properties.size) emitter.Size = new NumberSequence(properties.size);
+		if (properties.drag) emitter.Drag = properties.drag;
 	};
 
 	class Logic extends InstanceBlockLogic<typeof definition, particleEmitter> {
@@ -100,126 +114,108 @@ namespace ParticleEmitter {
 }
 
 namespace ParticleCreator {
-	const defaultNum = {
-		types: { number: { config: 0 } },
+	const cnum = (config: number) => ({ number: { config } });
+	const cnumrange = (config: number, min: number, max: number) => ({
+		number: {
+			config,
+			clamp: {
+				min,
+				max,
+				step: 0.01,
+				showAsSlider: true,
+			},
+		},
+	});
+	const defaultNum = cnum(0);
+	const defaultBool = { bool: { config: false } };
+	const defaultVec = { vector3: { config: Vector3.zero } };
+	const defaultNumRange = cnumrange(0, 0, 1);
+
+	const stringIdType = {
+		string: {
+			config: defaultParticleID,
+		},
 	};
 
-	const definition = {
+	const inpCreate = (displayName: string, description: string, types: BlockLogicFullInputDef["types"]) => ({
+		displayName,
+		description,
+		types,
+	});
+
+	export const definition = {
 		inputOrder: [
 			"particleID",
-			"speed",
 			"color",
+			"size",
+			"speed",
 			"rate",
+			"lifetime",
 			"rotation",
 			"rotationSpeed",
 			"transparency",
+			"orientation",
 			"squash",
-			"lifetime",
 			"acceleration",
+			"spreadAngle",
+			"velocityInheritance",
 			"flipbookLayout",
-		],
+			"brightness",
+			"drag",
+			"timeScale",
+			"lockedToPart",
+		] as const satisfies (keyof BlockLogicTypes.ParticleValue | "particleID")[],
 		input: {
-			particleID: {
-				displayName: "Particle",
-				tooltip: "ID of the particle.",
-				types: {
-					string: {
-						config: defaultParticleID,
+			particleID: inpCreate("Particle", "ID of the particle.", stringIdType),
+			rotation: inpCreate("Rotation", "The rotation. Speaks for itself", defaultNum),
+			rotationSpeed: inpCreate("Rotation Speed", "How fast your particles will rotate", defaultNum),
+			transparency: inpCreate("Transparency", "It's like opaque-ness but the other way around", defaultNumRange),
+			color: inpCreate("Color", "The color of the spawned particles", { color: { config: Colors.white } }),
+			squash: inpCreate("Squash", "How squashed will the particles be", defaultNum),
+			lifetime: inpCreate("Lifetime", "How long will your particle exist until despawning", cnum(5)),
+			acceleration: inpCreate("Acceleration", "The acceleration of the spawned partice", defaultVec),
+			speed: inpCreate("Particle Speed", "The speed. Ka-Chau.", cnum(2)),
+			rate: inpCreate("Spawn Rate", "How often the particles will spawn", cnum(5)),
+			brightness: inpCreate("Brightness", "How bright the particle's texture is", cnum(1)),
+			size: inpCreate("Size", "The size of the partice", cnum(1)),
+			drag: inpCreate("Drag", "How fast the particle will decelerate", defaultNum),
+			velocityInheritance: inpCreate("Velocity Inheritance", "", defaultNum),
+			timeScale: inpCreate("Time Scale", "The speed of animation of the particle.", cnumrange(1, 0, 1)),
+			spreadAngle: inpCreate(
+				"Spread Angle",
+				"The direction particles will spread. Z-axis isn't used.",
+				defaultVec,
+			),
+			lockedToPart: inpCreate(
+				"Locked To Part",
+				"Determines if the particle gets affected by the spawner's movement",
+				defaultBool,
+			),
+			flipbookLayout: inpCreate("Flipbook Layout", "idk ask the internet", {
+				enum: {
+					config: "None",
+					elements: {
+						None: { displayName: "None" },
+						Grid2x2: { displayName: "Grid 2x2" },
+						Grid4x4: { displayName: "Grid 4x4" },
+						Grid8x8: { displayName: "Grid 8x8" },
 					},
+					elementOrder: ["None", "Grid2x2", "Grid4x4", "Grid8x8"],
 				},
-			},
-			rotation: {
-				displayName: "Rotation",
-				tooltip: "The rotation. Speaks for itself.",
-				...defaultNum,
-			},
-			rotationSpeed: {
-				displayName: "Rotation Speed",
-				tooltip: "How fast your particles will rotate",
-				...defaultNum,
-			},
-			transparency: {
-				displayName: "Transparency",
-				tooltip: "It's like opaque-ness but the other way around",
-				types: {
-					number: {
-						config: 0,
-						clamp: {
-							min: 0,
-							max: 1,
-							step: 0.01,
-							showAsSlider: true,
-						},
+			}),
+			orientation: inpCreate("Orientation", "Which way the paricle will be facing", {
+				enum: {
+					config: "FacingCamera",
+					elements: {
+						FacingCamera: { displayName: "Facing Camera" },
+						FacingCameraWorldUp: { displayName: "Facing Camera World Up" },
+						Velocityparallel: { displayName: "Velocity Parallel" },
+						VelocityPerpendicular: { displayName: "Velocity Perpendicular" },
 					},
+					elementOrder: ["FacingCamera", "FacingCameraWorldUp", "Velocityparallel", "VelocityPerpendicular"],
 				},
-			},
-			color: {
-				displayName: "Color",
-				tooltip: "The color of the spawned particles",
-				types: { color: { config: Colors.white } },
-			},
-			squash: {
-				displayName: "Squash",
-				tooltip: "How squashed will the particles be",
-				...defaultNum,
-			},
-
-			lifetime: {
-				displayName: "Lifetime",
-				tooltip: "How long will your particle exist until despawning",
-				types: {
-					number: {
-						config: 5,
-					},
-				},
-			},
-
-			acceleration: {
-				displayName: "Acceleration",
-				tooltip: "The acceleration of the spawned partice",
-				types: {
-					vector3: {
-						config: Vector3.zero,
-					},
-				},
-			},
-			speed: {
-				displayName: "Particle speed",
-				tooltip: "The speed. Ka-Chau.",
-				types: {
-					number: {
-						config: 2,
-					},
-				},
-			},
-
-			flipbookLayout: {
-				displayName: "Flipbook layout",
-				tooltip: "idk ask the internet",
-				types: {
-					enum: {
-						config: "None",
-						elements: {
-							None: { displayName: "None" },
-							Grid2x2: { displayName: "Grid 2x2" },
-							Grid4x4: { displayName: "Grid 4x4" },
-							Grid8x8: { displayName: "Grid 8x8" },
-						},
-						elementOrder: ["None", "Grid2x2", "Grid4x4", "Grid8x8"],
-					},
-				},
-			},
-			rate: {
-				displayName: "Spawn rate",
-				tooltip: "How often the particles will spawn",
-				types: {
-					number: {
-						config: 5,
-					},
-				},
-			},
-		},
-
+			}),
+		} satisfies { [k in keyof BlockLogicTypes.ParticleValue]: BlockLogicFullInputDef },
 		output: {
 			output: {
 				displayName: "Output particle",

@@ -138,17 +138,28 @@ export namespace BlockLogicTypes {
 
 	//
 	export type ParticleValue = {
+		readonly flipbookLayout?: string;
 		readonly particleID: string;
-		readonly speed?: number;
+
 		readonly acceleration?: Vector3;
+		readonly spreadAngle?: Vector3;
+
+		readonly color?: Color3;
+
+		readonly velocityInheritance?: number;
+		readonly lockedToPart?: boolean;
 		readonly rotationSpeed?: number;
 		readonly transparency?: number;
+		readonly orientation?: number;
+		readonly brightness?: number;
+		readonly timeScale?: number;
 		readonly rotation?: number;
 		readonly lifetime?: number;
 		readonly squash?: number;
-		readonly color?: Color3;
-		readonly flipbookLayout?: string;
+		readonly speed?: number;
 		readonly rate?: number;
+		readonly size?: number;
+		readonly drag?: number;
 	};
 
 	export type Particle = BCPrimitive<ParticleValue>;
