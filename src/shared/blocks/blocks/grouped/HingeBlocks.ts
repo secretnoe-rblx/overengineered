@@ -18,14 +18,28 @@ const definition = {
 		lowerAngleLimit: {
 			displayName: "Lower Angle",
 			types: {
-				number: { config: -45 },
+				number: {
+					config: -45,
+					clamp: {
+						min: -180,
+						max: 180,
+						showAsSlider: true,
+					},
+				},
 			},
 			connectorHidden: true,
 		},
 		upperAngleLimit: {
 			displayName: "Upper Angle",
 			types: {
-				number: { config: 45 },
+				number: {
+					config: 45,
+					clamp: {
+						min: -180,
+						max: 180,
+						showAsSlider: true,
+					},
+				},
 			},
 			connectorHidden: true,
 		},
