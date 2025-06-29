@@ -195,7 +195,6 @@ class Logic extends InstanceBlockLogic<typeof definition> {
 		super(definition, block);
 
 		const soundInstance = new Instance("Sound", this.instance.PrimaryPart);
-		this.onEnable(() => this.output.isPlaying.set("bool", false));
 		soundInstance.Played.Connect(() => this.output.isPlaying.set("bool", true));
 		soundInstance.Ended.Connect(() => this.output.isPlaying.set("bool", false));
 		this.output.isPlaying.set("bool", false);
