@@ -78,7 +78,11 @@ export class ServerPlayersController extends HostedService {
 				try {
 					data = players.get(player.UserId) ?? {};
 
-					if (!GameDefinitions.isTesting && (data as { placeId?: number }).placeId !== game.PlaceId) {
+					if (
+						!GameDefinitions.isTesting &&
+						(data as { placeId?: number }).placeId &&
+						(data as { placeId?: number }).placeId !== game.PlaceId
+					) {
 						const placeId = (data! as { placeId: number }).placeId;
 						task.spawn(() => {
 							TeleportService.TeleportAsync(placeId, [player]);
