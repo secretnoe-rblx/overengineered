@@ -46,6 +46,7 @@ const forbiddenCharacterClassNames: string[] = [
 	"BodyPosition",
 	"BodyAngularVelocity",
 	"BodyThrust",
+	"Highlight",
 ];
 
 // Prints
