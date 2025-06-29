@@ -301,6 +301,10 @@ if (fastunload) {
 			new Vector3(endX * 4 + 4, 500, endZ * 4 + 4),
 		);
 
+		if (math.min(region.Size.X, region.Size.Y, region.Size.Z) <= 0) {
+			return;
+		}
+
 		terrain.FillBlock(region.CFrame, region.Size, Enum.Material.Air);
 		terrain.FindFirstChild(chunkX + "," + chunkZ)?.Destroy();
 	});
