@@ -66,6 +66,7 @@ export class ServerPlayersController extends HostedService {
 
 					const controller = scope.resolveForeignClass(ServerPlayerController, [player, plot]);
 					controllers.add(player.UserId, controller);
+					player.AddTag("Loaded");
 
 					return { success: true, controller };
 				});

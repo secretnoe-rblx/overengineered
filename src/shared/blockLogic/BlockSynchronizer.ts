@@ -74,6 +74,9 @@ export class BlockSynchronizer<TArg extends { readonly block: BlockModel; reqid?
 				for (const player of Players.GetPlayers()) {
 					if (player === invoker) {
 						if (!this.sendBackToOwner) continue;
+						if (!player.HasTag("Loaded")) {
+							continue;
+						}
 
 						event.s2c.send(player, { ...arg, reqid: arg.reqid ?? 0 });
 						return;
@@ -187,6 +190,10 @@ export class BlockSynchronizer<TArg extends { readonly block: BlockModel; reqid?
 			}
 
 			for (const player of Players.GetPlayers()) {
+				if (!player.HasTag("Loaded")) {
+					continue;
+				}
+
 				let parg = arg;
 				let send = true;
 				if (this.serverMiddlewarePerPlayer) {
