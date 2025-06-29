@@ -36,6 +36,7 @@ export class Beacon extends InstanceComponent<PVInstance> {
 			if (!character) return;
 
 			const distance = part.GetPivot().Position.sub(character.GetPivot().Position).Magnitude;
+			if (!distance) return;
 
 			const transparencyMultiplier = 0.8;
 			const transparency = 1 - math.clamp(distance - this.showUpDistance, 0, 1) * transparencyMultiplier;
