@@ -6,7 +6,44 @@ import type { BlockLogicFullBothDefinitions, InstanceBlockLogicArgs } from "shar
 import type { BlockBuildersWithoutIdAndDefaults, BlockLogicInfo } from "shared/blocks/Block";
 
 const definition = {
-	input: {},
+	inputOrder: ["enableLimits", "lowerAngleLimit", "upperAngleLimit", "restitution"],
+	input: {
+		enableLimits: {
+			displayName: "Angles Limited",
+			tooltip: "Enable limits",
+			types: {
+				bool: { config: false },
+			},
+		},
+		lowerAngleLimit: {
+			displayName: "Lower Angle",
+			types: {
+				number: { config: -45 },
+			},
+			connectorHidden: true,
+		},
+		upperAngleLimit: {
+			displayName: "Upper Angle",
+			types: {
+				number: { config: 45 },
+			},
+			connectorHidden: true,
+		},
+		restitution: {
+			displayName: "Restitution",
+			types: {
+				number: {
+					config: 0,
+					clamp: {
+						min: 0,
+						max: 1,
+						showAsSlider: true,
+					},
+				},
+			},
+			connectorHidden: true,
+		},
+	},
 	output: {},
 } satisfies BlockLogicFullBothDefinitions;
 
@@ -22,6 +59,15 @@ export class Logic extends InstanceBlockLogic<typeof definition, HingeBlock> {
 	constructor(block: InstanceBlockLogicArgs) {
 		super(definition, block);
 
+		const hinge = this.instance.Base.HingeConstraint;
+		this.on(({ enableLimits, lowerAngleLimit, upperAngleLimit, restitution }) => {
+			hinge.LimitsEnabled = enableLimits;
+			hinge.LowerAngle = lowerAngleLimit;
+			hinge.UpperAngle = upperAngleLimit;
+			hinge.Restitution = restitution;
+		});
+
+		// extra logic to break hinges if too much stress is applied
 		const blockScale = BlockManager.manager.scale.get(this.instance) ?? Vector3.one;
 		this.onTicc(() => {
 			const base = this.instance.FindFirstChild("BottomPart") as BasePart | undefined;
