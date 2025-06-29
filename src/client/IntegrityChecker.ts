@@ -1,19 +1,17 @@
 import {
 	ContentProvider,
-	HttpService,
 	LogService,
 	Players,
 	ReplicatedFirst,
 	ReplicatedStorage,
-	RunService,
 	StarterGui,
 	StarterPack,
 	StarterPlayer,
-	Workspace,
 } from "@rbxts/services";
 import { Interface } from "engine/client/gui/Interface";
 import { LocalPlayer } from "engine/client/LocalPlayer";
 import { Objects } from "engine/shared/fixes/Objects";
+import { PlayerRank } from "engine/shared/PlayerRank";
 import { CustomRemotes } from "shared/Remotes";
 
 // Random
@@ -89,14 +87,14 @@ export class IntegrityChecker {
 		});
 
 		// Hide services names (protection against some exploits)
-		if (!RunService.IsStudio()) {
-			Players.Name = HttpService.GenerateGUID(false);
-			ReplicatedFirst.Name = HttpService.GenerateGUID(false);
-			ReplicatedStorage.Name = HttpService.GenerateGUID(false);
-			StarterGui.Name = HttpService.GenerateGUID(false);
-			Workspace.Name = HttpService.GenerateGUID(false);
-			StarterPlayer.Name = HttpService.GenerateGUID(false);
-		}
+		// if (!RunService.IsStudio()) {
+		// 	Players.Name = HttpService.GenerateGUID(false);
+		// 	ReplicatedFirst.Name = HttpService.GenerateGUID(false);
+		// 	ReplicatedStorage.Name = HttpService.GenerateGUID(false);
+		// 	StarterGui.Name = HttpService.GenerateGUID(false);
+		// 	Workspace.Name = HttpService.GenerateGUID(false);
+		// 	StarterPlayer.Name = HttpService.GenerateGUID(false);
+		// }
 
 		this.initializeServicesProtection();
 		this.initializeCharacterProtection();
@@ -213,10 +211,10 @@ export class IntegrityChecker {
 	}
 
 	handle(violation: string) {
-		// if (PlayerRank.isAdmin(LocalPlayer.player)) {
-		// 	$err(`Integrity violation detected: ${violation}`);
-		// 	return;
-		// }
+		if (PlayerRank.isAdmin(LocalPlayer.player)) {
+			$err(`Integrity violation detected: ${violation}`);
+			return;
+		}
 
 		CustomRemotes.integrityViolation.send(violation);
 	}
@@ -259,7 +257,7 @@ export class IntegrityChecker {
 	// TODO: implement protection against other modifications of PlayerGui
 	initializeGUIProtection() {
 		const starterGuiInstances = StarterGui.GetChildren().map((child) => child.Name);
-		const guiNamesWhitelist = ["ContextActionGui", "Sun", "TouchGui", "RbxCameraUI", "Remotes"];
+		const guiNamesWhitelist = ["ContextActionGui", "Sun", "TouchGui", "RbxCameraUI", "Remotes", "ProximityPrompts"];
 
 		Interface.getPlayerGui().ChildAdded.Connect((desc) => {
 			task.wait();

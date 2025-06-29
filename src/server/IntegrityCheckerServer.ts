@@ -9,7 +9,7 @@ export class IntegrityCheckerServer extends HostedService {
 
 		// FIXME: test enough and then add bans
 		CustomRemotes.integrityViolation.invoked.Connect((player, violation) => {
-			player.Kick();
+			// player.Kick();
 
 			networkLogging.log({
 				source: networkLogging.getSourceFromPlayer(player),

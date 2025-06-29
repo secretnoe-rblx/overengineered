@@ -1,4 +1,5 @@
 import { ReplicatedFirst, Workspace } from "@rbxts/services";
+import { IntegrityChecker } from "client/IntegrityChecker";
 import type { ChunkGenerator, ChunkRenderer } from "client/terrain/ChunkLoader";
 import type { InfiniteTerrainActor } from "client/terrain/InfiniteTerrainActor";
 
@@ -14,6 +15,7 @@ export const TerrainChunkRenderer = (
 	const actorAmount = 8;
 
 	const folder = new Instance("Folder", ReplicatedFirst);
+	IntegrityChecker.whitelist.add(folder);
 	const actors: InfiniteTerrainActor[] = [];
 	let selectedActor = 0;
 
@@ -33,6 +35,7 @@ export const TerrainChunkRenderer = (
 			actor.Parent = folder;
 
 			const actorScript = (script.Parent!.WaitForChild("InfiniteTerrainActor") as ModuleScript).Clone();
+			IntegrityChecker.whitelist.add(actorScript);
 			actorScript.Parent = actor;
 
 			const tactor = (require(actorScript) as { default: InfiniteTerrainActor }).default;
