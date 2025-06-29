@@ -134,6 +134,17 @@ export class IntegrityChecker {
 			}
 		});
 
+		// Backpack is not used
+		(Players.LocalPlayer as unknown as { Backpack: Backpack }).Backpack.DescendantAdded.Connect((desc) => {
+			task.wait();
+
+			if (this.isWhitelisted(desc)) {
+				return;
+			}
+
+			this.handle(`${desc.ClassName} added to Backpack: ${desc.GetFullName()}`);
+		});
+
 		// Protect service itself
 		script.Destroying.Connect(() => {
 			this.handle("service destroyed");
