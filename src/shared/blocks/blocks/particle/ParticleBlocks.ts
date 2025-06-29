@@ -104,7 +104,7 @@ namespace ParticleEmitter {
 	export const Block = {
 		...BlockCreation.defaults,
 		id: "particleemitter",
-		displayName: "Particle emitter",
+		displayName: "Particle Emitter",
 		description: `Spawns various prepared particles.`,
 
 		limit: 20,
