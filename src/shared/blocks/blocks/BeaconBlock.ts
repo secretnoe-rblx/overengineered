@@ -110,6 +110,8 @@ class Logic extends InstanceBlockLogic<typeof definition> {
 			timePassed = (timePassed + seconds) % maxTimeInSeconds;
 			const progress = 1 - timePassed / maxTimeInSeconds;
 
+			if (!progress) return;
+
 			updateColor(startColor.Lerp(mc.get(), progress));
 		});
 
