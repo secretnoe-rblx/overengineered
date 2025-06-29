@@ -209,10 +209,10 @@ namespace ParticleCreator {
 					elements: {
 						FacingCamera: { displayName: "Facing Camera" },
 						FacingCameraWorldUp: { displayName: "Facing Camera World Up" },
-						Velocityparallel: { displayName: "Velocity Parallel" },
+						VelocityParallel: { displayName: "Velocity Parallel" },
 						VelocityPerpendicular: { displayName: "Velocity Perpendicular" },
 					},
-					elementOrder: ["FacingCamera", "FacingCameraWorldUp", "Velocityparallel", "VelocityPerpendicular"],
+					elementOrder: ["FacingCamera", "FacingCameraWorldUp", "VelocityParallel", "VelocityPerpendicular"],
 				},
 			}),
 		} satisfies { [k in keyof BlockLogicTypes.ParticleValue]: BlockLogicFullInputDef },
