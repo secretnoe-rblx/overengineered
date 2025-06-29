@@ -43,6 +43,10 @@ const updateEventType = t.interface({
 type UpdateData = t.Infer<typeof updateEventType>;
 
 const update = ({ block, color, data }: UpdateData) => {
+	if (!block.FindFirstChild("Part")) {
+		return;
+	}
+
 	block.Part.SurfaceGui.TextLabel.Text = dataToString(data);
 	block.Part.SurfaceGui.TextLabel.TextColor3 = color;
 };
