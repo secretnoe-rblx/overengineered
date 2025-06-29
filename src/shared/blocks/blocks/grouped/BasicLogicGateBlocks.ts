@@ -188,7 +188,7 @@ namespace Nand {
 		...BlockCreation.defaults,
 		id: "nand",
 		displayName: "NAND Gate",
-		description: "Returns true when both inputs are false",
+		description: "Returns true while any input is false",
 		modelSource: autoModel("DoubleGenericLogicBlockPrefab", "NAND", BlockCreation.Categories.bool),
 
 		logic: { definition, ctor: Logic },
