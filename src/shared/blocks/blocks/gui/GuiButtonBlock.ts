@@ -147,6 +147,8 @@ class Logic extends BlockLogic<typeof definition> {
 		label.MouseButton1Down.Connect(() => this.output.pressed.set("bool", true));
 		label.MouseButton1Up.Connect(() => this.output.pressed.set("bool", false));
 		label.MouseLeave.Connect(() => this.output.pressed.set("bool", false));
+
+		this.output.pressed.set("bool", false);
 	}
 }
 
