@@ -34,7 +34,6 @@ import { SharedMachine } from "shared/blockLogic/SharedMachine";
 import { ServerPartUtils } from "server/plots/ServerPartUtils";
 import { AutoPlotWelder } from "shared/building/PlotWelder";
 import { Component } from "engine/shared/component/Component";
-import { IntegrityCheckerServer } from "server/IntegrityCheckerServer";
 
 const builder = new GameHostBuilder(gameInfo);
 SandboxGame.initialize(builder);
@@ -79,7 +78,6 @@ initSpawnVehicle();
 
 // Initializing event workers
 RemoteEvents.initialize();
-IntegrityCheckerServer.initialize();
 
 // Game boot flags
 LaunchDataController.initialize();

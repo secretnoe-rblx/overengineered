@@ -14,7 +14,6 @@ import {
 import { Interface } from "engine/client/gui/Interface";
 import { LocalPlayer } from "engine/client/LocalPlayer";
 import { Objects } from "engine/shared/fixes/Objects";
-import { PlayerRank } from "engine/shared/PlayerRank";
 import { CustomRemotes } from "shared/Remotes";
 
 // Random
@@ -214,10 +213,10 @@ export class IntegrityChecker {
 	}
 
 	handle(violation: string) {
-		if (PlayerRank.isAdmin(LocalPlayer.player)) {
-			$err(`Integrity violation detected: ${violation}`);
-			return;
-		}
+		// if (PlayerRank.isAdmin(LocalPlayer.player)) {
+		// 	$err(`Integrity violation detected: ${violation}`);
+		// 	return;
+		// }
 
 		CustomRemotes.integrityViolation.send(violation);
 	}

@@ -7,6 +7,7 @@ import { ServerBlockLogicController } from "server/blocks/ServerBlockLogicContro
 import { ExternalDatabaseBackendPlayers, ExternalDatabaseBackendSlots } from "server/database/ExternalDatabaseBackend";
 import { PlayerDatabase } from "server/database/PlayerDatabase";
 import { SlotDatabase } from "server/database/SlotDatabase";
+import { IntegrityCheckerServer } from "server/IntegrityCheckerServer";
 import { PlayModeController as PlayModeController } from "server/modes/PlayModeController";
 import { UnreliableRemoteController } from "server/network/event/UnreliableRemoteHandler";
 import { PlayersCollision } from "server/PlayersCollision";
@@ -30,6 +31,7 @@ export namespace SandboxGame {
 
 		BaseGame.initialize(builder);
 		builder.services.registerService(NetworkLogging);
+		builder.services.registerService(IntegrityCheckerServer);
 
 		// FIXME: Walkaround proxy is down, should we set up our own?
 		// builder.services.registerService(DiscordLogging).withArgs([
