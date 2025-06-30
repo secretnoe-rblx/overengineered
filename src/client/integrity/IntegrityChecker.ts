@@ -8,6 +8,7 @@ import {
 	StarterPack,
 	StarterPlayer,
 } from "@rbxts/services";
+import { AssetsIntegrityChecker } from "client/integrity/AssetsIntegrityChecker";
 import { CharacterIntegrityChecker } from "client/integrity/CharacterIntegrityChecker";
 import { ForbiddenServicesIntegrityChecker } from "client/integrity/ForbiddenServicesIntegrityChecker";
 import { GlobalsIntegrityChecker } from "client/integrity/GlobalsIntegrityChecker";
@@ -211,5 +212,6 @@ export class IntegrityChecker extends ProtectedClass {
 		new ForbiddenServicesIntegrityChecker(this);
 		new CharacterIntegrityChecker(this);
 		new LoggingIntegrityChecker(this);
+		new AssetsIntegrityChecker(this);
 	}
 }
