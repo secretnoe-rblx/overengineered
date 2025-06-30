@@ -133,16 +133,16 @@ class ExecutorBase {
 		return ret;
 	}
 
-	protected readonly onStart: (() => void)[] = [];
-	protected readonly onEnd: (() => void)[] = [];
+	protected readonly onStart: ((parent: TutorialStepComponent) => void)[] = [];
+	protected readonly onEnd: ((parent: TutorialStepComponent) => void)[] = [];
 
 	/** Adds a function to run when this **executor** starts */
-	withOnStart(func: () => void): this {
+	withOnStart(func: (parent: TutorialStepComponent) => void): this {
 		this.onStart.push(func);
 		return this;
 	}
 	/** Adds a function to run when this **executor** ends (finished or destroyed) */
-	withOnEnd(func: () => void): this {
+	withOnEnd(func: (parent: TutorialStepComponent) => void): this {
 		this.onEnd.push(func);
 		return this;
 	}
@@ -155,7 +155,7 @@ class ExecutorBase {
 export class TutorialParallelExecutor extends ExecutorBase implements TutorialStep {
 	readonly run: TutorialStep["run"] = (parent, finish, ctx) => {
 		for (const func of this.onStart) {
-			func();
+			func(parent);
 		}
 
 		let completed = 0;
@@ -170,7 +170,7 @@ export class TutorialParallelExecutor extends ExecutorBase implements TutorialSt
 
 			ctx.setProgress(1);
 			for (const func of this.onEnd) {
-				func();
+				func(parent);
 			}
 			this.onEnd.clear();
 			finish();
@@ -186,7 +186,7 @@ export class TutorialParallelExecutor extends ExecutorBase implements TutorialSt
 
 		parent.onDestroy(() => {
 			for (const func of this.onEnd) {
-				func();
+				func(parent);
 			}
 		});
 		const sub = parent.event.loop(0, () => {
@@ -214,7 +214,7 @@ export class TutorialParallelExecutor extends ExecutorBase implements TutorialSt
 export class TutorialSequentialExecutor extends ExecutorBase implements TutorialStep {
 	readonly run: TutorialStep["run"] = (parent, finish, ctx) => {
 		for (const func of this.onStart) {
-			func();
+			func(parent);
 		}
 
 		let currentReq: TutorialConditionalStep | undefined;
@@ -222,7 +222,7 @@ export class TutorialSequentialExecutor extends ExecutorBase implements Tutorial
 
 		parent.onDestroy(() => {
 			for (const func of this.onEnd) {
-				func();
+				func(parent);
 			}
 		});
 
@@ -232,7 +232,7 @@ export class TutorialSequentialExecutor extends ExecutorBase implements Tutorial
 
 			ctx.setProgress(1);
 			for (const func of this.onEnd) {
-				func();
+				func(parent);
 			}
 			this.onEnd.clear();
 			finish();
@@ -296,7 +296,7 @@ export class NoBacktrackTutorialSequentialExecutor extends ExecutorBase implemen
 
 	readonly run: TutorialStep["run"] = (parent, finish, ctx) => {
 		for (const func of this.onStart) {
-			func();
+			func(parent);
 		}
 
 		let currentReq: TutorialConditionalStep | undefined;
@@ -304,7 +304,7 @@ export class NoBacktrackTutorialSequentialExecutor extends ExecutorBase implemen
 
 		parent.onDestroy(() => {
 			for (const func of this.onEnd) {
-				func();
+				func(parent);
 			}
 		});
 
@@ -314,7 +314,7 @@ export class NoBacktrackTutorialSequentialExecutor extends ExecutorBase implemen
 
 			ctx.setProgress(1);
 			for (const func of this.onEnd) {
-				func();
+				func(parent);
 			}
 			this.onEnd.clear();
 			finish();

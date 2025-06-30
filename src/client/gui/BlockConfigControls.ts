@@ -1181,6 +1181,7 @@ class ConfigAutoValueWrapper extends Control<ConfigValueWrapperDefinition> {
 		wireTypes: WireTypes,
 	) {
 		super(gui);
+		gui.Name = key;
 
 		const control = this.parent(new ConfigValueWrapper(gui));
 

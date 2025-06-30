@@ -1,5 +1,8 @@
 import { RunService } from "@rbxts/services";
+import { MultiBlockConfigControl } from "client/gui/BlockConfigControls";
 import { ConfirmPopup } from "client/gui/popup/ConfirmPopup";
+import { Element } from "engine/shared/Element";
+import { RocketBlocks } from "shared/blocks/blocks/RocketEngineBlocks";
 import type { MainScreenLayout } from "client/gui/MainScreenLayout";
 import type { PopupController } from "client/gui/PopupController";
 import type { BuildingMode } from "client/modes/build/BuildingMode";
@@ -14,6 +17,7 @@ const start = (tutorial: TutorialStarter, firstTime: boolean) => {
 			toolController: ToolController,
 			buildingMode: BuildingMode,
 			popupController: PopupController,
+			di: DIContainer,
 		) => {
 			const tc = tutorial.controller;
 			const plot = tutorial.plot;
@@ -245,51 +249,175 @@ const start = (tutorial: TutorialStarter, firstTime: boolean) => {
 				},
 			});
 
-			// configure rocket
-			step.step((parent, finish) => {
-				parent.parentFunc(
-					() =>
-						toolController.enabledTools.enableOnly(
-							buildingMode.tools.buildTool,
-							buildingMode.tools.deleteTool,
-							buildingMode.tools.configTool,
-						),
-					() => toolController.enabledTools.enableAll(),
-				);
-				parent.parent(plot.disableBuilding());
-				parent.parent(plot.disableDeleting());
-				parent.parent(
-					gui
-						.createText() //
-						.withText("ok now configure rocket"),
-				);
-
-				parent.parent(
-					plot.processDiff(
+			let frameParent: GuiObject | undefined;
+			step.sequence() //
+				.withOnStart(() =>
+					toolController.enabledTools.enableOnly(
+						buildingMode.tools.buildTool,
+						buildingMode.tools.deleteTool,
+						buildingMode.tools.configTool,
+					),
+				)
+				.withOnEnd(() => toolController.enabledTools.enableAll())
+				.withOnStart((parent) => parent.parent(plot.disableBuilding()))
+				.withOnStart((parent) => parent.parent(plot.disableDeleting()))
+				.withOnEnd(() => frameParent?.Destroy())
+				.step((parent, finish) => {
+					parent.parent(
+						gui
+							.createText() //
+							.withText("ok now i teach you the CONFIGURATION WINDOW")
+							.withNext(finish),
+					);
+				})
+				.step((parent, finish) => {
+					frameParent?.Destroy();
+					frameParent = Element.create(
+						"Frame",
 						{
-							version: 32,
-							configChanged: {
-								["2" as BlockUuid]: {
-									thrust: {
-										controlConfig: {
-											enabled: true,
-											mode: {
-												type: "instant",
-												instant: { mode: "onRelease" },
+							Position: new UDim2(0.3, 0, 0.033, 0),
+							Size: new UDim2(0, 324, 0, 600),
+							BackgroundColor3: Color3.fromRGB(1, 4, 9),
+							BackgroundTransparency: 0.5,
+							Parent: gui.instance,
+						},
+						{
+							padding: Element.create("UIPadding", {
+								PaddingBottom: new UDim(0, 5),
+								PaddingLeft: new UDim(0, 5),
+								PaddingRight: new UDim(0, 2),
+								PaddingTop: new UDim(0, 5),
+							}),
+						},
+					);
+
+					const frame = Element.create(
+						"ScrollingFrame",
+						{
+							Position: new UDim2(),
+							Size: new UDim2(1, 0, 1, 0),
+							BackgroundTransparency: 1,
+							AutomaticCanvasSize: Enum.AutomaticSize.Y,
+							ScrollBarThickness: 8,
+							Parent: frameParent,
+						},
+						{
+							list: Element.create("UIListLayout", { Padding: new UDim(0, 5) }),
+							padding: Element.create("UIPadding", { PaddingRight: new UDim(0, 9) }),
+						},
+					);
+
+					const configPreview = di.resolveForeignClass(MultiBlockConfigControl, [
+						frame,
+						RocketBlocks[0].logic!.definition.input,
+						{
+							["2" as BlockUuid]: {
+								thrust: {
+									controlConfig: {
+										enabled: true,
+										mode: { type: "instant", instant: { mode: "onRelease" } },
+										keys: [
+											{ key: "R", value: 100 },
+											{ key: "F", value: 0 },
+										],
+									},
+								},
+							},
+						} as never,
+						undefined,
+						new Map(),
+					]);
+					parent.parent(configPreview, { destroy: false, disable: false });
+
+					parent.parent(gui.createFullScreenFade());
+					parent.parent(
+						gui
+							.createText() //
+							.withText("THIS is the CONFIGURATION WINDOW example of ROCKET")
+							.withNext(finish),
+					);
+				})
+				.step((parent, finish) => {
+					if (!frameParent) throw "what";
+					parent.parent(
+						gui.createFullScreenFadeWithHoleAround(
+							frameParent.FindFirstChild("MultiKeys", true) as GuiObject,
+						),
+					);
+
+					parent.parent(
+						gui
+							.createText() //
+							.withText("look this configurable thing is KEY")
+							.withNext(finish),
+					);
+				})
+				.step((parent, finish) => {
+					if (!frameParent) throw "what";
+					parent.parent(
+						gui.createFullScreenFadeWithHoleAround(
+							frameParent.FindFirstChild("MultiKeys", true)!.FindFirstChild("Button", true) as GuiObject,
+						),
+					);
+
+					parent.parent(
+						gui
+							.createText() //
+							.withText("look this configurable thing is KEY")
+							.withText("when you presst this key...")
+							.withNext(finish),
+					);
+				})
+				.step((parent, finish) => {
+					if (!frameParent) throw "what";
+					parent.parent(
+						gui.createFullScreenFadeWithHoleAround(
+							frameParent.FindFirstChild("MultiKeys", true)!.FindFirstChild("Number", true) as GuiObject,
+						),
+					);
+
+					parent.parent(
+						gui
+							.createText() //
+							.withText("look this configurable thing is KEY")
+							.withText("when you presst this key ist MOVE to the number set")
+							.withNext(finish),
+					);
+				})
+				.step((parent, finish) => {
+					parent.parent(
+						gui
+							.createText() //
+							.withText("ok now configure rocket")
+							.withText("just like i teoched you !"),
+					);
+
+					parent.parent(
+						plot.processDiff(
+							{
+								version: 32,
+								configChanged: {
+									["2" as BlockUuid]: {
+										thrust: {
+											controlConfig: {
+												enabled: true,
+												mode: {
+													type: "instant",
+													instant: { mode: "onRelease" },
+												},
+												keys: [
+													{ key: "R", value: 100 },
+													{ key: "F", value: 0 },
+												],
 											},
-											keys: [
-												{ key: "R", value: 100 },
-												{ key: "F", value: 0 },
-											],
 										},
 									},
 								},
 							},
-						},
-						finish,
-					),
-				);
-			});
+							finish,
+						),
+					);
+				});
 
 			//
 

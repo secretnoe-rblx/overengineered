@@ -182,7 +182,6 @@ class Build extends Component {
 	waitForBuild(blocks: LatestSerializedBlocks, finish: () => void): Component {
 		const ret = new TutorialStepComponent();
 		ret.onSkip(() => {
-			print("spk");
 			this.building.placeOperation.execute({
 				plot: this.splot,
 				blocks: blocks.blocks
