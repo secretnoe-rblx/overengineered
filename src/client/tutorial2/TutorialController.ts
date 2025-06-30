@@ -20,9 +20,51 @@ const prefab = Interface.getInterface<{
 }>().Help.Tutorial;
 prefab.Visible = false;
 
+type ProgressTaskDefinition = GuiObject & {
+	readonly UIGradient: UIGradient;
+	readonly NameLabel: TextLabel;
+	readonly ProgressLabel: TextLabel;
+};
+class ProgressTask extends Control<ProgressTaskDefinition> {
+	constructor(gui: ProgressTaskDefinition) {
+		super(gui);
+	}
+
+	hideProgressText() {
+		this.gui.ProgressLabel.Visible = false;
+	}
+
+	setText(text: string) {
+		this.gui.NameLabel.Text = text;
+	}
+	setProgress(done: number, count: number) {
+		if (count === 0) {
+			this.gui.ProgressLabel.Text = "";
+			this.gui.UIGradient.Transparency = new NumberSequence(0);
+			return;
+		}
+
+		this.gui.ProgressLabel.Text = `${done}/${count}`;
+
+		if (done >= count - 0.1) {
+			this.gui.UIGradient.Transparency = new NumberSequence(0);
+		} else {
+			this.gui.UIGradient.Transparency = new NumberSequence([
+				new NumberSequenceKeypoint(0, 0),
+				new NumberSequenceKeypoint(done / count + 0.05, 0),
+				new NumberSequenceKeypoint(done / count + 0.1, 1),
+				new NumberSequenceKeypoint(1, 1),
+			]);
+		}
+	}
+}
+
 type ProgressDefinition = GuiObject & {
 	readonly Header: TextLabel;
 	readonly Content: GuiObject & {
+		readonly Tasks: GuiObject & {
+			readonly Task: ProgressTaskDefinition;
+		};
 		readonly TextLabel: TextLabel;
 		readonly Buttons: GuiObject & {
 			readonly Stop: GuiButton;
@@ -33,11 +75,13 @@ type ProgressDefinition = GuiObject & {
 	};
 };
 class Progress extends Control<ProgressDefinition> {
+	private readonly taskTemplate;
 	private stopAction = () => {};
 
 	constructor(gui: ProgressDefinition) {
 		super(gui);
 		this.gui.Progress.Size = new UDim2(new UDim(0, 0), this.gui.Progress.Size.Y);
+		this.taskTemplate = this.asTemplate(gui.Content.Tasks.Task);
 
 		this.gui.Content.Buttons.Stop.Visible = false;
 		this.parent(new Control(gui.Content.Buttons.Stop)) //
@@ -51,6 +95,16 @@ class Progress extends Control<ProgressDefinition> {
 	/** Sets the text */
 	setText(text: string) {
 		this.gui.Content.TextLabel.Text = text;
+	}
+
+	/** Adds a task */
+	addTask(text: string, count: number) {
+		const task = new ProgressTask(this.taskTemplate());
+		task.instance.Parent = this.gui.Content.Tasks;
+		task.setText(text);
+		task.setProgress(0, count);
+
+		return task;
 	}
 
 	/**
@@ -105,6 +159,7 @@ class HelpText extends Control<HelpTextDefinition> {
 	constructor(
 		gui: HelpTextDefinition,
 		private readonly scaledScreen: ScaledScreenGui,
+		private readonly progress: Progress,
 	) {
 		super(gui);
 
@@ -159,10 +214,16 @@ class HelpText extends Control<HelpTextDefinition> {
 	}
 
 	/** Adds a text line */
-	withText(text: string): this {
+	addText(text: string): LabelControl {
 		const control = this.parent(new LabelControl(this.textTemplate()));
 		control.value.set(text);
 
+		return control;
+	}
+
+	/** Adds a text line, returns `this` */
+	withText(text: string): this {
+		this.addText(text);
 		return this;
 	}
 
@@ -171,11 +232,13 @@ class HelpText extends Control<HelpTextDefinition> {
 		const btnn = this.parent(new Control(this.gui.Buttons.Next)) //
 			.addButtonAction(func);
 		btnn.setInstanceVisibility(true);
+		this.parent(this.progress.addTask("Press Next", 0));
 
 		return this;
 	}
 }
 
+export type { TutorialControllerGui };
 class TutorialControllerGui extends InstanceComponent<ScreenGui> {
 	private readonly scaled;
 	readonly progress;
@@ -265,7 +328,7 @@ class TutorialControllerGui extends InstanceComponent<ScreenGui> {
 
 	/** Creates a floating window with ability to add text, or a Next button */
 	createText() {
-		return this.parent(new HelpText(prefab.Text.Clone(), this.scaled));
+		return this.parent(new HelpText(prefab.Text.Clone(), this.scaled, this.progress));
 	}
 }
 

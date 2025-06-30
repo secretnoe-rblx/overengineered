@@ -2,11 +2,9 @@ import { ConfirmPopup } from "client/gui/popup/ConfirmPopup";
 import type { MainScreenLayout } from "client/gui/MainScreenLayout";
 import type { PopupController } from "client/gui/PopupController";
 import type { BuildingMode } from "client/modes/build/BuildingMode";
-import type { ToolBase } from "client/tools/ToolBase";
 import type { ToolController } from "client/tools/ToolController";
 import type { TutorialDescription } from "client/tutorial2/TutorialDescription";
 import type { TutorialStarter } from "client/tutorial2/TutorialStarter";
-import type { TutorialStepComponent } from "client/tutorial2/TutorialStepController";
 
 const start = (tutorial: TutorialStarter, firstTime: boolean) => {
 	tutorial.$onInjectAuto(
@@ -22,13 +20,6 @@ const start = (tutorial: TutorialStarter, firstTime: boolean) => {
 
 			const gui = tc.gui;
 			const tools = buildingMode.tools;
-
-			const enableOnlyTools = (parent: TutorialStepComponent, ...tools: readonly ToolBase[]) => {
-				parent.parentFunc(
-					() => toolController.enabledTools.enableOnly(...tools),
-					() => toolController.enabledTools.enableAll(),
-				);
-			};
 
 			if (firstTime) {
 				gui.progress.setStopAction((stop) => {
@@ -66,6 +57,8 @@ const start = (tutorial: TutorialStarter, firstTime: boolean) => {
 			step.sequence()
 				.withOnStart(() => toolController.enabledTools.enableOnly(buildingMode.tools.buildTool))
 				.withOnEnd(() => toolController.enabledTools.enableAll())
+				.withOnStart(() => buildingMode.tools.buildTool.gui.blockSelector.highlightedBlocks.set(["block"]))
+				.withOnEnd(() => buildingMode.tools.buildTool.gui.blockSelector.highlightedBlocks.set([]))
 
 				.conditional({
 					condition: () => toolController.selectedTool.get() === buildingMode.tools.buildTool,
@@ -189,6 +182,18 @@ const start = (tutorial: TutorialStarter, firstTime: boolean) => {
 				);
 
 				parent.parent(plot.processDiff({ version: 32, removed: ["0" as BlockUuid] }, finish));
+			});
+
+			//
+
+			// end
+			step.step((parent, finish) => {
+				parent.parent(
+					gui
+						.createText() //
+						.withText("damn good work")
+						.withNext(finish),
+				);
 			});
 
 			tutorial.start();

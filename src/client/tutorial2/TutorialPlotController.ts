@@ -10,7 +10,10 @@ import { PartUtils } from "shared/utils/PartUtils";
 import { VectorUtils } from "shared/utils/VectorUtils";
 import type { BuildingMode } from "client/modes/build/BuildingMode";
 import type { ClientBuilding, ClientBuildingTypes } from "client/modes/build/ClientBuilding";
+import type { BuildTool } from "client/tools/BuildTool";
 import type { BuildingDiffChange } from "client/tutorial2/BuildingDiffer";
+import type { TutorialControllerGui } from "client/tutorial2/TutorialController";
+import type { TutorialStarter } from "client/tutorial2/TutorialStarter";
 import type { MiddlewareResponse } from "engine/shared/Operation";
 import type { LatestSerializedBlocks } from "shared/building/BlocksSerializer";
 import type { ReadonlyPlot } from "shared/building/ReadonlyPlot";
@@ -95,7 +98,9 @@ class Build extends Component {
 
 	constructor(
 		private readonly plot: TutorialPlot,
+		private readonly gui: TutorialControllerGui,
 		private readonly building: ClientBuilding,
+		private readonly buildTool: BuildTool,
 	) {
 		super();
 
@@ -163,17 +168,34 @@ class Build extends Component {
 	waitForBuild(blocks: LatestSerializedBlocks, finish: () => void): Component {
 		const ret = new Component();
 
+		const sub = { blocks, finish };
+		this.subscribed.add(sub);
+
 		this.plot.build(blocks);
 
-		const b = { blocks, finish };
-		this.subscribed.add(b);
+		this.buildTool.gui.blockSelector.highlightedBlocks.set([
+			...new Set(this.subscribed.flatmap((b) => b.blocks.blocks.map((b) => b.id))),
+		]);
+		ret.onDestroy(() =>
+			this.buildTool.gui.blockSelector.highlightedBlocks.set([
+				...new Set(this.subscribed.flatmap((b) => b.blocks.blocks.map((b) => b.id))),
+			]),
+		);
+
+		const task = ret.parent(this.gui.progress.addTask("Place blocks", blocks.blocks.size()));
+		ret.event.subscribeRegistration(() =>
+			this.building.placeOperation.addMiddleware((arg) => {
+				task.setProgress(blocks.blocks.size() - sub.blocks.blocks.size(), blocks.blocks.size());
+				return { success: true, arg };
+			}),
+		);
 
 		ret.onDestroy(() => {
 			for (const { uuid } of blocks.blocks) {
 				this.plot.remove(uuid);
 			}
 		});
-		ret.onDestroy(() => this.subscribed.delete(b));
+		ret.onDestroy(() => this.subscribed.delete(sub));
 		return ret;
 	}
 }
@@ -184,6 +206,7 @@ class Remove extends Component {
 
 	constructor(
 		private readonly plot: TutorialPlot,
+		private readonly gui: TutorialControllerGui,
 		private readonly building: ClientBuilding,
 	) {
 		super();
@@ -231,11 +254,19 @@ class Remove extends Component {
 
 		const highlightSub = this.plot.highlight([...blocks]);
 
-		const b = { blocks, finish };
-		this.subscribed.add(b);
+		const sub = { blocks, finish };
+		this.subscribed.add(sub);
+
+		const task = ret.parent(this.gui.progress.addTask("Delete blocks", blocks.size()));
+		ret.event.subscribeRegistration(() =>
+			this.building.deleteOperation.addMiddleware((arg) => {
+				task.setProgress(blocks.size() - sub.blocks.size(), blocks.size());
+				return { success: true, arg };
+			}),
+		);
 
 		ret.onDestroy(() => highlightSub.Disconnect());
-		ret.onDestroy(() => this.subscribed.delete(b));
+		ret.onDestroy(() => this.subscribed.delete(sub));
 		return ret;
 	}
 }
@@ -246,15 +277,17 @@ export class TutorialPlotController extends Component {
 	private build: Build = undefined!;
 	private remove: Remove = undefined!;
 
-	constructor() {
+	constructor(ts: TutorialStarter) {
 		super();
 
 		this.$onInjectAuto((plot: ReadonlyPlot, splot: SharedPlot, blockList: BlockList, buildMode: BuildingMode) => {
 			buildMode.building.deleteOperation.execute({ blocks: "all", plot: splot });
 			this.plot = this.parent(new TutorialPlot(plot, blockList));
 
-			this.build = this.parent(new Build(this.plot, buildMode.building));
-			this.remove = this.parent(new Remove(this.plot, buildMode.building));
+			this.build = this.parent(
+				new Build(this.plot, ts.controller.gui, buildMode.building, buildMode.tools.buildTool),
+			);
+			this.remove = this.parent(new Remove(this.plot, ts.controller.gui, buildMode.building));
 		});
 	}
 
