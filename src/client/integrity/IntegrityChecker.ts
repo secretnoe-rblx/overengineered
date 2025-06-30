@@ -43,6 +43,7 @@ export class IntegrityChecker extends ProtectedClass {
 	) {
 		properties ??= {};
 		properties.protectedName ??= true;
+		properties.protectChildrenInstead ??= false;
 		properties.protectedInstances ??= "*";
 		properties.protectDestroying ??= true;
 		properties.whitelistedNames ??= [];
@@ -199,6 +200,13 @@ export class IntegrityChecker extends ProtectedClass {
 		this.protectLocation(Players.LocalPlayer.FindFirstChildOfClass("Backpack")!);
 		this.protectLocation(Players.LocalPlayer.FindFirstChildOfClass("StarterGear")!);
 		this.protectLocation(Players.LocalPlayer.FindFirstChildOfClass("PlayerScripts")!, {
+			whitelistedNames: [
+				"PlayerModule",
+				...StarterPlayer.FindFirstChildOfClass("StarterPlayerScripts")!
+					.FindFirstChild("PlayerModule")!
+					.GetDescendants()
+					.map((child) => child.Name),
+			],
 			protectDestroying: false,
 		});
 		this.protectLocation(StarterPack);
