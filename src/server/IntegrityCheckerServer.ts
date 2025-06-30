@@ -14,7 +14,7 @@ export class IntegrityCheckerServer extends HostedService {
 			networkLogging.log({
 				source: networkLogging.getSourceFromPlayer(player),
 				action: "leave",
-				data: `Integrity violation detected: ${violation} from player ${player.Name}`,
+				data: `Integrity violation detected: ${violation}`,
 			});
 
 			$err(`Integrity violation detected: ${violation} from player ${player.Name}`);
