@@ -212,6 +212,82 @@ export class TutorialParallelExecutor extends ExecutorBase implements TutorialSt
  * If any previous step condition starts returning `false`, destroys the current step and starts that one.
  */
 export class TutorialSequentialExecutor extends ExecutorBase implements TutorialStep {
+	readonly run: TutorialStep["run"] = (parent, finish, ctx) => {
+		for (const func of this.onStart) {
+			func();
+		}
+
+		let currentReq: TutorialConditionalStep | undefined;
+		let p: TutorialStepComponent | undefined;
+
+		parent.onDestroy(() => {
+			for (const func of this.onEnd) {
+				func();
+			}
+		});
+
+		const finished = () => {
+			p?.destroy();
+			sub.Disconnect();
+
+			ctx.setProgress(1);
+			for (const func of this.onEnd) {
+				func();
+			}
+			this.onEnd.clear();
+			finish();
+		};
+
+		parent.onSkip(() => {
+			sub.Disconnect();
+			p?.destroy();
+
+			for (let i = 0; i < this.steps.size(); i++) {
+				const step = this.steps[i];
+				if (step.condition()) continue;
+
+				const p = parent.parent(new TutorialStepComponent());
+				step.run(p, {
+					...ctx,
+					setProgress: (progress) => ctx.setProgress((i + progress) / this.steps.size()),
+				});
+				p.skip();
+			}
+
+			finished();
+		});
+		const sub = parent.event.loop(0, () => {
+			for (let i = 0; i < this.steps.size(); i++) {
+				const step = this.steps[i];
+				if (step.condition()) continue;
+
+				if (currentReq !== step) {
+					p?.destroy();
+					ctx.setProgress(i / this.steps.size());
+					p = parent.parent(new TutorialStepComponent());
+					p.onSkip(() => ((step as { condition: () => boolean }).condition = () => true));
+
+					const nextCtx: TutorialStepContext = {
+						...ctx,
+						setProgress: (progress) => ctx.setProgress((i + progress) / this.steps.size()),
+					};
+					step.run(p, nextCtx);
+				}
+				currentReq = step;
+
+				return;
+			}
+
+			finished();
+		});
+	};
+}
+
+/**
+ * Executes every step sequentially until all of them return true in {@link TutorialConditionalStep.condition}.
+ * Unlike {@link TutorialSequentialExecutor}, doesn't backtrack if a previous item condition returns false.
+ */
+export class NoBacktrackTutorialSequentialExecutor extends ExecutorBase implements TutorialStep {
 	private currentParent?: TutorialStepComponent;
 
 	skipCurrentSubstep() {
@@ -262,10 +338,15 @@ export class TutorialSequentialExecutor extends ExecutorBase implements Tutorial
 
 			finished();
 		});
+
+		let completed = 0;
 		const sub = parent.event.loop(0, () => {
-			for (let i = 0; i < this.steps.size(); i++) {
+			for (let i = completed; i < this.steps.size(); i++) {
 				const step = this.steps[i];
-				if (step.condition()) continue;
+				if (step.condition()) {
+					completed = i + 1;
+					continue;
+				}
 
 				if (currentReq !== step) {
 					p?.destroy();

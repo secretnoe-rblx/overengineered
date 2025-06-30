@@ -155,6 +155,7 @@ const start = (tutorial: TutorialStarter, firstTime: boolean) => {
 					);
 					parent.parent(tc.disableAllInputExcept([Enum.KeyCode.One, Enum.KeyCode.Three]));
 					parent.parent(gui.createFullScreenFadeWithHoleAround(mainScreen.hotbar.instance, Vector2.zero));
+					parent.parent(plot.disableBuilding());
 					parent.parent(
 						gui
 							.createText() //
@@ -176,6 +177,7 @@ const start = (tutorial: TutorialStarter, firstTime: boolean) => {
 						),
 					() => toolController.enabledTools.enableAll(),
 				);
+				parent.parent(plot.disableBuilding());
 				parent.parent(
 					gui
 						.createText() //
@@ -186,6 +188,107 @@ const start = (tutorial: TutorialStarter, firstTime: boolean) => {
 				);
 
 				parent.parent(plot.processDiff({ version: 32, removed: ["0" as BlockUuid] }, finish));
+			});
+
+			// place rocket block
+			step.step((parent, finish) => {
+				parent.parentFunc(
+					() =>
+						toolController.enabledTools.enableOnly(
+							buildingMode.tools.buildTool,
+							buildingMode.tools.deleteTool,
+						),
+					() => toolController.enabledTools.enableAll(),
+				);
+				parent.parent(plot.disableDeleting());
+				parent.parent(
+					gui
+						.createText() //
+						.withText("okay now the ROCKET, it makes FLY"),
+				);
+
+				parent.parent(
+					plot.processDiff(
+						{
+							version: 32,
+							added: [
+								{ uuid: "2" as BlockUuid, id: "smallrocketengine", location: new CFrame(5, 1.5, 0) },
+							],
+						},
+						finish,
+					),
+				);
+			});
+
+			// select config tool
+			step.conditional({
+				condition: () => toolController.selectedTool.get() === buildingMode.tools.configTool,
+				run: (parent) => {
+					parent.parentFunc(
+						() =>
+							toolController.enabledTools.enableOnly(
+								buildingMode.tools.buildTool,
+								buildingMode.tools.deleteTool,
+								buildingMode.tools.configTool,
+							),
+						() => toolController.enabledTools.enableAll(),
+					);
+					parent.parent(tc.disableAllInputExcept([Enum.KeyCode.One, Enum.KeyCode.Three, Enum.KeyCode.Four]));
+					parent.parent(gui.createFullScreenFadeWithHoleAround(mainScreen.hotbar.instance, Vector2.zero));
+					parent.parent(plot.disableBuilding());
+					parent.parent(plot.disableDeleting());
+					parent.parent(
+						gui
+							.createText() //
+							.withText("now THIRD TOOL is the CONFIG TOOL"),
+					);
+				},
+			});
+
+			// configure rocket
+			step.step((parent, finish) => {
+				parent.parentFunc(
+					() =>
+						toolController.enabledTools.enableOnly(
+							buildingMode.tools.buildTool,
+							buildingMode.tools.deleteTool,
+							buildingMode.tools.configTool,
+						),
+					() => toolController.enabledTools.enableAll(),
+				);
+				parent.parent(plot.disableBuilding());
+				parent.parent(plot.disableDeleting());
+				parent.parent(
+					gui
+						.createText() //
+						.withText("ok now configure rocket"),
+				);
+
+				parent.parent(
+					plot.processDiff(
+						{
+							version: 32,
+							configChanged: {
+								["2" as BlockUuid]: {
+									thrust: {
+										controlConfig: {
+											enabled: true,
+											mode: {
+												type: "instant",
+												instant: { mode: "onRelease" },
+											},
+											keys: [
+												{ key: "R", value: 100 },
+												{ key: "F", value: 0 },
+											],
+										},
+									},
+								},
+							},
+						},
+						finish,
+					),
+				);
 			});
 
 			//

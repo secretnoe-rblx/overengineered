@@ -1,13 +1,13 @@
 import { TutorialController } from "client/tutorial2/TutorialController";
 import { TutorialPlotController } from "client/tutorial2/TutorialPlotController";
-import { TutorialSequentialExecutor, TutorialStepComponent } from "client/tutorial2/TutorialStepController";
+import { NoBacktrackTutorialSequentialExecutor, TutorialStepComponent } from "client/tutorial2/TutorialStepController";
 import { Component } from "engine/shared/component/Component";
 import { Transforms } from "engine/shared/component/Transforms";
 import { ArgsSignal } from "engine/shared/event/Signal";
 import type { TutorialStepContext } from "client/tutorial2/TutorialStepController";
 
 export class TutorialStarter extends Component {
-	readonly stepController = new TutorialSequentialExecutor();
+	readonly stepController = new NoBacktrackTutorialSequentialExecutor();
 
 	readonly controller = this.parent(new TutorialController());
 	readonly plot = this.parent(new TutorialPlotController(this));

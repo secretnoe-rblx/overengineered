@@ -1,9 +1,10 @@
+import { Objects } from "engine/shared/fixes/Objects";
 import { BlocksSerializer } from "shared/building/BlocksSerializer";
 import type { PlacedBlockConfig } from "shared/blockLogic/BlockConfig";
 import type { LatestSerializedBlock, LatestSerializedBlocks } from "shared/building/BlocksSerializer";
 import type { ReadonlyPlot } from "shared/building/ReadonlyPlot";
 
-export type DiffBlock = LatestSerializedBlock;
+type DiffBlock = LatestSerializedBlock;
 
 type Added = {
 	readonly id: BlockId;
@@ -11,11 +12,7 @@ type Added = {
 	readonly location: CFrame;
 };
 type Removed = BlockUuid;
-type ConfigChanged = {
-	readonly uuid: BlockUuid;
-	readonly key: string;
-	readonly value: PartialThrough<PlacedBlockConfig[string]> | undefined;
-};
+type ConfigChanged = PartialThrough<PlacedBlockConfig>;
 type Moved = {
 	readonly uuid: BlockUuid;
 	readonly to: Vector3;
@@ -29,17 +26,12 @@ export type BuildingDiffChange = {
 	readonly version: number;
 	readonly added?: readonly Added[];
 	readonly removed?: readonly Removed[];
-	readonly configChanged?: readonly ConfigChanged[];
+	readonly configChanged?: { readonly [k in BlockUuid]: ConfigChanged };
 	readonly moved?: readonly Moved[];
 	readonly rotated?: readonly Rotated[];
 };
-const arrKeys = [
-	"added",
-	"removed",
-	"configChanged",
-	"moved",
-	"rotated",
-] as const satisfies (keyof BuildingDiffChange)[];
+const arrKeys = ["added", "removed", "moved", "rotated"] as const satisfies (keyof BuildingDiffChange)[];
+const objKeys = ["configChanged"] as const satisfies (keyof BuildingDiffChange)[];
 
 export namespace BuildingDiffer {
 	let before: LatestSerializedBlocks | undefined;
@@ -105,37 +97,6 @@ export namespace BuildingDiffer {
 		return toTsCode(BlocksSerializer.serializeToObject(plot));
 	}
 
-	function deepEquals(left: object, right: object): boolean {
-		for (const [kl] of pairs(left)) {
-			if (!(kl in right)) {
-				return false;
-			}
-
-			if (!valueEquals(left[kl], right[kl])) {
-				return false;
-			}
-		}
-		for (const [kr] of pairs(right)) {
-			if (!(kr in left)) {
-				return false;
-			}
-		}
-
-		return true;
-	}
-	function valueEquals(left: unknown, right: unknown): boolean {
-		if (typeOf(left) !== typeOf(right)) {
-			return false;
-		}
-
-		if (typeIs(left, "table")) {
-			assert(typeIs(right, "table"));
-			return deepEquals(left, right);
-		}
-
-		return left === right;
-	}
-
 	export function diff(
 		before: readonly DiffBlock[],
 		after: readonly DiffBlock[],
@@ -177,23 +138,8 @@ export namespace BuildingDiffer {
 				const cfgbefore = before.config ?? {};
 				const cfgafter = after.config ?? {};
 
-				for (const [key, vbefore] of pairs(cfgbefore)) {
-					if (!(key in cfgafter)) {
-						(changes.configChanged ??= []).push({ uuid, key, value: undefined });
-						continue;
-					}
-
-					const vafter = cfgafter[key];
-					if (!valueEquals(vbefore, vafter)) {
-						(changes.configChanged ??= []).push({ uuid, key, value: vafter });
-						continue;
-					}
-				}
-				for (const [key, vafter] of pairs(cfgafter)) {
-					if (!(key in cfgbefore)) {
-						(changes.configChanged ??= []).push({ uuid, key, value: vafter });
-						continue;
-					}
+				if (!Objects.deepEquals(cfgbefore, cfgafter)) {
+					(changes.configChanged ??= {})[uuid] = cfgafter;
 				}
 			}
 		}
@@ -210,6 +156,13 @@ export namespace BuildingDiffer {
 
 					for (const item of diff2[k]) {
 						(changes[k] ??= []).push(item as never);
+					}
+				}
+				for (const k of objKeys) {
+					if (!diff2[k]) continue;
+
+					for (const [kk, v] of pairs(diff2[k])) {
+						(changes[k] ??= {})[kk] = v;
 					}
 				}
 
