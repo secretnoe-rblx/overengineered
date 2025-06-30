@@ -8,6 +8,7 @@ export namespace ChatController {
 
 			if (message.TextSource) {
 				const player = Players.GetPlayerByUserId(message.TextSource.UserId);
+				props.Text = message.Text;
 
 				if (player && PlayerRank.isAdmin(player)) {
 					props.PrefixText =
@@ -18,6 +19,11 @@ export namespace ChatController {
 				}
 
 				props.Text = props.Text.gsub("plane crazy", `<font transparency="0.6">plain lazy</font>`)[0];
+				props.Text = props.Text.gsub("mechanica ", `<font color="rgb(255,255,0)">mechanica 👑 </font>`)[0];
+				props.Text = props.Text.gsub(
+					"elite engineering",
+					`<font color="rgb(255,127,0)">elite engineering 👑 </font>`,
+				)[0];
 			}
 
 			return props;
