@@ -27,6 +27,10 @@ export class PlayerSettingsGeneral extends ConfigControlList {
 			this.addToggle("Public speakers") //
 				.initToObjectPart(value, ["publicSpeakers"])
 				.setDescription("Allow others to hear your speaker block and hear speakers of others");
+
+			this.addToggle("Public particles") //
+				.initToObjectPart(value, ["publicParticles"])
+				.setDescription("Allow others to see your particles and see particles of others (Particle Block only)");
 		}
 	}
 }

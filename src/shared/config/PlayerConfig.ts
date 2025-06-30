@@ -122,6 +122,10 @@ export const PlayerConfigDefinition = {
 		type: "bool",
 		config: false as boolean,
 	},
+	publicParticles: {
+		type: "bool",
+		config: true as boolean,
+	},
 	autoPlotTeleport: {
 		type: "bool",
 		config: true as boolean,

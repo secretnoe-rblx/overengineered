@@ -80,7 +80,7 @@ namespace ParticleEmitter {
 		if (properties.drag) emitter.Drag = properties.drag;
 	};
 
-	class Logic extends InstanceBlockLogic<typeof definition, particleEmitter> {
+	export class Logic extends InstanceBlockLogic<typeof definition, particleEmitter> {
 		static readonly events = {
 			update: new BlockSynchronizer<UpdateData>("particle_update", updateDataType, updateStates),
 		} as const;
@@ -248,4 +248,5 @@ namespace ParticleCreator {
 	};
 }
 
+export type ParticleEmitterBlockLogic = typeof ParticleEmitter.Logic;
 export const ParticleBlocks: readonly BlockBuilder[] = [ParticleCreator.Block, ParticleEmitter.Block];

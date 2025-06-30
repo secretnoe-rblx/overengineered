@@ -238,7 +238,7 @@ const v15: UpdatablePlayerConfigVersion<PlayerConfigV13, PlayerConfigV14> = {
 	},
 };
 
-// Add autoPlotTeleport
+// Add publicSpeakers
 type PlayerConfigV15 = PlayerConfigV14 & { publicSpeakers: boolean };
 const v16: UpdatablePlayerConfigVersion<PlayerConfigV14, PlayerConfigV14> = {
 	version: 16,
@@ -252,7 +252,21 @@ const v16: UpdatablePlayerConfigVersion<PlayerConfigV14, PlayerConfigV14> = {
 	},
 };
 
-const versions = [v1, v2, v3, v4, v5, v6, v7, v8, v9, v10, v11, v12, v13, v14, v15, v16] as const;
+// Add autoPlotTeleport
+type PlayerConfigV16 = PlayerConfigV15 & { publicParticles: boolean };
+const v17: UpdatablePlayerConfigVersion<PlayerConfigV15, PlayerConfigV15> = {
+	version: 17,
+
+	update(prev: Partial<PlayerConfigV15>): Partial<PlayerConfigV16> {
+		return {
+			...prev,
+			publicParticles: true,
+			version: this.version,
+		};
+	},
+};
+
+const versions = [v1, v2, v3, v4, v5, v6, v7, v8, v9, v10, v11, v12, v13, v14, v15, v16, v17] as const;
 const current = versions[versions.size() - 1] as typeof versions extends readonly [...unknown[], infer T] ? T : never;
 
 export namespace PlayerConfigUpdater {
