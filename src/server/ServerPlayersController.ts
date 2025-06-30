@@ -88,6 +88,7 @@ export class ServerPlayersController extends HostedService {
 							TeleportService.TeleportAsync(placeId, [player]);
 						});
 					}
+					(data as { placeId?: number }).placeId = undefined;
 
 					return {
 						success: true,
