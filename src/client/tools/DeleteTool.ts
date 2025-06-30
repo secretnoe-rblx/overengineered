@@ -1,5 +1,6 @@
 import { SoundController } from "client/controller/SoundController";
 import { ConfirmPopup } from "client/gui/popup/ConfirmPopup";
+import { LogControl } from "client/gui/static/LogControl";
 import { MultiBlockSelector } from "client/tools/highlighters/MultiBlockSelector";
 import { SelectedBlocksHighlighter } from "client/tools/highlighters/SelectedBlocksHighlighter";
 import { ToolBase } from "client/tools/ToolBase";
@@ -8,6 +9,7 @@ import { InputController } from "engine/client/InputController";
 import { Keybinds } from "engine/client/Keybinds";
 import { Component } from "engine/shared/component/Component";
 import { ObservableCollectionSet } from "engine/shared/event/ObservableCollection";
+import { Colors } from "shared/Colors";
 import type { MainScreenLayout } from "client/gui/MainScreenLayout";
 import type { PopupController } from "client/gui/PopupController";
 import type { Tooltip } from "client/gui/static/TooltipsControl";
@@ -131,6 +133,9 @@ export class DeleteTool extends ToolBase {
 
 			SoundController.getSounds().Build.BlockDelete.PlaybackSpeed = SoundController.randomSoundSpeed();
 			SoundController.getSounds().Build.BlockDelete.Play();
+		} else {
+			LogControl.instance.addLine(response.message, Colors.red);
+			SoundController.getSounds().Build.BlockPlaceError.Play();
 		}
 	}
 	getDisplayName(): string {
