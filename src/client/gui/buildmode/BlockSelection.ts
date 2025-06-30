@@ -1,4 +1,4 @@
-import { ContentProvider, GuiService, Players, RunService } from "@rbxts/services";
+import { ContentProvider, GuiService, Players, PolicyService, RunService } from "@rbxts/services";
 import { BlockPreviewControl } from "client/gui/buildmode/BlockPreviewControl";
 import { BlockPipetteButton } from "client/gui/controls/BlockPipetteButton";
 import { GuiAnimator } from "client/gui/GuiAnimator";
@@ -265,6 +265,7 @@ export class BlockSelectionControl extends Control<BlockSelectionControlDefiniti
 		});
 	}
 
+	private adsAllowed?: boolean;
 	private create(selectedCategory: BlockCategoryPath, animated: boolean) {
 		const highlightButton = (control: InstanceComponent<Instance>) =>
 			(Interface.getTemplates<{ Highlight: GuiObject }>().Highlight.Clone().Parent = control.instance);
@@ -392,6 +393,7 @@ export class BlockSelectionControl extends Control<BlockSelectionControlDefiniti
 			let button: BlockControl;
 			const features = this.playerData.data.get().features;
 			if (
+				(this.adsAllowed ??= PolicyService.GetPolicyInfoForPlayerAsync(Players.LocalPlayer).AreAdsAllowed) &&
 				!PlayerRank.isAdmin(Players.LocalPlayer) &&
 				!(block.requiredFeatures ?? Objects.empty).all((c) => features.contains(c))
 			) {
