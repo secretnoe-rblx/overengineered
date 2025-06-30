@@ -20,7 +20,6 @@ import { CustomRemotes } from "shared/Remotes";
 
 export class IntegrityChecker extends ProtectedClass {
 	static readonly whitelist = new Set<Instance>();
-	private detected = false;
 
 	// Pre-made configurations
 	scriptInstances: (keyof Instances)[] = ["LocalScript", "ModuleScript", "Script"];
@@ -148,10 +147,6 @@ export class IntegrityChecker extends ProtectedClass {
 			$err(`Integrity violation detected: ${violation}`);
 			return;
 		}
-
-		if (this.detected) return;
-
-		this.detected = true;
 
 		// TODO: Restore this remote on destroy and notify the server
 		try {
