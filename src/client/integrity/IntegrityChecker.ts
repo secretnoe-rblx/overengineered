@@ -35,6 +35,7 @@ export class IntegrityChecker extends ProtectedClass {
 		path: Instance,
 		properties?: {
 			protectedName?: boolean;
+			protectChildrenInstead?: boolean;
 			protectedInstances?: (keyof Instances)[] | "*";
 			protectDestroying?: boolean;
 			whitelistedNames?: string[];
@@ -70,7 +71,7 @@ export class IntegrityChecker extends ProtectedClass {
 			this.handle(`${path.ClassName} renamed: ${path.Name}`);
 		});
 
-		path.DescendantAdded.Connect((desc) => {
+		(properties.protectChildrenInstead ? path.ChildAdded : path.DescendantAdded).Connect((desc) => {
 			task.wait();
 
 			if (this.isWhitelisted(desc)) {
@@ -92,7 +93,7 @@ export class IntegrityChecker extends ProtectedClass {
 		});
 
 		if (properties.protectDestroying) {
-			path.DescendantRemoving.Connect((desc) => {
+			(properties.protectChildrenInstead ? path.ChildRemoved : path.DescendantRemoving).Connect((desc) => {
 				task.wait();
 
 				if (this.isWhitelisted(desc)) {
@@ -170,6 +171,7 @@ export class IntegrityChecker extends ProtectedClass {
 		});
 		this.protectLocation(Interface.getPlayerGui(), {
 			protectedInstances: ["ScreenGui", ...this.scriptInstances],
+			protectChildrenInstead: true,
 			protectDestroying: false,
 			whitelistedNames: [
 				...StarterGui.GetChildren().map((child) => child.Name),
@@ -200,7 +202,15 @@ export class IntegrityChecker extends ProtectedClass {
 			protectDestroying: false,
 		});
 		this.protectLocation(StarterPack);
-		this.protectLocation(StarterPlayer);
+		this.protectLocation(StarterPlayer, {
+			whitelistedNames: [
+				"PlayerModule",
+				...StarterPlayer.FindFirstChildOfClass("StarterPlayerScripts")!
+					.FindFirstChild("PlayerModule")!
+					.GetDescendants()
+					.map((child) => child.Name),
+			],
+		});
 
 		// Other protections
 		new GlobalsIntegrityChecker(this);
