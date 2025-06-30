@@ -3,6 +3,7 @@ import { TutorialPlotController } from "client/tutorial2/TutorialPlotController"
 import { TutorialSequentialExecutor, TutorialStepComponent } from "client/tutorial2/TutorialStepController";
 import { Component } from "engine/shared/component/Component";
 import { Transforms } from "engine/shared/component/Transforms";
+import { ArgsSignal } from "engine/shared/event/Signal";
 import type { TutorialStepContext } from "client/tutorial2/TutorialStepController";
 
 export class TutorialStarter extends Component {
@@ -10,10 +11,12 @@ export class TutorialStarter extends Component {
 
 	readonly controller = this.parent(new TutorialController());
 	readonly plot = this.parent(new TutorialPlotController(this));
+	private readonly skipped = new ArgsSignal();
 
 	constructor() {
 		super();
 		this.controller.gui.progress.setStopAction(() => this.destroy());
+		this.controller.gui.progress.setSkipAction(() => this.skipped.Fire());
 	}
 
 	start() {
@@ -29,12 +32,14 @@ export class TutorialStarter extends Component {
 				t.hideProgressText();
 
 				Transforms.create() //
-					.funcTransform(0, 1, (v) => t.setProgress(v, 1), { duration: 1, style: "Linear" })
+					.funcTransform(1, 0, (v) => t.setProgress(v, 1), { duration: 1, style: "Linear" })
 					.then()
 					.func(() => this.destroy())
 					.run(t);
 			});
 		};
+
+		this.skipped.Connect(() => this.stepController.skipCurrentSubstep());
 		this.stepController.run(sparent, finish, ctx);
 	}
 }

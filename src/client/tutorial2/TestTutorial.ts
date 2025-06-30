@@ -1,3 +1,4 @@
+import { RunService } from "@rbxts/services";
 import { ConfirmPopup } from "client/gui/popup/ConfirmPopup";
 import type { MainScreenLayout } from "client/gui/MainScreenLayout";
 import type { PopupController } from "client/gui/PopupController";
@@ -34,6 +35,9 @@ const start = (tutorial: TutorialStarter, firstTime: boolean) => {
 
 			gui.progress.setTitle("Basics tutorial");
 			gui.progress.setText("Teaching about basics of the gaming");
+			if (RunService.IsStudio()) {
+				gui.progress.enableSkip();
+			}
 
 			// intro
 			step.step((parent, finish) => {

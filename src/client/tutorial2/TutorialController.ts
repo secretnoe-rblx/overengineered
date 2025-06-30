@@ -67,6 +67,7 @@ type ProgressDefinition = GuiObject & {
 		};
 		readonly TextLabel: TextLabel;
 		readonly Buttons: GuiObject & {
+			readonly Skip: GuiButton;
 			readonly Stop: GuiButton;
 		};
 	};
@@ -77,6 +78,7 @@ type ProgressDefinition = GuiObject & {
 class Progress extends Control<ProgressDefinition> {
 	private readonly taskTemplate;
 	private stopAction = () => {};
+	private skipAction = () => {};
 
 	constructor(gui: ProgressDefinition) {
 		super(gui);
@@ -97,6 +99,15 @@ class Progress extends Control<ProgressDefinition> {
 		this.gui.Content.TextLabel.Text = text;
 	}
 
+	/** Enables the Skip button, sets it to invoke {@link func} upon pressing */
+	enableSkip(): this {
+		const btnn = this.parent(new Control(this.gui.Content.Buttons.Skip)) //
+			.addButtonAction(() => this.skipAction());
+		btnn.setInstanceVisibility(true);
+
+		return this;
+	}
+
 	/** Adds a task */
 	addTask(text: string, count: number) {
 		const task = new ProgressTask(this.taskTemplate());
@@ -105,6 +116,17 @@ class Progress extends Control<ProgressDefinition> {
 		task.setProgress(0, count);
 
 		return task;
+	}
+
+	/**
+	 * Sets the Skip button action
+	 * @param func New Skip action. Accepts previous Skip action as `original` parameter
+	 */
+	setSkipAction(func: (original: () => void) => void) {
+		this.gui.Content.Buttons.Stop.Visible = true;
+
+		const prev = this.skipAction;
+		this.skipAction = () => func(prev);
 	}
 
 	/**

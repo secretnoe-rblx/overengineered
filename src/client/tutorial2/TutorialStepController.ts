@@ -1,11 +1,23 @@
 import { Component } from "engine/shared/component/Component";
+import { ArgsSignal } from "engine/shared/event/Signal";
 import type { ComponentParentConfig } from "engine/shared/component/Component";
 
 /**
  * A component which gets created upon every step start and gets destroyed upon its completion.
  * Used for parenting step-only components, starting remporary tasks or resolving objects from DI
  */
-export class TutorialStepComponent extends Component {
+export class TutorialStepComponent extends Component implements TutorialSkippable {
+	private readonly skipped = new ArgsSignal();
+
+	skip() {
+		this.skipped.Fire();
+		this.skipped.destroy();
+	}
+	onSkip(func: () => void): this {
+		this.skipped.Connect(func);
+		return this;
+	}
+
 	/** Immediately runs {@link init}. Runs {@link clear} upon destroy */
 	parentFunc(init: () => void, clear: () => void) {
 		init();
@@ -26,7 +38,18 @@ export class TutorialStepComponent extends Component {
 	}
 
 	/** Parents a component to this step part, destroying it when the step finishes */
-	override parent<T extends Component>(child: T, config?: ComponentParentConfig): T {
+	override parent<T extends Component | (Component & TutorialSkippable)>(
+		child: T,
+		config?: ComponentParentConfig,
+	): T {
+		if ("skip" in child) {
+			this.onSkip(() => {
+				if (!child.isDestroyed()) {
+					child.skip();
+				}
+			});
+		}
+
 		return super.parent(child, config);
 	}
 }
@@ -34,6 +57,10 @@ export class TutorialStepComponent extends Component {
 export interface TutorialStepContext {
 	/** Sets the progress for the current step sequence */
 	readonly setProgress: (percent: number) => void;
+}
+
+export interface TutorialSkippable {
+	skip(): void;
 }
 
 /**
@@ -138,10 +165,22 @@ export class TutorialParallelExecutor extends ExecutorBase implements TutorialSt
 			setProgress: (progress) => ctx.setProgress((completed + progress) / this.steps.size()),
 		};
 
+		const finished = () => {
+			sub.Disconnect();
+
+			ctx.setProgress(1);
+			for (const func of this.onEnd) {
+				func();
+			}
+			this.onEnd.clear();
+			finish();
+		};
+
 		for (const step of this.steps) {
 			if (step.condition()) continue;
 
 			const p = parent.parent(new TutorialStepComponent());
+			p.onSkip(() => ((step as { condition: () => boolean }).condition = () => true));
 			step.run(p, nextCtx);
 		}
 
@@ -161,14 +200,7 @@ export class TutorialParallelExecutor extends ExecutorBase implements TutorialSt
 				return;
 			}
 
-			sub.Disconnect();
-
-			ctx.setProgress(1);
-			for (const func of this.onEnd) {
-				func();
-			}
-			this.onEnd.clear();
-			finish();
+			finished();
 		});
 	};
 }
@@ -180,6 +212,12 @@ export class TutorialParallelExecutor extends ExecutorBase implements TutorialSt
  * If any previous step condition starts returning `false`, destroys the current step and starts that one.
  */
 export class TutorialSequentialExecutor extends ExecutorBase implements TutorialStep {
+	private currentParent?: TutorialStepComponent;
+
+	skipCurrentSubstep() {
+		this.currentParent?.skip();
+	}
+
 	readonly run: TutorialStep["run"] = (parent, finish, ctx) => {
 		for (const func of this.onStart) {
 			func();
@@ -193,6 +231,37 @@ export class TutorialSequentialExecutor extends ExecutorBase implements Tutorial
 				func();
 			}
 		});
+
+		const finished = () => {
+			p?.destroy();
+			sub.Disconnect();
+
+			ctx.setProgress(1);
+			for (const func of this.onEnd) {
+				func();
+			}
+			this.onEnd.clear();
+			finish();
+		};
+
+		parent.onSkip(() => {
+			sub.Disconnect();
+			p?.destroy();
+
+			for (let i = 0; i < this.steps.size(); i++) {
+				const step = this.steps[i];
+				if (step.condition()) continue;
+
+				const p = parent.parent(new TutorialStepComponent());
+				step.run(p, {
+					...ctx,
+					setProgress: (progress) => ctx.setProgress((i + progress) / this.steps.size()),
+				});
+				p.skip();
+			}
+
+			finished();
+		});
 		const sub = parent.event.loop(0, () => {
 			for (let i = 0; i < this.steps.size(); i++) {
 				const step = this.steps[i];
@@ -201,7 +270,8 @@ export class TutorialSequentialExecutor extends ExecutorBase implements Tutorial
 				if (currentReq !== step) {
 					p?.destroy();
 					ctx.setProgress(i / this.steps.size());
-					p = parent.parent(new TutorialStepComponent());
+					this.currentParent = p = parent.parent(new TutorialStepComponent());
+					p.onSkip(() => ((step as { condition: () => boolean }).condition = () => true));
 
 					const nextCtx: TutorialStepContext = {
 						...ctx,
@@ -214,15 +284,7 @@ export class TutorialSequentialExecutor extends ExecutorBase implements Tutorial
 				return;
 			}
 
-			p?.destroy();
-			sub.Disconnect();
-
-			ctx.setProgress(1);
-			for (const func of this.onEnd) {
-				func();
-			}
-			this.onEnd.clear();
-			finish();
+			finished();
 		});
 	};
 }

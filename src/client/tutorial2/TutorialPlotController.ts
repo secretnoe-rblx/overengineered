@@ -1,4 +1,5 @@
 import { Workspace } from "@rbxts/services";
+import { TutorialStepComponent } from "client/tutorial2/TutorialStepController";
 import { Component } from "engine/shared/component/Component";
 import { ComponentInstance } from "engine/shared/component/ComponentInstance";
 import { Element } from "engine/shared/Element";
@@ -98,6 +99,7 @@ class Build extends Component {
 
 	constructor(
 		private readonly plot: TutorialPlot,
+		private readonly splot: SharedPlot,
 		private readonly gui: TutorialControllerGui,
 		private readonly building: ClientBuilding,
 		private readonly buildTool: BuildTool,
@@ -166,7 +168,16 @@ class Build extends Component {
 	}
 
 	waitForBuild(blocks: LatestSerializedBlocks, finish: () => void): Component {
-		const ret = new Component();
+		const ret = new TutorialStepComponent();
+		ret.onSkip(() => {
+			print("spk");
+			this.building.placeOperation.execute({
+				plot: this.splot,
+				blocks: blocks.blocks
+					.filter((b) => !this.splot.tryGetBlock(b.uuid))
+					.map((b) => BlocksSerializer.serializedBlockToPlaceRequest(b, this.splot.origin)),
+			});
+		});
 
 		const sub = { blocks, finish };
 		this.subscribed.add(sub);
@@ -206,6 +217,7 @@ class Remove extends Component {
 
 	constructor(
 		private readonly plot: TutorialPlot,
+		private readonly splot: SharedPlot,
 		private readonly gui: TutorialControllerGui,
 		private readonly building: ClientBuilding,
 	) {
@@ -250,7 +262,15 @@ class Remove extends Component {
 	}
 
 	waitForDelete(blocks: ReadonlySet<BlockUuid>, finish: () => void): Component {
-		const ret = new Component();
+		const ret = new TutorialStepComponent();
+		ret.onSkip(() => {
+			this.building.deleteOperation.execute({
+				plot: this.splot,
+				blocks: blocks
+					.filter((uuid) => this.splot.tryGetBlock(uuid) !== undefined)
+					.map((uuid) => this.splot.getBlock(uuid)),
+			});
+		});
 
 		const highlightSub = this.plot.highlight([...blocks]);
 
@@ -285,9 +305,9 @@ export class TutorialPlotController extends Component {
 			this.plot = this.parent(new TutorialPlot(plot, blockList));
 
 			this.build = this.parent(
-				new Build(this.plot, ts.controller.gui, buildMode.building, buildMode.tools.buildTool),
+				new Build(this.plot, splot, ts.controller.gui, buildMode.building, buildMode.tools.buildTool),
 			);
-			this.remove = this.parent(new Remove(this.plot, ts.controller.gui, buildMode.building));
+			this.remove = this.parent(new Remove(this.plot, splot, ts.controller.gui, buildMode.building));
 		});
 	}
 
@@ -305,7 +325,7 @@ export class TutorialPlotController extends Component {
 			};
 		};
 
-		const ret = new Component();
+		const ret = new TutorialStepComponent();
 		if (diff.added) {
 			ret.parent(this.build.waitForBuild({ version: diff.version, blocks: diff.added }, addFinishCondition()));
 		}
