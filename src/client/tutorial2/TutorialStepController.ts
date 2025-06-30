@@ -109,10 +109,12 @@ class ExecutorBase {
 	protected readonly onStart: (() => void)[] = [];
 	protected readonly onEnd: (() => void)[] = [];
 
+	/** Adds a function to run when this **executor** starts */
 	withOnStart(func: () => void): this {
 		this.onStart.push(func);
 		return this;
 	}
+	/** Adds a function to run when this **executor** ends (finished or destroyed) */
 	withOnEnd(func: () => void): this {
 		this.onEnd.push(func);
 		return this;
@@ -125,7 +127,10 @@ class ExecutorBase {
  */
 export class TutorialParallelExecutor extends ExecutorBase implements TutorialStep {
 	readonly run: TutorialStep["run"] = (parent, finish, ctx) => {
-		for (const func of this.onStart) func();
+		for (const func of this.onStart) {
+			func();
+		}
+
 		let completed = 0;
 
 		const nextCtx: TutorialStepContext = {
@@ -140,6 +145,11 @@ export class TutorialParallelExecutor extends ExecutorBase implements TutorialSt
 			step.run(p, nextCtx);
 		}
 
+		parent.onDestroy(() => {
+			for (const func of this.onEnd) {
+				func();
+			}
+		});
 		const sub = parent.event.loop(0, () => {
 			completed = 0;
 			for (const step of this.steps) {
@@ -154,7 +164,10 @@ export class TutorialParallelExecutor extends ExecutorBase implements TutorialSt
 			sub.Disconnect();
 
 			ctx.setProgress(1);
-			for (const func of this.onEnd) func();
+			for (const func of this.onEnd) {
+				func();
+			}
+			this.onEnd.clear();
 			finish();
 		});
 	};
@@ -168,10 +181,18 @@ export class TutorialParallelExecutor extends ExecutorBase implements TutorialSt
  */
 export class TutorialSequentialExecutor extends ExecutorBase implements TutorialStep {
 	readonly run: TutorialStep["run"] = (parent, finish, ctx) => {
-		for (const func of this.onStart) func();
+		for (const func of this.onStart) {
+			func();
+		}
+
 		let currentReq: TutorialConditionalStep | undefined;
 		let p: TutorialStepComponent | undefined;
 
+		parent.onDestroy(() => {
+			for (const func of this.onEnd) {
+				func();
+			}
+		});
 		const sub = parent.event.loop(0, () => {
 			for (let i = 0; i < this.steps.size(); i++) {
 				const step = this.steps[i];
@@ -197,7 +218,10 @@ export class TutorialSequentialExecutor extends ExecutorBase implements Tutorial
 			sub.Disconnect();
 
 			ctx.setProgress(1);
-			for (const func of this.onEnd) func();
+			for (const func of this.onEnd) {
+				func();
+			}
+			this.onEnd.clear();
 			finish();
 		});
 	};

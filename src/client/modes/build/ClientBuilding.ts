@@ -12,7 +12,7 @@ import type { PlayerDataStorageRemotes } from "shared/remotes/PlayerDataRemotes"
 export namespace ClientBuildingTypes {
 	export type PlaceBlocksArgs = {
 		readonly plot: SharedPlot;
-		readonly blocks: readonly Omit<PlaceBlockRequest, "uuid">[];
+		readonly blocks: readonly PlaceBlockRequest[];
 	};
 
 	export type DeleteBlocksArgs = {

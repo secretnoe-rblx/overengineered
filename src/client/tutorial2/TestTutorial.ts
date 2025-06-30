@@ -62,10 +62,10 @@ const start = (tutorial: TutorialStarter, firstTime: boolean) => {
 				);
 			});
 
-			// place block
+			// select build tool
 			step.sequence()
 				.withOnStart(() => toolController.enabledTools.enableOnly(buildingMode.tools.buildTool))
-				.withOnEnd(() => toolController.enabledTools.enableAll)
+				.withOnEnd(() => toolController.enabledTools.enableAll())
 
 				.conditional({
 					condition: () => toolController.selectedTool.get() === buildingMode.tools.buildTool,
@@ -116,83 +116,80 @@ const start = (tutorial: TutorialStarter, firstTime: boolean) => {
 								.withText("select bock BLOCK"),
 						);
 					},
-				})
-				.step((parent, finish) => {
-					parent.parentFunc(
-						() => toolController.enabledTools.enableOnly(buildingMode.tools.buildTool),
-						() => toolController.enabledTools.enableAll,
-					);
-					parent.parent(
-						gui
-							.createText() //
-							.withText(
-								"Now using your BUILD TOOL and your BLOCKS.BLOCK, place a BLOCK in the HIGHGLITH",
-							),
-					);
-
-					parent.parent(
-						plot.processDiff(
-							{
-								version: 32,
-								added: [
-									{ uuid: "0" as BlockUuid, id: "block", location: new CFrame(0, 1.5, 0) },
-									{ uuid: "1" as BlockUuid, id: "block", location: new CFrame(2, 1.5, 0) },
-								],
-							},
-							finish,
-						),
-					);
 				});
 
-			// delete block
-			step.sequence()
-				.conditional({
-					condition: () => toolController.selectedTool.get() === buildingMode.tools.deleteTool,
-					run: (parent) => {
-						parent.parentFunc(
-							() =>
-								toolController.enabledTools.enableOnly(
-									buildingMode.tools.buildTool,
-									buildingMode.tools.deleteTool,
-								),
-							() => toolController.enabledTools.enableAll,
-						);
-						parent.parent(tc.disableAllInputExcept([Enum.KeyCode.One, Enum.KeyCode.Three]));
-						parent.parent(gui.createFullScreenFadeWithHoleAround(mainScreen.hotbar.instance, Vector2.zero));
-						parent.parent(
-							gui
-								.createText() //
-								.withText("WRONG. you are WRONG")
-								.withText("THIS IS DELETE TOOL")
-								.withText("SELECT TOOL"),
-						);
-					},
-				})
-				.step((parent, finish) => {
+			// place block
+			step.step((parent, finish) => {
+				parent.parentFunc(
+					() => toolController.enabledTools.enableOnly(buildingMode.tools.buildTool),
+					() => toolController.enabledTools.enableAll(),
+				);
+				parent.parent(
+					gui
+						.createText() //
+						.withText("Now using your BUILD TOOL and your BLOCKS.BLOCK, place a BLOCK in the HIGHGLITH"),
+				);
+
+				parent.parent(
+					plot.processDiff(
+						{
+							version: 32,
+							added: [
+								{ uuid: "0" as BlockUuid, id: "block", location: new CFrame(0, 1.5, 0) },
+								{ uuid: "1" as BlockUuid, id: "block", location: new CFrame(2, 1.5, 0) },
+							],
+						},
+						finish,
+					),
+				);
+			});
+
+			// select delete tool
+			step.conditional({
+				condition: () => toolController.selectedTool.get() === buildingMode.tools.deleteTool,
+				run: (parent) => {
 					parent.parentFunc(
 						() =>
 							toolController.enabledTools.enableOnly(
 								buildingMode.tools.buildTool,
 								buildingMode.tools.deleteTool,
 							),
-						() => toolController.enabledTools.enableAll,
+						() => toolController.enabledTools.enableAll(),
 					);
+					parent.parent(tc.disableAllInputExcept([Enum.KeyCode.One, Enum.KeyCode.Three]));
+					parent.parent(gui.createFullScreenFadeWithHoleAround(mainScreen.hotbar.instance, Vector2.zero));
 					parent.parent(
 						gui
 							.createText() //
-							.withText("destroy the IMPOSTER"),
+							.withText("good. NO, WRONG. you are WRONG. you should NOT HAVE placed that BLOCK.")
+							.withText("lets' DESTROY IT")
+							.withText("SELECT delete TOOL")
+							.withText("it deletes BLOCKS but not your debt"),
 					);
+				},
+			});
 
-					parent.parent(
-						plot.processDiff(
-							{
-								version: 32,
-								removed: ["0" as BlockUuid],
-							},
-							finish,
+			// delete block
+			step.step((parent, finish) => {
+				parent.parentFunc(
+					() =>
+						toolController.enabledTools.enableOnly(
+							buildingMode.tools.buildTool,
+							buildingMode.tools.deleteTool,
 						),
-					);
-				});
+					() => toolController.enabledTools.enableAll(),
+				);
+				parent.parent(
+					gui
+						.createText() //
+						.withText("destroy the IMPOSTER")
+						.withText("(hes highlighted red, you see)")
+						.withText("(sus or something)")
+						.withText("(delete him before he vents)"),
+				);
+
+				parent.parent(plot.processDiff({ version: 32, removed: ["0" as BlockUuid] }, finish));
+			});
 
 			tutorial.start();
 		},

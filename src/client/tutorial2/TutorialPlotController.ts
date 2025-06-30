@@ -9,8 +9,9 @@ import { Colors } from "shared/Colors";
 import { PartUtils } from "shared/utils/PartUtils";
 import { VectorUtils } from "shared/utils/VectorUtils";
 import type { BuildingMode } from "client/modes/build/BuildingMode";
-import type { ClientBuilding } from "client/modes/build/ClientBuilding";
+import type { ClientBuilding, ClientBuildingTypes } from "client/modes/build/ClientBuilding";
 import type { BuildingDiffChange } from "client/tutorial2/BuildingDiffer";
+import type { MiddlewareResponse } from "engine/shared/Operation";
 import type { LatestSerializedBlocks } from "shared/building/BlocksSerializer";
 import type { ReadonlyPlot } from "shared/building/ReadonlyPlot";
 import type { SharedPlot } from "shared/building/SharedPlot";
@@ -99,46 +100,63 @@ class Build extends Component {
 		super();
 
 		this.event.subscribeRegistration(() =>
-			this.building.placeOperation.addMiddleware((arg) => {
-				if (this.subscribed.size() === 0) {
-					return { success: true, arg };
-				}
+			this.building.placeOperation.addMiddleware(
+				(arg): MiddlewareResponse<ClientBuildingTypes.PlaceBlocksArgs> => {
+					if (this.subscribed.size() === 0) {
+						return { success: true, arg };
+					}
 
-				const bs = arg.blocks.mapFiltered((block) => {
-					for (const b of this.subscribed) {
-						const btp = b.blocks.blocks.find(
-							(value) =>
-								value.id === block.id &&
-								VectorUtils.roundVector3To(value.location.Position, 0.5) ===
-									VectorUtils.roundVector3To(
-										arg.plot.instance.BuildingArea.CFrame.ToObjectSpace(block!.location).Position,
-										0.5,
-									),
-						);
+					const bs = arg.blocks.mapFiltered((block) => {
+						for (const b of this.subscribed) {
+							const btp = b.blocks.blocks.find(
+								(value) =>
+									value.id === block.id &&
+									VectorUtils.roundVector3To(value.location.Position, 0.5) ===
+										VectorUtils.roundVector3To(
+											arg.plot.instance.BuildingArea.CFrame.ToObjectSpace(block!.location)
+												.Position,
+											0.5,
+										),
+							);
 
-						if (btp) {
-							return [btp, b] as const;
+							if (btp) {
+								return [btp, b] as const;
+							}
+						}
+					});
+
+					if (bs.size() !== arg.blocks.size()) {
+						return { success: false, message: "Invalid placement" };
+					}
+
+					for (const [b, sub] of bs) {
+						if (!b.uuid) continue;
+						plot.remove(b.uuid);
+
+						sub.blocks = { ...sub.blocks, blocks: sub.blocks.blocks.except([b]) };
+						if (sub.blocks.blocks.size() === 0) {
+							this.subscribed.delete(sub);
+							sub.finish();
 						}
 					}
-				});
 
-				if (bs.size() !== arg.blocks.size()) {
-					return { success: false, message: "Invalid placement" };
-				}
-
-				for (const [b, sub] of bs) {
-					if (!b.uuid) continue;
-					plot.remove(b.uuid);
-
-					sub.blocks = { ...sub.blocks, blocks: sub.blocks.blocks.except([b]) };
-					if (sub.blocks.blocks.size() === 0) {
-						this.subscribed.delete(sub);
-						sub.finish();
-					}
-				}
-
-				return { success: true, arg };
-			}),
+					return {
+						success: true,
+						arg: {
+							...arg,
+							blocks: bs.map(
+								([block]): PlaceBlockRequest => ({
+									...block,
+									location: arg.plot.instance.BuildingArea.CFrame.ToWorldSpace(block.location),
+									color: Colors.white,
+									material: Enum.Material.Plastic,
+									scale: Vector3.one,
+								}),
+							),
+						},
+					};
+				},
+			),
 		);
 	}
 
@@ -187,6 +205,10 @@ class Remove extends Component {
 						}
 					}
 				});
+
+				if (bs.size() !== blocks.size()) {
+					return { success: false, message: "Invalid deletion" };
+				}
 
 				for (const [b, sub] of bs) {
 					if (!b) continue;
