@@ -10,6 +10,8 @@ let DeltaIcon = "rbxasset://custom_gloop/new_logo.png";
 export class AssetsIntegrityChecker extends ProtectedClass {
 	constructor(private readonly integrityChecker: IntegrityChecker) {
 		super(script, (info) => this.integrityChecker.handle(info));
+
+		this.initialize();
 	}
 
 	initialize() {
