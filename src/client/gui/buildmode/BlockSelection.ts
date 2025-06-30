@@ -393,10 +393,15 @@ export class BlockSelectionControl extends Control<BlockSelectionControlDefiniti
 			let button: BlockControl;
 			const features = this.playerData.data.get().features;
 			if (
-				(this.adsAllowed ??= PolicyService.GetPolicyInfoForPlayerAsync(Players.LocalPlayer).AreAdsAllowed) &&
 				!PlayerRank.isAdmin(Players.LocalPlayer) &&
 				!(block.requiredFeatures ?? Objects.empty).all((c) => features.contains(c))
 			) {
+				if (
+					!(this.adsAllowed ??= PolicyService.GetPolicyInfoForPlayerAsync(Players.LocalPlayer).AreAdsAllowed)
+				) {
+					return;
+				}
+
 				button = createFeaturedBlockButton(block);
 			} else {
 				button = createBlockButton(block, () => {
