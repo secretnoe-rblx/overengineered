@@ -1,5 +1,5 @@
 import { ReplicatedFirst, Workspace } from "@rbxts/services";
-import { IntegrityChecker } from "client/IntegrityChecker";
+import { IntegrityChecker } from "client/integrity/IntegrityChecker";
 import type { ChunkGenerator, ChunkRenderer } from "client/terrain/ChunkLoader";
 import type { InfiniteTerrainActor } from "client/terrain/InfiniteTerrainActor";
 

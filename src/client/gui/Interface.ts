@@ -37,7 +37,7 @@ export namespace Interface {
 
 	/** Receives PlayerGui from the client */
 	export function getPlayerGui<T = PlayerGui>() {
-		return Players.LocalPlayer.WaitForChild("PlayerGui") as T;
+		return Players.LocalPlayer.FindFirstChildOfClass("PlayerGui") as T;
 	}
 
 	export function isCursorOnVisibleGui(): boolean {

@@ -23,7 +23,7 @@ namespace WikiStorage {
 			};
 
 			visit(ReplicatedStorage);
-			visit(LocalPlayer.player.WaitForChild("PlayerScripts"));
+			visit(LocalPlayer.player.FindFirstChildOfClass("PlayerScripts")!);
 
 			return ret;
 		}

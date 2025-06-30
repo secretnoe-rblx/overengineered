@@ -1,4 +1,4 @@
-import { IntegrityChecker } from "client/IntegrityChecker";
+import { IntegrityChecker } from "client/integrity/IntegrityChecker";
 import { Control } from "engine/client/gui/Control";
 import { Interface } from "engine/client/gui/Interface";
 import { ComponentInstance } from "engine/shared/component/ComponentInstance";

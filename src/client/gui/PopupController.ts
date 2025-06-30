@@ -1,5 +1,5 @@
 import { Interface } from "client/gui/Interface";
-import { IntegrityChecker } from "client/IntegrityChecker";
+import { IntegrityChecker } from "client/integrity/IntegrityChecker";
 import { AutoUIScaledComponent } from "engine/client/gui/AutoUIScaledControl";
 import { Control } from "engine/client/gui/Control";
 import { LocalPlayer } from "engine/client/LocalPlayer";

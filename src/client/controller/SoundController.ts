@@ -1,6 +1,7 @@
-import { Players, ReplicatedStorage, RunService, TweenService, Workspace } from "@rbxts/services";
+import { ReplicatedStorage, RunService, TweenService, Workspace } from "@rbxts/services";
 import { LocalPlayerController } from "client/controller/LocalPlayerController";
 import { Signals } from "client/Signals";
+import { Interface } from "engine/client/gui/Interface";
 import { LocalPlayer } from "engine/client/LocalPlayer";
 import { HostedService } from "engine/shared/di/HostedService";
 import { Sound } from "shared/Sound";
@@ -59,13 +60,9 @@ class UnderwaterSoundEffect extends HostedService {
 					PartUtils.applyToAllDescendantsOfType("Sound", Workspace, (sound) => {
 						applyUnderwaterEffect(sound);
 					});
-					PartUtils.applyToAllDescendantsOfType(
-						"Sound",
-						(Players.LocalPlayer as unknown as { PlayerGui: PlayerGui }).PlayerGui,
-						(sound) => {
-							applyUnderwaterEffect(sound);
-						},
-					);
+					PartUtils.applyToAllDescendantsOfType("Sound", Interface.getPlayerGui(), (sound) => {
+						applyUnderwaterEffect(sound);
+					});
 				} else {
 					cleanupUnderwaterEffect();
 				}
@@ -141,7 +138,7 @@ export namespace SoundController {
 
 	export function getSounds(): Sounds {
 		return (
-			(Players.LocalPlayer as unknown as { PlayerGui: PlayerGui }).PlayerGui as unknown as {
+			Interface.getPlayerGui() as unknown as {
 				GameUI: { Sounds: Sounds };
 			}
 		).GameUI.Sounds;
