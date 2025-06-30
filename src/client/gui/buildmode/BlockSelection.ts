@@ -391,7 +391,10 @@ export class BlockSelectionControl extends Control<BlockSelectionControlDefiniti
 
 			let button: BlockControl;
 			const features = this.playerData.data.get().features;
-			if (!(block.requiredFeatures ?? Objects.empty).all((c) => features.contains(c))) {
+			if (
+				!PlayerRank.isAdmin(Players.LocalPlayer) &&
+				!(block.requiredFeatures ?? Objects.empty).all((c) => features.contains(c))
+			) {
 				button = createFeaturedBlockButton(block);
 			} else {
 				button = createBlockButton(block, () => {

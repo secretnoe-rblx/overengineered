@@ -72,7 +72,10 @@ export class ServerBuildingRequestController extends Component {
 			}
 
 			const dbp = this.database.get(this.playerId);
-			if (!(b.requiredFeatures ?? Objects.empty).all((c) => (dbp.features ?? Objects.empty).contains(c))) {
+			if (
+				!PlayerRank.isAdminById(this.playerId) &&
+				!(b.requiredFeatures ?? Objects.empty).all((c) => (dbp.features ?? Objects.empty).contains(c))
+			) {
 				return err(`Not enough permissions to place ${b.id}`);
 			}
 
