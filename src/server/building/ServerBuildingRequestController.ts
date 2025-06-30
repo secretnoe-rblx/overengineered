@@ -1,8 +1,10 @@
 import { RunService } from "@rbxts/services";
 import { Component } from "engine/shared/component/Component";
+import { Objects } from "engine/shared/fixes/Objects";
 import { PlayerRank } from "engine/shared/PlayerRank";
 import { BlockManager } from "shared/building/BlockManager";
 import { BuildingManager } from "shared/building/BuildingManager";
+import type { PlayerDatabase } from "server/database/PlayerDatabase";
 import type { PlayerId } from "server/PlayerId";
 import type { BuildingPlot } from "shared/building/BuildingPlot";
 import type { SharedPlot } from "shared/building/SharedPlot";
@@ -33,6 +35,7 @@ export class ServerBuildingRequestController extends Component {
 
 		@inject private readonly plots: SharedPlots,
 		@inject private readonly blockList: BlockList,
+		@inject private readonly database: PlayerDatabase,
 	) {
 		super();
 
@@ -66,6 +69,11 @@ export class ServerBuildingRequestController extends Component {
 
 			if (b.devOnly && !RunService.IsStudio() && !PlayerRank.isAdminById(this.playerId)) {
 				return err(`Unknown block id ${b.id}`);
+			}
+
+			const dbp = this.database.get(this.playerId);
+			if (!(b.requiredFeatures ?? Objects.empty).all((c) => (dbp.features ?? Objects.empty).contains(c))) {
+				return err(`Not enough permissions to place ${b.id}`);
 			}
 
 			if (

@@ -3,12 +3,17 @@ import { BlockPreviewControl } from "client/gui/buildmode/BlockPreviewControl";
 import { BlockPipetteButton } from "client/gui/controls/BlockPipetteButton";
 import { GuiAnimator } from "client/gui/GuiAnimator";
 import { Interface } from "client/gui/Interface";
+import { AlertPopup } from "client/gui/popup/AlertPopup";
 import { TextButtonControl } from "engine/client/gui/Button";
 import { Control } from "engine/client/gui/Control";
+import { PartialControl } from "engine/client/gui/PartialControl";
 import { ComponentChildren } from "engine/shared/component/ComponentChildren";
 import { ObservableValue } from "engine/shared/event/ObservableValue";
+import { Objects } from "engine/shared/fixes/Objects";
 import { Localization } from "engine/shared/Localization";
 import { PlayerRank } from "engine/shared/PlayerRank";
+import type { PopupController } from "client/gui/PopupController";
+import type { PlayerDataStorage } from "client/PlayerDataStorage";
 import type { Theme } from "client/Theme";
 import type { InstanceComponent } from "engine/shared/component/InstanceComponent";
 import type { BlockCategoryPath } from "shared/blocks/Block";
@@ -141,16 +146,16 @@ class CategoryControl extends TextButtonControl<CategoryControlDefinition> {
 	}
 }
 
-type BlockControlDefinition = GuiButton & {
+type BlockControlParts = {
 	readonly ViewportFrame: ViewportFrame;
 	readonly TextLabel: TextLabel;
 };
-class BlockControl extends TextButtonControl<BlockControlDefinition> {
-	constructor(template: BlockControlDefinition, block: Block) {
-		super(template);
+class BlockControl extends PartialControl<BlockControlParts, GuiButton> {
+	constructor(gui: GuiButton, block: Block) {
+		super(gui);
 
-		this.text.set(block.displayName);
-		this.parent(new BlockPreviewControl(template.ViewportFrame, block.model));
+		this.parts.TextLabel.Text = block.displayName;
+		this.parent(new BlockPreviewControl(this.parts.ViewportFrame, block.model));
 	}
 }
 
@@ -165,7 +170,8 @@ export type BlockSelectionControlDefinition = GuiObject & {
 		readonly ScrollingFrame: ScrollingFrame & {
 			readonly NoResultsLabel: TextLabel;
 			readonly BackButtonTemplate: CategoryControlDefinition;
-			readonly BlockButtonTemplate: BlockControlDefinition;
+			readonly BlockButtonTemplate: GuiButton;
+			readonly DiscordBlockButtonTemplate: GuiButton;
 			readonly CategoryButtonTemplate: CategoryControlDefinition;
 		};
 	};
@@ -179,6 +185,7 @@ export type BlockSelectionControlDefinition = GuiObject & {
 export class BlockSelectionControl extends Control<BlockSelectionControlDefinition> {
 	private readonly backTemplate;
 	private readonly blockTemplate;
+	private readonly featuredBlockTemplate;
 	private readonly categoryTemplate;
 	private readonly breadcrumbTemplate;
 	private readonly list;
@@ -197,6 +204,8 @@ export class BlockSelectionControl extends Control<BlockSelectionControlDefiniti
 		template: BlockSelectionControlDefinition,
 		@inject readonly blockList: BlockList,
 		@inject private readonly theme: Theme,
+		@inject private readonly popupController: PopupController,
+		@inject private readonly playerData: PlayerDataStorage,
 	) {
 		super(template);
 
@@ -232,6 +241,7 @@ export class BlockSelectionControl extends Control<BlockSelectionControlDefiniti
 		// Prepare templates
 		this.backTemplate = this.asTemplate(this.gui.Content.ScrollingFrame.BackButtonTemplate);
 		this.blockTemplate = this.asTemplate(this.gui.Content.ScrollingFrame.BlockButtonTemplate);
+		this.featuredBlockTemplate = this.asTemplate(this.gui.Content.ScrollingFrame.DiscordBlockButtonTemplate);
 		this.categoryTemplate = this.asTemplate(this.gui.Content.ScrollingFrame.CategoryButtonTemplate);
 
 		this.event.subscribeObservable(this.selectedCategory, (category) => this.create(category, true), true);
@@ -316,7 +326,20 @@ export class BlockSelectionControl extends Control<BlockSelectionControlDefiniti
 
 		const createBlockButton = (block: Block, activated: () => void) => {
 			const control = new BlockControl(this.blockTemplate(), block);
-			control.activated.Connect(activated);
+			control.addButtonAction(activated);
+			this.list.add(control);
+
+			control.instance.LayoutOrder = idx++;
+			return control;
+		};
+
+		const createFeaturedBlockButton = (block: Block) => {
+			const control = new BlockControl(this.featuredBlockTemplate(), block);
+			control.addButtonAction(() =>
+				this.popupController.showPopup(
+					new AlertPopup(`This block is available for free in our community server`, undefined, 0),
+				),
+			);
 			this.list.add(control);
 
 			control.instance.LayoutOrder = idx++;
@@ -366,44 +389,50 @@ export class BlockSelectionControl extends Control<BlockSelectionControlDefiniti
 			if (block.hidden) return;
 			if (block.devOnly && !RunService.IsStudio() && !PlayerRank.isAdmin(Players.LocalPlayer)) return;
 
-			const button = createBlockButton(block, () => {
-				if (this.gui.Content.SearchTextBox.Text !== "") {
-					this.gui.Content.SearchTextBox.Text = "";
-					this.selectedCategory.set(block.category);
-				}
-				this.selectedBlock.set(block);
-			});
+			let button: BlockControl;
+			const features = this.playerData.data.get().features;
+			if (!(block.requiredFeatures ?? Objects.empty).all((c) => features.contains(c))) {
+				button = createFeaturedBlockButton(block);
+			} else {
+				button = createBlockButton(block, () => {
+					if (this.gui.Content.SearchTextBox.Text !== "") {
+						this.gui.Content.SearchTextBox.Text = "";
+						this.selectedCategory.set(block.category);
+					}
+					this.selectedBlock.set(block);
+				});
+
+				button.event.subscribeObservable(
+					this.selectedBlock,
+					(newblock) => {
+						button.overlayValue(
+							"BackgroundColor3",
+							newblock === block ? this.theme.get("buttonActive") : this.theme.get("backgroundSecondary"),
+						);
+
+						button.instance.FindFirstChild("Highlight")?.Destroy();
+						const targetBlocks = this.highlightedBlocks.get();
+						if (targetBlocks && newblock !== block && targetBlocks.includes(block.id)) {
+							highlightButton(button);
+						}
+
+						// Gamepad selection improvements
+						button.instance.SelectionOrder = newblock === block ? 0 : 1;
+					},
+					true,
+					true,
+				);
+			}
 
 			if (prev) {
 				button.instance.NextSelectionUp = prev.instance;
 				prev.instance.NextSelectionDown = button.instance;
 			}
 
-			button.event.subscribe(button.activated, () => {
+			button.addButtonAction(() => {
 				// Gamepad selection improvements
 				GuiService.SelectedObject = undefined;
 			});
-
-			button.event.subscribeObservable(
-				this.selectedBlock,
-				(newblock) => {
-					button.overlayValue(
-						"BackgroundColor3",
-						newblock === block ? this.theme.get("buttonActive") : this.theme.get("backgroundSecondary"),
-					);
-
-					button.instance.FindFirstChild("Highlight")?.Destroy();
-					const targetBlocks = this.highlightedBlocks.get();
-					if (targetBlocks && newblock !== block && targetBlocks.includes(block.id)) {
-						highlightButton(button);
-					}
-
-					// Gamepad selection improvements
-					button.instance.SelectionOrder = newblock === block ? 0 : 1;
-				},
-				true,
-				true,
-			);
 
 			prev = button;
 		};

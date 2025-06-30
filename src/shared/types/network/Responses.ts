@@ -1,3 +1,5 @@
+import type { PlayerFeature } from "server/database/PlayerDatabase";
+
 declare global {
 	type TouchControlInfo = Readonly<Record<string, { readonly pos: SerializedVector2 }>>;
 	type SlotMeta = {
@@ -37,6 +39,7 @@ declare global {
 		readonly settings: Partial<PlayerConfig> | undefined;
 		readonly slots: readonly SlotMeta[] | undefined;
 		readonly data: PlayerData | undefined;
+		readonly features: readonly PlayerFeature[] | undefined;
 	};
 
 	type SaveSlotResponse = Response<{ readonly blocks: number | undefined }>;

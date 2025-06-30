@@ -1,4 +1,5 @@
 import type { Component } from "engine/shared/component/Component";
+import type { PlayerFeature } from "server/database/PlayerDatabase";
 import type { BlockLogicFullBothDefinitions, GenericBlockLogicCtor } from "shared/blockLogic/BlockLogic";
 import type { BlockSynchronizer } from "shared/blockLogic/BlockSynchronizer";
 import type { BlockCreation, BlockMirrorBehaviour } from "shared/blocks/BlockCreation";
@@ -56,6 +57,7 @@ export type BlockBuilder = {
 		readonly replacementId?: string;
 	};
 
+	readonly requiredFeatures?: readonly PlayerFeature[];
 	readonly devOnly: boolean;
 	readonly search?: BlockSearchInfo;
 

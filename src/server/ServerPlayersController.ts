@@ -97,6 +97,7 @@ export class ServerPlayersController extends HostedService {
 							settings: data.settings,
 							slots: data.slots,
 							data: data.data,
+							features: data.features,
 						},
 					};
 				} catch (err) {
@@ -178,6 +179,7 @@ export class ServerPlayersController extends HostedService {
 						settings: data.settings,
 						slots: data.slots,
 						data: data.data,
+						features: data.features,
 					},
 				};
 			}),

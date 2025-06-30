@@ -55,6 +55,7 @@ export class PlayerDataController extends Component {
 			settings: data.settings,
 			slots: data.slots,
 			data: data.data,
+			features: data.features,
 		};
 	}
 }

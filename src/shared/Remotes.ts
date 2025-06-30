@@ -7,6 +7,7 @@ import {
 	S2CRemoteEvent,
 } from "engine/shared/event/PERemoteEvent";
 import { PlayerRank } from "engine/shared/PlayerRank";
+import type { PlayerFeature } from "server/database/PlayerDatabase";
 
 declare global {
 	type BuildResponse = Response<{ readonly model: BlockModel }>;
@@ -123,6 +124,7 @@ export interface PlayerInitResponse {
 		readonly settings: Partial<PlayerConfig> | undefined;
 		readonly slots: readonly SlotMeta[] | undefined;
 		readonly data: PlayerData | undefined;
+		readonly features: readonly PlayerFeature[] | undefined;
 	};
 }
 

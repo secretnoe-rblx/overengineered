@@ -4,11 +4,13 @@ import { t } from "engine/shared/t";
 import { PlayerConfigUpdater } from "server/PlayerConfigVersioning";
 import type { DatabaseBackend } from "engine/server/backend/DatabaseBackend";
 
+export type PlayerFeature = "lua_circuit";
 export type PlayerDatabaseData = {
 	readonly purchasedSlots?: number;
 	readonly settings?: Partial<PlayerConfig>;
 	readonly slots?: readonly SlotMeta[];
 	readonly data?: Partial<PlayerData>;
+	readonly features?: readonly PlayerFeature[];
 };
 
 export const PlayerBanned = t.interface({
