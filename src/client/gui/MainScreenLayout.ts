@@ -1,6 +1,6 @@
 import { LoadingController } from "client/controller/LoadingController";
 import { HotbarControl } from "client/gui/buildmode/HotbarControl";
-import { IntegrityChecker } from "client/integrity/IntegrityChecker";
+import { ServiceIntegrityChecker } from "client/integrity/ServiceIntegrityChecker";
 import { Control } from "engine/client/gui/Control";
 import { Interface } from "engine/client/gui/Interface";
 import { PartialControl } from "engine/client/gui/PartialControl";
@@ -212,7 +212,7 @@ export class MainScreenLayout extends Component {
 			{ Parent: this.instance, ZIndexBehavior: Enum.ZIndexBehavior.Sibling, DisplayOrder: -2 },
 			{ scale: Element.create("UIScale", { Scale: 8 }) },
 		);
-		IntegrityChecker.whitelist.add(this.fullScreenScaled8);
+		ServiceIntegrityChecker.whitelistInstance(this.fullScreenScaled8);
 
 		this.top = this.parentGui(new Top.MainScreenTop(this.instance.Top));
 		this.bottom = this.parentGui(new Bottom.MainScreenBottom(this.instance.Bottom));

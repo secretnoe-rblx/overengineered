@@ -1,5 +1,4 @@
 import {
-	HttpService,
 	Lighting,
 	Players,
 	ReplicatedFirst,
@@ -14,14 +13,12 @@ import { ForbiddenServicesIntegrityChecker } from "client/integrity/ForbiddenSer
 import { GlobalsIntegrityChecker } from "client/integrity/GlobalsIntegrityChecker";
 import { LoggingIntegrityChecker } from "client/integrity/LoggingIntegrityChecker";
 import { ProtectedClass } from "client/integrity/ProtectedClass";
+import { ServiceIntegrityChecker } from "client/integrity/ServiceIntegrityChecker";
 import { Interface } from "engine/client/gui/Interface";
 import { PlayerRank } from "engine/shared/PlayerRank";
 import { CustomRemotes } from "shared/Remotes";
 
 export class IntegrityChecker extends ProtectedClass {
-	static readonly whitelist = new Set<Instance>();
-
-	// Pre-made configurations
 	scriptInstances: (keyof Instances)[] = ["LocalScript", "ModuleScript", "Script"];
 	remoteInstances: (keyof Instances)[] = [
 		"RemoteEvent",
@@ -30,128 +27,6 @@ export class IntegrityChecker extends ProtectedClass {
 		"BindableFunction",
 		"RemoteFunction",
 	];
-
-	protectLocation(
-		path: Instance,
-		properties?: {
-			protectedName?: boolean;
-			protectedInstances?: (keyof Instances)[] | "*";
-			protectDestroying?: boolean;
-			whitelistedNames?: string[];
-		},
-	) {
-		properties ??= {};
-		properties.protectedName ??= true;
-		properties.protectedInstances ??= "*";
-		properties.protectDestroying ??= true;
-		properties.whitelistedNames ??= [];
-
-		if (properties.protectedName) {
-			path.Name = HttpService.GenerateGUID(false);
-		}
-
-		if (
-			type(properties.protectedInstances) === "table" &&
-			(properties.protectedInstances as defined[]).size() === 0
-		) {
-			return;
-		}
-
-		const getReadableName = (str: string) => {
-			return str.gsub(
-				"%x%x%x%x%x%x%x%x%-%x%x%x%x%-%x%x%x%x%-%x%x%x%x%-%x%x%x%x%x%x%x%x%x%x%x%x",
-				path.ClassName,
-				1,
-			)[0];
-		};
-
-		const isNameWhitelisted = (instance: Instance) => {
-			if (
-				properties.whitelistedNames?.includes(instance.Name) ||
-				(properties.whitelistedNames &&
-					properties.whitelistedNames.filter((name) => instance.GetFullName().contains(name)).size() > 0)
-			) {
-				return true;
-			}
-			return false;
-		};
-
-		// Default checks
-		path.GetPropertyChangedSignal("Name").Connect(() => {
-			this.handle(`${path.ClassName} renamed: ${path.Name}`);
-		});
-
-		path.DescendantAdded.Connect((desc) => {
-			task.wait();
-
-			if (this.isWhitelisted(desc)) {
-				protectInstance(desc);
-				return;
-			}
-
-			if (isNameWhitelisted(desc)) {
-				protectInstance(desc);
-				return;
-			}
-
-			if (
-				properties.protectedInstances === "*" ||
-				properties.protectedInstances?.includes(desc.ClassName as keyof Instances)
-			) {
-				this.handle(`${desc.ClassName} added to ${path.ClassName}: ${getReadableName(desc.GetFullName())}`);
-			}
-		});
-
-		if (properties.protectDestroying) {
-			path.DescendantRemoving.Connect((desc) => {
-				task.wait();
-
-				if (this.isWhitelisted(desc)) {
-					return;
-				}
-
-				if (isNameWhitelisted(desc)) {
-					return;
-				}
-
-				if (
-					properties.protectedInstances === "*" ||
-					properties.protectedInstances?.includes(desc.ClassName as keyof Instances)
-				) {
-					this.handle(
-						`${desc.ClassName} removed from ${path.ClassName}: ${getReadableName(desc.GetFullName())}`,
-					);
-				}
-			});
-		}
-
-		const protectInstance = (instance: Instance) => {
-			if (
-				properties.protectedInstances !== "*" &&
-				!properties.protectedInstances?.includes(instance.ClassName as keyof Instances)
-			)
-				return;
-
-			instance.GetPropertyChangedSignal("Name").Connect(() => {
-				this.handle(
-					`${instance.ClassName} renamed in ${path.ClassName}: ${getReadableName(instance.GetFullName())}`,
-				);
-			});
-		};
-
-		// Protect instance property changes
-		for (const instance of path.GetDescendants()) {
-			protectInstance(instance);
-		}
-	}
-
-	isWhitelisted(instance: Instance): boolean {
-		if (IntegrityChecker.whitelist.has(instance)) {
-			IntegrityChecker.whitelist.delete(instance);
-			return true;
-		}
-		return false;
-	}
 
 	handle(violation: string) {
 		if (PlayerRank.isAdmin(Players.LocalPlayer)) {
@@ -170,63 +45,74 @@ export class IntegrityChecker extends ProtectedClass {
 	constructor() {
 		super(script, (info) => this.handle(info));
 
-		this.protectLocation(ReplicatedStorage, {
-			protectedInstances: ["Folder", ...this.remoteInstances, ...this.scriptInstances],
-		});
-		this.protectLocation(ReplicatedFirst, {
-			protectedInstances: ["Folder", ...this.remoteInstances, ...this.scriptInstances],
-		});
-		this.protectLocation(StarterGui, {
-			protectedInstances: ["ScreenGui", ...this.scriptInstances],
-			whitelistedNames: [...StarterGui.GetChildren().map((child) => child.Name)],
-		});
-		this.protectLocation(Interface.getPlayerGui(), {
-			protectedInstances: ["ScreenGui", ...this.scriptInstances],
-			protectDestroying: false,
-			whitelistedNames: [
-				...StarterGui.GetChildren().map((child) => child.Name),
-				// Native
-				"ContextActionGui",
-				"TouchGui",
-				"RbxCameraUI",
-				"ProximityPrompts",
-
-				// Atmosphere
-				"Sun",
-
-				// Our custom interfaces
-				"Remotes",
-			],
-		});
-		this.protectLocation(Lighting, {
-			protectedInstances: [],
-		});
-		this.protectLocation(Players, {
-			protectedInstances: [],
+		new ServiceIntegrityChecker(this, ReplicatedStorage, {
+			protectedClasses: {
+				mode: "whitelist",
+				instances: ["Folder", ...this.remoteInstances, ...this.scriptInstances],
+			},
 		});
 
-		// Full isolation
-		this.protectLocation(Players.LocalPlayer.FindFirstChildOfClass("Backpack")!);
-		this.protectLocation(Players.LocalPlayer.FindFirstChildOfClass("StarterGear")!);
-		this.protectLocation(Players.LocalPlayer.FindFirstChildOfClass("PlayerScripts")!, {
-			whitelistedNames: [
-				"PlayerModule",
-				...StarterPlayer.FindFirstChildOfClass("StarterPlayerScripts")!
-					.FindFirstChild("PlayerModule")!
-					.GetDescendants()
-					.map((child) => child.Name),
-			],
-			protectDestroying: false,
+		new ServiceIntegrityChecker(this, ReplicatedFirst, {
+			protectedClasses: {
+				mode: "whitelist",
+				instances: [...this.remoteInstances, ...this.scriptInstances],
+			},
 		});
-		this.protectLocation(StarterPack);
-		this.protectLocation(StarterPlayer, {
-			whitelistedNames: [
-				"PlayerModule",
-				...StarterPlayer.FindFirstChildOfClass("StarterPlayerScripts")!
-					.FindFirstChild("PlayerModule")!
-					.GetDescendants()
-					.map((child) => child.Name),
-			],
+
+		new ServiceIntegrityChecker(this, StarterGui, {
+			protectedClasses: {
+				mode: "whitelist",
+				instances: ["ScreenGui", ...this.scriptInstances],
+			},
+			protectedNames: { mode: "whitelist", names: StarterGui.GetChildren().map((child) => child.Name) },
+		});
+
+		new ServiceIntegrityChecker(this, Interface.getPlayerGui(), {
+			protectedClasses: {
+				mode: "whitelist",
+				instances: ["ScreenGui", ...this.scriptInstances],
+			},
+			protectedNames: {
+				mode: "whitelist",
+				names: [
+					...StarterGui.GetChildren().map((child) => child.Name),
+					// Native
+					"ContextActionGui",
+					"TouchGui",
+					"RbxCameraUI",
+					"ProximityPrompts",
+
+					// Atmosphere
+					"Sun",
+
+					// Our custom interfaces
+					"Remotes",
+				],
+			},
+		});
+
+		new ServiceIntegrityChecker(this, Lighting, {
+			protectedClasses: {
+				mode: "whitelist",
+				instances: [],
+			},
+		});
+
+		new ServiceIntegrityChecker(this, Players, {
+			protectedClasses: {
+				mode: "whitelist",
+				instances: [],
+			},
+		});
+
+		new ServiceIntegrityChecker(this, Players.LocalPlayer.FindFirstChildOfClass("Backpack")!);
+		new ServiceIntegrityChecker(this, Players.LocalPlayer.FindFirstChildOfClass("StarterGear")!);
+		new ServiceIntegrityChecker(this, Players.LocalPlayer.FindFirstChildOfClass("PlayerScripts")!, {
+			protectedNames: { mode: "whitelist", names: ["PlayerModule"] },
+		});
+		new ServiceIntegrityChecker(this, StarterPack);
+		new ServiceIntegrityChecker(this, StarterPlayer, {
+			protectedNames: { mode: "whitelist", names: ["PlayerModule"] },
 		});
 
 		// Other protections

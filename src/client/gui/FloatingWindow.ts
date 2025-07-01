@@ -1,4 +1,4 @@
-import { IntegrityChecker } from "client/integrity/IntegrityChecker";
+import { ServiceIntegrityChecker } from "client/integrity/ServiceIntegrityChecker";
 import { Control } from "engine/client/gui/Control";
 import { Interface } from "engine/client/gui/Interface";
 import { ComponentInstance } from "engine/shared/component/ComponentInstance";
@@ -18,7 +18,7 @@ export class FloatingWindow extends Control<FloatingWindowDefinition> {
 	}
 	static create(gui: FloatingWindowDefinition): FloatingWindow {
 		const guiInstance = this.newScreen(gui.Name);
-		IntegrityChecker.whitelist.add(guiInstance);
+		ServiceIntegrityChecker.whitelistInstance(guiInstance);
 
 		const control = new FloatingWindow(gui, guiInstance);
 		control.add(control);

@@ -34,10 +34,6 @@ export class CharacterIntegrityChecker extends ProtectedClass {
 			character.DescendantAdded.Connect((desc) => {
 				task.wait();
 
-				if (this.integrityChecker.isWhitelisted(desc)) {
-					return;
-				}
-
 				if (forbiddenInstances.includes(desc.ClassName as keyof Instances)) {
 					this.integrityChecker.handle(`${desc.ClassName} added to character`);
 					return;

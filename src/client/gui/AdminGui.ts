@@ -1,7 +1,7 @@
 import { Players } from "@rbxts/services";
 import { AdminMessageController } from "client/AdminMessageController";
 import { SavePopup } from "client/gui/popup/SavePopup";
-import { IntegrityChecker } from "client/integrity/IntegrityChecker";
+import { ServiceIntegrityChecker } from "client/integrity/ServiceIntegrityChecker";
 import { PlayerDataStorage } from "client/PlayerDataStorage";
 import { ServerRestartController } from "client/ServerRestartController";
 import { TestRunner } from "client/test/TestRunner";
@@ -87,7 +87,7 @@ export class AdminGui extends HostedService {
 
 		const screen = Element.create("ScreenGui", { Name: "Admin", Enabled: false, Parent: Interface.getPlayerGui() });
 		ComponentInstance.init(this, screen);
-		IntegrityChecker.whitelist.add(screen);
+		ServiceIntegrityChecker.whitelistInstance(screen);
 
 		this.event.onInputBegin((input) => {
 			if (input.UserInputType !== Enum.UserInputType.Keyboard) return;
