@@ -44,8 +44,8 @@ export default class IDEPopup extends Control<IDEPopupDefinition> {
 			}
 		});
 
-		this.parent(new Control(gui.Heading.CloseButton).addButtonAction(() => this.hide()));
-		this.parent(new Control(gui.Content.Buttons.CancelButton).addButtonAction(() => this.hide()));
+		this.parent(new Control(gui.Heading.CloseButton).addButtonAction(() => this.hideThenDestroy()));
+		this.parent(new Control(gui.Content.Buttons.CancelButton).addButtonAction(() => this.hideThenDestroy()));
 		this.parent(
 			this.saveButton.addButtonAction(() => {
 				callback(gui.Content.Content.ScrollingFrame.TextBox.Text);
