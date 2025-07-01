@@ -22,6 +22,7 @@ export const TerrainChunkRenderer = (
 	const clearActors = () => {
 		for (const actor of folder.GetChildren()) {
 			if (actor.IsA("Actor")) {
+				IntegrityChecker.whitelist.add(actor);
 				actor.Destroy();
 			}
 		}

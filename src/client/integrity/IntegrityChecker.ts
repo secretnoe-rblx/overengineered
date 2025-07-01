@@ -35,7 +35,6 @@ export class IntegrityChecker extends ProtectedClass {
 		path: Instance,
 		properties?: {
 			protectedName?: boolean;
-			protectChildrenInstead?: boolean;
 			protectedInstances?: (keyof Instances)[] | "*";
 			protectDestroying?: boolean;
 			whitelistedNames?: string[];
@@ -43,7 +42,6 @@ export class IntegrityChecker extends ProtectedClass {
 	) {
 		properties ??= {};
 		properties.protectedName ??= true;
-		properties.protectChildrenInstead ??= false;
 		properties.protectedInstances ??= "*";
 		properties.protectDestroying ??= true;
 		properties.whitelistedNames ??= [];
@@ -67,12 +65,23 @@ export class IntegrityChecker extends ProtectedClass {
 			)[0];
 		};
 
+		const isNameWhitelisted = (instance: Instance) => {
+			if (
+				properties.whitelistedNames?.includes(instance.Name) ||
+				(properties.whitelistedNames &&
+					properties.whitelistedNames.filter((name) => instance.GetFullName().contains(name)).size() > 0)
+			) {
+				return true;
+			}
+			return false;
+		};
+
 		// Default checks
 		path.GetPropertyChangedSignal("Name").Connect(() => {
 			this.handle(`${path.ClassName} renamed: ${path.Name}`);
 		});
 
-		(properties.protectChildrenInstead ? path.ChildAdded : path.DescendantAdded).Connect((desc) => {
+		path.DescendantAdded.Connect((desc) => {
 			task.wait();
 
 			if (this.isWhitelisted(desc)) {
@@ -80,7 +89,7 @@ export class IntegrityChecker extends ProtectedClass {
 				return;
 			}
 
-			if (properties.whitelistedNames?.includes(desc.Name)) {
+			if (isNameWhitelisted(desc)) {
 				protectInstance(desc);
 				return;
 			}
@@ -94,14 +103,14 @@ export class IntegrityChecker extends ProtectedClass {
 		});
 
 		if (properties.protectDestroying) {
-			(properties.protectChildrenInstead ? path.ChildRemoved : path.DescendantRemoving).Connect((desc) => {
+			path.DescendantRemoving.Connect((desc) => {
 				task.wait();
 
 				if (this.isWhitelisted(desc)) {
 					return;
 				}
 
-				if (properties.whitelistedNames?.includes(desc.Name)) {
+				if (isNameWhitelisted(desc)) {
 					return;
 				}
 
@@ -169,10 +178,10 @@ export class IntegrityChecker extends ProtectedClass {
 		});
 		this.protectLocation(StarterGui, {
 			protectedInstances: ["ScreenGui", ...this.scriptInstances],
+			whitelistedNames: [...StarterGui.GetChildren().map((child) => child.Name)],
 		});
 		this.protectLocation(Interface.getPlayerGui(), {
 			protectedInstances: ["ScreenGui", ...this.scriptInstances],
-			protectChildrenInstead: true,
 			protectDestroying: false,
 			whitelistedNames: [
 				...StarterGui.GetChildren().map((child) => child.Name),
