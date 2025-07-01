@@ -1,18 +1,13 @@
 import { ContentProvider, Players, ReplicatedStorage, RunService, Workspace } from "@rbxts/services";
 import { LoadingController } from "client/controller/LoadingController";
-import { Anim } from "client/gui/Anim";
 import { BSOD } from "client/gui/BSOD";
 import { Interface } from "client/gui/Interface";
 import { IntegrityChecker } from "client/integrity/IntegrityChecker";
 import { SandboxGame } from "client/SandboxGame";
 import { LocalPlayer } from "engine/client/LocalPlayer";
-import { Transforms } from "engine/shared/component/Transforms";
 import { Instances } from "engine/shared/fixes/Instances";
-import { Objects } from "engine/shared/fixes/Objects";
 import { GameHostBuilder } from "engine/shared/GameHostBuilder";
-import { TestFramework } from "engine/shared/TestFramework";
 import { gameInfo } from "shared/GameInfo";
-import type { TransformProps } from "engine/shared/component/Transform";
 
 // new IntegrityChecker();
 new IntegrityChecker();
@@ -47,8 +42,6 @@ const host = LoadingController.run("Initializing", () => {
 
 	return host;
 });
-
-//host.services.resolveForeignClass(CenterOfMassController).enable();
 
 //testing
 //RunService.IsStudio() &&
@@ -97,72 +90,3 @@ if (Players.LocalPlayer.Name === "samlovebutter") {
 	
 	*/
 }
-if (RunService.IsStudio() && Players.LocalPlayer.Name === "i3ymm") {
-	const testsName = "BlockTests";
-	const testName: string | undefined = "testCaching";
-
-	const testss = TestFramework.findAllTestScripts().map(TestFramework.loadTestsFromScript);
-	const tests = Objects.fromEntries(
-		testss
-			.filter((t) => testsName in t && (!testName || testName in t[testsName]))
-			.flatmap((t) => Objects.entriesArray(testName ? { [testName]: t[testsName][testName] } : t[testsName])),
-	);
-
-	TestFramework.runMultiple("BlockLogic", tests!, host.services);
-}
-
-//
-
-task.spawn(() => {
-	if (true as boolean) return;
-
-	const d = 0.2;
-	const gui = Interface.getPlayerGui<{ test_delete_later: ScreenGui & { Build: GuiObject } }>().test_delete_later
-		.Build;
-	const props: TransformProps = { duration: 0.2 };
-
-	const e = (child: GuiObject) => {
-		while (true as boolean) {
-			Transforms.parallel(
-				Transforms.func(() => {
-					const [asc, childcopy] = Anim.createScreenForAnimating(child);
-					return (
-						Transforms.create()
-							// .moveRelative(childcopy, new UDim2(0, 0, 0, -50), props)
-							.show(childcopy)
-							.fadeOutFrom1(childcopy, props)
-							.then()
-							.destroy(asc)
-					);
-				}),
-				Anim.UIListLayout.animRemove(gui, child, props, "hide"),
-			).run(child);
-
-			task.wait(d);
-
-			Transforms.parallel(
-				Transforms.func(() => {
-					const [asc, childcopy] = Anim.createScreenForAnimating(child);
-					return (
-						Transforms.create()
-							// .moveRelative(childcopy, new UDim2(0, 0, 0, -50))
-							.show(childcopy)
-							// .moveRelative(childcopy, new UDim2(0, 0, 0, 50), props)
-							.fadeInFrom0(childcopy, props)
-							.then()
-							.destroy(asc)
-					);
-				}),
-				Anim.UIListLayout.animAdd(gui, child, props) //
-					.then()
-					.show(child),
-			).run(child);
-
-			task.wait(d);
-		}
-	};
-
-	task.spawn(() => e(gui.WaitForChild("Undo") as GuiObject));
-	//task.spawn(() => e(gui.WaitForChild("Redo") as GuiObject));
-	//task.spawn(() => e(gui.WaitForChild("CenterOfMass") as GuiObject));
-});

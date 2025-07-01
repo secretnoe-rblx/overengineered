@@ -1,4 +1,3 @@
-import { Players } from "@rbxts/services";
 import { ObservableValue } from "engine/shared/event/ObservableValue";
 import { Objects } from "engine/shared/fixes/Objects";
 
@@ -14,10 +13,6 @@ const defaultColors = {
 	buttonPositive: Color3.fromRGB(27, 106, 22),
 	buttonClose: Color3.fromRGB(255, 84, 84),
 };
-if (Players.LocalPlayer.Name === "i3ymm") {
-	(defaultColors as Writable<typeof defaultColors>).accent = Color3.fromHex("7d80da");
-	(defaultColors as Writable<typeof defaultColors>).buttonActive = Color3.fromHex("7d80da");
-}
 
 export type ThemeColorKey = keyof typeof defaultColors;
 
