@@ -3,7 +3,6 @@ import { AlertPopup } from "client/gui/popup/AlertPopup";
 import { ConfirmPopup } from "client/gui/popup/ConfirmPopup";
 import { SaveHistoryPopup } from "client/gui/popup/SaveHistory";
 import { Action } from "engine/client/Action";
-import { ButtonControl } from "engine/client/gui/Button";
 import { Control } from "engine/client/gui/Control";
 import { Interface } from "engine/client/gui/Interface";
 import { PartialControl } from "engine/client/gui/PartialControl";
@@ -493,7 +492,8 @@ export class SavePopup extends PartialControl<SlotsPopupParts> {
 		super(template.Clone());
 
 		this.$onInjectAuto((playerData: PlayerDataStorage) => {
-			this.parent(new ButtonControl(this.parts.CloseButton, () => this.hide()));
+			this.parent(new Control(this.parts.CloseButton)) //
+				.addButtonAction(() => this.hideThenDestroy());
 
 			const slots = this.parent(new SaveSlots(this.parts.SlotList, playerData));
 			this.parent(new SaveBottom(this.parts.Bottom, slots.current));
