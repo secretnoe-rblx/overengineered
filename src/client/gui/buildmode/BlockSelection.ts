@@ -4,6 +4,7 @@ import { BlockPipetteButton } from "client/gui/controls/BlockPipetteButton";
 import { GuiAnimator } from "client/gui/GuiAnimator";
 import { Interface } from "client/gui/Interface";
 import { AlertPopup } from "client/gui/popup/AlertPopup";
+import { ServiceIntegrityChecker } from "client/integrity/ServiceIntegrityChecker";
 import { TextButtonControl } from "engine/client/gui/Button";
 import { Control } from "engine/client/gui/Control";
 import { PartialControl } from "engine/client/gui/PartialControl";
@@ -267,8 +268,11 @@ export class BlockSelectionControl extends Control<BlockSelectionControlDefiniti
 
 	private adsAllowed?: boolean;
 	private create(selectedCategory: BlockCategoryPath, animated: boolean) {
-		const highlightButton = (control: InstanceComponent<Instance>) =>
-			(Interface.getTemplates<{ Highlight: GuiObject }>().Highlight.Clone().Parent = control.instance);
+		const highlightButton = (control: InstanceComponent<Instance>) => {
+			const button = Interface.getTemplates<{ Highlight: GuiObject }>().Highlight.Clone();
+			ServiceIntegrityChecker.whitelistInstance(button);
+			button.Parent = control.instance;
+		};
 
 		let idx = 0;
 
@@ -284,6 +288,7 @@ export class BlockSelectionControl extends Control<BlockSelectionControlDefiniti
 
 					if (targetCategory.size() < selectedCategory.size()) {
 						highlightButton(control);
+
 						break;
 					}
 
@@ -292,6 +297,7 @@ export class BlockSelectionControl extends Control<BlockSelectionControlDefiniti
 
 						if (selectedCategory[i] !== targetCategory[i]) {
 							highlightButton(control);
+
 							break;
 						}
 					}
