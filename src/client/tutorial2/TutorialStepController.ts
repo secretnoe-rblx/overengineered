@@ -3,6 +3,33 @@ import { ArgsSignal } from "engine/shared/event/Signal";
 import type { ComponentParentConfig } from "engine/shared/component/Component";
 
 /**
+ * A multi-step finish callback manager. Each time the returned function is called,
+ * it registers a new "condition". When all registered conditions have been completed
+ * (by calling the returned condition function), the original `finish` callback is triggered.
+ */
+export namespace TutorialMultiFinish {
+	/** Function to finish the tutorial step */
+
+	export type TutorialMultiFinish = { readonly new: () => () => void };
+	export function create(finish: () => void): TutorialMultiFinish {
+		let conds = 0;
+		return {
+			new: () => {
+				conds++;
+
+				return () => {
+					conds--;
+
+					if (conds === 0) {
+						finish();
+					}
+				};
+			},
+		};
+	}
+}
+
+/**
  * A component which gets created upon every step start and gets destroyed upon its completion.
  * Used for parenting step-only components, starting remporary tasks or resolving objects from DI
  */
@@ -64,7 +91,7 @@ export interface TutorialSkippable {
 }
 
 /**
- * Tutorial step with a condition which gets evaluated every frame (when in a sequence), and if false prevents
+ * Tutorial step with a condition which gets evaluated every frame (when in a sequence), and if false prevents the steps from continuing
  */
 interface TutorialConditionalStep {
 	/** Condition to be checked. **Evaluates every frame when this (or any further) sub-step is active.** */

@@ -1,5 +1,5 @@
 import { Workspace } from "@rbxts/services";
-import { TutorialStepComponent } from "client/tutorial2/TutorialStepController";
+import { TutorialMultiFinish, TutorialStepComponent } from "client/tutorial2/TutorialStepController";
 import { Component } from "engine/shared/component/Component";
 import { ComponentInstance } from "engine/shared/component/ComponentInstance";
 import { Element } from "engine/shared/Element";
@@ -440,29 +440,18 @@ export class TutorialPlotController extends Component {
 		});
 	}
 
-	processDiff(diff: BuildingDiffChange, finish: () => void): Component {
-		let conds = 0;
-		const addFinishCondition = () => {
-			conds++;
-
-			return () => {
-				conds--;
-
-				if (conds === 0) {
-					finish();
-				}
-			};
-		};
+	processDiff(diff: BuildingDiffChange, _finish: () => void): Component {
+		const mfinish = TutorialMultiFinish.create(_finish);
 
 		const ret = new TutorialStepComponent();
 		if (diff.added) {
-			ret.parent(this.build.waitForBuild({ version: diff.version, blocks: diff.added }, addFinishCondition()));
+			ret.parent(this.build.waitForBuild({ version: diff.version, blocks: diff.added }, mfinish.new()));
 		}
 		if (diff.removed) {
-			ret.parent(this.remove.waitForDelete(new ReadonlySet(diff.removed), addFinishCondition()));
+			ret.parent(this.remove.waitForDelete(new ReadonlySet(diff.removed), mfinish.new()));
 		}
 		if (diff.configChanged) {
-			ret.parent(this.config.waitForConfig(diff.configChanged, addFinishCondition()));
+			ret.parent(this.config.waitForConfig(diff.configChanged, mfinish.new()));
 		}
 
 		return ret;
