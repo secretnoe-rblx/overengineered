@@ -431,7 +431,8 @@ const start = (tutorial: TutorialStarter, firstTime: boolean) => {
 							.withText("we'll use this to control our plane thrust")
 							.withText("so configure")
 							.withText("key R = 100%")
-							.withText("key F = 0%"),
+							.withText("key F = 0%")
+							.withText("// TODO: doesn't work on mobile probably"),
 					);
 
 					parent.parent(
