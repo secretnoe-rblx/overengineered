@@ -562,7 +562,7 @@ namespace Mux {
 			displayName: "Multiplexer",
 			description: "Outputs values depending on 'State' input",
 			search: {
-				aliases: ["mux"],
+				aliases: ["mux", "if"],
 			},
 
 			logic: { definition: definitionMuxSmall, ctor: SmallMux, events },
@@ -573,7 +573,7 @@ namespace Mux {
 			displayName: "Multiplexer x8",
 			description: "Outputs values depending on 'State' input",
 			search: {
-				aliases: ["mux"],
+				aliases: ["mux", "if"],
 			},
 
 			logic: { definition: definitionMuxBig, ctor: BigMux, events },
