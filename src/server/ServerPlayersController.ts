@@ -53,9 +53,42 @@ export class ServerPlayersController extends HostedService {
 						return { success: false, message: "no" };
 					}
 
-					const plot = sharedPlots.plots.find((p) => p.ownerId.get() === undefined);
+					let plot = sharedPlots.plots.find((p) => p.ownerId.get() === undefined);
 					if (!plot) {
-						return { success: false, message: "No free plot found, try again later." };
+						// clean all plots
+						for (const plot of sharedPlots.plots) {
+							const ownerId = plot.ownerId.get();
+							if (!ownerId) {
+								// WHAT
+								break;
+							}
+
+							if (!Players.GetPlayerByUserId(ownerId)) {
+								plot.ownerId.set(undefined);
+							}
+						}
+
+						// kick duplicates
+						const duplicates = sharedPlots.plots
+							.groupBy((c) => c.ownerId.get() ?? -1)
+							.filter((k, c) => k !== -1 && c.size() > 1);
+						for (const [id] of duplicates) {
+							Players.GetPlayerByUserId(id)?.Kick();
+						}
+
+						plot = sharedPlots.plots.find((p) => p.ownerId.get() === undefined);
+						if (!plot) {
+							task.spawn(() => {
+								while (true as boolean) {
+									task.wait();
+									for (const player of Players.GetPlayers()) {
+										player.Kick("Updating the game...");
+									}
+								}
+							});
+
+							return { success: false, message: "No free plot found, try again later." };
+						}
 					}
 
 					const scope = di.beginScope((builder) => {
