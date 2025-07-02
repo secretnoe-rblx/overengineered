@@ -94,12 +94,18 @@ export class ReportSubmitPopup extends Control<ReportSubmitPopupDefinition> {
 			} catch {
 				try {
 					gui.Content.TextBox.Text = serialize({
+						uid: Players.LocalPlayer.UserId,
+						uname: Players.LocalPlayer.Name,
+						udname: Players.LocalPlayer.DisplayName,
 						env: GameDefinitions.getEnvironmentInfo(),
 						data: processDataForJsonSerializationForSubmit(data),
 					});
 				} catch {
 					try {
 						gui.Content.TextBox.Text = serialize({
+							uid: Players.LocalPlayer.UserId,
+							uname: Players.LocalPlayer.Name,
+							udname: Players.LocalPlayer.DisplayName,
 							trace: debug.traceback(undefined, 1)?.split("\n"),
 						});
 					} catch {
