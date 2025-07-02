@@ -25,6 +25,7 @@ export class ConfigControlBase<
 
 	constructor(gui: GuiObject & T, name: string) {
 		super(gui);
+		gui.Name = name;
 		this._v = new SubmittableValue(new ObservableValue<Values<V>>({}));
 
 		this.parts.TitleLabel.Text = name;

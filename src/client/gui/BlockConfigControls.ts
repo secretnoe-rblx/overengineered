@@ -144,6 +144,7 @@ const setWrapperColor = (wrapper: ConfigValueWrapper, valueType: PrimitiveKeys) 
 	wrapper.typeColor.set(BlockWireManager.types[valueType].color);
 };
 const setWrapperName = (control: Control<GuiObject & { readonly HeadingLabel: TextLabel }>, name: string) => {
+	control.instance.Name = name;
 	control.instance.HeadingLabel.Text = name;
 };
 const initTooltip = (

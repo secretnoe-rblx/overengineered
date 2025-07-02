@@ -1,9 +1,11 @@
 import { ContextActionService } from "@rbxts/services";
 import { LabelControl } from "client/gui/controls/LabelControl";
 import { ScaledScreenGui } from "client/gui/ScaledScreenGui";
+import { ServiceIntegrityChecker } from "client/integrity/ServiceIntegrityChecker";
 import { Control } from "engine/client/gui/Control";
 import { Interface } from "engine/client/gui/Interface";
 import { LocalPlayer } from "engine/client/LocalPlayer";
+import { Colors } from "engine/shared/Colors";
 import { Component } from "engine/shared/component/Component";
 import { InstanceComponent } from "engine/shared/component/InstanceComponent";
 import { Transforms } from "engine/shared/component/Transforms";
@@ -145,9 +147,10 @@ class Progress extends Control<ProgressDefinition> {
 	 * @argument progress The new progress, 0-1
 	 */
 	setProgress(progress: number) {
+		const color = progress > this.gui.Progress.Size.X.Scale ? Colors.white : Colors.red;
 		Transforms.create() //
-			.flashColor(this.gui.Progress, new Color3(1, 1, 1))
-			.flashColor(this.gui.Progress.Inner, new Color3(1, 1, 1))
+			.flashColor(this.gui.Progress, color)
+			.flashColor(this.gui.Progress.Inner, color)
 			.transform(
 				this.gui.Progress,
 				"Size",

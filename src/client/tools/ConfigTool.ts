@@ -50,7 +50,7 @@ namespace Scene {
 	};
 	@injectable
 	export class ConfigToolScene extends Control<ConfigToolSceneDefinition> {
-		private readonly configContainer;
+		readonly configContainer;
 		private readonly configParent;
 
 		constructor(
@@ -302,6 +302,7 @@ type TutorialConfigBlockHighlight = { position: Vector3 }; // TODO: config tool 
 export class ConfigTool extends ToolBase {
 	readonly blocksToConfigure: TutorialConfigBlockHighlight[] = [];
 	readonly selected = new ObservableCollectionSet<BlockModel>();
+	readonly gui;
 
 	constructor(
 		@inject mode: BuildingMode,
@@ -310,7 +311,7 @@ export class ConfigTool extends ToolBase {
 		@inject di: DIContainer,
 	) {
 		super(mode);
-		this.parentGui(
+		this.gui = this.parentGui(
 			di.resolveForeignClass(Scene.ConfigToolScene, [
 				ToolBase.getToolGui<"Config", Scene.ConfigToolSceneDefinition>().Config,
 			]),

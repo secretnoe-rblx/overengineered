@@ -1,14 +1,17 @@
 import { RunService } from "@rbxts/services";
 import { MultiBlockConfigControl } from "client/gui/BlockConfigControls";
 import { ConfirmPopup } from "client/gui/popup/ConfirmPopup";
+import { ScaledScreenGui } from "client/gui/ScaledScreenGui";
 import { Element } from "engine/shared/Element";
 import { RocketBlocks } from "shared/blocks/blocks/RocketEngineBlocks";
+import { BlockManager } from "shared/building/BlockManager";
 import type { MainScreenLayout } from "client/gui/MainScreenLayout";
 import type { PopupController } from "client/gui/PopupController";
 import type { BuildingMode } from "client/modes/build/BuildingMode";
 import type { ToolController } from "client/tools/ToolController";
 import type { TutorialDescription } from "client/tutorial2/TutorialDescription";
 import type { TutorialStarter } from "client/tutorial2/TutorialStarter";
+import type { Component } from "engine/shared/component/Component";
 
 const start = (tutorial: TutorialStarter, firstTime: boolean) => {
 	tutorial.$onInjectAuto(
@@ -136,8 +139,8 @@ const start = (tutorial: TutorialStarter, firstTime: boolean) => {
 						{
 							version: 32,
 							added: [
-								{ uuid: "0" as BlockUuid, id: "block", location: new CFrame(0, 1.5, 0) },
-								{ uuid: "1" as BlockUuid, id: "block", location: new CFrame(2, 1.5, 0) },
+								{ uuid: "b0" as BlockUuid, id: "block", location: new CFrame(0, 1.5, 0) },
+								{ uuid: "b1" as BlockUuid, id: "block", location: new CFrame(2, 1.5, 0) },
 							],
 						},
 						finish,
@@ -191,7 +194,7 @@ const start = (tutorial: TutorialStarter, firstTime: boolean) => {
 						.withText("(delete him before he vents)"),
 				);
 
-				parent.parent(plot.processDiff({ version: 32, removed: ["0" as BlockUuid] }, finish));
+				parent.parent(plot.processDiff({ version: 32, removed: ["b0" as BlockUuid] }, finish));
 			});
 
 			// place rocket block
@@ -216,7 +219,11 @@ const start = (tutorial: TutorialStarter, firstTime: boolean) => {
 						{
 							version: 32,
 							added: [
-								{ uuid: "2" as BlockUuid, id: "smallrocketengine", location: new CFrame(5, 1.5, 0) },
+								{
+									uuid: "rocket0" as BlockUuid,
+									id: "smallrocketengine",
+									location: new CFrame(5, 1.5, 0),
+								},
 							],
 						},
 						finish,
@@ -249,8 +256,64 @@ const start = (tutorial: TutorialStarter, firstTime: boolean) => {
 				},
 			});
 
-			let frameParent: GuiObject | undefined;
-			step.sequence() //
+			/** @deprecated */
+			const createConfigExample = (parent: Component) => {
+				const exampleGui = Element.create(
+					"ScreenGui",
+					{
+						Parent: gui.instance,
+					},
+					{
+						frame: Element.create(
+							"Frame",
+							{
+								Position: new UDim2(0.3, 0, 0.033, 0),
+								Size: new UDim2(0, 324, 0, 600),
+								BackgroundColor3: Color3.fromRGB(1, 4, 9),
+								BackgroundTransparency: 0.5,
+								Interactable: false,
+							},
+							{
+								padding: Element.create("UIPadding", {
+									PaddingBottom: new UDim(0, 5),
+									PaddingLeft: new UDim(0, 5),
+									PaddingRight: new UDim(0, 2),
+									PaddingTop: new UDim(0, 5),
+								}),
+								list: Element.create("UIListLayout", { Padding: new UDim(0, 5) }),
+							},
+						),
+					},
+				);
+
+				const configPreview = di.resolveForeignClass(MultiBlockConfigControl, [
+					exampleGui.frame,
+					RocketBlocks[0].logic!.definition.input,
+					{
+						["rocket0" as BlockUuid]: {
+							thrust: {
+								controlConfig: {
+									enabled: true,
+									mode: { type: "instant", instant: { mode: "onRelease" } },
+									keys: [
+										{ key: "R", value: 100 },
+										{ key: "F", value: 0 },
+									],
+								},
+							},
+						},
+					} as never,
+					undefined,
+					new Map(),
+				]);
+				parent.parent(configPreview);
+				parent.parent(new ScaledScreenGui(exampleGui));
+
+				return $tuple(configPreview, exampleGui);
+			};
+
+			// config tool explanation
+			step.sequence()
 				.withOnStart(() =>
 					toolController.enabledTools.enableOnly(
 						buildingMode.tools.buildTool,
@@ -261,135 +324,114 @@ const start = (tutorial: TutorialStarter, firstTime: boolean) => {
 				.withOnEnd(() => toolController.enabledTools.enableAll())
 				.withOnStart((parent) => parent.parent(plot.disableBuilding()))
 				.withOnStart((parent) => parent.parent(plot.disableDeleting()))
-				.withOnEnd(() => frameParent?.Destroy())
+				.withOnStart(() => (buildingMode.tools.configTool.gui.configContainer.instance.Interactable = false))
+				.withOnEnd(() => (buildingMode.tools.configTool.gui.configContainer.instance.Interactable = true))
+				.conditional({
+					condition: () => {
+						const sel = buildingMode.tools.configTool.selected.get();
+						return sel.size() === 1 && BlockManager.manager.uuid.get(sel.first()!) === "rocket0";
+					},
+					run: (parent) => {
+						parent.event.subscribeRegistration(() => plot.plot.highlight(["rocket0" as BlockUuid]));
+						parent.parent(
+							gui
+								.createText() //
+								.withText("ok now i teach you the CONFIGURATION WINDOW")
+								.withText("SELECT ROCKET BLOCK"),
+						);
+					},
+				})
 				.step((parent, finish) => {
+					parent.parent(
+						gui.createFullScreenFadeWithHoleAround(
+							buildingMode.tools.configTool.gui.configContainer.instance,
+						),
+					);
+
 					parent.parent(
 						gui
 							.createText() //
 							.withText("ok now i teach you the CONFIGURATION WINDOW")
+							.withText("THIS is CONFIGURATION WINDOW")
+							.withText("it makes CONFIGURATION WINDOW")
+							.withText("yiu CONFIGURE in this WINDOW")
+							.withText("-the blocks")
 							.withNext(finish),
 					);
 				})
 				.step((parent, finish) => {
-					frameParent?.Destroy();
-					frameParent = Element.create(
-						"Frame",
-						{
-							Position: new UDim2(0.3, 0, 0.033, 0),
-							Size: new UDim2(0, 324, 0, 600),
-							BackgroundColor3: Color3.fromRGB(1, 4, 9),
-							BackgroundTransparency: 0.5,
-							Parent: gui.instance,
-						},
-						{
-							padding: Element.create("UIPadding", {
-								PaddingBottom: new UDim(0, 5),
-								PaddingLeft: new UDim(0, 5),
-								PaddingRight: new UDim(0, 2),
-								PaddingTop: new UDim(0, 5),
-							}),
-						},
-					);
-
-					const frame = Element.create(
-						"ScrollingFrame",
-						{
-							Position: new UDim2(),
-							Size: new UDim2(1, 0, 1, 0),
-							BackgroundTransparency: 1,
-							AutomaticCanvasSize: Enum.AutomaticSize.Y,
-							ScrollBarThickness: 8,
-							Parent: frameParent,
-						},
-						{
-							list: Element.create("UIListLayout", { Padding: new UDim(0, 5) }),
-							padding: Element.create("UIPadding", { PaddingRight: new UDim(0, 9) }),
-						},
-					);
-
-					const configPreview = di.resolveForeignClass(MultiBlockConfigControl, [
-						frame,
-						RocketBlocks[0].logic!.definition.input,
-						{
-							["2" as BlockUuid]: {
-								thrust: {
-									controlConfig: {
-										enabled: true,
-										mode: { type: "instant", instant: { mode: "onRelease" } },
-										keys: [
-											{ key: "R", value: 100 },
-											{ key: "F", value: 0 },
-										],
-									},
-								},
-							},
-						} as never,
-						undefined,
-						new Map(),
-					]);
-					parent.parent(configPreview, { destroy: false, disable: false });
-
-					parent.parent(gui.createFullScreenFade());
-					parent.parent(
-						gui
-							.createText() //
-							.withText("THIS is the CONFIGURATION WINDOW example of ROCKET")
-							.withNext(finish),
-					);
-				})
-				.step((parent, finish) => {
-					if (!frameParent) throw "what";
 					parent.parent(
 						gui.createFullScreenFadeWithHoleAround(
-							frameParent.FindFirstChild("MultiKeys", true) as GuiObject,
+							buildingMode.tools.configTool.gui.configContainer.instance.FindFirstChild(
+								"MultiKeys",
+								true,
+							) as GuiObject,
 						),
 					);
 
 					parent.parent(
 						gui
 							.createText() //
-							.withText("look this configurable thing is KEY")
+							.withText("this configurable thing is KEY control")
 							.withNext(finish),
 					);
 				})
 				.step((parent, finish) => {
-					if (!frameParent) throw "what";
 					parent.parent(
 						gui.createFullScreenFadeWithHoleAround(
-							frameParent.FindFirstChild("MultiKeys", true)!.FindFirstChild("Button", true) as GuiObject,
+							buildingMode.tools.configTool.gui.configContainer.instance
+								.FindFirstChild("MultiKeys", true)!
+								.FindFirstChild("Template", true)!
+								.FindFirstChild("Button", true) as GuiObject,
+							new Vector2(4, 4),
 						),
 					);
 
 					parent.parent(
 						gui
 							.createText() //
-							.withText("look this configurable thing is KEY")
+							.withText("look this configurable thing is KEY control")
 							.withText("when you presst this key...")
 							.withNext(finish),
 					);
 				})
 				.step((parent, finish) => {
-					if (!frameParent) throw "what";
 					parent.parent(
 						gui.createFullScreenFadeWithHoleAround(
-							frameParent.FindFirstChild("MultiKeys", true)!.FindFirstChild("Number", true) as GuiObject,
+							buildingMode.tools.configTool.gui.configContainer.instance
+								.FindFirstChild("MultiKeys", true)!
+								.FindFirstChild("Template", true)!
+								.FindFirstChild("Number", true) as GuiObject,
+							new Vector2(4, 4),
 						),
 					);
 
 					parent.parent(
 						gui
 							.createText() //
-							.withText("look this configurable thing is KEY")
-							.withText("when you presst this key ist MOVE to the number set")
+							.withText("look this configurable thing is KEY control")
+							.withText("when you presst this key the number MOVE to the number")
 							.withNext(finish),
 					);
 				})
 				.step((parent, finish) => {
+					buildingMode.tools.configTool.gui.configContainer.instance.Interactable = true;
+					parent.parent(
+						gui.createFullScreenFadeWithHoleAround(
+							buildingMode.tools.configTool.gui.configContainer.instance.FindFirstChild(
+								"MultiKeys",
+								true,
+							) as GuiObject,
+						),
+					);
+
 					parent.parent(
 						gui
 							.createText() //
-							.withText("ok now configure rocket")
-							.withText("just like i teoched you !"),
+							.withText("we'll use this to control our plane thrust")
+							.withText("so configure")
+							.withText("key R = 100%")
+							.withText("key F = 0%"),
 					);
 
 					parent.parent(
@@ -397,7 +439,37 @@ const start = (tutorial: TutorialStarter, firstTime: boolean) => {
 							{
 								version: 32,
 								configChanged: {
-									["2" as BlockUuid]: {
+									["rocket0" as BlockUuid]: {
+										thrust: {
+											controlConfig: {
+												enabled: true,
+												keys: [
+													{ key: "R", value: 100 },
+													{ key: "F", value: 0 },
+												],
+											},
+										},
+									},
+								},
+							},
+							finish,
+						),
+					);
+				})
+				.step((parent, finish) => {
+					parent.parent(
+						gui.createFullScreenFadeWithHoleAround(
+							buildingMode.tools.configTool.gui.configContainer.instance //
+								.FindFirstChild("Smooth change", true) as GuiObject,
+						),
+					);
+
+					parent.parent(
+						plot.processDiff(
+							{
+								version: 32,
+								configChanged: {
+									["rocket0" as BlockUuid]: {
 										thrust: {
 											controlConfig: {
 												enabled: true,
@@ -417,12 +489,20 @@ const start = (tutorial: TutorialStarter, firstTime: boolean) => {
 							finish,
 						),
 					);
+
+					parent.parent(
+						gui
+							.createText() //
+							.withText("this thing controls whether number goes smoothly or instant")
+							.withText("disable IT"),
+					);
 				});
 
 			//
 
 			// end
 			step.step((parent, finish) => {
+				parent.parent(gui.createFullScreenFade());
 				parent.parent(
 					gui
 						.createText() //
