@@ -364,16 +364,11 @@ export class TutorialController extends Component {
 	constructor() {
 		super();
 
-		this.gui = this.parent(
-			new TutorialControllerGui(
-				Element.create("ScreenGui", {
-					Name: "Tutorial",
-					DisplayOrder: 99999,
-					IgnoreGuiInset: true,
-					Parent: Interface.getInterface(),
-				}),
-			),
-		);
+		const screen = Element.create("ScreenGui", { Name: "Tutorial", DisplayOrder: 99999, IgnoreGuiInset: true });
+		ServiceIntegrityChecker.whitelistInstance(screen);
+		screen.Parent = Interface.getInterface();
+
+		this.gui = this.parent(new TutorialControllerGui(screen));
 	}
 
 	/** Creates a component which disables user input of the provided {@link types} and enables back upon destroy */
