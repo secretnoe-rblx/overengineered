@@ -10,7 +10,7 @@ import type { BlockBuilder } from "shared/blocks/Block";
 
 const definition = {
 	inputOrder: ["sound", "play", "volume", "loop"],
-	outputOrder: ["isPlaying", "progress"],
+	outputOrder: ["isPlaying", "progress", "loudness"],
 	input: {
 		sound: {
 			displayName: "Sound",
@@ -55,6 +55,11 @@ const definition = {
 		progress: {
 			displayName: "Progress",
 			unit: "seconds",
+			types: ["number"],
+		},
+		loudness: {
+			displayName: "Loudness",
+			unit: "Number, 0-1000",
 			types: ["number"],
 		},
 	},
@@ -198,8 +203,12 @@ class Logic extends InstanceBlockLogic<typeof definition> {
 		soundInstance.Played.Connect(() => this.output.isPlaying.set("bool", true));
 		soundInstance.Ended.Connect(() => this.output.isPlaying.set("bool", false));
 		this.output.isPlaying.set("bool", false);
+		this.output.loudness.set("number", 0);
 
 		let nextSoundUpdate: BlockLogicTypes.SoundValue | undefined;
+		this.onTicc(() => {
+			this.output.loudness.set("number", soundInstance.PlaybackLoudness);
+		});
 
 		this.onk(["sound"], ({ sound }) => {
 			if (!soundInstance.IsPlaying) {
