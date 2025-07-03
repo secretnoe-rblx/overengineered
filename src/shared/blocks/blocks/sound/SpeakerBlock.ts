@@ -203,6 +203,7 @@ class Logic extends InstanceBlockLogic<typeof definition> {
 		soundInstance.Played.Connect(() => this.output.isPlaying.set("bool", true));
 		soundInstance.Ended.Connect(() => this.output.isPlaying.set("bool", false));
 		this.output.isPlaying.set("bool", false);
+		this.output.progress.set("number", 0);
 		this.output.loudness.set("number", 0);
 
 		let nextSoundUpdate: BlockLogicTypes.SoundValue | undefined;
