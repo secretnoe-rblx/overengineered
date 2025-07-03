@@ -13,7 +13,7 @@ export class IntegrityCheckerServer extends HostedService {
 
 			networkLogging.log({
 				source: networkLogging.getSourceFromPlayer(player),
-				action: "leave",
+				action: "integrity",
 				data: violation,
 			});
 
