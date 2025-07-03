@@ -108,6 +108,7 @@ declare global {
 	type PlayerData = {
 		readonly lastLaunchedVersion?: number;
 		readonly lastJoin?: number;
+		readonly warnings?: number;
 	};
 
 	type PlayerConfigDefinition = typeof PlayerConfigDefinition;
