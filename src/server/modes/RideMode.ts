@@ -13,7 +13,6 @@ import type { ServerPlayersController } from "server/ServerPlayersController";
 @injectable
 export class RideMode implements PlayModeBase {
 	private readonly cache = new Map<Player, Instance>();
-	private readonly required;
 
 	constructor(
 		@inject private readonly serverControllers: ServerPlayersController,
@@ -21,8 +20,6 @@ export class RideMode implements PlayModeBase {
 		@inject private readonly slots: SlotDatabase,
 		@inject private readonly playerData: PlayerDatabase,
 	) {
-		this.required = blockList.sorted.filter((b) => b.required);
-
 		Players.PlayerRemoving.Connect((player) => {
 			const blocks = this.cache.get(player);
 
@@ -86,16 +83,6 @@ export class RideMode implements PlayModeBase {
 		if (!controller) throw "what";
 
 		const blocksChildren = controller.blocks.getBlocks();
-
-		for (const block of this.required) {
-			if (!blocksChildren.find((value) => BlockManager.manager.id.get(value) === block.id)) {
-				return {
-					success: false,
-					message: block.displayName + " not found",
-				};
-			}
-		}
-
 		const copy = controller.blocks.cloneBlocks();
 		this.cache.set(player, copy);
 

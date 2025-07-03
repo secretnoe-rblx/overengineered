@@ -50,7 +50,6 @@ export type BlockBuilder = {
 			}
 		>;
 	};
-	readonly required: boolean;
 	readonly limit: number;
 	readonly mirror: {
 		readonly behaviour: BlockMirrorBehaviour;

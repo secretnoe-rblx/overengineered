@@ -1,4 +1,4 @@
-import { Players, RunService, Workspace } from "@rbxts/services";
+import { Players, Workspace } from "@rbxts/services";
 import { AdminMessageController } from "client/AdminMessageController";
 import { ClientEffectCreator } from "client/ClientEffectCreator";
 import { BeaconController } from "client/controller/BeaconController";
@@ -37,8 +37,6 @@ import { BasicCarTutorial } from "client/tutorial/tutorials/BasicCarTutorial";
 import { BasicPlaneTutorial } from "client/tutorial/tutorials/BasicPlaneTutorial";
 import { NewBasicPlaneTutorial } from "client/tutorial/tutorials/NewBasicPlaneTutorial";
 import { TutorialServiceInitializer } from "client/tutorial/TutorialService";
-import { TestTutorial } from "client/tutorial2/TestTutorial";
-import { TutorialStarter } from "client/tutorial2/TutorialStarter";
 import { InputController } from "engine/client/InputController";
 import { Keybinds } from "engine/client/Keybinds";
 import { ReadonlyPlot } from "shared/building/ReadonlyPlot";
@@ -182,12 +180,12 @@ export namespace SandboxGame {
 			});
 		}
 
-		if (RunService.IsStudio() && Players.LocalPlayer.Name === "hyprlandd") {
-			builder.enabled.Connect((di, host) => {
-				const stepController = new TutorialStarter();
-				TestTutorial.start(stepController, true);
-				host.parent(stepController);
-			});
-		}
+		// if (RunService.IsStudio() && Players.LocalPlayer.Name === "hyprlandd") {
+		// 	builder.enabled.Connect((di, host) => {
+		// 		const stepController = new TutorialStarter();
+		// 		TestTutorial.start(stepController, true);
+		// 		host.parent(stepController);
+		// 	});
+		// }
 	}
 }
