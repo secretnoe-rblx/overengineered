@@ -6,6 +6,8 @@ import { PlayerDataStorage } from "client/PlayerDataStorage";
 import { ServerRestartController } from "client/ServerRestartController";
 import { TestRunner } from "client/test/TestRunner";
 import { BuildingDiffer } from "client/tutorial2/BuildingDiffer";
+import { TestTutorial } from "client/tutorial2/TestTutorial";
+import { TutorialStarter } from "client/tutorial2/TutorialStarter";
 import { TextButtonControl } from "engine/client/gui/Button";
 import { Control } from "engine/client/gui/Control";
 import { Interface } from "engine/client/gui/Interface";
@@ -19,6 +21,7 @@ import type { PopupController } from "client/gui/PopupController";
 import type { TutorialsService } from "client/tutorial/TutorialService";
 import type { Component } from "engine/shared/component/Component";
 import type { InstanceComponentParentConfig } from "engine/shared/component/InstanceComponent";
+import type { GameHost } from "engine/shared/GameHost";
 import type { GameHostBuilder } from "engine/shared/GameHostBuilder";
 import type { Switches } from "engine/shared/Switches";
 import type { ReadonlyPlot } from "shared/building/ReadonlyPlot";
@@ -179,6 +182,12 @@ export class AdminGui extends HostedService {
 				for (const tutorial of di.resolve<TutorialsService>().allTutorials) {
 					sub.addButton(`run '${tutorial.name}'`, () => di.resolve<TutorialsService>().run(tutorial));
 				}
+
+				sub.addButton("[2] Run TestTutorial", () => {
+					const stepController = new TutorialStarter();
+					TestTutorial.start(stepController, true);
+					di.resolve<GameHost>().parent(stepController);
+				});
 			});
 		});
 
