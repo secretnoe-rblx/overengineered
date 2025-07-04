@@ -6,7 +6,7 @@ import { PlayerDataStorage } from "client/PlayerDataStorage";
 import { ServerRestartController } from "client/ServerRestartController";
 import { TestRunner } from "client/test/TestRunner";
 import { BuildingDiffer } from "client/tutorial2/BuildingDiffer";
-import { TestTutorial } from "client/tutorial2/TestTutorial";
+import { TestTutorial } from "client/tutorial2/tutorials/TestTutorial";
 import { TutorialStarter } from "client/tutorial2/TutorialStarter";
 import { TextButtonControl } from "engine/client/gui/Button";
 import { Control } from "engine/client/gui/Control";
