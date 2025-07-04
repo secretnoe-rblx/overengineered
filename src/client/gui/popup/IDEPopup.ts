@@ -54,6 +54,10 @@ export default class IDEPopup extends Control<IDEPopupDefinition> {
 			}),
 		);
 
+		this.event.subscribe(this.gui.Content.Content.Code.GetPropertyChangedSignal("CanvasPosition"), () => {
+			this.gui.Content.Content.Rows.CanvasPosition = this.gui.Content.Content.Code.CanvasPosition;
+		});
+
 		this.updateHighlight();
 	}
 
@@ -73,6 +77,5 @@ export default class IDEPopup extends Control<IDEPopupDefinition> {
 			str += `${index}\n`;
 		}
 		this.gui.Content.Content.Rows.TextLabel.Text = str;
-		this.gui.Content.Content.Rows.CanvasPosition = this.gui.Content.Content.Code.CanvasPosition;
 	}
 }
