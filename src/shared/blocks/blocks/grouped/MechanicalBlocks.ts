@@ -36,30 +36,30 @@ const blocks: BlockBuildersWithoutIdAndDefaults = {
 		description: "A cog for your machinery. Does it even work?",
 	},
 
-	// spurgear: {
-	// 	displayName: "Spur Great ",
-	// 	description: "N/A",
-	// },
-	// wormgear: {
-	// 	displayName: "Worm Gear",
-	// 	description: "N/A",
-	// },
-	// bevelgear: {
-	// 	displayName: "Beval Gear",
-	// 	description: "N/A",
-	// },
-	// helicalgear: {
-	// 	displayName: "Helical Gear",
-	// 	description: "N/A",
-	// },
-	// gearrack: {
-	// 	displayName: "Rack (Gear)",
-	// 	description: "N/A",
-	// },
-	// sprocketgear: {
-	// 	displayName: "Sprocket Gear",
-	// 	description: "N/A",
-	// },
+	spurgear: {
+		displayName: "Spur Gear",
+		description: "N/A",
+	},
+	wormgear: {
+		displayName: "Worm Gear",
+		description: "N/A",
+	},
+	bevelgear: {
+		displayName: "Beval Gear",
+		description: "N/A",
+	},
+	helicalgear: {
+		displayName: "Helical Gear",
+		description: "N/A",
+	},
+	gearrack: {
+		displayName: "Rack (Gear)",
+		description: "N/A",
+	},
+	sprocketgear: {
+		displayName: "Sprocket Gear",
+		description: "N/A",
+	},
 
 	wingrounding: {
 		displayName: "Wing Rounding",
