@@ -7,24 +7,6 @@ import type { BlockBuilder } from "shared/blocks/Block";
 const definition = {
 	inputOrder: ["targetAngle", "relativeAngle", "torque", "responsiveness"],
 	input: {
-		// gyroMode: {
-		// 	displayName: "Mode",
-		// 	types: {
-		// 		enum: {
-		// 			config: "followTarget",
-		// 			elementOrder: ["followTarget", "angleAsSpin"],
-		// 			elements: {
-		// 				followTarget: {
-		// 					displayName: "Follow target angle",
-		// 				},
-		// 				angleAsSpin: {
-		// 					displayName: "Target angle as spin",
-		// 				},
-		// 			},
-		// 		},
-		// 	},
-		// 	connectorHidden: true,
-		// },
 		targetAngle: {
 			displayName: "Target Angle",
 			tooltip: "The angle it's going to follow (in degrees)",
