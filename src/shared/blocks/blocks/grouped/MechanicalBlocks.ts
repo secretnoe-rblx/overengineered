@@ -39,26 +39,32 @@ const blocks: BlockBuildersWithoutIdAndDefaults = {
 	spurgear: {
 		displayName: "Spur Gear",
 		description: "N/A",
+		devOnly: true,
 	},
 	wormgear: {
 		displayName: "Worm Gear",
 		description: "N/A",
+		devOnly: true,
 	},
 	bevelgear: {
 		displayName: "Beval Gear",
 		description: "N/A",
+		devOnly: true,
 	},
 	helicalgear: {
 		displayName: "Helical Gear",
 		description: "N/A",
+		devOnly: true,
 	},
 	gearrack: {
 		displayName: "Rack (Gear)",
 		description: "N/A",
+		devOnly: true,
 	},
 	sprocketgear: {
 		displayName: "Sprocket Gear",
 		description: "N/A",
+		devOnly: true,
 	},
 
 	wingrounding: {

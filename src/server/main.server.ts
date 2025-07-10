@@ -16,6 +16,10 @@ Secrets.addDevelopmentSecret(
 );
 Secrets.addDevelopmentSecret("api_token", "literal:REDACTED_TOKEN");
 Secrets.addDevelopmentSecret("logging_token", "literal:REDACTED_TOKEN");
+Secrets.addDevelopmentSecret(
+	"join_mode_key",
+	"4dce4ec85c3fcc6be299e10c9fb95916c942398af86966ccbcf297ccfb95e1ca047081182ece591b219ffe578cd3cce38ab7a70286e24e7e4f2711407f5b2d58",
+);
 
 import { RemoteEvents } from "shared/RemoteEvents";
 import { SandboxGame } from "server/SandboxGame";

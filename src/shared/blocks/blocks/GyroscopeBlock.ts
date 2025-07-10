@@ -119,6 +119,7 @@ export const GyroscopeBlock = {
 	displayName: "Gyroscope",
 	description: "N/A",
 	limit: 20,
+	devOnly: true,
 
 	logic: { definition, ctor: Logic },
 } as const satisfies BlockBuilder;
