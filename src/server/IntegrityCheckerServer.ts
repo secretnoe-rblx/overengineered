@@ -1,8 +1,8 @@
 import { HostedService } from "engine/shared/di/HostedService";
 import { ExternalDatabaseBans } from "server/database/ExternalDatabaseBans";
 import { CustomRemotes } from "shared/Remotes";
-import type { NetworkLogging } from "engine/server/network/NetworkLogging";
 import type { PlayerDatabase } from "server/database/PlayerDatabase";
+import type { NetworkLogging } from "server/network/NetworkLogging";
 
 @injectable
 export class IntegrityCheckerServer extends HostedService {

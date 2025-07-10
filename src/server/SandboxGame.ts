@@ -1,7 +1,6 @@
 import { DataStoreService, RunService, Workspace } from "@rbxts/services";
 // import { BadgeController } from "server/BadgeController";
 import { BackupBackedDatabaseBackend } from "engine/server/backend/BackupBackedDatabaseBackend";
-import { NetworkLogging } from "engine/server/network/NetworkLogging";
 import { BaseGame } from "server/BaseGame";
 import { ServerBlockLogicController } from "server/blocks/ServerBlockLogicController";
 import { ExternalDatabaseBackendPlayers, ExternalDatabaseBackendSlots } from "server/database/ExternalDatabaseBackend";
@@ -10,6 +9,7 @@ import { SlotDatabase } from "server/database/SlotDatabase";
 import { IntegrityCheckerServer } from "server/IntegrityCheckerServer";
 import { PlayModeController as PlayModeController } from "server/modes/PlayModeController";
 import { UnreliableRemoteController } from "server/network/event/UnreliableRemoteHandler";
+import { NetworkLogging } from "server/network/NetworkLogging";
 import { ServerPlots } from "server/plots/ServerPlots";
 import { RagdollController } from "server/RagdollController";
 import { ServerEffectCreator } from "server/ServerEffectCreator";
