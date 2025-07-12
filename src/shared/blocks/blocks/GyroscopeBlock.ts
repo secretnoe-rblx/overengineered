@@ -1,11 +1,11 @@
-import { RunService } from "@rbxts/services";
+import { Players, RunService, Workspace } from "@rbxts/services";
 import { InstanceBlockLogic } from "shared/blockLogic/BlockLogic";
 import { BlockCreation } from "shared/blocks/BlockCreation";
 import type { BlockLogicFullBothDefinitions, InstanceBlockLogicArgs } from "shared/blockLogic/BlockLogic";
 import type { BlockBuilder } from "shared/blocks/Block";
 
 const definition = {
-	inputOrder: ["targetAngle", "relativeAngle", "torque", "responsiveness"],
+	inputOrder: ["targetAngle", "gyroMode", "torque", "responsiveness"],
 	input: {
 		targetAngle: {
 			displayName: "Target Angle",
@@ -16,14 +16,21 @@ const definition = {
 				},
 			},
 		},
-		relativeAngle: {
-			displayName: "Relative Angle",
-			tooltip: "Make Target Angle relative to the gyroscope",
+		gyroMode: {
+			displayName: "Mode",
 			types: {
-				bool: {
-					config: false,
+				enum: {
+					config: "followCamera",
+					elementOrder: ["localAngle", "followAngle", "followCamera", "followCursor"],
+					elements: {
+						localAngle: { displayName: "Local Angle", tooltip: "Make the block follow the global angle" },
+						followAngle: { displayName: "Follow Angle", tooltip: "Make the block follow the global angle" },
+						followCamera: { displayName: "Follow Camera", tooltip: "Follow player's camera angle" },
+						followCursor: { displayName: "Follow Cursor", tooltip: "Follow player's cursor" },
+					},
 				},
 			},
+			connectorHidden: true,
 		},
 		torque: {
 			displayName: "Torque",
@@ -53,6 +60,14 @@ const definition = {
 				},
 			},
 		},
+		enabled: {
+			displayName: "Enable",
+			types: {
+				bool: {
+					config: true,
+				},
+			},
+		},
 	},
 
 	output: {},
@@ -76,23 +91,57 @@ class Logic extends InstanceBlockLogic<typeof definition, GyroBlockModel> {
 		super(definition, block);
 
 		const targetAngle = this.initializeInputCache("targetAngle");
-		const isAngleRelative = this.initializeInputCache("relativeAngle");
-		const rsp = this.initializeInputCache("responsiveness");
+		const enabled = this.initializeInputCache("enabled");
+		const gMode = this.initializeInputCache("gyroMode");
 
 		const base = this.instance.Base;
+		const attachment = base.Attachment;
 		const Xring = base.ringX;
 		const Yring = base.ringY;
 		const Zring = base.ringZ;
 
-		const baseAngle = base.Rotation;
+		const baseCFrame = base.CFrame;
+		const player = Players.LocalPlayer;
+
+		base.AlignOrientation.CFrame = baseCFrame;
+
+		const getTargetAngle = (): Vector3 => {
+			const mode = gMode.get();
+
+			if (mode === "followAngle") {
+				const tg = targetAngle.get().apply((v) => math.rad(v));
+				const cf = (base.AlignOrientation.CFrame = CFrame.fromOrientation(tg.X, tg.Y, tg.Z));
+				base.AlignOrientation.CFrame = cf;
+				return targetAngle.get();
+			}
+
+			if (mode === "followCamera") {
+				const res = Workspace.CurrentCamera!.CFrame.mul(CFrame.fromOrientation(0, math.pi / 2, 0));
+				base.AlignOrientation.CFrame = res;
+				return new Vector3(...res.ToEulerAnglesXYZ()).apply((v) => math.deg(v));
+			}
+
+			if (mode === "followCursor") {
+				const mouse = player.GetMouse();
+				const dir = Workspace.CurrentCamera!.ScreenPointToRay(mouse.X, mouse.Y).Direction;
+				const pos = attachment.Position;
+				const res = CFrame.lookAt(pos, pos.add(dir)).mul(CFrame.fromOrientation(0, math.pi / 2, 0));
+				base.AlignOrientation.CFrame = res;
+				return new Vector3(...res.ToEulerAnglesXYZ()).apply((v) => math.deg(v));
+			}
+
+			return Vector3.zero;
+		};
 
 		this.event.subscribe(RunService.Heartbeat, () => {
+			if (!enabled.get()) return;
 			const ta = targetAngle.get();
-			if (!isAngleRelative.get()) {
-				const resAngle = ta.sub(baseAngle).apply((v) => math.fmod(v, 360));
+			if (gMode.get() !== "localAngle") {
+				const resAngle = getTargetAngle();
 				Xring.Rotation = new Vector3(0, 0, resAngle.Z);
 				Yring.Rotation = new Vector3(0, resAngle.Y, resAngle.Z);
 				Zring.Rotation = new Vector3(resAngle.X, resAngle.Y, resAngle.Z);
+				[Xring.Position, Yring.Position, Zring.Position] = [base.Position, base.Position, base.Position];
 				return;
 			}
 
@@ -101,14 +150,12 @@ class Logic extends InstanceBlockLogic<typeof definition, GyroBlockModel> {
 			base.ApplyAngularImpulse(res);
 		});
 
-		this.on(({ responsiveness, targetAngle, torque, relativeAngle }) => {
+		this.on(({ responsiveness, torque, gyroMode, enabled }) => {
 			// constraint parameters
-			base.AlignOrientation.Enabled = !relativeAngle;
+			base.AlignOrientation.Enabled = enabled;
+			base.AlignOrientation.Enabled = gyroMode !== "localAngle";
 			base.AlignOrientation.Responsiveness = responsiveness;
 			base.AlignOrientation.MaxTorque = torque;
-
-			// attachment parameters
-			base.Attachment.Orientation = targetAngle.sub(baseAngle);
 		});
 	}
 }
@@ -117,7 +164,7 @@ export const GyroscopeBlock = {
 	...BlockCreation.defaults,
 	id: "gyroscope",
 	displayName: "Gyroscope",
-	description: "N/A",
+	description: "Makes your things rotate to desired angle. Has different modes.",
 	limit: 20,
 	devOnly: true,
 
