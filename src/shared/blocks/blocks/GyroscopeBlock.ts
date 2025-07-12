@@ -5,7 +5,7 @@ import type { BlockLogicFullBothDefinitions, InstanceBlockLogicArgs } from "shar
 import type { BlockBuilder } from "shared/blocks/Block";
 
 const definition = {
-	inputOrder: ["targetAngle", "gyroMode", "torque", "responsiveness"],
+	inputOrder: ["targetAngle", "enabled", "gyroMode", "torque", "responsiveness"],
 	input: {
 		targetAngle: {
 			displayName: "Target Angle",
@@ -105,6 +105,9 @@ class Logic extends InstanceBlockLogic<typeof definition, GyroBlockModel> {
 
 		base.AlignOrientation.CFrame = baseCFrame;
 
+		const magicCFrameOffset = CFrame.fromOrientation(0, math.pi / 2, 0);
+
+		const CFrameToAngle = (cf: CFrame) => new Vector3(...cf.ToEulerAnglesXYZ()).apply((v) => math.deg(v));
 		const getTargetAngle = (): Vector3 => {
 			const mode = gMode.get();
 
@@ -116,18 +119,18 @@ class Logic extends InstanceBlockLogic<typeof definition, GyroBlockModel> {
 			}
 
 			if (mode === "followCamera") {
-				const res = Workspace.CurrentCamera!.CFrame.mul(CFrame.fromOrientation(0, math.pi / 2, 0));
+				const res = Workspace.CurrentCamera!.CFrame.mul(magicCFrameOffset);
 				base.AlignOrientation.CFrame = res;
-				return new Vector3(...res.ToEulerAnglesXYZ()).apply((v) => math.deg(v));
+				return CFrameToAngle(res);
 			}
 
 			if (mode === "followCursor") {
 				const mouse = player.GetMouse();
 				const dir = Workspace.CurrentCamera!.ScreenPointToRay(mouse.X, mouse.Y).Direction;
 				const pos = attachment.Position;
-				const res = CFrame.lookAt(pos, pos.add(dir)).mul(CFrame.fromOrientation(0, math.pi / 2, 0));
+				const res = CFrame.lookAt(pos, pos.add(dir)).mul(magicCFrameOffset);
 				base.AlignOrientation.CFrame = res;
-				return new Vector3(...res.ToEulerAnglesXYZ()).apply((v) => math.deg(v));
+				return CFrameToAngle(res);
 			}
 
 			return Vector3.zero;
