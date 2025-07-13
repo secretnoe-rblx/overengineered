@@ -120,9 +120,10 @@ class Logic extends InstanceBlockLogic<typeof definition, GyroBlockModel> {
 
 		const baseCFrame = base.CFrame;
 		const player = Players.LocalPlayer;
+		const al = base.AlignOrientation;
 
 		const magicCFrameOffset = CFrame.fromOrientation(0, math.pi / 2, 0);
-		let chachedCFrame = magicCFrameOffset;
+		let cachedCFrame = magicCFrameOffset;
 
 		const CFrameToAngle = (cf: CFrame) => new Vector3(...cf.ToEulerAnglesXYZ()).apply((v) => math.deg(v));
 		const getTargetAngle = (): Vector3 => {
@@ -130,32 +131,27 @@ class Logic extends InstanceBlockLogic<typeof definition, GyroBlockModel> {
 
 			if (mode === "followAngle") {
 				const tg = targetAngle.get().apply((v) => math.rad(v));
-				chachedCFrame = CFrame.fromOrientation(tg.X, tg.Y, tg.Z);
+				cachedCFrame = CFrame.fromOrientation(tg.X, tg.Y, tg.Z);
 				return targetAngle.get();
 			}
 
 			if (mode === "followCamera") {
-				chachedCFrame = Workspace.CurrentCamera!.CFrame.mul(magicCFrameOffset);
-				return CFrameToAngle(chachedCFrame);
+				cachedCFrame = Workspace.CurrentCamera!.CFrame.mul(magicCFrameOffset);
+				return CFrameToAngle(cachedCFrame);
 			}
 
 			if (mode === "followCursor") {
 				const mouse = player.GetMouse();
 				const dir = Workspace.CurrentCamera!.ScreenPointToRay(mouse.X, mouse.Y).Direction;
 				const pos = attachment.Position;
-				chachedCFrame = CFrame.lookAt(pos, pos.add(dir)).mul(magicCFrameOffset);
-				return CFrameToAngle(chachedCFrame);
+				cachedCFrame = CFrame.lookAt(pos, pos.add(dir)).mul(magicCFrameOffset);
+				return CFrameToAngle(cachedCFrame);
 			}
 
 			return Vector3.zero;
 		};
 
-		this.event.subscribe(RunService.Heartbeat, () => {
-			Logic.events.sync.send({
-				block: this.instance,
-				constraint_cframe: chachedCFrame,
-			});
-
+		const updateLogic = () => {
 			if (!enabled.get()) return;
 			const ta = targetAngle.get();
 			if (gMode.get() !== "localAngle") {
@@ -170,17 +166,18 @@ class Logic extends InstanceBlockLogic<typeof definition, GyroBlockModel> {
 			const bcf = base.CFrame;
 			const res = bcf.RightVector.mul(ta.X).add(bcf.UpVector.mul(ta.Y)).add(bcf.LookVector.mul(ta.Z));
 			base.ApplyAngularImpulse(res);
+		};
+
+		this.event.subscribe(RunService.Heartbeat, () => {
+			updateLogic();
+			al.CFrame = cachedCFrame;
 		});
 
 		this.on(({ responsiveness, torque, gyroMode, enabled }) => {
 			// constraint parameters
-			Logic.events.update.send({
-				block: inst,
-				responsiveness,
-				torque,
-				gyroMode,
-				enabled,
-			});
+			al.Responsiveness = responsiveness;
+			al.Enabled = gyroMode !== "localAngle" && enabled;
+			al.MaxTorque = torque;
 		});
 	}
 }
