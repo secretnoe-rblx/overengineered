@@ -83,14 +83,20 @@ const definition = {
 	output: {},
 } satisfies BlockLogicFullBothDefinitions;
 
+type lampBlock = BlockModel & {
+	Body: BasePart & {
+		Light: SpotLight;
+	};
+};
+
 const whiteColor = Color3.fromRGB(255, 255, 255);
 const blackColor = Color3.fromRGB(0, 0, 0);
 
 const update = ({ block, state, color, brightness, range, brightnessAffectsColor }: UpdateData) => {
-	const part = block.PrimaryPart;
+	const part = block.Body;
 	if (!part) return;
 
-	const light = part?.FindFirstChild("PointLight") as PointLight | undefined;
+	const light = part?.FindFirstChild("Light") as PointLight | undefined;
 	if (!light) return;
 
 	if (state) {
@@ -111,7 +117,7 @@ const update = ({ block, state, color, brightness, range, brightnessAffectsColor
 };
 
 const updateEventType = t.interface({
-	block: t.instance("Model").nominal("blockModel").as<BlockModel>(),
+	block: t.instance("Model").nominal("blockModel").as<lampBlock>(),
 	state: t.boolean,
 	color: t.color.orUndefined(),
 	brightness: t.numberWithBounds(0, 100),
@@ -125,7 +131,7 @@ const events = {
 } as const;
 
 export type { Logic as LampBlockLogic };
-class Logic extends InstanceBlockLogic<typeof definition> {
+class Logic extends InstanceBlockLogic<typeof definition, lampBlock> {
 	constructor(args: InstanceBlockLogicArgs) {
 		super(definition, args);
 
@@ -186,6 +192,12 @@ const list: BlockBuildersWithoutIdAndDefaults = {
 		displayName: "Small Lamp",
 		description: "A simple lamp but even simpler!",
 		weldRegionsSource: BlockCreation.WeldRegions.fAutomatic("cube"),
+		logic,
+		limit: 150,
+	},
+	spotlight: {
+		displayName: "Spotlight",
+		description: "Directional lamp.",
 		logic,
 		limit: 150,
 	},
