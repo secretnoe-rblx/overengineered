@@ -5,6 +5,7 @@ import { BracedShaftServerLogic } from "server/blocks/logic/BracedShaftServerLog
 import { ButtonServerLogic } from "server/blocks/logic/ButtonServerLogic";
 import { CameraBlockServerLogic } from "server/blocks/logic/CameraBlockServerLogic";
 import { DisconnectBlockServerLogic } from "server/blocks/logic/DisconnectBlockServerLogic";
+import { GyroscopeBlockServerLogic } from "server/blocks/logic/GyroscopeBlockLogic";
 import { LEDDisplayServerLogic } from "server/blocks/logic/LEDDisplayServerLogic";
 import { ParticleServerLogic } from "server/blocks/logic/ParticleBlockServerLogic";
 import { PistonBlockServerLogic } from "server/blocks/logic/PistonBlockServerLogic";
@@ -59,6 +60,7 @@ export class ServerBlockLogicController extends HostedService {
 			bracedshaft: BracedShaftServerLogic,
 			beacon: BeaconServerLogic,
 			backmount: BackMountBlockServerLogic,
+			gyroscope: GyroscopeBlockServerLogic,
 		};
 
 		//

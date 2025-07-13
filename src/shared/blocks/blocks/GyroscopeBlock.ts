@@ -1,4 +1,5 @@
 import { Players, RunService, Workspace } from "@rbxts/services";
+import { A2SRemoteEvent } from "engine/shared/event/PERemoteEvent";
 import { InstanceBlockLogic } from "shared/blockLogic/BlockLogic";
 import { BlockCreation } from "shared/blocks/BlockCreation";
 import type { BlockLogicFullBothDefinitions, InstanceBlockLogicArgs } from "shared/blockLogic/BlockLogic";
@@ -76,17 +77,32 @@ const definition = {
 type GyroBlockModel = BlockModel & {
 	Base: BasePart & {
 		AlignOrientation: AlignOrientation;
-		Attachment: Attachment;
-		ringZ: BasePart;
-		ringY: BasePart;
-		ringX: BasePart;
+		Attachment0: Attachment;
 	};
+	ringZ: BasePart;
+	ringY: BasePart;
+	ringX: BasePart;
 };
 
-export type { Logic as GyroscopeBlockLogic };
+type modes = keyof typeof definition.input.gyroMode.types.enum.elements;
 
+export type { Logic as GyroscopeBlockLogic };
 @injectable
 class Logic extends InstanceBlockLogic<typeof definition, GyroBlockModel> {
+	static events = {
+		sync: new A2SRemoteEvent<{
+			block: GyroBlockModel;
+			constraint_cframe: CFrame;
+		}>("sync_gyro", "RemoteEvent"),
+		update: new A2SRemoteEvent<{
+			block: GyroBlockModel;
+			responsiveness: number;
+			torque: number;
+			gyroMode: modes;
+			enabled: boolean;
+		}>("update_gyro", "RemoteEvent"),
+	};
+
 	constructor(block: InstanceBlockLogicArgs) {
 		super(definition, block);
 
@@ -94,18 +110,19 @@ class Logic extends InstanceBlockLogic<typeof definition, GyroBlockModel> {
 		const enabled = this.initializeInputCache("enabled");
 		const gMode = this.initializeInputCache("gyroMode");
 
-		const base = this.instance.Base;
-		const attachment = base.Attachment;
-		const Xring = base.ringX;
-		const Yring = base.ringY;
-		const Zring = base.ringZ;
+		const inst = this.instance;
+		const Xring = inst.ringX;
+		const Yring = inst.ringY;
+		const Zring = inst.ringZ;
+
+		const base = inst.Base;
+		const attachment = base.Attachment0;
 
 		const baseCFrame = base.CFrame;
 		const player = Players.LocalPlayer;
 
-		base.AlignOrientation.CFrame = baseCFrame;
-
 		const magicCFrameOffset = CFrame.fromOrientation(0, math.pi / 2, 0);
+		let chachedCFrame = magicCFrameOffset;
 
 		const CFrameToAngle = (cf: CFrame) => new Vector3(...cf.ToEulerAnglesXYZ()).apply((v) => math.deg(v));
 		const getTargetAngle = (): Vector3 => {
@@ -113,30 +130,32 @@ class Logic extends InstanceBlockLogic<typeof definition, GyroBlockModel> {
 
 			if (mode === "followAngle") {
 				const tg = targetAngle.get().apply((v) => math.rad(v));
-				const cf = (base.AlignOrientation.CFrame = CFrame.fromOrientation(tg.X, tg.Y, tg.Z));
-				base.AlignOrientation.CFrame = cf;
+				chachedCFrame = CFrame.fromOrientation(tg.X, tg.Y, tg.Z);
 				return targetAngle.get();
 			}
 
 			if (mode === "followCamera") {
-				const res = Workspace.CurrentCamera!.CFrame.mul(magicCFrameOffset);
-				base.AlignOrientation.CFrame = res;
-				return CFrameToAngle(res);
+				chachedCFrame = Workspace.CurrentCamera!.CFrame.mul(magicCFrameOffset);
+				return CFrameToAngle(chachedCFrame);
 			}
 
 			if (mode === "followCursor") {
 				const mouse = player.GetMouse();
 				const dir = Workspace.CurrentCamera!.ScreenPointToRay(mouse.X, mouse.Y).Direction;
 				const pos = attachment.Position;
-				const res = CFrame.lookAt(pos, pos.add(dir)).mul(magicCFrameOffset);
-				base.AlignOrientation.CFrame = res;
-				return CFrameToAngle(res);
+				chachedCFrame = CFrame.lookAt(pos, pos.add(dir)).mul(magicCFrameOffset);
+				return CFrameToAngle(chachedCFrame);
 			}
 
 			return Vector3.zero;
 		};
 
 		this.event.subscribe(RunService.Heartbeat, () => {
+			Logic.events.sync.send({
+				block: this.instance,
+				constraint_cframe: chachedCFrame,
+			});
+
 			if (!enabled.get()) return;
 			const ta = targetAngle.get();
 			if (gMode.get() !== "localAngle") {
@@ -155,10 +174,13 @@ class Logic extends InstanceBlockLogic<typeof definition, GyroBlockModel> {
 
 		this.on(({ responsiveness, torque, gyroMode, enabled }) => {
 			// constraint parameters
-			base.AlignOrientation.Enabled = enabled;
-			base.AlignOrientation.Enabled = gyroMode !== "localAngle";
-			base.AlignOrientation.Responsiveness = responsiveness;
-			base.AlignOrientation.MaxTorque = torque;
+			Logic.events.update.send({
+				block: inst,
+				responsiveness,
+				torque,
+				gyroMode,
+				enabled,
+			});
 		});
 	}
 }
@@ -169,7 +191,6 @@ export const GyroscopeBlock = {
 	displayName: "Gyroscope",
 	description: "Makes your things rotate to desired angle. Has different modes.",
 	limit: 20,
-	devOnly: true,
 
 	logic: { definition, ctor: Logic },
 } as const satisfies BlockBuilder;
