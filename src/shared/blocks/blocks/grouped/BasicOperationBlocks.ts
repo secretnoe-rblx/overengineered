@@ -1456,6 +1456,10 @@ const bool = {
 			{
 				input: {
 					value: defpartsf.bool("Value"),
+					trueValue: {
+						displayName: "True Value",
+						types: { number: { config: 1 } },
+					},
 				},
 				output: {
 					result: {
@@ -1464,8 +1468,8 @@ const bool = {
 					},
 				},
 			},
-			({ value }) => ({
-				result: { type: "number", value: value ? 1 : 0 },
+			({ value, trueValue }) => ({
+				result: { type: "number", value: value ? trueValue : 0 },
 			}),
 		),
 	},
