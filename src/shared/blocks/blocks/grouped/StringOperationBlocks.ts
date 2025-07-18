@@ -422,6 +422,50 @@ namespace StringCast {
 	} as const satisfies BlockBuilder;
 }
 
+namespace NumberToString {
+	const definition = {
+		input: {
+			value: {
+				displayName: "Value",
+				types: BlockConfigDefinitions.string,
+			},
+		},
+		output: {
+			result: {
+				displayName: "Result",
+				types: ["number"],
+			},
+		},
+	} satisfies BlockLogicFullBothDefinitions;
+
+	class Logic extends BlockLogic<typeof definition> {
+		constructor(block: BlockLogicArgs) {
+			super(definition, block);
+
+			this.on(({ value }) => {
+				const result = tonumber(value);
+				if (!result) this.output.result.unset();
+				else this.output.result.set("number", result);
+			});
+		}
+	}
+
+	export const block = {
+		...BlockCreation.defaults,
+		id: "stringtonumber",
+		displayName: "String To Number",
+		description: "Converts the given string into a number",
+		modelSource: autoModel("DoubleGenericLogicBlockPrefab", "tonum", BlockCreation.Categories.string),
+
+		search: {
+			aliases: ["text", "num"],
+			partialAliases: ["tonumber"],
+		},
+
+		logic: { definition, ctor: Logic },
+	} as const satisfies BlockBuilder;
+}
+
 export const StringOperationBlocks = [
 	StringSub.block,
 	StringChar.block,
@@ -432,4 +476,5 @@ export const StringOperationBlocks = [
 	StringUpperCase.block,
 	StringLowerCase.block,
 	StringCast.block,
+	NumberToString.block,
 ];
