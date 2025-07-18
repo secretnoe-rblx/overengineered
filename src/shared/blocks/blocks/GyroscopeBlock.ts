@@ -38,10 +38,10 @@ const definition = {
 			tooltip: "The amount of rotational force applied to the gyroscope",
 			types: {
 				number: {
-					config: 10000,
+					config: 100000,
 					clamp: {
 						min: 0,
-						max: 1_000_000,
+						max: 50_000_000,
 						showAsSlider: true,
 					},
 				},
@@ -156,9 +156,9 @@ class Logic extends InstanceBlockLogic<typeof definition, GyroBlockModel> {
 			const ta = targetAngle.get();
 			if (gMode.get() !== "localAngle") {
 				const resAngle = getTargetAngle();
-				Xring.Rotation = new Vector3(0, 0, resAngle.Z);
-				Yring.Rotation = new Vector3(0, resAngle.Y, resAngle.Z);
-				Zring.Rotation = new Vector3(resAngle.X, resAngle.Y, resAngle.Z);
+				Xring.Rotation = new Vector3(resAngle.X, 0, 0);
+				Yring.Rotation = new Vector3(0, resAngle.Y, 0);
+				Zring.Rotation = new Vector3(0, 0, resAngle.Z);
 				[Xring.Position, Yring.Position, Zring.Position] = [base.Position, base.Position, base.Position];
 				return;
 			}
