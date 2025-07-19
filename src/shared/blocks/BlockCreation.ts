@@ -25,7 +25,8 @@ export type BlockMirrorBehaviour =
 	| "normal"
 	| "wedgeWing"
 	| "tetra"
-	| "innertetra";
+	| "innertetra"
+	| "cornerwedge";
 
 /** Tools for creating a block and its data. */
 export namespace BlockCreation {

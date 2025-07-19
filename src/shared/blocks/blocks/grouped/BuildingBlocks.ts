@@ -78,25 +78,25 @@ const cornerWedges = {
 		displayName: "Corner Wedge 1x1",
 		description: "A simple corner wedge",
 
-		mirror: { behaviour: "offset270" },
+		mirror: { behaviour: "cornerwedge" },
 	},
 	cornerwedge2x1: {
 		displayName: "Corner Wedge 2x1",
 		description: "A simple corner weedge",
 
-		mirror: { behaviour: "offset270" },
+		mirror: { behaviour: "cornerwedge" },
 	},
 	cornerwedge3x1: {
 		displayName: "Corner Wedge 3x1",
 		description: "A simple corner weeedge",
 
-		mirror: { behaviour: "offset270" },
+		mirror: { behaviour: "cornerwedge" },
 	},
 	cornerwedge4x1: {
 		displayName: "Corner Wedge 4x1",
 		description: "A simple corner weeeedge",
 
-		mirror: { behaviour: "offset270" },
+		mirror: { behaviour: "cornerwedge" },
 	},
 	innercorner: {
 		displayName: "Inner Corner",

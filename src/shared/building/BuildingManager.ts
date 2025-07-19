@@ -147,6 +147,7 @@ export namespace BuildingManager {
 
 				const block = blockList.blocks[origBlock.id];
 				if (!block) return cframe;
+				const rad = math.rad;
 
 				const method = block.mirror.behaviour;
 				switch (method) {
@@ -171,12 +172,16 @@ export namespace BuildingManager {
 						throw "Unknown mode";
 					}
 					case "tetra": {
-						outScale = CFrame.fromOrientation(0, 0, math.rad(90)).mul(outScale).apply(math.abs);
-						return normalRotation(cframe.mul(CFrame.fromEulerAnglesYXZ(0, 0, math.pi * 1.5)));
+						outScale = CFrame.fromOrientation(0, 0, rad(90)).mul(outScale).apply(math.abs);
+						return normalRotation(cframe.mul(CFrame.fromEulerAnglesYXZ(0, 0, rad(270))));
 					}
 					case "innertetra": {
-						outScale = CFrame.fromOrientation(0, 0, math.rad(90)).mul(outScale).apply(math.abs);
-						return normalRotation(cframe.mul(CFrame.fromEulerAnglesYXZ(0, 0, math.pi * 0.5)));
+						outScale = CFrame.fromOrientation(0, 0, rad(90)).mul(outScale).apply(math.abs);
+						return normalRotation(cframe.mul(CFrame.fromEulerAnglesYXZ(0, 0, rad(90))));
+					}
+					case "cornerwedge": {
+						outScale = CFrame.fromOrientation(0, rad(90), 0).mul(outScale).apply(math.abs);
+						return normalRotation(cframe.mul(CFrame.fromEulerAnglesYXZ(0, rad(-90), 0)));
 					}
 				}
 			}
