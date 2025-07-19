@@ -24,10 +24,16 @@ const definition = {
 					config: "followCamera",
 					elementOrder: ["localAngle", "followAngle", "followCamera", "followCursor"],
 					elements: {
-						localAngle: { displayName: "Local Angle", tooltip: "Make the block follow the global angle" },
-						followAngle: { displayName: "Follow Angle", tooltip: "Make the block follow the global angle" },
-						followCamera: { displayName: "Follow Camera", tooltip: "Follow player's camera angle" },
-						followCursor: { displayName: "Follow Cursor", tooltip: "Follow player's cursor" },
+						localAngle: {
+							displayName: "Local Angle",
+							tooltip: "Make the block follow the local angle. Limited by torque.",
+						},
+						followAngle: {
+							displayName: "Follow Angle",
+							tooltip: "Make the block follow the global angle.",
+						},
+						followCamera: { displayName: "Follow Camera", tooltip: "Follow player's camera angle." },
+						followCursor: { displayName: "Follow Cursor", tooltip: "Follow player's cursor." },
 					},
 				},
 			},
@@ -109,6 +115,8 @@ class Logic extends InstanceBlockLogic<typeof definition, GyroBlockModel> {
 		const targetAngle = this.initializeInputCache("targetAngle");
 		const enabled = this.initializeInputCache("enabled");
 		const gMode = this.initializeInputCache("gyroMode");
+		const resp = this.initializeInputCache("responsiveness");
+		const torq = this.initializeInputCache("torque");
 
 		const inst = this.instance;
 		const Xring = inst.ringX;
@@ -118,15 +126,15 @@ class Logic extends InstanceBlockLogic<typeof definition, GyroBlockModel> {
 		const base = inst.Base;
 		const attachment = base.Attachment0;
 
-		const baseCFrame = base.CFrame;
 		const player = Players.LocalPlayer;
 		const al = base.AlignOrientation;
 
+		const magicOffset = new Vector3(90, 0, 0);
 		const magicCFrameOffset = CFrame.fromOrientation(0, math.pi / 2, 0);
 		let cachedCFrame = magicCFrameOffset;
 
 		const CFrameToAngle = (cf: CFrame) => new Vector3(...cf.ToEulerAnglesXYZ()).apply((v) => math.deg(v));
-		const getTargetAngle = (): Vector3 => {
+		const applyTargetAngle = (): Vector3 => {
 			const mode = gMode.get();
 
 			if (mode === "followAngle") {
@@ -147,24 +155,30 @@ class Logic extends InstanceBlockLogic<typeof definition, GyroBlockModel> {
 				cachedCFrame = CFrame.lookAt(pos, pos.add(dir)).mul(magicCFrameOffset);
 				return CFrameToAngle(cachedCFrame);
 			}
-
 			return Vector3.zero;
 		};
 
 		const updateLogic = () => {
+			//update ring position anyways
+			[Xring.Position, Yring.Position, Zring.Position] = [base.Position, base.Position, base.Position];
+
+			// main logic
 			if (!enabled.get()) return;
 			const ta = targetAngle.get();
 			if (gMode.get() !== "localAngle") {
-				const resAngle = getTargetAngle();
+				const resAngle = applyTargetAngle().add(magicOffset);
 				Xring.Rotation = new Vector3(resAngle.X, 0, 0);
 				Yring.Rotation = new Vector3(0, resAngle.Y, 0);
 				Zring.Rotation = new Vector3(0, 0, resAngle.Z);
-				[Xring.Position, Yring.Position, Zring.Position] = [base.Position, base.Position, base.Position];
 				return;
 			}
 
 			const bcf = base.CFrame;
-			const res = bcf.RightVector.mul(ta.X).add(bcf.UpVector.mul(ta.Y)).add(bcf.LookVector.mul(ta.Z));
+			let res = bcf.RightVector.mul(ta.X).add(bcf.UpVector.mul(ta.Y)).add(bcf.LookVector.mul(ta.Z));
+
+			//limit rotation by torque
+			if (res.Magnitude > torq.get()) res = res.mul(torq.get() / res.Magnitude);
+
 			base.ApplyAngularImpulse(res);
 		};
 
