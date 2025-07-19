@@ -41,20 +41,23 @@ const blocks: BlockBuildersWithoutIdAndDefaults = {
 		description: "Just a regular gear",
 	},
 	bevelgear: {
-		displayName: "Beval Gear",
-		description: "N/A",
+		displayName: "Beveled Gear",
+		description: "Tilted Spur Gear",
 	},
 	helicalgear: {
 		displayName: "Helical Gear",
-		description: "N/A",
+		description: "Tilted Beveled Gear",
 	},
 	gearrack: {
 		displayName: "Rack (Gear)",
-		description: "N/A",
+		description: "It's like a flat gear.. I mean gears are already flat but this one is a different way",
 	},
 	sprocketgear: {
-		displayName: "Sprocket Gear",
-		description: "N/A",
+		displayName: "Sprocket",
+		description: "Use it to hold your tank tracks",
+		search: {
+			partialAliases: ["gear", "sprocket", "track"],
+		},
 	},
 
 	wingrounding: {
