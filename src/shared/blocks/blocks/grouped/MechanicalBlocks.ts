@@ -32,8 +32,8 @@ const blocks: BlockBuildersWithoutIdAndDefaults = {
 	},
 
 	smallgear: {
-		displayName: "Small Gear",
-		description: "A cog for your machinery. Does it even work?",
+		displayName: "Small Gear (Legacy)",
+		description: "A cog for your machinery. Better use Spur Gear.",
 	},
 
 	spurgear: {
