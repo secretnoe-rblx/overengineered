@@ -7,7 +7,7 @@ import type { BlockBuildersWithoutIdAndDefaults, BlockLogicInfo } from "shared/b
 import type { ParticleEffect } from "shared/effects/ParticleEffect";
 import type { SoundEffect } from "shared/effects/SoundEffect";
 
-const definition = {
+export const rocketEngineLogicDefinition = {
 	inputOrder: ["thrust", "strength"],
 	input: {
 		thrust: {
@@ -82,7 +82,7 @@ type RocketModel = BlockModel & {
 export type { Logic as RocketBlockLogic };
 
 @injectable
-class Logic extends InstanceBlockLogic<typeof definition, RocketModel> {
+class Logic extends InstanceBlockLogic<typeof rocketEngineLogicDefinition, RocketModel> {
 	// Instances
 	private readonly engine;
 	private readonly vectorForce;
@@ -105,7 +105,7 @@ class Logic extends InstanceBlockLogic<typeof definition, RocketModel> {
 		@inject private readonly soundEffect: SoundEffect,
 		@inject private readonly particleEffect: ParticleEffect,
 	) {
-		super(definition, block);
+		super(rocketEngineLogicDefinition, block);
 
 		// Instances
 		const colbox = this.instance.ColBox;
@@ -205,7 +205,7 @@ class Logic extends InstanceBlockLogic<typeof definition, RocketModel> {
 	}
 }
 
-const logic: BlockLogicInfo = { definition, ctor: Logic };
+const logic: BlockLogicInfo = { definition: rocketEngineLogicDefinition, ctor: Logic };
 const list: BlockBuildersWithoutIdAndDefaults = {
 	rocketengine: {
 		displayName: "Rocket Engine",
