@@ -138,7 +138,7 @@ class Logic extends InstanceBlockLogic<typeof rocketEngineLogicDefinition, Rocke
 		this.onk(["flameColor"], ({ flameColor }) => {
 			this.particleEmitter.Color = new ColorSequence([
 				new ColorSequenceKeypoint(0, flameColor),
-				new ColorSequenceKeypoint(0.0868, flameColor.Lerp(Colors.black, 1 - 0.0868)),
+				new ColorSequenceKeypoint(0.0868, flameColor.Lerp(Colors.black, 0.0868)),
 				new ColorSequenceKeypoint(1, Colors.black),
 			]);
 
