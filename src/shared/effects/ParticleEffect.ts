@@ -4,10 +4,11 @@ import type { EffectCreator } from "shared/effects/EffectBase";
 
 type Args = {
 	readonly particle: ParticleEmitter;
-	readonly isEnabled: boolean;
-	readonly acceleration: Vector3;
+	readonly isEnabled?: boolean;
+	readonly acceleration?: Vector3;
 	readonly scale?: number;
 	readonly color?: Color3;
+	readonly colorSequence?: ColorSequence;
 };
 @injectable
 export class ParticleEffect extends EffectBase<Args> {
@@ -15,7 +16,7 @@ export class ParticleEffect extends EffectBase<Args> {
 		super(creator, "particle_effect");
 	}
 
-	override justRun({ particle, isEnabled, acceleration, color, scale }: Args): void {
+	override justRun({ particle, isEnabled, acceleration, color, scale, colorSequence }: Args): void {
 		if (!particle || !particle.Parent) return;
 
 		const part = particle.Parent;
@@ -27,8 +28,9 @@ export class ParticleEffect extends EffectBase<Args> {
 			);
 		}
 
-		particle.Enabled = isEnabled;
-		particle.Acceleration = acceleration;
+		if (isEnabled !== undefined) particle.Enabled = isEnabled;
+		if (acceleration !== undefined) particle.Acceleration = acceleration;
 		if (color) particle.Color = new ColorSequence(color);
+		if (colorSequence) particle.Color = colorSequence;
 	}
 }
