@@ -193,6 +193,7 @@ class Logic extends InstanceBlockLogic<typeof definition, JetModel> {
 		this.onDisable(() => {
 			updateForce(0);
 			updateSound(0, 0, 0);
+			hinge.Enabled = false;
 		});
 	}
 }
