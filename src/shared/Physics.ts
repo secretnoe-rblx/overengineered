@@ -16,17 +16,17 @@ export namespace Physics {
 		}
 	}
 
-	export function GetGravityOnHeight(value: LocalHeight): number {
-		return math.max(
-			GameEnvironment.EarthGravity - value * (GameEnvironment.EarthGravity / GameEnvironment.ZeroGravityHeight),
-			0,
-		);
+	const gravDiffModifier = GameEnvironment.EarthGravity / GameEnvironment.ZeroGravityHeight;
+	export function GetGravityModifierOnHeight(value: LocalHeight): number {
+		return math.max(GameEnvironment.EarthGravity - value * gravDiffModifier, 0);
 	}
 
+	export function GetGravityOnHeight(value: LocalHeight): number {
+		return math.max(GameEnvironment.EarthGravity - value * gravDiffModifier, 0);
+	}
+
+	const airDensDiffModifier = GameEnvironment.EarthAirDensity / GameEnvironment.ZeroAirHeight;
 	export function GetAirDensityOnHeight(value: LocalHeight) {
-		return math.max(
-			GameEnvironment.EarthAirDensity - value * (GameEnvironment.EarthAirDensity / GameEnvironment.ZeroAirHeight),
-			0,
-		);
+		return math.max(GameEnvironment.EarthAirDensity - value * airDensDiffModifier, 0);
 	}
 }
