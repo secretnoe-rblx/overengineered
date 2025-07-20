@@ -1,6 +1,7 @@
 import { InstanceBlockLogic } from "shared/blockLogic/BlockLogic";
 import { BlockCreation } from "shared/blocks/BlockCreation";
 import { BlockManager } from "shared/building/BlockManager";
+import { Colors } from "shared/Colors";
 import { Sound } from "shared/Sound";
 import type { BlockLogicFullBothDefinitions, InstanceBlockLogicArgs } from "shared/blockLogic/BlockLogic";
 import type { BlockBuildersWithoutIdAndDefaults, BlockLogicInfo } from "shared/blocks/Block";
@@ -8,7 +9,7 @@ import type { ParticleEffect } from "shared/effects/ParticleEffect";
 import type { SoundEffect } from "shared/effects/SoundEffect";
 
 export const rocketEngineLogicDefinition = {
-	inputOrder: ["thrust", "strength"],
+	inputOrder: ["thrust", "strength", "flameColor"],
 	input: {
 		thrust: {
 			displayName: "Thrust",
@@ -55,6 +56,14 @@ export const rocketEngineLogicDefinition = {
 						max: 100,
 						min: 0,
 					},
+				},
+			},
+		},
+		flameColor: {
+			displayName: "Flame Color",
+			types: {
+				color: {
+					config: Color3.fromRGB(255, 250, 185),
 				},
 			},
 		},
@@ -125,6 +134,19 @@ class Logic extends InstanceBlockLogic<typeof rocketEngineLogicDefinition, Rocke
 		// Max power
 		this.maxPower = this.basePower * multiplier;
 		this.output.maxpower.set("number", this.maxPower);
+
+		this.onk(["flameColor"], ({ flameColor }) => {
+			this.particleEmitter.Color = new ColorSequence([
+				new ColorSequenceKeypoint(0, flameColor),
+				new ColorSequenceKeypoint(0.0868, flameColor.Lerp(Colors.black, 1 - 0.0868)),
+				new ColorSequenceKeypoint(1, Colors.black),
+			]);
+
+			this.particleEffect.send(this.instance.PrimaryPart!, {
+				particle: this.particleEmitter,
+				colorSequence: this.particleEmitter.Color,
+			});
+		});
 
 		this.onAlwaysInputs(({ thrust, strength }) => {
 			//nan check
