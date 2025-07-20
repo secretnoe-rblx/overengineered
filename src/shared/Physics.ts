@@ -18,7 +18,7 @@ export namespace Physics {
 
 	const gravDiffModifier = GameEnvironment.EarthGravity / GameEnvironment.ZeroGravityHeight;
 	export function GetGravityModifierOnHeight(value: LocalHeight): number {
-		return math.max(GameEnvironment.EarthGravity - value * gravDiffModifier, 0);
+		return math.clamp(Physics.GetGravityOnHeight(value) / GameEnvironment.EarthGravity, 0, 1);
 	}
 
 	export function GetGravityOnHeight(value: LocalHeight): number {
@@ -26,6 +26,10 @@ export namespace Physics {
 	}
 
 	const airDensDiffModifier = GameEnvironment.EarthAirDensity / GameEnvironment.ZeroAirHeight;
+	export function GetAirDensityModifierOnHeight(value: LocalHeight): number {
+		return math.clamp(Physics.GetAirDensityOnHeight(value) / GameEnvironment.EarthAirDensity, 0, 1);
+	}
+
 	export function GetAirDensityOnHeight(value: LocalHeight) {
 		return math.max(GameEnvironment.EarthAirDensity - value * airDensDiffModifier, 0);
 	}
