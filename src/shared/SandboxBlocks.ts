@@ -35,6 +35,7 @@ import { GyroscopeBlock } from "shared/blocks/blocks/GyroscopeBlock";
 import { HeliumBlock } from "shared/blocks/blocks/HeliumBlock";
 import { ImpulseExtenderBlock } from "shared/blocks/blocks/ImpulseExtenderBlock";
 import { ImpulseGeneratorBlock } from "shared/blocks/blocks/ImpulseGeneratorBlock";
+import { JetEngineBlocks } from "shared/blocks/blocks/JetEngineBlocks";
 import { KeySensorBlock } from "shared/blocks/blocks/KeySensorBlock";
 import { LaserBlock } from "shared/blocks/blocks/LaserBlock";
 import { LedDisplayBlock } from "shared/blocks/blocks/LedDisplayBlock";
@@ -202,7 +203,7 @@ export const CreateSandboxBlocks = (di: DIContainer): BlockList => {
 	];
 
 	if (GameDefinitions.isTesting) {
-		const testBlocks: readonly BlockBuilder[] = [...weapons, GyroscopeBlock];
+		const testBlocks: readonly BlockBuilder[] = [...weapons, GyroscopeBlock, ...JetEngineBlocks];
 
 		for (const block of testBlocks) {
 			blocksArr.push(block);
