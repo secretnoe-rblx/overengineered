@@ -25,7 +25,7 @@ const definition = {
 					elementOrder: ["localAngle", "followAngle", "followCamera", "followCursor"],
 					elements: {
 						localAngle: {
-							displayName: "Local Angle",
+							displayName: "Velocity Angle",
 							tooltip: "Make the block follow the local angle. Limited by torque.",
 						},
 						followAngle: {
