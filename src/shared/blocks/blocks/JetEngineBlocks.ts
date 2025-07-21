@@ -200,13 +200,16 @@ class Logic extends InstanceBlockLogic<typeof definition, JetModel> {
 
 const logic: BlockLogicInfo = { definition, ctor: Logic };
 const list: BlockBuildersWithoutIdAndDefaults = {
-	jetengine: {
-		displayName: "Jet Engine",
-		description: "",
+	jetenginecivil: {
+		displayName: "Jet Engine (Civil)",
+		description: "Engines your jet or whatever",
 		logic,
-		// mirror: {
-		// 	behaviour: "offset180",
-		// },
+		limit: 50,
+	},
+	jetenginemilitary: {
+		displayName: "Jet Engine (Military)",
+		description: "Engines your jet or whatever (military grade)",
+		logic,
 		limit: 50,
 	},
 };
