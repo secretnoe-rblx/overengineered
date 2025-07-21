@@ -93,7 +93,7 @@ const whiteColor = Color3.fromRGB(255, 255, 255);
 const blackColor = Color3.fromRGB(0, 0, 0);
 
 const update = ({ block, state, color, brightness, range, brightnessAffectsColor }: UpdateData) => {
-	const part = block.GlowingPart;
+	const part = block.FindFirstChild("GlowingPart") as typeof block.GlowingPart;
 	if (!part) return;
 
 	const light = part?.FindFirstChild("Light") as PointLight | undefined;
