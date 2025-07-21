@@ -178,7 +178,7 @@ class Logic extends InstanceBlockLogic<typeof definition, lampBlock> {
 }
 
 //
-
+const search = { partialAliases: ["light"] };
 const logic: BlockLogicInfo = { definition, ctor: Logic, events };
 const list: BlockBuildersWithoutIdAndDefaults = {
 	lamp: {
@@ -187,6 +187,7 @@ const list: BlockBuildersWithoutIdAndDefaults = {
 		weldRegionsSource: BlockCreation.WeldRegions.fAutomatic("cube"),
 		logic,
 		limit: 150,
+		search,
 	},
 	smalllamp: {
 		displayName: "Small Lamp",
@@ -194,12 +195,14 @@ const list: BlockBuildersWithoutIdAndDefaults = {
 		weldRegionsSource: BlockCreation.WeldRegions.fAutomatic("cube"),
 		logic,
 		limit: 150,
+		search,
 	},
 	spotlight: {
 		displayName: "Spotlight",
 		description: "Directional lamp.",
 		logic,
 		limit: 150,
+		search,
 	},
 };
 export const LampBlocks = BlockCreation.arrayFromObject(list);
