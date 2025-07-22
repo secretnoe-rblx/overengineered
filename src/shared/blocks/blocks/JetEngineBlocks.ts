@@ -68,7 +68,7 @@ const definition = {
 } satisfies BlockLogicFullBothDefinitions;
 
 type JetModel = BlockModel & {
-	readonly TubineShaft: Instance & {
+	readonly TurbineShaft: Instance & {
 		readonly Working: Sound;
 		readonly Idle: Sound;
 		readonly Start: Sound;
@@ -103,9 +103,9 @@ class Logic extends InstanceBlockLogic<typeof definition, JetModel> {
 
 		// Instances
 		const colbox = this.instance.ColBox;
-		const shaft = this.instance.TubineShaft;
+		const shaft = this.instance.TurbineShaft;
 		const body = this.instance.TurbineBody;
-		const hinge = shaft.HingeConstraint;
+		// const hinge = shaft.HingeConstraint;
 
 		this.vectorForce = body.VectorForce;
 
@@ -182,7 +182,7 @@ class Logic extends InstanceBlockLogic<typeof definition, JetModel> {
 			thrustPercent = thrust / 100;
 			strengthPercent = strength / 100;
 
-			hinge.AngularVelocity = thrustPercent * 100;
+			// hinge.AngularVelocity = thrustPercent * 100;
 
 			updateForce(thrustPercent * strengthPercent);
 			updateSound(thrustPercent * maxSoundVolume, thrust, lastThrust);
@@ -193,11 +193,13 @@ class Logic extends InstanceBlockLogic<typeof definition, JetModel> {
 		this.onDisable(() => {
 			updateForce(0);
 			updateSound(0, 0, 0);
-			hinge.Enabled = false;
+			// hinge.Enabled = false;
+			playing.Stop();
 		});
 	}
 }
 
+const search = { partialAliases: ["turbine"] };
 const logic: BlockLogicInfo = { definition, ctor: Logic };
 const list: BlockBuildersWithoutIdAndDefaults = {
 	jetenginecivil: {
@@ -205,12 +207,14 @@ const list: BlockBuildersWithoutIdAndDefaults = {
 		description: "Engines your jet or whatever",
 		logic,
 		limit: 50,
+		search,
 	},
 	jetenginemilitary: {
 		displayName: "Jet Engine (Military)",
 		description: "Engines your jet or whatever (military grade)",
 		logic,
 		limit: 50,
+		search,
 	},
 };
 export const JetEngineBlocks = BlockCreation.arrayFromObject(list);
