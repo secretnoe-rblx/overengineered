@@ -73,6 +73,7 @@ import { SpeedometerBlock } from "shared/blocks/blocks/SpeedometerBlock";
 import { StackMemoryBlock } from "shared/blocks/blocks/StackMemoryBlock";
 import { SuspensionBlock } from "shared/blocks/blocks/SuspensionBlock";
 import { TpsCounterBlock } from "shared/blocks/blocks/TpsCounterBlock";
+import { ValueExtenderBlock } from "shared/blocks/blocks/ValueExtenderBlock";
 import { VehicleSeatBlock } from "shared/blocks/blocks/VehicleSeatBlock";
 import { CannonBarrels } from "shared/blocks/blocks/Weaponary/Cannon/CannonBarrels";
 import { CannonBases } from "shared/blocks/blocks/Weaponary/Cannon/CannonBases";
@@ -155,6 +156,7 @@ export const CreateSandboxBlocks = (di: DIContainer): BlockList => {
 		BackMountBlock,
 
 		DelayBlock,
+		ValueExtenderBlock,
 		FallbackBlock,
 		SingleImpulseBlock,
 		ImpulseGeneratorBlock,
