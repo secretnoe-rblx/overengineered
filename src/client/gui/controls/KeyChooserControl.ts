@@ -24,7 +24,7 @@ class _KeyChooserControl<TKC extends boolean> extends Control<KeyChooserControlD
 		const buttonColor = this.gui.BackgroundColor3;
 		const buttonColorActive = Colors.lightenPressed(this.gui.BackgroundColor3);
 
-		this.value.subscribe((value) => (this.gui.Text = value === "Unknown" ? "" : value));
+		this.value.subscribe((value) => (this.gui.Text = value === "Unknown" ? "" : value), true);
 
 		this.$onInjectAuto((popupController: PopupController) => {
 			this.gui.Activated.Connect(() => {
