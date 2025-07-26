@@ -13,11 +13,13 @@ import { ObservableValue } from "engine/shared/event/ObservableValue";
 import { Objects } from "engine/shared/fixes/Objects";
 import { Localization } from "engine/shared/Localization";
 import { PlayerRank } from "engine/shared/PlayerRank";
+import { BlockManager } from "shared/building/BlockManager";
 import type { PopupController } from "client/gui/PopupController";
 import type { PlayerDataStorage } from "client/PlayerDataStorage";
 import type { Theme } from "client/Theme";
 import type { InstanceComponent } from "engine/shared/component/InstanceComponent";
 import type { BlockCategoryPath } from "shared/blocks/Block";
+import type { ReadonlyPlot } from "shared/building/ReadonlyPlot";
 
 type Category = {
 	readonly path: BlockCategoryPath;
@@ -171,7 +173,9 @@ export type BlockSelectionControlDefinition = GuiObject & {
 		readonly ScrollingFrame: ScrollingFrame & {
 			readonly NoResultsLabel: TextLabel;
 			readonly BackButtonTemplate: CategoryControlDefinition;
-			readonly BlockButtonTemplate: GuiButton;
+			readonly BlockButtonTemplate: GuiButton & {
+				readonly CountText: TextLabel;
+			};
 			readonly DiscordBlockButtonTemplate: GuiButton;
 			readonly CategoryButtonTemplate: CategoryControlDefinition;
 		};
@@ -207,6 +211,7 @@ export class BlockSelectionControl extends Control<BlockSelectionControlDefiniti
 		@inject private readonly theme: Theme,
 		@inject private readonly popupController: PopupController,
 		@inject private readonly playerData: PlayerDataStorage,
+		@inject private readonly plot: ReadonlyPlot,
 	) {
 		super(template);
 
@@ -332,9 +337,18 @@ export class BlockSelectionControl extends Control<BlockSelectionControlDefiniti
 		};
 
 		const createBlockButton = (block: Block, activated: () => void) => {
-			const control = new BlockControl(this.blockTemplate(), block);
+			const gui = this.blockTemplate();
+			const control = new BlockControl(gui, block);
 			control.addButtonAction(activated);
 			this.list.add(control);
+
+			const upd = () => {
+				const count = this.plot.getBlocks().count((c) => BlockManager.manager.id.get(c) === block.id);
+				gui.CountText.Text = tostring(`${count}/${block.limit}`);
+			};
+			control.event.subscribe(this.plot.instance.ChildAdded, upd);
+			control.event.subscribe(this.plot.instance.ChildRemoved, upd);
+			upd();
 
 			control.instance.LayoutOrder = idx++;
 			return control;

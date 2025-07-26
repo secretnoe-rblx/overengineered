@@ -5,7 +5,7 @@ import type { BB } from "engine/shared/fixes/BB";
 @injectable
 export class ReadonlyPlot {
 	constructor(
-		protected readonly instance: Instance,
+		readonly instance: Instance,
 		readonly origin: CFrame,
 		readonly boundingBox: BB,
 	) {}
