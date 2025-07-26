@@ -306,7 +306,6 @@ const list: BlockBuildersWithoutIdAndDefaults = {
 	servomotorblock: {
 		displayName: "Servo",
 		description: "Turns to the configured angle",
-		limit: 100,
 		logic: {
 			definition: servoDefinition,
 			ctor: class extends Logic {
@@ -320,7 +319,6 @@ const list: BlockBuildersWithoutIdAndDefaults = {
 	sidewaysservo: {
 		displayName: "Sideways servo",
 		description: "Servo but sideways and with some degree of freedom",
-		limit: 100,
 		logic: {
 			definition: sidewaysServoDefinition,
 			ctor: class extends Logic {

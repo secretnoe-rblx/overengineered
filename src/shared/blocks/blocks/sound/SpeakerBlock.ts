@@ -262,7 +262,7 @@ export const SpeakerBlock = {
 	...BlockCreation.defaults,
 	id: "speaker",
 	displayName: "Speaker",
-	description: "Definitely speaks something, but only to you. Schizophrenia?",
+	description: "Definitely speaks something",
 	limit: 50,
 	search: {
 		partialAliases: ["sound", "music", "speaker", "play"],

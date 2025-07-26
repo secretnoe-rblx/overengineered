@@ -91,7 +91,6 @@ export const RadioReceiverBlock = {
 	id: "radioreceiver",
 	displayName: "Radio Receiver",
 	description: "Love is in the air? Wrong! Radio wave radia-tion!",
-	limit: 10,
 
 	logic: { definition, ctor: Logic },
 	modelSource: {

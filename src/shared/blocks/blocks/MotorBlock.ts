@@ -231,7 +231,6 @@ export const MotorBlock = {
 	id: "motorblock",
 	displayName: "Motor",
 	description: "Rotates attached blocks. For unpowered rotation, use the Hinge block.",
-	limit: 100,
 
 	logic: { definition, ctor: Logic, events },
 } as const satisfies BlockBuilder;

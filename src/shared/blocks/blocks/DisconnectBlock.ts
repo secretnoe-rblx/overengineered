@@ -57,7 +57,6 @@ class Logic extends InstanceBlockLogic<typeof definition, disconnectorBlock> {
 export const DisconnectBlock = {
 	...BlockCreation.defaults,
 	id: "disconnectblock",
-	limit: 100,
 	displayName: "Disconnector",
 	description: "Detaches connected parts",
 

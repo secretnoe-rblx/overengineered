@@ -5,7 +5,6 @@ const blocks: BlockBuildersWithoutIdAndDefaults = {
 	anchorblock: {
 		displayName: "Anchor",
 		description: "An immovable block",
-		limit: 20,
 
 		weldRegionsSource: BlockCreation.WeldRegions.fAutomatic("cube"),
 	},
@@ -13,12 +12,10 @@ const blocks: BlockBuildersWithoutIdAndDefaults = {
 	ballinsocket: {
 		displayName: "Ball in Socket",
 		description: "Ball socket for your mechanical ingenuities",
-		limit: 200,
 	},
 	ballinsocketangled: {
 		displayName: "Ball in Socket (Angled)",
 		description: "Angled ball socket for your mechanical ingenuities",
-		limit: 75,
 	},
 
 	shaft: {
@@ -28,7 +25,6 @@ const blocks: BlockBuildersWithoutIdAndDefaults = {
 	driveshaft: {
 		displayName: "Driveshaft",
 		description: "Kinda like a ball socket but with transmitting rotational force",
-		limit: 100,
 	},
 
 	smallgear: {

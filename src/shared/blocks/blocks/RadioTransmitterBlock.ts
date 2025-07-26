@@ -69,7 +69,6 @@ export const RadioTransmitterBlock = {
 	id: "radiotransmitter",
 	displayName: "Radio Transmitter",
 	description: "Transmits data over air for EVERYONE! True magic for a caveman!",
-	limit: 10,
 
 	logic: { definition, ctor: Logic },
 } as const satisfies BlockBuilder;

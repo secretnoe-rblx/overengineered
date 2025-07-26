@@ -186,7 +186,6 @@ const list: BlockBuildersWithoutIdAndDefaults = {
 		description: "A simple lamp. Turns on and off, or doesn't.",
 		weldRegionsSource: BlockCreation.WeldRegions.fAutomatic("cube"),
 		logic,
-		limit: 150,
 		search,
 	},
 	smalllamp: {
@@ -194,14 +193,12 @@ const list: BlockBuildersWithoutIdAndDefaults = {
 		description: "A simple lamp but even simpler!",
 		weldRegionsSource: BlockCreation.WeldRegions.fAutomatic("cube"),
 		logic,
-		limit: 150,
 		search,
 	},
 	spotlight: {
 		displayName: "Spotlight",
 		description: "Directional lamp.",
 		logic,
-		limit: 150,
 		search,
 	},
 };

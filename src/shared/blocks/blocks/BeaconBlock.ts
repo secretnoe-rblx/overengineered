@@ -143,7 +143,5 @@ export const BeaconBlock = {
 	displayName: "Beacon",
 	description: "Switchable marker. Only you can see it.",
 
-	limit: 20,
-
 	logic: { definition, ctor: Logic },
 } as const satisfies BlockBuilder;

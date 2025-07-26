@@ -200,7 +200,6 @@ export const RadarSectionBlock = {
 	id: "radarsection",
 	displayName: "Radar Section",
 	description: "Returns the position of the closest object in its field of view",
-	limit: 400,
 
 	logic: { definition, ctor: Logic },
 } as const satisfies BlockBuilder;

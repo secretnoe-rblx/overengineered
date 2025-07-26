@@ -200,7 +200,7 @@ export namespace BlockCreation {
 		},
 		markerPositionsSource: MarkerPositions.fromModelFolder,
 		weldRegionsSource: WeldRegions.fromAssetsOrAutomatic,
-		limit: 2000 as number,
+		limit: 3000 as number,
 		mirror: {
 			behaviour: "normal" as BlockMirrorBehaviour,
 		},
