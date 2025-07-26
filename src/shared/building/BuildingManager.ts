@@ -6,31 +6,7 @@ import type { SharedPlot } from "shared/building/SharedPlot";
 
 /** Methods for for getting information about blocks in a building */
 export namespace BuildingManager {
-	export const AllowedMaterials: readonly Enum.Material[] = [
-		Enum.Material.Asphalt,
-		Enum.Material.Basalt,
-		Enum.Material.Cardboard,
-		Enum.Material.RoofShingles,
-		Enum.Material.Rubber,
-		Enum.Material.Brick,
-		Enum.Material.Cobblestone,
-		Enum.Material.Concrete,
-		Enum.Material.DiamondPlate,
-		Enum.Material.Fabric,
-		Enum.Material.Glass,
-		Enum.Material.Granite,
-		Enum.Material.Grass,
-		Enum.Material.Ice,
-		Enum.Material.Marble,
-		Enum.Material.Metal,
-		Enum.Material.Pebble,
-		Enum.Material.WoodPlanks,
-		Enum.Material.Plastic,
-		Enum.Material.CorrodedMetal,
-		Enum.Material.Sand,
-		Enum.Material.Slate,
-		Enum.Material.Wood,
-	];
+	export const AllowedMaterials = Enum.Material.GetEnumItems().except([Enum.Material.Water, Enum.Material.Air]);
 
 	export function getAssemblyBlocks(block: BlockModel): BlockModel[] {
 		// using set to prevent duplicates
