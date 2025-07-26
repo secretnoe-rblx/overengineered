@@ -232,7 +232,7 @@ namespace ParticleCreator {
 					elementOrder: ["FacingCamera", "FacingCameraWorldUp", "VelocityParallel", "VelocityPerpendicular"],
 				},
 			}),
-			shape: inpCreate("Emission Shape", "Which way the paricle will be facing", {
+			emissionDirection: inpCreate("Emission Direction", "Which way the paricle will be facing", {
 				enum: {
 					config: "Top",
 					elements: enumOptionGenerate("Emissions facing", [
@@ -246,6 +246,13 @@ namespace ParticleCreator {
 					elementOrder: ["Top", "Bottom", "Front", "Back", "Left", "Right"],
 				},
 			}),
+			shape: inpCreate("Emission Shape", "Kinda hard to explain. Check it out yourself.", {
+				enum: {
+					config: "Box",
+					elements: enumOptionGenerate("Shape -", ["Box", "Cilynder", "Disc", "Sphere"]),
+					elementOrder: ["Box", "Cilynder", "Disc", "Sphere"],
+				},
+			}),
 			shapeInOut: inpCreate("Shape In/Out", "Determines if the particle will be emitted inwards or outwards", {
 				enum: {
 					config: "Outward",
@@ -256,7 +263,7 @@ namespace ParticleCreator {
 			shapeStyle: inpCreate("Shape style", "Determines how particles will spread around", {
 				enum: {
 					config: "Volume",
-					elements: enumOptionGenerate("Spread pattern ", ["Volume", "Surface"]),
+					elements: enumOptionGenerate("Follow", ["Volume", "Surface"]),
 					elementOrder: ["Volume", "Surface"],
 				},
 			}),
