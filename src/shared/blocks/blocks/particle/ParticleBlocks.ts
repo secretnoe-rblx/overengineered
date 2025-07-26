@@ -78,6 +78,12 @@ namespace ParticleEmitter {
 		if (properties.timeScale) emitter.TimeScale = properties.timeScale;
 		if (properties.size) emitter.Size = new NumberSequence(properties.size);
 		if (properties.drag) emitter.Drag = properties.drag;
+
+		if (properties.emissionDirection)
+			emitter.EmissionDirection = Enum.NormalId[properties.emissionDirection as never];
+		if (properties.shape) emitter.Shape = Enum.ParticleEmitterShape[properties.shape as never];
+		if (properties.shapeInOut) emitter.ShapeInOut = Enum.ParticleEmitterShapeInOut[properties.shapeInOut as never];
+		if (properties.shapeStyle) emitter.ShapeStyle = Enum.ParticleEmitterShapeStyle[properties.shapeStyle as never];
 	};
 
 	export class Logic extends InstanceBlockLogic<typeof definition, particleEmitter> {
