@@ -119,6 +119,7 @@ class ColorWindow extends Control<ColorWindowDefinition> {
 
 export type MaterialWindowDefinition = GuiObject & {
 	readonly TextLabel: TextLabel;
+	readonly Search: TextBox;
 	readonly Content: MaterialChooserDefinition;
 };
 class MaterialWindow extends ResizableWindow<MaterialWindowDefinition> {
@@ -128,7 +129,9 @@ class MaterialWindow extends ResizableWindow<MaterialWindowDefinition> {
 		color: ReadonlyObservableValue<Color3>,
 	) {
 		super(gui, 100, 504);
-		this.parent(new MaterialChooser(gui.Content, value, color));
+
+		const search = this.event.observableFromInstanceParam(gui.Search, "Text");
+		this.parent(new MaterialChooser(gui.Content, value, color, search));
 	}
 }
 

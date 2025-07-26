@@ -77,6 +77,7 @@ export class MaterialChooser extends Control<MaterialChooserDefinition> {
 		gui: MaterialChooserDefinition,
 		value?: SubmittableValue<Enum.Material>,
 		color?: ReadonlyObservableValue<Color3>,
+		search?: ReadonlyObservableValue<string>,
 	) {
 		super(gui);
 
@@ -109,6 +110,7 @@ export class MaterialChooser extends Control<MaterialChooserDefinition> {
 			);
 		}
 
+		const items: (ImageButton & { readonly TextLabel: TextLabel })[] = [];
 		const template = this.asTemplate(gui.Right.ScrollingFrame.MaterialTemplate, true);
 		for (const [i, material] of ipairs(
 			BuildingManager.AllowedMaterials.clone().sort((r, l) => r.Value < l.Value),
@@ -120,11 +122,21 @@ export class MaterialChooser extends Control<MaterialChooserDefinition> {
 			instance.TextLabel.Text = Materials.getMaterialDisplayName(material).upper();
 			instance.BackgroundColor3 = Colors.white;
 			instance.Image = Materials.getMaterialTextureAssetId(material);
+			items.push(instance);
 
 			// gamepasses disabled as this is uploaded as another game
 			// const gamepassid = instance.Name === "Neon" ? GameDefinitions.GAMEPASSES.NeonMaterial : undefined;
 			const gamepassid = undefined;
 			this.parent(new MaterialButton(instance, () => value.submit(material), gamepassid));
 		}
+
+		search!.subscribe((str) => {
+			for (const item of items) {
+				item.Visible =
+					str === undefined ||
+					str.size() === 0 ||
+					item.TextLabel.Text.lower().find(str.lower())[0] !== undefined;
+			}
+		});
 	}
 }

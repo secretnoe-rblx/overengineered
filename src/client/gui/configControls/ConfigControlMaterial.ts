@@ -32,14 +32,18 @@ class MaterialControl extends Control<ConfigControlMaterialDefinition["Control"]
 
 					const template = Interface.getInterface<{
 						Floating: {
-							Material: GuiObject & { Content: MaterialChooserDefinition };
+							Material: GuiObject & {
+								readonly Search: TextBox;
+								readonly Content: MaterialChooserDefinition;
+							};
 						};
 					}>().Floating.Material;
 					const colorGui = template.Clone();
 					colorGui.Position = new UDim2(0, mousePos.X, 0, mousePos.Y);
 
 					const window = new Control(colorGui);
-					const color = window.parent(new MaterialChooser(colorGui.Content, v));
+					const msearch = this.event.observableFromInstanceParam(colorGui.Search, "Text");
+					const color = window.parent(new MaterialChooser(colorGui.Content, v, undefined, msearch));
 
 					const popup = popupController.showPopup(window);
 
