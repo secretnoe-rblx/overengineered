@@ -113,13 +113,7 @@ class Logic extends InstanceBlockLogic<typeof definition> {
 		this.event.subscribe(view.Touched, (part) => {
 			if (part.HasTag("RADARVIEW")) return;
 			if (!minDistance) return;
-			//if (this.getDistanceTo(part).Magnitude < minDistance) return;
-
 			this.allTouchedBlocks.add(part);
-			//if (this.closestDetectedPart === undefined) {
-			//	return (this.closestDetectedPart = part);
-			//}
-
 			this.triggerDistanceListUpdate = true;
 		});
 
@@ -142,15 +136,6 @@ class Logic extends InstanceBlockLogic<typeof definition> {
 				"vector3",
 				this.closestDetectedPart ? this.getDistanceTo(this.closestDetectedPart) : Vector3.zero,
 			);
-
-			/*
-				this.closestDetectedPart = this.findClosestPart(minDistance);
-
-				if (this.closestDetectedPart) {
-					const d = this.getDistanceTo(this.closestDetectedPart);
-					this.output.distance.set("vector3", d);
-				} else this.output.distance.set("vector3", Vector3.zero);
-			*/
 
 			view.AssemblyLinearVelocity = Vector3.zero;
 			view.AssemblyAngularVelocity = Vector3.zero;

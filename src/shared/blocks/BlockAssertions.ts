@@ -102,12 +102,13 @@ export namespace BlockAssertions {
 		}
 	}
 	function* assertCollisionGroup(block: Model) {
+		const allowedExceptions = ["colbox", "radarview"];
 		for (const child of block.GetDescendants()) {
 			if (child.Parent?.Name === "WeldRegions") continue;
 			if (!child.IsA("BasePart")) continue;
 			if (!child.CanCollide) continue;
 
-			if (child.CollisionGroup !== "Blocks") {
+			if (child.CollisionGroup !== "Blocks" && !allowedExceptions.includes(child.Name.fullLower())) {
 				yield `Block ${block.Name} part ${child.Name} has a wrong collision group ${child.CollisionGroup}!`;
 			}
 		}
