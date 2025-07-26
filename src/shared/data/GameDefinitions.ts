@@ -9,7 +9,7 @@ export namespace GameDefinitions {
 	export const MAX_ANGULAR_SPEED = 40;
 	export const HEIGHT_OFFSET = -16384;
 
-	const icicle = 88843175246235;
+	const icicle = 101023772575559;
 	export const isTesting = RunService.IsStudio() || game.PlaceId === icicle;
 
 	export function getMaxSlots(player: Player, additional: number) {
