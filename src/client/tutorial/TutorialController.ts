@@ -766,7 +766,7 @@ export class TutorialController extends Component {
 
 		this.onEnable(() => {
 			try {
-				LoadingController.run(`Starting tutorial...`, () => CustomRemotes.modes.set.send("build"));
+				LoadingController.run(`Starting tutorial...`, () => CustomRemotes.modes.set.send({ mode: "build" }));
 			} catch {
 				// empty
 			}

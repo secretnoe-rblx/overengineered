@@ -6,6 +6,7 @@ import { PlayerUtils } from "engine/shared/utils/PlayerUtils";
 import { BuildMode } from "server/modes/BuildMode";
 import { RideMode } from "server/modes/RideMode";
 import { CustomRemotes } from "shared/Remotes";
+import type { SpawnPosition } from "client/modes/build/BuildingMode";
 import type { GameHostBuilder } from "engine/shared/GameHostBuilder";
 import type { PlayModeBase } from "server/modes/PlayModeBase";
 
@@ -54,8 +55,8 @@ export class PlayModeController extends HostedService {
 		return this.playerModes[playerId];
 	}
 
-	changeModeForPlayer(player: Player, mode: PlayModes | undefined): Response {
-		if (mode !== undefined && !PlayerUtils.isAlive(player)) {
+	changeModeForPlayer(player: Player, m: { mode: PlayModes; pos?: SpawnPosition } | undefined): Response {
+		if (m !== undefined && !PlayerUtils.isAlive(player)) {
 			return { success: false, message: "Player is not alive" };
 		}
 
@@ -63,22 +64,26 @@ export class PlayModeController extends HostedService {
 		if (prevmode) {
 			const transition = this.modes[prevmode];
 			if (transition) {
-				const result = transition.onTransitionTo(player, mode);
+				const result = transition.onTransitionTo(player, m?.mode);
 				if (!result || !result.success)
-					return result ?? { success: false, message: `Invalid play mode transition ${prevmode} => ${mode}` };
+					return (
+						result ?? { success: false, message: `Invalid play mode transition ${prevmode} => ${m?.mode}` }
+					);
 			}
 		}
-		if (mode) {
-			const transition = this.modes[mode];
+		if (m) {
+			const transition = this.modes[m.mode];
 			if (transition) {
-				const result = transition.onTransitionFrom(player, prevmode);
+				const result = transition.onTransitionFrom(player, prevmode, m?.pos);
 				if (!result || !result.success)
-					return result ?? { success: false, message: `Invalid play mode transition ${prevmode} => ${mode}` };
+					return (
+						result ?? { success: false, message: `Invalid play mode transition ${prevmode} => ${m?.mode}` }
+					);
 			}
 		}
 
-		$log(`${player.Name}'s mode: '${this.playerModes[player.UserId]}' => '${mode}'`);
-		this.playerModes[player.UserId] = mode;
+		$log(`${player.Name}'s mode: '${this.playerModes[player.UserId]}' => '${m?.mode}'`);
+		this.playerModes[player.UserId] = m?.mode;
 
 		// for (let i = 0; i < 3; i++) {
 		// 	try {
@@ -99,7 +104,7 @@ export class PlayModeController extends HostedService {
 		}
 
 		const req = Throttler.retryOnFail(3, 1, () => {
-			const result = CustomRemotes.modes.setOnClient.send(player, mode);
+			const result = CustomRemotes.modes.setOnClient.send(player, m?.mode);
 			if (!result.success) throw result.message;
 		});
 

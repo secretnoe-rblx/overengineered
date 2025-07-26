@@ -5,6 +5,7 @@ import { BlockManager } from "shared/building/BlockManager";
 import { BlocksSerializer } from "shared/building/BlocksSerializer";
 import { CustomRemotes } from "shared/Remotes";
 import { SlotsMeta } from "shared/SlotsMeta";
+import type { SpawnPosition } from "client/modes/build/BuildingMode";
 import type { PlayerDatabase } from "server/database/PlayerDatabase";
 import type { SlotDatabase } from "server/database/SlotDatabase";
 import type { PlayModeBase } from "server/modes/PlayModeBase";
@@ -53,9 +54,9 @@ export class RideMode implements PlayModeBase {
 		vehicleSeat.Sit(hrp);
 	}
 
-	onTransitionFrom(player: Player, prevmode: PlayModes | undefined): Response | undefined {
+	onTransitionFrom(player: Player, prevmode: PlayModes | undefined, pos?: SpawnPosition): Response | undefined {
 		if (prevmode === "build") {
-			return this.rideStart(player);
+			return this.rideStart(player, pos ?? "plot");
 		}
 	}
 	onTransitionTo(player: Player, nextmode: PlayModes | undefined): Response | undefined {
@@ -78,7 +79,17 @@ export class RideMode implements PlayModeBase {
 		CustomRemotes.physics.normalizeRootparts.send(players, { parts: rootParts });
 	}
 
-	private rideStart(player: Player): Response {
+	private rideStart(player: Player, pos: SpawnPosition): Response {
+		const positions: { readonly [k in SpawnPosition]: CFrame | undefined } = {
+			plot: undefined,
+			water1: new CFrame(769, -16345.559, 1269.5),
+			water2: new CFrame(-101, -16411.887, 3045),
+			space: new CFrame(50, 26411, 894),
+			idk: new CFrame(-14101, -16411.887, 35045),
+		};
+		print("spawning at ", pos);
+		const spawnPosition = positions[pos];
+
 		const controller = this.serverControllers.controllers.get(player.UserId)?.plotController;
 		if (!controller) throw "what";
 
@@ -91,6 +102,21 @@ export class RideMode implements PlayModeBase {
 			SlotsMeta.autosaveSlotIndex,
 			BlocksSerializer.serializeToObject(controller.blocks),
 		);
+
+		if (spawnPosition) {
+			for (const block of blocksChildren) {
+				block.PivotTo(spawnPosition.mul(controller.blocks.origin.ToObjectSpace(block.GetPivot())));
+			}
+
+			try {
+				const humanoid = player.Character?.FindFirstChild("Humanoid") as Humanoid;
+				humanoid.RootPart!.PivotTo(
+					spawnPosition.mul(controller.blocks.origin.ToObjectSpace(humanoid.RootPart!.GetPivot())),
+				);
+			} catch {
+				// empty
+			}
+		}
 
 		const hrp = player.Character?.WaitForChild("Humanoid") as Humanoid;
 		const vehicleSeat = blocksChildren

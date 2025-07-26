@@ -34,7 +34,7 @@ export class RideMode extends PlayMode {
 		this.parentGui(this.rideModeScene);
 
 		CustomRemotes.modes.set.sent.Connect((mode) => {
-			if (mode === "ride") return;
+			if (mode.mode === "ride") return;
 			if (!this.currentMachine) return;
 
 			this.currentMachine.getImpactController()?.disable();

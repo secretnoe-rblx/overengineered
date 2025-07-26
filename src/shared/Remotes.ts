@@ -7,6 +7,7 @@ import {
 	S2CRemoteEvent,
 } from "engine/shared/event/PERemoteEvent";
 import { PlayerRank } from "engine/shared/PlayerRank";
+import type { SpawnPosition } from "client/modes/build/BuildingMode";
 import type { PlayerFeature } from "server/database/PlayerDatabase";
 
 declare global {
@@ -159,7 +160,9 @@ export const CustomRemotes = {
 		},
 	},
 	modes: {
-		set: new C2S2CRemoteFunction<PlayModes>("md_set").addMiddleware(PERemoteEventMiddlewares.rateLimiter(30, 60)),
+		set: new C2S2CRemoteFunction<{ readonly mode: PlayModes; readonly pos?: SpawnPosition }>(
+			"md_set",
+		).addMiddleware(PERemoteEventMiddlewares.rateLimiter(30, 60)),
 		setOnClient: new S2C2SRemoteFunction<PlayModes | undefined>("md_setc"),
 		ride: {
 			teleportOnSeat: new C2SRemoteEvent("mdr_seat"),

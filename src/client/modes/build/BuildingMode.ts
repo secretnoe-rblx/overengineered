@@ -1,5 +1,6 @@
 import { LoadingController } from "client/controller/LoadingController";
 import { MirrorVisualizer } from "client/controller/MirrorVisualizer";
+import { SwitchControl } from "client/gui/controls/SwitchControl";
 import { SavePopup } from "client/gui/popup/SavePopup";
 import { Scene } from "client/gui/Scene";
 import { ActionController } from "client/modes/build/ActionController";
@@ -18,14 +19,18 @@ import { BlockSelect } from "client/tools/highlighters/BlockSelect";
 import { PaintTool } from "client/tools/PaintTool";
 import { WireTool } from "client/tools/WireTool";
 import { Action } from "engine/client/Action";
+import { Control } from "engine/client/gui/Control";
+import { Interface } from "engine/client/gui/Interface";
 import { LocalPlayer } from "engine/client/LocalPlayer";
 import { EventHandler } from "engine/shared/event/EventHandler";
 import { NumberObservableValue } from "engine/shared/event/NumberObservableValue";
 import { ObservableValue } from "engine/shared/event/ObservableValue";
+import { Instances } from "engine/shared/fixes/Instances";
 import { Objects } from "engine/shared/fixes/Objects";
 import { BlockCreation } from "shared/blocks/BlockCreation";
 import { BlockManager } from "shared/building/BlockManager";
 import { SharedRagdoll } from "shared/SharedRagdoll";
+import type { SwitchControlDefinition } from "client/gui/controls/SwitchControl";
 import type { MainScreenLayout } from "client/gui/MainScreenLayout";
 import type { PopupController } from "client/gui/PopupController";
 import type { PlayerDataStorage } from "client/PlayerDataStorage";
@@ -64,6 +69,39 @@ export class BuildingModeScene extends Scene {
 			.subscribeVisibilityFrom({ main_enabled: this.enabledState });
 
 		{
+			type gui = GuiObject & {
+				readonly TextLabel: TextLabel;
+				readonly Control: {
+					readonly Switch: GuiObject & {
+						readonly Control: SwitchControlDefinition;
+					};
+				};
+			};
+			const template = Instances.waitForChild<gui>(Interface.getInterface(), "Floating", "Switch");
+			const gui = template.Clone();
+			gui.Parent = template.Parent;
+			gui.Visible = false;
+			gui.TextLabel.Text = "CHOOSE SPAWN";
+
+			const contol = this.parent(new Control(gui));
+			const sw = contol.parent(
+				new SwitchControl(gui.Control.Switch.Control, [
+					["plot", { name: "Plot" }],
+					["water1", { name: "Water 1" }],
+					["water2", { name: "Water 2" }],
+					["space", { name: "Space" }],
+					["idk", { name: "idk" }],
+				] satisfies [SpawnPosition, unknown][]),
+			);
+			sw.value.set(mode.spawnPosition.get());
+			sw.value.subscribe((v) => mode.spawnPosition.set(v));
+
+			const runtp = this.parent(mainScreen.top.main.addButton("Teleport", { text: "?" }))
+				.addButtonAction(() => contol.setVisibleAndEnabled(!contol.isInstanceVisible()))
+				.subscribeVisibilityFrom({ main_enabled: this.enabledState });
+		}
+
+		{
 			const eh = new EventHandler();
 			this.onDisable(() => eh.unsubscribeAll());
 			this.event.subscribe(runbtn.instance.MouseButton1Down, () => {
@@ -93,6 +131,7 @@ export class BuildingModeScene extends Scene {
 }
 
 export type EditMode = "global" | "local";
+export type SpawnPosition = "plot" | "water1" | "water2" | "space" | "idk";
 
 @injectable
 export class BuildingMode extends PlayMode {
@@ -100,10 +139,11 @@ export class BuildingMode extends PlayMode {
 	readonly runAction = this.parent(
 		new Action<[runLogic?: boolean]>((runLogic = true) => {
 			RideMode.runWithoutLogicThisTime = !runLogic;
-			requestMode("ride");
+			requestMode("ride", this.spawnPosition.get());
 		}),
 	);
 	readonly teleportToPlotAction = this.parent(new Action(() => this.teleportToPlot()));
+	readonly spawnPosition = new ObservableValue<SpawnPosition>("plot");
 
 	readonly mirrorMode = new ObservableValue<MirrorMode>({});
 	readonly targetPlot;
