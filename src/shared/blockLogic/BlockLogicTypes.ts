@@ -146,6 +146,11 @@ export namespace BlockLogicTypes {
 
 		readonly color?: Color3;
 
+		readonly shape?: Enum.ParticleEmitterShape;
+		readonly shapeStyle?: Enum.ParticleEmitterShapeStyle;
+		readonly shapeInOut?: Enum.ParticleEmitterShapeInOut;
+		readonly emissionDirection?: Enum.NormalId;
+
 		readonly velocityInheritance?: number;
 		readonly lockedToPart?: boolean;
 		readonly rotationSpeed?: number;

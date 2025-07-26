@@ -97,6 +97,7 @@ namespace ParticleEmitter {
 					this,
 				),
 			);
+
 			this.onDisable(() => (this.instance.Body.ParticleEmitter.Enabled ??= false));
 		}
 	}
@@ -143,6 +144,12 @@ namespace ParticleCreator {
 		types,
 	});
 
+	const enumOptionGenerate = (base: string, options: string[]) => {
+		const res: Record<string, { displayName: string }> = {};
+		for (const v of options) res[v] = { displayName: `${base} ${v}` };
+		return res;
+	};
+
 	export const definition = {
 		inputOrder: [
 			"particleID",
@@ -164,6 +171,10 @@ namespace ParticleCreator {
 			"drag",
 			"timeScale",
 			"lockedToPart",
+			"emissionDirection",
+			"shape",
+			"shapeInOut",
+			"shapeStyle",
 		] as const satisfies (keyof BlockLogicTypes.ParticleValue | "particleID")[],
 		input: {
 			particleID: inpCreate("Particle", "ID of the particle.", stringIdType),
@@ -213,6 +224,34 @@ namespace ParticleCreator {
 						VelocityPerpendicular: { displayName: "Velocity Perpendicular" },
 					},
 					elementOrder: ["FacingCamera", "FacingCameraWorldUp", "VelocityParallel", "VelocityPerpendicular"],
+				},
+			}),
+			shape: inpCreate("Emission Shape", "Which way the paricle will be facing", {
+				enum: {
+					config: "Top",
+					elements: enumOptionGenerate("Emissions facing", [
+						"Top",
+						"Bottom",
+						"Front",
+						"Back",
+						"Left",
+						"Right",
+					]),
+					elementOrder: ["Top", "Bottom", "Front", "Back", "Left", "Right"],
+				},
+			}),
+			shapeInOut: inpCreate("Shape In/Out", "Determines if the particle will be emitted inwards or outwards", {
+				enum: {
+					config: "Outward",
+					elements: enumOptionGenerate("Emits ", ["InAndOut", "Inward", "Outward"]),
+					elementOrder: ["InAndOut", "Inward", "Outward"],
+				},
+			}),
+			shapeStyle: inpCreate("Shape style", "Determines how particles will spread around", {
+				enum: {
+					config: "Volume",
+					elements: enumOptionGenerate("Spread pattern ", ["Volume", "Surface"]),
+					elementOrder: ["Volume", "Surface"],
 				},
 			}),
 		} satisfies { [k in keyof BlockLogicTypes.ParticleValue]: BlockLogicFullInputDef },
