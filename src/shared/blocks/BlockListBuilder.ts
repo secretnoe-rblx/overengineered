@@ -61,9 +61,16 @@ export namespace BlockListBuilder {
 						cb.WeldConstraint.Part0 = cb;
 						cb.WeldConstraint.Part1 = model.PrimaryPart;
 						cb.WeldConstraint.Enabled = true;
-
 						cb.Transparency = 1;
+
 						model.PrimaryPart = cb;
+					}
+
+					// colbox collision autofix
+					const cb = model.PrimaryPart;
+					if (cb?.Name.fullLower() === "colbox") {
+						cb.CanCollide = false;
+						cb.CanQuery = false;
 					}
 
 					return $tuple(b.id, {
