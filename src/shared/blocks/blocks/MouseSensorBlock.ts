@@ -1,6 +1,7 @@
 import { Players, RunService, UserInputService, Workspace } from "@rbxts/services";
 import { BlockLogic } from "shared/blockLogic/BlockLogic";
 import { BlockCreation } from "shared/blocks/BlockCreation";
+import { GameDefinitions } from "shared/data/GameDefinitions";
 import type { BlockLogicArgs, BlockLogicFullBothDefinitions } from "shared/blockLogic/BlockLogic";
 import type { BlockBuilder } from "shared/blocks/Block";
 
@@ -55,7 +56,10 @@ class Logic extends BlockLogic<typeof definition> {
 
 				this.output.direction.set("vector3", ray.Direction);
 				this.output.angle3d.set("vector3", new Vector3(x, y, z));
-				this.output.position3d.set("vector3", Players.LocalPlayer.GetMouse()!.Hit.Position);
+				this.output.position3d.set(
+					"vector3",
+					Players.LocalPlayer.GetMouse()!.Hit.Position.add(new Vector3(GameDefinitions.HEIGHT_OFFSET)),
+				);
 			}
 		});
 	}
