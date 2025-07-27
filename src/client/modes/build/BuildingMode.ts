@@ -90,6 +90,7 @@ export class BuildingModeScene extends Scene {
 					["water1", { name: "Water 1" }],
 					["water2", { name: "Water 2" }],
 					["space", { name: "Space" }],
+					["helipad", { name: "Helipad" }],
 					["idk", { name: "idk" }],
 				] satisfies [SpawnPosition, unknown][]),
 			);
@@ -131,7 +132,7 @@ export class BuildingModeScene extends Scene {
 }
 
 export type EditMode = "global" | "local";
-export type SpawnPosition = "plot" | "water1" | "water2" | "space" | "idk";
+export type SpawnPosition = "plot" | "water1" | "water2" | "space" | "helipad" | "idk";
 
 @injectable
 export class BuildingMode extends PlayMode {

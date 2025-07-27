@@ -85,6 +85,7 @@ export class RideMode implements PlayModeBase {
 			water1: new CFrame(769, -16345.559, 1269.5),
 			water2: new CFrame(-101, -16411.887, 3045),
 			space: new CFrame(50, 26411, 894),
+			helipad: new CFrame(901, -14871.997, -798),
 			idk: new CFrame(-14101, -16411.887, 35045),
 		};
 		print("spawning at ", pos);
