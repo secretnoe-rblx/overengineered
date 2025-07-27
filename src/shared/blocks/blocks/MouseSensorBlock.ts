@@ -1,11 +1,11 @@
-import { RunService, UserInputService, Workspace } from "@rbxts/services";
+import { Players, RunService, UserInputService, Workspace } from "@rbxts/services";
 import { BlockLogic } from "shared/blockLogic/BlockLogic";
 import { BlockCreation } from "shared/blocks/BlockCreation";
 import type { BlockLogicArgs, BlockLogicFullBothDefinitions } from "shared/blockLogic/BlockLogic";
 import type { BlockBuilder } from "shared/blocks/Block";
 
 const definition = {
-	outputOrder: ["position", "angle", "direction", "angle3d"],
+	outputOrder: ["position", "angle", "direction", "angle3d", "position3d"],
 	input: {},
 	output: {
 		position: {
@@ -26,6 +26,11 @@ const definition = {
 		angle3d: {
 			displayName: "3D Angle of direction",
 			unit: "Radians",
+			types: ["vector3"],
+		},
+		position3d: {
+			displayName: "3D Position",
+			unit: "Vector3 Global position",
 			types: ["vector3"],
 		},
 	},
@@ -50,6 +55,7 @@ class Logic extends BlockLogic<typeof definition> {
 
 				this.output.direction.set("vector3", ray.Direction);
 				this.output.angle3d.set("vector3", new Vector3(x, y, z));
+				this.output.position3d.set("vector3", Players.LocalPlayer.GetMouse()!.Hit.Position);
 			}
 		});
 	}
@@ -59,7 +65,7 @@ export const MouseSensorBlock = {
 	...BlockCreation.defaults,
 	id: "mousesensor",
 	displayName: "Mouse Sensor",
-	description: "Returns the cursor position, relative to the screen",
+	description: "Returns some data about the mouse cursor",
 
 	logic: { definition, ctor: Logic },
 } as const satisfies BlockBuilder;
