@@ -212,14 +212,14 @@ const search = { partialAliases: ["turbine"] };
 const logic: BlockLogicInfo = { definition, ctor: Logic };
 const list: BlockBuildersWithoutIdAndDefaults = {
 	jetenginecivil: {
-		displayName: "Jet Engine (Civil)",
+		displayName: "Civil Jet Engine",
 		description: "Engines your jet or whatever",
 		logic,
 		limit: 50,
 		search,
 	},
 	jetenginemilitary: {
-		displayName: "Jet Engine (Military)",
+		displayName: "Military Jet Engine",
 		description: "Engines your jet or whatever (military grade)",
 		logic,
 		limit: 50,
