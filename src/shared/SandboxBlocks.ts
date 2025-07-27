@@ -202,10 +202,13 @@ export const CreateSandboxBlocks = (di: DIContainer): BlockList => {
 		GuiStatBlock,
 
 		...ParticleBlocks,
+
+		GyroscopeBlock,
+		...JetEngineBlocks,
 	];
 
 	if (GameDefinitions.isTesting) {
-		const testBlocks: readonly BlockBuilder[] = [...weapons, GyroscopeBlock, ...JetEngineBlocks];
+		const testBlocks: readonly BlockBuilder[] = [...weapons];
 
 		for (const block of testBlocks) {
 			blocksArr.push(block);
