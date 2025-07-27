@@ -157,12 +157,28 @@ export namespace SandboxGame {
 
 			{
 				const playerData = di.resolve<PlayerDataStorage>();
-				if (
-					playerData.config.get().autoLoad &&
-					playerData.slots.get()[SlotsMeta.autosaveSlotIndex] &&
-					playerData.slots.get()[SlotsMeta.autosaveSlotIndex].blocks !== 0
-				) {
-					playerData.loadPlayerSlot(SlotsMeta.autosaveSlotIndex, "Loading the autosave");
+				if (playerData.config.get().autoLoad) {
+					const slots = playerData.slots.get();
+
+					const autoloadIndices = [
+						SlotsMeta.autosaveSlotIndex,
+						SlotsMeta.lastRunSlotIndex,
+						SlotsMeta.quitSlotIndex,
+					];
+					const f = autoloadIndices
+						.mapFiltered((c) => slots[c])
+						.filter((v) => v.blocks !== 0)
+						.sort(
+							(l, r) =>
+								(l.saveTime ?? autoloadIndices.indexOf(l.index)) >
+								(r.saveTime ?? autoloadIndices.indexOf(r.index)),
+						);
+					$log(`Autosave load order: ${f.map((c) => c.index).join(", ")}`);
+
+					const first = f.first();
+					if (first) {
+						playerData.loadPlayerSlot(first.index, `Loading ${first.name}`);
+					}
 				}
 			}
 		});
