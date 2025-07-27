@@ -100,7 +100,7 @@ export class RideMode implements PlayModeBase {
 
 		this.slots.setBlocks(
 			player.UserId,
-			SlotsMeta.autosaveSlotIndex,
+			SlotsMeta.lastRunSlotIndex,
 			BlocksSerializer.serializeToObject(controller.blocks),
 		);
 
@@ -174,7 +174,7 @@ export class RideMode implements PlayModeBase {
 		} else {
 			controller.blocks.deleteOperation.execute("all");
 
-			const blocksToLoad = this.slots.getBlocks(player.UserId, SlotsMeta.autosaveSlotIndex);
+			const blocksToLoad = this.slots.getBlocks(player.UserId, SlotsMeta.lastRunSlotIndex);
 			BlocksSerializer.deserializeFromObject(blocksToLoad, controller.blocks, this.blockList);
 		}
 

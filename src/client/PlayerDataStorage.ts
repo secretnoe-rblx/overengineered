@@ -73,6 +73,8 @@ export class PlayerDataStorage {
 		const slots = new ObservableValue<{ readonly [k in number]: SlotMeta }>(Objects.empty);
 		this.data.subscribe((data) => slots.set(SlotsMeta.toTable(data.slots)), true);
 		this.slots = slots;
+
+		CustomRemotes.updateSaves.invoked.Connect((slots) => this._data.set({ ...this._data.get(), slots }));
 	}
 
 	async sendPlayerConfig(config: PartialThrough<PlayerConfig>) {

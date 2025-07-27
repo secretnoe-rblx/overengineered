@@ -5,8 +5,10 @@ import { asPlayerId } from "server/PlayerId";
 import { ServerPlotController } from "server/plots/ServerPlotController";
 import { ServerPlayerDataRemotesController } from "server/ServerPlayerDataRemotesController";
 import { BlocksSerializer } from "shared/building/BlocksSerializer";
+import { CustomRemotes } from "shared/Remotes";
 import { PlayerDataRemotes } from "shared/remotes/PlayerDataRemotes";
 import { SlotsMeta } from "shared/SlotsMeta";
+import type { PlayerDatabase } from "server/database/PlayerDatabase";
 import type { SlotDatabase } from "server/database/SlotDatabase";
 import type { PlayModeController } from "server/modes/PlayModeController";
 import type { BuildingPlot } from "shared/building/BuildingPlot";
@@ -25,6 +27,7 @@ export class ServerPlayerController extends Component {
 		@inject readonly plot: SharedPlot,
 		@inject playModeController: PlayModeController,
 		@inject slots: SlotDatabase,
+		@inject playerData: PlayerDatabase,
 		@inject di: DIContainer,
 	) {
 		super();
@@ -72,9 +75,23 @@ export class ServerPlayerController extends Component {
 			if (save) {
 				slots.setBlocks(playerId, SlotsMeta.quitSlotIndex, BlocksSerializer.serializeToObject(blocks));
 			} else {
-				slots.setBlocksFromAnotherSlot(playerId, SlotsMeta.quitSlotIndex, SlotsMeta.autosaveSlotIndex);
+				slots.setBlocksFromAnotherSlot(playerId, SlotsMeta.quitSlotIndex, SlotsMeta.lastRunSlotIndex);
 			}
 		};
 		this.onDestroy(savePlot);
+
+		this.event.loop(5 * 60, () => {
+			$log(`Saving ${player.Name} plot to autosave...`);
+
+			const save = playModeController.getPlayerModeById(playerId) === "build" && blocks.getBlocks().size() !== 0;
+
+			if (save) {
+				slots.setBlocks(playerId, SlotsMeta.autosaveSlotIndex, BlocksSerializer.serializeToObject(blocks));
+			} else {
+				slots.setBlocksFromAnotherSlot(playerId, SlotsMeta.autosaveSlotIndex, SlotsMeta.lastRunSlotIndex);
+			}
+
+			CustomRemotes.updateSaves.send(player, playerData.get(player.UserId).slots ?? []);
+		});
 	}
 }

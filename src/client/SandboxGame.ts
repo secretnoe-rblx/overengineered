@@ -159,10 +159,10 @@ export namespace SandboxGame {
 				const playerData = di.resolve<PlayerDataStorage>();
 				if (
 					playerData.config.get().autoLoad &&
-					playerData.slots.get()[SlotsMeta.quitSlotIndex] &&
-					playerData.slots.get()[SlotsMeta.quitSlotIndex].blocks !== 0
+					playerData.slots.get()[SlotsMeta.autosaveSlotIndex] &&
+					playerData.slots.get()[SlotsMeta.autosaveSlotIndex].blocks !== 0
 				) {
-					playerData.loadPlayerSlot(SlotsMeta.quitSlotIndex, "Loading the autosave");
+					playerData.loadPlayerSlot(SlotsMeta.autosaveSlotIndex, "Loading the autosave");
 				}
 			}
 		});

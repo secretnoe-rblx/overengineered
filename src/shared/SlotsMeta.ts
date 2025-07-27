@@ -7,16 +7,21 @@ export namespace SlotsMeta {
 
 	const testSlotStart = 1_000_000;
 	const testSlotOffset = testSlotStart + 2;
-	export const autosaveSlotIndex = -1;
+	export const lastRunSlotIndex = -1;
 	export const quitSlotIndex = -2;
+	export const autosaveSlotIndex = -3;
 	const specialSlots: Readonly<Record<number, SpecialSlotInfo>> = {
-		[autosaveSlotIndex]: {
+		[lastRunSlotIndex]: {
 			name: "Last run",
 			color: "57dbfa",
 		},
 		[quitSlotIndex]: {
 			name: "Last exit",
 			color: "ff1f5a",
+		},
+		[autosaveSlotIndex]: {
+			name: "Autosave",
+			color: "e8df64",
 		},
 	};
 
