@@ -411,7 +411,7 @@ class SaveSlots extends Control<SaveSlotsDefinition> {
 			.withParentInstance(gui);
 
 		const setItemVisibililtyBySearch = (item: SaveItem) => {
-			const has = item.meta.get().name.find(this.search.get())[0] !== undefined;
+			const has = item.meta.get().name.lower().find(this.search.get().lower())[0] !== undefined;
 			item.setVisibleAndEnabled(has);
 		};
 		this.event.subscribeObservable(
