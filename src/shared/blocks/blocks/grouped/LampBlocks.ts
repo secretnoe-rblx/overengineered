@@ -96,7 +96,7 @@ const update = ({ block, state, color, brightness, range, brightnessAffectsColor
 	const part = block.FindFirstChild("GlowingPart") as typeof block.GlowingPart;
 	if (!part) return;
 
-	const light = part?.FindFirstChild("Light") as PointLight | undefined;
+	const light = part.FindFirstChild("Light") as PointLight | undefined;
 	if (!light) return;
 
 	if (state) {
