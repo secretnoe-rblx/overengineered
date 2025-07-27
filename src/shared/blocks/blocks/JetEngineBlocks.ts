@@ -1,3 +1,4 @@
+import { RunService } from "@rbxts/services";
 import { InstanceBlockLogic } from "shared/blockLogic/BlockLogic";
 import { BlockCreation } from "shared/blocks/BlockCreation";
 import { BlockManager } from "shared/building/BlockManager";
@@ -68,7 +69,7 @@ const definition = {
 } satisfies BlockLogicFullBothDefinitions;
 
 type JetModel = BlockModel & {
-	readonly TurbineShaft: Instance & {
+	readonly TurbineShaft: MeshPart & {
 		readonly Working: Sound;
 		readonly Idle: Sound;
 		readonly Start: Sound;
@@ -77,6 +78,7 @@ type JetModel = BlockModel & {
 	};
 	readonly TurbineBody: Instance & {
 		readonly VectorForce: VectorForce;
+		readonly BladeLocation: Attachment;
 	};
 	readonly ColBox: Part;
 };
@@ -100,6 +102,9 @@ class Logic extends InstanceBlockLogic<typeof definition, JetModel> {
 
 		// const
 		const maxSoundVolume = 0.5;
+
+		// vals
+		const thrust = this.initializeInputCache("thrust");
 
 		// Instances
 		const colbox = this.instance.ColBox;
@@ -182,18 +187,22 @@ class Logic extends InstanceBlockLogic<typeof definition, JetModel> {
 			thrustPercent = thrust / 100;
 			strengthPercent = strength / 100;
 
-			// hinge.AngularVelocity = thrustPercent * 100;
-
 			updateForce(thrustPercent * strengthPercent);
 			updateSound(thrustPercent * maxSoundVolume, thrust, lastThrust);
 
 			lastThrust = thrust;
 		});
 
+		let rotationAccumulator = 0;
+		this.event.subscribe(RunService.Heartbeat, (dt) => {
+			shaft.CFrame = body.BladeLocation.WorldCFrame;
+			shaft.CFrame = shaft.CFrame.mul(CFrame.Angles(0, 0, (rotationAccumulator += (thrust.get() ?? 0) * dt)));
+			print(shaft.Rotation);
+		});
+
 		this.onDisable(() => {
 			updateForce(0);
 			updateSound(0, 0, 0);
-			// hinge.Enabled = false;
 			playing.Stop();
 		});
 	}
