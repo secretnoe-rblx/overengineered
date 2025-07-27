@@ -37,7 +37,7 @@ export class ServerPlotController extends Component {
 		]);
 
 		if (game.PrivateServerOwnerId === 0) {
-			this.blocks.initializeDelay(3, 6, 3);
+			this.blocks.initializeDelay(math.pow(2, 3), math.pow(2, 6), math.pow(2, 6));
 		}
 
 		this.parent(di.resolveForeignClass(AutoPlotWelder, [this.blocks]));
