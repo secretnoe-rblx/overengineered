@@ -13,6 +13,11 @@ export class AutoPlotWelder extends Component {
 		const welder = this.parent(new PlotWelder(plot, blockList));
 
 		this.event.subscribe(plot.placeOperation.executed, (arg, result) => welder.weldOnPlot(result.model));
+		// this.event.subscribe(plot.multiPlaceOperation.executed, (arg, result) => {
+		// 	for (const model of result.models) {
+		// 		welder.weldOnPlot(model);
+		// 	}
+		// });
 		this.event.subscribe(plot.deleteOperation.executed, (arg, result) => {
 			if (arg === "all") {
 				welder.deleteWelds();

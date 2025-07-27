@@ -123,19 +123,7 @@ export class ServerBuildingRequestController extends Component {
 			}
 		}
 
-		const placed: BlockModel[] = [];
-		for (const block of blocks) {
-			const placedBlock = bplot.placeOperation.execute(block);
-			if (!placedBlock.success) {
-				return placedBlock;
-			}
-
-			if (placedBlock.model) {
-				placed.push(placedBlock.model);
-			}
-		}
-
-		return { success: true, models: placed };
+		return bplot.multiPlaceOperation.execute(blocks);
 	}
 
 	private deleteBlocks(request: DeleteBlocksRequest): Response {

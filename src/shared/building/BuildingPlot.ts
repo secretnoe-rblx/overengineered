@@ -14,6 +14,7 @@ const success: SuccessResponse = { success: true };
 /** Building on a plot. */
 @injectable
 export class BuildingPlot extends ReadonlyPlot {
+	readonly multiPlaceOperation = new Operation(this.multiPlace.bind(this));
 	readonly placeOperation = new Operation(this.place.bind(this));
 	readonly deleteOperation = new Operation(this.delete.bind(this));
 	readonly editOperation = new Operation(this.edit.bind(this));
@@ -62,6 +63,22 @@ export class BuildingPlot extends ReadonlyPlot {
 	}
 	destroy(): void {
 		this.instance.Destroy();
+	}
+
+	private multiPlace(data: readonly PlaceBlockRequest[]): MultiBuildResponse {
+		const placed: BlockModel[] = [];
+		for (const block of data) {
+			const placedBlock = this.placeOperation.execute(block);
+			if (!placedBlock.success) {
+				return placedBlock;
+			}
+
+			if (placedBlock.model) {
+				placed.push(placedBlock.model);
+			}
+		}
+
+		return { success: true, models: placed };
 	}
 
 	/** @deprecated Used only for a specific case, do not use & do not remove */

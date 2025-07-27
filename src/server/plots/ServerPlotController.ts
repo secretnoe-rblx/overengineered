@@ -35,7 +35,10 @@ export class ServerPlotController extends Component {
 			plot.getCenter(),
 			plot.bounds,
 		]);
-		this.blocks.initializeDelay(3, 6, 3);
+
+		if (game.PrivateServerOwnerId === 0) {
+			this.blocks.initializeDelay(3, 6, 3);
+		}
 
 		this.parent(di.resolveForeignClass(AutoPlotWelder, [this.blocks]));
 

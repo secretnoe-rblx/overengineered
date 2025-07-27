@@ -94,21 +94,14 @@ const read = {
 	},
 } as const;
 const place = {
-	blocksOnPlot: (
-		plot: BuildingPlot,
-		data: readonly LatestSerializedBlock[],
-		place: (plot: BuildingPlot, blockData: LatestSerializedBlock) => void,
-	) => {
-		data.forEach((blockData) => place(plot, blockData));
-	},
+	blocksOnPlot: (plot: BuildingPlot, data: readonly LatestSerializedBlock[]) => {
+		const deserializedData = data.map((blockData) =>
+			BlocksSerializer.serializedBlockToPlaceRequest(blockData, plot.origin),
+		);
 
-	blockOnPlotV3: (plot: BuildingPlot, blockData: LatestSerializedBlock) => {
-		const deserializedData = BlocksSerializer.serializedBlockToPlaceRequest(blockData, plot.origin);
-
-		const response = plot.placeOperation.execute(deserializedData);
+		const response = plot.multiPlaceOperation.execute(deserializedData);
 		if (!response.success) {
-			$err(`Could not place block ${blockData.id}: ${response.message}`);
-			return;
+			$err(`Could not place blocks: ${response.message}`);
 		}
 	},
 } as const;
@@ -1690,7 +1683,7 @@ export namespace BlocksSerializer {
 		$log(`Loading a slot using savev${data.version}`);
 
 		data = upgradeSave(data, blockList);
-		place.blocksOnPlot(plot, data.blocks as readonly LatestSerializedBlock[], place.blockOnPlotV3);
+		place.blocksOnPlot(plot, data.blocks as readonly LatestSerializedBlock[]);
 		return data.blocks.size();
 	}
 
