@@ -7,8 +7,8 @@ import {
 	S2CRemoteEvent,
 } from "engine/shared/event/PERemoteEvent";
 import { PlayerRank } from "engine/shared/PlayerRank";
-import type { SpawnPosition } from "client/modes/build/BuildingMode";
 import type { PlayerFeature } from "server/database/PlayerDatabase";
+import type { SpawnPosition } from "shared/SpawnPositions";
 
 declare global {
 	type BuildResponse = Response<{ readonly model: BlockModel }>;

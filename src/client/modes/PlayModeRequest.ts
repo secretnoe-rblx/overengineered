@@ -3,7 +3,7 @@ import { SoundController } from "client/controller/SoundController";
 import { LogControl } from "client/gui/static/LogControl";
 import { Colors } from "shared/Colors";
 import { CustomRemotes } from "shared/Remotes";
-import type { SpawnPosition } from "client/modes/build/BuildingMode";
+import type { SpawnPosition } from "shared/SpawnPositions";
 
 let changing = false;
 export const requestMode = (mode: PlayModes, spawnPosition?: SpawnPosition) => {

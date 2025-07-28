@@ -6,9 +6,9 @@ import { PlayerUtils } from "engine/shared/utils/PlayerUtils";
 import { BuildMode } from "server/modes/BuildMode";
 import { RideMode } from "server/modes/RideMode";
 import { CustomRemotes } from "shared/Remotes";
-import type { SpawnPosition } from "client/modes/build/BuildingMode";
 import type { GameHostBuilder } from "engine/shared/GameHostBuilder";
 import type { PlayModeBase } from "server/modes/PlayModeBase";
+import type { SpawnPosition } from "shared/SpawnPositions";
 
 @injectable
 export class PlayModeController extends HostedService {

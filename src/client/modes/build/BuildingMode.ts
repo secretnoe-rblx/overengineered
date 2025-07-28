@@ -30,6 +30,7 @@ import { Objects } from "engine/shared/fixes/Objects";
 import { BlockCreation } from "shared/blocks/BlockCreation";
 import { BlockManager } from "shared/building/BlockManager";
 import { SharedRagdoll } from "shared/SharedRagdoll";
+import { spawnPositions } from "shared/SpawnPositions";
 import type { SwitchControlDefinition } from "client/gui/controls/SwitchControl";
 import type { MainScreenLayout } from "client/gui/MainScreenLayout";
 import type { PopupController } from "client/gui/PopupController";
@@ -38,6 +39,7 @@ import type { Theme } from "client/Theme";
 import type { ToolBase } from "client/tools/ToolBase";
 import type { ToolController } from "client/tools/ToolController";
 import type { SharedPlot } from "shared/building/SharedPlot";
+import type { SpawnPosition } from "shared/SpawnPositions";
 
 declare global {
 	type MirrorMode = {
@@ -84,16 +86,7 @@ export class BuildingModeScene extends Scene {
 			gui.TextLabel.Text = "CHOOSE SPAWN";
 
 			const contol = this.parent(new Control(gui));
-			const sw = contol.parent(
-				new SwitchControl(gui.Control.Switch.Control, [
-					["plot", { name: "Plot" }],
-					["water1", { name: "Water 1" }],
-					["water2", { name: "Water 2" }],
-					["space", { name: "Space" }],
-					["helipad", { name: "Helipad" }],
-					["idk", { name: "idk" }],
-				] satisfies [SpawnPosition, unknown][]),
-			);
+			const sw = contol.parent(new SwitchControl(gui.Control.Switch.Control, spawnPositions));
 			sw.value.set(mode.spawnPosition.get());
 			sw.value.subscribe((v) => mode.spawnPosition.set(v));
 
@@ -132,7 +125,6 @@ export class BuildingModeScene extends Scene {
 }
 
 export type EditMode = "global" | "local";
-export type SpawnPosition = "plot" | "water1" | "water2" | "space" | "helipad" | "idk";
 
 @injectable
 export class BuildingMode extends PlayMode {

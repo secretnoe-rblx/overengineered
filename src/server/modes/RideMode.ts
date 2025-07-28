@@ -5,11 +5,12 @@ import { BlockManager } from "shared/building/BlockManager";
 import { BlocksSerializer } from "shared/building/BlocksSerializer";
 import { CustomRemotes } from "shared/Remotes";
 import { SlotsMeta } from "shared/SlotsMeta";
-import type { SpawnPosition } from "client/modes/build/BuildingMode";
+import { spawnPositionsKeyed } from "shared/SpawnPositions";
 import type { PlayerDatabase } from "server/database/PlayerDatabase";
 import type { SlotDatabase } from "server/database/SlotDatabase";
 import type { PlayModeBase } from "server/modes/PlayModeBase";
 import type { ServerPlayersController } from "server/ServerPlayersController";
+import type { SpawnPosition } from "shared/SpawnPositions";
 
 @injectable
 export class RideMode implements PlayModeBase {
@@ -80,16 +81,8 @@ export class RideMode implements PlayModeBase {
 	}
 
 	private rideStart(player: Player, pos: SpawnPosition): Response {
-		const positions: { readonly [k in SpawnPosition]: CFrame | undefined } = {
-			plot: undefined,
-			water1: new CFrame(769, -16345.559, 1269.5),
-			water2: new CFrame(-101, -16411.887, 3045),
-			space: new CFrame(50, 26411, 894),
-			helipad: new CFrame(901, -14871.997, -798),
-			idk: new CFrame(-14101, -16411.887, 35045),
-		};
 		print("spawning at ", pos);
-		const spawnPosition = positions[pos];
+		const spawnPosition = spawnPositionsKeyed[pos];
 
 		const controller = this.serverControllers.controllers.get(player.UserId)?.plotController;
 		if (!controller) throw "what";
