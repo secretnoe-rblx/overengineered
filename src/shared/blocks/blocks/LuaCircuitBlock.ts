@@ -5,6 +5,7 @@ import { BlockLogic } from "shared/blockLogic/BlockLogic";
 import { BlockCreation } from "shared/blocks/BlockCreation";
 import type { LogControl } from "client/gui/static/LogControl";
 import type { BlockLogicArgs, BlockLogicFullBothDefinitions } from "shared/blockLogic/BlockLogic";
+import type { BlockLogicTypes } from "shared/blockLogic/BlockLogicTypes";
 import type { BlockBuilder } from "shared/blocks/Block";
 
 const vLuau = require(ReplicatedStorage.vLuau) as {
@@ -195,6 +196,14 @@ class Logic extends BlockLogic<typeof definition> {
 			},
 		};
 
+		const validOutputTypes: { readonly [k in string]?: keyof BlockLogicTypes.Primitives } = {
+			number: "number",
+			Vector3: "vector3",
+			Color3: "color",
+			string: "string",
+			boolean: "bool",
+		};
+
 		const baseEnv = {
 			print: (...args: unknown[]) => {
 				for (let i = 0; i < args.size(); i++) {
@@ -248,7 +257,9 @@ class Logic extends BlockLogic<typeof definition> {
 			onTick: (func: (dt: number, tick: number) => void): void => {
 				this.onTicc((ctx) => {
 					try {
-						func(ctx.dt, ctx.tick);
+						const c = coroutine.create(() => func(ctx.dt, ctx.tick));
+						coroutine.resume(c);
+						coroutines.push(c);
 					} catch (err) {
 						showErr(err);
 						this.close();
@@ -268,17 +279,8 @@ class Logic extends BlockLogic<typeof definition> {
 					error("Output index must be between 1 and 8", 2);
 				}
 
-				const retType = typeIs(value, "number")
-					? "number"
-					: typeIs(value, "Vector3")
-						? "Vector3"
-						: typeIs(value, "string")
-							? "string"
-							: typeIs(value, "boolean")
-								? "bool"
-								: "unknown";
-
-				if (retType === "unknown") {
+				const retType = validOutputTypes[typeOf(value)];
+				if (!retType) {
 					error(`Invalid object type ${typeOf(value)}`, 2);
 				}
 
@@ -307,18 +309,24 @@ class Logic extends BlockLogic<typeof definition> {
 			});
 		};
 
-		let t: thread | undefined;
+		const coroutines: thread[] = [];
+		const removedCoroutines: thread[] = [];
 		this.onTicc((ctx) => {
-			if (!t) return;
-			if (coroutine.status(t) === "dead") {
-				t = undefined;
-				return;
-			}
+			for (const t of coroutines) {
+				if (coroutine.status(t) === "dead") {
+					removedCoroutines.push(t);
+					continue;
+				}
 
-			const [success, data] = coroutine.resume(t, ctx.dt, ctx.tick);
-			if (!success) {
-				showErr(data);
+				const [success, data] = coroutine.resume(t, ctx.dt, ctx.tick);
+				if (!success) {
+					showErr(data);
+				}
 			}
+			for (const removed of removedCoroutines) {
+				coroutines.remove(coroutines.indexOf(removed));
+			}
+			removedCoroutines.clear();
 		});
 
 		this.onkFirstInputs(["code"], ({ code }) => {
@@ -334,7 +342,7 @@ class Logic extends BlockLogic<typeof definition> {
 			}
 
 			try {
-				t = coroutine.create(bytecode);
+				coroutines.push(coroutine.create(bytecode));
 			} catch (err) {
 				showErr(err);
 			}
