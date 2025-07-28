@@ -261,7 +261,9 @@ class Logic extends BlockLogic<typeof definition> {
 				this.onTicc((ctx) => {
 					try {
 						const c = coroutine.create(() => func(ctx.dt, ctx.tick));
-						coroutine.resume(c);
+						const [success, data] = coroutine.resume(c);
+						if (!success) throw data;
+
 						coroutines.push(c);
 					} catch (err) {
 						showErr(err);
