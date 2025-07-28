@@ -18,6 +18,7 @@ const definitionPart = {
 		bool: { config: false },
 		string: { config: "" },
 		vector3: { config: Vector3.zero },
+		color: { config: new Color3(0, 0, 0) },
 	},
 	configHidden: true,
 };
@@ -269,7 +270,7 @@ class Logic extends BlockLogic<typeof definition> {
 				});
 			},
 
-			getInput: (input: number): string | number | boolean | Vector3 | undefined => {
+			getInput: (input: number): string | number | boolean | Vector3 | Color3 | undefined => {
 				if (input < 1 || input > 8) {
 					error("Output index must be between 1 and 8", 2);
 				}
