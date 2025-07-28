@@ -251,11 +251,6 @@ class Logic extends BlockLogic<typeof definition> {
 			utf8,
 			next,
 			select,
-			setmetatable,
-			getmetatable,
-			rawget,
-			rawset,
-			rawequal,
 
 			onTick: (func: (dt: number, tick: number) => void): void => {
 				this.onTicc((ctx) => {
