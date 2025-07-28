@@ -235,6 +235,8 @@ class Logic extends BlockLogic<typeof definition> {
 			tonumber,
 			pairs,
 			ipairs,
+			type,
+			typeOf,
 			math,
 			string,
 			bit32,
