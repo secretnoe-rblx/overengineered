@@ -58,7 +58,7 @@ class Logic extends BlockLogic<typeof definition> {
 				this.output.angle3d.set("vector3", new Vector3(x, y, z));
 				this.output.position3d.set(
 					"vector3",
-					Players.LocalPlayer.GetMouse()!.Hit.Position.add(new Vector3(0, GameDefinitions.HEIGHT_OFFSET, 0)),
+					Players.LocalPlayer.GetMouse()!.Hit.Position.sub(new Vector3(0, GameDefinitions.HEIGHT_OFFSET, 0)),
 				);
 			}
 		});
