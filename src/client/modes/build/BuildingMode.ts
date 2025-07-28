@@ -90,6 +90,8 @@ export class BuildingModeScene extends Scene {
 			sw.value.set(mode.spawnPosition.get());
 			sw.value.subscribe((v) => mode.spawnPosition.set(v));
 
+			this.onDisable(() => contol.hide());
+
 			const runtp = this.parent(mainScreen.top.main.addButton("Teleport", { text: "?" }))
 				.addButtonAction(() => contol.setVisibleAndEnabled(!contol.isInstanceVisible()))
 				.subscribeVisibilityFrom({ main_enabled: this.enabledState });
