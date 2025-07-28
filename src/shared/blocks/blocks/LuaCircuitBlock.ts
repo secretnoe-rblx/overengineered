@@ -150,6 +150,11 @@ class Logic extends BlockLogic<typeof definition> {
 			[8]: this.initializeInputCache("input8"),
 		};
 
+		const showErr = (err: unknown) => {
+			log(`Runtime error: ${tostring(err)}`, "error");
+			blinkRedLEDLoop();
+		};
+
 		const log = function (text: string, level: "info" | "warn" | "error"): void {
 			if (level === "warn") {
 				warn("[Lua Circuit]", text);
@@ -161,6 +166,33 @@ class Logic extends BlockLogic<typeof definition> {
 				print("[Lua Circuit]", text);
 				logControl?.addLine(text);
 			}
+		};
+
+		const tasklib = {
+			wait: (duration?: number) => {
+				const start = time();
+				duration = math.max(duration ?? 0, 0);
+
+				const endTime = start + duration;
+				let current = start;
+
+				while (endTime >= current) {
+					coroutine.yield();
+					current = time();
+				}
+
+				return current - start;
+			},
+			waitTicks: (duration?: number) => {
+				const start = time();
+				duration = math.max(duration ?? 1, 1);
+
+				for (let i = 0; i < duration; i++) {
+					coroutine.yield();
+				}
+
+				return time() - start;
+			},
 		};
 
 		const baseEnv = {
@@ -185,6 +217,7 @@ class Logic extends BlockLogic<typeof definition> {
 
 				log((args as defined[]).join(" "), "error");
 			},
+			task: tasklib,
 			table,
 			assert: (condition: boolean, message?: string | undefined) => assert(condition, message),
 			pcall,
@@ -217,9 +250,8 @@ class Logic extends BlockLogic<typeof definition> {
 					try {
 						func(ctx.dt, ctx.tick);
 					} catch (err) {
-						log(`Ticking error: ${tostring(err)}`, "error");
+						showErr(err);
 						this.close();
-						blinkRedLEDLoop();
 					}
 				});
 			},
@@ -275,6 +307,20 @@ class Logic extends BlockLogic<typeof definition> {
 			});
 		};
 
+		let t: thread | undefined;
+		this.onTicc((ctx) => {
+			if (!t) return;
+			if (coroutine.status(t) === "dead") {
+				t = undefined;
+				return;
+			}
+
+			const [success, data] = coroutine.resume(t, ctx.dt, ctx.tick);
+			if (!success) {
+				showErr(data);
+			}
+		});
+
 		this.onkFirstInputs(["code"], ({ code }) => {
 			let bytecode: () => void;
 
@@ -288,10 +334,9 @@ class Logic extends BlockLogic<typeof definition> {
 			}
 
 			try {
-				bytecode();
+				t = coroutine.create(bytecode);
 			} catch (err) {
-				log(`Runtime error: ${tostring(err)}`, "error");
-				blinkRedLEDLoop();
+				showErr(err);
 			}
 		});
 	}
