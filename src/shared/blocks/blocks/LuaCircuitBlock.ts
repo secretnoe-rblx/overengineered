@@ -236,7 +236,7 @@ class Logic extends BlockLogic<typeof definition> {
 			pairs,
 			ipairs,
 			type,
-			typeOf: (obj: unknown) => typeOf(obj),
+			typeof: (obj: unknown) => typeOf(obj),
 			math,
 			string,
 			bit32,
