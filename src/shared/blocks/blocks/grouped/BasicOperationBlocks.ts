@@ -400,25 +400,37 @@ const maths = {
 		displayName: "Floor",
 		description: "Rounds down the input number",
 		modelSource: autoModel("GenericLogicBlockPrefab", "FLOOR", categories.math),
-		logic: logic(defs.num1_num, ({ value }) => ({
-			result: { type: "number", value: math.floor(value) },
-		})),
+		logic: logic(defs.numOrVec1_numOrVec, ({ value }) => {
+			if (typeIs(value, "number")) {
+				return { result: { type: "number", value: math.floor(value) } };
+			}
+
+			return { result: { type: "vector3", value: value.apply(math.floor) } };
+		}),
 	},
 	ceil: {
 		displayName: "Ceil",
 		description: "Rounds up the input number",
 		modelSource: autoModel("GenericLogicBlockPrefab", "CEIL", categories.math),
-		logic: logic(defs.num1_num, ({ value }) => ({
-			result: { type: "number", value: math.ceil(value) },
-		})),
+		logic: logic(defs.numOrVec1_numOrVec, ({ value }) => {
+			if (typeIs(value, "number")) {
+				return { result: { type: "number", value: math.ceil(value) } };
+			}
+
+			return { result: { type: "vector3", value: value.apply(math.ceil) } };
+		}),
 	},
 	sign: {
 		displayName: "Sign",
 		description: "Returns -1 if the value is under 0, 1 if greater than zero, and 0 if value is zero",
 		modelSource: autoModel("GenericLogicBlockPrefab", "SIGN", categories.math),
-		logic: logic(defs.num1_num, ({ value }) => ({
-			result: { type: "number", value: math.sign(value) },
-		})),
+		logic: logic(defs.numOrVec1_numOrVec, ({ value }) => {
+			if (typeIs(value, "number")) {
+				return { result: { type: "number", value: math.sign(value) } };
+			}
+
+			return { result: { type: "vector3", value: value.apply(math.sign) } };
+		}),
 	},
 	sqrt: {
 		displayName: "Square Root",
@@ -688,23 +700,80 @@ const maths = {
 			{
 				inputOrder: ["value", "min", "max"],
 				input: {
-					value: defpartsf.number("Value"),
-					min: defpartsf.number("Min"),
-					max: defpartsf.number("Max"),
+					value: {
+						displayName: "Value",
+						types: {
+							number: { config: 0 },
+							vector3: { config: Vector3.zero },
+						},
+						group: "0",
+					},
+					min: {
+						displayName: "Min",
+						types: {
+							number: { config: 0 },
+							vector3: { config: Vector3.zero },
+						},
+						group: "0",
+					},
+					max: {
+						displayName: "Max",
+						types: {
+							number: { config: 0 },
+							vector3: { config: Vector3.zero },
+						},
+						group: "0",
+					},
 				},
 				output: {
 					result: {
 						displayName: "Result",
-						types: ["number"],
+						types: ["number", "vector3"],
+						group: "0",
 					},
 				},
 			},
 			({ value, min, max }) => {
-				if (min > max) {
-					return BlockLogicValueResults.garbage;
+				if (typeIs(min, "number") && typeIs(max, "number")) {
+					if (min > max) {
+						return BlockLogicValueResults.garbage;
+					}
+				} else if (typeIs(min, "Vector3") && typeIs(max, "Vector3")) {
+					if (min.X > max.X || min.Y > max.Y || min.Z > max.Z) {
+						return BlockLogicValueResults.garbage;
+					}
+				} else if (typeIs(min, "number") && typeIs(max, "Vector3")) {
+					if (min > max.X || min > max.Y || min > max.Z) {
+						return BlockLogicValueResults.garbage;
+					}
+				} else if (typeIs(min, "Vector3") && typeIs(max, "number")) {
+					if (min.X > max || min.Y > max || min.Z > max) {
+						return BlockLogicValueResults.garbage;
+					}
 				}
 
-				return { result: { type: "number", value: math.clamp(value, min, max) } };
+				if (typeIs(value, "number")) {
+					if (!typeIs(min, "number") || !typeIs(max, "number")) {
+						return BlockLogicValueResults.garbage;
+					}
+
+					return { result: { type: "number", value: math.clamp(value, min, max) } };
+				}
+
+				let ret = value;
+				if (typeIs(min, "number")) {
+					ret = ret.apply((n) => math.max(n, min));
+				} else {
+					ret = ret.apply((n, ax) => math.max(n, min[ax]));
+				}
+
+				if (typeIs(max, "number")) {
+					ret = ret.apply((n) => math.min(n, max));
+				} else {
+					ret = ret.apply((n, ax) => math.min(n, max[ax]));
+				}
+
+				return { result: { type: "vector3", value: ret } };
 			},
 		),
 	},
@@ -717,18 +786,39 @@ const maths = {
 			{
 				inputOrder: ["value", "min"],
 				input: {
-					value: defpartsf.number("Value"),
-					min: defpartsf.number("Minimum"),
+					value: {
+						displayName: "Value",
+						types: { number: { config: 0 }, vector3: { config: Vector3.zero } },
+						group: "0",
+					},
+					min: {
+						displayName: "Minimum",
+						types: { number: { config: 0 }, vector3: { config: Vector3.zero } },
+						group: "0",
+					},
 				},
 				output: {
 					result: {
 						displayName: "Result",
-						types: ["number"],
+						types: ["number", "vector3"],
+						group: "0",
 					},
 				},
 			},
 			({ value, min }) => {
-				return { result: { type: "number", value: math.min(value, min) } };
+				if (typeIs(value, "number") && typeIs(min, "number")) {
+					return { result: { type: "number", value: math.min(value, min) } };
+				}
+
+				if (typeIs(value, "Vector3") && typeIs(min, "Vector3")) {
+					return { result: { type: "vector3", value: value.apply((n, ax) => math.min(n, min[ax])) } };
+				}
+
+				if (typeIs(value, "Vector3") && typeIs(min, "number")) {
+					return { result: { type: "vector3", value: value.apply((n) => math.min(n, min)) } };
+				}
+
+				return BlockLogicValueResults.garbage;
 			},
 		),
 	},
@@ -740,18 +830,39 @@ const maths = {
 			{
 				inputOrder: ["value", "max"],
 				input: {
-					value: defpartsf.number("Value"),
-					max: defpartsf.number("Maximum"),
+					value: {
+						displayName: "Value",
+						types: { number: { config: 0 }, vector3: { config: Vector3.zero } },
+						group: "0",
+					},
+					max: {
+						displayName: "Maximum",
+						types: { number: { config: 0 }, vector3: { config: Vector3.zero } },
+						group: "0",
+					},
 				},
 				output: {
 					result: {
 						displayName: "Result",
-						types: ["number"],
+						types: ["number", "vector3"],
+						group: "0",
 					},
 				},
 			},
 			({ value, max }) => {
-				return { result: { type: "number", value: math.max(value, max) } };
+				if (typeIs(value, "number") && typeIs(max, "number")) {
+					return { result: { type: "number", value: math.max(value, max) } };
+				}
+
+				if (typeIs(value, "Vector3") && typeIs(max, "Vector3")) {
+					return { result: { type: "vector3", value: value.apply((n, ax) => math.max(n, max[ax])) } };
+				}
+
+				if (typeIs(value, "Vector3") && typeIs(max, "number")) {
+					return { result: { type: "vector3", value: value.apply((n) => math.max(n, max)) } };
+				}
+
+				return BlockLogicValueResults.garbage;
 			},
 		),
 	},

@@ -1,6 +1,5 @@
 import { InstanceBlockLogic } from "shared/blockLogic/BlockLogic";
 import { BlockLogicValueResults } from "shared/blockLogic/BlockLogicValueStorage";
-import { BlockConfigDefinitions } from "shared/blocks/BlockConfigDefinitions";
 import { BlockCreation } from "shared/blocks/BlockCreation";
 import type { BlockLogicFullBothDefinitions, InstanceBlockLogicArgs } from "shared/blockLogic/BlockLogic";
 import type { BlockBuilder } from "shared/blocks/Block";
@@ -8,13 +7,28 @@ import type { BlockBuilder } from "shared/blocks/Block";
 const definition = {
 	inputOrder: ["min", "max"],
 	input: {
-		min: { displayName: "Min", types: BlockConfigDefinitions.number },
-		max: { displayName: "Max", types: { number: { config: 1 } } },
+		min: {
+			displayName: "Min",
+			types: {
+				number: { config: 0 },
+				vector3: { config: Vector3.zero },
+			},
+			group: "0",
+		},
+		max: {
+			displayName: "Max",
+			types: {
+				number: { config: 1 },
+				vector3: { config: Vector3.one },
+			},
+			group: "0",
+		},
 	},
 	output: {
 		result: {
 			displayName: "Result",
-			types: ["number"],
+			types: ["number", "vector3"],
+			group: "0",
 		},
 	},
 } satisfies BlockLogicFullBothDefinitions;
@@ -25,12 +39,28 @@ class Logic extends InstanceBlockLogic<typeof definition> {
 		super(definition, block);
 
 		this.onAlwaysInputs(({ min, max }) => {
-			if (max <= min) {
-				this.disableAndBurn();
-				return BlockLogicValueResults.garbage;
-			}
+			if (typeIs(min, "number") && typeIs(max, "number")) {
+				if (max <= min) {
+					this.disableAndBurn();
+					return BlockLogicValueResults.garbage;
+				}
 
-			this.output.result.set("number", math.random() * (max - min) + min);
+				this.output.result.set("number", math.random() * (max - min) + min);
+			} else if (typeIs(min, "Vector3") && typeIs(max, "Vector3")) {
+				if (max.X <= min.X || max.Y <= min.Y || max.Z <= min.Z) {
+					this.disableAndBurn();
+					return BlockLogicValueResults.garbage;
+				}
+
+				this.output.result.set(
+					"vector3",
+					new Vector3(
+						math.random() * (max.X - min.X) + min.X,
+						math.random() * (max.Y - min.Y) + min.Y,
+						math.random() * (max.Z - min.Z) + min.Z,
+					),
+				);
+			}
 		});
 	}
 }
