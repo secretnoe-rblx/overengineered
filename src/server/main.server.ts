@@ -7,17 +7,6 @@ if (!RunService.IsStudio()) {
 	}
 }
 
-import { Secrets } from "engine/server/Secrets";
-
-// API Secrets
-Secrets.addDevelopmentSecret(
-	"discord_webhook",
-	"https://webhook.lewisakura.moe/api/webhooks/1197990614671822999/kTKPwZN1p9sJQYLw7L4-jO3Au2LH6ffXxtJjNoLTZljuScGTpaVr9-hgVmGoq08IcfAV/queue",
-);
-Secrets.addDevelopmentSecret("api_token", "literal:REDACTED_TOKEN");
-Secrets.addDevelopmentSecret("logging_token", "literal:REDACTED_TOKEN");
-Secrets.addDevelopmentSecret("join_mode_key", "a860fbb49af609eec793fdf0b34e2951d95dd5b82dbd862f37f7fbdd59bb8657");
-
 import { RemoteEvents } from "shared/RemoteEvents";
 import { SandboxGame } from "server/SandboxGame";
 import { PlasmaProjectile } from "shared/weaponProjectiles/PlasmaProjectileLogic";

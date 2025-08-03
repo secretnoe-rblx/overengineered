@@ -1,15 +1,14 @@
 import { ContentProvider, Players, ReplicatedStorage, RunService, Workspace } from "@rbxts/services";
+import { IntegrityChecker } from "anywaymachines/client/integrity/IntegrityChecker";
 import { LoadingController } from "client/controller/LoadingController";
 import { BSOD } from "client/gui/BSOD";
 import { Interface } from "client/gui/Interface";
-import { IntegrityChecker } from "client/integrity/IntegrityChecker";
 import { SandboxGame } from "client/SandboxGame";
 import { LocalPlayer } from "engine/client/LocalPlayer";
 import { Instances } from "engine/shared/fixes/Instances";
 import { GameHostBuilder } from "engine/shared/GameHostBuilder";
 import { gameInfo } from "shared/GameInfo";
 
-// new IntegrityChecker();
 new IntegrityChecker();
 
 LocalPlayer.character.waitOnceFor(

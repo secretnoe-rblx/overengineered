@@ -1,15 +1,13 @@
-import { DataStoreService, RunService, Workspace } from "@rbxts/services";
+import { DataStoreService, ServerScriptService, Workspace } from "@rbxts/services";
 // import { BadgeController } from "server/BadgeController";
-import { BackupBackedDatabaseBackend } from "engine/server/backend/BackupBackedDatabaseBackend";
+
+import { DataStoreDatabaseBackend } from "engine/server/backend/DataStoreDatabaseBackend";
 import { BaseGame } from "server/BaseGame";
 import { ServerBlockLogicController } from "server/blocks/ServerBlockLogicController";
-import { ExternalDatabaseBackendPlayers, ExternalDatabaseBackendSlots } from "server/database/ExternalDatabaseBackend";
 import { PlayerDatabase } from "server/database/PlayerDatabase";
 import { SlotDatabase } from "server/database/SlotDatabase";
-import { IntegrityCheckerServer } from "server/IntegrityCheckerServer";
 import { PlayModeController as PlayModeController } from "server/modes/PlayModeController";
 import { UnreliableRemoteController } from "server/network/event/UnreliableRemoteHandler";
-import { NetworkLogging } from "server/network/NetworkLogging";
 import { ServerPlots } from "server/plots/ServerPlots";
 import { RagdollController } from "server/RagdollController";
 import { ServerEffectCreator } from "server/ServerEffectCreator";
@@ -29,39 +27,22 @@ export namespace SandboxGame {
 		}
 
 		BaseGame.initialize(builder);
-		builder.services.registerService(NetworkLogging);
-		builder.services.registerService(IntegrityCheckerServer);
 
-		// FIXME: Walkaround proxy is down, should we set up our own?
-		// builder.services.registerService(DiscordLogging).withArgs([
-		// 	{
-		// 		footerText:
-		// 			`🔨 ${GameDefinitions.isTestPlace() ? "⚠️ Test" : ""} Build ${game.PlaceVersion}` +
-		// 			(game.PrivateServerOwnerId !== 0 ? ", Private Server" : "") +
-		// 			` (${game.JobId.sub(game.JobId.size() - 4)})`,
-		// 	},
-		// ]);
-
-		builder.services
-			.registerSingletonClass(PlayerDatabase) //
-			.withArgs([
-				RunService.IsStudio()
-					? new ExternalDatabaseBackendPlayers()
-					: new BackupBackedDatabaseBackend(
-							new ExternalDatabaseBackendPlayers(),
-							DataStoreService.GetDataStore("players-bkp"),
-						),
-			]);
-		builder.services
-			.registerSingletonClass(SlotDatabase) //
-			.withArgs([
-				RunService.IsStudio()
-					? new ExternalDatabaseBackendSlots()
-					: new BackupBackedDatabaseBackend(
-							new ExternalDatabaseBackendSlots(),
-							DataStoreService.GetDataStore("slots-bkp"),
-						),
-			]);
+		// private anywaymachines services
+		const awm = ServerScriptService.FindFirstChild("anywaymachines")?.FindFirstChild("SandboxGame") as
+			| ModuleScript
+			| undefined;
+		if (awm) {
+			print("amongus, awm found");
+			(require(awm) as { SandboxGame: { init: (builder: GameHostBuilder) => void } }).SandboxGame.init(builder);
+		} else {
+			builder.services
+				.registerSingletonClass(PlayerDatabase) //
+				.withArgs([new DataStoreDatabaseBackend(DataStoreService.GetDataStore("players-bkp"))]);
+			builder.services
+				.registerSingletonClass(SlotDatabase) //
+				.withArgs([new DataStoreDatabaseBackend(DataStoreService.GetDataStore("slots-bkp"))]);
+		}
 
 		builder.services.registerService(ServerPlayersController);
 

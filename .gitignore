@@ -1,6 +1,6 @@
 /node_modules
 /out
-/rbxts-transformer-macros/out
+/src/engine/transformer/out
 /include
 *.tsbuildinfo
 *.lock

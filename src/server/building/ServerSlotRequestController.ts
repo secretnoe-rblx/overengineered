@@ -1,5 +1,5 @@
 import { Component } from "engine/shared/component/Component";
-import { ExternalDatabaseBackendSlots } from "server/database/ExternalDatabaseBackend";
+import { ExternalDatabaseBackendSlots } from "anywaymachines/server/database/ExternalDatabaseBackend";
 import { BlocksSerializer } from "shared/building/BlocksSerializer";
 import { SlotsMeta } from "shared/SlotsMeta";
 import type { PlayerDatabase } from "server/database/PlayerDatabase";
