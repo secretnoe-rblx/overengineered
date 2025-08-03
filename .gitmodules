@@ -1,3 +1,4 @@
-[submodule "src/engine"]
-	path = src/engine
-	url = https://github.com/anywaymachines/engine
+# Private overengineered services like Database, Integrity checker and more
+[submodule "src/anywaymachines"]
+	path = src/anywaymachines
+	url = https://github.com/anywaymachines/overengineered-services
