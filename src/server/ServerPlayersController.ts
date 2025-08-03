@@ -1,4 +1,4 @@
-import { Players, ServerStorage, TeleportService } from "@rbxts/services";
+import { Players, ServerStorage } from "@rbxts/services";
 import { ComponentKeyedChildren } from "engine/shared/component/ComponentKeyedChildren";
 import { HostedService } from "engine/shared/di/HostedService";
 import { Lock } from "engine/shared/fixes/Lock";
@@ -10,7 +10,6 @@ import { PlayerBanned } from "server/database/PlayerDatabase";
 import { asPlayerId } from "server/PlayerId";
 import { ServerPlayerController } from "server/ServerPlayerController";
 import { ServerPlayerDataRemotesController } from "server/ServerPlayerDataRemotesController";
-import { GameDefinitions } from "shared/data/GameDefinitions";
 import { CustomRemotes } from "shared/Remotes";
 import type { PlayerDatabase } from "server/database/PlayerDatabase";
 import type { SlotDatabase } from "server/database/SlotDatabase";
@@ -110,18 +109,6 @@ export class ServerPlayersController extends HostedService {
 				let data;
 				try {
 					data = players.get(player.UserId) ?? {};
-
-					if (
-						!GameDefinitions.isTesting &&
-						(data as { placeId?: number }).placeId &&
-						(data as { placeId?: number }).placeId !== game.PlaceId
-					) {
-						const placeId = (data! as { placeId: number }).placeId;
-						task.spawn(() => {
-							TeleportService.TeleportAsync(placeId, [player]);
-						});
-					}
-					(data as { placeId?: number }).placeId = undefined;
 
 					return {
 						success: true,
