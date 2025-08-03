@@ -42,11 +42,23 @@ class Logic extends BlockLogic<typeof definition> {
 	constructor(block: BlockLogicArgs) {
 		super(definition, block);
 
+		let wheel = 0;
+
+		this.event.subInput((ih) => {
+			ih.onInputBegan((input) => {
+				if (input.UserInputType === Enum.UserInputType.MouseWheel) {
+					wheel = input.Position.Z;
+				}
+			});
+		});
+
 		this.event.subscribe(RunService.PostSimulation, () => {
 			const mousePos = UserInputService.GetMouseLocation();
 			const relaPos = mousePos.div(Workspace.CurrentCamera!.ViewportSize);
 
-			this.output.position.set("vector3", new Vector3(relaPos.X, relaPos.Y, 0));
+			this.output.position.set("vector3", new Vector3(relaPos.X, relaPos.Y, wheel));
+			wheel = 0;
+
 			this.output.angle.set("number", math.deg(math.atan2(-(relaPos.Y - 0.5), relaPos.X - 0.5)));
 
 			const camera = Workspace.CurrentCamera;
