@@ -1,6 +1,8 @@
+import { Players, ReplicatedStorage, RunService, Workspace } from "@rbxts/services";
+Workspace.WaitForChild("Assets")!.Parent = ReplicatedStorage;
+
 /* eslint-disable import/order */
 import { TestFramework } from "engine/shared/TestFramework";
-import { Players, RunService, Workspace } from "@rbxts/services";
 if (!RunService.IsStudio()) {
 	for (const testscript of TestFramework.findAllTestScripts()) {
 		testscript.Destroy();
