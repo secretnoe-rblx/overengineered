@@ -36,7 +36,27 @@ class Logic extends BlockLogic<typeof definition> {
 		if (!RunService.IsClient()) return;
 
 		const keyToStr = (key: KeyCode) => {
+			if (key === "Zero") return "0";
+			if (key === "One") return "1";
+			if (key === "Two") return "2";
+			if (key === "Three") return "3";
+			if (key === "Four") return "4";
+			if (key === "Five") return "5";
+			if (key === "Six") return "6";
+			if (key === "Seven") return "7";
+			if (key === "Eight") return "8";
+			if (key === "Nine") return "9";
+
 			if (key === "KeypadZero") return "0";
+			if (key === "KeypadOne") return "1";
+			if (key === "KeypadTwo") return "2";
+			if (key === "KeypadThree") return "3";
+			if (key === "KeypadFour") return "4";
+			if (key === "KeypadFive") return "5";
+			if (key === "KeypadSix") return "6";
+			if (key === "KeypadSeven") return "7";
+			if (key === "KeypadEight") return "8";
+			if (key === "KeypadNine") return "9";
 
 			return key;
 		};
