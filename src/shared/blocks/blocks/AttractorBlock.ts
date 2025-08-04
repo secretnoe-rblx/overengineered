@@ -139,6 +139,10 @@ export const AttractorBlock = {
 	displayName: "Attractor",
 	description: "Magnet but attracts your every block ever",
 
+	search: {
+		partialAliases: ["magnet"],
+	},
+
 	logic: { definition, ctor: Logic },
 	modelSource: { model: BlockCreation.Model.fFromAssets("magnet"), category: () => ["Movement", "Force"] },
 } as const satisfies BlockBuilder;

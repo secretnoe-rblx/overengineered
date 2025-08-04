@@ -168,5 +168,8 @@ export const MagnetBlock = {
 	displayName: "Magnet",
 	description: "Block that attracts to different polarity magnets, repels from same. Only for your blocks, though",
 
+	search: {
+		partialAliases: ["attractor"],
+	},
 	logic: { definition, ctor: Logic },
 } as const satisfies BlockBuilder;
