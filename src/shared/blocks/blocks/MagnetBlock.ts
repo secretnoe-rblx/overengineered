@@ -89,11 +89,11 @@ RunService.PostSimulation.Connect((dt) => {
 				continue;
 			}
 
-			const strength2 = magnetj.getStrength() * magicNumber * dt;
-			if (strength2 === 0) continue;
-
 			const calculatedForce = calculateForce(magneti, magnetj);
 			if (!calculatedForce) continue;
+
+			const strength2 = magnetj.getStrength() * magicNumber * dt;
+			if (strength2 === 0) continue;
 
 			const appliedForce = calculatedForce.mul(strength1).add(calculatedForce.mul(strength2));
 			forcesApplied.set(magneti, (forcesApplied.get(magneti) ?? Vector3.zero).add(appliedForce));
