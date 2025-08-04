@@ -237,6 +237,19 @@ const cylinders = {
 		displayName: "Half Cylinder 2x2",
 		description: "Same as 1x2 half cylinder but wider and longer",
 	},
+
+	hollowcylinder: {
+		displayName: "Hollow Cylinder",
+		description: "A complicated cylinder",
+	},
+	hollowcylinderhalf: {
+		displayName: "Hollow Cylinder Half",
+		description: "Almost a complicated cylinder",
+	},
+	hollowcylinderquarter: {
+		displayName: "Hollow Cylinder Quarter",
+		description: "Not really a complicated cylinder",
+	},
 } as const satisfies BlockBuildersWithoutIdAndDefaults;
 
 const wedges = {
