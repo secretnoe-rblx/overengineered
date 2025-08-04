@@ -1,4 +1,4 @@
-import { RunService, UserInputService, Workspace } from "@rbxts/services";
+import { ReplicatedStorage, RunService, UserInputService, Workspace } from "@rbxts/services";
 import { Interface } from "client/gui/Interface";
 import { TooltipsHolder } from "client/gui/static/TooltipsControl";
 import { FloatingText } from "client/tools/additional/FloatingText";
@@ -23,7 +23,6 @@ import { Strings } from "engine/shared/fixes/String.propmacro";
 import { BlockManager } from "shared/building/BlockManager";
 import { SharedBuilding } from "shared/building/SharedBuilding";
 import { Colors } from "shared/Colors";
-import { ReplicatedAssets } from "shared/ReplicatedAssets";
 import type { MainScreenBottomLayer, MainScreenLayout } from "client/gui/MainScreenLayout";
 import type { ClientBuildingTypes } from "client/modes/build/ClientBuilding";
 import type { PlayerDataStorage } from "client/PlayerDataStorage";
@@ -31,24 +30,6 @@ import type { Theme } from "client/Theme";
 import type { Control } from "engine/client/gui/Control";
 import type { KeybindDefinition } from "engine/client/Keybinds";
 import type { ReadonlyObservableValue } from "engine/shared/event/ObservableValue";
-
-type EditHandles = BasePart & {
-	readonly SelectionBox: SelectionBox;
-	readonly Move: Instance & {
-		readonly XHandles: Handles;
-		readonly YHandles: Handles;
-		readonly ZHandles: Handles;
-	};
-	readonly Scale: Instance & {
-		readonly XHandles: Handles;
-		readonly YHandles: Handles;
-		readonly ZHandles: Handles;
-	};
-	readonly Rotate: Instance & {
-		readonly Center: BasePart;
-		readonly ArcHandles: ArcHandles;
-	};
-};
 
 interface EditingBlock {
 	readonly block: BlockModel;
@@ -260,7 +241,7 @@ const createButtonSwitchList = <K extends string>(
 @injectable
 class MoveComponent extends Component implements EditComponent {
 	constructor(
-		handles: EditHandles,
+		handles: typeof ReplicatedStorage.Assets.Helpers.EditHandles,
 		blocks: readonly EditingBlock[],
 		originalBB: BB,
 		grid: ReadonlyObservableValue<MoveGrid>,
@@ -337,9 +318,8 @@ class MoveComponent extends Component implements EditComponent {
 			});
 
 		const createVisualizer = () => {
-			const instance = ReplicatedAssets.get<{
-				MovementVisualizer: BasePart & { Decal: Decal };
-			}>().MovementVisualizer.Clone();
+			const instance = ReplicatedStorage.Assets.Helpers.MovementVisualizer.Clone();
+
 			instance.Decal.Transparency = 1;
 
 			const size = 500;
@@ -418,7 +398,7 @@ class MoveComponent extends Component implements EditComponent {
 @injectable
 class RotateComponent extends Component implements EditComponent {
 	constructor(
-		handles: EditHandles,
+		handles: typeof ReplicatedStorage.Assets.Helpers.EditHandles,
 		blocks: readonly EditingBlock[],
 		originalBB: BB,
 		grid: ReadonlyObservableValue<RotateGrid>,
@@ -511,7 +491,7 @@ class ScaleComponent extends Component implements EditComponent {
 	readonly error = new ObservableValue<string | undefined>(undefined);
 
 	constructor(
-		handles: EditHandles,
+		handles: typeof ReplicatedStorage.Assets.Helpers.EditHandles,
 		blocks: readonly EditingBlock[],
 		originalBB: BB,
 		grid: ReadonlyObservableValue<ScaleGrid>,
@@ -854,7 +834,7 @@ export class BlockEditor extends Component {
 			};
 		});
 
-		const handles = ReplicatedAssets.get<{ EditHandles: EditHandles }>().EditHandles.Clone();
+		const handles = ReplicatedStorage.Assets.Helpers.EditHandles.Clone();
 		handles.Parent = Interface.getPlayerGui();
 		ComponentInstance.init(this, handles);
 

@@ -33,7 +33,7 @@ class UnderwaterSoundEffect extends HostedService {
 
 		const underwaterEffectsCache: EqualizerSoundEffect[] = [];
 		const applyUnderwaterEffect = (sound: Sound) => {
-			const effect = ReplicatedStorage.Assets.Effects.Sounds.Effects.Underwater.Clone();
+			const effect = ReplicatedStorage.Assets.Sounds.Effects.Underwater.Clone();
 			effect.Parent = sound;
 			underwaterEffectsCache.push(effect);
 		};

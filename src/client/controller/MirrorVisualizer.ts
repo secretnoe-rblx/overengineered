@@ -13,7 +13,7 @@ export class MirrorVisualizer extends Component {
 
 		this.plot = plot;
 		this.mirrorMode = mirrorMode;
-		this.template = this.asTemplate(ReplicatedStorage.WaitForChild("Assets").WaitForChild("Mirror") as Part);
+		this.template = this.asTemplate(ReplicatedStorage.Assets.Helpers.Mirror);
 
 		this.event.subscribeObservable(this.mirrorMode, () => this.recreate(), true);
 		this.event.subscribeObservablePrev(this.plot, (plot, prev) => {

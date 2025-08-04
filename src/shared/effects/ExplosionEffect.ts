@@ -10,7 +10,7 @@ type Args = {
 };
 @injectable
 export class ExplosionEffect extends EffectBase<Args> {
-	readonly soundsFolder = ReplicatedStorage.Assets.Effects.Sounds.Explosion.GetChildren();
+	readonly soundsFolder = ReplicatedStorage.Assets.Sounds.Explosion.GetChildren();
 
 	constructor(@inject creator: EffectCreator) {
 		super(creator, "explosion_effect");

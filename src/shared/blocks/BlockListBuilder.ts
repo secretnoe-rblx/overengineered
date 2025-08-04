@@ -1,7 +1,6 @@
 import { RunService } from "@rbxts/services";
 import { C2S2CRemoteFunction } from "engine/shared/event/PERemoteEvent";
 import { BlockAssertions } from "shared/blocks/BlockAssertions";
-import { ReplicatedAssets } from "shared/ReplicatedAssets";
 import type { BlockBuilder } from "shared/blocks/Block";
 
 export namespace BlockListBuilder {
@@ -37,8 +36,16 @@ export namespace BlockListBuilder {
 		builders = builders.map(process);
 
 		if (RunService.IsServer()) {
-			type colboxPrefab = BasePart & { WeldConstraint: WeldConstraint };
-			const colboxPrefab = ReplicatedAssets.waitForAsset<colboxPrefab>("ColBoxExample");
+			const colbox = new Instance("Part") as Part & { readonly WeldConstraint: WeldConstraint };
+			colbox.CanCollide = false;
+			colbox.CanQuery = false;
+			colbox.Anchored = true;
+			colbox.Massless = true;
+			colbox.CollisionGroup = "ColBoxExclusive";
+			colbox.EnableFluidForces = false;
+
+			const weld = new Instance("WeldConstraint");
+			weld.Parent = colbox;
 
 			serverBuiltBlocks = asObject(
 				builders.mapToMap((b) => {
@@ -53,7 +60,7 @@ export namespace BlockListBuilder {
 					// add colboxes to single-part blocks for radar performance
 					const instncs = model?.GetChildren().filter((v) => !v.IsA("Folder"));
 					if (instncs.size() === 1) {
-						const cb = colboxPrefab.Clone();
+						const cb = colbox.Clone();
 						cb.Name = "Colbox";
 						cb.Size = (instncs[0] as BasePart).Size;
 						cb.Parent = model;

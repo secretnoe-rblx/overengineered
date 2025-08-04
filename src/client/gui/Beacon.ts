@@ -4,12 +4,6 @@ import { InstanceComponent } from "engine/shared/component/InstanceComponent";
 import { PartUtils } from "shared/utils/PartUtils";
 import { VectorUtils } from "shared/utils/VectorUtils";
 
-type BeaconBillboardGui = GuiObject & {
-	readonly Title: TextLabel;
-	readonly Distance: TextLabel;
-	readonly ImageLabel: ImageLabel;
-};
-
 export class Beacon extends InstanceComponent<PVInstance> {
 	readonly billboard;
 	showUpDistance = 30;
@@ -17,9 +11,7 @@ export class Beacon extends InstanceComponent<PVInstance> {
 	constructor(part: PVInstance, name: string) {
 		super(part);
 
-		this.billboard = (
-			ReplicatedStorage.Assets as unknown as { BeaconBillboardGui: BeaconBillboardGui }
-		).BeaconBillboardGui.Clone();
+		this.billboard = ReplicatedStorage.Assets.Guis.BeaconBillboardGui.Clone();
 
 		PartUtils.applyToAllDescendantsOfType("GuiObject", this.billboard, (gui) => {
 			gui.ZIndex = -1;

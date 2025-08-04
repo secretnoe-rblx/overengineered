@@ -49,7 +49,7 @@ export class CenterOfMassVisualizer extends Component {
 
 		const update = () => {
 			if (!this.machineCOM) {
-				this.machineCOM = ReplicatedStorage.Assets.CenterOfMassMachine.Clone();
+				this.machineCOM = ReplicatedStorage.Assets.Helpers.CenterOfMassMachine.Clone();
 				this.machineCOM.Parent = this.viewportFrame;
 			}
 
@@ -58,7 +58,7 @@ export class CenterOfMassVisualizer extends Component {
 
 			if (pos.size() > this.renderedBalls.size()) {
 				for (let i = 0; i < pos.size() - this.renderedBalls.size(); i++)
-					this.renderedBalls.push(ReplicatedStorage.Assets.CenterOfMassAssembly.Clone());
+					this.renderedBalls.push(ReplicatedStorage.Assets.Helpers.CenterOfMassAssembly.Clone());
 			}
 
 			if (pos.size() < this.renderedBalls.size()) {

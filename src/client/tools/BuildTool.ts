@@ -448,7 +448,7 @@ namespace SinglePlaceController {
 			this.event.subscribeObservable(this.selectedBlock, () => this.destroyGhosts());
 			this.onDisable(() => this.destroyGhosts());
 
-			const axis = ReplicatedStorage.Assets.Axis.Clone();
+			const axis = ReplicatedStorage.Assets.Helpers.Axis.Clone();
 			axis.Parent = Workspace;
 			this.onDestroy(() => axis.Destroy());
 

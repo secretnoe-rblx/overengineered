@@ -52,7 +52,7 @@ export class HideInterfaceController extends HostedService {
 
 			// Plot owner gui hide
 			plots.plots.forEach((plot) => {
-				const ownerGui = plot.instance.FindFirstChild(ReplicatedStorage.Assets.PlotOwnerGui.Name) as
+				const ownerGui = plot.instance.FindFirstChild(ReplicatedStorage.Assets.Guis.PlotOwnerGui.Name) as
 					| BillboardGui
 					| undefined;
 				if (ownerGui) {

@@ -45,45 +45,70 @@ interface ReplicatedStorage {
 				};
 			};
 		};
-		CenterOfMassAssembly: Model;
-		CenterOfMassMachine: Model;
-		Placeable: Folder;
-		Axis: Model & {
-			X: BasePart;
-			Y: BasePart;
-			Z: BasePart;
+		Helpers: Folder & {
+			CenterOfMassAssembly: Model;
+			CenterOfMassMachine: Model;
+			Axis: Model & {
+				X: BasePart;
+				Y: BasePart;
+				Z: BasePart;
+			};
+			MovementVisualizer: BasePart & { Decal: Decal };
+			EditHandles: BasePart & {
+				readonly SelectionBox: SelectionBox;
+				readonly Move: Instance & {
+					readonly XHandles: Handles;
+					readonly YHandles: Handles;
+					readonly ZHandles: Handles;
+				};
+				readonly Scale: Instance & {
+					readonly XHandles: Handles;
+					readonly YHandles: Handles;
+					readonly ZHandles: Handles;
+				};
+				readonly Rotate: Instance & {
+					readonly Center: BasePart;
+					readonly ArcHandles: ArcHandles;
+				};
+			};
+			Mirror: Part;
 		};
-		MoveHandles: MoveHandles;
-		ResizeHandles: MoveHandles;
-		RotateHandles: RotateHandles;
+		Placeable: Folder;
 		Effects: Folder & {
 			Fire: Folder;
 			Explosion: Folder;
 			Sparks: ParticleEmitter;
-			Sounds: Folder & {
-				Impact: Folder & {
-					Materials: Folder & {
-						Metal: SoundGroup;
-						Glass: SoundGroup;
-						Wood: SoundGroup;
-					};
+		};
+		Sounds: Folder & {
+			Impact: Folder & {
+				Materials: Folder & {
+					Metal: SoundGroup;
+					Glass: SoundGroup;
+					Wood: SoundGroup;
 				};
-				Effects: Folder & {
-					Underwater: EqualizerSoundEffect;
-				};
-				Explosion: Folder & { [key: string]: Sound };
 			};
+			Effects: Folder & {
+				Underwater: EqualizerSoundEffect;
+			};
+			Explosion: Folder & { [key: string]: Sound };
 		};
-		PlotOwnerGui: BillboardGui & {
-			UserImage: ImageLabel;
-			DisplayNameLabel: TextLabel;
-			UsernameLabel: TextLabel;
-			RankLabel: TextLabel;
-		};
-		UsernameGui: BillboardGui & {
-			DisplaynameLabel: TextLabel;
-			UsernameLabel: TextLabel;
-			RankLabel: TextLabel;
+		Guis: Folder & {
+			PlotOwnerGui: BillboardGui & {
+				UserImage: ImageLabel;
+				DisplayNameLabel: TextLabel;
+				UsernameLabel: TextLabel;
+				RankLabel: TextLabel;
+			};
+			UsernameGui: BillboardGui & {
+				DisplaynameLabel: TextLabel;
+				UsernameLabel: TextLabel;
+				RankLabel: TextLabel;
+			};
+			BeaconBillboardGui: GuiObject & {
+				readonly Title: TextLabel;
+				readonly Distance: TextLabel;
+				readonly ImageLabel: ImageLabel;
+			};
 		};
 		Wires: Folder & {
 			readonly WireMarker: BillboardGui & {

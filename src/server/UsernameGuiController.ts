@@ -14,7 +14,7 @@ export class UsernameGuiController extends HostedService {
 
 					const head = character.WaitForChild("Head") as BasePart;
 
-					const gui = ReplicatedStorage.Assets.UsernameGui.Clone();
+					const gui = ReplicatedStorage.Assets.Guis.UsernameGui.Clone();
 
 					gui.DisplaynameLabel.Text = player.DisplayName;
 					gui.UsernameLabel.Text = `@${player.Name}`;
