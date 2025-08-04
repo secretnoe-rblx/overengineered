@@ -8,7 +8,7 @@ import type { BlockBuilder } from "shared/blocks/Block";
 import type { ReadonlyPlot } from "shared/building/ReadonlyPlot";
 
 const definition = {
-	inputOrder: ["strength"],
+	inputOrder: ["strength", "distance"],
 	input: {
 		strength: {
 			displayName: "Strength",
