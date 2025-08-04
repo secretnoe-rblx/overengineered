@@ -37,6 +37,7 @@ import { HeliumBlock } from "shared/blocks/blocks/HeliumBlock";
 import { ImpulseExtenderBlock } from "shared/blocks/blocks/ImpulseExtenderBlock";
 import { ImpulseGeneratorBlock } from "shared/blocks/blocks/ImpulseGeneratorBlock";
 import { JetEngineBlocks } from "shared/blocks/blocks/JetEngineBlocks";
+import { KeyboardBlock } from "shared/blocks/blocks/KeyboardBlock";
 import { KeySensorBlock } from "shared/blocks/blocks/KeySensorBlock";
 import { LaserBlock } from "shared/blocks/blocks/LaserBlock";
 import { LedDisplayBlock } from "shared/blocks/blocks/LedDisplayBlock";
@@ -176,6 +177,7 @@ export const CreateSandboxBlocks = (di: DIContainer): BlockList => {
 		LuaCircuitBlock,
 
 		AltimeterBlock,
+		KeyboardBlock,
 		KeySensorBlock,
 		ButtonBlock,
 		ControllerBlock,

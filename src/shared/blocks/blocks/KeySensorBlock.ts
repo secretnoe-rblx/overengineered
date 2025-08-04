@@ -44,7 +44,7 @@ class Logic extends BlockLogic<typeof definition> {
 export const KeySensorBlock = {
 	...BlockCreation.defaults,
 	id: "keysensor",
-	displayName: "Keyboard Sensor",
+	displayName: "Key Sensor",
 	description: "Returns true when the chosen button is pressed",
 
 	logic: { definition, ctor: Logic },
