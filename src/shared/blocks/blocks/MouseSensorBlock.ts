@@ -44,13 +44,13 @@ class Logic extends BlockLogic<typeof definition> {
 
 		let wheel = 0;
 
-		this.event.subInput((ih) => {
-			ih.onInputBegan((input) => {
+		if (RunService.IsClient()) {
+			this.event.subscribe(UserInputService.InputBegan, (input) => {
 				if (input.UserInputType === Enum.UserInputType.MouseWheel) {
 					wheel = input.Position.Z;
 				}
 			});
-		});
+		}
 
 		this.event.subscribe(RunService.PostSimulation, () => {
 			const mousePos = UserInputService.GetMouseLocation();
