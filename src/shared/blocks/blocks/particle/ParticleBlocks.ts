@@ -249,8 +249,8 @@ namespace ParticleCreator {
 			shape: inpCreate("Emission Shape", "Kinda hard to explain. Check it out yourself.", {
 				enum: {
 					config: "Box",
-					elements: enumOptionGenerate("Shape -", ["Box", "Cilynder", "Disc", "Sphere"]),
-					elementOrder: ["Box", "Cilynder", "Disc", "Sphere"],
+					elements: enumOptionGenerate("Shape -", ["Box", "Cylinder", "Disc", "Sphere"]),
+					elementOrder: ["Box", "Cylinder", "Disc", "Sphere"],
 				},
 			}),
 			shapeInOut: inpCreate("Shape In/Out", "Determines if the particle will be emitted inwards or outwards", {
