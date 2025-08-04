@@ -91,21 +91,6 @@ class Logic extends BlockLogic<typeof definition> {
 		);
 
 		this.onDisable(() => ContextActionService.UnbindAction(actname));
-
-		// this.event.subscribe(UserInputService.InputBegan, (input) => {
-		// 	if (input.UserInputType !== Enum.UserInputType.Keyboard) return;
-
-		// 	const key = input.KeyCode.Name;
-		// 	this.output.pressed.set("bool", true);
-		// 	this.output.key.set("string", key);
-		// });
-		// this.event.subscribe(UserInputService.InputEnded, (input) => {
-		// 	if (input.UserInputType !== Enum.UserInputType.Keyboard) return;
-
-		// 	const key = input.KeyCode.Name;
-		// 	this.output.pressed.set("bool", false);
-		// 	this.output.key.set("string", key);
-		// });
 	}
 }
 
