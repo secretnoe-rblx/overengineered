@@ -2,6 +2,7 @@ import { DataStoreService, ServerScriptService, Workspace } from "@rbxts/service
 // import { BadgeController } from "server/BadgeController";
 
 import { DataStoreDatabaseBackend } from "engine/server/backend/DataStoreDatabaseBackend";
+import { Logger } from "engine/shared/Logger";
 import { BaseGame } from "server/BaseGame";
 import { ServerBlockLogicController } from "server/blocks/ServerBlockLogicController";
 import { PlayerDatabase } from "server/database/PlayerDatabase";
@@ -15,6 +16,7 @@ import { ServerPlayersController } from "server/ServerPlayersController";
 import { SpreadingFireController } from "server/SpreadingFireController";
 import { UsernameGuiController } from "server/UsernameGuiController";
 import { SharedPlots } from "shared/building/SharedPlots";
+import { GameDefinitions } from "shared/data/GameDefinitions";
 import { RemoteEvents } from "shared/RemoteEvents";
 import { CreateSandboxBlocks } from "shared/SandboxBlocks";
 import type { GameHostBuilder } from "engine/shared/GameHostBuilder";
@@ -33,7 +35,6 @@ export namespace SandboxGame {
 			| ModuleScript
 			| undefined;
 		if (awm) {
-			print("amongus, awm found");
 			(require(awm) as { SandboxGame: { init: (builder: GameHostBuilder) => void } }).SandboxGame.init(builder);
 		} else {
 			builder.services
@@ -42,6 +43,10 @@ export namespace SandboxGame {
 			builder.services
 				.registerSingletonClass(SlotDatabase) //
 				.withArgs([new DataStoreDatabaseBackend(DataStoreService.GetDataStore("slots-bkp"))]);
+		}
+
+		for (const line of GameDefinitions.getEnvironmentInfo()) {
+			Logger.info(line);
 		}
 
 		builder.services.registerService(ServerPlayersController);

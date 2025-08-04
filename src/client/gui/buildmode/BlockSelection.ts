@@ -14,6 +14,7 @@ import { Objects } from "engine/shared/fixes/Objects";
 import { Localization } from "engine/shared/Localization";
 import { PlayerRank } from "engine/shared/PlayerRank";
 import { BlockManager } from "shared/building/BlockManager";
+import { GameDefinitions } from "shared/data/GameDefinitions";
 import type { PopupController } from "client/gui/PopupController";
 import type { PlayerDataStorage } from "client/PlayerDataStorage";
 import type { Theme } from "client/Theme";
@@ -413,6 +414,7 @@ export class BlockSelectionControl extends Control<BlockSelectionControlDefiniti
 			let button: BlockControl;
 			const features = this.playerData.data.get().features;
 			if (
+				GameDefinitions.isOfficialAwms &&
 				!PlayerRank.isAdmin(Players.LocalPlayer) &&
 				!(block.requiredFeatures ?? Objects.empty).all((c) => features.contains(c))
 			) {

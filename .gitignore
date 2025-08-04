@@ -5,3 +5,5 @@
 *.tsbuildinfo
 *.lock
 sourcemap.json
+*.rbxl
+/.luaurc

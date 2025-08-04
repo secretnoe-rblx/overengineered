@@ -47,21 +47,33 @@ Get up and running with OverEngineered's development environment in just a few s
 
 2. **Install Dependencies**
 
-   Ensure [Node.js](https://nodejs.org/) is installed, then run:
+   It is recommended to use **Node.js v20 LTS** for best compatibility. Download it from the [official site](https://nodejs.org/).
+
+   Ensure Node.js is installed, then run:
 
    ```bash
    npm install
    ```
 
-3. **Start Rojo**
+3. **Download Rokit**
 
-   Install [Rojo](https://rojo.space/) in Roblox Studio, then launch the server:
+   Download and install [rokit](https://github.com/rojo-rbx/rokit) (required for asset and place management):
 
    ```bash
-   rojo serve
+   # Download and follow instructions from https://github.com/rojo-rbx/rokit
    ```
 
-4. **Run the Build Watcher**
+4. **Assemble the Place File**
+
+   Before starting Rojo or working in Roblox Studio, you must assemble the place file:
+
+   ```bash
+   lune run assemble
+   ```
+
+   This will generate or update `place.rbxl` using the current assets and structure.
+
+5. **Run the Build Watcher**
 
    In a separate terminal, start the TypeScript compiler in watch mode:
 
@@ -71,12 +83,22 @@ Get up and running with OverEngineered's development environment in just a few s
 
    This compiles TypeScript/roblox-ts code into Roblox Lua in real-time.
 
-5. **Connect Roblox Studio**
+6. **Start Rojo**
 
-   - Open Roblox Studio and navigate to **Plugins → Rojo → Connect**.
+   Install [Rojo](https://rojo.space/) in Roblox Studio, then launch the server:
+
+   ```bash
+   rojo serve
+   ```
+
+7. **Open Roblox Studio and Connect Rojo**
+
+   - Open Roblox Studio.
+   - In Roblox Studio, open the generated `place.rbxl` file.
+   - After the place is open, navigate to **Plugins → Rojo → Connect** to connect Rojo.
    - Your local code and assets will sync automatically with the Roblox environment.
 
-6. **Start Building!**
+8. **Start Building!**
 
    Make changes locally and watch them come to life in Roblox Studio.
 

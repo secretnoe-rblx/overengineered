@@ -1,0 +1,1060 @@
+[
+	{
+		"name": "ReplicatedStorage",
+		"children": [
+			{ "name": "TerrainModels", "path": "./game/ReplicatedStorage/terrain_models.rbxmx" },
+			{ "name": "Modules", "path": "./game/ReplicatedStorage/modules.rbxmx" }
+		]
+	},
+	{
+		"name": "StarterGui",
+		"children": [
+			{ "name": "BSOD", "path": "./game/StarterGui/BSOD.rbxmx" },
+			{ "name": "Freecam", "path": "./game/StarterGui/Freecam.rbxmx" },
+			{ "name": "GameUI", "path": "./game/StarterGui/GameUI.rbxmx" },
+			{ "name": "GameUIHidden", "path": "./game/StarterGui/GameUIHidden.rbxmx" },
+			{ "name": "Interface", "path": "./game/StarterGui/Interface.rbxmx" },
+			{ "name": "Ponders", "path": "./game/StarterGui/Ponders.rbxmx" },
+			{ "name": "Popups", "path": "./game/StarterGui/Popups.rbxmx" },
+			{ "name": "ScreenGui_test", "path": "./game/StarterGui/ScreenGui_test.rbxmx" },
+			{ "name": "Tests", "path": "./game/StarterGui/Tests.rbxmx" },
+			{ "name": "Unscaled", "path": "./game/StarterGui/Unscaled.rbxmx" }
+		]
+	},
+	{
+		"name": "Lighting",
+		"children": [
+			{ "name": "Atmosphere", "path": "./game/Lighting/atmosphere.rbxmx" },
+			{ "name": "Bloom", "path": "./game/Lighting/bloom.rbxmx" },
+			{ "name": "Blur", "path": "./game/Lighting/blur.rbxmx" },
+			{ "name": "ColorCorrection", "path": "./game/Lighting/color_correction.rbxmx" },
+			{ "name": "Sky", "path": "./game/Lighting/sky.rbxmx" },
+			{ "name": "SunRays", "path": "./game/Lighting/sun_rays.rbxmx" }
+		]
+	},
+	{
+		"name": "ReplicatedFirst",
+		"children": [ { "name": "3D Atmosphere", "path": "./game/ReplicatedFirst/atmosphere.rbxmx" } ]
+	},
+	{
+		"name": "StarterPlayer",
+		"children": [
+			{
+				"name": "StarterPlayerScripts",
+				"children": [ { "name": "PlayerModule", "path": "./game/StarterPlayerScripts/player_module.rbxmx" } ]
+			}
+		]
+	},
+	{
+		"name": "Workspace",
+		"children": [
+			{
+				"name": "Assets",
+				"children": [
+					{
+						"name": "Placeable",
+						"children": [
+							{
+								"name": "Blocks",
+								"children": [
+									{
+										"name": "Ball",
+										"path": "./game/Assets/Placeable/Blocks/Ball.rbxmx"
+									},
+									{
+										"name": "Beams",
+										"children": [
+											{
+												"name": "Beam2x1",
+												"path": "./game/Assets/Placeable/Blocks/Beams/Beam2x1.rbxmx"
+											},
+											{
+												"name": "Beam3x1",
+												"path": "./game/Assets/Placeable/Blocks/Beams/Beam3x1.rbxmx"
+											},
+											{
+												"name": "Beam4x1",
+												"path": "./game/Assets/Placeable/Blocks/Beams/Beam4x1.rbxmx"
+											}
+										]
+									},
+									{
+										"name": "Block",
+										"path": "./game/Assets/Placeable/Blocks/Block.rbxmx"
+									},
+									{
+										"name": "Cone",
+										"path": "./game/Assets/Placeable/Blocks/Cone.rbxmx"
+									},
+									{
+										"name": "CutCone",
+										"path": "./game/Assets/Placeable/Blocks/CutCone.rbxmx"
+									},
+									{
+										"name": "Cylinders",
+										"children": [
+											{
+												"name": "Cylinder1x1",
+												"path": "./game/Assets/Placeable/Blocks/Cylinders/Cylinder1x1.rbxmx"
+											},
+											{
+												"name": "Cylinder1x2",
+												"path": "./game/Assets/Placeable/Blocks/Cylinders/Cylinder1x2.rbxmx"
+											},
+											{
+												"name": "Cylinder2x1",
+												"path": "./game/Assets/Placeable/Blocks/Cylinders/Cylinder2x1.rbxmx"
+											},
+											{
+												"name": "Cylinder2x2",
+												"path": "./game/Assets/Placeable/Blocks/Cylinders/Cylinder2x2.rbxmx"
+											},
+											{
+												"name": "Halves",
+												"children": [
+													{
+														"name": "HalfCylinder1x1",
+														"path": "./game/Assets/Placeable/Blocks/Cylinders/Halves/HalfCylinder1x1.rbxmx"
+													},
+													{
+														"name": "HalfCylinder1x2",
+														"path": "./game/Assets/Placeable/Blocks/Cylinders/Halves/HalfCylinder1x2.rbxmx"
+													},
+													{
+														"name": "HalfCylinder2x1",
+														"path": "./game/Assets/Placeable/Blocks/Cylinders/Halves/HalfCylinder2x1.rbxmx"
+													},
+													{
+														"name": "HalfCylinder2x2",
+														"path": "./game/Assets/Placeable/Blocks/Cylinders/Halves/HalfCylinder2x2.rbxmx"
+													},
+													{
+														"name": "QuarterCylinder",
+														"path": "./game/Assets/Placeable/Blocks/Cylinders/Halves/QuarterCylinder.rbxmx"
+													}
+												]
+											},
+											{
+												"name": "Tubes",
+												"children": [
+													{
+														"name": "Cylinder90",
+														"path": "./game/Assets/Placeable/Blocks/Cylinders/Halves/Cylinder90.rbxmx"
+													},
+													{
+														"name": "Cylinder90VerticalHalf",
+														"path": "./game/Assets/Placeable/Blocks/Cylinders/Halves/Cylinder90VerticalHalf.rbxmx"
+													},
+													{
+														"name": "CylinderBig90",
+														"path": "./game/Assets/Placeable/Blocks/Cylinders/Halves/CylinderBig90.rbxmx"
+													},
+													{
+														"name": "HollowCylinder",
+														"path": "./game/Assets/Placeable/Blocks/Cylinders/Halves/HollowCylinder.rbxmx"
+													},
+													{
+														"name": "HollowCylinder90",
+														"path": "./game/Assets/Placeable/Blocks/Cylinders/Halves/HollowCylinder90.rbxmx"
+													},
+													{
+														"name": "HollowCylinder90VerticalHalf",
+														"path": "./game/Assets/Placeable/Blocks/Cylinders/Halves/HollowCylinder90VerticalHalf.rbxmx"
+													},
+													{
+														"name": "HollowCylinderBig90",
+														"path": "./game/Assets/Placeable/Blocks/Cylinders/Halves/HollowCylinderBig90.rbxmx"
+													},
+													{
+														"name": "HollowCylinderHalf",
+														"path": "./game/Assets/Placeable/Blocks/Cylinders/Halves/HollowCylinderHalf.rbxmx"
+													},
+													{
+														"name": "HollowCylinderQuarter",
+														"path": "./game/Assets/Placeable/Blocks/Cylinders/Halves/HollowCylinderQuarter.rbxmx"
+													}
+												]
+											}
+										]
+									},
+									{
+										"name": "HalfBall",
+										"path": "./game/Assets/Placeable/Blocks/HalfBall.rbxmx"
+									},
+									{
+										"name": "HalfBlock",
+										"path": "./game/Assets/Placeable/Blocks/HalfBlock.rbxmx"
+									},
+									{
+										"name": "HalfCone",
+										"path": "./game/Assets/Placeable/Blocks/HalfCone.rbxmx"
+									},
+									{
+										"name": "Trusses",
+										"children": [
+											{
+												"name": "Truss",
+												"path": "./game/Assets/Placeable/Blocks/Trusses/Truss.rbxmx"
+											},
+											{
+												"name": "TrussUnsupported",
+												"path": "./game/Assets/Placeable/Blocks/Trusses/TrussUnsupported.rbxmx"
+											}
+										]
+									},
+									{
+										"name": "Wedges",
+										"children": [
+											{
+												"name": "ConcavePrism",
+												"path": "./game/Assets/Placeable/Blocks/Wedges/ConcavePrism.rbxmx"
+											},
+											{
+												"name": "ConvexPrism",
+												"path": "./game/Assets/Placeable/Blocks/Wedges/ConvexPrism.rbxmx"
+											},
+											{
+												"name": "Corner",
+												"children": [
+													{
+														"name": "ConcaveCornerWedge",
+														"path": "./game/Assets/Placeable/Blocks/Wedges/Corner/ConcaveCornerWedge.rbxmx"
+													},
+													{
+														"name": "ConvexCornerWedge",
+														"path": "./game/Assets/Placeable/Blocks/Wedges/Corner/ConvexCornerWedge.rbxmx"
+													},
+													{
+														"name": "InnerCorner",
+														"path": "./game/Assets/Placeable/Blocks/Wedges/Corner/InnerCorner.rbxmx"
+													},
+													{
+														"name": "TetraRound",
+														"path": "./game/Assets/Placeable/Blocks/Wedges/Corner/TetraRound.rbxmx"
+													},
+													{
+														"name": "Wedges",
+														"children": [
+															{
+																"name": "CornerWedge1x1",
+																"path": "./game/Assets/Placeable/Blocks/Wedges/Corner/Wedges/CornerWedge1x1.rbxmx"
+															},
+															{
+																"name": "CornerWedge2x1",
+																"path": "./game/Assets/Placeable/Blocks/Wedges/Corner/Wedges/CornerWedge2x1.rbxmx"
+															},
+															{
+																"name": "CornerWedge3x1",
+																"path": "./game/Assets/Placeable/Blocks/Wedges/Corner/Wedges/CornerWedge3x1.rbxmx"
+															},
+															{
+																"name": "CornerWedge4x1",
+																"path": "./game/Assets/Placeable/Blocks/Wedges/Corner/Wedges/CornerWedge4x1.rbxmx"
+															},
+															{
+																"name": "Halves",
+																"children": [
+																	{
+																		"name": "HalfCornerWedge1x1",
+																		"path": "./game/Assets/Placeable/Blocks/Wedges/Corner/Wedges/Halves/HalfCornerWedge1x1.rbxmx"
+																	},
+																	{
+																		"name": "HalfCornerWedge2x1",
+																		"path": "./game/Assets/Placeable/Blocks/Wedges/Corner/Wedges/Halves/HalfCornerWedge2x1.rbxmx"
+																	},
+																	{
+																		"name": "HalfCornerWedge3x1",
+																		"path": "./game/Assets/Placeable/Blocks/Wedges/Corner/Wedges/Halves/HalfCornerWedge3x1.rbxmx"
+																	},
+																	{
+																		"name": "HalfCornerWedge4x1",
+																		"path": "./game/Assets/Placeable/Blocks/Wedges/Corner/Wedges/Halves/HalfCornerWedge4x1.rbxmx"
+																	},
+																	{
+																		"name": "Mirrored",
+																		"children": [
+																			{
+																				"name": "HalfCornerWedge1x1Mirrored",
+																				"path": "./game/Assets/Placeable/Blocks/Wedges/Corner/Wedges/Halves/Mirrored/HalfCornerWedge1x1Mirrored.rbxmx"
+																			},
+																			{
+																				"name": "HalfCornerWedge2x1Mirrored",
+																				"path": "./game/Assets/Placeable/Blocks/Wedges/Corner/Wedges/Halves/Mirrored/HalfCornerWedge2x1Mirrored.rbxmx"
+																			},
+																			{
+																				"name": "HalfCornerWedge3x1Mirrored",
+																				"path": "./game/Assets/Placeable/Blocks/Wedges/Corner/Wedges/Halves/Mirrored/HalfCornerWedge3x1Mirrored.rbxmx"
+																			},
+																			{
+																				"name": "HalfCornerWedge4x1Mirrored",
+																				"path": "./game/Assets/Placeable/Blocks/Wedges/Corner/Wedges/Halves/Mirrored/HalfCornerWedge4x1Mirrored.rbxmx"
+																			}
+																		]
+																	}
+																]
+															}
+														]
+													}
+												]
+											},
+											{
+												"name": "Halves",
+												"children": [
+													{
+														"name": "HalfWedge1x1",
+														"path": "./game/Assets/Placeable/Blocks/Wedges/Halves/HalfWedge1x1.rbxmx"
+													},
+													{
+														"name": "HalfWedge1x2",
+														"path": "./game/Assets/Placeable/Blocks/Wedges/Halves/HalfWedge1x2.rbxmx"
+													},
+													{
+														"name": "HalfWedge1x3",
+														"path": "./game/Assets/Placeable/Blocks/Wedges/Halves/HalfWedge1x3.rbxmx"
+													},
+													{
+														"name": "HalfWedge1x4",
+														"path": "./game/Assets/Placeable/Blocks/Wedges/Halves/HalfWedge1x4.rbxmx"
+													}
+												]
+											},
+											{
+												"name": "Pyramid",
+												"path": "./game/Assets/Placeable/Blocks/Wedges/Pyramid.rbxmx"
+											},
+											{
+												"name": "Tetrahedron",
+												"children": [
+													{
+														"name": "Inner",
+														"children": [
+															{
+																"name": "InnerTetra",
+																"path": "./game/Assets/Placeable/Blocks/Wedges/Tetrahedron/Inner/InnerTetra.rbxmx"
+															},
+															{
+																"name": "InnerTetra2x1",
+																"path": "./game/Assets/Placeable/Blocks/Wedges/Tetrahedron/Inner/InnerTetra2x1.rbxmx"
+															},
+															{
+																"name": "InnerTetra3x1",
+																"path": "./game/Assets/Placeable/Blocks/Wedges/Tetrahedron/Inner/InnerTetra3x1.rbxmx"
+															},
+															{
+																"name": "InnerTetra4x1",
+																"path": "./game/Assets/Placeable/Blocks/Wedges/Tetrahedron/Inner/InnerTetra4x1.rbxmx"
+															}
+														]
+													},
+													{
+														"name": "Tetrahedron",
+														"path": "./game/Assets/Placeable/Blocks/Wedges/Tetrahedron/Tetrahedron.rbxmx"
+													},
+													{
+														"name": "Tetrahedron2x1",
+														"path": "./game/Assets/Placeable/Blocks/Wedges/Tetrahedron/Tetrahedron2x1.rbxmx"
+													},
+													{
+														"name": "Tetrahedron3x1",
+														"path": "./game/Assets/Placeable/Blocks/Wedges/Tetrahedron/Tetrahedron3x1.rbxmx"
+													},
+													{
+														"name": "Tetrahedron4x1",
+														"path": "./game/Assets/Placeable/Blocks/Wedges/Tetrahedron/Tetrahedron4x1.rbxmx"
+													}
+												]
+											},
+											{
+												"name": "Wedge1x1",
+												"path": "./game/Assets/Placeable/Blocks/Wedges/Wedge1x1.rbxmx"
+											},
+											{
+												"name": "Wedge1x2",
+												"path": "./game/Assets/Placeable/Blocks/Wedges/Wedge1x2.rbxmx"
+											},
+											{
+												"name": "Wedge1x3",
+												"path": "./game/Assets/Placeable/Blocks/Wedges/Wedge1x3.rbxmx"
+											},
+											{
+												"name": "Wedge1x4",
+												"path": "./game/Assets/Placeable/Blocks/Wedges/Wedge1x4.rbxmx"
+											}
+										]
+									},
+									{
+										"name": "Wheels",
+										"children": [
+											{
+												"name": "BigOldWheel",
+												"path": "./game/Assets/Placeable/Blocks/Wheels/BigOldWheel.rbxmx"
+											},
+											{
+												"name": "BigWheel",
+												"path": "./game/Assets/Placeable/Blocks/Wheels/BigWheel.rbxmx"
+											},
+											{
+												"name": "LargeOldTrainWheel",
+												"path": "./game/Assets/Placeable/Blocks/Wheels/LargeOldTrainWheel.rbxmx"
+											},
+											{
+												"name": "OldWheel",
+												"path": "./game/Assets/Placeable/Blocks/Wheels/OldWheel.rbxmx"
+											},
+											{
+												"name": "SmallNewTrainWheel",
+												"path": "./game/Assets/Placeable/Blocks/Wheels/SmallNewTrainWheel.rbxmx"
+											},
+											{
+												"name": "SmallOldTrainWheel",
+												"path": "./game/Assets/Placeable/Blocks/Wheels/SmallOldTrainWheel.rbxmx"
+											},
+											{
+												"name": "SmallOldWheel",
+												"path": "./game/Assets/Placeable/Blocks/Wheels/SmallOldWheel.rbxmx"
+											},
+											{
+												"name": "SmallWheel",
+												"path": "./game/Assets/Placeable/Blocks/Wheels/SmallWheel.rbxmx"
+											},
+											{
+												"name": "Wheel",
+												"path": "./game/Assets/Placeable/Blocks/Wheels/Wheel.rbxmx"
+											}
+										]
+									}
+								]
+							},
+							{
+								"name": "Logic",
+								"children": [
+									{
+										"name": "Communication",
+										"children": [
+											{
+												"name": "Beacon",
+												"path": "./game/Assets/Placeable/Logic/Communication/Beacon.rbxmx"
+											},
+											{
+												"name": "RadioReciever",
+												"path": "./game/Assets/Placeable/Logic/Communication/RadioReciever.rbxmx"
+											},
+											{
+												"name": "RadioTransmitter",
+												"path": "./game/Assets/Placeable/Logic/Communication/RadioTransmitter.rbxmx"
+											}
+										]
+									},
+									{
+										"name": "Converter",
+										"children": [
+											{
+												"name": "Byte",
+												"children": [
+													{
+														"name": "ByteMaker",
+														"path": "./game/Assets/Placeable/Logic/Converter/Byte/ByteMaker.rbxmx"
+													},
+													{
+														"name": "ByteSplitter",
+														"path": "./game/Assets/Placeable/Logic/Converter/Byte/ByteSplitter.rbxmx"
+													}
+												]
+											}
+										]
+									},
+									{
+										"name": "Display",
+										"children": [
+											{
+												"name": "Lamp",
+												"path": "./game/Assets/Placeable/Logic/Display/Lamp.rbxmx"
+											},
+											{
+												"name": "LEDDisplay",
+												"path": "./game/Assets/Placeable/Logic/Display/LEDDisplay.rbxmx"
+											},
+											{
+												"name": "Screen",
+												"path": "./game/Assets/Placeable/Logic/Display/Screen.rbxmx"
+											},
+											{
+												"name": "SevenSegmentDisplay",
+												"path": "./game/Assets/Placeable/Logic/Display/SevenSegmentDisplay.rbxmx"
+											},
+											{
+												"name": "SmallLamp",
+												"path": "./game/Assets/Placeable/Logic/Display/SmallLamp.rbxmx"
+											},
+											{
+												"name": "Spotlight",
+												"path": "./game/Assets/Placeable/Logic/Display/Spotlight.rbxmx"
+											}
+										]
+									},
+									{
+										"name": "Gate",
+										"children": [
+											{
+												"name": "BigDemultiplexer",
+												"path": "./game/Assets/Placeable/Logic/Gate/BigDemultiplexer.rbxmx"
+											},
+											{
+												"name": "BigMultiplexer",
+												"path": "./game/Assets/Placeable/Logic/Gate/BigMultiplexer.rbxmx"
+											},
+											{
+												"name": "Demultiplexer",
+												"path": "./game/Assets/Placeable/Logic/Gate/Demultiplexer.rbxmx"
+											},
+											{
+												"name": "Multiplexer",
+												"path": "./game/Assets/Placeable/Logic/Gate/Multiplexer.rbxmx"
+											}
+										]
+									},
+									{
+										"name": "Memory",
+										"children": [
+											{
+												"name": "RandomAccessMemory",
+												"path": "./game/Assets/Placeable/Logic/Memory/RandomAccessMemory.rbxmx"
+											},
+											{
+												"name": "ReadOnlyMemory",
+												"path": "./game/Assets/Placeable/Logic/Memory/ReadOnlyMemory.rbxmx"
+											},
+											{
+												"name": "StackMemory",
+												"path": "./game/Assets/Placeable/Logic/Memory/StackMemory.rbxmx"
+											}
+										]
+									},
+									{
+										"name": "Other",
+										"children": [
+											{
+												"name": "Buffer",
+												"path": "./game/Assets/Placeable/Logic/Other/Buffer.rbxmx"
+											},
+											{
+												"name": "Camera",
+												"path": "./game/Assets/Placeable/Logic/Other/Camera.rbxmx"
+											},
+											{
+												"name": "ImpulseGenerator",
+												"path": "./game/Assets/Placeable/Logic/Other/ImpulseGenerator.rbxmx"
+											},
+											{
+												"name": "LuaCircuit",
+												"path": "./game/Assets/Placeable/Logic/Other/LuaCircuit.rbxmx"
+											}
+										]
+									},
+									{
+										"name": "Particle",
+										"children": [
+											{
+												"name": "ParticleCreator",
+												"path": "./game/Assets/Placeable/Logic/Particle/ParticleCreator.rbxmx"
+											},
+											{
+												"name": "ParticleEmitter",
+												"path": "./game/Assets/Placeable/Logic/Particle/ParticleEmitter.rbxmx"
+											}
+										]
+									},
+									{
+										"name": "Sensor",
+										"children": [
+											{
+												"name": "Altimeter",
+												"path": "./game/Assets/Placeable/Logic/Sensor/Altimeter.rbxmx"
+											},
+											{
+												"name": "AngleSensor",
+												"path": "./game/Assets/Placeable/Logic/Sensor/AngleSensor.rbxmx"
+											},
+											{
+												"name": "Button",
+												"path": "./game/Assets/Placeable/Logic/Sensor/Button.rbxmx"
+											},
+											{
+												"name": "FireSensor",
+												"path": "./game/Assets/Placeable/Logic/Sensor/FireSensor.rbxmx"
+											},
+											{
+												"name": "GravitySensor",
+												"path": "./game/Assets/Placeable/Logic/Sensor/GravitySensor.rbxmx"
+											},
+											{
+												"name": "KeyboardSensor",
+												"path": "./game/Assets/Placeable/Logic/Sensor/KeyboardSensor.rbxmx"
+											},
+											{
+												"name": "KeySensor",
+												"path": "./game/Assets/Placeable/Logic/Sensor/KeySensor.rbxmx"
+											},
+											{
+												"name": "Laser",
+												"path": "./game/Assets/Placeable/Logic/Sensor/Laser.rbxmx"
+											},
+											{
+												"name": "MassSensor",
+												"path": "./game/Assets/Placeable/Logic/Sensor/MassSensor.rbxmx"
+											},
+											{
+												"name": "MouseSensor",
+												"path": "./game/Assets/Placeable/Logic/Sensor/MouseSensor.rbxmx"
+											},
+											{
+												"name": "OwnerCameraLocator",
+												"path": "./game/Assets/Placeable/Logic/Sensor/OwnerCameraLocator.rbxmx"
+											},
+											{
+												"name": "OwnerLocator",
+												"path": "./game/Assets/Placeable/Logic/Sensor/OwnerLocator.rbxmx"
+											},
+											{
+												"name": "RadarSection",
+												"path": "./game/Assets/Placeable/Logic/Sensor/RadarSection.rbxmx"
+											},
+											{
+												"name": "Speedometer",
+												"path": "./game/Assets/Placeable/Logic/Sensor/Speedometer.rbxmx"
+											}
+										]
+									},
+									{
+										"name": "Sound",
+										"children": [
+											{
+												"name": "Speaker",
+												"path": "./game/Assets/Placeable/Logic/Sound/Speaker.rbxmx"
+											}
+										]
+									}
+								]
+							},
+							{
+								"name": "Mechanics",
+								"children": [
+									{
+										"name": "Ball in Sockets",
+										"children": [
+											{
+												"name": "BallInSocket",
+												"path": "./game/Assets/Placeable/Mechanics/Ball in Sockets/BallInSocket.rbxmx"
+											},
+											{
+												"name": "BallInSocketAngled",
+												"path": "./game/Assets/Placeable/Mechanics/Ball in Sockets/BallInSocketAngled.rbxmx"
+											}
+										]
+									},
+									{
+										"name": "BearingShaft",
+										"path": "./game/Assets/Placeable/Mechanics/BearingShaft.rbxmx"
+									},
+									{
+										"name": "BracedShaft",
+										"path": "./game/Assets/Placeable/Mechanics/BracedShaft.rbxmx"
+									},
+									{
+										"name": "Driveshaft",
+										"path": "./game/Assets/Placeable/Mechanics/Driveshaft.rbxmx"
+									},
+									{
+										"name": "Gears",
+										"children": [
+											{
+												"name": "BevelGear",
+												"path": "./game/Assets/Placeable/Mechanics/Gears/BevelGear.rbxmx"
+											},
+											{
+												"name": "GearRack",
+												"path": "./game/Assets/Placeable/Mechanics/Gears/GearRack.rbxmx"
+											},
+											{
+												"name": "HelicalGear",
+												"path": "./game/Assets/Placeable/Mechanics/Gears/HelicalGear.rbxmx"
+											},
+											{
+												"name": "SmallGear",
+												"path": "./game/Assets/Placeable/Mechanics/Gears/SmallGear.rbxmx"
+											},
+											{
+												"name": "SprocketGear",
+												"path": "./game/Assets/Placeable/Mechanics/Gears/SprocketGear.rbxmx"
+											},
+											{
+												"name": "SpurGear",
+												"path": "./game/Assets/Placeable/Mechanics/Gears/SpurGear.rbxmx"
+											},
+											{
+												"name": "WormGear",
+												"path": "./game/Assets/Placeable/Mechanics/Gears/WormGear.rbxmx"
+											}
+										]
+									},
+									{
+										"name": "Piston",
+										"path": "./game/Assets/Placeable/Mechanics/Piston.rbxmx"
+									},
+									{
+										"name": "Shaft",
+										"path": "./game/Assets/Placeable/Mechanics/Shaft.rbxmx"
+									}
+								]
+							},
+							{
+								"name": "Movement",
+								"children": [
+									{
+										"name": "Force",
+										"children": [
+											{
+												"name": "Gyroscope",
+												"path": "./game/Assets/Placeable/Movement/Force/Gyroscope.rbxmx"
+											},
+											{
+												"name": "Magnet",
+												"path": "./game/Assets/Placeable/Movement/Force/Magnet.rbxmx"
+											}
+										]
+									},
+									{
+										"name": "Motor",
+										"children": [
+											{
+												"name": "HingeBlock",
+												"path": "./game/Assets/Placeable/Movement/Motor/HingeBlock.rbxmx"
+											},
+											{
+												"name": "MotorBlock",
+												"path": "./game/Assets/Placeable/Movement/Motor/MotorBlock.rbxmx"
+											},
+											{
+												"name": "ServomotorBlock",
+												"path": "./game/Assets/Placeable/Movement/Motor/ServomotorBlock.rbxmx"
+											},
+											{
+												"name": "SidewaysServo",
+												"path": "./game/Assets/Placeable/Movement/Motor/SidewaysServo.rbxmx"
+											},
+											{
+												"name": "SmallHingeBlock",
+												"path": "./game/Assets/Placeable/Movement/Motor/SmallHingeBlock.rbxmx"
+											}
+										]
+									},
+									{
+										"name": "Physics",
+										"children": [
+											{
+												"name": "AnchorBlock",
+												"path": "./game/Assets/Placeable/Movement/Physics/AnchorBlock.rbxmx"
+											},
+											{
+												"name": "Ballast",
+												"path": "./game/Assets/Placeable/Movement/Physics/Ballast.rbxmx"
+											},
+											{
+												"name": "DisconnectBlock",
+												"path": "./game/Assets/Placeable/Movement/Physics/DisconnectBlock.rbxmx"
+											},
+											{
+												"name": "HeliumBlock",
+												"path": "./game/Assets/Placeable/Movement/Physics/HeliumBlock.rbxmx"
+											},
+											{
+												"name": "Rope",
+												"path": "./game/Assets/Placeable/Movement/Physics/Rope.rbxmx"
+											},
+											{
+												"name": "SuspensionBlock",
+												"path": "./game/Assets/Placeable/Movement/Physics/SuspensionBlock.rbxmx"
+											}
+										]
+									},
+									{
+										"name": "Propulsion",
+										"children": [
+											{
+												"name": "JetEngineCivil",
+												"path": "./game/Assets/Placeable/Movement/Propulsion/JetEngineCivil.rbxmx"
+											},
+											{
+												"name": "JetEngineMilitary",
+												"path": "./game/Assets/Placeable/Movement/Propulsion/JetEngineMilitary.rbxmx"
+											},
+											{
+												"name": "RCSEngine",
+												"path": "./game/Assets/Placeable/Movement/Propulsion/RCSEngine.rbxmx"
+											},
+											{
+												"name": "RocketEngine",
+												"path": "./game/Assets/Placeable/Movement/Propulsion/RocketEngine.rbxmx"
+											},
+											{
+												"name": "SmallRocketEngine",
+												"path": "./game/Assets/Placeable/Movement/Propulsion/SmallRocketEngine.rbxmx"
+											}
+										]
+									}
+								]
+							},
+							{
+								"name": "Seats",
+								"children": [
+									{
+										"name": "BackMount",
+										"path": "./game/Assets/Placeable/Seats/BackMount.rbxmx"
+									},
+									{
+										"name": "PassengerSeat",
+										"path": "./game/Assets/Placeable/Seats/PassengerSeat.rbxmx"
+									},
+									{
+										"name": "VehicleSeat",
+										"path": "./game/Assets/Placeable/Seats/VehicleSeat.rbxmx"
+									}
+								]
+							},
+							{
+								"name": "Weapons",
+								"children": [
+									{
+										"name": "Accumulator",
+										"path": "./game/Assets/Placeable/Weapons/Accumulator.rbxmx"
+									},
+									{
+										"name": "AmmunitionBlock",
+										"path": "./game/Assets/Placeable/Weapons/AmmunitionBlock.rbxmx"
+									},
+									{
+										"name": "APAmmo",
+										"path": "./game/Assets/Placeable/Weapons/APAmmo.rbxmx"
+									},
+									{
+										"name": "APShells",
+										"path": "./game/Assets/Placeable/Weapons/APShells.rbxmx"
+									},
+									{
+										"name": "ArmoredHeavyMGBarrel",
+										"path": "./game/Assets/Placeable/Weapons/ArmoredHeavyMGBarrel.rbxmx"
+									},
+									{
+										"name": "ArmoredLightMGBarrel",
+										"path": "./game/Assets/Placeable/Weapons/ArmoredLightMGBarrel.rbxmx"
+									},
+									{
+										"name": "ArmoredMediumMGBarrel",
+										"path": "./game/Assets/Placeable/Weapons/ArmoredMediumMGBarrel.rbxmx"
+									},
+									{
+										"name": "CannonBreech",
+										"path": "./game/Assets/Placeable/Weapons/CannonBreech.rbxmx"
+									},
+									{
+										"name": "CylindricalTNT",
+										"path": "./game/Assets/Placeable/Weapons/CylindricalTNT.rbxmx"
+									},
+									{
+										"name": "Emitter",
+										"path": "./game/Assets/Placeable/Weapons/Emitter.rbxmx"
+									},
+									{
+										"name": "HalfSphericalTNT",
+										"path": "./game/Assets/Placeable/Weapons/HalfSphericalTNT.rbxmx"
+									},
+									{
+										"name": "HE Shells",
+										"path": "./game/Assets/Placeable/Weapons/HE Shells.rbxmx"
+									},
+									{
+										"name": "HeavyCannonBarrel",
+										"path": "./game/Assets/Placeable/Weapons/HeavyCannonBarrel.rbxmx"
+									},
+									{
+										"name": "HeavyCannonBase",
+										"path": "./game/Assets/Placeable/Weapons/HeavyCannonBase.rbxmx"
+									},
+									{
+										"name": "HeavyMGBarrel",
+										"path": "./game/Assets/Placeable/Weapons/HeavyMGBarrel.rbxmx"
+									},
+									{
+										"name": "HeavyMuzzleBreak",
+										"path": "./game/Assets/Placeable/Weapons/HeavyMuzzleBreak.rbxmx"
+									},
+									{
+										"name": "IncendiaryAmmunition",
+										"path": "./game/Assets/Placeable/Weapons/IncendiaryAmmunition.rbxmx"
+									},
+									{
+										"name": "LaserEmitter",
+										"path": "./game/Assets/Placeable/Weapons/LaserEmitter.rbxmx"
+									},
+									{
+										"name": "LaserLens",
+										"path": "./game/Assets/Placeable/Weapons/LaserLens.rbxmx"
+									},
+									{
+										"name": "LightCannonBarrel",
+										"path": "./game/Assets/Placeable/Weapons/LightCannonBarrel.rbxmx"
+									},
+									{
+										"name": "LightCannonBase",
+										"path": "./game/Assets/Placeable/Weapons/LightCannonBase.rbxmx"
+									},
+									{
+										"name": "LightMGBarrel",
+										"path": "./game/Assets/Placeable/Weapons/LightMGBarrel.rbxmx"
+									},
+									{
+										"name": "LightMuzzleBreak",
+										"path": "./game/Assets/Placeable/Weapons/LightMuzzleBreak.rbxmx"
+									},
+									{
+										"name": "MediumCannonBarrel",
+										"path": "./game/Assets/Placeable/Weapons/MediumCannonBarrel.rbxmx"
+									},
+									{
+										"name": "MediumCannonBase",
+										"path": "./game/Assets/Placeable/Weapons/MediumCannonBase.rbxmx"
+									},
+									{
+										"name": "MediumMGBarrel",
+										"path": "./game/Assets/Placeable/Weapons/MediumMGBarrel.rbxmx"
+									},
+									{
+										"name": "MediumMuzzleBreak",
+										"path": "./game/Assets/Placeable/Weapons/MediumMuzzleBreak.rbxmx"
+									},
+									{
+										"name": "MGLoader",
+										"path": "./game/Assets/Placeable/Weapons/MGLoader.rbxmx"
+									},
+									{
+										"name": "PlasmaGun",
+										"path": "./game/Assets/Placeable/Weapons/PlasmaGun.rbxmx"
+									},
+									{
+										"name": "PlasmaGunBarrel",
+										"path": "./game/Assets/Placeable/Weapons/PlasmaGunBarrel.rbxmx"
+									},
+									{
+										"name": "PlasmaSeparatorMuzzle",
+										"path": "./game/Assets/Placeable/Weapons/PlasmaSeparatorMuzzle.rbxmx"
+									},
+									{
+										"name": "PlasmaShotgunMuzzle",
+										"path": "./game/Assets/Placeable/Weapons/PlasmaShotgunMuzzle.rbxmx"
+									},
+									{
+										"name": "SphericalTNT",
+										"path": "./game/Assets/Placeable/Weapons/SphericalTNT.rbxmx"
+									},
+									{
+										"name": "TNT",
+										"path": "./game/Assets/Placeable/Weapons/TNT.rbxmx"
+									}
+								]
+							},
+							{
+								"name": "Wings",
+								"children": [
+									{
+										"name": "WedgeWing1x1",
+										"path": "./game/Assets/Placeable/Wings/WedgeWing1x1.rbxmx"
+									},
+									{
+										"name": "WedgeWing1x2",
+										"path": "./game/Assets/Placeable/Wings/WedgeWing1x2.rbxmx"
+									},
+									{
+										"name": "WedgeWing1x3",
+										"path": "./game/Assets/Placeable/Wings/WedgeWing1x3.rbxmx"
+									},
+									{
+										"name": "WedgeWing1x4",
+										"path": "./game/Assets/Placeable/Wings/WedgeWing1x4.rbxmx"
+									},
+									{
+										"name": "Wing1x1",
+										"path": "./game/Assets/Placeable/Wings/Wing1x1.rbxmx"
+									},
+									{
+										"name": "Wing1x2",
+										"path": "./game/Assets/Placeable/Wings/Wing1x2.rbxmx"
+									},
+									{
+										"name": "Wing1x3",
+										"path": "./game/Assets/Placeable/Wings/Wing1x3.rbxmx"
+									},
+									{
+										"name": "Wing1x4",
+										"path": "./game/Assets/Placeable/Wings/Wing1x4.rbxmx"
+									},
+									{
+										"name": "WingRounding",
+										"path": "./game/Assets/Placeable/Wings/WingRounding.rbxmx"
+									},
+									{
+										"name": "WingSharpening",
+										"path": "./game/Assets/Placeable/Wings/WingSharpening.rbxmx"
+									}
+								]
+							}
+						]
+					},
+					{
+						"name": "Prefabs",
+						"path": "./game/Assets/prefabs.rbxmx"
+					},
+					{
+						"name": "Guis",
+						"path": "./game/Assets/guis.rbxmx"
+					},
+					{
+						"name": "Helpers",
+						"path": "./game/Assets/helpers.rbxmx"
+					},
+					{
+						"name": "Ponders",
+						"path": "./game/Assets/ponders.rbxmx"
+					},
+					{
+						"name": "Sounds",
+						"path": "./game/Assets/sounds.rbxmx"
+					},
+					{
+						"name": "WeaponProjectiles",
+						"path": "./game/Assets/weapon_projectiles.rbxmx"
+					},
+					{
+						"name": "Wires",
+						"path": "./game/Assets/wires.rbxmx"
+					},
+					{
+						"name": "Effects",
+						"path": "./game/Assets/effects.rbxmx"
+					}
+				]
+			},
+			{
+				"name": "Map",
+				"path": "./game/Workspace/map.rbxm"
+			},
+			{
+				"name": "Obstacles",
+				"path": "./game/Workspace/obstacles.rbxm"
+			},
+			{
+				"name": "Plots",
+				"path": "./game/Workspace/plots.rbxm"
+			}
+		]
+	}
+]

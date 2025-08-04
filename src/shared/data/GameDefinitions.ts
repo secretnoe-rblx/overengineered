@@ -1,7 +1,9 @@
-import { Players, RunService } from "@rbxts/services";
+import { Players, ReplicatedStorage, RunService } from "@rbxts/services";
 import { PlayerRank } from "engine/shared/PlayerRank";
 
 export namespace GameDefinitions {
+	export const isOfficialAwms = ReplicatedStorage.FindFirstChild("anywaymachines") !== undefined;
+
 	// Building
 	export const FREE_SLOTS = 70;
 	export const ADMIN_SLOTS = 100 - FREE_SLOTS;
@@ -22,7 +24,15 @@ export namespace GameDefinitions {
 	export function getEnvironmentInfo(): readonly string[] {
 		const ret = [];
 
-		ret.push(`User: ${Players.LocalPlayer.UserId} @${Players.LocalPlayer.Name} ${Players.LocalPlayer.DisplayName}`);
+		ret.push(isOfficialAwms ? `[Official awms build]` : "[Unofficial build]");
+		if (Players.LocalPlayer) {
+			ret.push(
+				`User: ${Players.LocalPlayer.UserId} @${Players.LocalPlayer.Name} ${Players.LocalPlayer.DisplayName}`,
+			);
+		} else {
+			ret.push("Server");
+		}
+
 		ret.push(`Build: ${RunService.IsStudio() ? "🔒 Studio" : game.PlaceVersion}`);
 		ret.push(`Server: ${RunService.IsStudio() ? "🔒 Studio" : game.JobId}`);
 
