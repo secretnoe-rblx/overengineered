@@ -448,7 +448,7 @@ const maths = {
 		modelSource: autoModel("DoubleGenericLogicBlockPrefab", "LERP", categories.math),
 		logic: logic(
 			{
-				inputOrder: ["value1", "value2"],
+				inputOrder: ["value1", "value2", "alpha"],
 				input: {
 					value1: {
 						displayName: "Value 1",
