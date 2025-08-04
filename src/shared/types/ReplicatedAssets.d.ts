@@ -1,5 +1,7 @@
 interface ReplicatedStorage {
-	vLuau: ModuleScript;
+	Modules: Folder & {
+		vLuau: ModuleScript;
+	};
 	Assets: Folder & {
 		Atmosphere: Folder & {
 			AtmosphericExtinction: Model & {

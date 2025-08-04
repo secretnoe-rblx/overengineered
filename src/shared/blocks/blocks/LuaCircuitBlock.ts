@@ -8,7 +8,7 @@ import type { BlockLogicArgs, BlockLogicFullBothDefinitions } from "shared/block
 import type { BlockLogicTypes } from "shared/blockLogic/BlockLogicTypes";
 import type { BlockBuilder } from "shared/blocks/Block";
 
-const vLuau = require(ReplicatedStorage.vLuau) as {
+const vLuau = require(ReplicatedStorage.Modules.vLuau) as {
 	luau_execute: (code: string, env: unknown) => LuaTuple<[start: () => void, close: () => void]>;
 };
 
