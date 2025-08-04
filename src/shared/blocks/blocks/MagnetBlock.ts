@@ -8,7 +8,7 @@ import type { InstanceBlockLogicArgs } from "shared/blockLogic/BlockLogic";
 import type { BlockBuilder } from "shared/blocks/Block";
 
 const definition = {
-	inputOrder: ["strength", "invertPolarity"],
+	inputOrder: ["strength", "invertPolarity", "distance"],
 	input: {
 		strength: {
 			displayName: "Strength",
@@ -41,6 +41,12 @@ const definition = {
 				},
 			},
 		},
+		distance: {
+			displayName: "Distance multiplier",
+			types: {
+				number: { config: 1 },
+			},
+		},
 	},
 	output: {},
 } satisfies BlockLogicFullBothDefinitions;
@@ -49,11 +55,11 @@ const magicNumber = 60 * 1; // dt
 const magnets: Logic[] = [];
 const forcesApplied: Map<Logic, Vector3> = new Map<Logic, Vector3>();
 
-const calculateForce = (block1: Logic, block2: Logic): Vector3 | undefined => {
+const calculateForce = (block1: Logic, block2: Logic, distMult: number): Vector3 | undefined => {
 	const pos1 = block1.part.Position;
 	const pos2 = block2.part.Position;
 	const difference = pos1.sub(pos2);
-	const distance = difference.Magnitude;
+	const distance = difference.Magnitude / distMult;
 	if (distance > 10) return;
 
 	const invSqrt = 1 / (1 + math.sqrt(distance));
@@ -89,11 +95,15 @@ RunService.PostSimulation.Connect((dt) => {
 				continue;
 			}
 
+			const calculatedForce = calculateForce(
+				magneti,
+				magnetj,
+				magneti.distanceMultiplier * magnetj.distanceMultiplier,
+			);
+			if (!calculatedForce) continue;
+
 			const strength2 = magnetj.getStrength() * magicNumber * dt;
 			if (strength2 === 0) continue;
-
-			const calculatedForce = calculateForce(magneti, magnetj);
-			if (!calculatedForce) continue;
 
 			const appliedForce = calculatedForce.mul(strength1).add(calculatedForce.mul(strength2));
 			forcesApplied.set(magneti, (forcesApplied.get(magneti) ?? Vector3.zero).add(appliedForce));
@@ -117,6 +127,7 @@ class Logic extends InstanceBlockLogic<typeof definition> {
 	private strength = 0;
 
 	readonly scale: number;
+	distanceMultiplier: number = 1;
 
 	constructor(block: InstanceBlockLogicArgs) {
 		super(definition, block);
@@ -126,6 +137,7 @@ class Logic extends InstanceBlockLogic<typeof definition> {
 		this.scale = blockScale.X * blockScale.Y * blockScale.Z;
 
 		this.onk(["strength"], ({ strength }) => (this.strength = strength));
+		this.onk(["distance"], ({ distance }) => (this.distanceMultiplier = distance));
 		this.onk(["invertPolarity"], ({ invertPolarity }) => {
 			this.polarity = invertPolarity;
 			PartUtils.applyToAllDescendantsOfType(
@@ -156,5 +168,8 @@ export const MagnetBlock = {
 	displayName: "Magnet",
 	description: "Block that attracts to different polarity magnets, repels from same. Only for your blocks, though",
 
+	search: {
+		partialAliases: ["attractor"],
+	},
 	logic: { definition, ctor: Logic },
 } as const satisfies BlockBuilder;

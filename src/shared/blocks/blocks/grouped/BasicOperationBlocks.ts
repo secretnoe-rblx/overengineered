@@ -1,4 +1,5 @@
 import { RunService } from "@rbxts/services";
+import { Colors } from "engine/shared/Colors";
 import { MathUtils } from "engine/shared/fixes/MathUtils";
 import { CalculatableBlockLogic } from "shared/blockLogic/BlockLogic";
 import { BlockLogicValueResults } from "shared/blockLogic/BlockLogicValueStorage";
@@ -439,6 +440,67 @@ const maths = {
 		logic: logic(defs.num1_num, ({ value }) => ({
 			result: { type: "number", value: math.sqrt(value) },
 		})),
+	},
+
+	lerp: {
+		displayName: "Lerp",
+		description: "i can't be arsed to explain this",
+		modelSource: autoModel("DoubleGenericLogicBlockPrefab", "LERP", categories.math),
+		logic: logic(
+			{
+				inputOrder: ["value1", "value2"],
+				input: {
+					value1: {
+						displayName: "Value 1",
+						types: {
+							number: { config: 0 },
+							vector3: { config: Vector3.zero },
+							color: { config: Colors.white },
+						},
+						group: "0",
+					},
+					value2: {
+						displayName: "Value 2",
+						types: {
+							number: { config: 1 },
+							vector3: { config: Vector3.one },
+							color: { config: Colors.black },
+						},
+						group: "0",
+					},
+					alpha: {
+						displayName: "Alpha",
+						unit: "0-1",
+						types: {
+							number: { config: 0 },
+						},
+					},
+				},
+				output: {
+					result: {
+						displayName: "Result",
+						types: ["number", "vector3", "color"],
+						group: "0",
+					},
+				},
+			},
+			({ value1, value2, alpha }, logic) => {
+				if (typeIs(value1, "number") && typeIs(value2, "number")) {
+					return {
+						result: { type: "number", value: new Vector3(value1).Lerp(new Vector3(value2), alpha).X },
+					};
+				}
+				if (typeIs(value1, "Vector3") && typeIs(value2, "Vector3")) {
+					return { result: { type: "vector3", value: value1.Lerp(value2, alpha) } };
+				}
+				if (typeIs(value1, "Color3") && typeIs(value2, "Color3")) {
+					return { result: { type: "color", value: value1.Lerp(value2, alpha) } };
+				}
+
+				logic.disableAndBurn();
+				return BlockLogicValueResults.garbage;
+			},
+		),
 	},
 
 	add: {

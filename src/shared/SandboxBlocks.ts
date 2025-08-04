@@ -1,6 +1,7 @@
 import { BlockListBuilder } from "shared/blocks/BlockListBuilder";
 import { AltimeterBlock } from "shared/blocks/blocks/AltimeterBlock";
 import { AngleSensorBlock } from "shared/blocks/blocks/AngleSensorBlock";
+import { AttractorBlock } from "shared/blocks/blocks/AttractorBlock";
 import { BackMountBlock } from "shared/blocks/blocks/BackMountBlock";
 import { BallastBlock } from "shared/blocks/blocks/BallastBlock";
 import { BeaconBlock } from "shared/blocks/blocks/BeaconBlock";
@@ -142,6 +143,7 @@ export const CreateSandboxBlocks = (di: DIContainer): BlockList => {
 		BallastBlock,
 		HeliumBlock,
 		MagnetBlock,
+		AttractorBlock,
 		BracedShaftBlock,
 		BearingShaftBlock,
 
