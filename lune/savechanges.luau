@@ -88,6 +88,12 @@ local function saveInstanceToFile(instance, filePath, depth)
 		instance.WorldPivotData = nil
 	end
 
+	for _, child in ipairs(instance:GetDescendants()) do
+		if child:IsA("Model") and child.PrimaryPart then
+			child.WorldPivotData = nil
+		end
+	end
+
 	-- roblox.serializeModel expects a table of instances.
 	-- If isXml is true, XML format will be used, otherwise binary.
 	local success, data = protectedCall(
