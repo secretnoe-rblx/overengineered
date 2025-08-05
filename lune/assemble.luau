@@ -26,6 +26,8 @@ local CONFIG = {
 
 	-- Properties to set for DataModel.Workspace
 	WorkspaceProperties = {
+		Origin = roblox.CFrame.new(0, -16384, 0),
+		WorldPivot = roblox.CFrame.new(0, -16384, 0),
 		FallenPartsDestroyHeight = -17000,
 		SignalBehavior = roblox.Enum.SignalBehavior.Default,
 		FluidForces = roblox.Enum.FluidForces.Experimental,
@@ -35,6 +37,9 @@ local CONFIG = {
 	},
 
 	Services = {
+		Players = {
+			RespawnTime = 3,
+		},
 		Lighting = {
 			Ambient = roblox.Color3.fromRGB(70, 70, 70),
 			Brightness = 3,
@@ -43,9 +48,15 @@ local CONFIG = {
 			GlobalShadows = true,
 			OutdoorAmbient = roblox.Color3.fromRGB(57, 56, 46),
 			PrioritizeLightingQuality = true,
+			ClockTime = 14,
+			GeographicLatitude = 41.733,
 		},
 		MaterialService = {
 			Use2022Materials = true,
+		},
+		StarterPlayer = {
+			CharacterWalkSpeed = 20,
+			NameDisplayDistance = 0,
 		},
 		TextChatService = {
 			ChatVersion = roblox.Enum.ChatVersion.TextChatService,
