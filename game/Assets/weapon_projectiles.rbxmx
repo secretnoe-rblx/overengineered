@@ -272,18 +272,18 @@
         <BinaryString name="Tags"></BinaryString>
         <OptionalCoordinateFrame name="WorldPivotData">
           <CFrame>
-            <X>104.27002</X>
-            <Y>-16381.567</Y>
-            <Z>222.94965</Z>
+            <X>104.27</X>
+            <Y>-16381.499</Y>
+            <Z>222.95</Z>
             <R00>0</R00>
-            <R01>-1</R01>
-            <R02>0</R02>
-            <R10>1</R10>
-            <R11>0</R11>
+            <R01>0</R01>
+            <R02>1</R02>
+            <R10>0</R10>
+            <R11>1</R11>
             <R12>0</R12>
-            <R20>0</R20>
+            <R20>-1</R20>
             <R21>0</R21>
-            <R22>1</R22>
+            <R22>0</R22>
           </CFrame>
         </OptionalCoordinateFrame>
       </Properties>
@@ -917,18 +917,18 @@
         <BinaryString name="Tags"></BinaryString>
         <OptionalCoordinateFrame name="WorldPivotData">
           <CFrame>
-            <X>109.77002</X>
+            <X>109.77031</X>
             <Y>-16380.998</Y>
             <Z>222.94803</Z>
             <R00>0</R00>
-            <R01>0</R01>
-            <R02>-1</R02>
-            <R10>0</R10>
-            <R11>-1</R11>
+            <R01>-1</R01>
+            <R02>0</R02>
+            <R10>1</R10>
+            <R11>0</R11>
             <R12>0</R12>
-            <R20>-1</R20>
+            <R20>0</R20>
             <R21>0</R21>
-            <R22>0</R22>
+            <R22>1</R22>
           </CFrame>
         </OptionalCoordinateFrame>
       </Properties>
@@ -1183,15 +1183,15 @@
             <X>112.75</X>
             <Y>-16381.113</Y>
             <Z>222.18329</Z>
-            <R00>1</R00>
+            <R00>0</R00>
             <R01>0</R01>
-            <R02>0</R02>
+            <R02>1</R02>
             <R10>0</R10>
             <R11>1</R11>
             <R12>0</R12>
-            <R20>0</R20>
+            <R20>-1</R20>
             <R21>0</R21>
-            <R22>1</R22>
+            <R22>0</R22>
           </CFrame>
         </OptionalCoordinateFrame>
       </Properties>

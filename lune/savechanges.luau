@@ -84,6 +84,10 @@ local function saveInstanceToFile(instance, filePath, depth)
 
 	ensureDirectoryExists(filePath)
 
+	if instance:IsA("Model") and instance.PrimaryPart then
+		instance.WorldPivotData = nil
+	end
+
 	-- roblox.serializeModel expects a table of instances.
 	-- If isXml is true, XML format will be used, otherwise binary.
 	local success, data = protectedCall(
