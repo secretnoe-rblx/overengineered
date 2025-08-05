@@ -1,5 +1,4 @@
 import { Component } from "engine/shared/component/Component";
-import { ExternalDatabaseBackendSlots } from "anywaymachines/server/database/ExternalDatabaseBackend";
 import { BlocksSerializer } from "shared/building/BlocksSerializer";
 import { SlotsMeta } from "shared/SlotsMeta";
 import type { PlayerDatabase } from "server/database/PlayerDatabase";
@@ -8,24 +7,43 @@ import type { PlayerId } from "server/PlayerId";
 import type { BuildingPlot } from "shared/building/BuildingPlot";
 import type { PlayerDataStorageRemotesSlots } from "shared/remotes/PlayerDataRemotes";
 
+export interface SlotHistoryLoader {
+	readonly loadSlotHistory: (
+		selv: ServerSlotRequestController,
+		{ index }: PlayerLoadSlotRequest,
+	) => LoadSlotHistoryResponse;
+	readonly loadSlotFromHistory: (
+		selv: ServerSlotRequestController,
+		{ databaseId, historyId }: PlayerLoadSlotFromHistoryRequest,
+	) => LoadSlotResponse;
+}
+
 @injectable
 export class ServerSlotRequestController extends Component {
 	constructor(
-		@inject private readonly playerId: PlayerId,
+		@inject readonly playerId: PlayerId,
 		@inject slotRemotes: PlayerDataStorageRemotesSlots,
-		@inject private readonly blocks: BuildingPlot,
+		@inject readonly blocks: BuildingPlot,
 
-		@inject private readonly blockList: BlockList,
-		@inject private readonly players: PlayerDatabase,
-		@inject private readonly slots: SlotDatabase,
+		@inject readonly blockList: BlockList,
+		@inject readonly players: PlayerDatabase,
+		@inject readonly slots: SlotDatabase,
 	) {
 		super();
+
+		this.onInject(() => {
+			const loader: SlotHistoryLoader = this.getDI().tryResolve<SlotHistoryLoader>() ?? {
+				loadSlotHistory: () => ({ success: false, message: "Unavailable" }),
+				loadSlotFromHistory: () => ({ success: false, message: "Unavailable" }),
+			};
+
+			slotRemotes.loadHistory.subscribe((p, arg) => loader.loadSlotHistory(this, arg));
+			slotRemotes.loadFromHistory.subscribe((p, arg) => loader.loadSlotFromHistory(this, arg));
+		});
 
 		slotRemotes.load.subscribe((p, arg) => this.loadSlot(arg));
 		slotRemotes.save.subscribe((p, arg) => this.saveSlot(arg));
 		slotRemotes.delete.subscribe((p, arg) => this.deleteSlot(arg));
-		slotRemotes.loadHistory.subscribe((p, arg) => this.loadSlotHistory(arg));
-		slotRemotes.loadFromHistory.subscribe((p, arg) => this.loadSlotFromHistory(arg));
 	}
 
 	private saveSlot(request: PlayerSaveSlotRequest): SaveSlotResponse {
@@ -88,35 +106,6 @@ export class ServerSlotRequestController extends Component {
 		$log(`Loading ${userid}'s slot ${index}`);
 		const dblocks = BlocksSerializer.deserializeFromObject(blocks, this.blocks, this.blockList);
 		$log(`Loaded ${userid} slot ${index} in ${os.clock() - start}`);
-
-		return { success: true, isEmpty: dblocks === 0 };
-	}
-
-	private loadSlotHistory({ index }: PlayerLoadSlotRequest): LoadSlotHistoryResponse {
-		const dbid = ExternalDatabaseBackendSlots.getDatabaseIdFromSlotId(this.playerId, index);
-		const history = ExternalDatabaseBackendSlots.loadHistoryList(this.playerId, dbid);
-
-		return { success: true, history };
-	}
-	private loadSlotFromHistory({ databaseId, historyId }: PlayerLoadSlotFromHistoryRequest): LoadSlotResponse {
-		const userid = this.playerId;
-
-		const start = os.clock();
-		const blocks = BlocksSerializer.jsonToObject(
-			ExternalDatabaseBackendSlots.loadSlotFromHistory(userid, databaseId, historyId) ?? {
-				blocks: [],
-				version: 0,
-			},
-		);
-
-		this.blocks.deleteOperation.execute("all");
-		if (blocks.blocks.size() === 0) {
-			return { success: true, isEmpty: true };
-		}
-
-		$log(`Loading ${userid}'s slot D${databaseId} H${historyId}`);
-		const dblocks = BlocksSerializer.deserializeFromObject(blocks, this.blocks, this.blockList);
-		$log(`Loaded ${userid} slot D${databaseId} H${historyId} in ${os.clock() - start}`);
 
 		return { success: true, isEmpty: dblocks === 0 };
 	}
