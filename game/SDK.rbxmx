@@ -61,55 +61,57 @@ function pluginModule:Setup()
 	
 	SSS:RemoveTag(tag)
 	
-	-- Weld groups are not possible with lune
-	print("OverEngineered SDK: Registering collision groups")
-	PS:RegisterCollisionGroup("BlockCollider")
-	PS:RegisterCollisionGroup("BlockRaycast")
-	PS:RegisterCollisionGroup("BlockWeld")
-	PS:RegisterCollisionGroup("Blocks")
-	PS:RegisterCollisionGroup("ColBoxExclusive")
-	PS:RegisterCollisionGroup("Projectile")
-	PS:RegisterCollisionGroup("RadarDetects")
-	PS:RegisterCollisionGroup("moduleMarker")
-	-- BlockCollider
-	PS:CollisionGroupSetCollidable("BlockCollider", "Default", false)
-	PS:CollisionGroupSetCollidable("BlockCollider", "BlockRaycast", true)
+	-- Weld groups are not possible with lune (nvm)
+	--print("OverEngineered SDK: Registering collision groups")
+	--PS:RegisterCollisionGroup("Plugin_Unselectable_Group")
+	--PS:RegisterCollisionGroup("Blocks")
+	--PS:RegisterCollisionGroup("BlockWeld")
+	--PS:RegisterCollisionGroup("BlockCollider")
+	--PS:RegisterCollisionGroup("StudioSelectable")
+	--PS:RegisterCollisionGroup("Projectile")
+	--PS:RegisterCollisionGroup("moduleMarker")
+	--PS:RegisterCollisionGroup("RadarDetects")
+	--PS:RegisterCollisionGroup("BlockRaycast")
+	--PS:RegisterCollisionGroup("ColBoxExclusive")
+	---- BlockCollider
+	--PS:CollisionGroupSetCollidable("BlockCollider", "Default", false)
+	--PS:CollisionGroupSetCollidable("BlockCollider", "BlockRaycast", true)
 	
-	-- BlockRaycast
-	PS:CollisionGroupSetCollidable("BlockRaycast", "moduleMarker", false)
+	---- BlockRaycast
+	--PS:CollisionGroupSetCollidable("BlockRaycast", "moduleMarker", false)
 	
-	-- BlockWeld
-	PS:CollisionGroupSetCollidable("BlockWeld", "Default", false)
-	PS:CollisionGroupSetCollidable("BlockWeld", "BlockRaycast", true)
-	PS:CollisionGroupSetCollidable("BlockWeld", "Blocks", true)
+	---- BlockWeld
+	--PS:CollisionGroupSetCollidable("BlockWeld", "Default", false)
+	--PS:CollisionGroupSetCollidable("BlockWeld", "BlockRaycast", true)
+	--PS:CollisionGroupSetCollidable("BlockWeld", "Blocks", true)
 	
-	-- Blocks
-	PS:CollisionGroupSetCollidable("Blocks", "BlockCollider", false)
-	PS:CollisionGroupSetCollidable("Blocks", "RadarDetects", false)
+	---- Blocks
+	--PS:CollisionGroupSetCollidable("Blocks", "BlockCollider", false)
+	--PS:CollisionGroupSetCollidable("Blocks", "RadarDetects", false)
 	
-	-- ColBoxExclusive
-	PS:CollisionGroupSetCollidable("ColBoxExclusive", "BlockCollider", false)
-	PS:CollisionGroupSetCollidable("ColBoxExclusive", "BlockWeld", false)
-	PS:CollisionGroupSetCollidable("ColBoxExclusive", "ColBoxExclusive", false)
-	PS:CollisionGroupSetCollidable("ColBoxExclusive", "Projectile", false)
-	PS:CollisionGroupSetCollidable("ColBoxExclusive", "moduleMarker", false)
+	---- ColBoxExclusive
+	--PS:CollisionGroupSetCollidable("ColBoxExclusive", "BlockCollider", false)
+	--PS:CollisionGroupSetCollidable("ColBoxExclusive", "BlockWeld", false)
+	--PS:CollisionGroupSetCollidable("ColBoxExclusive", "ColBoxExclusive", false)
+	--PS:CollisionGroupSetCollidable("ColBoxExclusive", "Projectile", false)
+	--PS:CollisionGroupSetCollidable("ColBoxExclusive", "moduleMarker", false)
 	
-	-- Projectile
-	PS:CollisionGroupSetCollidable("Projectile", "BlockCollider", false)
-	PS:CollisionGroupSetCollidable("Projectile", "BlockWeld", false)
-	PS:CollisionGroupSetCollidable("Projectile", "ColBoxExclusive", false)
-	PS:CollisionGroupSetCollidable("Projectile", "Projectile", false)
-	PS:CollisionGroupSetCollidable("Projectile", "RadarDetects", false)
-	PS:CollisionGroupSetCollidable("Projectile", "moduleMarker", false)
+	---- Projectile
+	--PS:CollisionGroupSetCollidable("Projectile", "BlockCollider", false)
+	--PS:CollisionGroupSetCollidable("Projectile", "BlockWeld", false)
+	--PS:CollisionGroupSetCollidable("Projectile", "ColBoxExclusive", false)
+	--PS:CollisionGroupSetCollidable("Projectile", "Projectile", false)
+	--PS:CollisionGroupSetCollidable("Projectile", "RadarDetects", false)
+	--PS:CollisionGroupSetCollidable("Projectile", "moduleMarker", false)
 	
-	-- RadarDetects
-	PS:CollisionGroupSetCollidable("RadarDetects", "Default", false)
-	PS:CollisionGroupSetCollidable("RadarDetects", "BlockRaycast", true)
-	PS:CollisionGroupSetCollidable("RadarDetects", "ColBoxExclusive", true)
+	---- RadarDetects
+	--PS:CollisionGroupSetCollidable("RadarDetects", "Default", false)
+	--PS:CollisionGroupSetCollidable("RadarDetects", "BlockRaycast", true)
+	--PS:CollisionGroupSetCollidable("RadarDetects", "ColBoxExclusive", true)
 	
-	-- moduleMarker
-	PS:CollisionGroupSetCollidable("moduleMarker", "Default", false)
-	PS:CollisionGroupSetCollidable("moduleMarker", "Blocks", true)
+	---- moduleMarker
+	--PS:CollisionGroupSetCollidable("moduleMarker", "Default", false)
+	--PS:CollisionGroupSetCollidable("moduleMarker", "Blocks", true)
 	
 	-- Teleport camera to the bottom
 	print("OverEngineered SDK: Teleporting user camera to the map")
