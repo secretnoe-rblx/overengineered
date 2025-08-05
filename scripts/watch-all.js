@@ -14,13 +14,20 @@ const invocationDir = process.cwd();
 const outPath = path.join(projectRoot, "out");
 const lunewatchPath = path.join(projectRoot, "scripts", "lunewatch.js");
 
-// Log helper with color
 const logMain = (...args) => console.log(chalk.green("[main]"), ...args);
 
 logMain("Project root:   ", projectRoot);
 logMain("Invocation dir: ", invocationDir);
 logMain("Watching ./out in:", outPath);
 logMain("lunewatch path:", lunewatchPath);
+
+function printWithPrefix(data, prefix, colorFn) {
+	const lines = data.toString().split(/\r?\n/);
+	for (let i = 0; i < lines.length; i++) {
+		const line = lines[i];
+		console.log(colorFn(prefix) + " " + line);
+	}
+}
 
 function runCommand(label, command, args, cwd) {
 	const proc = spawn(command, args, {
@@ -35,11 +42,11 @@ function runCommand(label, command, args, cwd) {
 	const exitColor = chalk.gray;
 
 	proc.stdout.on("data", (data) => {
-		process.stdout.write(color(`${prefix} `) + data.toString());
+		printWithPrefix(data, prefix, color);
 	});
 
 	proc.stderr.on("data", (data) => {
-		process.stderr.write(errorColor(`${prefix} ERROR `) + data.toString());
+		printWithPrefix(data, prefix + " ERROR", errorColor);
 	});
 
 	proc.on("close", (code) => {
@@ -49,10 +56,8 @@ function runCommand(label, command, args, cwd) {
 	return proc;
 }
 
-// 1) npm run watch
 runCommand("compile", "npm", ["run", "watch"], invocationDir);
 
-// 2) wait for ./out
 function waitForOutFolder() {
 	if (fs.existsSync(outPath) && fs.statSync(outPath).isDirectory()) {
 		runCommand("rojo", "npm", ["run", "rojo"], invocationDir);
@@ -71,5 +76,4 @@ function waitForOutFolder() {
 
 waitForOutFolder();
 
-// 3) run lunewatch.js
 runCommand("assets", "node", [lunewatchPath], projectRoot);
