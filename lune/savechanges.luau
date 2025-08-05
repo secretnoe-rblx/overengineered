@@ -39,7 +39,7 @@ local function log(message, depth)
 end
 
 -- Warning function (always displayed)
-local function warn(message, depth)
+local function warn(message: unknown, depth: number)
 	depth = depth or 0
 	local fullMessage = ("[WARN] %s%s"):format(string.rep("  ", depth), tostring(message))
 	print(fullMessage)
@@ -132,6 +132,49 @@ local function processNode(node, parentInstance, depth)
 	end
 end
 
+type instanceProps = {
+	path: string | nil,
+	children: { [string]: instanceProps },
+}
+type manifest = {
+	game: { [string]: instanceProps },
+}
+
+local function processNode2(name: string, node: instanceProps, parentInstance: Instance, depth: number)
+	log("Looking for instance: '" .. name .. "' in " .. parentInstance:GetFullName(), depth)
+
+	local childInstance;
+	if parentInstance:IsA("DataModel") then
+		childInstance = parentInstance:GetService(name)
+	else
+		childInstance = parentInstance:FindFirstChild(name)
+	end
+
+	if not childInstance then
+		local fullPath = parentInstance:GetFullName() .. "." .. name
+		warn("Could not find instance: " .. fullPath, depth)
+		table.insert(missingInstances, fullPath)
+		return
+	end
+
+	if node.path then
+		-- if has both path and children, save only properties
+		if node.children then
+			local clone = childInstance:Clone();
+			clone:ClearAllChildren()
+			saveInstanceToFile(clone, node.path, depth + 1)
+			clone:Destroy()
+		else
+			saveInstanceToFile(childInstance, node.path, depth + 1)
+		end
+	end
+	if node.children then
+		for k, v in pairs(node.children) do
+			processNode2(k, v, childInstance, depth + 1)
+		end
+	end
+end
+
 local function main()
 	log("Starting place extraction process...")
 
@@ -143,7 +186,7 @@ local function main()
 		return false
 	end
 
-	local success, manifest = protectedCall(serde.decode, "Failed to parse manifest JSON", "json", manifestJson)
+	local success, manifest: manifest = protectedCall(serde.decode, "Failed to parse manifest JSON", "json", manifestJson)
 	if not success then return false end
 	log("Manifest parsed successfully.")
 
@@ -161,22 +204,8 @@ local function main()
 
 	-- 3. Traversing the manifest and exporting models
 	log("Starting instance export based on manifest...")
-	for _, serviceData in ipairs(manifest) do
-		local serviceName = serviceData.name
-		if not serviceName then
-			warn("Invalid service entry in manifest: missing 'name'. Skipping.")
-			continue
-		end
-
-		log("Processing service: " .. serviceName, 1)
-		local getServiceSuccess, service = protectedCall(game.GetService, "Failed to get service: " .. serviceName, game,
-			serviceName)
-
-		if getServiceSuccess and serviceData.children then
-			for _, childNode in ipairs(serviceData.children) do
-				processNode(childNode, service, 2)
-			end
-		end
+	for name, props in pairs(manifest.game) do
+		processNode2(name, props, game, 0)
 	end
 
 	return #criticalErrors == 0
