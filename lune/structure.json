@@ -22,6 +22,10 @@
 		]
 	},
 	{
+		"name": "ServerScriptService",
+		"children": [{ "name": "Map Scripts", "path": "./game/ServerScriptService/map_scripts.rbxmx" }]
+	},
+	{
 		"name": "Lighting",
 		"children": [
 			{ "name": "Atmosphere", "path": "./game/Lighting/atmosphere.rbxmx" },
@@ -34,14 +38,14 @@
 	},
 	{
 		"name": "ReplicatedFirst",
-		"children": [ { "name": "3D Atmosphere", "path": "./game/ReplicatedFirst/atmosphere.rbxmx" } ]
+		"children": [{ "name": "3D Atmosphere", "path": "./game/ReplicatedFirst/atmosphere.rbxmx" }]
 	},
 	{
 		"name": "StarterPlayer",
 		"children": [
 			{
 				"name": "StarterPlayerScripts",
-				"children": [ { "name": "PlayerModule", "path": "./game/StarterPlayerScripts/player_module.rbxmx" } ]
+				"children": [{ "name": "PlayerModule", "path": "./game/StarterPlayerScripts/player_module.rbxmx" }]
 			}
 		]
 	},
