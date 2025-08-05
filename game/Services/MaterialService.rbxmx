@@ -1,0 +1,53 @@
+<roblox version="4">
+  <Item class="MaterialService" referent="0">
+    <Properties>
+      <string name="Name">MaterialService</string>
+      <string name="AsphaltName">Asphalt</string>
+      <BinaryString name="AttributesSerialize"></BinaryString>
+      <string name="BasaltName">Basalt</string>
+      <string name="BrickName">Brick</string>
+      <SecurityCapabilities name="Capabilities">0</SecurityCapabilities>
+      <string name="CardboardName">Cardboard</string>
+      <string name="CarpetName">Carpet</string>
+      <string name="CeramicTilesName">CeramicTiles</string>
+      <string name="ClayRoofTilesName">ClayRoofTiles</string>
+      <string name="CobblestoneName">Cobblestone</string>
+      <string name="ConcreteName">Concrete</string>
+      <string name="CorrodedMetalName">CorrodedMetal</string>
+      <string name="CrackedLavaName">CrackedLava</string>
+      <string name="DiamondPlateName">DiamondPlate</string>
+      <string name="FabricName">Fabric</string>
+      <string name="FoilName">Foil</string>
+      <string name="GlacierName">Glacier</string>
+      <string name="GraniteName">Granite</string>
+      <string name="GrassName">Grass</string>
+      <string name="GroundName">Ground</string>
+      <string name="IceName">Ice</string>
+      <string name="LeafyGrassName">LeafyGrass</string>
+      <string name="LeatherName">Leather</string>
+      <string name="LimestoneName">Limestone</string>
+      <string name="MarbleName">Marble</string>
+      <string name="MetalName">Metal</string>
+      <string name="MudName">Mud</string>
+      <string name="PavementName">Pavement</string>
+      <string name="PebbleName">Pebble</string>
+      <string name="PlasterName">Plaster</string>
+      <string name="PlasticName">Plastic</string>
+      <string name="RockName">Rock</string>
+      <string name="RoofShinglesName">RoofShingles</string>
+      <string name="RubberName">Rubber</string>
+      <string name="SaltName">Salt</string>
+      <string name="SandName">Sand</string>
+      <bool name="DefinesCapabilities">false</bool>
+      <string name="SandstoneName">Sandstone</string>
+      <string name="SlateName">Slate</string>
+      <string name="SmoothPlasticName">SmoothPlastic</string>
+      <string name="SnowName">Snow</string>
+      <int64 name="SourceAssetId">-1</int64>
+      <BinaryString name="Tags"></BinaryString>
+      <bool name="Use2022MaterialsXml">true</bool>
+      <string name="WoodName">Wood</string>
+      <string name="WoodPlanksName">WoodPlanks</string>
+    </Properties>
+  </Item>
+</roblox>

@@ -1,0 +1,19 @@
+<roblox version="4">
+  <Item class="StarterGui" referent="0">
+    <Properties>
+      <string name="Name">StarterGui</string>
+      <BinaryString name="AttributesSerialize"></BinaryString>
+      <SecurityCapabilities name="Capabilities">0</SecurityCapabilities>
+      <bool name="ResetPlayerGuiOnSpawn">true</bool>
+      <token name="RtlTextSupport">0</token>
+      <bool name="DefinesCapabilities">false</bool>
+      <token name="ScreenOrientation">2</token>
+      <bool name="ShowDevelopmentGui">true</bool>
+      <int64 name="SourceAssetId">-1</int64>
+      <Ref name="StudioDefaultStyleSheet">null</Ref>
+      <Ref name="StudioInsertWidgetLayerCollectorAutoLinkStyleSheet">null</Ref>
+      <BinaryString name="Tags"></BinaryString>
+      <token name="VirtualCursorMode">0</token>
+    </Properties>
+  </Item>
+</roblox>

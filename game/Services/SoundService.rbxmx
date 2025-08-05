@@ -1,0 +1,22 @@
+<roblox version="4">
+  <Item class="SoundService" referent="0">
+    <Properties>
+      <string name="Name">SoundService</string>
+      <token name="AmbientReverb">0</token>
+      <BinaryString name="AttributesSerialize"></BinaryString>
+      <token name="AudioApiByDefault">0</token>
+      <SecurityCapabilities name="Capabilities">0</SecurityCapabilities>
+      <token name="CharacterSoundsUseNewApi">0</token>
+      <token name="DefaultListenerLocation">0</token>
+      <float name="DistanceFactor">3.33</float>
+      <float name="DopplerScale">1</float>
+      <bool name="IsNewExpForAudioApiByDefault">false</bool>
+      <bool name="RespectFilteringEnabled">false</bool>
+      <float name="RolloffScale">1</float>
+      <bool name="DefinesCapabilities">false</bool>
+      <int64 name="SourceAssetId">-1</int64>
+      <BinaryString name="Tags"></BinaryString>
+      <token name="VolumetricAudio">1</token>
+    </Properties>
+  </Item>
+</roblox>

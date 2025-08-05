@@ -1,0 +1,205 @@
+<roblox version="4">
+  <Item class="TextChatService" referent="0">
+    <Properties>
+      <string name="Name">TextChatService</string>
+      <BinaryString name="AttributesSerialize"></BinaryString>
+      <SecurityCapabilities name="Capabilities">0</SecurityCapabilities>
+      <bool name="ChatTranslationFTUXShown">true</bool>
+      <bool name="ChatTranslationToggleEnabled">false</bool>
+      <token name="ChatVersion">1</token>
+      <bool name="CreateDefaultCommands">true</bool>
+      <bool name="CreateDefaultTextChannels">true</bool>
+      <bool name="HasSeenDeprecationDialog">false</bool>
+      <bool name="IsLegacyChatDisabled">false</bool>
+      <bool name="DefinesCapabilities">false</bool>
+      <int64 name="SourceAssetId">-1</int64>
+      <BinaryString name="Tags"></BinaryString>
+    </Properties>
+    <Item class="ChatWindowConfiguration" referent="1">
+      <Properties>
+        <string name="Name">ChatWindowConfiguration</string>
+        <BinaryString name="AttributesSerialize"></BinaryString>
+        <Color3 name="BackgroundColor3">
+          <R>0.09803922</R>
+          <G>0.105882354</G>
+          <B>0.11372549</B>
+        </Color3>
+        <double name="BackgroundTransparency">0.3</double>
+        <SecurityCapabilities name="Capabilities">0</SecurityCapabilities>
+        <bool name="Enabled">true</bool>
+        <Font name="FontFace">
+          <Family>
+            <url>rbxasset://fonts/families/GothamSSm.json</url>
+          </Family>
+          <Weight>500</Weight>
+          <Style>Normal</Style>
+          <CachedFaceId>
+            <url>rbxasset://fonts/Montserrat-Medium.ttf</url>
+          </CachedFaceId>
+        </Font>
+        <float name="HeightScale">1</float>
+        <token name="HorizontalAlignment">1</token>
+        <bool name="DefinesCapabilities">false</bool>
+        <int64 name="SourceAssetId">-1</int64>
+        <BinaryString name="Tags"></BinaryString>
+        <Color3 name="TextColor3">
+          <R>1</R>
+          <G>1</G>
+          <B>1</B>
+        </Color3>
+        <int64 name="TextSize">14</int64>
+        <Color3 name="TextStrokeColor3">
+          <R>0</R>
+          <G>0</G>
+          <B>0</B>
+        </Color3>
+        <double name="TextStrokeTransparency">0.5</double>
+        <token name="VerticalAlignment">1</token>
+        <float name="WidthScale">1</float>
+      </Properties>
+    </Item>
+    <Item class="ChatInputBarConfiguration" referent="2">
+      <Properties>
+        <string name="Name">ChatInputBarConfiguration</string>
+        <BinaryString name="AttributesSerialize"></BinaryString>
+        <bool name="AutocompleteEnabled">true</bool>
+        <Color3 name="BackgroundColor3">
+          <R>0.09803922</R>
+          <G>0.105882354</G>
+          <B>0.11372549</B>
+        </Color3>
+        <double name="BackgroundTransparency">0.2</double>
+        <SecurityCapabilities name="Capabilities">0</SecurityCapabilities>
+        <bool name="Enabled">true</bool>
+        <Font name="FontFace">
+          <Family>
+            <url>rbxasset://fonts/families/GothamSSm.json</url>
+          </Family>
+          <Weight>500</Weight>
+          <Style>Normal</Style>
+          <CachedFaceId>
+            <url>rbxasset://fonts/Montserrat-Medium.ttf</url>
+          </CachedFaceId>
+        </Font>
+        <token name="KeyboardKeyCode">47</token>
+        <Color3 name="PlaceholderColor3">
+          <R>0.69803923</R>
+          <G>0.69803923</G>
+          <B>0.69803923</B>
+        </Color3>
+        <bool name="DefinesCapabilities">false</bool>
+        <int64 name="SourceAssetId">-1</int64>
+        <BinaryString name="Tags"></BinaryString>
+        <Ref name="TargetTextChannel">null</Ref>
+        <Color3 name="TextColor3">
+          <R>1</R>
+          <G>1</G>
+          <B>1</B>
+        </Color3>
+        <int64 name="TextSize">14</int64>
+        <Color3 name="TextStrokeColor3">
+          <R>0</R>
+          <G>0</G>
+          <B>0</B>
+        </Color3>
+        <double name="TextStrokeTransparency">0.5</double>
+      </Properties>
+    </Item>
+    <Item class="BubbleChatConfiguration" referent="3">
+      <Properties>
+        <string name="Name">BubbleChatConfiguration</string>
+        <string name="AdorneeName">HumanoidRootPart</string>
+        <BinaryString name="AttributesSerialize"></BinaryString>
+        <Color3 name="BackgroundColor3">
+          <R>0.98039216</R>
+          <G>0.98039216</G>
+          <B>0.98039216</B>
+        </Color3>
+        <double name="BackgroundTransparency">0.1</double>
+        <float name="BubbleDuration">15</float>
+        <float name="BubblesSpacing">6</float>
+        <SecurityCapabilities name="Capabilities">0</SecurityCapabilities>
+        <bool name="Enabled">true</bool>
+        <token name="Font">18</token>
+        <Font name="FontFace">
+          <Family>
+            <url>rbxasset://fonts/families/GothamSSm.json</url>
+          </Family>
+          <Weight>500</Weight>
+          <Style>Normal</Style>
+          <CachedFaceId>
+            <url>rbxasset://fonts/Montserrat-Medium.ttf</url>
+          </CachedFaceId>
+        </Font>
+        <Vector3 name="LocalPlayerStudsOffset">
+          <X>0</X>
+          <Y>0</Y>
+          <Z>0</Z>
+        </Vector3>
+        <float name="MaxBubbles">3</float>
+        <float name="MaxDistance">100</float>
+        <float name="MinimizeDistance">40</float>
+        <bool name="DefinesCapabilities">false</bool>
+        <int64 name="SourceAssetId">-1</int64>
+        <BinaryString name="Tags"></BinaryString>
+        <bool name="TailVisible">true</bool>
+        <Color3 name="TextColor3">
+          <R>0.22352941</R>
+          <G>0.23137255</G>
+          <B>0.23921569</B>
+        </Color3>
+        <int64 name="TextSize">16</int64>
+        <float name="VerticalStudsOffset">0</float>
+      </Properties>
+    </Item>
+    <Item class="ChannelTabsConfiguration" referent="4">
+      <Properties>
+        <string name="Name">ChannelTabsConfiguration</string>
+        <BinaryString name="AttributesSerialize"></BinaryString>
+        <Color3 name="BackgroundColor3">
+          <R>0.09803922</R>
+          <G>0.105882354</G>
+          <B>0.11372549</B>
+        </Color3>
+        <double name="BackgroundTransparency">0</double>
+        <SecurityCapabilities name="Capabilities">0</SecurityCapabilities>
+        <bool name="Enabled">false</bool>
+        <Font name="FontFace">
+          <Family>
+            <url>rbxasset://fonts/families/BuilderSans.json</url>
+          </Family>
+          <Weight>700</Weight>
+          <Style>Normal</Style>
+          <CachedFaceId>
+            <url>rbxasset://fonts/BuilderSans-Bold.otf</url>
+          </CachedFaceId>
+        </Font>
+        <Color3 name="HoverBackgroundColor3">
+          <R>0.49019608</R>
+          <G>0.49019608</G>
+          <B>0.49019608</B>
+        </Color3>
+        <bool name="DefinesCapabilities">false</bool>
+        <Color3 name="SelectedTabTextColor3">
+          <R>1</R>
+          <G>1</G>
+          <B>1</B>
+        </Color3>
+        <int64 name="SourceAssetId">-1</int64>
+        <BinaryString name="Tags"></BinaryString>
+        <Color3 name="TextColor3">
+          <R>0.6862745</R>
+          <G>0.6862745</G>
+          <B>0.6862745</B>
+        </Color3>
+        <int64 name="TextSize">18</int64>
+        <Color3 name="TextStrokeColor3">
+          <R>0</R>
+          <G>0</G>
+          <B>0</B>
+        </Color3>
+        <double name="TextStrokeTransparency">1</double>
+      </Properties>
+    </Item>
+  </Item>
+</roblox>
