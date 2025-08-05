@@ -444,7 +444,7 @@ const maths = {
 
 	lerp: {
 		displayName: "Lerp",
-		description: "i can't be arsed to explain this",
+		description: "Applies a linear gradient between two values using alpha",
 		modelSource: autoModel("DoubleGenericLogicBlockPrefab", "LERP", categories.math),
 		logic: logic(
 			{
