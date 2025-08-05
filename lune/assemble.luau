@@ -100,68 +100,103 @@ local function protectedCall(func, errorMessage, ...)
 	return true, result
 end
 
-local function loadAndPlaceModel(filePath, parent, instanceName)
+type instanceProps = {
+	path: string | nil,
+	children: { [string]: instanceProps },
+}
+type manifest = {
+	game: { [string]: instanceProps },
+}
+
+local function loadAndPlaceModel(filePath: string, parent: Instance, name: string): { Instance }
 	log("Attempting to load: " .. filePath)
 	if not fs.isFile(filePath) then
 		warn("File not found: " .. filePath)
 		table.insert(missingFiles, filePath)
-		return false
+		return {}
 	end
 
 	local success, contents = protectedCall(fs.readFile, "Failed to read file: " .. filePath, filePath)
-	if not success then return false end
+	if not success then return {} end
 
 	success, localInstances = protectedCall(roblox.deserializeModel, "Failed to deserialize: " .. filePath, contents)
-	if not success then return false end
+	if not success then return {} end
+
 
 	if #localInstances == 0 then
 		warn("No instances found in file: " .. filePath)
-		return false
+		return {}
 	end
 
 	for _, inst in ipairs(localInstances) do
-		if instanceName then
-			inst.Name = instanceName
+		inst.Name = name
+
+		success, err = protectedCall(function() inst.Parent = parent end, "Failed to parent instance '" .. inst.Name .. "' from " .. filePath .. " to " .. parent:GetFullName())
+		if not success then
+			return {}
 		end
-		success, err = protectedCall(function() inst.Parent = parent end,
-			"Failed to parent instance '" .. inst.Name .. "' from " .. filePath .. " to " .. parent:GetFullName())
-		if not success then return false end
 		log("Placed instance '" .. inst.Name .. "' from " .. filePath .. " into " .. parent:GetFullName())
 	end
-	return true
+ 
+	return localInstances
 end
+local function processNode(props: instanceProps, name: string, parent: Instance)
+	local instance
 
-local function processNode(node, parent)
-	if not node.name then
-		error("Invalid manifest node: missing 'name' key.")
-		return false
-	end
-
-	if node.path then
-		return loadAndPlaceModel(node.path, parent, node.name)
-	elseif node.children then
-		local container = parent:FindFirstChild(node.name)
-		if not container then
-			local className = SPECIAL_CONTAINERS[node.name] or "Folder"
-			log("Creating instance: '" .. node.name .. "' of class '" .. className .. "' in " .. parent:GetFullName())
-			container = Instance.new(className)
-			container.Name = node.name
-			container.Parent = parent
+	if props.path then
+		instance = loadAndPlaceModel(props.path, parent, name)[1]
+		if not instance then return false end
+	else
+		if parent:IsA('DataModel') then
+			instance = parent:GetService(name)
 		else
-			log("Found existing container: '" .. container:GetFullName() .. "' of class " .. container.ClassName)
+			instance = parent:FindFirstChild(name);
 		end
 
+		if not instance then
+			local className = SPECIAL_CONTAINERS[name] or "Folder"
+			log("Creating instance: '" .. name .. "' of class '" .. className .. "' in " .. parent:GetFullName())
+			instance = Instance.new(className)
+			instance.Name = name
+			instance.Parent = parent
+		else
+			log("Found existing container: '" .. instance:GetFullName() .. "' of class " .. instance.ClassName)
+		end
+	end
+
+	if props.children then
 		local allChildrenProcessed = true
-		for _, childNode in ipairs(node.children) do
-			if not processNode(childNode, container) then
+		for k, v in pairs(props.children) do
+			print('						pcc', k)
+			if not processNode(v, k, instance) then
 				allChildrenProcessed = false
 			end
 		end
 		return allChildrenProcessed
-	else
-		error("Invalid manifest node '" .. node.name .. "': must have 'path' or 'children' key.")
+	end
+
+	return true;
+end
+
+local function processStructureJson(game: DataModel)
+	log("Reading manifest from: " .. CONFIG.ManifestPath)
+	local manifestJson, readErr = fs.readFile(CONFIG.ManifestPath)
+	if not manifestJson then
+		error("Failed to read manifest file '" .. CONFIG.ManifestPath .. "': " .. tostring(readErr))
 		return false
 	end
+
+	local success, manifest: manifest = protectedCall(serde.decode, "Failed to parse manifest JSON", "json", manifestJson)
+	if not success then return false end
+	log("Manifest parsed successfully.")
+
+
+	for name, props in pairs(manifest.game) do
+		processNode(props, name, game)
+	end
+
+	log("Finished processing all services")
+	return true
 end
 
 --------------------------------------------------------------------------------
@@ -170,8 +205,6 @@ end
 local function main()
 	log("Starting place build process...")
 	local game = Instance.new("DataModel")
-
-	game:GetService("HttpService").HttpEnabled = true;
 
 	-- 1. Workspace configuration
 	log("Configuring Workspace service...")
@@ -199,48 +232,10 @@ local function main()
 	end
 	log("Services configured.")
 
-	-- 3. Reading and parsing the manifest
-	log("Reading manifest from: " .. CONFIG.ManifestPath)
-	local manifestJson, readErr = fs.readFile(CONFIG.ManifestPath)
-	if not manifestJson then
-		error("Failed to read manifest file '" .. CONFIG.ManifestPath .. "': " .. tostring(readErr))
-		return false
-	end
-	success, manifest = protectedCall(serde.decode, "Failed to parse manifest JSON", "json", manifestJson)
-	if not success then return false end
-	log("Manifest parsed successfully.")
+	success = processStructureJson(game)
 
-	-- 4. Processing services
-	local overallBuildSuccess = true
-	for _, serviceData in ipairs(manifest) do
-		local serviceName = serviceData.name
-		if not serviceName then
-			error("Invalid service entry in manifest: missing 'name'. Skipping.")
-			overallBuildSuccess = false
-			continue
-		end
-		if not serviceData.children then
-			error("Invalid service entry '" .. serviceName .. "': missing 'children'. Skipping.")
-			overallBuildSuccess = false
-			continue
-		end
-		log("Processing service: " .. serviceName)
-		local getServiceSuccess, service = protectedCall(game.GetService, "Failed to get service: " .. serviceName, game,
-			serviceName)
-		if not getServiceSuccess then
-			overallBuildSuccess = false
-			continue
-		end
-		for _, childNode in ipairs(serviceData.children) do
-			if not processNode(childNode, service) then
-				overallBuildSuccess = false
-			end
-		end
-	end
-	log("Finished processing all services.")
-
-	-- 5. SDK Flag in ServerScriptService
 	game:GetService("ServerScriptService"):AddTag("overengineered")
+	game:GetService("HttpService").HttpEnabled = true;
 
 	-- 6. Serialization and saving of .rbxl
 	log("Serializing final place...")
@@ -251,7 +246,7 @@ local function main()
 	if not success then return false end
 	log("Place saved successfully to " .. CONFIG.OutputPath)
 
-	return overallBuildSuccess and (#criticalErrors == 0)
+	return success and (#criticalErrors == 0)
 end
 
 --------------------------------------------------------------------------------

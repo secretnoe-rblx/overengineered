@@ -6,7 +6,7 @@ local process = require("@lune/process")
 -- Check if running on Windows
 if process.os ~= "windows" then
     print("SDK installation is not supported on " .. process.os .. " systems, install it yourself")
-    return
+    return nil
 end
 
 -- Define source and destination paths
@@ -17,7 +17,7 @@ local destinationPath = pluginPath .. "/SDK.rbxmx"
 -- Check if source file exists
 if not fs.isFile(sourcePath) then
     print("Error: Source file not found at " .. sourcePath)
-    return
+    return nil
 end
 
 -- Check if SDK is already installed
