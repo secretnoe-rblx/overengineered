@@ -10,9 +10,6 @@ local fs = require("@lune/fs")
 local roblox = require("@lune/roblox")
 local serde = require("@lune/serde")
 
--- Run the SDK installation script first
-require("./_install")
-
 local Instance = roblox.Instance
 
 --------------------------------------------------------------------------------
