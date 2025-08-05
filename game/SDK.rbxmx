@@ -64,29 +64,37 @@ function pluginModule:Setup()
 	-- Weld groups are not possible with lune
 	print("OverEngineered SDK: Registering collision groups")
 	PS:RegisterCollisionGroup("BlockCollider")
+	PS:RegisterCollisionGroup("BlockRaycast")
+	PS:RegisterCollisionGroup("BlockWeld")
+	PS:RegisterCollisionGroup("Blocks")
+	PS:RegisterCollisionGroup("ColBoxExclusive")
+	PS:RegisterCollisionGroup("Projectile")
+	PS:RegisterCollisionGroup("RadarDetects")
+	PS:RegisterCollisionGroup("moduleMarker")
+	-- BlockCollider
 	PS:CollisionGroupSetCollidable("BlockCollider", "Default", false)
 	PS:CollisionGroupSetCollidable("BlockCollider", "BlockRaycast", true)
 	
-	PS:RegisterCollisionGroup("BlockRaycast")
+	-- BlockRaycast
 	PS:CollisionGroupSetCollidable("BlockRaycast", "moduleMarker", false)
 	
-	PS:RegisterCollisionGroup("BlockWeld")
+	-- BlockWeld
 	PS:CollisionGroupSetCollidable("BlockWeld", "Default", false)
 	PS:CollisionGroupSetCollidable("BlockWeld", "BlockRaycast", true)
 	PS:CollisionGroupSetCollidable("BlockWeld", "Blocks", true)
 	
-	PS:RegisterCollisionGroup("Blocks")
+	-- Blocks
 	PS:CollisionGroupSetCollidable("Blocks", "BlockCollider", false)
 	PS:CollisionGroupSetCollidable("Blocks", "RadarDetects", false)
 	
-	PS:RegisterCollisionGroup("ColBoxExclusive")
+	-- ColBoxExclusive
 	PS:CollisionGroupSetCollidable("ColBoxExclusive", "BlockCollider", false)
 	PS:CollisionGroupSetCollidable("ColBoxExclusive", "BlockWeld", false)
 	PS:CollisionGroupSetCollidable("ColBoxExclusive", "ColBoxExclusive", false)
 	PS:CollisionGroupSetCollidable("ColBoxExclusive", "Projectile", false)
 	PS:CollisionGroupSetCollidable("ColBoxExclusive", "moduleMarker", false)
 	
-	PS:RegisterCollisionGroup("Projectile")
+	-- Projectile
 	PS:CollisionGroupSetCollidable("Projectile", "BlockCollider", false)
 	PS:CollisionGroupSetCollidable("Projectile", "BlockWeld", false)
 	PS:CollisionGroupSetCollidable("Projectile", "ColBoxExclusive", false)
@@ -94,12 +102,12 @@ function pluginModule:Setup()
 	PS:CollisionGroupSetCollidable("Projectile", "RadarDetects", false)
 	PS:CollisionGroupSetCollidable("Projectile", "moduleMarker", false)
 	
-	PS:RegisterCollisionGroup("RadarDetects")
+	-- RadarDetects
 	PS:CollisionGroupSetCollidable("RadarDetects", "Default", false)
 	PS:CollisionGroupSetCollidable("RadarDetects", "BlockRaycast", true)
 	PS:CollisionGroupSetCollidable("RadarDetects", "ColBoxExclusive", true)
 	
-	PS:RegisterCollisionGroup("moduleMarker")
+	-- moduleMarker
 	PS:CollisionGroupSetCollidable("moduleMarker", "Default", false)
 	PS:CollisionGroupSetCollidable("moduleMarker", "Blocks", true)
 	
