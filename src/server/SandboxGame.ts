@@ -1,7 +1,7 @@
-import { DataStoreService, ServerScriptService, Workspace } from "@rbxts/services";
+import { ServerScriptService, Workspace } from "@rbxts/services";
 // import { BadgeController } from "server/BadgeController";
 
-import { DataStoreDatabaseBackend } from "engine/server/backend/DataStoreDatabaseBackend";
+import { InMemoryDatabaseBackend } from "engine/server/backend/InMemoryDatabaseBackend";
 import { Logger } from "engine/shared/Logger";
 import { BaseGame } from "server/BaseGame";
 import { ServerBlockLogicController } from "server/blocks/ServerBlockLogicController";
@@ -39,10 +39,17 @@ export namespace SandboxGame {
 		} else {
 			builder.services
 				.registerSingletonClass(PlayerDatabase) //
-				.withArgs([new DataStoreDatabaseBackend(DataStoreService.GetDataStore("players-bkp"))]);
+				.withArgs([new InMemoryDatabaseBackend()]);
 			builder.services
 				.registerSingletonClass(SlotDatabase) //
-				.withArgs([new DataStoreDatabaseBackend(DataStoreService.GetDataStore("slots-bkp"))]);
+				.withArgs([new InMemoryDatabaseBackend()]);
+
+			// builder.services
+			// 	.registerSingletonClass(PlayerDatabase) //
+			// 	.withArgs([new DataStoreDatabaseBackend(DataStoreService.GetDataStore("players"))]);
+			// builder.services
+			// 	.registerSingletonClass(SlotDatabase) //
+			// 	.withArgs([new DataStoreDatabaseBackend(DataStoreService.GetDataStore("slots"))]);
 		}
 
 		for (const line of GameDefinitions.getEnvironmentInfo()) {
