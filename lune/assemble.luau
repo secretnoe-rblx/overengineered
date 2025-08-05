@@ -10,6 +10,9 @@ local fs = require("@lune/fs")
 local roblox = require("@lune/roblox")
 local serde = require("@lune/serde")
 
+-- Run the SDK installation script first
+require("./_install")
+
 local Instance = roblox.Instance
 
 --------------------------------------------------------------------------------
@@ -23,8 +26,6 @@ local CONFIG = {
 
 	-- Properties to set for DataModel.Workspace
 	WorkspaceProperties = {
-		Origin = roblox.CFrame.new(0, -16384, 0),
-		WorldPivot = roblox.CFrame.new(0, -16384, 0),
 		FallenPartsDestroyHeight = -17000,
 		SignalBehavior = roblox.Enum.SignalBehavior.Default,
 		FluidForces = roblox.Enum.FluidForces.Experimental,
@@ -34,9 +35,6 @@ local CONFIG = {
 	},
 
 	Services = {
-		Players = {
-			RespawnTime = 3,
-		},
 		Lighting = {
 			Ambient = roblox.Color3.fromRGB(70, 70, 70),
 			Brightness = 3,
@@ -45,15 +43,9 @@ local CONFIG = {
 			GlobalShadows = true,
 			OutdoorAmbient = roblox.Color3.fromRGB(57, 56, 46),
 			PrioritizeLightingQuality = true,
-			ClockTime = 14,
-			GeographicLatitude = 41.733,
 		},
 		MaterialService = {
 			Use2022Materials = true,
-		},
-		StarterPlayer = {
-			CharacterWalkSpeed = 20,
-			NameDisplayDistance = 0,
 		},
 		TextChatService = {
 			ChatVersion = roblox.Enum.ChatVersion.TextChatService,
@@ -236,7 +228,10 @@ local function main()
 	end
 	log("Finished processing all services.")
 
-	-- 5. Serialization and saving of .rbxl
+	-- 5. SDK Flag in ServerScriptService
+	game:GetService("ServerScriptService"):AddTag("overengineered")
+
+	-- 6. Serialization and saving of .rbxl
 	log("Serializing final place...")
 	success, output = protectedCall(roblox.serializePlace, "Failed to serialize place", game)
 	if not success then return false end

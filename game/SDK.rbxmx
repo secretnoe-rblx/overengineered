@@ -1,0 +1,89 @@
+<roblox xmlns:xmime="http://www.w3.org/2005/05/xmlmime" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://www.roblox.com/roblox.xsd" version="4">
+	<Meta name="ExplicitAutoJoints">true</Meta>
+	<External>null</External>
+	<External>nil</External>
+	<Item class="LocalScript" referent="RBX208CE4CD4E4E4765A2653801523FE61B">
+		<Properties>
+			<BinaryString name="AttributesSerialize"></BinaryString>
+			<SecurityCapabilities name="Capabilities">0</SecurityCapabilities>
+			<bool name="DefinesCapabilities">false</bool>
+			<bool name="Disabled">false</bool>
+			<Content name="LinkedSource"><null></null></Content>
+			<string name="Name">OverengineeredSDK</string>
+			<token name="RunContext">0</token>
+			<string name="ScriptGuid">{EC876F93-43F6-4772-86F8-49505D4BCC21}</string>
+			<ProtectedString name="Source"><![CDATA[assert(plugin, "This script must be run as a plugin!")
+-- Code beyond this point will execute only if the script is run as a plugin
+
+-- Load the module and pass the plugin reference
+local pluginModule = require(script.PluginModule)
+pluginModule:Initialize(plugin)
+
+-- Verify if the plugin reference was initialized
+pluginModule:CheckForPluginGlobal()]]></ProtectedString>
+			<int64 name="SourceAssetId">-1</int64>
+			<BinaryString name="Tags"></BinaryString>
+		</Properties>
+		<Item class="ModuleScript" referent="RBXCD57B5522B304FD18F2C0B5612B00AEC">
+			<Properties>
+				<BinaryString name="AttributesSerialize"></BinaryString>
+				<SecurityCapabilities name="Capabilities">0</SecurityCapabilities>
+				<bool name="DefinesCapabilities">false</bool>
+				<Content name="LinkedSource"><null></null></Content>
+				<string name="Name">PluginModule</string>
+				<string name="ScriptGuid">{E3B31CB4-BC17-4EEC-AD61-A345AAE89E4C}</string>
+				<ProtectedString name="Source"><![CDATA[local pluginModule = {}
+local plugin
+
+local SSS = game:GetService("ServerScriptService")
+local PS = game:GetService("PhysicsService")
+
+-- Initialize the plugin reference if not already set
+function pluginModule:Initialize(pluginReference: Plugin)
+	if plugin ~= pluginReference then
+		plugin = pluginReference
+	else
+		error("Plugin is already initialized")
+	end
+end
+
+-- Check if the plugin reference is set and print out appropriate info
+function pluginModule:CheckForPluginGlobal()
+	if plugin ~= nil then
+		pluginModule:Setup()
+	end
+end
+
+-- Set up the plugin
+function pluginModule:Setup()
+	local tag = "overengineered"
+	if not SSS:HasTag(tag) then return end
+	
+	SSS:RemoveTag(tag)
+	
+	-- Weld groups are not possible with lune
+	print("OverEngineered SDK: Registering collision groups")
+	PS:RegisterCollisionGroup("BlockCollider")
+	PS:RegisterCollisionGroup("BlockRaycast")
+	PS:RegisterCollisionGroup("BlockWeld")
+	PS:RegisterCollisionGroup("Blocks")
+	PS:RegisterCollisionGroup("ColBoxExclusive")
+	PS:RegisterCollisionGroup("Projectile")
+	PS:RegisterCollisionGroup("RadarDetects")
+	PS:RegisterCollisionGroup("moduleMarker")
+	
+	-- Teleport camera to the bottom
+	print("OverEngineered SDK: Teleporting user camera to the map")
+	workspace.CurrentCamera.CFrame = CFrame.new(144.445, -16346.246, 12.678)
+	
+	-- The end
+	print("OverEngineered SDK: Set up complete!")
+end
+
+return pluginModule]]></ProtectedString>
+				<int64 name="SourceAssetId">-1</int64>
+				<BinaryString name="Tags"></BinaryString>
+			</Properties>
+		</Item>
+	</Item>
+</roblox>
