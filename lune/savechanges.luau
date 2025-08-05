@@ -102,36 +102,6 @@ local function saveInstanceToFile(instance, filePath, depth)
 	return success
 end
 
--- Recursively processes a node from the manifest, finding the corresponding Instance in the game
-local function processNode(node, parentInstance, depth)
-	local instanceName = node.name
-	if not instanceName then
-		warn("Invalid manifest node: missing 'name' key.", depth)
-		return
-	end
-
-	log("Looking for instance: '" .. instanceName .. "' in " .. parentInstance:GetFullName(), depth)
-
-	local childInstance = parentInstance:FindFirstChild(instanceName)
-
-	if not childInstance then
-		local fullPath = parentInstance:GetFullName() .. "." .. instanceName
-		warn("Could not find instance: " .. fullPath, depth)
-		table.insert(missingInstances, fullPath)
-		return
-	end
-
-	if node.path then
-		-- This is a file node, it needs to be saved
-		saveInstanceToFile(childInstance, node.path, depth + 1)
-	elseif node.children then
-		-- This is a folder node, recursively process its children
-		for _, childNode in ipairs(node.children) do
-			processNode(childNode, childInstance, depth + 1)
-		end
-	end
-end
-
 type instanceProps = {
 	path: string | nil,
 	children: { [string]: instanceProps },
@@ -140,7 +110,7 @@ type manifest = {
 	game: { [string]: instanceProps },
 }
 
-local function processNode2(name: string, node: instanceProps, parentInstance: Instance, depth: number)
+local function processNode(name: string, node: instanceProps, parentInstance: Instance, depth: number)
 	log("Looking for instance: '" .. name .. "' in " .. parentInstance:GetFullName(), depth)
 
 	local childInstance;
@@ -170,7 +140,7 @@ local function processNode2(name: string, node: instanceProps, parentInstance: I
 	end
 	if node.children then
 		for k, v in pairs(node.children) do
-			processNode2(k, v, childInstance, depth + 1)
+			processNode(k, v, childInstance, depth + 1)
 		end
 	end
 end
@@ -205,7 +175,7 @@ local function main()
 	-- 3. Traversing the manifest and exporting models
 	log("Starting instance export based on manifest...")
 	for name, props in pairs(manifest.game) do
-		processNode2(name, props, game, 0)
+		processNode(name, props, game, 0)
 	end
 
 	return #criticalErrors == 0
