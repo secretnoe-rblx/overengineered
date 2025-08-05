@@ -45,7 +45,7 @@ class Logic extends BlockLogic<typeof definition> {
 		let wheel = 0;
 
 		if (RunService.IsClient()) {
-			this.event.subscribe(UserInputService.InputBegan, (input) => {
+			this.event.subscribe(UserInputService.InputChanged, (input) => {
 				if (input.UserInputType === Enum.UserInputType.MouseWheel) {
 					wheel = input.Position.Z;
 				}
