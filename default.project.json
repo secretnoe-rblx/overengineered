@@ -10,9 +10,6 @@
 			},
 			"engine": {
 				"$path": "out/engine/server"
-			},
-			"anywaymachines": {
-				"$path": "out/anywaymachines/server"
 			}
 		},
 		"ReplicatedStorage": {
@@ -31,9 +28,6 @@
 			},
 			"engine": {
 				"$path": "out/engine/shared"
-			},
-			"anywaymachines": {
-				"$path": "out/anywaymachines/shared"
 			}
 		},
 		"StarterPlayer": {
@@ -45,9 +39,6 @@
 				},
 				"engine": {
 					"$path": "out/engine/client"
-				},
-				"anywaymachines": {
-					"$path": "out/anywaymachines/client"
 				}
 			}
 		},
@@ -55,12 +46,6 @@
 			"$className": "Workspace",
 			"$properties": {
 				"FilteringEnabled": true
-			}
-		},
-		"HttpService": {
-			"$className": "HttpService",
-			"$properties": {
-				"HttpEnabled": true
 			}
 		},
 		"SoundService": {
