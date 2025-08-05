@@ -167,7 +167,6 @@ local function processNode(props: instanceProps, name: string, parent: Instance)
 	if props.children then
 		local allChildrenProcessed = true
 		for k, v in pairs(props.children) do
-			print('						pcc', k)
 			if not processNode(v, k, instance) then
 				allChildrenProcessed = false
 			end
