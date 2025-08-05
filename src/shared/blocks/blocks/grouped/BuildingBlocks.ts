@@ -249,6 +249,7 @@ const cylinders = {
 	hollowcylinderquarter: {
 		displayName: "Hollow Cylinder Quarter",
 		description: "Not really a complicated cylinder",
+		mirror: { behaviour: "offset90" },
 	},
 } as const satisfies BlockBuildersWithoutIdAndDefaults;
 
