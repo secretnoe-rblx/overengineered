@@ -10,9 +10,6 @@ local fs = require("@lune/fs")
 local roblox = require("@lune/roblox")
 local serde = require("@lune/serde")
 
--- Run the SDK installation script first
-require("./_install")
-
 local Instance = roblox.Instance
 
 --------------------------------------------------------------------------------
@@ -23,45 +20,6 @@ local CONFIG = {
 	Debug = true,
 	ManifestPath = "./lune/structure.json",
 	OutputPath = "place.rbxl",
-
-	-- Properties to set for DataModel.Workspace
-	WorkspaceProperties = {
-		Origin = roblox.CFrame.new(0, -16384, 0),
-		WorldPivot = roblox.CFrame.new(0, -16384, 0),
-		FallenPartsDestroyHeight = -17000,
-		SignalBehavior = roblox.Enum.SignalBehavior.Default,
-		FluidForces = roblox.Enum.FluidForces.Experimental,
-		PhysicsSteppingMethod = roblox.Enum.PhysicsSteppingMethod.Adaptive,
-		RenderingCacheOptimizations = roblox.Enum.RenderingCacheOptimizationMode.Enabled,
-		StreamingEnabled = false,
-	},
-
-	Services = {
-		Players = {
-			RespawnTime = 3,
-		},
-		Lighting = {
-			Ambient = roblox.Color3.fromRGB(70, 70, 70),
-			Brightness = 3,
-			EnvironmentDiffuseScale = 1,
-			EnvironmentSpecularScale = 1,
-			GlobalShadows = true,
-			OutdoorAmbient = roblox.Color3.fromRGB(57, 56, 46),
-			PrioritizeLightingQuality = true,
-			ClockTime = 14,
-			GeographicLatitude = 41.733,
-		},
-		MaterialService = {
-			Use2022Materials = true,
-		},
-		StarterPlayer = {
-			CharacterWalkSpeed = 20,
-			NameDisplayDistance = 0,
-		},
-		TextChatService = {
-			ChatVersion = roblox.Enum.ChatVersion.TextChatService,
-		},
-	}
 }
 
 -- Table for special containers
@@ -135,7 +93,7 @@ local function loadAndPlaceModel(filePath: string, parent: Instance, name: strin
 		if not success then
 			return {}
 		end
-		log("Placed instance '" .. inst.Name .. "' from " .. filePath .. " into " .. parent:GetFullName())
+		log("Placed instance '" .. inst.Name .. "' from " .. filePath .. " into " .. (if parent:IsA('DataModel') then "game" else parent:GetFullName()))
 	end
  
 	return localInstances
@@ -205,39 +163,12 @@ local function main()
 	log("Starting place build process...")
 	local game = Instance.new("DataModel")
 
-	-- 1. Workspace configuration
-	log("Configuring Workspace service...")
-	local success, err = protectedCall(function()
-		for prop, val in pairs(CONFIG.WorkspaceProperties) do
-			game.Workspace[prop] = val
-		end
-	end, "Failed to configure Workspace properties")
-	if not success then return false end
+	log("Processing manifest...")
+	local success = processStructureJson(game)
 
-	-- CHANGE HERE: Added step for Lighting configuration
-	-- 2. Lighting configuration
-	log("Configuring services...")
-	for k, v in pairs(CONFIG.Services) do
-		log("Configuring " .. k .. "...")
-		success, err = protectedCall(function()
-			local service = game:GetService(k)
-			for prop, val in pairs(v) do
-				service[prop] = val
-			end
-		end, "Failed to configure " .. k .. " properties")
-		if not success then return false end
-
-		log(k .. " configured.")
-	end
-	log("Services configured.")
-
-	success = processStructureJson(game)
-
-	game:GetService("ServerScriptService"):AddTag("overengineered")
 	game:GetService("HttpService").HttpEnabled = true;
 
-	-- 6. Serialization and saving of .rbxl
-	log("Serializing final place...")
+	log("Serializing the place...")
 	success, output = protectedCall(roblox.serializePlace, "Failed to serialize place", game)
 	if not success then return false end
 	log("Writing place to: " .. CONFIG.OutputPath)
