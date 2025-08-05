@@ -237,19 +237,58 @@ const cylinders = {
 		displayName: "Half Cylinder 2x2",
 		description: "Same as 1x2 half cylinder but wider and longer",
 	},
+	quartercylinder: {
+		displayName: "Quarter Cylinder",
+		description: "Like a cylinder but cilynder",
+	},
 
 	hollowcylinder: {
 		displayName: "Hollow Cylinder",
 		description: "A complicated cylinder",
+		search: { partialAliases: ["tube", "pipe"] },
 	},
 	hollowcylinderhalf: {
 		displayName: "Hollow Cylinder Half",
 		description: "Almost a complicated cylinder",
+		search: { partialAliases: ["tube", "pipe"] },
 	},
 	hollowcylinderquarter: {
 		displayName: "Hollow Cylinder Quarter",
 		description: "Not really a complicated cylinder",
 		mirror: { behaviour: "offset90" },
+		search: { partialAliases: ["tube", "pipe"] },
+	},
+	hollowcylinder90: {
+		displayName: "Hollow Cylinder 90",
+		description: "A bended hollow tube for all your sewer needs",
+		search: { partialAliases: ["tube", "pipe"] },
+	},
+	cylinder90: {
+		displayName: "Cylinder 90",
+		description: "A bended tube NOT for all your sewer needs",
+		search: { partialAliases: ["tube", "pipe"] },
+	},
+	hollowcylinderbig90: {
+		displayName: "Hollow Cylinder 90 Big",
+		description: "A beeg bended hollow tube for all your sewer needs",
+		search: { partialAliases: ["tube", "pipe", "macaroni"] },
+	},
+	cylinderbig90: {
+		displayName: "Cylinder 90 Big",
+		description: "A beeg bended tube NOT for all your sewer needs",
+		search: { partialAliases: ["tube", "pipe", "macaroni"] },
+	},
+	hollowcylinder90verticalhalf: {
+		displayName: "Hollow Cylinder 90 Vertical Half",
+		description: "A vertical half of a bended hollow tube",
+		search: { partialAliases: ["tube", "pipe", "macaroni"] },
+		mirror: { behaviour: "hcylvertical" },
+	},
+	cylinder90verticalhalf: {
+		displayName: "Cylinder 90 Vertical Half",
+		description: "A vertical half of a bended tube",
+		search: { partialAliases: ["tube", "pipe", "macaroni"] },
+		mirror: { behaviour: "hcylvertical" },
 	},
 } as const satisfies BlockBuildersWithoutIdAndDefaults;
 

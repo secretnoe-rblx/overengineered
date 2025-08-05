@@ -159,6 +159,19 @@ export namespace BuildingManager {
 						outScale = CFrame.fromOrientation(0, rad(90), 0).mul(outScale).apply(math.abs);
 						return normalRotation(cframe.mul(CFrame.fromEulerAnglesYXZ(0, rad(-90), 0)));
 					}
+					case "hcylvertical": {
+						outScale = CFrame.fromOrientation(rad(90), 0, 0).mul(outScale).apply(math.abs);
+						const rot =
+							mode === "x"
+								? CFrame.fromEulerAnglesYXZ(rad(90), rad(180), rad(180))
+								: mode === "y"
+									? CFrame.fromEulerAnglesYXZ(rad(90), 0, rad(180))
+									: mode === "z"
+										? CFrame.fromEulerAnglesYXZ(rad(90), 0, rad(180))
+										: CFrame.identity;
+
+						return normalRotation(cframe.mul(CFrame.fromEulerAnglesYXZ(rad(90), 0, rad(180))));
+					}
 				}
 			}
 
