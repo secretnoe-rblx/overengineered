@@ -5,7 +5,9 @@
 	"main": "index.js",
 	"scripts": {
 		"build": "rbxtsc",
-		"watch": "rbxtsc -w"
+		"watch": "rbxtsc -w",
+		"rojo": "rojo serve default.project.json",
+		"dev": "node ./scripts/watch-all.js"
 	},
 	"keywords": [],
 	"author": "anywaymachines",
