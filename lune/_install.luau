@@ -21,23 +21,27 @@ if not fs.isFile(sourcePath) then
 end
 
 -- Check if SDK is already installed
-if fs.isFile(destinationPath) then
-    -- Already installed, exit silently
-	return
-end
+local isAlreadyInstalled = fs.isFile(destinationPath)
 
 -- Check if plugin directory exists, create if it doesn't
 if not fs.isDir(pluginPath) then
-    print("Creating plugin directory at " .. pluginPath)
+    if not isAlreadyInstalled then
+        print("Creating plugin directory at " .. pluginPath)
+    end
     fs.writeDir(pluginPath)
 end
 
 -- Copy the SDK file
-print("Copying SDK.rbxmx to Roblox Studio plugins...")
-print("Source: " .. sourcePath)
-print("Destination: " .. destinationPath)
+if not isAlreadyInstalled then
+    print("Copying SDK.rbxmx to Roblox Studio plugins...")
+    print("Source: " .. sourcePath)
+    print("Destination: " .. destinationPath)
+end
 
 local sourceContent = fs.readFile(sourcePath)
 fs.writeFile(destinationPath, sourceContent)
 
-print("SDK.rbxmx successfully installed to Roblox Studio plugins!")
+if not isAlreadyInstalled then
+    print("SDK.rbxmx successfully installed to Roblox Studio plugins!")
+end
+return nil
