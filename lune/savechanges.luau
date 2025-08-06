@@ -136,6 +136,8 @@ local function processNode(name: string, node: instanceProps, parentInstance: In
 
 	if node.kind then
 		if node.kind.kind == 'folder' then
+			fs.removeDir(node.kind.root)
+
 			local root = #childInstance:GetFullName() + 1;
 			local function processFoldered(parentInstance: Instance, depth: number)
 				if parentInstance:IsA("Folder") then
