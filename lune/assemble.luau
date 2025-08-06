@@ -108,8 +108,7 @@ local function processNode(props: instanceProps, name: string, parent: Instance)
 				local files = fs.readDir(path)
 				for i, fname in  files do
 					local fpath = path .. '/' .. fname
-					print(fpath, ' | ', fname)
-					local idx = fname:find("%.") or math.huge
+					local idx = fname:find("%.") or (#fname + 1)
 					fname = fname:sub(1, idx - 1)
 
 					if fs.isFile(fpath) then
@@ -117,10 +116,10 @@ local function processNode(props: instanceProps, name: string, parent: Instance)
 					else
 						local instance = parent:FindFirstChild(fname);
 						if not instance then
-							local className = SPECIAL_CONTAINERS[name] or "Folder"
+							local className = SPECIAL_CONTAINERS[fname] or "Folder"
 							log("Creating instance: '" .. name .. "' of class '" .. className .. "' in " .. parent:GetFullName())
 							instance = Instance.new(className)
-							instance.Name = name
+							instance.Name = fname
 							instance.Parent = parent
 						else
 							log("Found existing container: '" .. instance:GetFullName() .. "' of class " .. instance.ClassName)
@@ -131,7 +130,17 @@ local function processNode(props: instanceProps, name: string, parent: Instance)
 				end
 			end
 
-			writeFoldered(props.kind.root, parent);
+			local instance = parent:FindFirstChild(name);
+			if not instance then
+				local className = SPECIAL_CONTAINERS[name] or "Folder"
+				log("Creating instance: '" .. name .. "' of class '" .. className .. "' in " .. parent:GetFullName())
+				instance = Instance.new(className)
+				instance.Name = name
+				instance.Parent = parent
+			else
+				log("Found existing container: '" .. instance:GetFullName() .. "' of class " .. instance.ClassName)
+			end
+			writeFoldered(props.kind.root, instance);
 			return true
 		end
 	end
