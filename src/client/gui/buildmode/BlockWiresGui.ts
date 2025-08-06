@@ -1,5 +1,6 @@
 import { ReplicatedStorage, Workspace } from "@rbxts/services";
 import { LogControl } from "client/gui/static/LogControl";
+import { ServiceIntegrityChecker } from "client/integrity/ServiceIntegrityChecker";
 import { Control } from "engine/client/gui/Control";
 import { Interface } from "engine/client/gui/Interface";
 import { Colors } from "engine/shared/Colors";
@@ -21,6 +22,7 @@ const markerParent = Element.create("ScreenGui", {
 	Parent: Interface.getPlayerGui(),
 	ResetOnSpawn: false,
 });
+ServiceIntegrityChecker.whitelistInstance(markerParent);
 const wireParent = Element.create("ViewportFrame", {
 	Name: "WireViewportFrame",
 	Size: UDim2.fromScale(1, 1),

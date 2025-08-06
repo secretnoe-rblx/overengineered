@@ -1,6 +1,7 @@
 import { GamepadService, GuiService, Players, ReplicatedStorage, RunService, Workspace } from "@rbxts/services";
 import { Interface } from "client/gui/Interface";
 import { LogControl } from "client/gui/static/LogControl";
+import { ServiceIntegrityChecker } from "client/integrity/ServiceIntegrityChecker";
 import { ToolBase } from "client/tools/ToolBase";
 import { Control } from "engine/client/gui/Control";
 import { InputController } from "engine/client/InputController";
@@ -31,6 +32,7 @@ const markerParent = Element.create("ScreenGui", {
 	Parent: Interface.getPlayerGui(),
 	ResetOnSpawn: false,
 });
+ServiceIntegrityChecker.whitelistInstance(markerParent);
 const wireParent = Element.create("ViewportFrame", {
 	Name: "WireViewportFrame",
 	Size: UDim2.fromScale(1, 1),

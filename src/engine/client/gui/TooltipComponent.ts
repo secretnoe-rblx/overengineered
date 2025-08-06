@@ -1,4 +1,5 @@
 import { Players, RunService, UserInputService } from "@rbxts/services";
+import { ServiceIntegrityChecker } from "client/integrity/ServiceIntegrityChecker";
 import { AutoUIScaledComponent } from "engine/client/gui/AutoUIScaledControl";
 import { Control } from "engine/client/gui/Control";
 import { Interface } from "engine/client/gui/Interface";
@@ -22,6 +23,7 @@ const screen = Element.create("ScreenGui", {
 	DisplayOrder: 99999,
 	Parent: Players.LocalPlayer.FindFirstChildOfClass("PlayerGui")!,
 });
+ServiceIntegrityChecker.whitelistInstance(screen);
 
 type TooltipDefinition = GuiObject & {
 	readonly TextLabel: TextLabel;
