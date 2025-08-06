@@ -302,6 +302,23 @@ const cylinders = {
 		search: { partialAliases: ["tube", "pipe", "macaroni"] },
 		mirror: { behaviour: "hcylvertical" },
 	},
+
+	cylinderto1x1cubeconnector: {
+		displayName: "Cylinder To 1x1 Cube Connector",
+		description: "plane engineers",
+	},
+	cylinderto2x1cubeconnector: {
+		displayName: "Cylinder To 2x1 Cube Connector",
+		description: "plane engineers but wide",
+	},
+	cylinderto2x2cubeconnector: {
+		displayName: "Cylinder To 2x2 Cube Connector",
+		description: "plane engineers but big",
+	},
+	cylinderto2x4cubeconnector: {
+		displayName: "Cylinder To 2x4 Cube Connector",
+		description: "plane engineers but big and wide",
+	},
 } as const satisfies BlockBuildersWithoutIdAndDefaults;
 
 const wedges = {
