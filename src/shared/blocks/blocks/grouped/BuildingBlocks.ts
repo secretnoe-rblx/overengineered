@@ -319,6 +319,22 @@ const cylinders = {
 		displayName: "Cylinder To 2x4 Cube Connector",
 		description: "plane engineers but big and wide",
 	},
+	halfcylinderto1x1cubeconnector: {
+		displayName: "Half Cylinder To 1x1 Cube Connector",
+		description: "plane",
+	},
+	halfcylinderto1xhalfcubeconnector: {
+		displayName: "Half Cylinder To 1xHalf Cube Connector",
+		description: "plane but wide",
+	},
+	halfcylinderto2x2cubeconnector: {
+		displayName: "Half Cylinder To 2x2 Cube Connector",
+		description: "plane but big",
+	},
+	halfcylinderto2x1cubeconnector: {
+		displayName: "Half Cylinder To 2x1 Cube Connector",
+		description: "plane but big and wide",
+	},
 } as const satisfies BlockBuildersWithoutIdAndDefaults;
 
 const wedges = {
