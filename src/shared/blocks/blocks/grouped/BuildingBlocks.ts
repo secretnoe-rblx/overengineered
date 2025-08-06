@@ -259,45 +259,45 @@ const cylinders = {
 		search: { partialAliases: ["tube", "pipe"] },
 	},
 	hollowcylinder90: {
-		displayName: "Hollow Cylinder 90",
+		displayName: "Hollow Cylinder (90 degrees)",
 		description: "A bended hollow tube for all your sewer needs",
 		search: { partialAliases: ["tube", "pipe"] },
 	},
 	cylinder90: {
-		displayName: "Cylinder 90",
+		displayName: "Cylinder (90 degrees)",
 		description: "A bended tube NOT for all your sewer needs",
 		search: { partialAliases: ["tube", "pipe"] },
 	},
 	hollowcylinderbig90: {
-		displayName: "Hollow Cylinder 90 Big",
+		displayName: "Big Hollow Cylinder (90 degrees)",
 		description: "A beeg bended hollow tube for all your sewer needs",
 		search: { partialAliases: ["tube", "pipe", "macaroni"] },
 	},
 	cylinderbig90: {
-		displayName: "Cylinder 90 Big",
+		displayName: "Big Cylinder (90 degrees)",
 		description: "A beeg bended tube NOT for all your sewer needs",
 		search: { partialAliases: ["tube", "pipe", "macaroni"] },
 	},
 	hollowcylinder90verticalhalf: {
-		displayName: "Hollow Cylinder 90 Vertical Half",
+		displayName: "Vertical Half Hollow Cylinder (90 degrees)",
 		description: "A vertical half of a bended hollow tube",
 		search: { partialAliases: ["tube", "pipe", "macaroni"] },
 		mirror: { behaviour: "hcylvertical" },
 	},
 	cylinder90verticalhalf: {
-		displayName: "Cylinder 90 Vertical Half",
+		displayName: "Vertical Half Cylinder (90 degrees)",
 		description: "A vertical half of a bended tube",
 		search: { partialAliases: ["tube", "pipe", "macaroni"] },
 		mirror: { behaviour: "hcylvertical" },
 	},
 	hollowcylinder90horizontalhalf: {
-		displayName: "Hollow Cylinder 90 Horizontal Half",
+		displayName: "Horizontal Half Hollow Cylinder (90 degrees)",
 		description: "A horizontal half of a bended hollow tube",
 		search: { partialAliases: ["tube", "pipe", "macaroni"] },
 		mirror: { behaviour: "hcylvertical" },
 	},
 	cylinder90horizontalhalf: {
-		displayName: "Cylinder 90 Horizontal Half",
+		displayName: "Horizontal Half Cylinder (90 degrees)",
 		description: "A horizontal half of a bended tube",
 		search: { partialAliases: ["tube", "pipe", "macaroni"] },
 		mirror: { behaviour: "hcylvertical" },
@@ -305,35 +305,37 @@ const cylinders = {
 
 	cylinderto1x1cubeconnector: {
 		displayName: "Cylinder To 1x1 Cube Connector",
-		description: "plane engineers",
+		description: "A connector to connect your connections between cylinder connection and cube connection",
 	},
 	cylinderto2x1cubeconnector: {
 		displayName: "Cylinder To 2x1 Cube Connector",
-		description: "plane engineers but wide",
+		description: "A connector to connect your connections between cylinder connection and cube connection but wide",
 	},
 	cylinderto2x2cubeconnector: {
 		displayName: "Cylinder To 2x2 Cube Connector",
-		description: "plane engineers but big",
+		description: "A connector to connect your connections between cylinder connection and cube connection but big",
 	},
 	cylinderto2x4cubeconnector: {
 		displayName: "Cylinder To 2x4 Cube Connector",
-		description: "plane engineers but big and wide",
+		description:
+			"A connector to connect your connections between cylinder connection and cube connection but increased in size",
 	},
 	halfcylinderto1x1cubeconnector: {
 		displayName: "Half Cylinder To 1x1 Cube Connector",
-		description: "plane",
+		description:
+			"A connector to connect your connections between cylinder connection and cube connection but some sizes were halved",
 	},
 	halfcylinderto1xhalfcubeconnector: {
 		displayName: "Half Cylinder To 1xHalf Cube Connector",
-		description: "plane but wide",
+		description: "A connector to connect your connections but I'm getting tired of making the descriptions",
 	},
 	halfcylinderto2x2cubeconnector: {
 		displayName: "Half Cylinder To 2x2 Cube Connector",
-		description: "plane but big",
+		description: "A connector to connect things",
 	},
 	halfcylinderto2x1cubeconnector: {
 		displayName: "Half Cylinder To 2x1 Cube Connector",
-		description: "plane but big and wide",
+		description: "A connector but wife left me",
 	},
 } as const satisfies BlockBuildersWithoutIdAndDefaults;
 
