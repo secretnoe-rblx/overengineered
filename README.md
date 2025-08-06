@@ -3,113 +3,121 @@
 <p align="center">
   <a href="https://discord.gg/raax9xUMDc">
     <img src="https://discord.com/api/guilds/1053774759244083280/widget.png?style=shield" alt="Join our Discord" />
-  </a>
   <a href="https://join.anywaymachines.com">
     <img src="https://img.shields.io/badge/Roblox-Join%20Now-blue?style=flat-square&logo=roblox" alt="Play on Roblox" />
   </a>
   <a href="https://github.com/Maks-gaming/OverEngineered">
     <img src="https://img.shields.io/github/stars/anywaymachines/overengineered?style=flat-square" alt="GitHub Stars" />
   </a>
-</p>
-
 <p align="center">
   <strong>Roblox sandbox physics game with logic and destruction</strong>
 </p>
 
-[OverEngineered](https://join.anywaymachines.com) is a sandbox physics game on Roblox, centered around constructing mechanical and logical machines, and then testing them. From planes to cars to wild hybrids, from mini-processors to guided missles - build anything you want, then test it in a dynamic and destructible world. Currently in **beta**, join the fun at [join.anywaymachines.com](https://join.anywaymachines.com)!
+A sandbox physics game on Roblox centered around constructing mechanical and logical machines. From planes to cars to wild hybrids, from mini-processors to guided missiles—build anything you want, then test it in a dynamic and destructible world.
 
 ---
 
 ## ✨ Key Features
 
-- 🛠 **Destruction Physics**: Experience realistic crashes and chaotic destruction.
-- 🧩 **Block-Based Building**: Craft vehicles with a flexible, customizable system.
-- ⚙️ **Advanced Components**: Use thrusters, motors, hinges, and more to bring your creations to life.
-- 🧠 **Powerful logic**: Wire up logic blocks to make your creations do whatever you want, or even write your own lua code!
-- 💻 **Powered by roblox-ts**: Built with a modified [roblox-ts](https://roblox-ts.com) for the best experience of TypeScript.
-
-## ⚠️ Disclaimer
-
-*This is a game. Don’t try this in real life.*
-
-OverEngineered is all about safe, creative gameplay. It does not condone or replicate harmful real-world actions or events. Any similarities are purely coincidental.
-
-## ⚠️ Disclaimer 2
-
-This game has been a target of over 200 false DMCA strikes since the end of 2023, and going. Since the official place constantly gets taken down, to find it use our official link https://join.anywaymachines.com.
-
-*Your saves are almost save with our 5 minute auto-saving system*
+-   🛠️ **Destruction Physics**: Experience realistic crashes and chaotic destruction.
+-   🧩 **Block-Based Building**: Craft vehicles with a flexible, customizable system.
+-   ⚙️ **Advanced Components**: Use thrusters, motors, hinges, and more to bring your creations to life.
+-   🧠 **Powerful Logic**: Wire up logic blocks to make your creations do whatever you want, or even write your own Lua code!
+-   💻 **Powered by roblox-ts**: Built with a modified [roblox-ts](https://roblox-ts.com) for a first-class TypeScript development experience.
 
 ---
 
-## 🛠 Getting Started
+## 📌 Important Information
 
-Get up and running with OverEngineered's development environment in just a few steps:
+| Icon | Details |
+| :--: | --- |
+| 🛡️ | **Safety Disclaimer**<br>OverEngineered is a virtual sandbox for creative experimentation. All in-game actions are fictional and should **never** be attempted in real life. Please play responsibly! |
+| 🔗 | **Game Access & DMCA**<br>Due to frequent false DMCA takedowns, the official place may be unavailable. Always use our **[verified link](https://join.anywaymachines.com)** to find the latest working version. |
+| 💾 | **Automatic Saves**<br>Your progress is protected by an automatic save system every 5 minutes, so your creations remain as safe as possible even during disruptions. |
 
-1. **Clone the Repository**
+---
 
-   ```bash
-   git clone https://github.com/anywaymachines/overengineered.git
-   cd overengineered
-   ```
+## 🚀 Getting Started: Development Setup
 
-2. **Install Dependencies**
+Get up and running with the OverEngineered development environment in a few steps.
 
-   It is recommended to use **Node.js v20 LTS** for best compatibility. Download it from the [official site](https://nodejs.org/).
+### Prerequisites
 
-   Ensure Node.js is installed, then run:
+-   [**Git**](https://git-scm.com/downloads)
+-   [**Node.js v20 LTS**](https://nodejs.org/)
 
-   ```bash
-   npm install
-   ```
+### Installation
 
-3. **Download Rokit**
+1.  **Clone the Repository**
+    ```bash
+    git clone https://github.com/anywaymachines/overengineered.git
+    cd overengineered
+    ```
 
-   Download and install [rokit](https://github.com/rojo-rbx/rokit) (required for asset and place management):
+2.  **Install Dependencies**
+    ```bash
+    npm install
+    ```
 
-   ```bash
-   # Download and follow instructions from https://github.com/rojo-rbx/rokit
-   ```
+3.  **Install Rokit**
+    [Rokit](https://github.com/rojo-rbx/rokit) is required for asset and place management. Choose one of the methods below.
 
-4. **Assemble the Place File**
+    <details>
+    <summary><strong>Recommended (No Rust Required)</strong></summary>
 
-   Before starting Rojo or working in Roblox Studio, you must assemble the place file:
+    -   **Linux / macOS:**
+        ```bash
+        curl -sSf https://raw.githubusercontent.com/rojo-rbx/rokit/main/scripts/install.sh | bash
+        ```
+    -   **Windows (PowerShell):**
+        ```powershell
+        Invoke-RestMethod https://raw.githubusercontent.com/rojo-rbx/rokit/main/scripts/install.ps1 | Invoke-Expression
+        ```
 
-   ```bash
-   lune run assemble
-   ```
+    </details>
 
-   This will generate or update `place.rbxl` using the current assets and structure.
+    <details>
+    <summary><strong>Alternative (Requires Rust/Cargo)</strong></summary>
 
-5. **Run the Build Watcher**
+    -   First, install [Rust & Cargo](https://www.rust-lang.org/tools/install).
+    -   Then, install Rokit:
+        ```bash
+        cargo install rokit
+        ```
+    </details>
 
-   In a separate terminal, start the TypeScript compiler in watch mode:
+4.  **Assemble the Place File**
+    Before opening Studio, you must generate the `place.rbxl` file:
+    ```bash
+    lune run assemble
+    ```
 
-   ```bash
-   npm run watch
-   ```
+5.  **Start the Development Server**
+    This command launches all necessary services, including the TypeScript compiler and Rojo server.
+    ```bash
+    npm run dev
+    ```
 
-   This compiles TypeScript/roblox-ts code into Roblox Lua in real-time.
+6.  **Connect Rojo in Roblox Studio**
+    -   Open the generated `place.rbxl` file in Roblox Studio.
+    -   Navigate to **Plugins → Rojo → Connect**.
+    -   Your local code will now sync automatically with the Studio environment.
 
-6. **Start Rojo**
+You're all set! Make changes in your code editor and watch them appear live in Studio.
 
-   Install [Rojo](https://rojo.space/) in Roblox Studio, then launch the server:
+> **Note:** When the development server is running, saving assets inside the place will automatically organize all models into their respective folders.
 
-   ```bash
-   rojo serve
-   ```
+---
 
-7. **Open Roblox Studio and Connect Rojo**
+## 🤝 Contributing
 
-   - Open Roblox Studio.
-   - In Roblox Studio, open the generated `place.rbxl` file.
-   - After the place is open, navigate to **Plugins → Rojo → Connect** to connect Rojo.
-   - Your local code and assets will sync automatically with the Roblox environment.
+We welcome community contributions! Feel free to open an issue or submit a pull request.
 
-8. **Start Building!**
+> **Repository Submodule Notice:**
+> This repository contains a submodule with proprietary services for our official database and anti-exploit protection. These components are exclusive to our infrastructure and are **not required** for local development or community contributions.
 
-   Make changes locally and watch them come to life in Roblox Studio.
+---
 
 ## 📝 License
 
-This project is licensed under a custom non-commercial license. See [LICENSE](LICENSE) for details.
+This project is licensed under a custom non-commercial license. See the [LICENSE](LICENSE) file for details.
