@@ -59,6 +59,7 @@ local function protectedCall(func, errorMessage, ...)
 end
 
 type instanceProps = {
+	kind: nil | { kind: "folder", root: string },
 	path: string | nil,
 	children: { [string]: instanceProps },
 }
@@ -99,8 +100,43 @@ local function loadAndPlaceModel(filePath: string, parent: Instance, name: strin
 	return localInstances
 end
 local function processNode(props: instanceProps, name: string, parent: Instance)
-	local instance
+	if props.kind then
+		if props.kind.kind == "folder" then
+			local function writeFoldered(path: string, parent: Instance)
+				if not fs.isDir(path) then fs.writeDir(path) end
 
+				local files = fs.readDir(path)
+				for i, fname in  files do
+					local fpath = path .. '/' .. fname
+					print(fpath, ' | ', fname)
+					local idx = fname:find("%.") or math.huge
+					fname = fname:sub(1, idx - 1)
+
+					if fs.isFile(fpath) then
+						loadAndPlaceModel(fpath, parent, fname)
+					else
+						local instance = parent:FindFirstChild(fname);
+						if not instance then
+							local className = SPECIAL_CONTAINERS[name] or "Folder"
+							log("Creating instance: '" .. name .. "' of class '" .. className .. "' in " .. parent:GetFullName())
+							instance = Instance.new(className)
+							instance.Name = name
+							instance.Parent = parent
+						else
+							log("Found existing container: '" .. instance:GetFullName() .. "' of class " .. instance.ClassName)
+						end
+
+						writeFoldered(fpath, instance)
+					end
+				end
+			end
+
+			writeFoldered(props.kind.root, parent);
+			return true
+		end
+	end
+
+	local instance
 	if props.path then
 		instance = loadAndPlaceModel(props.path, parent, name)[1]
 		if not instance then return false end

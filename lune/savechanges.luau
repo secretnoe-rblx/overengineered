@@ -109,6 +109,7 @@ local function saveInstanceToFile(instance, filePath, depth)
 end
 
 type instanceProps = {
+	kind: nil | { kind: "folder", root: string },
 	path: string | nil,
 	children: { [string]: instanceProps },
 }
@@ -131,6 +132,24 @@ local function processNode(name: string, node: instanceProps, parentInstance: In
 		warn("Could not find instance: " .. fullPath, depth)
 		table.insert(missingInstances, fullPath)
 		return
+	end
+
+	if node.kind then
+		if node.kind.kind == 'folder' then
+			local root = #childInstance:GetFullName() + 1;
+			local function processFoldered(parentInstance: Instance, depth: number)
+				if parentInstance:IsA("Folder") then
+					for i, v in parentInstance:GetChildren() do
+						processFoldered(v, depth + 1)
+					end
+				else
+					saveInstanceToFile(parentInstance, node.kind.root .. '/' .. parentInstance:GetFullName():sub(root):gsub("%.", "/") .. '.rbxmx', depth + 1)
+				end
+			end
+
+			processFoldered(childInstance, depth)
+			return
+		end
 	end
 
 	if node.path then
