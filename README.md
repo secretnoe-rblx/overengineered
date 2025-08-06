@@ -13,24 +13,32 @@
 </p>
 
 <p align="center">
-  <strong>A chaotic sandbox physics game where you build, race, and crash epic vehicles!</strong>
+  <strong>Roblox sandbox physics game with logic and destruction</strong>
 </p>
 
-[OverEngineered](https://join.anywaymachines.com) is a thrilling sandbox physics game on Roblox, centered around creative vehicle construction and spectacular destruction. From planes to cars to wild hybrids, build anything your imagination conjures, then test it in a dynamic, destructible world. Currently in **beta**, join the fun at [join.anywaymachines.com](https://join.anywaymachines.com)!
+[OverEngineered](https://join.anywaymachines.com) is a sandbox physics game on Roblox, centered around constructing mechanical and logical machines, and then testing them. From planes to cars to wild hybrids, from mini-processors to guided missles - build anything you want, then test it in a dynamic and destructible world. Currently in **beta**, join the fun at [join.anywaymachines.com](https://join.anywaymachines.com)!
 
 ---
 
 ## ✨ Key Features
 
-- 🛠 **Destructible Physics**: Experience realistic crashes and chaotic destruction.
+- 🛠 **Destruction Physics**: Experience realistic crashes and chaotic destruction.
 - 🧩 **Block-Based Building**: Craft vehicles with a flexible, customizable system.
 - ⚙️ **Advanced Components**: Use thrusters, motors, hinges, and more to bring your creations to life.
-- 💻 **Powered by roblox-ts**: Built with a modified [roblox-ts](https://roblox-ts.com) for seamless development.
-- 🎨 **Unleash Creativity**: Experiment with endless designs in a sandbox playground.
+- 🧠 **Powerful logic**: Wire up logic blocks to make your creations do whatever you want, or even write your own lua code!
+- 💻 **Powered by roblox-ts**: Built with a modified [roblox-ts](https://roblox-ts.com) for the best experience of TypeScript.
 
 ## ⚠️ Disclaimer
 
+*This is a game. Don’t try this in real life.*
+
 OverEngineered is all about safe, creative gameplay. It does not condone or replicate harmful real-world actions or events. Any similarities are purely coincidental.
+
+## ⚠️ Disclaimer 2
+
+This game has been a target of over 200 false DMCA strikes since the end of 2023, and going. Since the official place constantly gets taken down, to find it use our official link https://join.anywaymachines.com.
+
+*Your saves are almost save with our 5 minute auto-saving system*
 
 ---
 
