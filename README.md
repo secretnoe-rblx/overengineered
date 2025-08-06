@@ -13,17 +13,17 @@
   <strong>Roblox sandbox physics game with logic and destruction</strong>
 </p>
 
-A sandbox physics game on Roblox centered around constructing mechanical and logical machines. From planes to cars to wild hybrids, from mini-processors to guided missiles—build anything you want, then test it in a dynamic and destructible world.
+A sandbox physics game on Roblox centered around constructing mechanical and logical machines. From planes to cars to wild hybrids, from mini-processors to guided missiles — build anything you want, then test it in a dynamic and destructible world.
 
 ---
 
 ## ✨ Key Features
 
--   🛠️ **Destruction Physics**: Experience realistic crashes and chaotic destruction.
--   🧩 **Block-Based Building**: Craft vehicles with a flexible, customizable system.
--   ⚙️ **Advanced Components**: Use thrusters, motors, hinges, and more to bring your creations to life.
--   🧠 **Powerful Logic**: Wire up logic blocks to make your creations do whatever you want, or even write your own Lua code!
--   💻 **Powered by roblox-ts**: Built with a modified [roblox-ts](https://roblox-ts.com) for a first-class TypeScript development experience.
+- 🛠️ **Destruction Physics**: Experience realistic crashes and chaotic destruction.
+- 🧩 **Block-Based Building**: Craft vehicles with a flexible, customizable system.
+- ⚙️ **Advanced Components**: Use thrusters, motors, hinges, and more to bring your creations to life.
+- 🧠 **Powerful Logic**: Wire up logic blocks to make your creations do whatever you want, or even write your own Lua code!
+- 💻 **Powered by roblox-ts**: Built with a modified [roblox-ts](https://roblox-ts.com) for a first-class TypeScript development experience.
 
 ---
 
@@ -43,33 +43,38 @@ Get up and running with the OverEngineered development environment in a few step
 
 ### Prerequisites
 
--   [**Git**](https://git-scm.com/downloads)
--   [**Node.js v20 LTS**](https://nodejs.org/)
+- [**Git**](https://git-scm.com/downloads)
+- [**Node.js v20 LTS**](https://nodejs.org/)
 
 ### Installation
 
-1.  **Clone the Repository**
+1. **Clone the Repository**
+
     ```bash
     git clone https://github.com/anywaymachines/overengineered.git
     cd overengineered
     ```
 
-2.  **Install Dependencies**
+2. **Install Dependencies**
+
     ```bash
     npm install
     ```
 
-3.  **Install Rokit**
+3. **Install Rokit**
     [Rokit](https://github.com/rojo-rbx/rokit) is required for asset and place management. Choose one of the methods below.
 
     <details>
     <summary><strong>Recommended (No Rust Required)</strong></summary>
 
-    -   **Linux / macOS:**
+    - **Linux / macOS:**
+
         ```bash
         curl -sSf https://raw.githubusercontent.com/rojo-rbx/rokit/main/scripts/install.sh | bash
         ```
-    -   **Windows (PowerShell):**
+
+    - **Windows (PowerShell):**
+
         ```powershell
         Invoke-RestMethod https://raw.githubusercontent.com/rojo-rbx/rokit/main/scripts/install.ps1 | Invoke-Expression
         ```
@@ -79,29 +84,33 @@ Get up and running with the OverEngineered development environment in a few step
     <details>
     <summary><strong>Alternative (Requires Rust/Cargo)</strong></summary>
 
-    -   First, install [Rust & Cargo](https://www.rust-lang.org/tools/install).
-    -   Then, install Rokit:
+    - First, install [Rust & Cargo](https://www.rust-lang.org/tools/install).
+    - Then, install Rokit:
+
         ```bash
         cargo install rokit
         ```
+
     </details>
 
-4.  **Assemble the Place File**
+4. **Assemble the Place File**
     Before opening Studio, you must generate the `place.rbxl` file:
+
     ```bash
     lune run assemble
     ```
 
-5.  **Start the Development Server**
+5. **Start the Development Server**
     This command launches all necessary services, including the TypeScript compiler and Rojo server.
+
     ```bash
     npm run dev
     ```
 
-6.  **Connect Rojo in Roblox Studio**
-    -   Open the generated `place.rbxl` file in Roblox Studio.
-    -   Navigate to **Plugins → Rojo → Connect**.
-    -   Your local code will now sync automatically with the Studio environment.
+6. **Connect Rojo in Roblox Studio**
+    - Open the generated `place.rbxl` file in Roblox Studio.
+    - Navigate to **Plugins → Rojo → Connect**.
+    - Your local code will now sync automatically with the Studio environment.
 
 You're all set! Make changes in your code editor and watch them appear live in Studio.
 
