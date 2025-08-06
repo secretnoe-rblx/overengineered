@@ -10,7 +10,6 @@ if (argIndex !== -1 && process.argv[argIndex + 1]) {
 }
 
 const invocationDir = process.cwd();
-
 const outPath = path.join(projectRoot, "out");
 const lunewatchPath = path.join(projectRoot, "scripts", "lunewatch.js");
 
@@ -25,12 +24,16 @@ function printWithPrefix(data, prefix, colorFn) {
 	const lines = data.toString().split(/\r?\n/);
 	for (let i = 0; i < lines.length; i++) {
 		const line = lines[i];
-		console.log(colorFn(prefix) + " " + line);
+		if (line.trim() !== "") {
+			console.log(colorFn(prefix) + " " + line);
+		}
 	}
 }
 
-function runCommand(label, command, args, cwd) {
-	const proc = spawn(command, args, {
+function runCommand(label, command, argsArray, cwd) {
+	const fullCommand = [command, ...argsArray].map((arg) => (/\s/.test(arg) ? `"${arg}"` : arg)).join(" ");
+
+	const proc = spawn(fullCommand, {
 		cwd,
 		stdio: "pipe",
 		shell: true,
