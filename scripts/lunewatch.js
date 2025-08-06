@@ -3,6 +3,7 @@ const { exec } = require("child_process");
 const path = "./place.rbxl";
 
 let fileCreated = false;
+/** @type {fs.FSWatcher | null} */
 let watcher = null;
 
 function runCommand() {
@@ -21,15 +22,20 @@ function runCommand() {
 }
 
 function startWatching() {
-	if (watcher) return;
+	function restart() {
+		watcher?.close();
+		watcher = fs.watch(path, (eventType) => {
+			if (eventType === "change") {
+				runCommand();
+			}
 
-	watcher = fs.watch(path, (eventType) => {
-		if (eventType === "change") {
-			runCommand();
-		}
-	});
+			restart();
+		});
 
-	console.log("[watcher] Watching for changes to place.rbxl");
+		console.log("[watcher] Started the watcher for place.rbxl");
+	}
+
+	restart();
 }
 
 function waitForFile() {
