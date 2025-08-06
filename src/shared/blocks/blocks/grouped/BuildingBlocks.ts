@@ -290,6 +290,18 @@ const cylinders = {
 		search: { partialAliases: ["tube", "pipe", "macaroni"] },
 		mirror: { behaviour: "hcylvertical" },
 	},
+	hollowcylinder90horizontalhalf: {
+		displayName: "Hollow Cylinder 90 Horizontal Half",
+		description: "A horizontal half of a bended hollow tube",
+		search: { partialAliases: ["tube", "pipe", "macaroni"] },
+		mirror: { behaviour: "hcylvertical" },
+	},
+	cylinder90horizontalhalf: {
+		displayName: "Cylinder 90 Horizontal Half",
+		description: "A horizontal half of a bended tube",
+		search: { partialAliases: ["tube", "pipe", "macaroni"] },
+		mirror: { behaviour: "hcylvertical" },
+	},
 } as const satisfies BlockBuildersWithoutIdAndDefaults;
 
 const wedges = {
