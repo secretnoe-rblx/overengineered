@@ -1,12 +1,10 @@
-import { Players, UserInputService } from "@rbxts/services";
+import { Players, RunService, UserInputService } from "@rbxts/services";
 import { EventHandler } from "engine/shared/event/EventHandler";
-import { A2SRemoteEvent } from "engine/shared/event/PERemoteEvent";
-import { Keys } from "engine/shared/fixes/Keys";
+import { A2SRemoteEvent, S2CRemoteEvent } from "engine/shared/event/PERemoteEvent";
 import { t } from "engine/shared/t";
 import { InstanceBlockLogic } from "shared/blockLogic/BlockLogic";
 import { BlockSynchronizer } from "shared/blockLogic/BlockSynchronizer";
 import { BlockCreation } from "shared/blocks/BlockCreation";
-import { BuildingManager } from "shared/building/BuildingManager";
 import type { BlockLogicFullBothDefinitions, InstanceBlockLogicArgs } from "shared/blockLogic/BlockLogic";
 import type { BlockBuilder } from "shared/blocks/Block";
 
@@ -71,148 +69,120 @@ type BackMountModel = BlockModel & {
 	PlayerWeldConstraint: Motor6D;
 };
 
-export type { Logic as BackMountBlockLogic };
+const updateProximity = ({ block, key, isPublic, owner, connectToRootPart }: proximityInferedType) => {
+	const pp = block.FindFirstChild("ProximityPrompt") as typeof block.ProximityPrompt;
+	if (!pp) return;
 
-const blocks = new Map<BackMountModel, EventHandler>();
+	// set activation key
+	const k = Enum.KeyCode[key as unknown as never];
+	pp.KeyboardKeyCode = k;
+	pp.GamepadKeyCode = k;
 
-const remove = ({ block, owner }: disable) => {
-	const eh = blocks.get(block);
-	if (!eh) return;
+	const handler = new EventHandler();
 
-	eh.unsubscribeAll();
+	// subscribe to block being destroyed
+	handler.subscribe(block.ChildRemoved, () => handler.unsubscribeAll());
 
-	const weld = block.FindFirstChild("PlayerWeldConstraint") as Motor6D | undefined;
-	const humanoid = Players.LocalPlayer.Character?.FindFirstChild("Humanoid") as Humanoid | undefined;
-	if (humanoid && weld?.Part1 && humanoid.IsAncestorOf(weld.Part1)) {
-		detach(block, owner);
-	}
-};
-
-const init = ({ owner, block, key, connectToRootPart }: initClient) => {
-	// print("RCEVIENG INIT_CLIENT  from " + owner.Name);
-	if (blocks.has(block)) return;
-
-	const eh = new EventHandler();
-	blocks.set(block, eh);
-
-	const pp = block.ProximityPrompt;
-	pp.KeyboardKeyCode = Keys.Keys[key];
-	pp.Triggered.Connect(() => {
-		// fix teleporting to 000; todo make a better fix later
-		for (const b of BuildingManager.getMachineBlocks(block)) {
-			for (const child of b.GetDescendants()) {
-				if (!child.IsA("BasePart")) continue;
-
-				child.FindFirstChild("_AlignPosition")?.Destroy();
-				child.FindFirstChild("_AlignOrientation")?.Destroy();
-			}
-		}
-
-		Logic.events.weldMountToPlayer.send({ block, connectToRootPart });
-	});
-
-	block.Destroying.Connect(() => remove({ block, owner }));
-
-	const humanoid = Players.LocalPlayer.Character?.FindFirstChild("Humanoid") as Humanoid | undefined;
-	if (humanoid) {
-		eh.subscribe(humanoid.Died, () => detach(block, owner));
-	}
-
-	eh.subscribe(UserInputService.InputBegan, (input, gameProccessed) => {
+	// subscribe to keypress
+	handler.subscribe(UserInputService.InputBegan, (input, gameProccessed) => {
 		if (gameProccessed) return;
-		if (input.KeyCode !== pp.KeyboardKeyCode) return;
+		if (input.KeyCode !== k) return;
 
-		detach(block, owner);
+		// add extra chech that it is welded to this player
+		// we do not want to spam with remote events, do we?
+		const cnstr = block.FindFirstChild("PlayerWeldConstraint") as typeof block.PlayerWeldConstraint;
+		if (!cnstr) return;
+		if (cnstr.Part1) return;
+
+		// unweld
+		Logic.events.weldMountUpdate.send({
+			block,
+			weldedState: false,
+			owner,
+		});
 	});
 
-	const isEnabled = () => {
-		// if (Players.LocalPlayer === owner && block.PlayerWeldConstraint.Enabled) return true;
-		return !block.PlayerWeldConstraint.Enabled;
-	};
-	pp.Enabled = isEnabled();
-	eh.subscribe(block.PlayerWeldConstraint.GetPropertyChangedSignal("Enabled"), () => (pp.Enabled = isEnabled()));
+	handler.subscribe(pp.Triggered, () => {
+		// weld because there is no prompt when welded
+		Logic.events.weldMountUpdate.send({
+			block,
+			weldedState: true,
+			owner,
+			connectToRootPart,
+		});
+	});
+
+	// make thing accessible to anyone else
+	if (owner !== Players.LocalPlayer) pp.MaxActivationDistance = isPublic ? 5 : 0;
+	else pp.MaxActivationDistance = 5;
+	pp.Enabled = true;
 };
 
-const detach = (block: BackMountModel, owner: Player) => {
-	Logic.events.unweldMountFromPlayer.send({ block, owner });
-};
-
-const initClientType = t.interface({
+const proximityEventType = t.interface({
 	block: t.instance("Model").nominal("blockModel").as<BackMountModel>(),
-	owner: t.any.as<Player>(),
 	connectToRootPart: t.boolean,
-	key: t.any.as<KeyCode>(),
-});
-const disableType = t.interface({
-	block: t.instance("Model").nominal("blockModel").as<BackMountModel>(),
 	owner: t.any.as<Player>(),
+	isPublic: t.boolean,
+	key: t.string,
 });
 
-type initClient = t.Infer<typeof initClientType>;
-type disable = t.Infer<typeof disableType>;
+type proximityInferedType = t.Infer<typeof proximityEventType>;
 
+type weldTypeEvent = {
+	readonly block: BackMountModel;
+	readonly weldedState: boolean;
+	readonly owner: Player;
+	readonly connectToRootPart?: boolean;
+};
+
+type logicUpdateEvent = {
+	readonly block: BackMountModel;
+	readonly weldedTo: Player | undefined;
+};
+
+export type { Logic as BackMountBlockLogic };
 class Logic extends InstanceBlockLogic<typeof definition, BackMountModel> {
 	static readonly events = {
-		initServer: new A2SRemoteEvent<{
-			block: BackMountModel;
-			key: KeyCode;
-			connectToRootPart: boolean;
-			owner: Player;
-		}>("backmount_initServer", "RemoteEvent"),
-		weldMountToPlayer: new A2SRemoteEvent<{
-			readonly block: BackMountModel;
-			readonly connectToRootPart: boolean;
-		}>("backmount_weld", "RemoteEvent"),
-		unweldMountFromPlayer: new A2SRemoteEvent<{
-			readonly owner: Player;
-			readonly block: BackMountModel;
-		}>("backmount_unweld", "RemoteEvent"),
-
-		initClient: new BlockSynchronizer("backmount_init", initClientType, init),
-		disable: new BlockSynchronizer("backmount_disable", disableType, remove),
+		updateLogic: new S2CRemoteEvent<logicUpdateEvent>("backmount_logic", "RemoteEvent"),
+		weldMountUpdate: new A2SRemoteEvent<weldTypeEvent>("backmount_weld", "RemoteEvent"),
+		updateProximity: new BlockSynchronizer<proximityInferedType>(
+			"backmount_proximity",
+			proximityEventType,
+			updateProximity,
+		),
 	} as const;
 
 	constructor(block: InstanceBlockLogicArgs) {
 		super(definition, block);
 
-		this.event.subscribeObservable(
-			this.event.readonlyObservableFromInstanceParam(this.instance.PlayerWeldConstraint, "Enabled"),
-			(enabled) => this.output.mounted.set("bool", !enabled),
-		);
-
-		this.onk(["detachKey", "connectToRootPart", "shared"], ({ detachKey, connectToRootPart, shared }) => {
-			if (!Keys.isKey(detachKey)) {
-				detachKey = this.definition.input.detachKey.types.key.config;
-				if (!Keys.isKey(detachKey)) return;
-			}
-
-			if (shared) {
-				const data = {
-					block: this.instance,
-					key: detachKey,
-					connectToRootPart,
-					owner: Players.LocalPlayer,
-				};
-
-				// print("SENDING EVENT STARTUP TO EVERYONE");
-				// it's fine to send the init event here because these input values cannot be changed (connectorHidden: true)
-				Logic.events.initClient.sendOrBurn(data, this);
-				Logic.events.initServer.send(data);
-			} else {
-				init({ block: this.instance, key: detachKey, connectToRootPart, owner: Players.LocalPlayer });
-			}
+		// update pressable key
+		this.onk(["detachKey", "shared", "connectToRootPart"], ({ detachKey, shared, connectToRootPart }) => {
+			Logic.events.updateProximity.send({
+				block: this.instance,
+				key: detachKey,
+				isPublic: shared,
+				owner: Players.LocalPlayer,
+				connectToRootPart,
+			});
 		});
 
-		this.onk(["detachBool"], ({ detachBool }) => {
-			if (!detachBool) return;
-			detach(this.instance, Players.LocalPlayer);
+		// call weld stuff on detach bool
+		this.onk(["detachBool", "connectToRootPart"], ({ detachBoolChanged, detachBool, connectToRootPart }) => {
+			if (!detachBoolChanged) return;
+			Logic.events.weldMountUpdate.send({
+				block: this.instance,
+				weldedState: detachBool,
+				owner: Players.LocalPlayer,
+				connectToRootPart,
+			});
 		});
 
-		this.onDisable(() => {
-			Logic.events.disable.sendOrBurn({ block: this.instance, owner: Players.LocalPlayer }, this);
-			Logic.events.unweldMountFromPlayer.send({ block: this.instance, owner: Players.LocalPlayer });
-			this.output.mounted.set("bool", false);
-		});
+		if (RunService.IsClient()) {
+			this.event.subscribe(Logic.events.updateLogic.invoked, ({ block, weldedTo }) => {
+				if (block !== this.instance) return;
+				this.output.mounted.set("bool", !!weldedTo);
+			});
+		}
 	}
 }
 
@@ -224,7 +194,7 @@ export const BackMountBlock = {
 	limit: 15,
 
 	search: {
-		partialAliases: ["body"],
+		partialAliases: ["body", "backpack"],
 	},
 
 	logic: { definition, ctor: Logic },

@@ -1,8 +1,5 @@
-import { Players } from "@rbxts/services";
-import { InstanceComponent } from "engine/shared/component/InstanceComponent";
 import { ServerBlockLogic } from "server/blocks/ServerBlockLogic";
-import { BuildingManager } from "shared/building/BuildingManager";
-import { SharedRagdoll } from "shared/SharedRagdoll";
+import { ServerPartUtils } from "server/plots/ServerPartUtils";
 import type { PlayModeController } from "server/modes/PlayModeController";
 import type { ServerPlayersController } from "server/ServerPlayersController";
 import type { BackMountBlockLogic } from "shared/blocks/blocks/BackMountBlock";
@@ -16,79 +13,55 @@ export class BackMountBlockServerLogic extends ServerBlockLogic<typeof BackMount
 	) {
 		super(logic, playModeController);
 
-		logic.events.initServer.invoked.Connect((player, data) => {
-			const block = data.block;
+		const getPlayerTorso = (p: Player, connectToRootPart: boolean) => {
+			const ch = p.Character;
+			if (!ch) return;
+			const h = ch.FindFirstChild("Humanoid") as Humanoid;
+			if (!h) return;
 
-			if (!this.isValidBlock(block, player, false, false)) return;
-			if (!block.FindFirstChild("PlayerWeldConstraint")) return;
+			if (connectToRootPart) return h.RootPart;
 
-			const c = new InstanceComponent(block);
-			c.event.subscribeMap(
-				playersController.controllers,
-				(playerid, controller) => {
-					if (!controller) return;
-
-					const player = Players.GetPlayerByUserId(playerid);
-					if (!player) return;
-
-					logic.events.initClient.send(data);
-				},
-				true,
-			);
-			c.enable();
-		});
-
-		logic.events.weldMountToPlayer.invoked.Connect((player, { block, connectToRootPart }) => {
-			if (!this.isValidBlock(block, player, false, false)) return;
-			if (!block.FindFirstChild("PlayerWeldConstraint")) return;
-
-			// fix teleporting to 000; todo make a better fix later
-			for (const b of BuildingManager.getMachineBlocks(block)) {
-				for (const child of b.GetDescendants()) {
-					if (!child.IsA("BasePart")) continue;
-
-					child.FindFirstChild("_AlignPosition")?.Destroy();
-					child.FindFirstChild("_AlignOrientation")?.Destroy();
-				}
+			switch (h.RigType) {
+				case Enum.HumanoidRigType.R6:
+					return h.Parent?.FindFirstChild("Torso") as BasePart;
+				case Enum.HumanoidRigType.R15:
+					return h.Parent?.FindFirstChild("UpperTorso") as BasePart;
 			}
 
-			const humanoid = player?.Character?.FindFirstChild("Humanoid") as Humanoid | undefined;
-			if (!humanoid) return;
+			return;
+		};
 
-			let torso: BasePart | undefined;
-			if (!connectToRootPart) {
-				switch (humanoid.RigType) {
-					case Enum.HumanoidRigType.R6:
-						torso = humanoid.Parent?.FindFirstChild("Torso") as BasePart;
-						break;
-					case Enum.HumanoidRigType.R15:
-						torso = humanoid.Parent?.FindFirstChild("UpperTorso") as BasePart;
-						break;
-					default:
-						throw "what";
-				}
-			} else torso = humanoid.RootPart;
+		const isAlreadyWelded = (w: Motor6D) => w.Part1 !== undefined;
+		logic.events.weldMountUpdate.invoked.Connect((player, data) => {
+			if (!player) return;
+			const isWeldRequest = data.weldedState && !isAlreadyWelded(data.block.PlayerWeldConstraint);
 
-			if (!torso) return;
+			// print("Owner", data.owner);
+			//weld if unwelded
+			if (isWeldRequest) {
+				const torso = getPlayerTorso(player, data.connectToRootPart!);
+				if (!torso) return;
+				ServerPartUtils.switchDescendantsNetworkOwner(data.block, player);
+				data.block.PlayerWeldConstraint.C0 = new CFrame(new Vector3(0, 0, -torso.Size.Z));
+				data.block.PlayerWeldConstraint.Part1 = torso;
 
-			SharedRagdoll.setPlayerRagdoll(humanoid, false);
-			humanoid.Sit = false;
-			humanoid.RootPart?.PivotTo(block.GetPivot());
-			block.PlayerWeldConstraint.C0 = new CFrame(0, 0, -torso.Size.Z + 0.15);
-			block.PlayerWeldConstraint.Enabled = true;
-			block.PlayerWeldConstraint.Part1 = torso;
-		});
-
-		logic.events.unweldMountFromPlayer.invoked.Connect((player, { block, owner }) => {
-			if (!this.isValidBlock(block, player, false, false)) return;
-			if (!block.FindFirstChild("PlayerWeldConstraint")) return;
-
-			if (!block.PlayerWeldConstraint.Part1 || !player?.Character?.IsAncestorOf(block.PlayerWeldConstraint.Part1))
+				// update logic
+				logic.events.updateLogic.send(data.owner, {
+					block: data.block,
+					weldedTo: player,
+				});
+				// print("Welded", player);
 				return;
+			}
 
-			block.PlayerWeldConstraint.Enabled = false;
-			block.PlayerWeldConstraint.Part1 = block.WaitForChild("mainPart") as BasePart;
-			block.PrimaryPart!.SetNetworkOwner(owner);
+			//unweld otherwise
+			ServerPartUtils.switchDescendantsNetworkOwner(data.block, data.owner);
+			data.block.PlayerWeldConstraint.Part1 = undefined;
+			logic.events.updateLogic.send(data.owner, {
+				block: data.block,
+				weldedTo: undefined,
+			});
+			// print("Unwelded", player);
 		});
 	}
 }
