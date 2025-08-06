@@ -8,6 +8,7 @@ import { CenterOfMassController } from "client/modes/build/CenterOfMassControlle
 import { ClientBuilding } from "client/modes/build/ClientBuilding";
 import { ClientBuildingValidationController } from "client/modes/build/ClientBuildingValidationController";
 import { GridController } from "client/modes/build/GridController";
+import { WeldVisualizerController } from "client/modes/build/WeldVisualizer";
 import { PlayMode } from "client/modes/PlayMode";
 import { requestMode } from "client/modes/PlayModeRequest";
 import { RideMode } from "client/modes/ride/RideMode";
@@ -168,6 +169,7 @@ export class BuildingMode extends PlayMode {
 			di.registerSingletonValue(this);
 			di.registerSingletonClass(ActionController);
 			di.registerSingletonClass(CenterOfMassController);
+			di.registerSingletonClass(WeldVisualizerController);
 			di.registerSingletonClass(ClientBuilding);
 			di.registerSingletonClass(ClientBuildingValidationController);
 			di.registerSingletonClass(GridController).withArgs([this.moveGrid, this.rotateGrid, this.editMode]);
@@ -245,6 +247,7 @@ export class BuildingMode extends PlayMode {
 
 		this.parent(di.resolve<GridController>());
 		this.parent(di.resolve<CenterOfMassController>());
+		this.parent(di.resolve<WeldVisualizerController>());
 
 		this.event.subInput((ih) => {
 			ih.onKeyDown("LeftControl", () => this.gridEnabled.set(false));
