@@ -6,6 +6,7 @@ import { ComponentStateContainer } from "engine/shared/component/ComponentStateC
 import { Transforms } from "engine/shared/component/Transforms";
 import { Element } from "engine/shared/Element";
 import { ObservableValue } from "engine/shared/event/ObservableValue";
+import { BlockManager } from "shared/building/BlockManager";
 import { SharedPlot } from "shared/building/SharedPlot";
 import { Colors } from "shared/Colors";
 import type { MainScreenLayout } from "client/gui/MainScreenLayout";
@@ -67,9 +68,6 @@ export class WeldVisualizer extends Component {
 			item.Parent = this.viewportFrame;
 			return item;
 		};
-		const clearupFrame = () => {
-			//
-		};
 
 		const update = () => {
 			if (!this.machineCOM) {
@@ -85,6 +83,12 @@ export class WeldVisualizer extends Component {
 					const pos1 = weld.Part0?.Position;
 					const pos2 = weld.Part1?.Position;
 					if (!pos1 || !pos2) continue;
+
+					const block1 = BlockManager.tryGetBlockModelByPart(weld.Part0);
+					const block2 = BlockManager.tryGetBlockModelByPart(weld.Part1);
+					if (!block1 || block1 === block2) {
+						continue;
+					}
 
 					const cloned = nextWeldInstance();
 					cloned.Parent = this.viewportFrame;
