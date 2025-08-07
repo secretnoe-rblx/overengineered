@@ -373,7 +373,7 @@
       <Properties>
         <string name="Name">Tire</string>
         <SharedString name="AeroMeshData">rxNJufX5oaagQE3qNtzJSQ==</SharedString>
-        <bool name="Anchored">false</bool>
+        <bool name="Anchored">true</bool>
         <BinaryString name="AttributesSerialize"></BinaryString>
         <bool name="AudioCanCollide">true</bool>
         <float name="BackParamA">-0.5</float>
@@ -541,7 +541,7 @@
       <Properties>
         <string name="Name">Rim</string>
         <SharedString name="AeroMeshData">rxNJufX5oaagQE3qNtzJSQ==</SharedString>
-        <bool name="Anchored">false</bool>
+        <bool name="Anchored">true</bool>
         <BinaryString name="AttributesSerialize"></BinaryString>
         <bool name="AudioCanCollide">true</bool>
         <float name="BackParamA">-0.5</float>
@@ -708,7 +708,7 @@
     <Item class="Part" referent="9">
       <Properties>
         <string name="Name">Collider</string>
-        <bool name="Anchored">false</bool>
+        <bool name="Anchored">true</bool>
         <BinaryString name="AttributesSerialize"></BinaryString>
         <bool name="AudioCanCollide">true</bool>
         <float name="BackParamA">-0.5</float>
@@ -835,7 +835,7 @@
       <Properties>
         <string name="Name">Part</string>
         <SharedString name="AeroMeshData">rxNJufX5oaagQE3qNtzJSQ==</SharedString>
-        <bool name="Anchored">false</bool>
+        <bool name="Anchored">true</bool>
         <ContentId name="AssetId">
           <url>https://www.roblox.com//asset/?id=84888285636353</url>
         </ContentId>

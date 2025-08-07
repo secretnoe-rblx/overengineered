@@ -51,7 +51,7 @@
         <token name="BottomSurfaceInput">0</token>
         <CoordinateFrame name="CFrame">
           <X>94.79974</X>
-          <Y>-16378.927</Y>
+          <Y>-16378.928</Y>
           <Z>30.030018</Z>
           <R00>1</R00>
           <R01>0</R01>
@@ -373,7 +373,7 @@
       <Properties>
         <string name="Name">Tire</string>
         <SharedString name="AeroMeshData">rxNJufX5oaagQE3qNtzJSQ==</SharedString>
-        <bool name="Anchored">false</bool>
+        <bool name="Anchored">true</bool>
         <BinaryString name="AttributesSerialize"></BinaryString>
         <bool name="AudioCanCollide">true</bool>
         <float name="BackParamA">-0.5</float>
@@ -541,7 +541,7 @@
       <Properties>
         <string name="Name">Rim</string>
         <SharedString name="AeroMeshData">rxNJufX5oaagQE3qNtzJSQ==</SharedString>
-        <bool name="Anchored">false</bool>
+        <bool name="Anchored">true</bool>
         <BinaryString name="AttributesSerialize"></BinaryString>
         <bool name="AudioCanCollide">true</bool>
         <float name="BackParamA">-0.5</float>
@@ -708,7 +708,7 @@
     <Item class="Part" referent="9">
       <Properties>
         <string name="Name">Collider</string>
-        <bool name="Anchored">false</bool>
+        <bool name="Anchored">true</bool>
         <BinaryString name="AttributesSerialize"></BinaryString>
         <bool name="AudioCanCollide">true</bool>
         <float name="BackParamA">-0.5</float>
@@ -835,7 +835,7 @@
       <Properties>
         <string name="Name">Part</string>
         <SharedString name="AeroMeshData">rxNJufX5oaagQE3qNtzJSQ==</SharedString>
-        <bool name="Anchored">false</bool>
+        <bool name="Anchored">true</bool>
         <ContentId name="AssetId">
           <url>https://www.roblox.com//asset/?id=80518556611710</url>
         </ContentId>
