@@ -675,7 +675,7 @@
         <bool name="DefinesCapabilities">false</bool>
         <token name="shape">1</token>
         <Vector3 name="size">
-          <X>2</X>
+          <X>1</X>
           <Y>2</Y>
           <Z>2</Z>
         </Vector3>
