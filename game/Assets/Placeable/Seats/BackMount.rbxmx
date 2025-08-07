@@ -905,6 +905,7 @@
         <float name="HoldDuration">0</float>
         <token name="KeyboardKeyCode">101</token>
         <float name="MaxActivationDistance">12</float>
+        <float name="MaxIndicatorDistance">0</float>
         <string name="ObjectText"></string>
         <bool name="RequiresLineOfSight">false</bool>
         <Ref name="RootLocalizationTable">null</Ref>
@@ -952,7 +953,7 @@
         </CoordinateFrame>
         <SecurityCapabilities name="Capabilities">0</SecurityCapabilities>
         <float name="DesiredAngle">0</float>
-        <bool name="Enabled">false</bool>
+        <bool name="Enabled">true</bool>
         <float name="MaxVelocity">0</float>
         <Ref name="Part0">2</Ref>
         <Ref name="Part1">2</Ref>

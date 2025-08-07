@@ -180,7 +180,11 @@ class Logic extends InstanceBlockLogic<typeof definition, BackMountModel> {
 		if (RunService.IsClient()) {
 			this.event.subscribe(Logic.events.updateLogic.invoked, ({ block, weldedTo }) => {
 				if (block !== this.instance) return;
-				this.output.mounted.set("bool", !!weldedTo);
+				const state = !!weldedTo;
+				this.output.mounted.set("bool", state);
+				const pp = block.FindFirstChild("ProximityPrompt") as typeof block.ProximityPrompt;
+				if (!pp) return;
+				pp.ActionText = state ? "Detach" : "Attach";
 			});
 		}
 	}
