@@ -60,9 +60,9 @@
           <token name="BottomSurface">0</token>
           <token name="BottomSurfaceInput">0</token>
           <CoordinateFrame name="CFrame">
-            <X>70.25</X>
-            <Y>-16378.633</Y>
-            <Z>71.043365</Z>
+            <X>70.5</X>
+            <Y>-16378.64</Y>
+            <Z>68.56062</Z>
             <R00>1</R00>
             <R01>0</R01>
             <R02>0</R02>
@@ -201,9 +201,9 @@
           <token name="BottomSurface">0</token>
           <token name="BottomSurfaceInput">0</token>
           <CoordinateFrame name="CFrame">
-            <X>70.25</X>
-            <Y>-16379.642</Y>
-            <Z>70.01858</Z>
+            <X>70.5</X>
+            <Y>-16379.648</Y>
+            <Z>67.535835</Z>
             <R00>1</R00>
             <R01>0</R01>
             <R02>0</R02>
@@ -342,9 +342,9 @@
         <token name="BottomSurface">0</token>
         <token name="BottomSurfaceInput">0</token>
         <CoordinateFrame name="CFrame">
-          <X>70.25</X>
-          <Y>-16378.637</Y>
-          <Z>70.02284</Z>
+          <X>70.5</X>
+          <Y>-16378.644</Y>
+          <Z>67.5401</Z>
           <R00>1</R00>
           <R01>0</R01>
           <R02>0</R02>
@@ -469,9 +469,9 @@
         <token name="BottomSurface">0</token>
         <token name="BottomSurfaceInput">0</token>
         <CoordinateFrame name="CFrame">
-          <X>70.25</X>
-          <Y>-16378.637</Y>
-          <Z>70.02284</Z>
+          <X>70.5</X>
+          <Y>-16378.644</Y>
+          <Z>67.5401</Z>
           <R00>1</R00>
           <R01>0</R01>
           <R02>0</R02>
@@ -609,9 +609,9 @@
         <token name="BottomSurface">0</token>
         <token name="BottomSurfaceInput">0</token>
         <CoordinateFrame name="CFrame">
-          <X>70.25</X>
-          <Y>-16378.611</Y>
-          <Z>70.02284</Z>
+          <X>70.5</X>
+          <Y>-16378.618</Y>
+          <Z>67.5401</Z>
           <R00>1</R00>
           <R01>0</R01>
           <R02>0</R02>
