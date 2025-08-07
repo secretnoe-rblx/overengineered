@@ -44,23 +44,32 @@ const balls: BlockBuildersWithoutIdAndDefaults = {
 		description: "it could be a cannon ball.. Or anything else, really..",
 		search: { partialAliases: ["circle", "sphere"] },
 	},
+	hollowball: {
+		displayName: "Hollow Ball",
+		description: "Is it useful? No idea!",
+		search: { partialAliases: ["circle", "sphere"] },
+	},
+
 	halfball: {
 		displayName: "Half Ball",
 		description: "It's rolling around.. half of the time..",
 		search: { partialAliases: ["circle", "sphere"] },
 	},
+	hollowhalfball: {
+		displayName: "Hollow Half Ball",
+		description: "the MOON is made of CHEESE and THIS is made of HOPES and DREAMS",
+		search: { partialAliases: ["circle", "sphere"] },
+	},
 
-	ball4: {
-		displayName: "1/4 Ball",
+	quarterball: {
+		displayName: "Quarter Ball",
 		description: "It's rolling around, almost",
 		search: { partialAliases: ["circle", "sphere"] },
-		// mirror: { behaviour: "tetra" },
 	},
-	hollowball4: {
-		displayName: "Hollow 1/4 Ball",
+	hollowquarterball: {
+		displayName: "Hollow Quarter Ball",
 		description: "Not only it's not rolling around, but someone eateded a big chunk of it",
 		search: { partialAliases: ["circle", "sphere"] },
-		// mirror: { behaviour: "tetra" },
 	},
 
 	ball8: {
