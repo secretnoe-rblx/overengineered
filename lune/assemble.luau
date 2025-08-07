@@ -206,12 +206,18 @@ end
 --------------------------------------------------------------------------------
 local function main()
 	log("Starting place build process...")
-	local game = Instance.new("DataModel")
+	local game = Instance.new("DataModel") :: DataModel
 
 	log("Processing manifest...")
 	local success = processStructureJson(game)
 
 	game:GetService("HttpService").HttpEnabled = true;
+
+	log("Updating default camera position...");
+	local camera = game.Workspace.CurrentCamera;
+	camera.Name = "Camera"
+	camera.Focus = roblox.CFrame.new(roblox.Vector3.new(104.5, -16379.115, 64))
+	camera.CFrame = roblox.CFrame.new(roblox.Vector3.new(165.52, -16352.801, 108.668)) * roblox.CFrame.fromOrientation(math.rad(-19.818), math.rad(52.103), -0)
 
 	log("Serializing the place...")
 	success, output = protectedCall(roblox.serializePlace, "Failed to serialize place", game)
