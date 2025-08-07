@@ -315,6 +315,18 @@ const cylinders = {
 		search: { partialAliases: ["tube", "pipe", "macaroni"] },
 		mirror: { behaviour: "hcylvertical" },
 	},
+	hollowcylinderbig90horizontalhalf: {
+		displayName: "Horizontal Half Big Hollow Cylinder (90 degrees)",
+		description: "A big horizontal half of a bended hollow tube",
+		search: { partialAliases: ["tube", "pipe", "macaroni"] },
+		mirror: { behaviour: "hcylvertical" },
+	},
+	cylinderbig90horizontalhalf: {
+		displayName: "Horizontal Half Big Cylinder (90 degrees)",
+		description: "A big horizontal half of a bended tube",
+		search: { partialAliases: ["tube", "pipe", "macaroni"] },
+		mirror: { behaviour: "hcylvertical" },
+	},
 
 	cylinderto1x1cubeconnector: {
 		displayName: "Cylinder To 1x1 Cube Connector",
