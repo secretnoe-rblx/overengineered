@@ -268,16 +268,6 @@ const cylinders = {
 		description: "A bended tube NOT for all your sewer needs",
 		search: { partialAliases: ["tube", "pipe"] },
 	},
-	hollowcylinderbig90: {
-		displayName: "Big Hollow Cylinder (90 degrees)",
-		description: "A beeg bended hollow tube for all your sewer needs",
-		search: { partialAliases: ["tube", "pipe", "macaroni"] },
-	},
-	cylinderbig90: {
-		displayName: "Big Cylinder (90 degrees)",
-		description: "A beeg bended tube NOT for all your sewer needs",
-		search: { partialAliases: ["tube", "pipe", "macaroni"] },
-	},
 	hollowcylinder90verticalhalf: {
 		displayName: "Vertical Half Hollow Cylinder (90 degrees)",
 		description: "A vertical half of a bended hollow tube",
@@ -299,6 +289,29 @@ const cylinders = {
 	cylinder90horizontalhalf: {
 		displayName: "Horizontal Half Cylinder (90 degrees)",
 		description: "A horizontal half of a bended tube",
+		search: { partialAliases: ["tube", "pipe", "macaroni"] },
+		mirror: { behaviour: "hcylvertical" },
+	},
+
+	hollowcylinderbig90: {
+		displayName: "Big Hollow Cylinder (90 degrees)",
+		description: "A beeg bended hollow tube for all your sewer needs",
+		search: { partialAliases: ["tube", "pipe", "macaroni"] },
+	},
+	cylinderbig90: {
+		displayName: "Big Cylinder (90 degrees)",
+		description: "A beeg bended tube NOT for all your sewer needs",
+		search: { partialAliases: ["tube", "pipe", "macaroni"] },
+	},
+	hollowcylinderbig90verticalhalf: {
+		displayName: "Vertical Half Big Hollow Cylinder (90 degrees)",
+		description: "A big vertical half of a bended hollow tube",
+		search: { partialAliases: ["tube", "pipe", "macaroni"] },
+		mirror: { behaviour: "hcylvertical" },
+	},
+	cylinderbig90verticalhalf: {
+		displayName: "Vertical Half Big Cylinder (90 degrees)",
+		description: "A big vertical half of a bended tube",
 		search: { partialAliases: ["tube", "pipe", "macaroni"] },
 		mirror: { behaviour: "hcylvertical" },
 	},
