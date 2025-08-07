@@ -80,15 +80,14 @@ export class WeldVisualizer extends Component {
 			const blocks = parent.GetChildren() as BlockModel[];
 			for (const block of blocks) {
 				for (const weld of block.GetDescendants().filter((c) => c.IsA("WeldConstraint"))) {
-					const pos1 = weld.Part0?.Position;
-					const pos2 = weld.Part1?.Position;
-					if (!pos1 || !pos2) continue;
-
 					const block1 = BlockManager.tryGetBlockModelByPart(weld.Part0);
 					const block2 = BlockManager.tryGetBlockModelByPart(weld.Part1);
-					if (!block1 || block1 === block2) {
+					if (!block1 || !block2 || block1 === block2) {
 						continue;
 					}
+
+					const pos1 = block1.GetPivot().Position;
+					const pos2 = block2.GetPivot().Position;
 
 					const cloned = nextWeldInstance();
 					cloned.Parent = this.viewportFrame;
