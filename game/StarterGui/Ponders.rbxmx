@@ -105,9 +105,11 @@
           <token name="LineJoinMode">2</token>
           <bool name="DefinesCapabilities">false</bool>
           <int64 name="SourceAssetId">-1</int64>
+          <token name="StrokeSizingMode">0</token>
           <BinaryString name="Tags"></BinaryString>
           <float name="Thickness">8</float>
           <float name="Transparency">0</float>
+          <int name="ZIndex">1</int>
         </Properties>
       </Item>
       <Item class="Frame" referent="3">
