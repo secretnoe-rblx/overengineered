@@ -1,7 +1,7 @@
 import { BlockCreation } from "shared/blocks/BlockCreation";
 import type { BlockBuildersWithoutIdAndDefaults } from "shared/blocks/Block";
 
-const blocks = {
+const blocks: BlockBuildersWithoutIdAndDefaults = {
 	block: {
 		displayName: "Block",
 		description: "Makes you question why every engineering game has it",
@@ -20,14 +20,6 @@ const blocks = {
 
 		weldRegionsSource: BlockCreation.WeldRegions.fAutomatic("cube"),
 	},
-	ball: {
-		displayName: "Ball",
-		description: "it could be a cannon ball.. Or anything else, really..",
-	},
-	halfball: {
-		displayName: "Half Ball",
-		description: "It's rolling around.. half of the time..",
-	},
 	cone: {
 		displayName: "Cone",
 		description: "Filled with weird geometry jokes. Sadly, no ice cream",
@@ -44,9 +36,48 @@ const blocks = {
 		displayName: "Half Block",
 		description: "Like a block, but with a small caveat...",
 	},
-} as const satisfies BlockBuildersWithoutIdAndDefaults;
+};
 
-const beams = {
+const balls: BlockBuildersWithoutIdAndDefaults = {
+	ball: {
+		displayName: "Ball",
+		description: "it could be a cannon ball.. Or anything else, really..",
+		search: { partialAliases: ["circle", "sphere"] },
+	},
+	halfball: {
+		displayName: "Half Ball",
+		description: "It's rolling around.. half of the time..",
+		search: { partialAliases: ["circle", "sphere"] },
+	},
+
+	ball4: {
+		displayName: "1/4 Ball",
+		description: "It's rolling around, almost",
+		search: { partialAliases: ["circle", "sphere"] },
+		// mirror: { behaviour: "tetra" },
+	},
+	hollowball4: {
+		displayName: "Hollow 1/4 Ball",
+		description: "Not only it's not rolling around, but someone eateded a big chunk of it",
+		search: { partialAliases: ["circle", "sphere"] },
+		// mirror: { behaviour: "tetra" },
+	},
+
+	ball8: {
+		displayName: "1/8 Ball",
+		description: "It's (not) rolling around",
+		search: { partialAliases: ["circle", "sphere"] },
+		mirror: { behaviour: "tetra" },
+	},
+	hollowball8: {
+		displayName: "Hollow 1/8 Ball",
+		description: "Not only it's not rolling around, but someone eateded most of it",
+		search: { partialAliases: ["circle", "sphere"] },
+		mirror: { behaviour: "tetra" },
+	},
+};
+
+const beams: BlockBuildersWithoutIdAndDefaults = {
 	beam2x1: {
 		displayName: "Beam 2x1",
 		description: "A block, but 2x1!",
@@ -59,9 +90,9 @@ const beams = {
 		displayName: "Beam 4x1",
 		description: "A block, but 4x1!!!",
 	},
-} as const satisfies BlockBuildersWithoutIdAndDefaults;
+};
 
-const cornerWedges = {
+const cornerWedges: BlockBuildersWithoutIdAndDefaults = {
 	concavecornerwedge: {
 		displayName: "Concave Corner Wedge",
 		description: "The convex corner wedge, but concave",
@@ -202,9 +233,9 @@ const cornerWedges = {
 
 		mirror: { behaviour: "normal", replacementId: "halfcornerwedge4x1" },
 	},
-} as const satisfies BlockBuildersWithoutIdAndDefaults;
+};
 
-const cylinders = {
+const cylinders: BlockBuildersWithoutIdAndDefaults = {
 	cylinder1x1: {
 		displayName: "Cylinder 1x1",
 		description: "A simple cylinder",
@@ -362,9 +393,9 @@ const cylinders = {
 		displayName: "Half Cylinder To 2x1 Cube Connector",
 		description: "A connector but wife left me",
 	},
-} as const satisfies BlockBuildersWithoutIdAndDefaults;
+};
 
-const wedges = {
+const wedges: BlockBuildersWithoutIdAndDefaults = {
 	concaveprism: {
 		displayName: "Concave Prism",
 		description: "The convex prism, but concave",
@@ -413,9 +444,9 @@ const wedges = {
 		displayName: "Half Wedge 1x4",
 		description: "A wedge 1x4, but it's.. half.. the size?",
 	},
-} as const satisfies BlockBuildersWithoutIdAndDefaults;
+};
 
-const trainWheels = {
+const trainWheels: BlockBuildersWithoutIdAndDefaults = {
 	largeoldtrainwheel: {
 		displayName: "Large Old Train Wheel",
 		description: "A large old train wheel",
@@ -428,12 +459,13 @@ const trainWheels = {
 		displayName: "Small Old Train Wheel",
 		description: "A small cousin of the old train wheel",
 	},
-} as const satisfies BlockBuildersWithoutIdAndDefaults;
+};
 
 //
 
 const list: BlockBuildersWithoutIdAndDefaults = {
 	...blocks,
+	...balls,
 	...beams,
 	...cornerWedges,
 	...cylinders,
