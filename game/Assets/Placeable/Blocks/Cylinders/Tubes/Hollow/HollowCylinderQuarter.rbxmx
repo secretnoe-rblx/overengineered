@@ -330,7 +330,7 @@
         <Properties>
           <string name="Name">Part</string>
           <bool name="Anchored">true</bool>
-          <BinaryString name="AttributesSerialize">AQAAAAYAAAB0YXJnZXQCCwAAAFdpbmdTdXJmYWNl</BinaryString>
+          <BinaryString name="AttributesSerialize"></BinaryString>
           <bool name="AudioCanCollide">true</bool>
           <float name="BackParamA">-0.5</float>
           <float name="BackParamB">0.5</float>
@@ -341,7 +341,7 @@
           <token name="BottomSurface">0</token>
           <token name="BottomSurfaceInput">0</token>
           <CoordinateFrame name="CFrame">
-            <X>85.5</X>
+            <X>85.490585</X>
             <Y>-16378.624</Y>
             <Z>74.477066</Z>
             <R00>1</R00>
@@ -429,7 +429,7 @@
         <Properties>
           <string name="Name">Part</string>
           <bool name="Anchored">true</bool>
-          <BinaryString name="AttributesSerialize">AQAAAAYAAAB0YXJnZXQCCwAAAFdpbmdTdXJmYWNl</BinaryString>
+          <BinaryString name="AttributesSerialize"></BinaryString>
           <bool name="AudioCanCollide">true</bool>
           <float name="BackParamA">-0.5</float>
           <float name="BackParamB">0.5</float>
@@ -442,7 +442,7 @@
           <CoordinateFrame name="CFrame">
             <X>86.440636</X>
             <Y>-16378.624</Y>
-            <Z>73.5649</Z>
+            <Z>73.53689</Z>
             <R00>1</R00>
             <R01>0</R01>
             <R02>0</R02>
@@ -553,7 +553,7 @@
           <R21>0</R21>
           <R22>1</R22>
         </CoordinateFrame>
-        <bool name="CanCollide">true</bool>
+        <bool name="CanCollide">false</bool>
         <bool name="CanQuery">true</bool>
         <bool name="CanTouch">true</bool>
         <SecurityCapabilities name="Capabilities">0</SecurityCapabilities>
