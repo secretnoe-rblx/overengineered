@@ -80,7 +80,8 @@ const balls: BlockBuildersWithoutIdAndDefaults = {
 	},
 	hollowball8: {
 		displayName: "Hollow 1/8 Ball",
-		description: "I feel like there a way to make a joke about the name, but I can't really figure it out like with the non-hollow version..",
+		description:
+			"I feel like there a way to make a joke about the name, but I can't really figure it out like with the non-hollow version..",
 		search: { partialAliases: ["circle", "sphere"] },
 		mirror: { behaviour: "tetra" },
 	},
