@@ -59,7 +59,7 @@ export const GuiStatBlock = {
 
 	logic: { definition, ctor: Logic },
 	modelSource: {
-		model: BlockCreation.Model.fAutoCreated("DoubleGuiLogicBlockPrefab", "STAT"),
+		model: BlockCreation.Model.fAutoCreated("DoubleGuiLogicBlockPrefab", "METER"),
 		category: () => BlockCreation.Categories.gui,
 	},
 } as const satisfies BlockBuilder;
