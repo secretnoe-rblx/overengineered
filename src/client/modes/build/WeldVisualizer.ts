@@ -93,7 +93,7 @@ export class WeldVisualizer extends Component {
 					cloned.Parent = this.viewportFrame;
 
 					const distance = pos1.sub(pos2).Magnitude;
-					cloned.Size = new Vector3(distance - 0.4, 0.15, 0.15);
+					cloned.Size = new Vector3(distance - 0.4, 0.07, 0.07);
 					cloned.CFrame = new CFrame(pos2, pos1)
 						.mul(new CFrame(0, 0, -distance / 2))
 						.mul(CFrame.Angles(0, math.rad(90), 0));
