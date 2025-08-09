@@ -20,8 +20,11 @@ export class PlayerSettingsControls extends ConfigControlList {
 			this.addToggle("Automatic trigger") //
 				.initToObjectPart(value, ["ragdoll", "autoFall"]);
 
-			this.addToggle("Automatic recovery") //
+			this.addToggle("Automatic recovery after 4 seconds") //
 				.initToObjectPart(value, ["ragdoll", "autoRecovery"]);
+
+			this.addToggle("Automatic recovery when trying to move") //
+				.initToObjectPart(value, ["ragdoll", "autoRecoveryByMoving"]);
 
 			this.addKey("Trigger key") //
 				.initToObjectPart(value, ["ragdoll", "triggerKey"]);

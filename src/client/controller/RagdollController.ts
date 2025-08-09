@@ -45,7 +45,12 @@ function initAutoRagdoll(event: ComponentEvents, humanoid: Humanoid, enabled: Re
 		SharedRagdoll.event.send(true);
 	});
 }
-function initRagdollUp(event: ComponentEvents, humanoid: Humanoid, autoRecovery: ReadonlyObservableValue<boolean>) {
+function initRagdollUp(
+	event: ComponentEvents,
+	humanoid: Humanoid,
+	autoRecoveryByTimer: ReadonlyObservableValue<boolean>,
+	autoRecoveryByMoving: ReadonlyObservableValue<boolean>,
+) {
 	const player = LocalPlayer.player;
 
 	while (!player.Character?.FindFirstChild("ConstraintsFolder")) {
@@ -64,33 +69,44 @@ function initRagdollUp(event: ComponentEvents, humanoid: Humanoid, autoRecovery:
 
 				if (humanoid.GetState() !== Enum.HumanoidStateType.Dead && humanoid.Health > 0) {
 					task.spawn(() => {
-						task.wait(getUpTime);
-
-						while (task.wait()) {
-							if (humanoid.Health <= 0) break;
-							if (!humanoid.RootPart) break;
-							if (!isPlayerRagdolling(humanoid)) break;
-
-							if (!autoRecovery.get()) {
-								ContextActionService.BindActionAtPriority(
-									actionName,
-									() => {
-										task.spawn(() => SharedRagdoll.event.send(false));
-
-										ContextActionService.UnbindAction(actionName);
-										return Enum.ContextActionResult.Pass;
-									},
-									false,
-									2000 + 1,
-									...Enum.PlayerActions.GetEnumItems(),
-								);
-
-								break;
-							}
+						const unragdollIfSlow = () => {
+							if (humanoid.Health <= 0) return;
+							if (!humanoid.RootPart) return;
+							if (!isPlayerRagdolling(humanoid)) return;
 
 							if (humanoid.RootPart.AssemblyLinearVelocity.Magnitude < 10) {
 								SharedRagdoll.event.send(false);
-								break;
+								ContextActionService.UnbindAction(actionName);
+
+								return true;
+							}
+						};
+
+						task.wait(getUpTime);
+
+						if (autoRecoveryByTimer.get() && unragdollIfSlow()) return;
+
+						if (autoRecoveryByMoving.get()) {
+							ContextActionService.UnbindAction(actionName);
+							ContextActionService.BindActionAtPriority(
+								actionName,
+								() => {
+									task.spawn(() => SharedRagdoll.event.send(false));
+
+									ContextActionService.UnbindAction(actionName);
+									return Enum.ContextActionResult.Pass;
+								},
+								false,
+								2000 + 1,
+								...Enum.PlayerActions.GetEnumItems(),
+							);
+						}
+
+						if (autoRecoveryByTimer.get()) {
+							while (task.wait()) {
+								if (unragdollIfSlow()) {
+									break;
+								}
 							}
 						}
 					});
@@ -187,6 +203,7 @@ export class RagdollController extends HostedService {
 						event,
 						humanoid,
 						playerDataStorage.config.createBased((c) => c.ragdoll.autoRecovery),
+						playerDataStorage.config.createBased((c) => c.ragdoll.autoRecoveryByMoving),
 					);
 					initAutoRagdoll(
 						event,

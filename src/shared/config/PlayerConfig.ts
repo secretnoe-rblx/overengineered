@@ -54,6 +54,7 @@ declare global {
 		readonly triggerByKey: boolean;
 		readonly triggerKey: KeyCode | undefined;
 		readonly autoRecovery: boolean;
+		readonly autoRecoveryByMoving: boolean;
 	};
 	type PhysicsConfiguration = {
 		readonly simplified_aerodynamics: boolean;
@@ -219,6 +220,7 @@ export const PlayerConfigDefinition = {
 			triggerByKey: false as boolean,
 			triggerKey: "X" as KeyCode | undefined,
 			autoRecovery: true as boolean,
+			autoRecoveryByMoving: true as boolean,
 		},
 	},
 	visuals: {
