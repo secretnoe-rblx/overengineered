@@ -125,7 +125,7 @@ class Controller extends Component {
 @injectable
 export class PaintTool extends ToolBase {
 	readonly selectedMaterial = new ObservableValue<Enum.Material>(Enum.Material.Plastic);
-	readonly selectedColor = new ObservableValue<Color3>(Color3.fromRGB(255, 255, 255));
+	readonly selectedColor = new ObservableValue<Color4>({ color: Color3.fromRGB(255, 255, 255), alpha: 1 });
 	readonly enableMaterial = new ObservableValue(true);
 	readonly enableColor = new ObservableValue(true);
 	readonly controller;
@@ -152,7 +152,7 @@ export class PaintTool extends ToolBase {
 	}
 	paint(
 		blocks: readonly BlockModel[],
-		original?: ReadonlyMap<BlockModel, { readonly material: Enum.Material; readonly color: Color3 }>,
+		original?: ReadonlyMap<BlockModel, { readonly material: Enum.Material; readonly color: Color4 }>,
 	) {
 		return this.clientBuilding.paintOperation.execute({
 			plot: this.targetPlot.get(),

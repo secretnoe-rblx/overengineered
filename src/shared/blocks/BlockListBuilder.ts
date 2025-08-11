@@ -88,6 +88,16 @@ export namespace BlockListBuilder {
 					});
 				}),
 			);
+
+			for (const [id, block] of pairs(serverBuiltBlocks)) {
+				for (const part of block.model.GetDescendants()) {
+					if (!part.IsA("BasePart")) continue;
+
+					if (part.Transparency === 1) {
+						part.AddTag("TRANSPARENT");
+					}
+				}
+			}
 		}
 
 		let remoteBlocks: typeof serverBuiltBlocks;

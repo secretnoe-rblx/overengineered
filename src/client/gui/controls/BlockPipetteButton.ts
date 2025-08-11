@@ -99,11 +99,11 @@ export class BlockPipetteButton extends ButtonControl {
 
 		return pipette;
 	}
-	static forColor(gui: ButtonDefinition, clicked: (color: Color3) => void) {
+	static forColor(gui: ButtonDefinition, clicked: (color: Color4) => void) {
 		const pipette = new BlockPipetteButton(gui);
 		pipette.onSelect.Connect((part) => {
 			if (part.IsA("BasePart")) {
-				clicked(part.Color);
+				clicked({ color: part.Color, alpha: 1 });
 			} else {
 				const data = BlockManager.manager.color.get(part);
 				clicked(data);

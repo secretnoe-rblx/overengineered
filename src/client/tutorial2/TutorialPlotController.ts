@@ -158,7 +158,7 @@ class Build extends Component {
 								([block]): PlaceBlockRequest => ({
 									...block,
 									location: arg.plot.instance.BuildingArea.CFrame.ToWorldSpace(block.location),
-									color: Colors.white,
+									color: { color: Colors.white, alpha: 1 },
 									material: Enum.Material.Plastic,
 									scale: Vector3.one,
 								}),

@@ -1,3 +1,5 @@
+import { Color4 } from "shared/Color4";
+
 export namespace Serializer {
 	export namespace CFrameSerializer {
 		export function serialize(cframe: CFrame): SerializedCFrame {
@@ -35,6 +37,20 @@ export namespace Serializer {
 				return Color3.fromRGB(serializedColor[0], serializedColor[1], serializedColor[2]);
 
 			return Color3.fromHex(serializedColor);
+		}
+	}
+
+	export namespace Color4Serializer {
+		export function serialize(color: Color4): SerializedColor {
+			return Color4.toHex(color);
+		}
+
+		export function deserialize(serializedColor: SerializedColor | readonly [number, number, number]): Color4 {
+			if (!typeIs(serializedColor, "string")) {
+				return { color: Color3.fromRGB(serializedColor[0], serializedColor[1], serializedColor[2]), alpha: 1 };
+			}
+
+			return Color4.fromHex(serializedColor);
 		}
 	}
 }

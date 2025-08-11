@@ -28,7 +28,7 @@ namespace WorldPipetteTests {
 			} else {
 				const data = BlockManager.getBlockDataByBlockModel(part);
 				(megaPipette.instance as TextButton).Text =
-					`${data.id} ${data.material.Name} #${data.color.ToHex().upper()}`;
+					`${data.id} ${data.material.Name} #${data.color.color.ToHex().upper()}`;
 			}
 
 			return true;
@@ -42,7 +42,10 @@ namespace WorldPipetteTests {
 
 		const colorPipette = newpipettebtn("COLOR PIPETTE");
 		list.add(
-			BlockPipetteButton.forColor(colorPipette, (color) => (colorPipette.Text = "#" + color.ToHex().upper())),
+			BlockPipetteButton.forColor(
+				colorPipette,
+				(color) => (colorPipette.Text = "#" + color.color.ToHex().upper()),
+			),
 		);
 
 		return list;

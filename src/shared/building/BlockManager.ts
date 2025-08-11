@@ -6,7 +6,7 @@ declare global {
 	type BlockDataBase = {
 		readonly id: BlockId;
 		readonly uuid: BlockUuid;
-		readonly color: Color3;
+		readonly color: Color4;
 		readonly material: Enum.Material;
 		readonly config: PlacedBlockConfig | undefined;
 		readonly customData?: { [k in string | number]: unknown };
@@ -82,8 +82,13 @@ export namespace BlockManager {
 			},
 		},
 		color: {
-			set: (block, value) => block.SetAttribute("color", value),
-			get: (block) => (block.GetAttribute("color") as Color3 | undefined) ?? Color3.fromRGB(255, 255, 255),
+			set: (block, value) => block.SetAttribute("color", JSON.serialize(value)),
+			get: (block) => {
+				const attribute = block.GetAttribute("color") as string | undefined;
+				if (attribute === undefined) return { color: Color3.fromRGB(255, 255, 255), alpha: 1 };
+
+				return JSON.deserialize<Color4>(attribute);
+			},
 		},
 
 		config: {

@@ -319,10 +319,10 @@ namespace Controllers {
 	@injectable
 	export class Paint extends Component {
 		private static readonly material = new ObservableValue<Enum.Material>(Enum.Material.Plastic);
-		private static readonly color = new ObservableValue<Color3>(new Color3(1, 1, 1));
+		private static readonly color = new ObservableValue<Color4>({ color: new Color3(1, 1, 1), alpha: 1 });
 		private readonly origData: ReadonlyMap<
 			BlockModel,
-			{ readonly material: Enum.Material; readonly color: Color3 }
+			{ readonly material: Enum.Material; readonly color: Color4 }
 		>;
 		private canceled = false;
 

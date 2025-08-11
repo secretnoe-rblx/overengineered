@@ -57,8 +57,9 @@ interface SerializedBlockV4
 interface SerializedBlockV5 extends ReplaceWith<SerializedBlockV4, { readonly scale?: Vector3 | undefined }> {}
 interface SerializedBlockV6
 	extends ReplaceWith<SerializedBlockV5, { readonly customData?: PlacedBlockData["customData"] | undefined }> {}
+interface SerializedBlockV7 extends ReplaceWith<SerializedBlockV6, { readonly color?: Color4 | undefined }> {}
 
-export type LatestSerializedBlock = SerializedBlockV6;
+export type LatestSerializedBlock = SerializedBlockV7;
 export type LatestSerializedBlocks = SerializedBlocks<LatestSerializedBlock>;
 
 namespace Filter {
@@ -66,7 +67,7 @@ namespace Filter {
 	const plastic = Enum.Material.Plastic;
 
 	export function deleteDefaultValues(block: Writable<ReplaceWith<LatestSerializedBlock, { config?: {} }>>) {
-		if (block.color === white) {
+		if (block.color?.color === white && block.color.alpha === 1) {
 			delete block.color;
 		}
 		if (block.material === plastic) {
@@ -989,7 +990,7 @@ const v24: UpgradableBlocksSerializer<SerializedBlocks<SerializedBlockV3>, typeo
 	upgradeFrom(prev: SerializedBlocks<SerializedBlockV3>): SerializedBlocks<SerializedBlockV3> {
 		const update = (block: SerializedBlockV3): SerializedBlockV3 => {
 			const ret = { ...block };
-			Filter.deleteDefaultValues(ret);
+			// Filter.deleteDefaultValues(ret);
 
 			return ret;
 		};
@@ -1576,11 +1577,29 @@ const v32: UpgradableBlocksSerializer<SerializedBlocks<SerializedBlockV5>, typeo
 		};
 	},
 };
+
+// Add customData
+const v33: UpgradableBlocksSerializer<SerializedBlocks<SerializedBlockV7>, typeof v32> = {
+	version: 33,
+
+	upgradeFrom(prev: SerializedBlocks<SerializedBlockV6>): SerializedBlocks<SerializedBlockV7> {
+		return {
+			version: this.version,
+			blocks: prev.blocks.map(
+				(b): SerializedBlockV7 => ({
+					...b,
+					color: b.color ? (typeIs(b.color, "Color3") ? { color: b.color, alpha: 1 } : b.color) : undefined,
+				}),
+			),
+		};
+	},
+};
+
 //
 
 const versions = [
 	...([v4, v5, v6, v7, v8, v9, v10, v11, v12, v13, v14, v15, v16, v17, v18, v19, v20, v21, v22] as const),
-	...([v23, v24, v25, v26, v27, v28, v29, v30, v31, v32] as const),
+	...([v23, v24, v25, v26, v27, v28, v29, v30, v31, v32, v33] as const),
 ] as const;
 const current = versions[versions.size() - 1] as typeof versions extends readonly [...unknown[], infer T] ? T : never;
 
@@ -1621,7 +1640,7 @@ export namespace BlocksSerializer {
 				connections: block.connections,
 
 				loc: Serializer.CFrameSerializer.serialize(block.location),
-				col: block.color && Serializer.Color3Serializer.serialize(block.color),
+				col: block.color && Serializer.Color4Serializer.serialize(block.color),
 				mat: block.material && Serializer.EnumMaterialSerializer.serialize(block.material),
 				scl: block.scale && JSON.serialize(block.scale),
 			};
@@ -1657,7 +1676,7 @@ export namespace BlocksSerializer {
 				connections: block.connections,
 
 				location: Serializer.CFrameSerializer.deserialize(block.loc),
-				color: block.col ? Serializer.Color3Serializer.deserialize(block.col) : undefined,
+				color: block.col ? Serializer.Color4Serializer.deserialize(block.col) : undefined,
 				material: block.mat ? Serializer.EnumMaterialSerializer.deserialize(block.mat) : undefined,
 				scale: block.scl ? JSON.deserialize(block.scl) : undefined,
 			};
@@ -1695,7 +1714,7 @@ export namespace BlocksSerializer {
 			id: blockData.id,
 			location: buildingCenter.ToWorldSpace(blockData.location),
 
-			color: blockData.color ?? Color3.fromRGB(255, 255, 255),
+			color: blockData.color ?? { color: Color3.fromRGB(255, 255, 255), alpha: 1 },
 			material: blockData.material ?? Enum.Material.Plastic,
 			config: blockData.config,
 			customData: blockData.customData,

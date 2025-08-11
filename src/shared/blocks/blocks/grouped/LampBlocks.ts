@@ -135,7 +135,7 @@ class Logic extends InstanceBlockLogic<typeof definition, lampBlock> {
 	constructor(args: InstanceBlockLogicArgs) {
 		super(definition, args);
 
-		const blockColor = BlockManager.manager.color.get(args.instance);
+		const blockColor = BlockManager.manager.color.get(args.instance).color;
 
 		const colorFunctions: Record<
 			keyof (typeof definition)["input"]["colorMixing"]["types"]["enum"]["elements"],

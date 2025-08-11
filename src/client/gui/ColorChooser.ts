@@ -176,8 +176,8 @@ export class ColorChooser extends Control<ColorChooserDefinition> {
 
 			this.add(
 				BlockPipetteButton.forColor(gui.Sliders.QuickAction.SelectButton, (color) => {
-					value.set(color);
-					value.submit(color);
+					value.set(color.color);
+					value.submit(color.color);
 				}),
 			);
 		}

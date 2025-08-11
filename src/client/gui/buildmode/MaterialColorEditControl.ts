@@ -10,13 +10,14 @@ import { InstanceComponent } from "engine/shared/component/InstanceComponent";
 import { Transforms } from "engine/shared/component/Transforms";
 import { TransformService } from "engine/shared/component/TransformService";
 import { Materials } from "engine/shared/data/Materials";
-import { ObservableValue } from "engine/shared/event/ObservableValue";
 import { ArgsSignal } from "engine/shared/event/Signal";
 import { SubmittableValue } from "engine/shared/event/SubmittableValue";
+import { Color4 } from "shared/Color4";
 import { Colors } from "shared/Colors";
 import type { Color4ChooserDefinition } from "client/gui/Color4Chooser";
 import type { MaterialChooserDefinition } from "client/gui/MaterialChooser";
 import type { TextButtonDefinition } from "engine/client/gui/Button";
+import type { ObservableValue } from "engine/shared/event/ObservableValue";
 import type { ReadonlyObservableValue } from "engine/shared/event/ObservableValue";
 
 export type MaterialColorEditControlDefinition = GuiObject & {
@@ -105,15 +106,15 @@ export type ColorWindowDefinition = GuiObject & {
 	};
 };
 class ColorWindow extends Control<ColorWindowDefinition> {
-	constructor(gui: ColorWindowDefinition, value: SubmittableValue<Color3>) {
+	constructor(gui: ColorWindowDefinition, value: SubmittableValue<Color4>) {
 		super(gui);
 
-		const v = new SubmittableValue<Color4>(new ObservableValue({ alpha: 1, color: value.get() }));
-		this.event.subscribeObservable(v.value, (val) => value.set(val.color));
-		this.event.subscribeObservable(value.value, (val) => v.set({ alpha: 1, color: val }));
-		v.submitted.Connect((v) => value.submit(v.color));
+		const v = new SubmittableValue<Color4>(value.value);
+		this.event.subscribeObservable(v.value, (val) => value.set(val));
+		this.event.subscribeObservable(value.value, (val) => v.set(val));
+		v.submitted.Connect((v) => value.submit(v));
 
-		this.parent(new Color4Chooser(gui.Content.Control, v, false));
+		this.parent(new Color4Chooser(gui.Content.Control, v, true));
 	}
 }
 
@@ -126,7 +127,7 @@ class MaterialWindow extends ResizableWindow<MaterialWindowDefinition> {
 	constructor(
 		gui: MaterialWindowDefinition,
 		value: SubmittableValue<Enum.Material>,
-		color: ReadonlyObservableValue<Color3>,
+		color: ReadonlyObservableValue<Color4>,
 	) {
 		super(gui, 100, 504);
 
@@ -166,7 +167,7 @@ export class MaterialColorEditControl extends InstanceComponent<MaterialColorEdi
 		const materialv = SubmittableValue.from<Enum.Material>(Enum.Material.Plastic);
 		this.materialv = materialv.asHalfReadonly();
 
-		const colorv = SubmittableValue.from<Color3>(Color3.fromRGB(255, 255, 255));
+		const colorv = SubmittableValue.from<Color4>({ color: Color3.fromRGB(255, 255, 255), alpha: 1 });
 		this.colorv = colorv.asHalfReadonly();
 
 		const materialbtn = this.parent(new TextButtonControl(this.instance.Material));
@@ -181,14 +182,18 @@ export class MaterialColorEditControl extends InstanceComponent<MaterialColorEdi
 		);
 
 		const colorbtn = this.parent(new TextButtonControl(this.instance.Color));
-		this.event.subscribeObservable(colorv.value, (value) => colorbtn.text.set("#" + value.ToHex().upper()), true);
+		this.event.subscribeObservable(
+			colorv.value,
+			(value) => colorbtn.text.set("#" + Color4.toHex(value).upper()),
+			true,
+		);
 		this.event.subscribeObservable(
 			colorv.value,
 			(value) => {
-				this.instance.Color.Pipette.BackgroundColor3 = value;
+				this.instance.Color.Pipette.BackgroundColor3 = value.color;
 				MaterialChooser.setColorOfPreview(value, this.instance.Material.Pipette);
 
-				const imgColor = value.ToHSV()[2] > 0.5 ? Colors.black : Colors.white;
+				const imgColor = value.color.ToHSV()[2] > 0.5 ? Colors.black : Colors.white;
 				if (this.instance.Color.Pipette.ImageLabel.ImageColor3 !== imgColor) {
 					TransformService.cancel(this.instance.Color.Pipette.ImageLabel);
 					TransformService.run(this.instance.Color.Pipette.ImageLabel, (tr) =>
@@ -259,7 +264,7 @@ export class MaterialColorEditControl extends InstanceComponent<MaterialColorEdi
 		);
 	}
 
-	autoSubscribe(material: ObservableValue<Enum.Material>, color: ObservableValue<Color3>) {
+	autoSubscribe(material: ObservableValue<Enum.Material>, color: ObservableValue<Color4>) {
 		this.event.subscribeObservable(material, (m) => this.materialv.set(m), true, true);
 		this.event.subscribe(this.materialv.submitted, (v) => material.set(v));
 

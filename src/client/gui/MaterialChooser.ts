@@ -61,13 +61,13 @@ export type MaterialChooserDefinition = GuiObject & {
 };
 /** Material chooser part */
 export class MaterialChooser extends Control<MaterialChooserDefinition> {
-	static setColorOfPreview(color: Color3, child: ImageLabel | ImageButton) {
+	static setColorOfPreview(color: Color4, child: ImageLabel | ImageButton) {
 		if (child.Image === "") {
-			child.BackgroundColor3 = color;
+			child.BackgroundColor3 = color.color;
 			child.ImageColor3 = Colors.white;
 		} else {
 			child.BackgroundColor3 = Colors.white;
-			child.ImageColor3 = color;
+			child.ImageColor3 = color.color;
 		}
 	}
 
@@ -76,7 +76,7 @@ export class MaterialChooser extends Control<MaterialChooserDefinition> {
 	constructor(
 		gui: MaterialChooserDefinition,
 		value?: SubmittableValue<Enum.Material>,
-		color?: ReadonlyObservableValue<Color3>,
+		color?: ReadonlyObservableValue<Color4>,
 		search?: ReadonlyObservableValue<string>,
 	) {
 		super(gui);

@@ -3,6 +3,7 @@ import { JSON } from "engine/shared/fixes/Json";
 import { Operation } from "engine/shared/Operation";
 import { BlockManager } from "shared/building/BlockManager";
 import { SharedBuilding } from "shared/building/SharedBuilding";
+import { Color4 } from "shared/Color4";
 import type { ActionController } from "client/modes/build/ActionController";
 import type { PlacedBlockConfig } from "shared/blockLogic/BlockConfig";
 import type { BlockLogicTypes } from "shared/blockLogic/BlockLogicTypes";
@@ -37,8 +38,8 @@ export namespace ClientBuildingTypes {
 		readonly plot: SharedPlot;
 		readonly blocks: readonly BlockModel[] | "all";
 		readonly material: Enum.Material | undefined;
-		readonly color: Color3 | undefined;
-		readonly original?: ReadonlyMap<BlockModel, { readonly material: Enum.Material; readonly color: Color3 }>;
+		readonly color: Color4 | undefined;
+		readonly original?: ReadonlyMap<BlockModel, { readonly material: Enum.Material; readonly color: Color4 }>;
 	};
 
 	export type UpdateConfigArgs = {
@@ -324,10 +325,10 @@ export class ClientBuilding {
 						grouped.set(material, matmap);
 					}
 
-					let colormap = matmap.get(color.ToHex());
+					let colormap = matmap.get(Color4.toHex(color));
 					if (!colormap) {
 						colormap = [];
-						matmap.set(color.ToHex(), colormap);
+						matmap.set(Color4.toHex(color), colormap);
 					}
 
 					colormap.push(uuid);
@@ -340,7 +341,7 @@ export class ClientBuilding {
 						const result = this.building.paintBlocks.send({
 							plot: plot.instance,
 							material,
-							color: Color3.fromHex(color),
+							color: Color4.fromHex(color),
 							blocks,
 						});
 

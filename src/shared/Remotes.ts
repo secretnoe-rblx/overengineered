@@ -51,7 +51,7 @@ declare global {
 	type PaintBlocksRequest = {
 		readonly plot: PlotModel;
 		readonly blocks: readonly BlockModel[] | "all";
-		readonly color?: Color3;
+		readonly color?: Color4;
 		readonly material?: Enum.Material;
 	};
 	type NormalizeRootpartsRequest = {

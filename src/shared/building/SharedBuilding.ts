@@ -75,7 +75,7 @@ export namespace SharedBuilding {
 	 */
 	export function paint(
 		blocks: readonly BlockModel[],
-		color: Color3 | undefined,
+		color: Color4 | undefined,
 		material: Enum.Material | undefined,
 		byBuild: boolean = false,
 	) {
@@ -116,7 +116,8 @@ export namespace SharedBuilding {
 
 			if (color) {
 				BlockManager.manager.color.set(block, color);
-				PartUtils.switchDescendantsColor(block, color);
+				PartUtils.switchDescendantsColor(block, color.color);
+				PartUtils.switchDescendantsTransparency(block, 1 - color.alpha);
 			}
 		}
 	}

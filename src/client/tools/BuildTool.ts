@@ -724,7 +724,7 @@ namespace MultiPlaceController {
 		protected constructor(
 			protected readonly pressPosition: Vector3,
 			private readonly selectedBlock: Block,
-			private readonly selectedColor: Color3,
+			private readonly selectedColor: Color4,
 			private readonly selectedMaterial: Enum.Material,
 			private readonly mirrorModes: MirrorMode,
 			private readonly plot: SharedPlot,
@@ -909,7 +909,7 @@ namespace MultiPlaceController {
 		constructor(
 			pressPosition: Vector3,
 			selectedBlock: Block,
-			selectedColor: Color3,
+			selectedColor: Color4,
 			selectedMaterial: Enum.Material,
 			mirrorModes: MirrorMode,
 			plot: SharedPlot,
@@ -951,7 +951,7 @@ namespace MultiPlaceController {
 		constructor(
 			pressPosition: Vector3,
 			selectedBlock: Block,
-			selectedColor: Color3,
+			selectedColor: Color4,
 			selectedMaterial: Enum.Material,
 			mirrorModes: MirrorMode,
 			plot: SharedPlot,
@@ -1086,7 +1086,7 @@ namespace MultiPlaceController {
 @injectable
 export class BuildTool extends ToolBase {
 	readonly selectedMaterial = new ObservableValue<Enum.Material>(Enum.Material.Plastic);
-	readonly selectedColor = new ObservableValue<Color3>(Color3.fromRGB(255, 255, 255));
+	readonly selectedColor = new ObservableValue<Color4>({ color: Color3.fromRGB(255, 255, 255), alpha: 1 });
 	readonly selectedBlock = new ObservableValue<Block | undefined>(undefined);
 	readonly currentMode = this.parent(new ComponentChild<IController>(true));
 	readonly blockRotation = new ObservableValue<CFrame>(CFrame.identity);

@@ -13,7 +13,7 @@ export namespace PartUtils {
 				part.UsePartColor = true;
 			}
 
-			if (part.Transparency !== 1) {
+			if (!part.HasTag("TRANSPARENT")) {
 				part.Transparency = 0.5;
 			}
 		}
@@ -25,7 +25,7 @@ export namespace PartUtils {
 	export function switchDescendantsMaterial(model: Instance, material: Enum.Material): void {
 		applyToAllDescendantsOfType("BasePart", model, (part) => {
 			if (part.HasTag("STATIC_MATERIAL")) return;
-			if (part.Transparency === 1) return;
+			if (part.HasTag("TRANSPARENT")) return;
 
 			part.Material = material;
 		});
@@ -42,7 +42,7 @@ export namespace PartUtils {
 	export function switchDescendantsTransparency(model: Instance, transparency: number): void {
 		applyToAllDescendantsOfType("BasePart", model, (part) => {
 			if (part.HasTag("STATIC_MATERIAL")) return;
-			if (part.Transparency === 1) return;
+			if (part.HasTag("TRANSPARENT")) return;
 
 			part.Transparency = transparency;
 		});
