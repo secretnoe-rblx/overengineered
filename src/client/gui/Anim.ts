@@ -1,5 +1,6 @@
 import { Interface } from "client/gui/Interface";
 import { ScaledScreenGui } from "client/gui/ScaledScreenGui";
+import { ServiceIntegrityChecker } from "client/integrity/ServiceIntegrityChecker";
 import { Transforms } from "engine/shared/component/Transforms";
 import { Element } from "engine/shared/Element";
 import type { TransformBuilder, TransformProps } from "engine/shared/component/Transform";
@@ -142,8 +143,9 @@ export namespace Anim {
 			ClipToDeviceSafeArea: childScreen?.ClipToDeviceSafeArea,
 			SafeAreaCompatibility: childScreen?.SafeAreaCompatibility,
 			ScreenInsets: childScreen?.ScreenInsets,
-			Parent: Interface.getPlayerGui(),
 		});
+		ServiceIntegrityChecker.whitelistInstance(screen);
+		screen.Parent = Interface.getPlayerGui();
 		const ssg = new ScaledScreenGui(screen);
 		ssg.enable();
 
