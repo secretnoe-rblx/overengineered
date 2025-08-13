@@ -41,9 +41,7 @@ export namespace PartUtils {
 
 	export function switchDescendantsTransparency(model: Instance, transparency: number): void {
 		applyToAllDescendantsOfType("BasePart", model, (part) => {
-			if (part.HasTag("STATIC_MATERIAL")) return;
 			if (part.HasTag("TRANSPARENT")) return;
-
 			part.Transparency = transparency;
 		});
 	}
