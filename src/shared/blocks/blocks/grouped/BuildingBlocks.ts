@@ -107,13 +107,13 @@ const cornerWedges: BlockBuildersWithoutIdAndDefaults = {
 		displayName: "Concave Corner Wedge",
 		description: "The convex corner wedge, but concave",
 
-		mirror: { behaviour: "offset270" },
+		mirror: { behaviour: "cornerwedge" },
 	},
 	convexcornerwedge: {
 		displayName: "Convex Corner Wedge",
 		description: "The concave corner wedge, but convex",
 
-		mirror: { behaviour: "offset270" },
+		mirror: { behaviour: "cornerwedge" },
 	},
 	cornerwedge1x1: {
 		displayName: "Corner Wedge 1x1",
@@ -193,7 +193,7 @@ const cornerWedges: BlockBuildersWithoutIdAndDefaults = {
 		displayName: "Tetra Round",
 		description: "A rounded version of the tetrahedron",
 
-		mirror: { behaviour: "offset270" },
+		mirror: { behaviour: "cornerwedge" },
 	},
 	halfcornerwedge1x1: {
 		displayName: "Half Corner Wedge 1x1",
@@ -418,6 +418,36 @@ const wedges: BlockBuildersWithoutIdAndDefaults = {
 		description: "The concave prism, but convex",
 
 		mirror: { behaviour: "offset180" },
+	},
+	concaveprismoutercorner: {
+		displayName: "Concave Prism Outer Corner",
+		description: "The convex prism outer corner, but concave",
+
+		mirror: { behaviour: "cornerwedge" },
+	},
+	concaveprisminnercorner: {
+		displayName: "Concave Prism Inner Corner",
+		description: "The convex prism inner con- wait we don't have that block",
+
+		mirror: { behaviour: "cornerwedge" },
+	},
+	convexprismoutercorner: {
+		displayName: "Convex Prism Outer Corner",
+		description: "The concave prism outer corner, but convex",
+
+		mirror: { behaviour: "cornerwedge" },
+	},
+	circularcornerwedge: {
+		displayName: "Circular Corner Wedge",
+		description: "what",
+
+		mirror: { behaviour: "offset180", replacementId: "circularcornerwedgemirrored" },
+	},
+	circularcornerwedgemirrored: {
+		displayName: "Circular Corner Wedge (Mirrored)",
+		description: "what",
+
+		mirror: { behaviour: "offset180", replacementId: "circularcornerwedge" },
 	},
 	pyramid: {
 		displayName: "Pyramid",
