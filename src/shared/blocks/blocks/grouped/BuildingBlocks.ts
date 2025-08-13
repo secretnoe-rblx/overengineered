@@ -296,7 +296,7 @@ const cylinders: BlockBuildersWithoutIdAndDefaults = {
 	hollowcylinderquarter: {
 		displayName: "Hollow Cylinder Quarter",
 		description: "Not really a complicated cylinder",
-		mirror: { behaviour: "offset90" },
+		mirror: { behaviour: "hcylquart" },
 		search: { partialAliases: ["tube", "pipe"] },
 	},
 	hollowcylinder90: {

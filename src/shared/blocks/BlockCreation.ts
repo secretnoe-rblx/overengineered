@@ -27,6 +27,7 @@ export type BlockMirrorBehaviour =
 	| "tetra"
 	| "innertetra"
 	| "cornerwedge"
+	| "hcylquart"
 	| "hcylvertical";
 
 /** Tools for creating a block and its data. */
