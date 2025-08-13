@@ -281,6 +281,7 @@ const cylinders: BlockBuildersWithoutIdAndDefaults = {
 	quartercylinder: {
 		displayName: "Quarter Cylinder",
 		description: "Like a cylinder but cilynder",
+		mirror: { behaviour: "hcylquart" },
 	},
 
 	hollowcylinder: {
