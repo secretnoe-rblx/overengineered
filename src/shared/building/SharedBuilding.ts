@@ -117,7 +117,12 @@ export namespace SharedBuilding {
 			if (color) {
 				BlockManager.manager.color.set(block, color);
 				PartUtils.switchDescendantsColor(block, color.color);
-				PartUtils.switchDescendantsTransparency(block, 1 - color.alpha);
+
+				if (material === Enum.Material.Glass && color.alpha >= 0.99) {
+					PartUtils.switchDescendantsTransparency(block, 0.3);
+				} else if (!byBuild) {
+					PartUtils.switchDescendantsTransparency(block, 1 - color.alpha);
+				}
 			}
 		}
 	}
