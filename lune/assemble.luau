@@ -8,6 +8,7 @@
 -- Required modules
 local fs = require("@lune/fs")
 local roblox = require("@lune/roblox")
+local process = require("@lune/process")
 local serde = require("@lune/serde")
 
 local Instance = roblox.Instance
@@ -19,7 +20,7 @@ local CONFIG = {
 	-- Enable/disable debug messages
 	Debug = true,
 	ManifestPath = "./lune/structure.json",
-	OutputPath = "place.rbxl",
+	OutputPath = process.args[1] or "place.rbxl",
 }
 
 -- Table for special containers
