@@ -19,6 +19,10 @@ export namespace Color4 {
 			return { color: Color3.fromHex(hex), alpha: 1 };
 		}
 
+		if (hexSize === 7) {
+			const [colorHex, alphaHex] = [hex.sub(1, 6), hex.sub(7, 7)];
+			return { color: Color3.fromHex(colorHex), alpha: (tonumber(alphaHex, 16) ?? 255) / 255 };
+		}
 		if (hexSize === 4 || hexSize === 8) {
 			const [colorHex, alphaHex] =
 				hexSize === 4 //
@@ -28,6 +32,8 @@ export namespace Color4 {
 			return { color: Color3.fromHex(colorHex), alpha: (tonumber(alphaHex, 16) ?? 255) / 255 };
 		}
 
-		throw "Unknown color";
+		// ffffff0
+
+		throw `Unknown color ${hex}`;
 	}
 }
