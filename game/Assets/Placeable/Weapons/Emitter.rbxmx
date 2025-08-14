@@ -339,6 +339,10 @@
           <Content name="TextureContent">
             <uri>http://www.roblox.com/asset/?id=18150183939</uri>
           </Content>
+          <BinaryString name="TexturePack">
+          </BinaryString>
+          <BinaryString name="TexturePackMetadata">
+          </BinaryString>
           <float name="Transparency">0</float>
           <Vector2 name="UVOffset">
             <X>0</X>
@@ -378,6 +382,10 @@
           <Content name="TextureContent">
             <uri>http://www.roblox.com/asset/?id=18150183939</uri>
           </Content>
+          <BinaryString name="TexturePack">
+          </BinaryString>
+          <BinaryString name="TexturePackMetadata">
+          </BinaryString>
           <float name="Transparency">0</float>
           <Vector2 name="UVOffset">
             <X>0</X>
@@ -417,6 +425,10 @@
           <Content name="TextureContent">
             <uri>http://www.roblox.com/asset/?id=18150183939</uri>
           </Content>
+          <BinaryString name="TexturePack">
+          </BinaryString>
+          <BinaryString name="TexturePackMetadata">
+          </BinaryString>
           <float name="Transparency">0</float>
           <Vector2 name="UVOffset">
             <X>0</X>
@@ -456,6 +468,10 @@
           <Content name="TextureContent">
             <uri>http://www.roblox.com/asset/?id=18150183939</uri>
           </Content>
+          <BinaryString name="TexturePack">
+          </BinaryString>
+          <BinaryString name="TexturePackMetadata">
+          </BinaryString>
           <float name="Transparency">0</float>
           <Vector2 name="UVOffset">
             <X>0</X>

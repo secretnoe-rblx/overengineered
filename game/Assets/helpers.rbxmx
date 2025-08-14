@@ -1642,6 +1642,10 @@
           <Content name="TextureContent">
             <uri>rbxassetid://95838022921830</uri>
           </Content>
+          <BinaryString name="TexturePack">
+          </BinaryString>
+          <BinaryString name="TexturePackMetadata">
+          </BinaryString>
           <float name="Transparency">0.7</float>
           <Vector2 name="UVOffset">
             <X>0</X>
