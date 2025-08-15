@@ -8,8 +8,15 @@ import type { BlockBuilder } from "shared/blocks/Block";
 import type { ReadonlyPlot } from "shared/building/ReadonlyPlot";
 
 const definition = {
-	inputOrder: ["strength", "distance"],
+	inputOrder: ["repel", "strength", "distance"],
 	input: {
+		repel: {
+			displayName: "Repel",
+			tooltip: "Repel instead of attract",
+			types: {
+				bool: { config: false },
+			},
+		},
 		strength: {
 			displayName: "Strength",
 			types: {
@@ -77,8 +84,10 @@ RunService.PostSimulation.Connect((dt) => {
 					continue;
 				}
 
-				const calculatedForce = calculateForce(attractor, otherPart, attr.distanceMultiplier);
+				let calculatedForce = calculateForce(attractor, otherPart, attr.distanceMultiplier);
 				if (!calculatedForce) continue;
+
+				calculatedForce = calculatedForce.mul(attr.repel ? -1 : 1);
 
 				const blockScale = BlockManager.manager.scale.get(otherPart.Parent as BlockModel) ?? Vector3.one;
 				const force2 = blockScale.X * blockScale.Y * blockScale.Z;
@@ -98,7 +107,7 @@ RunService.PostSimulation.Connect((dt) => {
 export type { Logic as MagnetBlockLogic };
 @injectable
 class Logic extends InstanceBlockLogic<typeof definition> {
-	polarity = false;
+	repel = false;
 	readonly part;
 	private strength = 0;
 
@@ -115,6 +124,7 @@ class Logic extends InstanceBlockLogic<typeof definition> {
 		const blockScale = BlockManager.manager.scale.get(block.instance) ?? Vector3.one;
 		this.scale = blockScale.X * blockScale.Y * blockScale.Z;
 
+		this.onk(["repel"], ({ repel }) => (this.repel = repel));
 		this.onk(["strength"], ({ strength }) => (this.strength = strength));
 		this.onk(["distance"], ({ distance }) => (this.distanceMultiplier = distance));
 
