@@ -7,7 +7,7 @@
       <bool name="ResetPlayerGuiOnSpawn">true</bool>
       <token name="RtlTextSupport">0</token>
       <bool name="DefinesCapabilities">false</bool>
-      <token name="ScreenOrientation">2</token>
+      <token name="ScreenOrientation">1</token>
       <bool name="ShowDevelopmentGui">true</bool>
       <int64 name="SourceAssetId">-1</int64>
       <Ref name="StudioDefaultStyleSheet">null</Ref>
