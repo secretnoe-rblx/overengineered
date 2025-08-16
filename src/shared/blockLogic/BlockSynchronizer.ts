@@ -47,7 +47,7 @@ export class BlockSynchronizer<TArg extends { readonly block: BlockModel; reqid?
 		this.event = event;
 
 		if (RunService.IsServer()) {
-			let currentArg: TArg | undefined = undefined;
+			const saved = new Map<BlockModel, TArg>();
 
 			event.c2s.invoked.Connect((invoker, arg) => {
 				if (!t.typeCheck(arg, ttype)) {
@@ -69,7 +69,10 @@ export class BlockSynchronizer<TArg extends { readonly block: BlockModel; reqid?
 					}
 				}
 
-				currentArg = arg;
+				if (!saved.has(arg.block)) {
+					arg.block.Destroying.Connect(() => saved.delete(arg.block));
+				}
+				saved.set(arg.block, arg);
 
 				for (const player of Players.GetPlayers()) {
 					if (player === invoker) {
@@ -108,8 +111,9 @@ export class BlockSynchronizer<TArg extends { readonly block: BlockModel; reqid?
 			});
 
 			Players.PlayerAdded.Connect((player) => {
-				if (currentArg === undefined) return;
-				event.s2c.send(player, (currentArg = this.getExisting?.(currentArg) ?? currentArg));
+				for (const [, arg] of saved) {
+					event.s2c.send(player, this.getExisting?.(arg) ?? arg);
+				}
 			});
 		} else if (RunService.IsClient()) {
 			event.s2c.invoked.Connect((arg) => {
