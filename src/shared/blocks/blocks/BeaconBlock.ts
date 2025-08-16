@@ -3,11 +3,13 @@ import { A2SRemoteEvent } from "engine/shared/event/PERemoteEvent";
 import { InstanceBlockLogic } from "shared/blockLogic/BlockLogic";
 import { BlockCreation } from "shared/blocks/BlockCreation";
 import { Colors } from "shared/Colors";
-import type { Beacon } from "client/gui/Beacon";
+import { GameDefinitions } from "shared/data/GameDefinitions";
+import type { ManualBeacon } from "client/gui/Beacon";
 import type { BlockLogicFullBothDefinitions, InstanceBlockLogicArgs } from "shared/blockLogic/BlockLogic";
 import type { BlockBuilder } from "shared/blocks/Block";
 
 const definition = {
+	inputOrder: ["enabled", "text", "showUpDistance", "markerColor", "position"],
 	input: {
 		enabled: {
 			displayName: "Enabled",
@@ -47,6 +49,15 @@ const definition = {
 				},
 			},
 		},
+		position: {
+			displayName: "Position",
+			tooltip: "Position of the marker. Leave at [0, 0, 0] to use the block position.",
+			types: {
+				vector3: {
+					config: Vector3.zero,
+				},
+			},
+		},
 	},
 	output: {},
 } satisfies BlockLogicFullBothDefinitions;
@@ -71,7 +82,7 @@ class Logic extends InstanceBlockLogic<typeof definition> {
 		data.block.LED.Color = data.color;
 	}
 
-	beaconInstance: Beacon | undefined;
+	beaconInstance: ManualBeacon | undefined;
 	constructor(block: InstanceBlockLogicArgs) {
 		super(definition, block);
 
@@ -124,6 +135,18 @@ class Logic extends InstanceBlockLogic<typeof definition> {
 			this.beaconInstance.billboard.Title.TextColor3 = markerColor;
 			this.beaconInstance.billboard.ImageLabel.ImageColor3 = markerColor;
 			this.beaconInstance.billboard.Distance.TextColor3 = markerColor;
+		});
+
+		this.onk(["position"], ({ position }) => {
+			if (!this.beaconInstance) return;
+
+			if (position === Vector3.zero) {
+				position = this.instance.GetPivot().Position;
+			} else {
+				position = position.add(new Vector3(0, GameDefinitions.HEIGHT_OFFSET, 0));
+			}
+
+			this.beaconInstance.position = position;
 		});
 
 		this.onDisable(() => this.beaconInstance?.destroy());

@@ -1,15 +1,21 @@
 import { Players, ReplicatedStorage, RunService, Workspace } from "@rbxts/services";
 import { Interface } from "client/gui/Interface";
+import { Component } from "engine/shared/component/Component";
 import { InstanceComponent } from "engine/shared/component/InstanceComponent";
 import { PartUtils } from "shared/utils/PartUtils";
 import { VectorUtils } from "shared/utils/VectorUtils";
 
-export class Beacon extends InstanceComponent<PVInstance> {
+/**
+ * Beacon with a public position setter
+ */
+export class ManualBeacon extends Component {
 	readonly billboard;
 	showUpDistance = 30;
 
-	constructor(part: PVInstance, name: string) {
-		super(part);
+	position = Vector3.zero;
+
+	constructor(name: string) {
+		super();
 
 		this.billboard = ReplicatedStorage.Assets.Guis.BeaconBillboardGui.Clone();
 
@@ -27,7 +33,7 @@ export class Beacon extends InstanceComponent<PVInstance> {
 			const character = Players.LocalPlayer.Character;
 			if (!character) return;
 
-			const distance = part.GetPivot().Position.sub(character.GetPivot().Position).Magnitude;
+			const distance = this.position.sub(character.GetPivot().Position).Magnitude;
 			if (!distance) return;
 
 			const transparencyMultiplier = 0.8;
@@ -41,7 +47,7 @@ export class Beacon extends InstanceComponent<PVInstance> {
 
 			this.billboard.Distance.Text =
 				distance > 1000 ? `${math.floor(distance / 100) / 10} kst` : `${math.floor(distance)} st`;
-			const [screenPos, isVisible] = Workspace.CurrentCamera!.WorldToViewportPoint(part.GetPivot().Position);
+			const [screenPos, isVisible] = Workspace.CurrentCamera!.WorldToViewportPoint(this.position);
 			const screenSize = Workspace.CurrentCamera!.ViewportSize;
 			const adjustableOffset =
 				this.billboard.AbsoluteSize.Y > this.billboard.AbsoluteSize.X
@@ -86,6 +92,20 @@ export class Beacon extends InstanceComponent<PVInstance> {
 			}
 
 			this.billboard.Position = new UDim2(0, pos_x, 0, pos_y);
+		});
+	}
+}
+
+/**
+ * Beacon that gets its position from a PVInstance
+ */
+export class Beacon extends InstanceComponent<PVInstance> {
+	constructor(part: PVInstance, name: string) {
+		super(part);
+
+		const beacon = this.parent(new ManualBeacon(name));
+		this.event.subscribe(RunService.RenderStepped, () => {
+			beacon.position = part.GetPivot().Position;
 		});
 	}
 }

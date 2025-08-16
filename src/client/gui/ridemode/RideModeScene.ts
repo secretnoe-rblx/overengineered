@@ -1,7 +1,7 @@
 import { RunService, UserInputService, Workspace } from "@rbxts/services";
 import { LoadingController } from "client/controller/LoadingController";
 import { LocalPlayerController } from "client/controller/LocalPlayerController";
-import { Beacon } from "client/gui/Beacon";
+import { ManualBeacon } from "client/gui/Beacon";
 import { CheckBoxControl } from "client/gui/controls/CheckBoxControl";
 import { FormattedLabelControl } from "client/gui/controls/FormattedLabelControl";
 import { ProgressBarControl } from "client/gui/controls/ProgressBarControl";
@@ -489,7 +489,7 @@ export class RideModeScene extends Control<RideModeSceneDefinition> {
 				.filter((c) => c instanceof beaconBlockClass) as unknown as readonly BeaconBlockLogic[];
 
 			for (const beacon of beacons) {
-				beacon.beaconInstance = new Beacon(beacon.instance, beacon.definition.input.text.displayName);
+				beacon.beaconInstance = new ManualBeacon(beacon.definition.input.text.displayName);
 				beacon.updateData(beacon.definition.input.text.displayName, true);
 			}
 		}
