@@ -1,4 +1,4 @@
-import { ContentProvider, Players, ReplicatedStorage, RunService, Workspace } from "@rbxts/services";
+import { ContentProvider, Players, ReplicatedStorage, RunService, StarterGui, Workspace } from "@rbxts/services";
 import { LoadingController } from "client/controller/LoadingController";
 import { BSOD } from "client/gui/BSOD";
 import { Interface } from "client/gui/Interface";
@@ -7,6 +7,8 @@ import { LocalPlayer } from "engine/client/LocalPlayer";
 import { Instances } from "engine/shared/fixes/Instances";
 import { GameHostBuilder } from "engine/shared/GameHostBuilder";
 import { gameInfo } from "shared/GameInfo";
+
+StarterGui.ScreenOrientation = Enum.ScreenOrientation.LandscapeSensor;
 
 LocalPlayer.character.waitOnceFor(
 	(character) => character !== undefined,
