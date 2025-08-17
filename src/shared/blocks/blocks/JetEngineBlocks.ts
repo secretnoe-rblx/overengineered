@@ -197,7 +197,6 @@ class Logic extends InstanceBlockLogic<typeof definition, JetModel> {
 		this.event.subscribe(RunService.Heartbeat, (dt) => {
 			shaft.CFrame = body.BladeLocation.WorldCFrame;
 			shaft.CFrame = shaft.CFrame.mul(CFrame.Angles(0, 0, (rotationAccumulator += (thrust.get() ?? 0) * dt)));
-			print(shaft.Rotation);
 		});
 
 		this.onDisable(() => {
@@ -208,12 +207,19 @@ class Logic extends InstanceBlockLogic<typeof definition, JetModel> {
 	}
 }
 
-const search = { partialAliases: ["turbine"] };
+const search = { partialAliases: ["turbine", "engine", "military", "civil", "engine", "afterburner"] };
 const logic: BlockLogicInfo = { definition, ctor: Logic };
 const list: BlockBuildersWithoutIdAndDefaults = {
 	jetenginecivil: {
 		displayName: "Civil Jet Engine",
 		description: "Engines your jet or whatever",
+		logic,
+		limit: 50,
+		search,
+	},
+	jetenginemilitaryold: {
+		displayName: "Military Jet Engine (Old Model)",
+		description: "Long live military jet engine! ",
 		logic,
 		limit: 50,
 		search,
