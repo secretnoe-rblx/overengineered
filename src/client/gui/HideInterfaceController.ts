@@ -9,7 +9,7 @@ import type { SharedPlots } from "shared/building/SharedPlots";
 
 @injectable
 export class HideInterfaceController extends HostedService {
-	private readonly visible = new ObservableValue(true);
+	readonly visible = new ObservableValue(true);
 
 	private readonly guis = [Interface.getGameUI(), Interface.getUnscaledGameUI(), Interface.getInterface()] as const;
 	private currentUnhideScreen?: ScreenGui;

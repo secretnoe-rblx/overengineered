@@ -7,6 +7,7 @@ import { CameraController } from "client/controller/CameraController";
 import { ChatController } from "client/controller/ChatController";
 import { DayCycleController } from "client/controller/DayCycleController";
 import { EnvBlacklistsController } from "client/controller/EnvBlacklistsController";
+import { FreecamController } from "client/controller/FreecamController";
 import { GameEnvironmentController } from "client/controller/GameEnvironmentController";
 import { GraphicsSettingsController } from "client/controller/GraphicsSettingsController";
 import { LoadingController } from "client/controller/LoadingController";
@@ -116,6 +117,7 @@ export namespace SandboxGame {
 			.autoInit();
 		builder.services.registerService(ToolController);
 
+		builder.services.registerService(FreecamController);
 		builder.services.registerService(GameEnvironmentController);
 		builder.services.registerService(EnvBlacklistsController);
 		SoundController.initializeAll(builder);
