@@ -25,6 +25,9 @@ const blocks: BlockBuildersWithoutIdAndDefaults = {
 	driveshaft: {
 		displayName: "Driveshaft",
 		description: "Kinda like a ball socket but with transmitting rotational force",
+		search: {
+			partialAliases: ["universal", "joint"],
+		},
 	},
 
 	smallgear: {
