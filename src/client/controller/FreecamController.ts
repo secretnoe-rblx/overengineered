@@ -6,7 +6,7 @@ import type { MainScreenLayout } from "client/gui/MainScreenLayout";
 import type { PlayModeController } from "client/modes/PlayModeController";
 import type { ReadonlyPlot } from "shared/building/ReadonlyPlot";
 
-const keydef = Keybinds.registerDefinition("smoohtfreecam", ["Smooth freecam"], [["LeftShift", "O"]]);
+const keydef = Keybinds.registerDefinition("freecam", ["Freecam"], [["LeftShift", "O"]]);
 
 @injectable
 export class FreecamController extends HostedService {
