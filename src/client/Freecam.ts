@@ -1,5 +1,6 @@
 import { ContextActionService, Players, RunService, UserInputService, Workspace } from "@rbxts/services";
 import { Action } from "engine/client/Action";
+import { LocalPlayer } from "engine/client/LocalPlayer";
 import { OverlayValueStorage } from "engine/shared/component/OverlayValueStorage";
 import { ObservableValue } from "engine/shared/event/ObservableValue";
 
@@ -15,10 +16,10 @@ type GameSettings = {
 };
 const GameSettings = (UserSettings() as unknown as { GameSettings: GameSettings }).GameSettings;
 
-let LocalPlayer = Players.LocalPlayer;
-if (!LocalPlayer) {
+let Player = Players.LocalPlayer;
+if (!Player) {
 	Players.GetPropertyChangedSignal("LocalPlayer").Wait();
-	LocalPlayer = Players.LocalPlayer;
+	Player = Players.LocalPlayer;
 }
 
 let Camera = Workspace.CurrentCamera!;
@@ -115,6 +116,7 @@ namespace Input {
 		K: 0,
 		I: 0,
 		Y: 0,
+		Space: 0,
 		Up: 0,
 		Down: 0,
 		LeftShift: 0,
@@ -130,14 +132,13 @@ namespace Input {
 
 	const NAV_GAMEPAD_SPEED = new Vector3(1, 1, 1);
 	const NAV_KEYBOARD_SPEED = new Vector3(1, 1, 1);
-	const PAN_MOUSE_SPEED = new Vector2(1, 1).mul(pi / 64);
-	const PAN_GAMEPAD_SPEED = new Vector2(1, 1).mul(pi / 8);
-	const FOV_WHEEL_SPEED = 1.0;
-	const FOV_GAMEPAD_SPEED = 0.25;
 	const NAV_ADJ_SPEED = 0.75;
 	const NAV_SHIFT_MUL = 0.25;
 
 	let navSpeed = 1;
+
+	let base = Vector3.zero;
+	let capture: SignalConnection | undefined;
 
 	export function Vel(dt: number) {
 		navSpeed = clamp(navSpeed + dt * (keyboard.Up - keyboard.Down) * NAV_ADJ_SPEED, 0.01, 4);
@@ -150,59 +151,40 @@ namespace Input {
 
 		const kKeyboard = new Vector3(
 			keyboard.D - keyboard.A + keyboard.K - keyboard.H,
-			keyboard.E - keyboard.Q + keyboard.I - keyboard.Y,
+			keyboard.E - keyboard.Q + keyboard.I - keyboard.Y + keyboard.Space,
 			keyboard.S - keyboard.W + keyboard.J - keyboard.U,
 		).mul(NAV_KEYBOARD_SPEED);
 
 		const shift =
 			UserInputService.IsKeyDown(Enum.KeyCode.LeftShift) || UserInputService.IsKeyDown(Enum.KeyCode.RightShift);
 
-		return kGamepad.add(kKeyboard).mul(navSpeed * (shift ? NAV_SHIFT_MUL : 1));
-	}
-
-	export function Pan() {
-		const kGamepad = new Vector2(
-			thumbstickCurve(gamepad.Thumbstick2.Y),
-			thumbstickCurve(-gamepad.Thumbstick2.X),
-		).mul(PAN_GAMEPAD_SPEED);
-		const kMouse = mouse.Delta.mul(PAN_MOUSE_SPEED);
-		mouse.Delta = new Vector2();
-		return kGamepad.add(kMouse);
-	}
-
-	export function Fov() {
-		const kGamepad = (gamepad.ButtonX - gamepad.ButtonY) * FOV_GAMEPAD_SPEED;
-		const kMouse = mouse.MouseWheel * FOV_WHEEL_SPEED;
-		mouse.MouseWheel = 0;
-		return kGamepad + kMouse;
+		return base
+			.add(kGamepad)
+			.add(kKeyboard)
+			.mul(navSpeed * (shift ? NAV_SHIFT_MUL : 1));
 	}
 
 	function Keypress(action: string, state: Enum.UserInputState, input: InputObject) {
 		keyboard[input.KeyCode.Name] = state === Enum.UserInputState.Begin ? 1 : 0;
 		return Enum.ContextActionResult.Sink;
 	}
-
 	function GpButton(action: string, state: Enum.UserInputState, input: InputObject) {
 		gamepad[input.KeyCode.Name] = (state === Enum.UserInputState.Begin ? 1 : 0) as never;
 		return Enum.ContextActionResult.Sink;
 	}
-
 	function MousePan(action: string, state: Enum.UserInputState, input: InputObject) {
 		const delta = input.Delta;
 		mouse.Delta = new Vector2(-delta.Y, -delta.X);
 		return Enum.ContextActionResult.Sink;
 	}
-
 	function Thumb(action: string, state: Enum.UserInputState, input: InputObject) {
 		gamepad[input.KeyCode.Name] = input.Position as never;
 		return Enum.ContextActionResult.Sink;
 	}
-
 	function Trigger(action: string, state: Enum.UserInputState, input: InputObject) {
 		gamepad[input.KeyCode.Name] = input.Position.Z as never;
 		return Enum.ContextActionResult.Sink;
 	}
-
 	function MouseWheel(action: string, state: Enum.UserInputState, input: InputObject) {
 		mouse[input.UserInputType.Name] = -input.Position.Z;
 		return Enum.ContextActionResult.Sink;
@@ -238,6 +220,7 @@ namespace Input {
 			Enum.KeyCode.I,
 			Enum.KeyCode.Q,
 			Enum.KeyCode.Y,
+			Enum.KeyCode.Space,
 			Enum.KeyCode.Up,
 			Enum.KeyCode.Down,
 		);
@@ -279,9 +262,27 @@ namespace Input {
 			Enum.KeyCode.Thumbstick1,
 			Enum.KeyCode.Thumbstick2,
 		);
+
+		const t = task.spawn(() => {
+			const h = LocalPlayer.humanoid.get()!;
+			const pos = h.RootPart!.GetPivot();
+
+			const controls = LocalPlayer.getPlayerModule().GetControls();
+			while (true as boolean) {
+				task.wait();
+				base = controls.GetMoveVector();
+				h.RootPart?.PivotTo(pos);
+			}
+		});
+		capture = {
+			Disconnect() {
+				task.cancel(t);
+			},
+		};
 	}
 
 	export function StopCapture() {
+		capture?.Disconnect();
 		navSpeed = 1;
 		Zero(gamepad);
 		Zero(keyboard);
