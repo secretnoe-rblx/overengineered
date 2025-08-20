@@ -39,7 +39,7 @@
       <Properties>
         <string name="Name">MountingRing1</string>
         <SharedString name="AeroMeshData">rxNJufX5oaagQE3qNtzJSQ==</SharedString>
-        <bool name="Anchored">false</bool>
+        <bool name="Anchored">true</bool>
         <ContentId name="AssetId">
           <null>
           </null>
@@ -205,7 +205,7 @@
       <Properties>
         <string name="Name">MountingRing2</string>
         <SharedString name="AeroMeshData">rxNJufX5oaagQE3qNtzJSQ==</SharedString>
-        <bool name="Anchored">false</bool>
+        <bool name="Anchored">true</bool>
         <ContentId name="AssetId">
           <null>
           </null>
@@ -371,7 +371,7 @@
       <Properties>
         <string name="Name">Electrical</string>
         <SharedString name="AeroMeshData">rxNJufX5oaagQE3qNtzJSQ==</SharedString>
-        <bool name="Anchored">false</bool>
+        <bool name="Anchored">true</bool>
         <BinaryString name="AttributesSerialize"></BinaryString>
         <bool name="AudioCanCollide">true</bool>
         <float name="BackParamA">-0.5</float>
@@ -539,7 +539,7 @@
       <Properties>
         <string name="Name">FuelPipes</string>
         <SharedString name="AeroMeshData">rxNJufX5oaagQE3qNtzJSQ==</SharedString>
-        <bool name="Anchored">false</bool>
+        <bool name="Anchored">true</bool>
         <BinaryString name="AttributesSerialize"></BinaryString>
         <bool name="AudioCanCollide">true</bool>
         <float name="BackParamA">-0.5</float>
@@ -956,7 +956,7 @@
       <Properties>
         <string name="Name">TurbineBody</string>
         <SharedString name="AeroMeshData">rxNJufX5oaagQE3qNtzJSQ==</SharedString>
-        <bool name="Anchored">false</bool>
+        <bool name="Anchored">true</bool>
         <BinaryString name="AttributesSerialize"></BinaryString>
         <bool name="AudioCanCollide">true</bool>
         <float name="BackParamA">-0.5</float>
@@ -1288,11 +1288,11 @@
             <Z>0.12299347</Z>
             <R00>1</R00>
             <R01>0</R01>
-            <R02>-0.00000004371139</R02>
+            <R02>0</R02>
             <R10>0</R10>
             <R11>1</R11>
             <R12>0</R12>
-            <R20>0.00000004371139</R20>
+            <R20>0</R20>
             <R21>0</R21>
             <R22>1</R22>
           </CoordinateFrame>
