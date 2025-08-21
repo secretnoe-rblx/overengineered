@@ -74,6 +74,7 @@ import { SpeakerBlock } from "shared/blocks/blocks/sound/SpeakerBlock";
 import { SpeedometerBlock } from "shared/blocks/blocks/SpeedometerBlock";
 import { StackMemoryBlock } from "shared/blocks/blocks/StackMemoryBlock";
 import { SuspensionBlock } from "shared/blocks/blocks/SuspensionBlock";
+import { TextureBlock } from "shared/blocks/blocks/TextureBlock";
 import { TpsCounterBlock } from "shared/blocks/blocks/TpsCounterBlock";
 import { ValueExtenderBlock } from "shared/blocks/blocks/ValueExtenderBlock";
 import { VehicleSeatBlock } from "shared/blocks/blocks/VehicleSeatBlock";
@@ -153,6 +154,7 @@ export const CreateSandboxBlocks = (di: DIContainer): BlockList => {
 		SevenSegmentDisplayBlock,
 		CameraBlock,
 		BeaconBlock,
+		TextureBlock,
 
 		VehicleSeatBlock,
 		PassengerSeatBlock,
