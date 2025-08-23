@@ -67,6 +67,7 @@ const definition = {
 
 const updateSound = (instance: Sound, sound: BlockLogicTypes.SoundValue): boolean => {
 	if (!sound.id || sound.id.size() === 0) {
+		instance.Stop();
 		instance.SoundId = "";
 		return false;
 	}
@@ -170,7 +171,8 @@ const update = ({ block, play, sound, loop, progress, volume }: UpdateType) => {
 			instance.Play();
 		}
 	} else {
-		if (play) {
+		print(play, sound?.id && sound.id.size() !== 0);
+		if (play && sound?.id && sound.id.size() !== 0) {
 			instance.Play();
 		}
 	}
@@ -202,6 +204,7 @@ class Logic extends InstanceBlockLogic<typeof definition> {
 		const soundInstance = new Instance("Sound", this.instance.PrimaryPart);
 		soundInstance.Played.Connect(() => this.output.isPlaying.set("bool", true));
 		soundInstance.Ended.Connect(() => this.output.isPlaying.set("bool", false));
+		soundInstance.Stopped.Connect(() => this.output.isPlaying.set("bool", false));
 		this.output.isPlaying.set("bool", false);
 		this.output.progress.set("number", 0);
 		this.output.loudness.set("number", 0);
@@ -211,10 +214,14 @@ class Logic extends InstanceBlockLogic<typeof definition> {
 			this.output.loudness.set("number", soundInstance.PlaybackLoudness);
 		});
 
+		const playCache = this.initializeInputCache("play");
+
 		this.onk(["sound"], ({ sound }) => {
 			if (!soundInstance.IsPlaying) {
-				nextSoundUpdate = sound;
-				return;
+				if (!playCache.tryGet()) {
+					nextSoundUpdate = sound;
+					return;
+				}
 			}
 
 			events.update.send({
