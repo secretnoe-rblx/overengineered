@@ -95,7 +95,7 @@ class Logic extends InstanceBlockLogic<typeof definition, ScreenBlock> {
 const immediate = BlockCreation.immediate(definition, (block: ScreenBlock, config) => {
 	Instances.waitForChild(block, "Part", "SurfaceGui", "TextLabel");
 
-	update({
+	events.update.send({
 		block,
 		color: BlockCreation.defaultIfWiredUnset(config?.textColor, definition.input.textColor.types.color.config),
 		data: BlockCreation.defaultIfWiredUnset(config?.data, "Screen"),

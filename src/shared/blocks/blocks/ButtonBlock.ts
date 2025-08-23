@@ -221,7 +221,7 @@ const immediate = BlockCreation.immediate(definition, (block: buttonType, config
 	const btn = Instances.waitForChild(block, "Button");
 	Instances.waitForChild(btn, "SurfaceGui", "TextLabel");
 
-	updateButtonText({
+	events.updateText.send({
 		block,
 		buttonColor: BlockCreation.defaultIfWiredUnset(
 			config?.buttonColor,

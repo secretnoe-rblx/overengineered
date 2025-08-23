@@ -135,7 +135,7 @@ class Logic extends InstanceBlockLogic<typeof definition> {
 const immediate = BlockCreation.immediate(definition, (block: BlockModel, config) => {
 	Instances.waitForChild(block, "Part");
 
-	update({
+	events.update.send({
 		block,
 		stretch: BlockCreation.defaultIfWiredUnset(config?.stretch, definition.input.stretch.types.bool.config),
 		assetId: BlockCreation.defaultIfWiredUnset(config?.assetid, definition.input.assetid.types.number.config),
