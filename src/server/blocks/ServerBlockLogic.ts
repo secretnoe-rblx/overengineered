@@ -13,6 +13,31 @@ export abstract class ServerBlockLogic<T extends GenericBlockLogicCtor> {
 		this.logic = logic;
 	}
 
+	static staticIsValidBlockNamed(
+		block: BasePart | undefined,
+		player: Player | undefined,
+		playModeController: PlayModeController,
+		checkOwnership: boolean = true,
+		checkRideMode: boolean = true,
+	): string | undefined {
+		if (!block) return "No block";
+		if (!block.IsDescendantOf(Workspace)) return "Block not in workspace";
+
+		if (player) {
+			if (checkRideMode && playModeController.getPlayerMode(player) !== "ride") {
+				return "Invalid mode";
+			}
+
+			if (checkOwnership) {
+				const plot = SharedPlots.staticTryGetPlotByOwnerID(player.UserId);
+				if (!plot) return "No plot";
+
+				if (!block?.Anchored && !block?.AssemblyRootPart?.Anchored && !block.IsDescendantOf(plot)) {
+					return "Block anchored";
+				}
+			}
+		}
+	}
 	static staticIsValidBlock(
 		block: BasePart | undefined,
 		player: Player | undefined,
@@ -20,25 +45,9 @@ export abstract class ServerBlockLogic<T extends GenericBlockLogicCtor> {
 		checkOwnership: boolean = true,
 		checkRideMode: boolean = true,
 	): boolean {
-		if (!block) return false;
-		if (!block.IsDescendantOf(Workspace)) return false;
-
-		if (player) {
-			if (checkRideMode && playModeController.getPlayerMode(player) !== "ride") {
-				return false;
-			}
-
-			if (checkOwnership) {
-				const plot = SharedPlots.staticTryGetPlotByOwnerID(player.UserId);
-				if (!plot) return false;
-
-				if (!block?.Anchored && !block?.AssemblyRootPart?.Anchored && !block.IsDescendantOf(plot)) {
-					return false;
-				}
-			}
-		}
-
-		return true;
+		return (
+			this.staticIsValidBlockNamed(block, player, playModeController, checkOwnership, checkRideMode) === undefined
+		);
 	}
 	protected isValidBlock(
 		block: BlockModel | undefined,

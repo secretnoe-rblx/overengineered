@@ -37,8 +37,15 @@ export class ServerBlockLogicController extends HostedService {
 					if (!arg.block) return { success: false, message: "No block" };
 					if (!arg.block?.PrimaryPart) return { success: false, message: "No primary part" };
 
-					if (!ServerBlockLogic.staticIsValidBlock(arg.block.PrimaryPart, invoker, playModeController)) {
-						return { success: false, message: "Invalid something" };
+					const err = ServerBlockLogic.staticIsValidBlockNamed(
+						arg.block.PrimaryPart,
+						invoker,
+						playModeController,
+						undefined,
+						false,
+					);
+					if (err) {
+						return { success: false, message: err };
 					}
 
 					return { success: true, value: arg };
