@@ -20,7 +20,7 @@ const definition = {
 		},
 		transparency: {
 			displayName: "Transparency",
-			types: { number: { config: 0 } },
+			types: { number: { config: 0, clamp: { showAsSlider: true, min: 0, max: 1 } } },
 		},
 		color: {
 			displayName: "Color",
