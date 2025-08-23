@@ -1,5 +1,6 @@
 import { Colors } from "engine/shared/Colors";
 import { Element } from "engine/shared/Element";
+import { Instances } from "engine/shared/fixes/Instances";
 import { t } from "engine/shared/t";
 import { InstanceBlockLogic } from "shared/blockLogic/BlockLogic";
 import { BlockSynchronizer } from "shared/blockLogic/BlockSynchronizer";
@@ -132,6 +133,8 @@ class Logic extends InstanceBlockLogic<typeof definition> {
 }
 
 const immediate = BlockCreation.immediate(definition, (block: BlockModel, config) => {
+	Instances.waitForChild(block, "Part");
+
 	update({
 		block,
 		stretch: BlockCreation.defaultIfWiredUnset(config?.stretch, definition.input.stretch.types.bool.config),
