@@ -74,7 +74,9 @@ export class ServerBlockLogicController extends HostedService {
 			$log(`Initializing server logic for ${id}`);
 
 			const bl = blockList.blocks[id]?.logic?.ctor;
-			if (!bl) continue;
+			if (!bl) {
+				throw `Unknown server block logic id ${id}`;
+			}
 
 			logics.push(container.resolveForeignClass(logic, [bl] as never));
 		}
