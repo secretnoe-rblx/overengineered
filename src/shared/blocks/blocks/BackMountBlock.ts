@@ -1,4 +1,4 @@
-import { Players, RunService, UserInputService } from "@rbxts/services";
+import { Players, RunService, UserInputService, Workspace } from "@rbxts/services";
 import { EventHandler } from "engine/shared/event/EventHandler";
 import { A2SRemoteEvent, S2CRemoteEvent } from "engine/shared/event/PERemoteEvent";
 import { t } from "engine/shared/t";
@@ -69,6 +69,10 @@ type BackMountModel = BlockModel & {
 	PlayerWeldConstraint: Motor6D;
 };
 
+// declaring constants here
+const MAX_PROMPT_VISIBILITY_DISTANCE = 5;
+const MAX_PROMPT_VISIBILITY_DISTANCE_EQUIPPED = 15;
+
 const updateProximity = ({ block, key, isPublic, owner, connectToRootPart }: proximityInferedType) => {
 	const pp = block.FindFirstChild("ProximityPrompt") as typeof block.ProximityPrompt;
 	if (!pp) return;
@@ -112,8 +116,30 @@ const updateProximity = ({ block, key, isPublic, owner, connectToRootPart }: pro
 		});
 	});
 
+	// some checks so the prompt disappears when player wearing
+	const theBlock = block;
+	let weldOwner: Player | undefined;
+
+	handler.subscribe(RunService.Heartbeat, () => {
+		if (weldOwner !== Players.LocalPlayer) {
+			if (!weldOwner) theBlock.ProximityPrompt.MaxActivationDistance = MAX_PROMPT_VISIBILITY_DISTANCE;
+			else theBlock.ProximityPrompt.MaxActivationDistance = 0;
+			return;
+		}
+		const camera = Workspace.CurrentCamera;
+		if (!camera) return;
+		const distance = camera.CFrame.Position.sub(theBlock.mainPart.Position).Magnitude;
+		theBlock.ProximityPrompt.MaxActivationDistance =
+			distance > MAX_PROMPT_VISIBILITY_DISTANCE_EQUIPPED ? 0 : distance;
+	});
+
+	handler.subscribe(Logic.events.updateLogic.invoked, ({ block, weldedTo }) => {
+		if (block !== theBlock) return;
+		weldOwner = weldedTo;
+	});
+
 	// make thing accessible to anyone else
-	if (owner !== Players.LocalPlayer) pp.MaxActivationDistance = isPublic ? 5 : 0;
+	if (owner !== Players.LocalPlayer) pp.MaxActivationDistance = isPublic ? MAX_PROMPT_VISIBILITY_DISTANCE : 0;
 	else pp.MaxActivationDistance = 5;
 	pp.Enabled = true;
 };
@@ -154,6 +180,7 @@ class Logic extends InstanceBlockLogic<typeof definition, BackMountModel> {
 
 	constructor(block: InstanceBlockLogicArgs) {
 		super(definition, block);
+		let weldedToPlayer: Player | undefined;
 
 		// update pressable key
 		this.onk(["detachKey", "shared", "connectToRootPart"], ({ detachKey, shared, connectToRootPart }) => {
@@ -180,11 +207,11 @@ class Logic extends InstanceBlockLogic<typeof definition, BackMountModel> {
 		if (RunService.IsClient()) {
 			this.event.subscribe(Logic.events.updateLogic.invoked, ({ block, weldedTo }) => {
 				if (block !== this.instance) return;
-				const state = !!weldedTo;
-				this.output.mounted.set("bool", state);
+				const isWelded = !!(weldedToPlayer = weldedTo);
+				this.output.mounted.set("bool", isWelded);
 				const pp = block.FindFirstChild("ProximityPrompt") as typeof block.ProximityPrompt;
 				if (!pp) return;
-				pp.ActionText = state ? "Detach" : "Attach";
+				pp.ActionText = isWelded ? "Detach" : "Attach";
 			});
 		}
 	}
