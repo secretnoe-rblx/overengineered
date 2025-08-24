@@ -173,7 +173,9 @@ class Logic extends InstanceBlockLogic<typeof definition, JetModel> {
 				Physics.LocalHeight.fromGlobal(this.instance.GetPivot().Y),
 			);
 
-			this.vectorForce.Force = new Vector3(this.maxPower * modifier * math.clamp(gravModifier - 0.2, 0, 1));
+			this.vectorForce.Force = new Vector3(
+				this.maxPower * modifier * math.clamp(gravModifier - magicThreshold, 0, 1),
+			);
 		};
 
 		let lastThrust = 0;
