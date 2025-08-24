@@ -171,8 +171,7 @@ const update = ({ block, play, sound, loop, progress, volume }: UpdateType) => {
 			instance.Play();
 		}
 	} else {
-		print(play, sound?.id && sound.id.size() !== 0);
-		if (play && sound?.id && sound.id.size() !== 0) {
+		if (play && (!sound?.id || sound.id.size() !== 0)) {
 			instance.Play();
 		}
 	}
