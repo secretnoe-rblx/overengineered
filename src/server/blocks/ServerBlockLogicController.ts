@@ -60,7 +60,7 @@ export class ServerBlockLogicController extends HostedService {
 			screen: ScreenServerLogic,
 			button: ButtonServerLogic,
 			speaker: SpeakerServerLogic,
-			particle: ParticleServerLogic,
+			particleemitter: ParticleServerLogic,
 			piston: PistonBlockServerLogic,
 			sevensegmentdisplay: SevenSegmentDisplayServerLogic,
 			bracedshaft: BracedShaftServerLogic,
