@@ -351,7 +351,7 @@
           <ColorSequence name="Color">0 0.9607843 1 0.69803923 0 1 0.9607843 1 0.69803923 0 </ColorSequence>
           <float name="Drag">0</float>
           <token name="EmissionDirection">1</token>
-          <bool name="Enabled">true</bool>
+          <bool name="Enabled">false</bool>
           <NumberRange name="FlipbookFramerate">1 1 </NumberRange>
           <string name="FlipbookIncompatible">Particle texture must be 1024 by 1024 to use flipbooks.</string>
           <token name="FlipbookLayout">0</token>
