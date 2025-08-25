@@ -84,10 +84,6 @@ export class BuildingPlot extends ReadonlyPlot {
 		return { success: true, models: placed };
 	}
 
-	/** @deprecated Used only for a specific case, do not use & do not remove */
-	justPlaceExisting(block: BlockModel): void {
-		block.Parent = this.instance;
-	}
 	private place(data: PlaceBlockRequest): BuildResponse {
 		const block = this.blockList.blocks[data.id];
 		if (!block) {

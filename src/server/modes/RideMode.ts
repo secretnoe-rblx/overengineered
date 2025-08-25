@@ -1,5 +1,3 @@
-import { Players } from "@rbxts/services";
-import { Throttler } from "engine/shared/Throttler";
 import { ServerPartUtils } from "server/plots/ServerPartUtils";
 import { BlockManager } from "shared/building/BlockManager";
 import { BlocksSerializer } from "shared/building/BlocksSerializer";
@@ -14,23 +12,12 @@ import type { SpawnPosition } from "shared/SpawnPositions";
 
 @injectable
 export class RideMode implements PlayModeBase {
-	private readonly cache = new Map<Player, Instance>();
-
 	constructor(
 		@inject private readonly serverControllers: ServerPlayersController,
 		@inject private readonly blockList: BlockList,
 		@inject private readonly slots: SlotDatabase,
 		@inject private readonly playerData: PlayerDatabase,
 	) {
-		Players.PlayerRemoving.Connect((player) => {
-			const blocks = this.cache.get(player);
-
-			if (blocks) {
-				blocks.Destroy();
-				this.cache.delete(player);
-			}
-		});
-
 		CustomRemotes.modes.ride.teleportOnSeat.invoked.Connect(this.sit.bind(this));
 	}
 	private sit(player: Player) {
@@ -88,8 +75,6 @@ export class RideMode implements PlayModeBase {
 		if (!controller) throw "what";
 
 		const blocksChildren = controller.blocks.getBlocks();
-		const copy = controller.blocks.cloneBlocks();
-		this.cache.set(player, copy);
 
 		this.slots.setBlocks(
 			player.UserId,
@@ -153,25 +138,11 @@ export class RideMode implements PlayModeBase {
 		const controller = this.serverControllers.controllers.get(player.UserId)?.plotController;
 		if (!controller) throw "what";
 
-		Throttler.forEach(6, controller.blocks.getBlocks(), (b) => b.Destroy());
+		controller.blocks.deleteOperation.execute("all");
 
-		const cache = this.cache.get(player);
-		if (cache) {
-			const time = os.clock();
-			Throttler.forEach(3, cache.GetChildren() as BlockModel[], (child) =>
-				controller.blocks.justPlaceExisting(child),
-			);
+		const blocksToLoad = this.slots.getBlocks(player.UserId, SlotsMeta.lastRunSlotIndex);
+		BlocksSerializer.deserializeFromObject(blocksToLoad, controller.blocks, this.blockList);
 
-			cache.Destroy();
-			print(`Loaded the cached save in ${os.clock() - time}`);
-		} else {
-			controller.blocks.deleteOperation.execute("all");
-
-			const blocksToLoad = this.slots.getBlocks(player.UserId, SlotsMeta.lastRunSlotIndex);
-			BlocksSerializer.deserializeFromObject(blocksToLoad, controller.blocks, this.blockList);
-		}
-
-		this.cache.delete(player);
 		return { success: true };
 	}
 }
