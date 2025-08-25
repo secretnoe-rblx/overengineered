@@ -38,9 +38,12 @@ export class BuildingPlot extends ReadonlyPlot {
 	}
 
 	initializeDelay(placeDelay: number, deleteDelay: number, editDelay: number) {
-		const addDelay = (signal: ReadonlyArgsSignal<[]>, chance: number) => {
+		const addDelay = (signal: ReadonlyArgsSignal<[]>, count: number) => {
+			let i = 0;
 			signal.Connect(() => {
-				if (math.random(chance) === 1) {
+				i++;
+				if (i > count) {
+					i = 0;
 					task.wait();
 				}
 			});
