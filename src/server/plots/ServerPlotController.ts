@@ -36,10 +36,13 @@ export class ServerPlotController extends Component {
 			plot.bounds,
 		]);
 
-		if (game.PrivateServerOwnerId === 0) {
+		if (
+			// !game.GetService("RunService").IsStudio() && // uncomment to enable private server behaviour in studio
+			game.PrivateServerOwnerId === 0
+		) {
 			this.blocks.initializeDelay(10, 64, 64);
 		} else {
-			this.blocks.initializeDelay(200, 400, 400);
+			this.blocks.initializeDelay(50, 100, 100);
 		}
 
 		this.parent(di.resolveForeignClass(AutoPlotWelder, [this.blocks]));
