@@ -58,7 +58,7 @@ const getTypeColor = (wireType: keyof BlockLogicTypes.Primitives) => {
 };
 
 export namespace BlockWiresMarkers {
-	type MarkerComponentDefinition = BillboardGui & {
+	export type MarkerComponentDefinition = BillboardGui & {
 		readonly TextButton: GuiButton & {
 			readonly White: Frame;
 			readonly Filled: Frame;
@@ -290,8 +290,8 @@ export namespace BlockWiresMarkers {
 	}
 }
 
-type WireComponentDefinition = Part;
-class WireComponent extends InstanceComponent<WireComponentDefinition> {
+export type WireComponentDefinition = Part;
+export class WireComponent extends InstanceComponent<WireComponentDefinition> {
 	private static readonly visibleTransparency = 0.4;
 	static createInstance(): WireComponentDefinition {
 		return Element.create("Part", {
@@ -307,14 +307,17 @@ class WireComponent extends InstanceComponent<WireComponentDefinition> {
 		});
 	}
 	static create(from: BlockWiresMarkers.Output, to: BlockWiresMarkers.Input): WireComponent {
-		return new WireComponent(this.createInstance(), from, to);
+		const wire = new WireComponent(this.createInstance(), from.position, to.position);
+		wire.subColorsFromTypes(from.availableTypes);
+
+		return wire;
 	}
 
-	private readonly types;
+	private readonly colors;
 
-	constructor(instance: WireComponentDefinition, from: BlockWiresMarkers.Output, to: BlockWiresMarkers.Input) {
+	constructor(instance: WireComponentDefinition, from: Vector3, to: Vector3) {
 		super(instance);
-		this.types = new ObservableValue(from.availableTypes.get());
+		this.colors = new ObservableValue<readonly Color3[]>([Colors.white]);
 
 		this.onEnable(() => (this.instance.Transparency = WireComponent.visibleTransparency));
 		this.onDisable(() => (this.instance.Transparency = 1));
@@ -322,16 +325,15 @@ class WireComponent extends InstanceComponent<WireComponentDefinition> {
 		let loop: (() => void) | undefined;
 		this.onDestroy(() => loop?.());
 		this.event.subscribeObservable(
-			this.types,
-			(types) => {
+			this.colors,
+			(colors) => {
 				loop?.();
-				const setcolor = (color: Color3) => (this.instance.Color = color);
+				const set = (color: Color3) => (this.instance.Color = color);
 
-				if (types.size() === 1) {
-					setcolor(getTypeColor(types[0]));
+				if (colors.size() === 1) {
+					set(colors[0]);
 				} else {
-					const func = (index: number) =>
-						setcolor(getTypeColor(types[index % (types.size() === 0 ? 1 : types.size())]));
+					const func = (index: number) => set(colors[index % (colors.size() === 0 ? 1 : colors.size())]);
 
 					looped.set(this, func);
 					loop = () => looped.delete(this);
@@ -341,10 +343,17 @@ class WireComponent extends InstanceComponent<WireComponentDefinition> {
 			true,
 		);
 
-		// markers share the availableTypes anyways so there's no need to intersect them
-		this.event.subscribeObservable(from.availableTypes, () => this.types.set(from.availableTypes.get()), true);
+		WireComponent.staticSetPosition(this.instance, from, to);
+	}
 
-		WireComponent.staticSetPosition(this.instance, from.position, to.position);
+	setColors(colors: readonly Color3[]) {
+		this.colors.set(colors);
+	}
+	subColors(colors: ReadonlyObservableValue<readonly Color3[]>) {
+		this.event.subscribeObservable(colors, () => this.colors.set(colors.get()), true);
+	}
+	subColorsFromTypes(types: ReadonlyObservableValue<readonly (keyof BlockLogicTypes.Primitives)[]>) {
+		this.event.subscribeObservable(types, () => this.colors.set(types.get().map(getTypeColor)), true);
 	}
 
 	static staticSetPosition(wire: WireComponentDefinition, from: Vector3, to: Vector3) {

@@ -57,7 +57,9 @@ interface SerializedBlockV4
 interface SerializedBlockV5 extends ReplaceWith<SerializedBlockV4, { readonly scale?: Vector3 | undefined }> {}
 interface SerializedBlockV6
 	extends ReplaceWith<SerializedBlockV5, { readonly customData?: PlacedBlockData["customData"] | undefined }> {}
-interface SerializedBlockV7 extends ReplaceWith<SerializedBlockV6, { readonly color?: Color4 | undefined }> {}
+interface SerializedBlockV7 extends ReplaceWith<SerializedBlockV6, { readonly color?: Color4 | undefined }> {
+	readonly welds?: BlockWelds;
+}
 
 export type LatestSerializedBlock = SerializedBlockV7;
 export type LatestSerializedBlocks = SerializedBlocks<LatestSerializedBlock>;
@@ -1632,6 +1634,7 @@ export namespace BlocksSerializer {
 			readonly mat: SerializedEnum | undefined;
 			readonly col: SerializedColor | undefined;
 			readonly scl: string | undefined;
+			readonly wld: string | undefined;
 		}
 	>;
 
@@ -1660,6 +1663,7 @@ export namespace BlocksSerializer {
 				col: block.color && Serializer.Color4Serializer.serialize(block.color),
 				mat: block.material && Serializer.EnumMaterialSerializer.serialize(block.material),
 				scl: block.scale && JSON.serialize(block.scale),
+				wld: block.welds && JSON.serialize(block.welds),
 			};
 		};
 
@@ -1696,6 +1700,7 @@ export namespace BlocksSerializer {
 				color: block.col ? Serializer.Color4Serializer.deserialize(block.col) : undefined,
 				material: block.mat ? Serializer.EnumMaterialSerializer.deserialize(block.mat) : undefined,
 				scale: block.scl ? JSON.deserialize(block.scl) : undefined,
+				welds: block.wld ? JSON.deserialize(block.wld) : undefined,
 			};
 		};
 
@@ -1737,6 +1742,7 @@ export namespace BlocksSerializer {
 			customData: blockData.customData,
 			uuid: blockData.uuid,
 			scale: blockData.scale,
+			welds: blockData.welds,
 		};
 	}
 }

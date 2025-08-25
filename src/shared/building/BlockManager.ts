@@ -11,9 +11,18 @@ declare global {
 		readonly config: PlacedBlockConfig | undefined;
 		readonly customData?: { [k in string | number]: unknown };
 		readonly scale: Vector3 | undefined;
+		readonly welds?: BlockWelds;
 	};
 
 	type PlacedBlockData<T extends BlockModel = BlockModel> = BlockDataBase & { readonly instance: T };
+
+	type BlockWelds = readonly BlockWeld[];
+	type BlockWeld = {
+		readonly thisPart: readonly string[];
+		readonly otherUuid: BlockUuid;
+		readonly otherPart: readonly string[];
+		readonly welded: boolean;
+	};
 }
 
 interface Manager<T> {
@@ -112,6 +121,16 @@ export namespace BlockManager {
 				return JSON.deserialize<PlacedBlockData["customData"]>(attribute);
 			},
 		},
+		welds: {
+			set: (block, value: BlockWelds | undefined) =>
+				block.SetAttribute("welds", value ? JSON.serialize(value) : undefined),
+			get: (block) => {
+				const attribute = block.GetAttribute("welds") as string | undefined;
+				if (attribute === undefined) return undefined;
+
+				return JSON.deserialize<BlockWelds>(attribute);
+			},
+		},
 	} satisfies { readonly [k in Exclude<keyof PlacedBlockData, "instance">]: Manager<PlacedBlockData[k]> };
 
 	export function getBlockDataByBlockModel(model: BlockModel): PlacedBlockData {
@@ -124,6 +143,7 @@ export namespace BlockManager {
 			config: manager.config.get(model),
 			customData: manager.customData.get(model),
 			scale: manager.scale.get(model),
+			welds: manager.welds.get(model),
 		};
 	}
 }

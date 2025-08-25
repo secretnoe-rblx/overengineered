@@ -79,6 +79,16 @@ declare global {
 		readonly plot: PlotModel;
 		readonly blocks: readonly BlockModel[];
 	};
+	type WeldRequest = {
+		readonly plot: PlotModel;
+		readonly datas: readonly {
+			readonly thisUuid: BlockUuid;
+			readonly thisPart: readonly string[];
+			readonly otherUuid: BlockUuid;
+			readonly otherPart: readonly string[];
+			readonly welded: boolean;
+		}[];
+	};
 
 	type PlayerUpdateSettingsRequest = PartialThrough<PlayerConfig>;
 	type PlayerUpdateDataRequest = {

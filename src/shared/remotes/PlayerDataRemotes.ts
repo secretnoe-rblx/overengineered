@@ -12,6 +12,7 @@ export type PlayerDataStorageRemotesBuilding = {
 	readonly updateConfig: C2S2CRemoteFunction<ConfigUpdateRequest>;
 	readonly updateCustomData: C2S2CRemoteFunction<CustomDataUpdateRequest>;
 	readonly resetConfig: C2S2CRemoteFunction<ConfigResetRequest>;
+	readonly weld: C2S2CRemoteFunction<WeldRequest>;
 };
 export type PlayerDataStorageRemotesSlots = {
 	readonly load: C2S2CRemoteFunction<PlayerLoadSlotRequest, LoadSlotResponse>;
@@ -61,6 +62,7 @@ export namespace PlayerDataRemotes {
 			updateConfig: new C2S2CRemoteFunction(get("building_updatecfg", "RemoteFunction")),
 			updateCustomData: new C2S2CRemoteFunction(get("building_updatecdt", "RemoteFunction")),
 			resetConfig: new C2S2CRemoteFunction(get("building_resetcfg", "RemoteFunction")),
+			weld: new C2S2CRemoteFunction(get("building_weld", "RemoteFunction")),
 		}));
 	}
 

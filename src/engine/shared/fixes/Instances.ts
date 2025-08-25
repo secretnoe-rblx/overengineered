@@ -48,4 +48,22 @@ export namespace Instances {
 
 		return ret;
 	}
+	export function relativePathOf(instance: Instance, relativeTo: Instance): string[] {
+		if (!instance.IsDescendantOf(relativeTo)) {
+			throw "Not a descendand";
+		}
+
+		const ret: string[] = [];
+
+		let parent: Instance | undefined = instance;
+		while (parent) {
+			if (parent === relativeTo) break;
+			if (parent === game) break;
+
+			ret.unshift(parent.Name);
+			parent = parent.Parent;
+		}
+
+		return ret;
+	}
 }

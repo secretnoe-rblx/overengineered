@@ -1,7 +1,9 @@
+import { Instances } from "engine/shared/fixes/Instances";
 import { BlockManager } from "shared/building/BlockManager";
 import { MaterialData } from "shared/data/MaterialData";
 import { PartUtils } from "shared/utils/PartUtils";
 import type { BlockLogicTypes } from "shared/blockLogic/BlockLogicTypes";
+import type { ReadonlyPlot } from "shared/building/ReadonlyPlot";
 
 /** Methods for editing the building */
 export namespace SharedBuilding {
@@ -124,6 +126,52 @@ export namespace SharedBuilding {
 					PartUtils.switchDescendantsTransparency(block, 1 - color.alpha);
 				}
 			}
+		}
+	}
+
+	export function findWeld(part1: Instance, part2: Instance) {
+		for (const weld of part1.GetChildren()) {
+			if (!weld.IsA("WeldConstraint")) continue;
+
+			if ((weld.Part0 === part1 && weld.Part1 === part2) || (weld.Part0 === part2 && weld.Part1 === part1)) {
+				return weld;
+			}
+		}
+		for (const weld of part2.GetChildren()) {
+			if (!weld.IsA("WeldConstraint")) continue;
+
+			if ((weld.Part0 === part1 && weld.Part1 === part2) || (weld.Part0 === part2 && weld.Part1 === part1)) {
+				return weld;
+			}
+		}
+	}
+	export function applyWelds(block: BlockModel, plot: ReadonlyPlot, welds: BlockWelds) {
+		for (const data of welds) {
+			const thisPart = Instances.findChild(block, ...data.thisPart);
+			if (!thisPart) {
+				warn("Skipping welding update: Can't find this part", block, data.thisPart.join("."));
+				continue;
+			}
+
+			const otherBlock = plot.tryGetBlock(data.otherUuid);
+			if (!otherBlock) {
+				warn("Skipping welding update: Can't find other block", data.otherUuid);
+				continue;
+			}
+
+			const otherPart = Instances.findChild(otherBlock, ...data.otherPart);
+			if (!otherPart) {
+				warn("Skipping welding update: Can't find other part", data.otherUuid, data.otherPart.join("."));
+				continue;
+			}
+
+			const weld = SharedBuilding.findWeld(thisPart, otherPart);
+			if (!weld) {
+				warn("Skipping welding update: Can't find weld between", block, thisPart, ">", otherBlock, otherPart);
+				continue;
+			}
+
+			weld.Enabled = data.welded;
 		}
 	}
 }

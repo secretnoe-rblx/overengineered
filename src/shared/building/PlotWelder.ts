@@ -2,6 +2,7 @@ import { RunService, ServerStorage, Workspace } from "@rbxts/services";
 import { Component } from "engine/shared/component/Component";
 import { ComponentInstance } from "engine/shared/component/ComponentInstance";
 import { BlockManager } from "shared/building/BlockManager";
+import { SharedBuilding } from "shared/building/SharedBuilding";
 import type { BuildingPlot } from "shared/building/BuildingPlot";
 
 /** {@link PlotWelder} that automatically subscribes to {@link BuildingPlot} block changing */
@@ -108,10 +109,10 @@ export class PlotWelder extends Component {
 
 		collider.Parent = this.collidersParent;
 
-		this.weld(collider);
+		this.weld(collider, block);
 	}
 
-	private weld(colliders: Model) {
+	private weld(colliders: Model, block: BlockModel) {
 		const getTarget = (collider: BasePart): BasePart | undefined => {
 			const targetBlock = this.plot.getBlock(collider.Parent!.Name as BlockUuid);
 			let part: BasePart | undefined;
@@ -155,6 +156,21 @@ export class PlotWelder extends Component {
 				this.makeJoints(targetPart, anotherTargetPart);
 			}
 		}
+
+		const weldData = BlockManager.manager.welds.get(block);
+		if (weldData) {
+			SharedBuilding.applyWelds(block, this.plot, weldData);
+		}
+
+		for (const welded of weldedTo) {
+			const otherBlock = BlockManager.tryGetBlockModelByPart(welded);
+			if (!otherBlock) continue;
+
+			const weldData = BlockManager.manager.welds.get(otherBlock);
+			if (weldData) {
+				SharedBuilding.applyWelds(otherBlock, this.plot, weldData);
+			}
+		}
 	}
 
 	moveCollisions(block: BlockModel, newpivot: CFrame) {
@@ -169,10 +185,10 @@ export class PlotWelder extends Component {
 			BlockManager.manager.scale.get(block),
 		);
 
-		this.weld(child);
+		this.weld(child, block);
 	}
 
-	makeJoints(part0: BasePart, part1: BasePart) {
+	private makeJoints(part0: BasePart, part1: BasePart) {
 		const weld = new Instance("WeldConstraint");
 
 		weld.Part0 = part0;

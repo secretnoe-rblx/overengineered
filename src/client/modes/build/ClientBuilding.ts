@@ -76,6 +76,17 @@ export namespace ClientBuildingTypes {
 		readonly inputBlock: BlockModel;
 		readonly inputConnection: BlockConnectionName;
 	};
+
+	export type WeldArgs = {
+		readonly plot: SharedPlot;
+		readonly datas: readonly {
+			readonly thisUuid: BlockUuid;
+			readonly thisPart: readonly string[];
+			readonly otherUuid: BlockUuid;
+			readonly otherPart: readonly string[];
+			readonly welded: boolean;
+		}[];
+	};
 }
 
 /** Methods to send building requests to the server, with undo/redo support. No validation is performed. */
@@ -89,6 +100,7 @@ export class ClientBuilding {
 	readonly resetConfigOperation = new Operation(this.resetConfig.bind(this));
 	readonly logicConnectOperation = new Operation(this.logicConnect.bind(this));
 	readonly logicDisconnectOperation = new Operation(this.logicDisconnect.bind(this));
+	readonly weldOperation = new Operation(this.weld.bind(this));
 
 	private readonly building;
 
@@ -484,6 +496,24 @@ export class ClientBuilding {
 					plot: plot.instance,
 					inputBlock: plot.getBlock(inputBlock),
 					inputConnection,
+				});
+			},
+		);
+	}
+
+	weld({ plot, datas }: ClientBuildingTypes.WeldArgs) {
+		return this.actionController.execute(
+			"Toggle weld",
+			() => {
+				return this.building.weld.send({
+					plot: plot.instance,
+					datas: datas.map((c) => ({ ...c, welded: !c.welded })),
+				});
+			},
+			() => {
+				return this.building.weld.send({
+					plot: plot.instance,
+					datas,
 				});
 			},
 		);
