@@ -35,6 +35,21 @@ export class BuildingPlot extends ReadonlyPlot {
 		@inject private readonly blockList: BlockList,
 	) {
 		super(instance, origin, boundingBox);
+
+		const addDelay = (signal: ReadonlyArgsSignal<[]>) => {
+			let lastWait = 0;
+			signal.Connect(() => {
+				const now = time();
+				if (now - lastWait > 1) {
+					lastWait = now;
+					task.wait();
+				}
+			});
+		};
+
+		addDelay(this.blockPlaced);
+		addDelay(this.blockDestroyed);
+		addDelay(this.blockEdited);
 	}
 
 	initializeDelay(placeDelay: number, deleteDelay: number, editDelay: number) {
@@ -42,7 +57,7 @@ export class BuildingPlot extends ReadonlyPlot {
 			let i = 0;
 			signal.Connect(() => {
 				i++;
-				if (i > count) {
+				if (i >= count) {
 					i = 0;
 					task.wait();
 				}
