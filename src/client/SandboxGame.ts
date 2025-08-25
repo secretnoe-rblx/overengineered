@@ -179,7 +179,7 @@ export namespace SandboxGame {
 
 					const first = f.first();
 					if (first) {
-						playerData.loadPlayerSlot(first.index, `Loading ${first.name}`);
+						task.spawn(() => playerData.loadPlayerSlot(first.index, `Loading ${first.name}`));
 					}
 				}
 			}
