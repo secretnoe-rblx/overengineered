@@ -196,7 +196,7 @@ class Logic extends InstanceBlockLogic<typeof definition, JetModel> {
 		});
 
 		let rotationAccumulator = 0;
-		this.event.subscribe(RunService.Heartbeat, (dt) => {
+		this.event.subscribe(RunService.PreRender, (dt) => {
 			shaft.CFrame = body.BladeLocation.WorldCFrame;
 			shaft.CFrame = shaft.CFrame.mul(CFrame.Angles(0, 0, (rotationAccumulator += (thrust.get() ?? 0) * dt)));
 		});
