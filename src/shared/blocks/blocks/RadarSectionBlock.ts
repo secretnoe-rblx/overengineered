@@ -123,7 +123,7 @@ class Logic extends InstanceBlockLogic<typeof definition> {
 			this.triggerDistanceListUpdate = part === this.closestDetectedPart;
 		});
 
-		this.event.subscribe(RunService.Heartbeat, () => {
+		this.event.subscribe(RunService.PreSimulation, () => {
 			if (this.closestDetectedPart?.Parent === undefined || this.triggerDistanceListUpdate) {
 				this.triggerDistanceListUpdate = false;
 
