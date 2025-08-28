@@ -128,6 +128,21 @@ class Marker extends InstanceComponent<BlockWiresMarkers.MarkerComponentDefiniti
 }
 
 namespace Visual {
+	export function hideAllWires(markers: readonly Marker[]) {
+		for (const marker of markers) {
+			for (const weld of marker.welds) {
+				weld.Archivable = false;
+			}
+		}
+	}
+	export function showAllWires(markers: readonly Marker[]) {
+		for (const marker of markers) {
+			for (const weld of marker.welds) {
+				weld.Archivable = true;
+			}
+		}
+	}
+
 	export function hideNonConnectableMarkers(from: Marker, markers: readonly Marker[]) {
 		for (const marker of markers) {
 			if (marker === from) continue;
@@ -417,6 +432,11 @@ export class WeldTool extends ToolBase {
 			controller.selectedMarker.subscribe((m) => this.selectedMarker.set(m), true);
 		};
 		this.event.onPrepare(setController);
+
+		this.event.subInput((ih) => {
+			ih.onKeyDown("F", () => Visual.hideAllWires(this.markers.getAll()));
+			ih.onKeyUp("F", () => Visual.showAllWires(this.markers.getAll()));
+		});
 	}
 
 	private createEverythingOnPlot(plot: SharedPlot) {
@@ -479,7 +499,7 @@ export class WeldTool extends ToolBase {
 
 	protected getTooltips(): readonly Tooltip[] {
 		return [
-			{ keys: [["F"]], text: "Hide connected markers" },
+			{ keys: [["F"]], text: "Hide wires" },
 			{ keys: [["ButtonY"]], text: "Marker selection mode" },
 			{ keys: [["ButtonA"]], text: "Click on marker" },
 			{ keys: [["ButtonX"]], text: "Cancel selection" },
