@@ -62,57 +62,82 @@ const reGenerateUuids = (
 	const plotBlocks = plot.getBlocks().mapToSet(BlockManager.manager.uuid.get);
 
 	for (const [olduuid, newblock] of uuidmap) {
-		const config = existingBlocks.get(olduuid)?.config;
-		if (!config) continue;
+		const uc = () => {
+			const config = existingBlocks.get(olduuid)?.config;
+			if (!config) return;
 
-		const keysToDelete: string[] = [];
-		for (const [key, cfg] of [...asMap(config)]) {
-			if (cfg.type !== "wire") continue;
-			const connection = cfg.config;
+			const keysToDelete: string[] = [];
+			for (const [key, cfg] of [...asMap(config)]) {
+				if (cfg.type !== "wire") continue;
+				const connection = cfg.config;
 
-			if (!plotBlocks.has(connection.blockUuid) && !uuidmap.has(connection.blockUuid)) {
+				if (!plotBlocks.has(connection.blockUuid) && !uuidmap.has(connection.blockUuid)) {
+					$log(
+						`Deleting a nonexistent connection ${olduuid} ${key} -> ${connection.blockUuid} ${connection.connectionName}`,
+					);
+
+					keysToDelete.push(key);
+				}
+			}
+
+			const keysToChange = new Map<string, BlockUuid>();
+			for (const [key, cfg] of pairs(config)) {
+				if (cfg.type !== "wire") continue;
+				if (keysToDelete.includes(key)) continue;
+				const connection = cfg.config;
+
+				const neww = uuidmap.get(connection.blockUuid);
+				if (!neww) continue;
+
 				$log(
-					`Deleting a nonexistent connection ${olduuid} ${key} -> ${connection.blockUuid} ${connection.connectionName}`,
+					`Rerouting a connection ${olduuid} ${key} -> ${connection.blockUuid} ${connection.connectionName}`,
 				);
-
-				keysToDelete.push(key);
+				keysToChange.set(key, neww.uuid);
 			}
-		}
 
-		const keysToChange = new Map<string, BlockUuid>();
-		for (const [key, cfg] of pairs(config)) {
-			if (cfg.type !== "wire") continue;
-			if (keysToDelete.includes(key)) continue;
-			const connection = cfg.config;
+			const copy: Writable<typeof config> = {};
+			for (const [key, cfg] of pairs(config)) {
+				if (cfg.type !== "wire") {
+					copy[key] = cfg;
+					continue;
+				}
 
-			const neww = uuidmap.get(connection.blockUuid);
-			if (!neww) continue;
+				if (keysToDelete.includes(key)) {
+					continue;
+				}
 
-			$log(`Rerouting a connection ${olduuid} ${key} -> ${connection.blockUuid} ${connection.connectionName}`);
-			keysToChange.set(key, neww.uuid);
-		}
+				const keyToChange = keysToChange.get(key);
+				if (keyToChange) {
+					copy[key] = { ...cfg, config: { ...cfg.config, blockUuid: keyToChange } };
+					continue;
+				}
 
-		const copy: Writable<typeof config> = {};
-		for (const [key, cfg] of pairs(config)) {
-			if (cfg.type !== "wire") {
 				copy[key] = cfg;
-				continue;
 			}
 
-			if (keysToDelete.includes(key)) {
-				continue;
+			newblock.config = copy;
+		};
+		uc();
+
+		const uw = () => {
+			const welds = existingBlocks.get(olduuid)?.welds;
+			if (!welds) return;
+
+			const newWelds: BlockWeld[] = [];
+			for (const weld of welds) {
+				const neww = uuidmap.get(weld.otherUuid);
+				if (!neww) {
+					newWelds.push(weld);
+					continue;
+				}
+
+				$log(`Rerouting a weld at [${olduuid}] ${weld.otherUuid} -> ${neww.uuid}`);
+				newWelds.push({ ...weld, otherUuid: neww.uuid });
 			}
 
-			const keyToChange = keysToChange.get(key);
-			if (keyToChange) {
-				copy[key] = { ...cfg, config: { ...cfg.config, blockUuid: keyToChange } };
-				continue;
-			}
-
-			copy[key] = cfg;
-		}
-
-		newblock.config = copy;
+			newblock.welds = newWelds;
+		};
+		uw();
 	}
 
 	return newblocks;

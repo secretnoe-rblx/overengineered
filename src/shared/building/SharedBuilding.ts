@@ -146,28 +146,30 @@ export namespace SharedBuilding {
 		}
 	}
 	export function applyWelds(block: BlockModel, plot: ReadonlyPlot, welds: BlockWelds) {
+		const wi = (...data: readonly unknown[]) => warn("[ignorable]", ...data);
+
 		for (const data of welds) {
 			const thisPart = Instances.findChild(block, ...data.thisPart);
 			if (!thisPart) {
-				warn("Skipping welding update: Can't find this part", block, data.thisPart.join("."));
+				wi(" Skipping welding update: Can't find this part", block, data.thisPart.join("."));
 				continue;
 			}
 
 			const otherBlock = plot.tryGetBlock(data.otherUuid);
 			if (!otherBlock) {
-				warn("Skipping welding update: Can't find other block", data.otherUuid);
+				wi(" Skipping welding update: Can't find other block", data.otherUuid);
 				continue;
 			}
 
 			const otherPart = Instances.findChild(otherBlock, ...data.otherPart);
 			if (!otherPart) {
-				warn("Skipping welding update: Can't find other part", data.otherUuid, data.otherPart.join("."));
+				wi(" Skipping welding update: Can't find other part", data.otherUuid, data.otherPart.join("."));
 				continue;
 			}
 
 			const weld = SharedBuilding.findWeld(thisPart, otherPart);
 			if (!weld) {
-				warn("Skipping welding update: Can't find weld between", block, thisPart, ">", otherBlock, otherPart);
+				wi(" Skipping welding update: Can't find weld between", block, thisPart, ">", otherBlock, otherPart);
 				continue;
 			}
 
