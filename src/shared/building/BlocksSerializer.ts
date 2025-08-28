@@ -82,6 +82,26 @@ namespace Filter {
 			delete block.connections;
 		}
 	}
+
+	export function cleanup(blocks: Map<BlockUuid, Writable<LatestSerializedBlock>>) {
+		for (const [, v] of blocks) {
+			if (!v.welds) continue;
+
+			const weldCopy: BlockWeld[] = [];
+			for (const weld of v.welds) {
+				if (weld.welded) {
+					continue;
+				}
+				if (!blocks.has(weld.otherUuid)) {
+					continue;
+				}
+
+				weldCopy.push(weld);
+			}
+
+			v.welds = weldCopy;
+		}
+	}
 }
 
 const read = {
@@ -1724,6 +1744,11 @@ export namespace BlocksSerializer {
 		$log(`Loading a slot using savev${data.version}`);
 
 		data = upgradeSave(data, blockList);
+		Filter.cleanup(
+			data.blocks.mapToMap((b) =>
+				$tuple((b as LatestSerializedBlock).uuid, b as Writable<LatestSerializedBlock>),
+			),
+		);
 		place.blocksOnPlot(plot, data.blocks as readonly LatestSerializedBlock[]);
 		return data.blocks.size();
 	}
