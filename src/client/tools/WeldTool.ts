@@ -425,7 +425,7 @@ export class WeldTool extends ToolBase {
 				.GetDescendants()
 				.filter((c) => c.IsA("WeldConstraint"))
 				.filter((c) => c.Name === "AutoWeld")
-				.filter((c) => c.Part0 !== undefined && c.Part1 !== undefined),
+				.filter((c) => c.Part0?.Parent !== undefined && c.Part1?.Parent !== undefined),
 		);
 		let partWelds = new Map<BasePart, WeldConstraint[]>();
 		for (const weld of welds) {
