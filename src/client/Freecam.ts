@@ -336,7 +336,6 @@ function CheckMouseLockAvailability() {
 
 namespace PlayerState {
 	type current = {
-		cameraFieldOfView: number;
 		cameraType: Enum.CameraType;
 		cameraCFrame: CFrame;
 		cameraFocus: CFrame;
@@ -346,7 +345,6 @@ namespace PlayerState {
 
 	export function Push() {
 		current = {
-			cameraFieldOfView: Camera.FieldOfView,
 			cameraType: Camera.CameraType,
 			cameraCFrame: Camera.CFrame,
 			cameraFocus: Camera.Focus,
@@ -356,14 +354,12 @@ namespace PlayerState {
 					: UserInputService.MouseBehavior,
 		};
 
-		Camera.FieldOfView = 70;
 		Camera.CameraType = Enum.CameraType.Custom;
 		UserInputService.MouseBehavior = Enum.MouseBehavior.Default;
 	}
 	export function Pop() {
 		if (!current) return;
 
-		Camera.FieldOfView = current.cameraFieldOfView;
 		Camera.CameraType = current.cameraType;
 		Camera.CFrame = current.cameraCFrame;
 		Camera.Focus = current.cameraFocus;
