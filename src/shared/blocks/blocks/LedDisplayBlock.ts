@@ -6,7 +6,7 @@ import type { BlockLogicFullBothDefinitions, InstanceBlockLogicArgs } from "shar
 import type { BlockBuilder } from "shared/blocks/Block";
 
 const definition = {
-	inputOrder: ["posx", "posy", "color", "update", "reset"],
+	inputOrder: ["posx", "posy", "color", "update", "reset", "suspendDraw"],
 	input: {
 		posx: {
 			displayName: "Position X",
@@ -68,14 +68,22 @@ const definition = {
 			},
 			configHidden: true,
 		},
+		suspendDraw: {
+			displayName: "Suspend drawing",
+			tooltip: "If true, buffer pixel changes, and when this input is false, draw them all at once",
+			types: {
+				bool: {
+					config: false,
+				},
+			},
+			configHidden: true,
+		},
 	},
 	output: {},
 } satisfies BlockLogicFullBothDefinitions;
 
-type cachedChange = {
-	readonly frame: Frame;
-	color: Color3;
-};
+// using array to save space when sending network events
+type cachedChange = [frame: Frame, color: Color3];
 
 export type { Logic as LedDisplayBlockLogic };
 class Logic extends InstanceBlockLogic<typeof definition> {
@@ -86,19 +94,21 @@ class Logic extends InstanceBlockLogic<typeof definition> {
 		}>("leddisplay_prepare", "RemoteEvent"), // TODO: fix this shit crap
 		update: new A2SRemoteEvent<{
 			readonly block: BlockModel;
-			readonly changes: Map<Frame, cachedChange>;
-		}>("leddisplay_update"),
+			readonly changes: readonly cachedChange[];
+		}>("leddisplay_update", "RemoteEvent"),
 		fill: new A2SRemoteEvent<{
 			readonly block: BlockModel;
 			readonly color: Color3;
 			readonly frames: Frame[][];
-		}>("leddisplay_fill"),
+		}>("leddisplay_fill", "RemoteEvent"),
 	} as const;
 
 	constructor(block: InstanceBlockLogicArgs) {
 		super(definition, block);
 
-		const cachedChanges: Map<Frame, cachedChange> = new Map();
+		let cachedChanges = new Map<Frame, cachedChange>();
+		let suspendBuffer = new Map<Frame, cachedChange>();
+
 		const baseColor = this.definition.input.color.types.color.config;
 
 		Logic.events.prepare.send({ block: block.instance, baseColor: baseColor });
@@ -117,23 +127,33 @@ class Logic extends InstanceBlockLogic<typeof definition> {
 
 			Logic.events.update.send({
 				block: block.instance,
-				changes: cachedChanges,
+				changes: cachedChanges.values(),
 			});
 			cachedChanges.clear();
 		});
 
-		this.on(({ posx, posy, color, update }) => {
+		this.on(({ posx, posy, color, update, suspendDraw }) => {
 			if (!update) return;
 
 			if (typeIs(color, "Vector3")) {
 				color = Color3.fromRGB(color.X, color.Y, color.Z);
 			}
 
+			const target = suspendDraw ? suspendBuffer : cachedChanges;
+
 			const frame = display[posx][posy];
-			cachedChanges.set(frame, { frame, color });
+			target.set(frame, [frame, color]);
 		});
 
-		this.on(({ reset }) => {
+		this.onk(["suspendDraw"], ({ suspendDraw }) => {
+			if (suspendDraw) return;
+			if (suspendBuffer.isEmpty()) return;
+
+			cachedChanges = suspendBuffer;
+			suspendBuffer = new Map();
+		});
+
+		this.onk(["reset"], ({ reset }) => {
 			if (!reset) return;
 
 			Logic.events.fill.send({
