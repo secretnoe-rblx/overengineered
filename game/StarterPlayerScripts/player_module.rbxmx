@@ -571,8 +571,12 @@ function CameraModule:Update(dt)
 				end
 			--end
 		end
-
-		currentCamera.CFrame = newCameraCFrame
+		
+		if self.tppaused then
+			currentCamera.CFrame = CFrame.new(currentCamera.CFrame.Position) * newCameraCFrame.Rotation
+		else 
+			currentCamera.CFrame = newCameraCFrame
+		end
 		currentCamera.Focus = newCameraFocus
 
 		-- Update to character local transparency as needed based on camera-to-subject distance
@@ -645,7 +649,7 @@ end
 
 local cameraModuleObject = CameraModule.new()
 
-return {}
+return cameraModuleObject
 ]]></string>
         <int64 name="SourceAssetId">-1</int64>
         <BinaryString name="Tags"></BinaryString>

@@ -375,6 +375,7 @@ export namespace Freecam {
 	function start() {
 		if (freecaming.get()) return;
 		freecaming.set(true);
+		(LocalPlayer.getPlayerModule().GetCameras() as unknown as { tppaused: boolean }).tppaused = true;
 
 		const cameraCFrame = Camera.CFrame;
 		cameraPos = cameraCFrame.Position;
@@ -388,6 +389,7 @@ export namespace Freecam {
 	function stop() {
 		if (!freecaming.get()) return;
 		freecaming.set(false);
+		(LocalPlayer.getPlayerModule().GetCameras() as unknown as { tppaused: boolean }).tppaused = false;
 
 		Input.StopCapture();
 		RunService.UnbindFromRenderStep("Freecam");
