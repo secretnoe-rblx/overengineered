@@ -3,7 +3,6 @@ import { ArgsSignal } from "engine/shared/event/Signal";
 import { BB } from "engine/shared/fixes/BB";
 import { JSON } from "engine/shared/fixes/Json";
 import { Objects } from "engine/shared/fixes/Objects";
-import { Strings } from "engine/shared/fixes/String.propmacro";
 import { Operation } from "engine/shared/Operation";
 import { BlockManager } from "shared/building/BlockManager";
 import { ReadonlyPlot } from "shared/building/ReadonlyPlot";
@@ -132,6 +131,11 @@ export class BuildingPlot extends ReadonlyPlot {
 
 		BlockManager.manager.scale.set(model, data.scale);
 		BlockManager.manager.uuid.set(model, uuid);
+		BlockManager.manager.collidable.set(model, data.collidable);
+		if (data.collidable === false) {
+			SharedBuilding.recollide(model, false);
+		}
+
 		model.Name = uuid;
 
 		SharedBuilding.paint([model], data.color, data.material, true);
@@ -278,21 +282,9 @@ export class BuildingPlot extends ReadonlyPlot {
 		return success;
 	}
 	weld(datas: WeldRequest["datas"]): Response {
-		print(Strings.pretty(datas));
 		for (const data of datas) {
 			const thisBlock = this.getBlock(data.thisUuid);
 			SharedBuilding.applyWelds(thisBlock, this, [data]);
-			// const thisPart = Instances.findChild(thisBlock, ...data.thisPart);
-			// if (!thisPart) throw "what";
-
-			// const otherBlock = this.getBlock(data.otherUuid);
-			// const otherPart = Instances.findChild(otherBlock, ...data.otherPart);
-			// if (!otherPart) throw "what";
-
-			// const weld = SharedBuilding.findWeld(thisPart, otherPart);
-			// if (!weld) throw "No weld";
-
-			// weld.Enabled = data.welded;
 
 			const welds =
 				BlockManager.manager.welds.get(thisBlock)?.filter((c) => {
@@ -303,17 +295,22 @@ export class BuildingPlot extends ReadonlyPlot {
 					);
 				}) ?? [];
 
-			print("orig:", Strings.pretty(BlockManager.manager.welds.get(thisBlock) ?? []));
-			print("filt:", Strings.pretty(welds));
-
 			welds.push({
 				thisPart: data.thisPart,
 				otherPart: data.otherPart,
 				otherUuid: data.otherUuid,
 				welded: data.welded,
 			});
-			print("new:", Strings.pretty(welds));
 			BlockManager.manager.welds.set(thisBlock, welds);
+		}
+
+		return success;
+	}
+	recollide(datas: RecollideRequest["datas"]): Response {
+		for (const { uuid, enabled } of datas) {
+			const block = this.getBlock(uuid);
+			SharedBuilding.recollide(block, enabled);
+			BlockManager.manager.collidable.set(block, enabled);
 		}
 
 		return success;

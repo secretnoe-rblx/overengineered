@@ -23,7 +23,8 @@ import { PartUtils } from "shared/utils/PartUtils";
 import type { MainScreenLayout } from "client/gui/MainScreenLayout";
 import type { ActionController } from "client/modes/build/ActionController";
 import type { BuildingMode } from "client/modes/build/BuildingMode";
-import type { ClientBuilding } from "client/modes/build/ClientBuilding";
+import type { ClientBuilding, ClientBuildingTypes } from "client/modes/build/ClientBuilding";
+import type { Theme } from "client/Theme";
 import type { SharedPlot } from "shared/building/SharedPlot";
 
 const placeToBlockRequest = (block: BlockModel): PlaceBlockRequestWithUuid => {
@@ -434,6 +435,80 @@ namespace Controllers {
 			}
 		}
 	}
+
+	@injectable
+	export class Collide extends Component {
+		private readonly origData: ReadonlyMap<BlockModel, boolean>;
+		private canceled = false;
+
+		constructor(
+			tool: EditTool,
+			plot: SharedPlot,
+			blocks: readonly BlockModel[],
+			@inject mainScreen: MainScreenLayout,
+			@inject private readonly clientBuilding: ClientBuilding,
+			@inject theme: Theme,
+		) {
+			super();
+
+			this.origData = blocks.mapToMap((b) => $tuple(b, BlockManager.manager.collidable.get(b) ?? true));
+
+			const confirmLayer = this.parentGui(mainScreen.bottom.push());
+			confirmLayer
+				.addButton("Confirm", undefined, "buttonPositive") //
+				.addButtonAction(() => this.destroy());
+			confirmLayer
+				.addButton("Cancel", undefined, "buttonNegative") //
+				.addButtonAction(() => {
+					this.cancel();
+					this.destroy();
+				});
+
+			const collidable = new ObservableValue(true);
+
+			const layer = this.parentGui(mainScreen.bottom.push());
+			const btn = layer
+				.addButton("Collision", undefined, "buttonPositive") //
+				.addButtonAction(() => collidable.toggle());
+			collidable.subscribe((e) => btn.themeButton(theme, e ? "buttonPositive" : "buttonNegative"));
+
+			this.event.subscribeObservable(
+				collidable,
+				(collidable) => {
+					for (const block of blocks) {
+						SharedBuilding.recollide(block, collidable);
+					}
+				},
+				true,
+			);
+
+			this.onDestroy(() => {
+				if (this.canceled) return;
+
+				const response = this.clientBuilding.recollideOperation.execute({
+					plot,
+					datas: blocks.map((b): ClientBuildingTypes.RecollideArgs["datas"][number] => ({
+						uuid: BlockManager.manager.uuid.get(b),
+						enabled: collidable.get(),
+					})),
+				});
+				if (!response.success) {
+					LogControl.instance.addLine(response.message, Colors.red);
+					this.cancel();
+				}
+
+				return response.success;
+			});
+		}
+
+		cancel() {
+			this.canceled = true;
+
+			for (const [block, collidable] of this.origData) {
+				SharedBuilding.recollide(block, collidable);
+			}
+		}
+	}
 }
 
 export type EditToolMode = "Move" | "Paste" | "Scale" | "Rotate" | "Paint";
@@ -493,6 +568,7 @@ export class EditTool extends ToolBase {
 			paste: this.parent(new Action(() => this.paste())),
 			paint: this.parent(new Action(() => this.paint())),
 			delete: this.parent(new Action(() => this.deleteSelectedBlocks())),
+			recollide: this.parent(new Action(() => this.recollide())),
 
 			mirrorX: this.parent(new Action(() => this.mirrorSelectedBlocks("x"))),
 			mirrorY: this.parent(new Action(() => this.mirrorSelectedBlocks("y"))),
@@ -518,6 +594,7 @@ export class EditTool extends ToolBase {
 		actions.paste.subCanExecuteFrom({ noControler, hasCopiedBlocks });
 		actions.paint.subCanExecuteFrom({ noControler, someBlocksSelected });
 		actions.delete.subCanExecuteFrom({ noControler, someBlocksSelected });
+		actions.recollide.subCanExecuteFrom({ noControler, someBlocksSelected });
 
 		actions.mirrorX.subCanExecuteFrom({ noControler, someBlocksSelected });
 		actions.mirrorY.subCanExecuteFrom({ noControler, someBlocksSelected });
@@ -539,6 +616,7 @@ export class EditTool extends ToolBase {
 			layer.addButton("copy", "18369509575").subscribeToAction(actions.copy);
 			layer.addButton("paste", "18369509575").subscribeToAction(actions.paste);
 			layer.addButton("delete", "12539349041", "buttonNegative").subscribeToAction(actions.delete);
+			layer.addButton("collider", "131288038500406").subscribeToAction(actions.recollide);
 		}
 
 		{
@@ -588,6 +666,11 @@ export class EditTool extends ToolBase {
 	private paint() {
 		this.controller.set(
 			this.di.resolveForeignClass(Controllers.Paint, [this, this.targetPlot.get(), [...this.selected.get()]]),
+		);
+	}
+	private recollide() {
+		this.controller.set(
+			this.di.resolveForeignClass(Controllers.Collide, [this, this.targetPlot.get(), [...this.selected.get()]]),
 		);
 	}
 	private copySelectedBlocks() {

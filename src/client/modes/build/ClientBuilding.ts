@@ -87,6 +87,14 @@ export namespace ClientBuildingTypes {
 			readonly welded: boolean;
 		}[];
 	};
+
+	export type RecollideArgs = {
+		readonly plot: SharedPlot;
+		readonly datas: readonly {
+			readonly uuid: BlockUuid;
+			readonly enabled: boolean;
+		}[];
+	};
 }
 
 /** Methods to send building requests to the server, with undo/redo support. No validation is performed. */
@@ -101,6 +109,7 @@ export class ClientBuilding {
 	readonly logicConnectOperation = new Operation(this.logicConnect.bind(this));
 	readonly logicDisconnectOperation = new Operation(this.logicDisconnect.bind(this));
 	readonly weldOperation = new Operation(this.weld.bind(this));
+	readonly recollideOperation = new Operation(this.recollide.bind(this));
 
 	private readonly building;
 
@@ -515,6 +524,21 @@ export class ClientBuilding {
 					plot: plot.instance,
 					datas,
 				});
+			},
+		);
+	}
+
+	recollide({ plot, datas }: ClientBuildingTypes.RecollideArgs) {
+		return this.actionController.execute(
+			"Toggle collisions",
+			() => {
+				return this.building.recollide.send({
+					plot: plot.instance,
+					datas: datas.map((c) => ({ ...c, enabled: !c.enabled })),
+				});
+			},
+			() => {
+				return this.building.recollide.send({ plot: plot.instance, datas });
 			},
 		);
 	}

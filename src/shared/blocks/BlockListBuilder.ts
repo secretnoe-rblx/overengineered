@@ -96,6 +96,10 @@ export namespace BlockListBuilder {
 					if (part.Transparency === 1) {
 						part.AddTag("TRANSPARENT");
 					}
+
+					if (!part.CanCollide) {
+						part.AddTag("NONCOLLIDABLE");
+					}
 				}
 			}
 		}

@@ -50,6 +50,7 @@ export class ServerBuildingRequestController extends Component {
 		b.updateCustomData.subscribe((p, arg) => this.updateCustomData(arg));
 		b.resetConfig.subscribe((p, arg) => this.resetConfig(arg));
 		b.weld.subscribe((p, arg) => this.weld(arg));
+		b.recollide.subscribe((p, arg) => this.recollide(arg));
 	}
 
 	private placeBlocks(request: PlaceBlocksRequest): MultiBuildResponse {
@@ -235,5 +236,19 @@ export class ServerBuildingRequestController extends Component {
 		}
 
 		return this.blocks.weld(request.datas);
+	}
+	private recollide(request: RecollideRequest): Response {
+		if (!this.plots.isBuildingAllowed(request.plot, this.playerId)) {
+			return errBuildingNotPermitted;
+		}
+
+		for (const { uuid } of request.datas) {
+			const block = this.plot.tryGetBlock(uuid);
+			if (!block || !isBlockOnPlot(block, request.plot)) {
+				return errBuildingNotPermitted;
+			}
+		}
+
+		return this.blocks.recollide(request.datas);
 	}
 }

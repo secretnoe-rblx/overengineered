@@ -129,6 +129,13 @@ export namespace SharedBuilding {
 		}
 	}
 
+	export function recollide(block: BlockModel, enabled: boolean) {
+		PartUtils.applyToAllDescendantsOfType("BasePart", block, (p) => {
+			if (p.HasTag("NONCOLLIDABLE")) return;
+			p.CanCollide = enabled;
+		});
+	}
+
 	export function findWeld(part1: Instance, part2: Instance) {
 		for (const weld of part1.GetChildren()) {
 			if (!weld.IsA("WeldConstraint")) continue;

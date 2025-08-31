@@ -12,6 +12,7 @@ declare global {
 		readonly customData?: { [k in string | number]: unknown };
 		readonly scale: Vector3 | undefined;
 		readonly welds?: BlockWelds;
+		readonly collidable?: boolean;
 	};
 
 	type PlacedBlockData<T extends BlockModel = BlockModel> = BlockDataBase & { readonly instance: T };
@@ -131,6 +132,11 @@ export namespace BlockManager {
 				return JSON.deserialize<BlockWelds>(attribute);
 			},
 		},
+
+		collidable: {
+			set: (block, value) => block.SetAttribute("collidable", value),
+			get: (block) => block.GetAttribute("collidable") as boolean | undefined,
+		},
 	} satisfies { readonly [k in Exclude<keyof PlacedBlockData, "instance">]: Manager<PlacedBlockData[k]> };
 
 	export function getBlockDataByBlockModel(model: BlockModel): PlacedBlockData {
@@ -144,6 +150,7 @@ export namespace BlockManager {
 			customData: manager.customData.get(model),
 			scale: manager.scale.get(model),
 			welds: manager.welds.get(model),
+			collidable: manager.collidable.get(model),
 		};
 	}
 }

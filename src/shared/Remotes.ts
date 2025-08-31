@@ -89,6 +89,13 @@ declare global {
 			readonly welded: boolean;
 		}[];
 	};
+	type RecollideRequest = {
+		readonly plot: PlotModel;
+		readonly datas: readonly {
+			readonly uuid: BlockUuid;
+			readonly enabled: boolean;
+		}[];
+	};
 
 	type PlayerUpdateSettingsRequest = PartialThrough<PlayerConfig>;
 	type PlayerUpdateDataRequest = {
