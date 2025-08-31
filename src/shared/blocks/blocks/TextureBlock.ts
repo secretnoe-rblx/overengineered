@@ -1,6 +1,7 @@
 import { Colors } from "engine/shared/Colors";
 import { Element } from "engine/shared/Element";
 import { Instances } from "engine/shared/fixes/Instances";
+import { Objects } from "engine/shared/fixes/Objects";
 import { t } from "engine/shared/t";
 import { InstanceBlockLogic } from "shared/blockLogic/BlockLogic";
 import { BlockSynchronizer } from "shared/blockLogic/BlockSynchronizer";
@@ -9,7 +10,7 @@ import type { BlockLogicFullBothDefinitions, InstanceBlockLogicArgs } from "shar
 import type { BlockBuilder } from "shared/blocks/Block";
 
 const definition = {
-	inputOrder: ["assetid", "stretch", "transparency", "color"],
+	inputOrder: ["assetid", "stretch", "transparency", "color", "singleFace"],
 	input: {
 		assetid: {
 			displayName: "Texture ID",
@@ -27,6 +28,11 @@ const definition = {
 			displayName: "Color",
 			types: { color: { config: Colors.white } },
 		},
+		singleFace: {
+			displayName: "Single face",
+			types: { bool: { config: false } },
+			connectorHidden: true,
+		},
 	},
 	output: {},
 } satisfies BlockLogicFullBothDefinitions;
@@ -40,11 +46,12 @@ const updateType = t.intersection(
 		assetId: t.number,
 		transparency: t.numberWithBounds(0, 1),
 		color: t.color,
+		singleFace: t.boolean,
 	}),
 );
 type updateType = t.Infer<typeof updateType>;
 
-const update = ({ block, stretch, assetId, transparency, color }: updateType) => {
+const update = ({ block, stretch, assetId, transparency, color, singleFace }: updateType) => {
 	const part = block.FindFirstChild("Part");
 	if (!part) return;
 
@@ -53,25 +60,36 @@ const update = ({ block, stretch, assetId, transparency, color }: updateType) =>
 		child.Destroy();
 	}
 
-	let cur = part.GetChildren().filter((c) => c.IsA(stretch ? "Decal" : "Texture"));
+	let cur: readonly (Texture | Decal)[] = part.GetChildren().filter((c) => c.IsA(stretch ? "Decal" : "Texture"));
+	if ((singleFace === true && cur.size() !== 1) || (singleFace === false && cur.size() !== 6)) {
+		for (const item of cur) {
+			item.Destroy();
+		}
+
+		cur = Objects.empty;
+	}
+
 	if (cur.size() === 0) {
-		const forAllFaces = <T>(func: (face: Enum.NormalId) => T): T[] => [
-			func(Enum.NormalId.Back),
-			func(Enum.NormalId.Bottom),
-			func(Enum.NormalId.Front),
-			func(Enum.NormalId.Left),
-			func(Enum.NormalId.Right),
-			func(Enum.NormalId.Top),
-		];
+		const forAllFaces = <T>(func: (face: Enum.NormalId) => T): T[] =>
+			singleFace
+				? [func(Enum.NormalId.Front)]
+				: [
+						func(Enum.NormalId.Top),
+						func(Enum.NormalId.Bottom),
+						func(Enum.NormalId.Left),
+						func(Enum.NormalId.Right),
+						func(Enum.NormalId.Front),
+						func(Enum.NormalId.Back),
+					];
 
 		if (stretch) {
-			cur = forAllFaces((face) => Element.create("Decal", { Face: face, Parent: part }));
+			cur = forAllFaces((face) => Element.create("Decal", { Name: face.Name, Face: face, Parent: part }));
 		} else {
-			cur = forAllFaces((face) => Element.create("Texture", { Face: face, Parent: part }));
+			cur = forAllFaces((face) => Element.create("Texture", { Name: face.Name, Face: face, Parent: part }));
 		}
 	}
 
-	type TextureDecal = Instance & { Texture: string; Transparency: number; Color3: Color3 };
+	type TextureDecal = Texture & Decal;
 	for (const child of cur) {
 		if (assetId) {
 			(child as TextureDecal).Texture = `rbxassetid://${assetId}`;
@@ -98,6 +116,7 @@ class Logic extends InstanceBlockLogic<typeof definition> {
 		const assetIdCache = this.initializeInputCache("assetid");
 		const transparencyCache = this.initializeInputCache("transparency");
 		const colorCache = this.initializeInputCache("color");
+		const singleFaceCache = this.initializeInputCache("singleFace");
 
 		this.onk(["stretch"], ({ stretch }) => {
 			events.update.send({
@@ -106,8 +125,10 @@ class Logic extends InstanceBlockLogic<typeof definition> {
 				assetId: assetIdCache.tryGet(),
 				transparency: transparencyCache.tryGet(),
 				color: colorCache.tryGet(),
+				singleFace: singleFaceCache.tryGet(),
 			});
 		});
+
 		this.onk(["assetid"], ({ assetid }) => {
 			events.update.send({
 				block: block.instance,
@@ -129,6 +150,13 @@ class Logic extends InstanceBlockLogic<typeof definition> {
 				color,
 			});
 		});
+		this.onk(["singleFace"], ({ singleFace }) => {
+			events.update.send({
+				block: block.instance,
+				stretch: stretchCache.get(),
+				singleFace,
+			});
+		});
 	}
 }
 
@@ -144,6 +172,10 @@ const immediate = BlockCreation.immediate(definition, (block: BlockModel, config
 			definition.input.transparency.types.number.config,
 		),
 		color: BlockCreation.defaultIfWiredUnset(config?.color, definition.input.color.types.color.config),
+		singleFace: BlockCreation.defaultIfWiredUnset(
+			config?.singleFace,
+			definition.input.singleFace.types.bool.config,
+		),
 	});
 });
 
