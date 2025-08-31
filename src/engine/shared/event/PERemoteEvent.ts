@@ -414,7 +414,7 @@ export class A2SRemoteEvent<TArg = undefined> extends PERemoteEvent<CustomRemote
 	/** @server */
 	readonly invoked = this._invoked.asReadonly();
 
-	constructor(name: string, eventType: CreatableRemoteEvents = "UnreliableRemoteEvent") {
+	constructor(name: string, eventType: CreatableRemoteEvents = "RemoteEvent") {
 		super(name, eventType);
 
 		if (RunService.IsServer()) {

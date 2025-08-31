@@ -38,7 +38,7 @@ class Logic extends BlockLogic<typeof definition> {
 		readonly frequency: number;
 		readonly valueType: BlockLogicTypes.IdListOfType<typeof definition.input.value.types>;
 		readonly value: BlockLogicTypes.TypeListOfType<typeof definition.input.value.types>;
-	}>("b_radio_transmitter_send", "UnreliableRemoteEvent");
+	}>("b_radio_transmitter_send", "RemoteEvent");
 
 	private readonly colorFade = Color3.fromRGB(0, 0, 0);
 	private readonly originalColor;

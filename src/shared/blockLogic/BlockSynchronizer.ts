@@ -41,7 +41,7 @@ export class BlockSynchronizer<TArg extends { readonly block: BlockModel; reqid?
 		private readonly name: string,
 		private readonly ttype: t.Type<TArg>,
 		func?: NoInfer<(arg: TArg) => void>,
-		eventType: CreatableRemoteEvents = "UnreliableRemoteEvent",
+		eventType: CreatableRemoteEvents = "RemoteEvent",
 	) {
 		const event = new BidirectionalRemoteEvent<TArg>(name, eventType);
 		this.event = event;
