@@ -139,9 +139,10 @@ const updateProximity = ({ block, key, isPublic, owner, connectToRootPart }: pro
 	});
 
 	// make thing accessible to anyone else
-	if (owner !== Players.LocalPlayer) pp.MaxActivationDistance = isPublic ? MAX_PROMPT_VISIBILITY_DISTANCE : 0;
-	else pp.MaxActivationDistance = 5;
-	pp.Enabled = true;
+	if (owner !== Players.LocalPlayer) {
+		pp.MaxActivationDistance = isPublic ? MAX_PROMPT_VISIBILITY_DISTANCE : 0;
+	} else pp.MaxActivationDistance = 5;
+	pp.Enabled = isPublic;
 };
 
 const proximityEventType = t.interface({
