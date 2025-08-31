@@ -1482,7 +1482,6 @@ const color = {
 		modelSource: autoModel("TripleGenericLogicBlockPrefab", "CLR->VEC3", categories.converterColor),
 		logic: logic(
 			{
-				outputOrder: ["result_r", "result_g", "result_b"],
 				input: {
 					value: defpartsf.color("Value"),
 				},

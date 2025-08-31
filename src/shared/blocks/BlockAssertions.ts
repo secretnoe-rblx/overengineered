@@ -189,6 +189,26 @@ export namespace BlockAssertions {
 		}
 	}
 
+	function* checkDefinitionOrder(block: Block, defs: BlockLogicFullBothDefinitions) {
+		if (defs.inputOrder) {
+			if (
+				defs.inputOrder.any((c) => !(c in defs.input)) ||
+				Objects.keys(defs.input).any((c) => !defs.inputOrder!.includes(c))
+			) {
+				yield `Block ${block.id} definition has invalid inputOrder`;
+			}
+		}
+
+		if (defs.outputOrder) {
+			if (
+				defs.outputOrder.any((c) => !(c in defs.output)) ||
+				Objects.keys(defs.output).any((c) => !defs.outputOrder!.includes(c))
+			) {
+				yield `Block ${block.id} definition has invalid outputOrder`;
+			}
+		}
+	}
+
 	function* checkLowercaseAlias(block: Block) {
 		if (
 			block.search?.aliases?.any((a) => a.fullLower() !== a) ||
@@ -204,6 +224,7 @@ export namespace BlockAssertions {
 	function getAllLogicErrors(block: Block, logic: Block["logic"] & defined): readonly string[] {
 		return [
 			...checkNoSameNamesInLogicDefinition(block, logic.definition),
+			...checkDefinitionOrder(block, logic.definition),
 			//
 		];
 	}
