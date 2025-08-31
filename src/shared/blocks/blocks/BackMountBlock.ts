@@ -92,16 +92,13 @@ const updateProximity = ({ block, key, isPublic, owner, connectToRootPart }: pro
 		if (gameProccessed) return;
 		if (input.KeyCode !== k) return;
 
-		// add extra chech that it is welded to this player
-		// we do not want to spam with remote events, do we?
 		const cnstr = block.FindFirstChild("PlayerWeldConstraint") as typeof block.PlayerWeldConstraint;
 		if (!cnstr) return;
-		if (cnstr.Part1) return;
 
 		// unweld
 		Logic.events.weldMountUpdate.send({
 			block,
-			weldedState: false,
+			weldedState: !cnstr.Part1,
 			owner,
 		});
 	});
@@ -139,10 +136,14 @@ const updateProximity = ({ block, key, isPublic, owner, connectToRootPart }: pro
 	});
 
 	// make thing accessible to anyone else
+
 	if (owner !== Players.LocalPlayer) {
 		pp.MaxActivationDistance = isPublic ? MAX_PROMPT_VISIBILITY_DISTANCE : 0;
-	} else pp.MaxActivationDistance = 5;
-	pp.Enabled = isPublic;
+		pp.Enabled = isPublic;
+	} else {
+		pp.Enabled = true;
+		pp.MaxActivationDistance = MAX_PROMPT_VISIBILITY_DISTANCE;
+	}
 };
 
 const proximityEventType = t.interface({
