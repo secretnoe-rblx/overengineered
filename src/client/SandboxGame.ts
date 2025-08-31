@@ -183,6 +183,8 @@ export namespace SandboxGame {
 					}
 				}
 			}
+
+			CustomRemotes.playerLoaded.send();
 		});
 
 		{

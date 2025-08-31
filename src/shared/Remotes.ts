@@ -1,3 +1,4 @@
+import { RunService } from "@rbxts/services";
 import {
 	BidirectionalRemoteEvent,
 	C2S2CRemoteFunction,
@@ -163,6 +164,7 @@ PlayerRank.developers.push(
 
 export const CustomRemotes = {
 	initPlayer: new C2S2CRemoteFunction<undefined, Response<PlayerInitResponse>>("player_init"),
+	playerLoaded: new C2SRemoteEvent("player_loaded"),
 	adminDataFor: new C2S2CRemoteFunction<number, Response<PlayerInitResponse>>("player_init_admin"),
 
 	updateSaves: new S2CRemoteEvent<readonly SlotMeta[]>("pl_save_update", "RemoteEvent"),
@@ -194,3 +196,7 @@ export const CustomRemotes = {
 	restartProgress: new S2CRemoteEvent<Remotes.ServerRestartProgressArgs>("restartprogress"),
 	integrityViolation: new C2SRemoteEvent<string>("integrity_violation"),
 } as const;
+
+if (RunService.IsServer()) {
+	CustomRemotes.playerLoaded.invoked.Connect((player) => $log(`Received ${player.Name} loaded request`));
+}

@@ -2,6 +2,7 @@ import { Players, RunService } from "@rbxts/services";
 import { BidirectionalRemoteEvent } from "engine/shared/event/PERemoteEvent";
 import { ArgsSignal } from "engine/shared/event/Signal";
 import { t } from "engine/shared/t";
+import { CustomRemotes } from "shared/Remotes";
 import type { CreatableRemoteEvents } from "engine/shared/event/PERemoteEvent";
 import type { BlockLogic, BlockLogicBothDefinitions } from "shared/blockLogic/BlockLogic";
 
@@ -110,7 +111,7 @@ export class BlockSynchronizer<TArg extends { readonly block: BlockModel; reqid?
 				}
 			});
 
-			Players.PlayerAdded.Connect((player) => {
+			CustomRemotes.playerLoaded.invoked.Connect((player) => {
 				for (const [, arg] of saved) {
 					event.s2c.send(player, this.getExisting?.(arg) ?? arg);
 				}
