@@ -86,7 +86,7 @@ const update = ({ block, stretch, assetId, transparency, color }: updateType) =>
 };
 
 const events = {
-	update: new BlockSynchronizer("update", updateType, update),
+	update: new BlockSynchronizer("tb_update", updateType, update),
 };
 
 export type { Logic as TextureBlockLogic };
