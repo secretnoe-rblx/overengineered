@@ -118,6 +118,7 @@ const updateProximity = ({ block, key, isPublic, owner, connectToRootPart }: pro
 	let weldOwner: Player | undefined;
 
 	handler.subscribe(RunService.Heartbeat, () => {
+		if (!theBlock) return;
 		if (weldOwner !== Players.LocalPlayer) {
 			if (!weldOwner) theBlock.ProximityPrompt.MaxActivationDistance = MAX_PROMPT_VISIBILITY_DISTANCE;
 			else theBlock.ProximityPrompt.MaxActivationDistance = 0;
