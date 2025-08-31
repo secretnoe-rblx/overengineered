@@ -86,6 +86,12 @@ export namespace BlockWiresMarkers {
 			offset: Vector3 | number | "center",
 			scale: Vector3 | undefined,
 			originalOrigin: BasePart,
+			perfab?: BillboardGui & {
+				readonly TextButton: GuiButton & {
+					readonly White: Frame;
+					readonly Filled: Frame;
+				};
+			},
 		): MarkerComponentDefinition {
 			if (typeIs(offset, "number")) {
 				offset = this.getPartMarkerPositions(originalOrigin)[offset];
@@ -97,7 +103,7 @@ export namespace BlockWiresMarkers {
 				offset = offset.mul(scale);
 			}
 
-			const markerInstance = ReplicatedStorage.Assets.Wires.WireMarker.Clone();
+			const markerInstance = (perfab ?? ReplicatedStorage.Assets.Wires.WireMarker).Clone();
 
 			markerInstance.MaxDistance = 200;
 			markerInstance.Adornee = origin;

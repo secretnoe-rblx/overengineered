@@ -119,6 +119,12 @@ interface ReplicatedStorage {
 					readonly Filled: Frame;
 				};
 			};
+			readonly WeldMarker: BillboardGui & {
+				readonly TextButton: GuiButton & {
+					readonly White: Frame;
+					readonly Filled: Frame;
+				};
+			};
 		};
 	};
 }

@@ -1,4 +1,4 @@
-import { GamepadService, GuiService, Players, RunService, Workspace } from "@rbxts/services";
+import { GamepadService, GuiService, Players, ReplicatedStorage, RunService, Workspace } from "@rbxts/services";
 import { BlockWiresMarkers, WireComponent } from "client/gui/buildmode/BlockWiresGui";
 import { Interface } from "client/gui/Interface";
 import { ServiceIntegrityChecker } from "client/integrity/ServiceIntegrityChecker";
@@ -99,7 +99,13 @@ const toggleMarkers = (building: ClientBuilding, left: Marker, right: Marker) =>
 
 class Marker extends InstanceComponent<BlockWiresMarkers.MarkerComponentDefinition> {
 	static createInstance(origin: BasePart) {
-		return BlockWiresMarkers.Marker.createInstance(origin, "center", undefined, origin);
+		return BlockWiresMarkers.Marker.createInstance(
+			origin,
+			"center",
+			undefined,
+			origin,
+			ReplicatedStorage.Assets.Wires.WeldMarker,
+		);
 	}
 
 	readonly position: Vector3;
