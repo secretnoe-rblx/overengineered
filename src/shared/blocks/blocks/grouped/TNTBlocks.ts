@@ -70,52 +70,44 @@ const definition = {
 	output: {},
 } satisfies BlockLogicFullBothDefinitions;
 
+type TNTBlock = BlockModel & {
+	Part: UnionOperation | BasePart;
+};
+
 export type { Logic as TNTBlockLogic };
-class Logic extends InstanceBlockLogic<typeof definition> {
+class Logic extends InstanceBlockLogic<typeof definition, TNTBlock> {
 	constructor(block: InstanceBlockLogicArgs) {
 		super(definition, block);
 
-		const doExplode = (part: BasePart, radius: number, pressure: number, flammable: boolean) => {
-			if (!part) return;
+		const mainPart = this.instance.Part;
 
-			RemoteEvents.Explode.send({ part, radius, pressure, isFlammable: flammable });
+		const radius = this.initializeInputCache("radius");
+		const pressure = this.initializeInputCache("pressure");
+		const flammable = this.initializeInputCache("flammable");
+		const impact = this.initializeInputCache("impact");
+
+		const explodeTNT = () => {
+			RemoteEvents.Explode.send({
+				part: mainPart,
+				radius: radius.get(),
+				pressure: pressure.get(),
+				isFlammable: flammable.get(),
+			});
 			this.disable();
 		};
 
-		const mainPart = (this.instance.FindFirstChild("Part") ??
-			this.instance.FindFirstChild("Union") ??
-			this.instance.PrimaryPart!) as BasePart;
-
-		this.on(({ explode, radius, pressure, flammable }) => {
+		this.on(({ explode }) => {
 			if (!explode) return;
-			doExplode(mainPart, radius, pressure, flammable);
+			explodeTNT();
 		});
 
-		let radius: number | undefined;
-		let pressure: number | undefined;
-		let flammable: boolean | undefined;
-		this.onk(
-			["radius", "pressure", "flammable"],
-			(ctx) => ([radius, pressure, flammable] = [ctx.radius, ctx.pressure, ctx.flammable]),
-		);
-
-		const impactCache = this.initializeInputCache("impact");
-
 		this.event.subscribe(mainPart.Touched, (part) => {
-			if (!impactCache.tryGet()) return;
-			if (radius === undefined || pressure === undefined || flammable === undefined) {
-				return;
-			}
-			if (part.CollisionGroup !== "Blocks" && part.CollisionGroup !== "Default") {
-				return;
-			}
+			if (!impact.get()) return;
 
 			const velocity1 = mainPart.AssemblyLinearVelocity.Magnitude;
 			const velocity2 = part.AssemblyLinearVelocity.Magnitude;
 
-			if (velocity1 > (velocity2 + 1) * 10) {
-				doExplode(mainPart, radius, pressure, flammable);
-			}
+			if (velocity1 > (velocity2 + 1) * 10) explodeTNT();
 		});
 	}
 }
