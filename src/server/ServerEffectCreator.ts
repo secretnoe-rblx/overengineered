@@ -51,11 +51,8 @@ class ServerEffect<T> implements EEEffect<T> {
 		const other =
 			this.playerDatabase.get(player.UserId).settings?.graphics?.othersEffects ??
 			PlayerConfigDefinition.graphics.config.othersEffects;
-		if (!other) {
-			return false;
-		}
 
-		return true;
+		return !!other;
 	}
 }
 
