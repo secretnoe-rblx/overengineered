@@ -45,7 +45,7 @@ const definition = {
 
 		shared: {
 			displayName: "Shared",
-			tooltip: "Allows other players to wear your back mount.",
+			tooltip: "Allows other players to wear your back mount. It doesn't work as it used to.",
 			types: {
 				bool: {
 					config: false,
@@ -73,77 +73,127 @@ type BackMountModel = BlockModel & {
 const MAX_PROMPT_VISIBILITY_DISTANCE = 5;
 const MAX_PROMPT_VISIBILITY_DISTANCE_EQUIPPED = 15;
 
-const updateProximity = ({ block, key, isPublic, owner, connectToRootPart }: proximityInferedType) => {
+const owners = new Map<BackMountModel, Player | undefined>();
+
+const updateWeld = (caller: Player, owner: Player, block: BackMountModel) => {
+	const weldOwner = owners.get(block);
+
+	if (weldOwner === undefined) {
+		Logic.events.weldMountUpdate.send({
+			block,
+			weldedState: true,
+			owner,
+		});
+		return;
+	}
+
+	if (weldOwner === caller) {
+		Logic.events.weldMountUpdate.send({
+			block,
+			weldedState: false,
+			owner,
+		});
+		return;
+	}
+};
+
+const ownerSideInit = ({ block, key, owner }: proximityInferedType, pp: ProximityPrompt) => {
+	// set activation key
+	const k = Enum.KeyCode[key as unknown as never];
+	const isUnknownKeybind = k === Enum.KeyCode.Unknown;
+
+	const player = Players.LocalPlayer;
+	const mainPart = block.FindFirstChild("mainPart") as BasePart;
+	if (!mainPart) return;
+
+	// remote client event handler
+	const handler = new EventHandler();
+
+	// subscribe to block being destroyed
+	handler.subscribe(block.DescendantRemoving, () => handler.unsubscribeAll());
+	handler.subscribe(pp.Triggered, () => updateWeld(player, owner, block));
+
+	// subscribe to keypress
+	handler.subscribe(UserInputService.InputBegan, (input, gameProccessed) => {
+		if (gameProccessed) return;
+		if (isUnknownKeybind) return;
+		if (input.KeyCode !== k) return;
+
+		updateWeld(player, owner, block);
+	});
+
+	// some checks so the prompt disappears when player wearing
+	handler.subscribe(RunService.Heartbeat, () => {
+		const weldOwner = owners.get(block);
+		if (weldOwner !== player) return;
+
+		const camera = Workspace.CurrentCamera;
+		if (!camera) return;
+
+		const distance = camera.CFrame.Position.sub(mainPart.Position).Magnitude;
+		pp.MaxActivationDistance = distance > MAX_PROMPT_VISIBILITY_DISTANCE_EQUIPPED ? 0 : distance;
+	});
+};
+
+const otherClientSideInit = ({ block, isPublic, owner }: proximityInferedType, pp: ProximityPrompt) => {
+	const player = Players.LocalPlayer;
+	const mainPart = block.FindFirstChild("mainPart") as BasePart;
+	if (!mainPart) return;
+
+	// remote client event handler
+	const handler = new EventHandler();
+
+	// subscribe to block being destroyed
+	handler.subscribe(block.DescendantRemoving, () => handler.unsubscribeAll());
+	handler.subscribe(pp.Triggered, () => updateWeld(player, owner, block));
+
+	// some checks so the prompt disappears when player wearing
+	handler.subscribe(RunService.Heartbeat, () => {
+		if (!isPublic) return;
+		const weldOwner = owners.get(block);
+		// these two checks are placed here ON PURPOSE
+		// allows the owner of the block to unequip the block off other players
+		if (weldOwner === undefined) {
+			pp.MaxActivationDistance = MAX_PROMPT_VISIBILITY_DISTANCE_EQUIPPED;
+			return;
+		}
+
+		if (weldOwner !== player) {
+			pp.MaxActivationDistance = 0;
+			return;
+		}
+
+		const camera = Workspace.CurrentCamera;
+		if (!camera) return;
+
+		const distance = camera.CFrame.Position.sub(mainPart.Position).Magnitude;
+		pp.MaxActivationDistance = distance > MAX_PROMPT_VISIBILITY_DISTANCE_EQUIPPED ? 0 : distance;
+	});
+};
+
+const updateProximity = (data: proximityInferedType) => {
+	const block = data.block;
+	const key = data.key;
 	const pp = block.FindFirstChild("ProximityPrompt") as typeof block.ProximityPrompt;
 	if (!pp) return;
 
 	// set activation key
 	const k = Enum.KeyCode[key as unknown as never];
-	pp.KeyboardKeyCode = k;
-	pp.GamepadKeyCode = k;
+	const isUnknownKeybind = k === Enum.KeyCode.Unknown;
 
-	const handler = new EventHandler();
+	if (!isUnknownKeybind) {
+		pp.KeyboardKeyCode = k;
+		pp.GamepadKeyCode = k;
+	} else pp.Enabled = false;
 
-	// subscribe to block being destroyed
-	handler.subscribe(block.ChildRemoved, () => handler.unsubscribeAll());
-
-	// subscribe to keypress
-	handler.subscribe(UserInputService.InputBegan, (input, gameProccessed) => {
-		if (gameProccessed) return;
-		if (input.KeyCode !== k) return;
-
-		const cnstr = block.FindFirstChild("PlayerWeldConstraint") as typeof block.PlayerWeldConstraint;
-		if (!cnstr) return;
-
-		// unweld
-		Logic.events.weldMountUpdate.send({
-			block,
-			weldedState: !cnstr.Part1,
-			owner,
-		});
-	});
-
-	handler.subscribe(pp.Triggered, () => {
-		// weld because there is no prompt when welded
-		Logic.events.weldMountUpdate.send({
-			block,
-			weldedState: true,
-			owner,
-			connectToRootPart,
-		});
-	});
-
-	// some checks so the prompt disappears when player wearing
-	const theBlock = block;
-	let weldOwner: Player | undefined;
-
-	handler.subscribe(RunService.Heartbeat, () => {
-		if (!theBlock) return;
-		if (weldOwner !== Players.LocalPlayer) {
-			if (!weldOwner) theBlock.ProximityPrompt.MaxActivationDistance = MAX_PROMPT_VISIBILITY_DISTANCE;
-			else theBlock.ProximityPrompt.MaxActivationDistance = 0;
-			return;
-		}
-		const camera = Workspace.CurrentCamera;
-		if (!camera) return;
-		const distance = camera.CFrame.Position.sub(theBlock.mainPart.Position).Magnitude;
-		theBlock.ProximityPrompt.MaxActivationDistance =
-			distance > MAX_PROMPT_VISIBILITY_DISTANCE_EQUIPPED ? 0 : distance;
-	});
-
-	handler.subscribe(Logic.events.updateLogic.invoked, ({ block, weldedTo }) => {
-		if (block !== theBlock) return;
-		weldOwner = weldedTo;
-	});
-
-	// make thing accessible to anyone else
-
-	if (owner !== Players.LocalPlayer) {
-		pp.MaxActivationDistance = isPublic ? MAX_PROMPT_VISIBILITY_DISTANCE : 0;
-		pp.Enabled = isPublic;
-	} else {
+	if (data.owner === Players.LocalPlayer) {
 		pp.Enabled = true;
 		pp.MaxActivationDistance = MAX_PROMPT_VISIBILITY_DISTANCE;
+		ownerSideInit(data, pp);
+	} else {
+		pp.Enabled = data.isPublic;
+		pp.MaxActivationDistance = data.isPublic ? MAX_PROMPT_VISIBILITY_DISTANCE : 0;
+		otherClientSideInit(data, pp);
 	}
 };
 
@@ -183,7 +233,6 @@ class Logic extends InstanceBlockLogic<typeof definition, BackMountModel> {
 
 	constructor(block: InstanceBlockLogicArgs) {
 		super(definition, block);
-		let weldedToPlayer: Player | undefined;
 
 		// update pressable key
 		this.onk(["detachKey", "shared", "connectToRootPart"], ({ detachKey, shared, connectToRootPart }) => {
@@ -210,15 +259,20 @@ class Logic extends InstanceBlockLogic<typeof definition, BackMountModel> {
 		if (RunService.IsClient()) {
 			this.event.subscribe(Logic.events.updateLogic.invoked, ({ block, weldedTo }) => {
 				if (block !== this.instance) return;
-				const isWelded = !!(weldedToPlayer = weldedTo);
-				this.output.mounted.set("bool", isWelded);
-				const pp = block.FindFirstChild("ProximityPrompt") as typeof block.ProximityPrompt;
-				if (!pp) return;
-				pp.ActionText = isWelded ? "Detach" : "Attach";
+				this.output.mounted.set("bool", !!weldedTo);
 			});
 		}
 	}
 }
+
+// add handler to make it constantly fill the map
+Logic.events.updateLogic.invoked.Connect(({ block, weldedTo }) => {
+	owners.set(block, weldedTo);
+	const pp = block.FindFirstChild("ProximityPrompt") as typeof block.ProximityPrompt;
+	if (!pp) return;
+	pp.ActionText = weldedTo ? "Detach" : "Attach";
+	pp.MaxActivationDistance = !weldedTo ? MAX_PROMPT_VISIBILITY_DISTANCE : 0;
+});
 
 export const BackMountBlock = {
 	...BlockCreation.defaults,
