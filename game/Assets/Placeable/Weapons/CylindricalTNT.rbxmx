@@ -245,7 +245,7 @@
     </Item>
     <Item class="UnionOperation" referent="1">
       <Properties>
-        <string name="Name">Union</string>
+        <string name="Name">Part</string>
         <SharedString name="AeroMeshData">rxNJufX5oaagQE3qNtzJSQ==</SharedString>
         <bool name="Anchored">true</bool>
         <ContentId name="AssetId">

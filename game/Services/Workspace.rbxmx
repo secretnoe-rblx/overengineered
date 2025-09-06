@@ -3,6 +3,7 @@
     <Properties>
       <string name="Name">Workspace</string>
       <float name="AirDensity">0</float>
+      <float name="AirTurbulenceIntensity">0</float>
       <bool name="AllowThirdPartySales">false</bool>
       <BinaryString name="AttributesSerialize"></BinaryString>
       <token name="AuthorityMode">1</token>
