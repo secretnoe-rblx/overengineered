@@ -135,7 +135,11 @@ const ownerSideInit = ({ block, key, owner }: proximityInferedType, pp: Proximit
 	});
 };
 
-const otherClientSideInit = ({ block, isPublic, owner }: proximityInferedType, pp: ProximityPrompt) => {
+const otherClientSideInit = ({ block, key, isPublic, owner }: proximityInferedType, pp: ProximityPrompt) => {
+	// set activation key
+	const k = Enum.KeyCode[key as unknown as never];
+	const isUnknownKeybind = k === Enum.KeyCode.Unknown;
+
 	const player = Players.LocalPlayer;
 	const mainPart = block.FindFirstChild("mainPart") as BasePart;
 	if (!mainPart) return;
@@ -146,6 +150,18 @@ const otherClientSideInit = ({ block, isPublic, owner }: proximityInferedType, p
 	// subscribe to block being destroyed
 	handler.subscribe(block.DescendantRemoving, () => handler.unsubscribeAll());
 	handler.subscribe(pp.Triggered, () => updateWeld(player, owner, block));
+
+	// subscribe to keypress
+	handler.subscribe(UserInputService.InputBegan, (input, gameProccessed) => {
+		if (gameProccessed) return;
+		if (isUnknownKeybind) return;
+		if (input.KeyCode !== k) return;
+
+		// make it only available to unweld on the same key
+		if (owners.get(block) !== player) return;
+
+		updateWeld(player, owner, block);
+	});
 
 	// some checks so the prompt disappears when player wearing
 	handler.subscribe(RunService.Heartbeat, () => {
