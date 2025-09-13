@@ -5,6 +5,7 @@ import { t } from "engine/shared/t";
 import { InstanceBlockLogic } from "shared/blockLogic/BlockLogic";
 import { BlockSynchronizer } from "shared/blockLogic/BlockSynchronizer";
 import { BlockCreation } from "shared/blocks/BlockCreation";
+import { BlockManager } from "shared/building/BlockManager";
 import type { PlayerDataStorage } from "client/PlayerDataStorage";
 import type { BlockLogicFullBothDefinitions, InstanceBlockLogicArgs } from "shared/blockLogic/BlockLogic";
 import type { BlockBuilder } from "shared/blocks/Block";
@@ -75,7 +76,10 @@ type buttonType = BlockModel & {
 			TextLabel: TextLabel;
 		};
 	};
-	PrismaticConstraint: PrismaticConstraint;
+	Base: UnionOperation & {
+		PressedPosition: Attachment;
+		DepressedPosition: Attachment;
+	};
 	LED: BasePart;
 };
 const baseLEDColor = Color3.fromRGB(17, 17, 17);
@@ -105,6 +109,7 @@ const updateButtonText = ({ block, buttonColor, text }: updateTextData) => {
 
 const updateButtonState = ({ block, LEDcolor, buttonState }: updateStateData) => {
 	block.LED.Color = buttonState ? LEDcolor : baseLEDColor;
+	allButtonStates.set(block, buttonState);
 };
 
 const init = ({ block, owner }: initButton) => {
@@ -112,7 +117,27 @@ const init = ({ block, owner }: initButton) => {
 	block.Button.ClickDetector.MouseClick.Connect(() => {
 		clickEvent.send(owner, block);
 	});
+
+	const YScale = BlockManager.manager.scale.get(block)?.Y;
+	if (!YScale) return;
+
+	const base = block.Base;
+	const button = block.Button;
+
+	// defining constants and magic numbers
+	const pressedPosition = new Vector3(0.2 * YScale, 0.2 * YScale, 0.2 * YScale);
+	const depressedPosition = new Vector3(0.5 * YScale, 0.5 * YScale, 0.5 * YScale);
+
+	const e = RunService.Heartbeat.Connect(() => {
+		const state = allButtonStates.get(block);
+		button.Position = base.CFrame.UpVector.mul(state ? pressedPosition : depressedPosition).add(base.Position);
+		button.Orientation = base.Orientation;
+	});
+
+	block.DescendantRemoving.Connect(() => e.Disconnect());
 };
+
+const allButtonStates = new Map<buttonType, boolean>();
 
 const events = {
 	updateText: new BlockSynchronizer("b_button_data_update_text", updateTextDataType, updateButtonText),
@@ -132,14 +157,14 @@ class Logic extends InstanceBlockLogic<typeof definition, buttonType> {
 		const inst = this.instance;
 		if (!inst) return;
 		const button = inst.Button;
+		button.Anchored = true;
+
 		const led = inst.LED;
 
 		const cachedLEDColor = this.initializeInputCache("lampColor");
 		const cachedSwitchMode = this.initializeInputCache("switchMode");
 		const cachedSharedMode = this.initializeInputCache("sharedMode");
 
-		const pc = inst.PrismaticConstraint;
-		const maxLengthMagicNumber = (pc.UpperLimit = 0.3);
 		let UpdateOnNextTick = false;
 		let isPressed = false;
 
@@ -161,19 +186,16 @@ class Logic extends InstanceBlockLogic<typeof definition, buttonType> {
 
 			if (isSwitch) {
 				this.output.result.set("bool", (isPressed = !isPressed));
-				pc.UpperLimit = isPressed ? 0.1 : maxLengthMagicNumber;
 				upd();
 				return;
 			}
 
 			this.output.result.set("bool", (isPressed = true));
-			pc.UpperLimit = 0.1;
 			const triggerLamp = playerDataStorage?.config.get().graphics.logicEffects === true;
 			if (triggerLamp) {
 				led.Color = cachedLEDColor.get();
 				upd();
 			}
-			task.delay(0.2, () => (pc.UpperLimit = maxLengthMagicNumber));
 			UpdateOnNextTick = true;
 		};
 
