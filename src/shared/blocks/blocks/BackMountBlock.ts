@@ -74,7 +74,6 @@ const MAX_PROMPT_VISIBILITY_DISTANCE = 5;
 const MAX_PROMPT_VISIBILITY_DISTANCE_EQUIPPED = 15;
 
 const owners = new Map<BackMountModel, Player | undefined>();
-
 const updateWeld = (caller: Player, owner: Player, block: BackMountModel) => {
 	const weldOwner = owners.get(block);
 
@@ -196,6 +195,8 @@ const updateProximity = (data: proximityInferedType) => {
 	// set activation key
 	const k = Enum.KeyCode[key as unknown as never];
 	const isUnknownKeybind = k === Enum.KeyCode.Unknown;
+
+	block.DescendantRemoving.Connect(() => owners.delete(block));
 
 	if (!isUnknownKeybind) {
 		pp.KeyboardKeyCode = k;
