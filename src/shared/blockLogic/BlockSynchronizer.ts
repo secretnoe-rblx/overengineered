@@ -1,7 +1,6 @@
 import { Players, RunService } from "@rbxts/services";
 import { BidirectionalRemoteEvent } from "engine/shared/event/PERemoteEvent";
 import { ArgsSignal } from "engine/shared/event/Signal";
-import { Strings } from "engine/shared/fixes/String.propmacro";
 import { t } from "engine/shared/t";
 import { CustomRemotes } from "shared/Remotes";
 import type { CreatableRemoteEvents } from "engine/shared/event/PERemoteEvent";
@@ -52,7 +51,7 @@ export class BlockSynchronizer<TArg extends { readonly block: BlockModel; reqid?
 			const saved = new Map<BlockModel, TArg>();
 
 			event.c2s.invoked.Connect((invoker, arg) => {
-				print(`[BS] [SRV] received inv  ${name}`, Strings.pretty(arg ?? {}));
+				//print(`[BS] [SRV] received inv  ${name}`, Strings.pretty(arg ?? {}));
 				if (!t.typeCheck(arg, ttype)) {
 					invoker.Kick(`Network error at ${name}`);
 					return;
@@ -109,7 +108,7 @@ export class BlockSynchronizer<TArg extends { readonly block: BlockModel; reqid?
 					}
 					if (!send) continue;
 
-					print(`[BS] [SRV] sending   ${name} to ${player.Name}`, Strings.pretty(arg ?? {}));
+					//print(`[BS] [SRV] sending   ${name} to ${player.Name}`, Strings.pretty(arg ?? {}));
 					event.s2c.send(player, parg);
 				}
 			});
@@ -121,7 +120,7 @@ export class BlockSynchronizer<TArg extends { readonly block: BlockModel; reqid?
 			});
 		} else if (RunService.IsClient()) {
 			event.s2c.invoked.Connect((arg) => {
-				print(`[BS] [CLI] receied   ${name}`, Strings.pretty(arg ?? {}));
+				//print(`[BS] [CLI] receied   ${name}`, Strings.pretty(arg ?? {}));
 				if (this.sendBackToOwner && "reqid" in arg && arg.reqid) {
 					// reqid is being sent to owner only
 
@@ -224,7 +223,7 @@ export class BlockSynchronizer<TArg extends { readonly block: BlockModel; reqid?
 				}
 				if (!send) continue;
 
-				print(`[BS] [SRC] sending   ${this.name} to ${player.Name}`, Strings.pretty(arg ?? {}));
+				//print(`[BS] [SRC] sending   ${this.name} to ${player.Name}`, Strings.pretty(arg ?? {}));
 				this.event.s2c.send(player, parg);
 			}
 		} else if (RunService.IsClient()) {
@@ -234,9 +233,9 @@ export class BlockSynchronizer<TArg extends { readonly block: BlockModel; reqid?
 				arg.block.SetAttribute(name, arg.reqid);
 			}
 
-			print(`[BS] [CLI] invoking LOCAL   ${this.name}`, Strings.pretty(arg ?? {}));
+			//print(`[BS] [CLI] invoking LOCAL   ${this.name}`, Strings.pretty(arg ?? {}));
 			this._invoked.Fire(arg);
-			print(`[BS] [CLI] sending REMOTE   ${this.name}`, Strings.pretty(arg ?? {}));
+			//print(`[BS] [CLI] sending REMOTE   ${this.name}`, Strings.pretty(arg ?? {}));
 			this.event.c2s.send(arg);
 		}
 	}
