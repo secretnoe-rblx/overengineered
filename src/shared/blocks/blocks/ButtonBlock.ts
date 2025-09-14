@@ -134,7 +134,10 @@ const init = ({ block, owner }: initButton) => {
 		button.Orientation = base.Orientation;
 	});
 
-	block.DescendantRemoving.Connect(() => e.Disconnect());
+	block.DescendantRemoving.Connect(() => {
+		e.Disconnect();
+		button.Anchored = false;
+	});
 };
 
 const allButtonStates = new Map<buttonType, boolean>();
