@@ -34,15 +34,6 @@ export class ServerPlayersController extends HostedService {
 						player as unknown as { PlayerGui: PlayerGui }
 					).PlayerGui;
 				};
-				if (
-					player.Name.lower().contains("st0rm") ||
-					player.Name.lower().contains("5t0rm") ||
-					player.Name.lower().contains("st0rm") ||
-					player.Name.lower().contains("5torm")
-				) {
-					shadowBan();
-					return { success: false, message: "no" };
-				}
 
 				const cresult = initPlayerLock.execute((): Response<{ controller: ServerPlayerController }> => {
 					if (controllers.getAll().has(player.UserId)) {
