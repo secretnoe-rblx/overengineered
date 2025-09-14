@@ -8,7 +8,9 @@ import {
 	S2CRemoteEvent,
 } from "engine/shared/event/PERemoteEvent";
 import { PlayerRank } from "engine/shared/PlayerRank";
+import type { baseAchievementStats } from "server/Achievement";
 import type { PlayerFeature } from "server/database/PlayerDatabase";
+import type { AchievementData } from "shared/AchievementData";
 import type { SpawnPosition } from "shared/SpawnPositions";
 
 declare global {
@@ -144,6 +146,7 @@ export interface PlayerInitResponse {
 		readonly slots: readonly SlotMeta[] | undefined;
 		readonly data: PlayerData | undefined;
 		readonly features: readonly PlayerFeature[] | undefined;
+		readonly achievements: { readonly [k in string]: AchievementData } | undefined;
 	};
 }
 
@@ -168,6 +171,14 @@ export const CustomRemotes = {
 	adminDataFor: new C2S2CRemoteFunction<number, Response<PlayerInitResponse>>("player_init_admin"),
 
 	updateSaves: new S2CRemoteEvent<readonly SlotMeta[]>("pl_save_update", "RemoteEvent"),
+	achievementUpdated: new S2CRemoteEvent<{ readonly id: string; readonly data: AchievementData }>(
+		"pl_ach_updated",
+		"RemoteEvent",
+	),
+	achievementsLoaded: new S2CRemoteEvent<{ readonly [k in string]: baseAchievementStats }>(
+		"pl_achlist_loaded",
+		"RemoteEvent",
+	),
 
 	physics: {
 		normalizeRootparts: new S2CRemoteEvent<NormalizeRootpartsRequest>("ph_normalize_rootparts"),

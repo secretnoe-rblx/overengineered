@@ -3,6 +3,7 @@ import { Db } from "engine/server/Database";
 import { t } from "engine/shared/t";
 import { PlayerConfigUpdater } from "server/PlayerConfigVersioning";
 import type { DatabaseBackend } from "engine/server/backend/DatabaseBackend";
+import type { AchievementData } from "shared/AchievementData";
 
 export type PlayerFeature = "lua_circuit";
 export type PlayerDatabaseData = {
@@ -11,6 +12,7 @@ export type PlayerDatabaseData = {
 	readonly slots?: readonly SlotMeta[];
 	readonly data?: Partial<PlayerData>;
 	readonly features?: readonly PlayerFeature[];
+	readonly achievements?: { readonly [k in string]: AchievementData };
 };
 
 export const PlayerBanned = t.interface({

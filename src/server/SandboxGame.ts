@@ -1,8 +1,8 @@
 import { ServerScriptService, Workspace } from "@rbxts/services";
-// import { BadgeController } from "server/BadgeController";
 
 import { InMemoryDatabaseBackend } from "engine/server/backend/InMemoryDatabaseBackend";
 import { Logger } from "engine/shared/Logger";
+import { AchievementController } from "server/AchievementController";
 import { BaseGame } from "server/BaseGame";
 import { ServerBlockLogicController } from "server/blocks/ServerBlockLogicController";
 import { PlayerDatabase } from "server/database/PlayerDatabase";
@@ -74,6 +74,7 @@ export namespace SandboxGame {
 		builder.services.registerService(ServerBlockLogicController);
 		builder.services.registerService(UnreliableRemoteController);
 		builder.services.registerService(RagdollController);
+		builder.services.registerService(AchievementController);
 
 		// BadgeController.initializeIfProd(builder);
 	}

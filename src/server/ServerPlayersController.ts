@@ -119,6 +119,7 @@ export class ServerPlayersController extends HostedService {
 							slots: data.slots,
 							data: data.data,
 							features: data.features,
+							achievements: data.achievements,
 						},
 					};
 				} catch (err) {
@@ -201,6 +202,7 @@ export class ServerPlayersController extends HostedService {
 						slots: data.slots,
 						data: data.data,
 						features: data.features,
+						achievements: data.achievements,
 					},
 				};
 			}),

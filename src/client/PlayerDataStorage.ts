@@ -42,6 +42,7 @@ export class PlayerDataStorage {
 			slots: data.slots ?? Objects.empty,
 			data: data.data ?? {},
 			features: data.features ?? [],
+			achievements: data.achievements ?? {},
 		};
 	}
 
@@ -56,6 +57,7 @@ export class PlayerDataStorage {
 
 	readonly config;
 	readonly slots;
+	readonly achievements;
 
 	readonly loadedSlot = new ObservableValue<number | undefined>(undefined);
 
@@ -70,11 +72,17 @@ export class PlayerDataStorage {
 		this.config = new ObservableValue(data.settings);
 		this.data.subscribe((d) => this.config.set(d.settings));
 
+		this.achievements = new ObservableValue(data.achievements);
+		this.data.subscribe((d) => this.achievements.set(d.achievements));
+
 		const slots = new ObservableValue<{ readonly [k in number]: SlotMeta }>(Objects.empty);
 		this.data.subscribe((data) => slots.set(SlotsMeta.toTable(data.slots)), true);
 		this.slots = slots;
 
 		CustomRemotes.updateSaves.invoked.Connect((slots) => this._data.set({ ...this._data.get(), slots }));
+		CustomRemotes.achievementUpdated.invoked.Connect(({ id, data }) =>
+			this._data.set({ ...this._data.get(), achievements: { ...this._data.get().achievements, id: data } }),
+		);
 	}
 
 	async sendPlayerConfig(config: PartialThrough<PlayerConfig>) {

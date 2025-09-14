@@ -190,6 +190,7 @@ export class Component extends ComponentState implements DebuggableComponent {
 	parent<T extends Component>(child: T, config?: ComponentParentConfig): T {
 		this.parented ??= [];
 		this.parented.push(child);
+		this.tryProvideDIToChild(child);
 
 		if (config?.enable ?? true) {
 			this.onEnable(() => child.enable());
@@ -205,7 +206,6 @@ export class Component extends ComponentState implements DebuggableComponent {
 			this.onDestroy(() => child.destroy());
 		}
 
-		this.tryProvideDIToChild(child);
 		return child;
 	}
 

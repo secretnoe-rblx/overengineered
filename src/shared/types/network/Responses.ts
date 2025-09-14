@@ -1,4 +1,5 @@
 import type { PlayerFeature } from "server/database/PlayerDatabase";
+import type { AchievementData } from "shared/AchievementData";
 
 declare global {
 	type TouchControlInfo = Readonly<Record<string, { readonly pos: SerializedVector2 }>>;
@@ -40,6 +41,7 @@ declare global {
 		readonly slots: readonly SlotMeta[] | undefined;
 		readonly data: PlayerData | undefined;
 		readonly features: readonly PlayerFeature[] | undefined;
+		readonly achievements: { readonly [k in string]: AchievementData } | undefined;
 	};
 
 	type SaveSlotResponse = Response<{ readonly blocks: number | undefined }>;

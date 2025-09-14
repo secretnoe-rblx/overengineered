@@ -1,6 +1,7 @@
 import { Players, Workspace } from "@rbxts/services";
 import { AdminMessageController } from "client/AdminMessageController";
 import { ClientEffectCreator } from "client/ClientEffectCreator";
+import { AchievementController } from "client/controller/AchievementController";
 import { BeaconController } from "client/controller/BeaconController";
 import { BlurController } from "client/controller/BlurController";
 import { CameraController } from "client/controller/CameraController";
@@ -145,6 +146,7 @@ export namespace SandboxGame {
 		ChatController.initializeAdminPrefix();
 		builder.services.registerService(PopupController);
 		builder.services.registerSingletonValue(LogControl.instance);
+		builder.services.registerService(AchievementController);
 
 		builder.enabled.Connect((di) => {
 			LogControl.instance.enable();
