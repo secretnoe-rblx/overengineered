@@ -1,6 +1,7 @@
 import { RunService, ServerStorage, Workspace } from "@rbxts/services";
 import { Component } from "engine/shared/component/Component";
 import { ComponentInstance } from "engine/shared/component/ComponentInstance";
+import { Objects } from "engine/shared/fixes/Objects";
 import { BlockManager } from "shared/building/BlockManager";
 import { SharedBuilding } from "shared/building/SharedBuilding";
 import type { BuildingPlot } from "shared/building/BuildingPlot";
@@ -46,6 +47,7 @@ export class AutoPlotWelder extends Component {
 @injectable
 export class PlotWelder extends Component {
 	readonly collidersParent: WorldModel;
+	private readonly weldCache = new Map<BasePart, WeldConstraint[]>();
 
 	constructor(
 		private readonly plot: BuildingPlot,
@@ -196,6 +198,30 @@ export class PlotWelder extends Component {
 		weld.Name = "AutoWeld";
 
 		weld.Parent = part0;
+
+		const c0 = this.weldCache.get(part0);
+		if (!c0) {
+			this.weldCache.set(part0, [weld]);
+			part0.Destroying.Connect(() => this.weldCache.delete(part0));
+		} else {
+			this.weldCache.set(part0, [...c0, weld]);
+		}
+
+		const c1 = this.weldCache.get(part1);
+		if (!c1) {
+			this.weldCache.set(part1, [weld]);
+			part0.Destroying.Connect(() => this.weldCache.delete(part0));
+		} else {
+			this.weldCache.set(part1, [...c1, weld]);
+		}
+
+		weld.Destroying.Connect(() => {
+			const c0 = this.weldCache.get(part0);
+			if (c0) this.weldCache.set(part0, c0.except([weld]));
+
+			const c1 = this.weldCache.get(part1);
+			if (c1) this.weldCache.set(part1, c1.except([weld]));
+		});
 	}
 
 	unweld(model: BlockModel): Set<BasePart> {
@@ -225,27 +251,18 @@ export class PlotWelder extends Component {
 		return connected;
 	}
 
-	static getWeldsToOtherBlocks(model: BlockModel): Set<Constraint | JointInstance> {
-		const result = new Set<Constraint | JointInstance>();
+	getWeldsToOtherBlocks(model: BlockModel): Set<WeldConstraint> {
+		const result = new Set<WeldConstraint>();
 
 		const modelParts = model
 			.GetChildren()
 			.filter((value) => value.IsA("BasePart") && value.Name.lower() !== "colbox");
 		for (let i = 0; i < modelParts.size(); i++) {
 			const modelPart = modelParts[i] as BasePart;
-			const welds = modelPart.GetJoints();
+			const welds = this.weldCache.get(modelPart) ?? Objects.empty;
 			for (const weld of welds) {
-				if (weld.IsA("Constraint")) {
-					if (
-						(weld.Attachment0?.Parent?.IsDescendantOf(model) ?? true) &&
-						(weld.Attachment1?.Parent?.IsDescendantOf(model) ?? true)
-					) {
-						continue;
-					}
-				} else {
-					if ((weld.Part0?.IsDescendantOf(model) ?? true) && (weld.Part1?.IsDescendantOf(model) ?? true)) {
-						continue;
-					}
+				if ((weld.Part0?.IsDescendantOf(model) ?? true) && (weld.Part1?.IsDescendantOf(model) ?? true)) {
+					continue;
 				}
 
 				result.add(weld);
@@ -255,7 +272,7 @@ export class PlotWelder extends Component {
 		return result;
 	}
 	unweldFromOtherBlocks(model: BlockModel): void {
-		for (const weld of PlotWelder.getWeldsToOtherBlocks(model)) {
+		for (const weld of this.getWeldsToOtherBlocks(model)) {
 			weld.Destroy();
 		}
 	}
