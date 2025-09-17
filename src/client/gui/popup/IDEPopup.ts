@@ -1,6 +1,9 @@
 import { Interface } from "client/gui/Interface";
 import { TextButtonControl } from "engine/client/gui/Button";
 import { Control } from "engine/client/gui/Control";
+import { Instances } from "engine/shared/fixes/Instances";
+import { Colors } from "shared/Colors";
+import type { PlayerDataStorage } from "client/PlayerDataStorage";
 
 type IDEPopupDefinition = GuiObject & {
 	readonly Heading: Frame & {
@@ -36,6 +39,18 @@ export default class IDEPopup extends Control<IDEPopupDefinition> {
 			Popups: { Crossplatform: { IDE: IDEPopupDefinition } };
 		}>().Popups.Crossplatform.IDE.Clone();
 		super(gui);
+
+		this.$onInjectAuto((dataStorage: PlayerDataStorage) => {
+			if (!dataStorage.config.get().syntaxHighlight) {
+				const tb = Instances.findChild<TextBox>(gui, "Content", "Content", "Code", "TextBox");
+				if (!tb) return;
+
+				tb.FindFirstChild("SyntaxHighlighting")?.Destroy();
+				tb.FindFirstChild("SyntaxHighlights")?.Destroy();
+				tb.TextColor3 = Colors.white;
+				tb.TextTransparency = 0;
+			}
+		});
 
 		gui.Content.Content.Code.TextBox.Text = code;
 		this.saveButton = new TextButtonControl(gui.Content.Buttons.SaveButton);

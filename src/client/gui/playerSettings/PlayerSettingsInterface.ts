@@ -23,5 +23,8 @@ export class PlayerSettingsInterface extends ConfigControlList {
 			this.addToggle("Plot") //
 				.initToObjectPart(value, ["beacons", "plot"]);
 		}
+
+		this.addToggle("Syntax highlight in code editor") //
+			.initToObjectPart(value, ["syntaxHighlight"]);
 	}
 }

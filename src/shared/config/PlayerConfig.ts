@@ -249,4 +249,8 @@ export const PlayerConfigDefinition = {
 			simplified_aerodynamics: true as boolean,
 		},
 	},
+	syntaxHighlight: {
+		type: "bool",
+		config: true as boolean,
+	},
 } as const satisfies ConfigTypesToDefinition<keyof PlayerConfigTypes.Types, PlayerConfigTypes.Types>;
