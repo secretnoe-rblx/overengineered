@@ -1,4 +1,3 @@
-import { Strings } from "engine/shared/fixes/String.propmacro";
 import { ServerBlockLogic } from "server/blocks/ServerBlockLogic";
 import { ServerPartUtils } from "server/plots/ServerPartUtils";
 import type { PlayModeController } from "server/modes/PlayModeController";
@@ -10,18 +9,18 @@ export class BackMountBlockServerLogic extends ServerBlockLogic<typeof BackMount
 		super(logic, playModeController);
 
 		const getPlayerTorso = (p: Player, connectToRootPart: boolean) => {
-			const ch = p.Character;
-			if (!ch) return;
-			const h = ch.FindFirstChild("Humanoid") as Humanoid;
-			if (!h) return;
+			const humanoid = p.Character?.FindFirstChild("Humanoid") as Humanoid | undefined;
+			if (!humanoid) return;
 
-			if (connectToRootPart) return h.RootPart;
+			if (connectToRootPart) {
+				return humanoid.RootPart;
+			}
 
-			switch (h.RigType) {
+			switch (humanoid.RigType) {
 				case Enum.HumanoidRigType.R6:
-					return h.Parent?.FindFirstChild("Torso") as BasePart;
+					return humanoid.Parent?.FindFirstChild("Torso") as BasePart;
 				case Enum.HumanoidRigType.R15:
-					return h.Parent?.FindFirstChild("UpperTorso") as BasePart;
+					return humanoid.Parent?.FindFirstChild("UpperTorso") as BasePart;
 			}
 
 			return;
@@ -30,12 +29,11 @@ export class BackMountBlockServerLogic extends ServerBlockLogic<typeof BackMount
 		const isAlreadyWelded = (w: Motor6D) => w.Part1 !== undefined;
 		logic.events.weldMountUpdate.invoked.Connect((player, data) => {
 			if (!player) return;
-			print("[server] received weld mount update: ", Strings.pretty(data ?? {}));
 			const isWeldRequest = data.weldedState && !isAlreadyWelded(data.block.PlayerWeldConstraint);
 
 			//weld if unwelded
 			if (isWeldRequest) {
-				const torso = getPlayerTorso(player, data.connectToRootPart!);
+				const torso = getPlayerTorso(player, data.connectToRootPart ?? false);
 				if (!torso) return;
 				data.block.PlayerWeldConstraint.C0 = new CFrame(new Vector3(0, 0, -torso.Size.Z));
 				data.block.PlayerWeldConstraint.Part1 = torso;

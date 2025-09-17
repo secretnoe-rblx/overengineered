@@ -74,7 +74,7 @@ const MAX_PROMPT_VISIBILITY_DISTANCE = 5;
 const MAX_PROMPT_VISIBILITY_DISTANCE_EQUIPPED = 15;
 
 const owners = new Map<BackMountModel, Player | undefined>();
-const updateWeld = (caller: Player, owner: Player, block: BackMountModel) => {
+const updateWeld = (caller: Player, owner: Player, block: BackMountModel, connectToRootPart: boolean) => {
 	const weldOwner = owners.get(block);
 
 	if (weldOwner === undefined) {
@@ -82,6 +82,7 @@ const updateWeld = (caller: Player, owner: Player, block: BackMountModel) => {
 			block,
 			weldedState: true,
 			owner,
+			connectToRootPart,
 		});
 		return;
 	}
@@ -91,12 +92,13 @@ const updateWeld = (caller: Player, owner: Player, block: BackMountModel) => {
 			block,
 			weldedState: false,
 			owner,
+			connectToRootPart,
 		});
 		return;
 	}
 };
 
-const ownerSideInit = ({ block, key, owner }: proximityInferedType, pp: ProximityPrompt) => {
+const ownerSideInit = ({ block, key, owner, connectToRootPart }: proximityInferedType, pp: ProximityPrompt) => {
 	// set activation key
 	const k = Enum.KeyCode[key as unknown as never];
 	const isUnknownKeybind = k === Enum.KeyCode.Unknown;
@@ -110,7 +112,7 @@ const ownerSideInit = ({ block, key, owner }: proximityInferedType, pp: Proximit
 
 	// subscribe to block being destroyed
 	handler.subscribe(block.DescendantRemoving, () => handler.unsubscribeAll());
-	handler.subscribe(pp.Triggered, () => updateWeld(player, owner, block));
+	handler.subscribe(pp.Triggered, () => updateWeld(player, owner, block, connectToRootPart));
 
 	// subscribe to keypress
 	handler.subscribe(UserInputService.InputBegan, (input, gameProccessed) => {
@@ -118,7 +120,7 @@ const ownerSideInit = ({ block, key, owner }: proximityInferedType, pp: Proximit
 		if (isUnknownKeybind) return;
 		if (input.KeyCode !== k) return;
 
-		updateWeld(player, owner, block);
+		updateWeld(player, owner, block, connectToRootPart);
 	});
 
 	// some checks so the prompt disappears when player wearing
@@ -134,7 +136,10 @@ const ownerSideInit = ({ block, key, owner }: proximityInferedType, pp: Proximit
 	});
 };
 
-const otherClientSideInit = ({ block, key, isPublic, owner }: proximityInferedType, pp: ProximityPrompt) => {
+const otherClientSideInit = (
+	{ block, key, isPublic, owner, connectToRootPart }: proximityInferedType,
+	pp: ProximityPrompt,
+) => {
 	// set activation key
 	const k = Enum.KeyCode[key as unknown as never];
 	const isUnknownKeybind = k === Enum.KeyCode.Unknown;
@@ -148,7 +153,7 @@ const otherClientSideInit = ({ block, key, isPublic, owner }: proximityInferedTy
 
 	// subscribe to block being destroyed
 	handler.subscribe(block.DescendantRemoving, () => handler.unsubscribeAll());
-	handler.subscribe(pp.Triggered, () => updateWeld(player, owner, block));
+	handler.subscribe(pp.Triggered, () => updateWeld(player, owner, block, connectToRootPart));
 
 	// subscribe to keypress
 	handler.subscribe(UserInputService.InputBegan, (input, gameProccessed) => {
@@ -159,7 +164,7 @@ const otherClientSideInit = ({ block, key, isPublic, owner }: proximityInferedTy
 		// make it only available to unweld on the same key
 		if (owners.get(block) !== player) return;
 
-		updateWeld(player, owner, block);
+		updateWeld(player, owner, block, connectToRootPart);
 	});
 
 	// some checks so the prompt disappears when player wearing
@@ -228,7 +233,7 @@ type weldTypeEvent = {
 	readonly block: BackMountModel;
 	readonly weldedState: boolean;
 	readonly owner: Player;
-	readonly connectToRootPart?: boolean;
+	readonly connectToRootPart: boolean;
 };
 
 type logicUpdateEvent = {
