@@ -46,6 +46,36 @@ class ColorControl extends Control<ConfigControlColorDefinition["Control"]> {
 
 					const popup = popupController.showPopup(window);
 
+					const fitToScreen = (instance: GuiObject) => {
+						const min = instance.AbsolutePosition;
+						if (min.X < 0) {
+							instance.Position = instance.Position.add(new UDim2(0, -min.X, 0, 0));
+						}
+						if (min.Y < 0) {
+							instance.Position = instance.Position.add(new UDim2(0, 0, 0, -min.Y));
+						}
+
+						const screen = instance.FindFirstAncestorWhichIsA("ScreenGui");
+						if (!screen) return;
+						const scale = screen.FindFirstChild("UIScale") as UIScale | undefined;
+						if (!scale) return;
+
+						const screenSize = screen.AbsoluteSize.add(new Vector2(0, -40));
+						const max = instance.AbsolutePosition.add(instance.AbsoluteSize);
+
+						if (max.X > screenSize.X) {
+							instance.Position = instance.Position.add(
+								new UDim2(0, (screenSize.X - max.X) / scale.Scale, 0, 0),
+							);
+						}
+						if (max.Y > screenSize.Y) {
+							instance.Position = instance.Position.add(
+								new UDim2(0, 0, 0, (screenSize.Y - max.Y) / scale.Scale),
+							);
+						}
+					};
+					fitToScreen(colorGui);
+
 					let isInside = false;
 					colorGui.MouseEnter.Connect(() => (isInside = true));
 					colorGui.MouseLeave.Connect(() => (isInside = false));
