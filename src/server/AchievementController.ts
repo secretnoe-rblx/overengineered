@@ -5,6 +5,7 @@ import { LogicOverclockBlock } from "shared/blocks/blocks/LogicOverclockBlock";
 import { BlockManager } from "shared/building/BlockManager";
 import { CustomRemotes } from "shared/Remotes";
 import type { ClientBuilding } from "client/modes/build/ClientBuilding";
+import type { PlayerDatabase } from "server/database/PlayerDatabase";
 import type { PlayModeController } from "server/modes/PlayModeController";
 import type { ServerPlayersController } from "server/ServerPlayersController";
 import type { FireEffect } from "shared/effects/FireEffect";
@@ -87,8 +88,8 @@ export class AchievementController extends HostedService {
 
 @injectable
 class AchievementWelcome extends Achievement {
-	constructor(@inject player: Player) {
-		super(player, {
+	constructor(@inject player: Player, @inject database: PlayerDatabase) {
+		super(player, database, {
 			id: "WELCOME",
 			name: `Hi, ${player.Name}!`,
 			description: `Welcome to OverEngineered!`,
@@ -100,8 +101,8 @@ class AchievementWelcome extends Achievement {
 
 @injectable
 class AchievementTheIssue extends Achievement {
-	constructor(@inject player: Player) {
-		super(player, {
+	constructor(@inject player: Player, @inject database: PlayerDatabase) {
+		super(player, database, {
 			id: "THE_ISSUE",
 			name: "DMCA abuse",
 			description: "Now go to our community server and read #the-issue channel",
@@ -116,11 +117,11 @@ class AchievementTheIssue extends Achievement {
 
 @injectable
 class AchievementPlaytime extends Achievement<{ seconds_spent: number }> {
-	constructor(@inject player: Player) {
+	constructor(@inject player: Player, @inject database: PlayerDatabase) {
 		//1 hour
 		const target_seconds = 1 * 60 * 60;
 		const target_hours = target_seconds / 60 / 60;
-		super(player, {
+		super(player, database, {
 			id: "SPEND_1_HOUR",
 			name: `Spare time`,
 			description: `Play for over ${target_hours} ${target_hours > 1 ? "hours" : "hour"} in total`,
@@ -136,11 +137,11 @@ class AchievementPlaytime extends Achievement<{ seconds_spent: number }> {
 
 @injectable
 class AchievementAfkTime extends Achievement<{ seconds_record: number }> {
-	constructor(@inject player: Player) {
+	constructor(@inject player: Player, @inject database: PlayerDatabase) {
 		//15 minutes
 		const target_seconds = 15 * 60;
 		const target_minutes = target_seconds / 60;
-		super(player, {
+		super(player, database, {
 			id: "BE_AFK_15_MINUTES",
 			name: `DON'T TOUCH ANYTHING!`,
 			description: `Be AFK for ${target_minutes} minutes`,
@@ -158,8 +159,8 @@ class AchievementAfkTime extends Achievement<{ seconds_record: number }> {
 }
 
 abstract class AchievementHeightRecord extends Achievement<{ height_record: number }> {
-	constructor(player: Player, name: string, description: string, targetHeight: number) {
-		super(player, {
+	constructor(player: Player, database: PlayerDatabase, name: string, description: string, targetHeight: number) {
+		super(player, database, {
 			id: `HEIGHT_TARGET_${targetHeight}`,
 			name,
 			description: `${description} (${targetHeight} studs traveled)`,
@@ -178,31 +179,32 @@ abstract class AchievementHeightRecord extends Achievement<{ height_record: numb
 
 @injectable
 class AchievementHeightRecord25k extends AchievementHeightRecord {
-	constructor(@inject player: Player) {
-		super(player, `Space tourism`, `Leave the atmosphere`, 25_000);
+	constructor(@inject player: Player, @inject database: PlayerDatabase) {
+		super(player, database, `Space tourism`, `Leave the atmosphere`, 25_000);
 	}
 }
 
 @injectable
 class AchievementHeightRecord75k extends AchievementHeightRecord {
-	constructor(@inject player: Player) {
-		super(player, `SPAAAAACE`, `Deeper into the void!`, 75_000);
+	constructor(@inject player: Player, @inject database: PlayerDatabase) {
+		super(player, database, `SPAAAAACE`, `Deeper into the void!`, 75_000);
 	}
 }
 
 @injectable
 class AchievementHeightRecord150k extends AchievementHeightRecord {
-	constructor(@inject player: Player) {
-		super(player, `Deepfried space`, `Things are wobbly over here`, 150_000);
+	constructor(@inject player: Player, @inject database: PlayerDatabase) {
+		super(player, database, `Deepfried space`, `Things are wobbly over here`, 150_000);
 	}
 }
 
 abstract class AchievementSpeedRecord extends Achievement<{ time_record: number }> {
-	constructor(player: Player, name: string, targetSpeed: number, hidden = false) {
-		super(player, {
+	constructor(player: Player, database: PlayerDatabase, name: string, targetSpeed: number, hidden = false) {
+		super(player, database, {
 			id: `SPEED_TARGET_${targetSpeed}`,
 			name: name,
 			description: `Reach speed over ${targetSpeed} studs/second in horizontal axis for 3 seconds`,
+			hidden,
 		});
 
 		let time_record = this.getData()?.time_record ?? 0;
@@ -227,43 +229,43 @@ abstract class AchievementSpeedRecord extends Achievement<{ time_record: number 
 
 @injectable
 class AchievementSpeedRecord1k extends AchievementSpeedRecord {
-	constructor(@inject player: Player) {
-		super(player, `A bit fast, eh?`, 1000);
+	constructor(@inject player: Player, @inject database: PlayerDatabase) {
+		super(player, database, `A bit fast, eh?`, 1000);
 	}
 }
 
 @injectable
 class AchievementSpeedRecord5k extends AchievementSpeedRecord {
-	constructor(@inject player: Player) {
-		super(player, `4.114 Machs doesn't sound like a lot`, 5000);
+	constructor(@inject player: Player, @inject database: PlayerDatabase) {
+		super(player, database, `4.114 Machs doesn't sound like a lot`, 5000);
 	}
 }
 
 @injectable
 class AchievementSpeedRecord15k extends AchievementSpeedRecord {
-	constructor(@inject player: Player) {
-		super(player, `BRO WHERE ARE WE GOING?!`, 15_000, true);
+	constructor(@inject player: Player, @inject database: PlayerDatabase) {
+		super(player, database, `BRO WHERE ARE WE GOING?!`, 15_000, true);
 	}
 }
 
 @injectable
 class AchievementSpeedRecord50k extends AchievementSpeedRecord {
-	constructor(@inject player: Player) {
-		super(player, `Typical High Speed Fan`, 50_000, true);
+	constructor(@inject player: Player, @inject database: PlayerDatabase) {
+		super(player, database, `Typical High Speed Fan`, 50_000, true);
 	}
 }
 
 @injectable
 class AchievementSpeedRecord100k extends AchievementSpeedRecord {
-	constructor(@inject player: Player) {
-		super(player, `Lightspeed Enjoyer`, 150_000, true);
+	constructor(@inject player: Player, @inject database: PlayerDatabase) {
+		super(player, database, `Lightspeed Enjoyer`, 150_000, true);
 	}
 }
 
 @injectable
 class AchievementCatchOnFire extends Achievement {
-	constructor(@inject player: Player, @inject fireffect: FireEffect) {
-		super(player, {
+	constructor(@inject player: Player, @inject database: PlayerDatabase, @inject fireffect: FireEffect) {
+		super(player, database, {
 			id: "CATCH_ON_FIRE",
 			name: "OverCooked!",
 			description: "Better call the fire department! (We don't have one)",
@@ -275,8 +277,13 @@ class AchievementCatchOnFire extends Achievement {
 
 @injectable
 class AchievementOverclock extends Achievement {
-	constructor(@inject player: Player, @inject playModeController: PlayModeController, @inject plot: ClientBuilding) {
-		super(player, {
+	constructor(
+		@inject player: Player,
+		@inject database: PlayerDatabase,
+		@inject playModeController: PlayModeController,
+		@inject plot: ClientBuilding,
+	) {
+		super(player, database, {
 			id: "USE_OVERCLOCK",
 			name: "OverClocked!",
 			description: "What's that noise? OHHH MY PC",
