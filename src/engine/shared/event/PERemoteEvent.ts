@@ -212,10 +212,12 @@ const createWaiter = <TRet extends Response>(middlewares: readonly WaiterMiddlew
 export class S2C2SRemoteFunction<TArg = undefined, TResp extends Response = Response> extends PERemoteEvent<
 	CustomRemoteFunctionBase<TArg, TArg, TResp | ErrorResponse>
 > {
+	private readonly _sent = new ArgsSignal<[arg: TArg, response: ErrorResponse | TResp]>();
+	readonly sent = this._sent.asReadonly();
+
 	/** @client */
 	private invoked?: (arg: TArg) => TResp;
 	private readonly middlewares: WaiterMiddleware[] = [];
-
 	constructor(name: RemoteName) {
 		super(name, "RemoteFunction");
 
@@ -269,6 +271,7 @@ export class S2C2SRemoteFunction<TArg = undefined, TResp extends Response = Resp
 			return errCanceled;
 		}
 
+		this._sent.Fire(arg!, result);
 		return result;
 	}
 }
