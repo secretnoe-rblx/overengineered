@@ -12,13 +12,12 @@ export type baseAchievementStats = {
 	readonly visualizationType?: "NONE" | "PROGRESS_BAR" | "NUMBER";
 };
 
-@injectable
 export abstract class Achievement<Z = {}, T extends Z & AchievementData = Z & AchievementData> extends Component {
-	@inject private readonly database: PlayerDatabase = undefined!;
 	private data?: T;
 
 	constructor(
 		private readonly player: Player,
+		private readonly database: PlayerDatabase,
 		readonly info: baseAchievementStats,
 	) {
 		super();
