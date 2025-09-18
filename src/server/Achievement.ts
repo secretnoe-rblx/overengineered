@@ -53,4 +53,10 @@ export abstract class Achievement<Z = {}, T extends Z & AchievementData = Z & Ac
 		});
 		CustomRemotes.achievementUpdated.send(this.player, { id: this.info.id, data });
 	}
+
+	/** Shorthand for `this.set` with `data.completed = true` */
+	complete(data: Omit<T, "completed" | "completionDateUnix">) {
+		(data as Writable<T>).completed = true;
+		this.set(data as T);
+	}
 }
