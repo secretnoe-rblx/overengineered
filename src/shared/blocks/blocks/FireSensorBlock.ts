@@ -38,7 +38,7 @@ class Logic extends InstanceBlockLogic<typeof definition> {
 		super(definition, block);
 
 		const detectionRadiusCache = this.initializeInputCache("detectionradius");
-		fireffect.event.s2c.invoked.Connect((args) => {
+		this.event.subscribe(fireffect.event.s2c.invoked, (args) => {
 			const detectionRadius = detectionRadiusCache.tryGet();
 			if (!detectionRadius) return;
 
