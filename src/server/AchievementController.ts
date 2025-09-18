@@ -152,7 +152,7 @@ class AchievementAfkTime extends Achievement<{ seconds_record: number }> {
 	}
 }
 
-class AchievementHeightRecord extends Achievement<{ height_record: number }> {
+abstract class AchievementHeightRecord extends Achievement<{ height_record: number }> {
 	constructor(player: Player, name: string, description: string, targetHeight: number) {
 		super(player, {
 			id: `HEIGHT_TARGET_${targetHeight}`,
@@ -192,7 +192,7 @@ class AchievementHeightRecord150k extends AchievementHeightRecord {
 	}
 }
 
-class AchievementSpeedRecord extends Achievement<{ time_record: number }> {
+abstract class AchievementSpeedRecord extends Achievement<{ time_record: number }> {
 	constructor(player: Player, name: string, targetSpeed: number, hidden = false) {
 		super(player, {
 			id: `SPEED_TARGET_${targetSpeed}`,
