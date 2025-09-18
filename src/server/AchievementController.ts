@@ -95,7 +95,7 @@ class AchievementWelcome extends Achievement {
 
 @injectable
 class AchievementTheIssue extends Achievement {
-	constructor(@injectable player: Player) {
+	constructor(@inject player: Player) {
 		super(player, {
 			id: "THE_ISSUE",
 			name: "DMCA abuse",
@@ -173,21 +173,21 @@ class AchievementHeightRecord extends Achievement<{ height_record: number }> {
 
 @injectable
 class AchievementHeightRecord25k extends AchievementHeightRecord {
-	constructor(@injectable player: Player) {
+	constructor(@inject player: Player) {
 		super(player, `Space tourism`, `Leave the atmosphere`, 25_000);
 	}
 }
 
 @injectable
 class AchievementHeightRecord75k extends AchievementHeightRecord {
-	constructor(@injectable player: Player) {
+	constructor(@inject player: Player) {
 		super(player, `SPAAAAACE`, `Deeper into the void!`, 75_000);
 	}
 }
 
 @injectable
 class AchievementHeightRecord150k extends AchievementHeightRecord {
-	constructor(@injectable player: Player) {
+	constructor(@inject player: Player) {
 		super(player, `Deepfried space`, `Things are wobbly over here`, 150_000);
 	}
 }
@@ -222,42 +222,42 @@ class AchievementSpeedRecord extends Achievement<{ time_record: number }> {
 
 @injectable
 class AchievementSpeedRecord1k extends AchievementSpeedRecord {
-	constructor(@injectable player: Player) {
+	constructor(@inject player: Player) {
 		super(player, `A bit fast, eh?`, 1000);
 	}
 }
 
 @injectable
 class AchievementSpeedRecord5k extends AchievementSpeedRecord {
-	constructor(@injectable player: Player) {
+	constructor(@inject player: Player) {
 		super(player, `4.114 Machs doesn't sound like a lot`, 5000);
 	}
 }
 
 @injectable
 class AchievementSpeedRecord15k extends AchievementSpeedRecord {
-	constructor(@injectable player: Player) {
+	constructor(@inject player: Player) {
 		super(player, `BRO WHERE ARE WE GOING?!`, 15_000, true);
 	}
 }
 
 @injectable
 class AchievementSpeedRecord50k extends AchievementSpeedRecord {
-	constructor(@injectable player: Player) {
+	constructor(@inject player: Player) {
 		super(player, `Typical High Speed Fan`, 50_000, true);
 	}
 }
 
 @injectable
 class AchievementSpeedRecord100k extends AchievementSpeedRecord {
-	constructor(@injectable player: Player) {
+	constructor(@inject player: Player) {
 		super(player, `Lightspeed Enjoyer`, 150_000, true);
 	}
 }
 
 @injectable
 class AchievementCatchOnFire extends Achievement {
-	constructor(@injectable player: Player, @inject fireffect: FireEffect) {
+	constructor(@inject player: Player, @inject fireffect: FireEffect) {
 		super(player, {
 			id: "CATCH_ON_FIRE",
 			name: "OverCooked!",
