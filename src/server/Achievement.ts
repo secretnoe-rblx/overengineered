@@ -23,6 +23,22 @@ export abstract class Achievement<Z = {}, T extends Z & AchievementData = Z & Ac
 		super();
 	}
 
+	private remotechanged = false;
+	getChangesForRemote(): T | undefined {
+		if (!this.remotechanged) return;
+		this.remotechanged = false;
+
+		return this.data;
+	}
+
+	private dbchanged = false;
+	getChangesForDatabase(): T | undefined {
+		if (!this.dbchanged) return;
+		this.dbchanged = false;
+
+		return this.data;
+	}
+
 	getData(): T | undefined {
 		if (this.data) return this.data;
 		const pdata = this.database.get(this.player.UserId);
@@ -44,13 +60,18 @@ export abstract class Achievement<Z = {}, T extends Z & AchievementData = Z & Ac
 			(data as Writable<T>).completionDateUnix = DateTime.now().UnixTimestamp;
 		}
 		this.data = data;
+		this.dbchanged = this.remotechanged = true;
 
-		const pdata = this.database.get(this.player.UserId);
-		this.database.set(this.player.UserId, {
-			...pdata,
-			achievements: { ...(pdata.achievements ?? {}), [this.info.id]: data },
-		});
-		CustomRemotes.achievementUpdated.send(this.player, { id: this.info.id, data });
+		// const pdata = this.database.get(this.player.UserId);
+		// this.database.set(this.player.UserId, {
+		// 	...pdata,
+		// 	achievements: { ...(pdata.achievements ?? {}), [this.info.id]: data },
+		// });
+
+		// send update immediately if completed
+		if (data.completed) {
+			CustomRemotes.achievements.update.send(this.player, { [this.info.id]: data });
+		}
 	}
 
 	/** Shorthand for `this.set` with `data.completed = true` */

@@ -171,14 +171,10 @@ export const CustomRemotes = {
 	adminDataFor: new C2S2CRemoteFunction<number, Response<PlayerInitResponse>>("player_init_admin"),
 
 	updateSaves: new S2CRemoteEvent<readonly SlotMeta[]>("pl_save_update", "RemoteEvent"),
-	achievementUpdated: new S2CRemoteEvent<{ readonly id: string; readonly data: AchievementData }>(
-		"pl_ach_updated",
-		"RemoteEvent",
-	),
-	achievementsLoaded: new S2CRemoteEvent<{ readonly [k in string]: baseAchievementStats }>(
-		"pl_achlist_loaded",
-		"RemoteEvent",
-	),
+	achievements: {
+		update: new S2CRemoteEvent<{ readonly [k in string]: AchievementData }>("pl_achs_updated", "RemoteEvent"),
+		loaded: new S2CRemoteEvent<{ readonly [k in string]: baseAchievementStats }>("pl_achs_loaded", "RemoteEvent"),
+	},
 
 	physics: {
 		normalizeRootparts: new S2CRemoteEvent<NormalizeRootpartsRequest>("ph_normalize_rootparts"),

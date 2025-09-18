@@ -33,7 +33,7 @@ const init = (list: AchievementList, player: Player) => {
 	];
 
 	const instanced = achievements.map((ach) => list.add(ach));
-	CustomRemotes.achievementsLoaded.send(player, asObject(list.list.mapToMap((k, v) => $tuple(k, v.info))));
+	CustomRemotes.achievements.loaded.send(player, asObject(list.list.mapToMap((k, v) => $tuple(k, v.info))));
 	for (const v of instanced) list.parent(v);
 };
 
@@ -66,6 +66,46 @@ export class AchievementController extends HostedService {
 
 			const list = controller.parent(new AchievementList(controller.player));
 			task.defer(() => init(list, controller.player));
+
+			// player update sending loop
+			controller.event.loop(10, () => {
+				const datas: { [k in string]: AchievementData } = {};
+				for (const [id, achievement] of list.list) {
+					const d = achievement.getChangesForRemote();
+					if (!d) continue;
+
+					datas[id] = d;
+				}
+
+				if (asMap(datas).isEmpty()) return;
+
+				$log(`Sending to player ${player.Name} achievement datas of ${Strings.pretty(asMap(datas).keys())}`);
+				CustomRemotes.achievements.update.send(player, datas);
+			});
+
+			controller.$onInjectAuto((database: PlayerDatabase) => {
+				// database flushing loop
+				controller.event.loop(60, () => {
+					const datas: { [k in string]: AchievementData } = {};
+					for (const [id, achievement] of list.list) {
+						const d = achievement.getChangesForDatabase();
+						if (!d) continue;
+
+						datas[id] = d;
+					}
+
+					if (asMap(datas).isEmpty()) return;
+
+					$log(`Flushing player ${player.Name} achievement datas of ${Strings.pretty(asMap(datas).keys())}`);
+					CustomRemotes.achievements.update.send(player, datas);
+
+					const pdata = database.get(player.UserId);
+					database.set(player.UserId, {
+						...pdata,
+						achievements: { ...(pdata.achievements ?? {}), ...datas },
+					});
+				});
+			});
 		});
 	}
 }

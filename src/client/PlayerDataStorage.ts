@@ -80,8 +80,8 @@ export class PlayerDataStorage {
 		this.slots = slots;
 
 		CustomRemotes.updateSaves.invoked.Connect((slots) => this._data.set({ ...this._data.get(), slots }));
-		CustomRemotes.achievementUpdated.invoked.Connect(({ id, data }) =>
-			this._data.set({ ...this._data.get(), achievements: { ...this._data.get().achievements, id: data } }),
+		CustomRemotes.achievements.update.invoked.Connect((data) =>
+			this._data.set({ ...this._data.get(), achievements: { ...this._data.get().achievements, ...data } }),
 		);
 	}
 
