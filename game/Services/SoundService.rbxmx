@@ -2,6 +2,7 @@
   <Item class="SoundService" referent="0">
     <Properties>
       <string name="Name">SoundService</string>
+      <bool name="AcousticSimulationEnabled">false</bool>
       <token name="AmbientReverb">0</token>
       <BinaryString name="AttributesSerialize"></BinaryString>
       <token name="AudioApiByDefault">0</token>
