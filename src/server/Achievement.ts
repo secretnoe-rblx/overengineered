@@ -41,7 +41,9 @@ export abstract class Achievement<Z = {}, T extends Z & AchievementData = Z & Ac
 	set(data: T) {
 		if (this.getData()?.completed) return;
 
-		(data as Writable<T>).completionDateUnix = DateTime.now().UnixTimestamp;
+		if (data.completed) {
+			(data as Writable<T>).completionDateUnix = DateTime.now().UnixTimestamp;
+		}
 		this.data = data;
 
 		const pdata = this.database.get(this.player.UserId);
