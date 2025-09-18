@@ -1,7 +1,11 @@
-import { RunService, TextChatService, UserInputService } from "@rbxts/services";
+import { Players, RunService, TextChatService, UserInputService } from "@rbxts/services";
 import { HostedService } from "engine/shared/di/HostedService";
 import { Achievement } from "server/Achievement";
+import { LogicOverclockBlock } from "shared/blocks/blocks/LogicOverclockBlock";
+import { BlockManager } from "shared/building/BlockManager";
 import { CustomRemotes } from "shared/Remotes";
+import type { ClientBuilding } from "client/modes/build/ClientBuilding";
+import type { PlayModeController } from "server/modes/PlayModeController";
 import type { ServerPlayersController } from "server/ServerPlayersController";
 import type { FireEffect } from "shared/effects/FireEffect";
 
@@ -24,6 +28,7 @@ const init = (list: AchievementList, player: Player) => {
 		AchievementCatchOnFire,
 
 		AchievementTheIssue,
+		AchievementOverclock,
 	];
 
 	const instanced = achievements.map((ach) => list.add(ach));
@@ -261,9 +266,68 @@ class AchievementCatchOnFire extends Achievement {
 		super(player, {
 			id: "CATCH_ON_FIRE",
 			name: "OverCooked!",
-			description: "Better call the fire department! (We don't have one.)",
+			description: "Better call the fire department! (We don't have one)",
 		});
 
 		this.event.subscribe(fireffect.event.c2s.invoked, (owner) => this.set({ completed: owner === player }));
+	}
+}
+
+@injectable
+class AchievementOverclock extends Achievement {
+	constructor(@inject player: Player, @inject playModeController: PlayModeController, @inject plot: ClientBuilding) {
+		super(player, {
+			id: "USE_OVERCLOCK",
+			name: "OverClocked!",
+			description: "What's that noise? OHHH MY PC",
+		});
+
+		let hasOverClock = false;
+		this.event.subscribe(Players.PlayerRemoving, (p) => {
+			if (p !== player) return;
+			hasOverClock = false;
+		});
+
+		this.event.subscribe(plot.placeOperation.executed, (a, b) => {
+			const id = a.plot.ownerId.get();
+			if (!id) return;
+
+			const p = Players.GetPlayerByUserId(id);
+			if (p !== player) return;
+
+			for (const m of b.models) {
+				if (BlockManager.manager.id.get(m) === LogicOverclockBlock.id) {
+					hasOverClock = true;
+					return;
+				}
+			}
+		});
+
+		this.event.subscribe(plot.deleteOperation.executed, (a, b) => {
+			const id = a.plot.ownerId.get();
+			if (!id) return;
+
+			if (a.blocks === "all") {
+				hasOverClock = false;
+				return;
+			}
+
+			const p = Players.GetPlayerByUserId(id);
+			if (p !== player) return;
+
+			for (const m of a.blocks) {
+				if (BlockManager.manager.id.get(m) === LogicOverclockBlock.id) {
+					hasOverClock = false;
+					return;
+				}
+			}
+		});
+
+		this.event.subscribe(CustomRemotes.modes.setOnClient.sent, () => {
+			const mode = playModeController.getPlayerMode(player);
+			if (mode !== "ride") return;
+
+			this.set({ completed: hasOverClock });
+		});
 	}
 }
