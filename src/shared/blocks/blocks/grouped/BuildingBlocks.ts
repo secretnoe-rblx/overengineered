@@ -502,6 +502,12 @@ const trainWheels: BlockBuildersWithoutIdAndDefaults = {
 	},
 };
 
+const random: BlockBuildersWithoutIdAndDefaults = {
+	handle: {
+		displayName: "Handle",
+		description: "To hold",
+	},
+};
 //
 
 const list: BlockBuildersWithoutIdAndDefaults = {
@@ -512,5 +518,6 @@ const list: BlockBuildersWithoutIdAndDefaults = {
 	...cylinders,
 	...wedges,
 	...trainWheels,
+	...random,
 };
 export const BuildingBlocks = BlockCreation.arrayFromObject(list);
