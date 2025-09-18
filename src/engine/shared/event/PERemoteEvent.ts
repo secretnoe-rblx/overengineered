@@ -213,6 +213,7 @@ export class S2C2SRemoteFunction<TArg = undefined, TResp extends Response = Resp
 	CustomRemoteFunctionBase<TArg, TArg, TResp | ErrorResponse>
 > {
 	private readonly _sent = new ArgsSignal<[arg: TArg, response: ErrorResponse | TResp]>();
+	/** @server */
 	readonly sent = this._sent.asReadonly();
 
 	/** @client */
@@ -279,6 +280,14 @@ export class S2C2SRemoteFunction<TArg = undefined, TResp extends Response = Resp
 export class C2S2CRemoteFunction<TArg = undefined, TResp extends Response = Response> extends PERemoteEvent<
 	CustomRemoteFunctionBase<TArg, TArg, TResp | ErrorResponse>
 > {
+	private readonly _received = new ArgsSignal<[player: Player, arg: TArg]>();
+	/** @server */
+	readonly received = this._received.asReadonly();
+
+	private readonly _processed = new ArgsSignal<[player: Player, arg: TArg, response: TResp & SuccessResponse]>();
+	/** @server */
+	readonly processed = this._processed.asReadonly();
+
 	private readonly _sent = new ArgsSignal<[arg: TArg]>();
 	/** @client */
 	readonly sent = this._sent.asReadonly();
@@ -324,7 +333,15 @@ export class C2S2CRemoteFunction<TArg = undefined, TResp extends Response = Resp
 	/** @server */
 	subscribe(func: typeof this.invoked & defined): SignalConnection {
 		if (this.invoked) throw "what";
-		this.invoked = func;
+		this.invoked = (player, arg) => {
+			this._received.Fire(player, arg);
+			const result = func(player, arg);
+			if (result.success) {
+				this._processed.Fire(player, arg, result as TResp & SuccessResponse);
+			}
+
+			return result;
+		};
 
 		// eslint-disable-next-line @typescript-eslint/no-this-alias
 		const selv = this;

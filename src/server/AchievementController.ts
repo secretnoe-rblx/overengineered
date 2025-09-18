@@ -5,11 +5,12 @@ import { Achievement } from "server/Achievement";
 import { LogicOverclockBlock } from "shared/blocks/blocks/LogicOverclockBlock";
 import { BlockManager } from "shared/building/BlockManager";
 import { CustomRemotes } from "shared/Remotes";
-import type { ClientBuilding } from "client/modes/build/ClientBuilding";
 import type { PlayModeController } from "server/modes/PlayModeController";
 import type { ServerPlayersController } from "server/ServerPlayersController";
 import type { AchievementData } from "shared/AchievementData";
+import type { SharedPlots } from "shared/building/SharedPlots";
 import type { FireEffect } from "shared/effects/FireEffect";
+import type { PlayerDataStorageRemotesBuilding } from "shared/remotes/PlayerDataRemotes";
 
 const init = (list: AchievementList, player: Player, data: { readonly [x: string]: AchievementData } | undefined) => {
 	const achievements: readonly ConstructorOf<Achievement>[] = [
@@ -327,7 +328,12 @@ class AchievementCatchOnFire extends Achievement {
 
 @injectable
 class AchievementOverclock extends Achievement {
-	constructor(@inject player: Player, @inject playModeController: PlayModeController, @inject plot: ClientBuilding) {
+	constructor(
+		@inject player: Player,
+		@inject playModeController: PlayModeController,
+		@inject plots: SharedPlots,
+		@inject plot: PlayerDataStorageRemotesBuilding,
+	) {
 		super(player, {
 			id: "USE_OVERCLOCK",
 			name: "OverClocked!",
@@ -340,8 +346,8 @@ class AchievementOverclock extends Achievement {
 			hasOverClock = false;
 		});
 
-		this.event.subscribe(plot.placeOperation.executed, (a, b) => {
-			const id = a.plot.ownerId.get();
+		this.event.subscribe(plot.placeBlocks.processed, (player, a, b) => {
+			const id = plots.getPlotComponent(a.plot).ownerId.get();
 			if (!id) return;
 
 			const p = Players.GetPlayerByUserId(id);
@@ -355,8 +361,8 @@ class AchievementOverclock extends Achievement {
 			}
 		});
 
-		this.event.subscribe(plot.deleteOperation.executed, (a, b) => {
-			const id = a.plot.ownerId.get();
+		this.event.subscribe(plot.deleteBlocks.processed, (player, a, b) => {
+			const id = plots.getPlotComponent(a.plot).ownerId.get();
 			if (!id) return;
 
 			if (a.blocks === "all") {

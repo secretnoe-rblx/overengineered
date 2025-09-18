@@ -39,6 +39,7 @@ export class ServerPlayerController extends Component {
 		const dataController = this.parent(ServerPlayerDataRemotesController.create(di, playerId));
 		this.remotesFolder = dataController.remotesFolder;
 		const buildingRemotes = PlayerDataRemotes.createBuilding(this.remotesFolder);
+		this.cacheDI(buildingRemotes);
 
 		this.remotes = {
 			slots: dataController.slotRemotes,
