@@ -1,6 +1,5 @@
 import { Component } from "engine/shared/component/Component";
 import { CustomRemotes } from "shared/Remotes";
-import type { PlayerDatabase } from "server/database/PlayerDatabase";
 import type { AchievementData } from "shared/AchievementData";
 
 export type baseAchievementStats = {
@@ -17,10 +16,14 @@ export abstract class Achievement<Z = {}, T extends Z & AchievementData = Z & Ac
 
 	constructor(
 		private readonly player: Player,
-		private readonly database: PlayerDatabase,
 		readonly info: baseAchievementStats,
 	) {
 		super();
+	}
+
+	/** @deprecated @hidden Internal usage only */
+	setData(data: T | undefined) {
+		this.data = data;
 	}
 
 	private remotechanged = false;
@@ -40,17 +43,7 @@ export abstract class Achievement<Z = {}, T extends Z & AchievementData = Z & Ac
 	}
 
 	getData(): T | undefined {
-		if (this.data) return this.data;
-		const pdata = this.database.get(this.player.UserId);
-
-		// loading from database takes time, and some achievements can trigger set() multiple times during fetching
-		// if, after loading, we already have a loaded data, then we just return it, otherwise we end up using old data
-		if (this.data) return this.data;
-
-		const achievements = pdata.achievements;
-		if (!achievements || !(this.info.id in achievements)) return;
-
-		return (this.data = achievements[this.info.id] as T);
+		return this.data;
 	}
 
 	set(data: T) {

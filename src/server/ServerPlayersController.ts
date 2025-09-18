@@ -20,7 +20,11 @@ import type { PlayerInitResponse } from "shared/Remotes";
 export class ServerPlayersController extends HostedService {
 	readonly controllers;
 
-	constructor(@inject players: PlayerDatabase, @inject sharedPlots: SharedPlots, @inject di: DIContainer) {
+	constructor(
+		@inject readonly players: PlayerDatabase,
+		@inject sharedPlots: SharedPlots,
+		@inject di: DIContainer,
+	) {
 		super();
 
 		const controllers = this.parent(new ComponentKeyedChildren<number, ServerPlayerController>(true));
