@@ -10,7 +10,7 @@
       <token name="AvatarUnificationMode">0</token>
       <SecurityCapabilities name="Capabilities">0</SecurityCapabilities>
       <token name="ClientAnimatorThrottling">2</token>
-      <BinaryString name="CollisionGroupData"><![CDATA[AQsABGX+//8HRGVmYXVsdAEEQvr//xlQbHVnaW5fVW5zZWxlY3RhYmxlX0dyb3VwAgTt/v//BkJsb2NrcwMELPr//wlCbG9ja1dlbGQEBDD6//8NQmxvY2tDb2xsaWRlcgUE/f7//xBTdHVkaW9TZWxlY3RhYmxlBgQn+v//ClByb2plY3RpbGUHBCT4//8MbW9kdWxlTWFya2VyCAQA/v//DFJhZGFyRGV0ZWN0cwkEf////wxCbG9ja1JheWNhc3QKBCX7//8PQ29sQm94RXhjbHVzaXZl]]></BinaryString>
+      <BinaryString name="CollisionGroupData"><![CDATA[AQwABGX+//8HRGVmYXVsdAEEQvL//xlQbHVnaW5fVW5zZWxlY3RhYmxlX0dyb3VwAgTt9v//BkJsb2NrcwMELPL//wlCbG9ja1dlbGQEBDDy//8NQmxvY2tDb2xsaWRlcgUE/f7//xBTdHVkaW9TZWxlY3RhYmxlBgQn8v//ClByb2plY3RpbGUHBCTw//8MbW9kdWxlTWFya2VyCAQA9v//DFJhZGFyRGV0ZWN0cwkEf/f//wxCbG9ja1JheWNhc3QKBCXz//8PQ29sQm94RXhjbHVzaXZlCwQh8P//E1BsYXllclNjcmlwdFRyaWdnZXI=]]></BinaryString>
       <Ref name="CurrentCamera">null</Ref>
       <double name="DistributedGameTime">0</double>
       <bool name="ExplicitAutoJoints">true</bool>
