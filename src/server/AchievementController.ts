@@ -3,8 +3,11 @@ import { HostedService } from "engine/shared/di/HostedService";
 import { Strings } from "engine/shared/fixes/String.propmacro";
 import { Achievement } from "server/Achievement";
 import { LogicOverclockBlock } from "shared/blocks/blocks/LogicOverclockBlock";
+import { LuaCircuitBlock } from "shared/blocks/blocks/LuaCircuitBlock";
 import { BlockManager } from "shared/building/BlockManager";
 import { CustomRemotes } from "shared/Remotes";
+import type { baseAchievementStats } from "server/Achievement";
+import type { PlayerDatabase } from "server/database/PlayerDatabase";
 import type { PlayModeController } from "server/modes/PlayModeController";
 import type { ServerPlayersController } from "server/ServerPlayersController";
 import type { AchievementData } from "shared/AchievementData";
@@ -15,6 +18,7 @@ import type { PlayerDataStorageRemotesBuilding } from "shared/remotes/PlayerData
 const init = (list: AchievementList, player: Player, data: { readonly [x: string]: AchievementData } | undefined) => {
 	const achievements: readonly ConstructorOf<Achievement>[] = [
 		AchievementWelcome,
+		AchievementLuaCircuitObtained,
 		AchievementPlaytime,
 		AchievementAfkTime,
 
@@ -34,10 +38,22 @@ const init = (list: AchievementList, player: Player, data: { readonly [x: string
 		AchievementOverclock,
 
 		// map-specific ones
+		AchievementBreakSomething,
+		AchievementFindBanana,
+		AchievementFindUFO,
+
 		AchievementCentrifuge30seconds,
 		AchievementCentrifuge20seconds,
 		AchievementCentrifuge10seconds,
 		AchievementCentrifuge5seconds,
+
+		AchievementAmogusTrack20seconds,
+		AchievementAmogusTrack15seconds,
+		AchievementAmogusTrack10seconds,
+
+		AchievementAirRingsEasy,
+		AchievementAirRingsMedium,
+		AchievementAirRingsHard,
 	];
 
 	const instanced = achievements.map((ach) => {
@@ -49,6 +65,50 @@ const init = (list: AchievementList, player: Player, data: { readonly [x: string
 	});
 	CustomRemotes.achievements.loaded.send(player, asObject(list.list.mapToMap((k, v) => $tuple(k, v.info))));
 	for (const v of instanced) list.parent(v);
+};
+
+type triggerInstances = Folder & Record<`trigger${number}`, BasePart>;
+
+const ws = Workspace as Workspace & {
+	Triggers: {
+		Centrifuge: triggerInstances;
+		AmogusTrack: triggerInstances;
+		AirRingsEasy: triggerInstances;
+		AirRingsMedium: triggerInstances;
+		AirRingsHard: triggerInstances;
+	};
+	Map: Folder & {
+		Banana: Model;
+		UFO: Model;
+		"Main Island": {
+			Fun: {
+				Destructibles: Folder;
+			};
+		};
+	};
+};
+
+const _triggers = ws.Triggers;
+
+//make triggers invisible on run
+for (const f of Workspace.FindFirstChild("Triggers")!.GetChildren()) {
+	f.GetChildren().forEach((v) => ((v as BasePart).Transparency = 1));
+}
+
+// DO NOT CHANGE! RETURNS SORTED ARRAY!
+const getTriggerList = (n: keyof typeof _triggers) => {
+	const tgs = _triggers[n];
+	const rawlist = tgs.GetChildren() as (BasePart | UnionOperation)[];
+	const list = [];
+	for (let i = 0; i < rawlist.size(); i++) {
+		const v = tgs.FindFirstChild(`trigger${i}`);
+		if (!v) throw `Trigger init error: "trigger${i}" not found in triggers of ${n}`;
+		list[i] = v as BasePart | UnionOperation;
+	}
+
+	const record = {} as triggerInstances;
+	list.forEach((v) => (record[v.Name as `trigger${number}`] = v));
+	return $tuple(list, record);
 };
 
 @injectable
@@ -127,31 +187,6 @@ export class AchievementController extends HostedService {
 	}
 }
 
-type triggerInstances = Record<`trigger${number}`, BasePart>;
-const _triggers = (
-	Workspace as Workspace & {
-		Triggers: {
-			Centrifuge: Folder & triggerInstances;
-		};
-	}
-).Triggers;
-
-// DO NOT CHANGE! RETURNS SORTED ARRAY!
-const getTriggerList = (n: keyof typeof _triggers) => {
-	const tgs = _triggers[n];
-	const rawlist = tgs.GetChildren() as (BasePart | UnionOperation)[];
-	const list = [];
-	for (let i = 0; i < rawlist.size(); i++) {
-		const v = tgs.FindFirstChild(`trigger${i}`);
-		if (!v) throw `Trigger init error: "trigger${i}" not found in triggers of ${n}`;
-		list[i] = v as BasePart | UnionOperation;
-	}
-
-	const record = {} as triggerInstances;
-	list.forEach((v) => (record[v.Name as `trigger${number}`] = v));
-	return $tuple(list, record);
-};
-
 /*
 	PLEASE DO NOT SPOIL THE ACHIEVEMENTS FOR OTHER PLAYERS!!!
 	PLEASE DO NOT SPOIL THE ACHIEVEMENTS FOR OTHER PLAYERS!!!
@@ -194,6 +229,21 @@ class AchievementTheIssue extends Achievement {
 			if (msg.TextSource?.UserId !== player.UserId) return;
 			this.set({ completed: msg.Text.fullLower().contains("plane crazy") });
 		});
+	}
+}
+
+@injectable
+class AchievementLuaCircuitObtained extends Achievement {
+	constructor(@inject player: Player, @inject playerDatabase: PlayerDatabase) {
+		super(player, {
+			id: "LUA_CIRCUIT",
+			name: "Oh yeah, it's big brain time",
+			description: `Obtain ${LuaCircuitBlock.displayName} by joining our community server and following instructions there.`,
+		});
+
+		this.onEnable(() =>
+			this.set({ completed: (playerDatabase.get(player.UserId).features?.indexOf("lua_circuit") ?? 0) > 0 }),
+		);
 	}
 }
 
@@ -346,7 +396,7 @@ class AchievementSpeedRecord100k extends AchievementSpeedRecord {
 
 @injectable
 class AchievementCatchOnFire extends Achievement {
-	constructor(@inject player: Player, @inject @inject fireffect: FireEffect) {
+	constructor(@inject player: Player, @inject fireffect: FireEffect) {
 		super(player, {
 			id: "CATCH_ON_FIRE",
 			name: "OverCooked!",
@@ -421,23 +471,64 @@ class AchievementOverclock extends Achievement {
 	}
 }
 
-abstract class AchievementCentrifuge extends Achievement {
+abstract class AchievementCheckpoints extends Achievement<{ checkpoints_finished: string[] }> {
 	constructor(
 		player: Player,
 		playModeController: PlayModeController,
-		name: string,
-		timeout_seconds: number,
-		hidden = false,
+		data: baseAchievementStats,
+		triggerGroup: keyof typeof _triggers,
 	) {
-		super(player, {
-			id: `CENTRIFUGE_TARGET_${timeout_seconds}`,
-			name,
-			description: `Make a lap in the Centrifuge in ${timeout_seconds} seconds or less`,
-			hidden,
-		});
+		super(player, data);
+
+		const checkpoints_finished = new Set(this.getData()?.checkpoints_finished ?? []);
+		const hitSequence: (BasePart | undefined)[] = [];
+		const [triggersList, triggersRecord] = getTriggerList(triggerGroup);
+		const listLen = triggersList.size();
+		for (let i = 0; i < listLen; i++) {
+			const t = triggersList[i];
+
+			this.event.subscribe(t.Touched, (inst) => {
+				//get player's mode
+				// yes it DOESN'T actually check if player is in their own vehicle
+				// but it doesn't matter because player doesn't know it
+				if (playModeController.getPlayerMode(player) !== "ride") return;
+
+				//check if part touched is player's
+				if (inst.Parent !== player.Character) return;
+
+				//add timeout to the trigger
+				hitSequence[i] = t;
+				checkpoints_finished.add(t.Name);
+
+				//check if all triggered
+				let allTriggered = true;
+				for (let j = 0; j < listLen; j++) {
+					const tr = hitSequence[j];
+
+					if (tr === undefined) {
+						allTriggered = false;
+						break;
+					}
+				}
+
+				this.set({ completed: allTriggered, checkpoints_finished: [...checkpoints_finished] });
+			});
+		}
+	}
+}
+
+abstract class AchievementCheckpointsWithTimeout extends Achievement {
+	constructor(
+		player: Player,
+		playModeController: PlayModeController,
+		data: baseAchievementStats,
+		timeout_seconds: number,
+		triggerGroup: keyof typeof _triggers,
+	) {
+		super(player, data);
 
 		const hitSequence: (BasePart | undefined)[] = [];
-		const [triggersList, triggersRecord] = getTriggerList("Centrifuge");
+		const [triggersList, triggersRecord] = getTriggerList(triggerGroup);
 		const listLen = triggersList.size();
 		for (let i = 0; i < listLen; i++) {
 			const t = triggersList[i];
@@ -473,6 +564,29 @@ abstract class AchievementCentrifuge extends Achievement {
 	}
 }
 
+abstract class AchievementCentrifuge extends AchievementCheckpointsWithTimeout {
+	constructor(
+		player: Player,
+		playModeController: PlayModeController,
+		name: string,
+		timeout_seconds: number,
+		hidden = false,
+	) {
+		super(
+			player,
+			playModeController,
+			{
+				id: `CENTRIFUGE_TARGET_${timeout_seconds}`,
+				name,
+				description: `Make a lap in the Centrifuge in ${timeout_seconds} seconds or less`,
+				hidden,
+			},
+			timeout_seconds,
+			"Centrifuge",
+		);
+	}
+}
+
 @injectable
 class AchievementCentrifuge30seconds extends AchievementCentrifuge {
 	constructor(@inject player: Player, @inject playModeController: PlayModeController) {
@@ -498,5 +612,195 @@ class AchievementCentrifuge10seconds extends AchievementCentrifuge {
 class AchievementCentrifuge5seconds extends AchievementCentrifuge {
 	constructor(@inject player: Player, @inject playModeController: PlayModeController) {
 		super(player, playModeController, `KA-CHOW`, 5, true);
+	}
+}
+
+abstract class AchievementAmogusTrack extends AchievementCheckpointsWithTimeout {
+	constructor(
+		player: Player,
+		playModeController: PlayModeController,
+		timeout_seconds: number,
+		name: string,
+		hidden = false,
+		description = `Make a lap on the race track in ${timeout_seconds} seconds or less. No shortcut.`,
+	) {
+		super(
+			player,
+			playModeController,
+			{
+				id: `RACE_TRACK_TARGET_${timeout_seconds}`,
+				name,
+				description,
+				hidden,
+			},
+			timeout_seconds,
+			"AmogusTrack",
+		);
+	}
+}
+
+@injectable
+class AchievementAmogusTrack20seconds extends AchievementAmogusTrack {
+	constructor(@inject player: Player, @inject playModeController: PlayModeController) {
+		super(player, playModeController, 20, `Minimum Viable Product`, false, `Just running a lap is a solution too`);
+	}
+}
+
+@injectable
+class AchievementAmogusTrack15seconds extends AchievementAmogusTrack {
+	constructor(@inject player: Player, @inject playModeController: PlayModeController) {
+		super(player, playModeController, 15, `Circuit Breaker`);
+	}
+}
+
+@injectable
+class AchievementAmogusTrack10seconds extends AchievementAmogusTrack {
+	constructor(@inject player: Player, @inject playModeController: PlayModeController) {
+		super(player, playModeController, 10, `TAS Bot Approved`);
+	}
+}
+
+@injectable
+class AchievementAirRingsEasy extends AchievementCheckpoints {
+	constructor(@inject player: Player, @inject playModeController: PlayModeController) {
+		super(
+			player,
+			playModeController,
+			{
+				id: `AIR_COURSE_EASY`,
+				name: "Flight School Graduate",
+				description: ``,
+			},
+			"AirRingsEasy",
+		);
+	}
+}
+
+@injectable
+class AchievementAirRingsMedium extends AchievementCheckpointsWithTimeout {
+	constructor(@inject player: Player, @inject playModeController: PlayModeController) {
+		super(
+			player,
+			playModeController,
+			{
+				id: `AIR_COURSE_MEDIUM`,
+				name: "",
+				description: ``,
+			},
+			99999999,
+			"AirRingsMedium",
+		);
+	}
+}
+
+@injectable
+class AchievementAirRingsHard extends AchievementCheckpointsWithTimeout {
+	constructor(@inject player: Player, @inject playModeController: PlayModeController) {
+		super(
+			player,
+			playModeController,
+			{
+				id: `AIR_COURSE_HARD`,
+				name: "",
+				description: ``,
+			},
+			99999999,
+			"AirRingsHard",
+		);
+	}
+}
+
+abstract class AchievementFindGetNearObject extends Achievement {
+	constructor(
+		player: Player,
+		data: baseAchievementStats,
+		targetObject: BasePart | UnionOperation | undefined,
+		activationDistance: number,
+		waitTarget: number,
+	) {
+		super(player, data);
+
+		let counter = 0;
+		this.event.subscribe(RunService.Heartbeat, (delta) => {
+			const character = player.Character?.PrimaryPart;
+
+			if (!character || !targetObject) {
+				counter = 0;
+				return;
+			}
+
+			// same result, purposefully separated conditions
+			if (character.Position.sub(targetObject.Position).Magnitude < activationDistance) {
+				counter = 0;
+				return;
+			}
+
+			counter += delta;
+
+			this.set({ completed: counter >= waitTarget });
+		});
+	}
+}
+
+@injectable
+class AchievementFindBanana extends AchievementFindGetNearObject {
+	constructor(@inject player: Player) {
+		super(
+			player,
+			{
+				id: "FIND_BANANA",
+				name: "Completely bananas!",
+				description: "Find the banana!",
+				hidden: true,
+			},
+			ws.Map.Banana.PrimaryPart,
+			10,
+			8,
+		);
+	}
+}
+
+@injectable
+class AchievementFindUFO extends AchievementFindGetNearObject {
+	constructor(@inject player: Player) {
+		super(
+			player,
+			{
+				id: "FIND_UFO",
+				name: "I Want to Believe!",
+				description: "Find the UFO!",
+				hidden: true,
+			},
+			ws.Map.UFO.PrimaryPart,
+			15,
+			8,
+		);
+	}
+}
+
+@injectable
+class AchievementBreakSomething extends Achievement {
+	constructor(@inject player: Player) {
+		super(player, {
+			id: "BREAK_MAP_DESTRUCTABLE",
+			name: "Breaking Change",
+			description: "Break a hydrant or something, or be near when it happens",
+		});
+
+		const activationDistance = 10;
+		for (const o of ws.Map["Main Island"].Fun.Destructibles.GetChildren()) {
+			if (o.Name !== "Fire Hydrant") continue;
+			const obj = o as Instance & {
+				Main: BasePart & {
+					TriggeredSound: Sound;
+				};
+			};
+
+			this.event.subscribe(obj.Main.TriggeredSound.Played, () => {
+				const character = player.Character?.PrimaryPart;
+				if (!character) return;
+				this.set({ completed: character.Position.sub(obj.Main.Position).Magnitude < activationDistance });
+			});
+		}
 	}
 }
