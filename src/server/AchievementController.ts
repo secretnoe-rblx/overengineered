@@ -1,4 +1,4 @@
-import { Players, RunService, TextChatService, UserInputService } from "@rbxts/services";
+import { Players, RunService, TextChatService, UserInputService, Workspace } from "@rbxts/services";
 import { HostedService } from "engine/shared/di/HostedService";
 import { Strings } from "engine/shared/fixes/String.propmacro";
 import { Achievement } from "server/Achievement";
@@ -32,6 +32,12 @@ const init = (list: AchievementList, player: Player, data: { readonly [x: string
 
 		AchievementTheIssue,
 		AchievementOverclock,
+
+		// map-specific ones
+		AchievementCentrifuge30seconds,
+		AchievementCentrifuge20seconds,
+		AchievementCentrifuge10seconds,
+		AchievementCentrifuge5seconds,
 	];
 
 	const instanced = achievements.map((ach) => {
@@ -120,6 +126,31 @@ export class AchievementController extends HostedService {
 		});
 	}
 }
+
+type triggerInstances = Record<`trigger${number}`, BasePart>;
+const _triggers = (
+	Workspace as Workspace & {
+		Triggers: {
+			Centrifuge: Folder & triggerInstances;
+		};
+	}
+).Triggers;
+
+// DO NOT CHANGE! RETURNS SORTED ARRAY!
+const getTriggerList = (n: keyof typeof _triggers) => {
+	const tgs = _triggers[n];
+	const rawlist = tgs.GetChildren() as (BasePart | UnionOperation)[];
+	const list = [];
+	for (let i = 0; i < rawlist.size(); i++) {
+		const v = tgs.FindFirstChild(`trigger${i}`);
+		if (!v) throw `Trigger init error: "trigger${i}" not found in triggers of ${n}`;
+		list[i] = v as BasePart | UnionOperation;
+	}
+
+	const record = {} as triggerInstances;
+	list.forEach((v) => (record[v.Name as `trigger${number}`] = v));
+	return $tuple(list, record);
+};
 
 /*
 	PLEASE DO NOT SPOIL THE ACHIEVEMENTS FOR OTHER PLAYERS!!!
@@ -387,5 +418,85 @@ class AchievementOverclock extends Achievement {
 
 			this.set({ completed: hasOverClock });
 		});
+	}
+}
+
+abstract class AchievementCentrifuge extends Achievement {
+	constructor(
+		player: Player,
+		playModeController: PlayModeController,
+		name: string,
+		timeout_seconds: number,
+		hidden = false,
+	) {
+		super(player, {
+			id: `CENTRIFUGE_TARGET_${timeout_seconds}`,
+			name,
+			description: `Make a lap in the Centrifuge in ${timeout_seconds} seconds or less`,
+			hidden,
+		});
+
+		const hitSequence: (BasePart | undefined)[] = [];
+		const [triggersList, triggersRecord] = getTriggerList("Centrifuge");
+		const listLen = triggersList.size();
+		for (let i = 0; i < listLen; i++) {
+			const t = triggersList[i];
+			let thread: thread;
+
+			this.event.subscribe(t.Touched, (inst) => {
+				//get player's mode
+				// yes it DOESN'T actually check if player is in their own vehicle
+				// but it doesn't matter because player doesn't know it
+				if (playModeController.getPlayerMode(player) !== "ride") return;
+
+				//check if part touched is player's
+				if (inst.Parent !== player.Character) return;
+
+				//add timeout to the trigger
+				hitSequence[i] = t;
+				if (thread) task.cancel(thread);
+				thread = task.delay(timeout_seconds, () => (hitSequence[i] = undefined));
+
+				//check if all triggered
+				let allTriggered = true;
+				for (let j = 0; j < listLen; j++) {
+					const tr = hitSequence[j];
+					if (tr === undefined) {
+						allTriggered = false;
+						break;
+					}
+				}
+
+				this.set({ completed: allTriggered });
+			});
+		}
+	}
+}
+
+@injectable
+class AchievementCentrifuge30seconds extends AchievementCentrifuge {
+	constructor(@inject player: Player, @inject playModeController: PlayModeController) {
+		super(player, playModeController, `30 Seconds or Less`, 30);
+	}
+}
+
+@injectable
+class AchievementCentrifuge20seconds extends AchievementCentrifuge {
+	constructor(@inject player: Player, @inject playModeController: PlayModeController) {
+		super(player, playModeController, `Now We're Cooking with Gas!`, 20);
+	}
+}
+
+@injectable
+class AchievementCentrifuge10seconds extends AchievementCentrifuge {
+	constructor(@inject player: Player, @inject playModeController: PlayModeController) {
+		super(player, playModeController, `Right round like a record, baby`, 10);
+	}
+}
+
+@injectable
+class AchievementCentrifuge5seconds extends AchievementCentrifuge {
+	constructor(@inject player: Player, @inject playModeController: PlayModeController) {
+		super(player, playModeController, `KA-CHOW`, 5, true);
 	}
 }
