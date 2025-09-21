@@ -423,6 +423,27 @@ const cylinders: BlockBuildersWithoutIdAndDefaults = {
 		displayName: "Half Cylinder To 2x1 Cube Hollow Connector",
 		description: "A connector but wife left me but hollow",
 	},
+
+	cylinderto1x1cubehollowconnector: {
+		displayName: "Cylinder To 1x1 Cube Hollow Connector",
+		description:
+			"A connector to connect your connections between cylinder connection and cube connection but hollow",
+	},
+	cylinderto2x1cubehollowconnector: {
+		displayName: "Cylinder To 2x1 Cube Hollow Connector",
+		description:
+			"A connector to connect your connections between cylinder connection and cube connection but wide but hollow",
+	},
+	halfcylinderto1x1cubehollowconnector: {
+		displayName: "Half Cylinder To 1x1 Cube Hollow Connector",
+		description:
+			"A connector to connect your connections between cylinder connection and cube connection but some sizes were halved but hollow",
+	},
+	halfcylinderto1xhalfcubehollowconnector: {
+		displayName: "Half Cylinder To 1xHalf Cube Hollow Connector",
+		description:
+			"A connector to connect your connections but I'm getting tired of making the descriptions but hollow",
+	},
 };
 
 const wedges: BlockBuildersWithoutIdAndDefaults = {
