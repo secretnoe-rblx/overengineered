@@ -6,6 +6,7 @@ import { LogicOverclockBlock } from "shared/blocks/blocks/LogicOverclockBlock";
 import { LuaCircuitBlock } from "shared/blocks/blocks/LuaCircuitBlock";
 import { BlockManager } from "shared/building/BlockManager";
 import { CustomRemotes } from "shared/Remotes";
+import type { PlayerDataStorage } from "client/PlayerDataStorage";
 import type { baseAchievementStats } from "server/Achievement";
 import type { PlayerDatabase } from "server/database/PlayerDatabase";
 import type { PlayModeController } from "server/modes/PlayModeController";
@@ -36,6 +37,7 @@ const init = (list: AchievementList, player: Player, data: { readonly [x: string
 
 		AchievementTheIssue,
 		AchievementOverclock,
+		AchievementFOVMax,
 
 		// map-specific ones
 		AchievementBreakSomething,
@@ -50,6 +52,10 @@ const init = (list: AchievementList, player: Player, data: { readonly [x: string
 		AchievementAmogusTrack20seconds,
 		AchievementAmogusTrack15seconds,
 		AchievementAmogusTrack10seconds,
+
+		AchievementOvalTrack20seconds,
+		AchievementOvalTrack15seconds,
+		AchievementOvalTrack10seconds,
 
 		AchievementAirRingsEasy,
 		AchievementAirRingsMedium,
@@ -76,6 +82,7 @@ const ws = Workspace as Workspace & {
 		AirRingsEasy: triggerInstances;
 		AirRingsMedium: triggerInstances;
 		AirRingsHard: triggerInstances;
+		OvalTrack: triggerInstances;
 	};
 	Map: Folder & {
 		Banana: Model;
@@ -660,6 +667,49 @@ class AchievementAmogusTrack10seconds extends AchievementAmogusTrack {
 	}
 }
 
+abstract class AchievementOvalTrack extends AchievementCheckpointsWithTimeout {
+	constructor(
+		player: Player,
+		playModeController: PlayModeController,
+		timeout_seconds: number,
+		name: string,
+		description = `Make a lap on the Oval race track in ${timeout_seconds} seconds or less. No shortcut.`,
+	) {
+		super(
+			player,
+			playModeController,
+			{
+				id: `RACE_TRACK_OVALS_TARGET_${timeout_seconds}`,
+				name,
+				description,
+			},
+			timeout_seconds,
+			"AmogusTrack",
+		);
+	}
+}
+
+@injectable
+class AchievementOvalTrack20seconds extends AchievementOvalTrack {
+	constructor(@inject player: Player, @inject playModeController: PlayModeController) {
+		super(player, playModeController, 20, `First Lap`);
+	}
+}
+
+@injectable
+class AchievementOvalTrack15seconds extends AchievementOvalTrack {
+	constructor(@inject player: Player, @inject playModeController: PlayModeController) {
+		super(player, playModeController, 15, `Qualifying Lap`);
+	}
+}
+
+@injectable
+class AchievementOvalTrack10seconds extends AchievementOvalTrack {
+	constructor(@inject player: Player, @inject playModeController: PlayModeController) {
+		super(player, playModeController, 10, `Grind Prix`);
+	}
+}
+
 @injectable
 class AchievementAirRingsEasy extends AchievementCheckpoints {
 	constructor(@inject player: Player, @inject playModeController: PlayModeController) {
@@ -669,7 +719,7 @@ class AchievementAirRingsEasy extends AchievementCheckpoints {
 			{
 				id: `AIR_COURSE_EASY`,
 				name: "Flight School Graduate",
-				description: ``,
+				description: `Finish easy difficulty air course`,
 			},
 			"AirRingsEasy",
 		);
@@ -684,10 +734,10 @@ class AchievementAirRingsMedium extends AchievementCheckpointsWithTimeout {
 			playModeController,
 			{
 				id: `AIR_COURSE_MEDIUM`,
-				name: "",
-				description: ``,
+				name: "Through John's Heart",
+				description: `Finish medium difficulty air course in 25 seconds or less`,
 			},
-			99999999,
+			25,
 			"AirRingsMedium",
 		);
 	}
@@ -701,10 +751,10 @@ class AchievementAirRingsHard extends AchievementCheckpointsWithTimeout {
 			playModeController,
 			{
 				id: `AIR_COURSE_HARD`,
-				name: "",
-				description: ``,
+				name: "No Room for Error",
+				description: `Finish intentionally hard air course in 60 seconds or less.. Designed to test player's skills in engineering and piloting.`,
 			},
-			99999999,
+			60,
 			"AirRingsHard",
 		);
 	}
@@ -787,10 +837,10 @@ class AchievementBreakSomething extends Achievement {
 			description: "Break a hydrant or something, or be near when it happens",
 		});
 
-		const activationDistance = 10;
+		const activationDistance = 15;
 		for (const o of ws.Map["Main Island"].Fun.Destructibles.GetChildren()) {
 			if (o.Name !== "Fire Hydrant") continue;
-			const obj = o as Instance & {
+			const obj = o as Model & {
 				Main: BasePart & {
 					TriggeredSound: Sound;
 				};
@@ -802,5 +852,20 @@ class AchievementBreakSomething extends Achievement {
 				this.set({ completed: character.Position.sub(obj.Main.Position).Magnitude < activationDistance });
 			});
 		}
+	}
+}
+
+@injectable
+class AchievementFOVMax extends Achievement {
+	constructor(@inject player: Player, @inject playerData: PlayerDataStorage) {
+		super(player, {
+			id: "FOV_MAX",
+			name: "Quake",
+			description: "Set your FOV to the maximum value",
+			hidden: true,
+		});
+
+		this.set({ completed: playerData.config.get().betterCamera.fov >= 200 });
+		this.event.subscribe(playerData.config.changed, (c) => this.set({ completed: c.betterCamera.fov >= 200 }));
 	}
 }
