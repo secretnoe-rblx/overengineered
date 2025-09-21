@@ -118,7 +118,6 @@ const init = ({ block, owner }: initButton) => {
 	block.ClickableBase.ClickDetector.MaxActivationDistance = math.huge;
 	const onClickEvent = () => clickEvent.send(owner, block);
 	handler.subscribe(block.ClickableBase.ClickDetector.MouseClick, onClickEvent);
-	// handler.subscribe(block.ColoredLine.ClickDetector.MouseClick, onClickEvent);
 
 	const YScale = BlockManager.manager.scale.get(block)?.Y;
 	if (!YScale) return;

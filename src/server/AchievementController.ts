@@ -5,11 +5,12 @@ import { Achievement } from "server/Achievement";
 import { LogicOverclockBlock } from "shared/blocks/blocks/LogicOverclockBlock";
 import { LuaCircuitBlock } from "shared/blocks/blocks/LuaCircuitBlock";
 import { BlockManager } from "shared/building/BlockManager";
+import { GameDefinitions } from "shared/data/GameDefinitions";
 import { CustomRemotes } from "shared/Remotes";
-import type { PlayerDataStorage } from "client/PlayerDataStorage";
 import type { baseAchievementStats } from "server/Achievement";
 import type { PlayerDatabase } from "server/database/PlayerDatabase";
 import type { PlayModeController } from "server/modes/PlayModeController";
+import type { ServerPlayerController } from "server/ServerPlayerController";
 import type { ServerPlayersController } from "server/ServerPlayersController";
 import type { AchievementData } from "shared/AchievementData";
 import type { SharedPlots } from "shared/building/SharedPlots";
@@ -310,7 +311,7 @@ abstract class AchievementHeightRecord extends Achievement<{ height_record: numb
 			const character = player.Character?.PrimaryPart;
 			if (!character) return;
 
-			height_record = math.max(character.Position.Y, height_record);
+			height_record = math.max(character.Position.Y - GameDefinitions.HEIGHT_OFFSET, height_record);
 			this.set({ completed: height_record > targetHeight, height_record });
 		});
 	}
@@ -857,7 +858,7 @@ class AchievementBreakSomething extends Achievement {
 
 @injectable
 class AchievementFOVMax extends Achievement {
-	constructor(@inject player: Player, @inject playerData: PlayerDataStorage) {
+	constructor(@inject player: Player, @inject serverPlayerController: ServerPlayerController) {
 		super(player, {
 			id: "FOV_MAX",
 			name: "Quake",
@@ -865,7 +866,10 @@ class AchievementFOVMax extends Achievement {
 			hidden: true,
 		});
 
-		this.set({ completed: playerData.config.get().betterCamera.fov >= 200 });
-		this.event.subscribe(playerData.config.changed, (c) => this.set({ completed: c.betterCamera.fov >= 200 }));
+		this.event.subscribe(serverPlayerController.remotes.player.updateSettings.invoked, (p, s) => {
+			if (p !== player) return;
+			if (!s.betterCamera?.fov) return;
+			this.set({ completed: s.betterCamera.fov >= 200 });
+		});
 	}
 }
