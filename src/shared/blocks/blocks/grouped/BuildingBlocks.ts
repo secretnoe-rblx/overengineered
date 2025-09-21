@@ -20,6 +20,24 @@ const blocks: BlockBuildersWithoutIdAndDefaults = {
 
 		weldRegionsSource: BlockCreation.WeldRegions.fAutomatic("cube"),
 	},
+	scalabletruss1: {
+		displayName: "Scalable truss 1",
+		description: "Maybe climbable, possible cool, actually scalable. Empty variant",
+
+		weldRegionsSource: BlockCreation.WeldRegions.fAutomatic("cube"),
+	},
+	scalabletruss2: {
+		displayName: "Scalable truss 2",
+		description: "Maybe climbable, possible cool, actually scalable. Somewhat empty variant",
+
+		weldRegionsSource: BlockCreation.WeldRegions.fAutomatic("cube"),
+	},
+	scalabletruss3: {
+		displayName: "Scalable truss 3",
+		description: "Maybe climbable, possible cool, actually scalable. Kinda empty variant",
+
+		weldRegionsSource: BlockCreation.WeldRegions.fAutomatic("cube"),
+	},
 	cone: {
 		displayName: "Cone",
 		description: "Filled with weird geometry jokes. Sadly, no ice cream",
