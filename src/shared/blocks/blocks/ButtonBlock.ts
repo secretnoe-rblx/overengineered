@@ -1,4 +1,5 @@
 import { Players, RunService } from "@rbxts/services";
+import { EventHandler } from "engine/shared/event/EventHandler";
 import { A2OCRemoteEvent } from "engine/shared/event/PERemoteEvent";
 import { Instances } from "engine/shared/fixes/Instances";
 import { t } from "engine/shared/t";
@@ -75,9 +76,10 @@ type buttonType = BlockModel & {
 			TextLabel: TextLabel;
 		};
 	};
-	Base: UnionOperation & {
+	ClickableBase: {
 		ClickDetector: ClickDetector;
 	};
+	Base: UnionOperation;
 	LED: BasePart;
 };
 const baseLEDColor = Color3.fromRGB(17, 17, 17);
@@ -111,10 +113,12 @@ const updateButtonState = ({ block, LEDcolor, buttonState }: updateStateData) =>
 };
 
 const init = ({ block, owner }: initButton) => {
-	block.Base.ClickDetector.MaxActivationDistance = math.huge;
-	block.Base.ClickDetector.MouseClick.Connect(() => {
-		clickEvent.send(owner, block);
-	});
+	const handler = new EventHandler();
+
+	block.ClickableBase.ClickDetector.MaxActivationDistance = math.huge;
+	const onClickEvent = () => clickEvent.send(owner, block);
+	handler.subscribe(block.ClickableBase.ClickDetector.MouseClick, onClickEvent);
+	// handler.subscribe(block.ColoredLine.ClickDetector.MouseClick, onClickEvent);
 
 	const YScale = BlockManager.manager.scale.get(block)?.Y;
 	if (!YScale) return;
@@ -126,13 +130,13 @@ const init = ({ block, owner }: initButton) => {
 	const pressedPosition = new Vector3(0.35 * YScale, 0.35 * YScale, 0.35 * YScale);
 	const depressedPosition = new Vector3(0.5 * YScale, 0.5 * YScale, 0.5 * YScale);
 
-	const e = RunService.PreRender.Connect(() => {
+	handler.subscribe(RunService.Heartbeat, () => {
 		const state = allButtonStates.get(block);
 		button.Position = base.CFrame.UpVector.mul(state ? pressedPosition : depressedPosition).add(base.Position);
 		button.Orientation = base.Orientation;
 	});
 
-	block.DescendantRemoving.Connect(() => e.Disconnect());
+	handler.subscribe(block.DescendantRemoving, () => handler.unsubscribeAll());
 };
 
 const allButtonStates = new Map<buttonType, boolean>();
