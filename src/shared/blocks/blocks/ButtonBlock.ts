@@ -71,14 +71,12 @@ const definition = {
 
 type buttonType = BlockModel & {
 	Button: BasePart & {
-		ClickDetector: ClickDetector;
 		SurfaceGui: {
 			TextLabel: TextLabel;
 		};
 	};
 	Base: UnionOperation & {
-		PressedPosition: Attachment;
-		DepressedPosition: Attachment;
+		ClickDetector: ClickDetector;
 	};
 	LED: BasePart;
 };
@@ -113,8 +111,8 @@ const updateButtonState = ({ block, LEDcolor, buttonState }: updateStateData) =>
 };
 
 const init = ({ block, owner }: initButton) => {
-	block.Button.ClickDetector.MaxActivationDistance = math.huge;
-	block.Button.ClickDetector.MouseClick.Connect(() => {
+	block.Base.ClickDetector.MaxActivationDistance = math.huge;
+	block.Base.ClickDetector.MouseClick.Connect(() => {
 		clickEvent.send(owner, block);
 	});
 
@@ -125,19 +123,16 @@ const init = ({ block, owner }: initButton) => {
 	const button = block.Button;
 
 	// defining constants and magic numbers
-	const pressedPosition = new Vector3(0.2 * YScale, 0.2 * YScale, 0.2 * YScale);
+	const pressedPosition = new Vector3(0.35 * YScale, 0.35 * YScale, 0.35 * YScale);
 	const depressedPosition = new Vector3(0.5 * YScale, 0.5 * YScale, 0.5 * YScale);
 
-	const e = RunService.Heartbeat.Connect(() => {
+	const e = RunService.PreRender.Connect(() => {
 		const state = allButtonStates.get(block);
 		button.Position = base.CFrame.UpVector.mul(state ? pressedPosition : depressedPosition).add(base.Position);
 		button.Orientation = base.Orientation;
 	});
 
-	block.DescendantRemoving.Connect(() => {
-		e.Disconnect();
-		button.Anchored = false;
-	});
+	block.DescendantRemoving.Connect(() => e.Disconnect());
 };
 
 const allButtonStates = new Map<buttonType, boolean>();
@@ -160,7 +155,6 @@ class Logic extends InstanceBlockLogic<typeof definition, buttonType> {
 		const inst = this.instance;
 		if (!inst) return;
 		const button = inst.Button;
-		button.Anchored = true;
 
 		const led = inst.LED;
 
