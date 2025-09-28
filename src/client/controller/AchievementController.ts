@@ -1,5 +1,17 @@
+import { Control } from "engine/client/gui/Control";
 import { HostedService } from "engine/shared/di/HostedService";
 import { CustomRemotes } from "shared/Remotes";
+
+export type AchievementGuiDefinition = GuiObject & {
+	//
+};
+export class AchievementGui extends Control<AchievementGuiDefinition> {
+	constructor(gui: AchievementGuiDefinition) {
+		super(gui);
+
+		//
+	}
+}
 
 export class AchievementController extends HostedService {
 	constructor() {
