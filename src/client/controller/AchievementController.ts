@@ -138,7 +138,7 @@ class AchievementControl extends PartialControl<AchievementControlParts> {
 		if (this.info.hidden) {
 			const showInStudio = showHiddenInStudio && RunService.IsStudio();
 			this.visibilityComponent().setVisible(showInStudio || (data.completed ?? false), "hiddenach");
-		}
+		} else this.visibilityComponent().setVisible(true);
 
 		const visualizeText = (num: number): string => {
 			if (!this.info.units) {
