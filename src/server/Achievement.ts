@@ -1,6 +1,5 @@
 import { Component } from "engine/shared/component/Component";
 import { Objects } from "engine/shared/fixes/Objects";
-import { Strings } from "engine/shared/fixes/String.propmacro";
 import { CustomRemotes } from "shared/Remotes";
 import type { AchievementData } from "shared/AchievementData";
 
@@ -67,13 +66,11 @@ export abstract class Achievement<Z = {}, T extends Z & AchievementData = Z & Ac
 			return;
 		}
 
-		print(`AMONGUS setting ${this.info.id} to ${Strings.pretty(data)}`);
 		this.forceSet(data);
 	}
 
 	/** @hidden @deprecated */
 	forceSet(data: T) {
-		print(`AMONGUS FORCEsetting ${this.info.id} to ${Strings.pretty(data)}`);
 		if (this.info.max && data.progress && data.progress >= this.info.max) {
 			(data as Writable<T>).completed = true;
 		}
