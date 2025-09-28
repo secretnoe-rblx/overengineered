@@ -36,6 +36,8 @@
           <string name="FlipbookIncompatible">Particle texture must be 1024 by 1024 to use flipbooks.</string>
           <token name="FlipbookLayout">0</token>
           <token name="FlipbookMode">0</token>
+          <int name="FlipbookSizeX">1</int>
+          <int name="FlipbookSizeY">1</int>
           <bool name="FlipbookStartRandom">false</bool>
           <NumberRange name="Lifetime">0.2 0.2 </NumberRange>
           <float name="LightEmission">1</float>
@@ -88,6 +90,8 @@
           <string name="FlipbookIncompatible">Particle texture must be 1024 by 1024 to use flipbooks.</string>
           <token name="FlipbookLayout">0</token>
           <token name="FlipbookMode">0</token>
+          <int name="FlipbookSizeX">1</int>
+          <int name="FlipbookSizeY">1</int>
           <bool name="FlipbookStartRandom">false</bool>
           <NumberRange name="Lifetime">0.2 0.2 </NumberRange>
           <float name="LightEmission">1</float>
@@ -140,6 +144,8 @@
           <string name="FlipbookIncompatible">Particle texture must be 1024 by 1024 to use flipbooks.</string>
           <token name="FlipbookLayout">0</token>
           <token name="FlipbookMode">0</token>
+          <int name="FlipbookSizeX">1</int>
+          <int name="FlipbookSizeY">1</int>
           <bool name="FlipbookStartRandom">false</bool>
           <NumberRange name="Lifetime">0.15 0.3 </NumberRange>
           <float name="LightEmission">0</float>
@@ -192,6 +198,8 @@
           <string name="FlipbookIncompatible">Particle texture must be 1024 by 1024 to use flipbooks.</string>
           <token name="FlipbookLayout">0</token>
           <token name="FlipbookMode">0</token>
+          <int name="FlipbookSizeX">1</int>
+          <int name="FlipbookSizeY">1</int>
           <bool name="FlipbookStartRandom">false</bool>
           <NumberRange name="Lifetime">0.75 5 </NumberRange>
           <float name="LightEmission">0</float>
@@ -244,6 +252,8 @@
           <string name="FlipbookIncompatible">Particle texture must be 1024 by 1024 to use flipbooks.</string>
           <token name="FlipbookLayout">0</token>
           <token name="FlipbookMode">0</token>
+          <int name="FlipbookSizeX">1</int>
+          <int name="FlipbookSizeY">1</int>
           <bool name="FlipbookStartRandom">false</bool>
           <NumberRange name="Lifetime">0.75 5 </NumberRange>
           <float name="LightEmission">0</float>
@@ -297,6 +307,8 @@
         <string name="FlipbookIncompatible">Particle texture must be 1024 by 1024 to use flipbooks.</string>
         <token name="FlipbookLayout">0</token>
         <token name="FlipbookMode">0</token>
+        <int name="FlipbookSizeX">1</int>
+        <int name="FlipbookSizeY">1</int>
         <bool name="FlipbookStartRandom">false</bool>
         <NumberRange name="Lifetime">0.5 1 </NumberRange>
         <float name="LightEmission">1</float>
@@ -719,6 +731,8 @@
           <string name="FlipbookIncompatible">Particle texture must be 1024 by 1024 to use flipbooks.</string>
           <token name="FlipbookLayout">0</token>
           <token name="FlipbookMode">0</token>
+          <int name="FlipbookSizeX">1</int>
+          <int name="FlipbookSizeY">1</int>
           <bool name="FlipbookStartRandom">false</bool>
           <NumberRange name="Lifetime">0 3 </NumberRange>
           <float name="LightEmission">0.86</float>
@@ -790,6 +804,8 @@
           <string name="FlipbookIncompatible">Particle texture must be 1024 by 1024 to use flipbooks.</string>
           <token name="FlipbookLayout">0</token>
           <token name="FlipbookMode">0</token>
+          <int name="FlipbookSizeX">1</int>
+          <int name="FlipbookSizeY">1</int>
           <bool name="FlipbookStartRandom">false</bool>
           <NumberRange name="Lifetime">0 6 </NumberRange>
           <float name="LightEmission">0.86</float>

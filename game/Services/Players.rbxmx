@@ -6,8 +6,8 @@
       <bool name="BanningEnabled">true</bool>
       <SecurityCapabilities name="Capabilities">0</SecurityCapabilities>
       <bool name="CharacterAutoLoads">true</bool>
-      <int name="MaxPlayersInternal">12</int>
-      <int name="PreferredPlayersInternal">0</int>
+      <int name="MaxPlayersInternal">60</int>
+      <int name="PreferredPlayersInternal">60</int>
       <float name="RespawnTime">3</float>
       <bool name="DefinesCapabilities">false</bool>
       <int64 name="SourceAssetId">-1</int64>

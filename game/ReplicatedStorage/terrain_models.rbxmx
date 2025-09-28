@@ -198,6 +198,16 @@
             <Content name="ColorMapContent">
               <uri>rbxassetid://5164021540</uri>
             </Content>
+            <Content name="EmissiveMaskContent">
+              <null>
+              </null>
+            </Content>
+            <float name="EmissiveStrength">1</float>
+            <Color3 name="EmissiveTint">
+              <R>1</R>
+              <G>1</G>
+              <B>1</B>
+            </Color3>
             <Content name="MetalnessMapContent">
               <uri>rbxassetid://6036394111</uri>
             </Content>
@@ -370,6 +380,16 @@
             <Content name="ColorMapContent">
               <uri>rbxassetid://5164022511</uri>
             </Content>
+            <Content name="EmissiveMaskContent">
+              <null>
+              </null>
+            </Content>
+            <float name="EmissiveStrength">1</float>
+            <Color3 name="EmissiveTint">
+              <R>1</R>
+              <G>1</G>
+              <B>1</B>
+            </Color3>
             <Content name="MetalnessMapContent">
               <null>
               </null>
@@ -580,6 +600,16 @@
             <Content name="ColorMapContent">
               <uri>rbxassetid://5197149333</uri>
             </Content>
+            <Content name="EmissiveMaskContent">
+              <null>
+              </null>
+            </Content>
+            <float name="EmissiveStrength">1</float>
+            <Color3 name="EmissiveTint">
+              <R>1</R>
+              <G>1</G>
+              <B>1</B>
+            </Color3>
             <Content name="MetalnessMapContent">
               <null>
               </null>
@@ -804,6 +834,16 @@
             <Content name="ColorMapContent">
               <uri>rbxassetid://5548259390</uri>
             </Content>
+            <Content name="EmissiveMaskContent">
+              <null>
+              </null>
+            </Content>
+            <float name="EmissiveStrength">1</float>
+            <Color3 name="EmissiveTint">
+              <R>1</R>
+              <G>1</G>
+              <B>1</B>
+            </Color3>
             <Content name="MetalnessMapContent">
               <uri>rbxassetid://6036394111</uri>
             </Content>
@@ -1012,6 +1052,16 @@
             <Content name="ColorMapContent">
               <uri>rbxassetid://5127576858</uri>
             </Content>
+            <Content name="EmissiveMaskContent">
+              <null>
+              </null>
+            </Content>
+            <float name="EmissiveStrength">1</float>
+            <Color3 name="EmissiveTint">
+              <R>1</R>
+              <G>1</G>
+              <B>1</B>
+            </Color3>
             <Content name="MetalnessMapContent">
               <uri>rbxassetid://5123540033</uri>
             </Content>
@@ -1220,6 +1270,16 @@
             <Content name="ColorMapContent">
               <uri>rbxassetid://5023000888</uri>
             </Content>
+            <Content name="EmissiveMaskContent">
+              <null>
+              </null>
+            </Content>
+            <float name="EmissiveStrength">1</float>
+            <Color3 name="EmissiveTint">
+              <R>1</R>
+              <G>1</G>
+              <B>1</B>
+            </Color3>
             <Content name="MetalnessMapContent">
               <uri>rbxassetid://5004526382</uri>
             </Content>
@@ -1392,6 +1452,16 @@
             <Content name="ColorMapContent">
               <uri>rbxassetid://5349749467</uri>
             </Content>
+            <Content name="EmissiveMaskContent">
+              <null>
+              </null>
+            </Content>
+            <float name="EmissiveStrength">1</float>
+            <Color3 name="EmissiveTint">
+              <R>1</R>
+              <G>1</G>
+              <B>1</B>
+            </Color3>
             <Content name="MetalnessMapContent">
               <uri>rbxassetid://6036394111</uri>
             </Content>
@@ -1615,6 +1685,16 @@
             <Content name="ColorMapContent">
               <uri>rbxassetid://6033775484</uri>
             </Content>
+            <Content name="EmissiveMaskContent">
+              <null>
+              </null>
+            </Content>
+            <float name="EmissiveStrength">1</float>
+            <Color3 name="EmissiveTint">
+              <R>1</R>
+              <G>1</G>
+              <B>1</B>
+            </Color3>
             <Content name="MetalnessMapContent">
               <null>
               </null>
@@ -1788,6 +1868,16 @@
             <Content name="ColorMapContent">
               <uri>rbxassetid://6033775915</uri>
             </Content>
+            <Content name="EmissiveMaskContent">
+              <null>
+              </null>
+            </Content>
+            <float name="EmissiveStrength">1</float>
+            <Color3 name="EmissiveTint">
+              <R>1</R>
+              <G>1</G>
+              <B>1</B>
+            </Color3>
             <Content name="MetalnessMapContent">
               <null>
               </null>
@@ -2012,6 +2102,16 @@
             <Content name="ColorMapContent">
               <uri>rbxassetid://5131733537</uri>
             </Content>
+            <Content name="EmissiveMaskContent">
+              <null>
+              </null>
+            </Content>
+            <float name="EmissiveStrength">1</float>
+            <Color3 name="EmissiveTint">
+              <R>1</R>
+              <G>1</G>
+              <B>1</B>
+            </Color3>
             <Content name="MetalnessMapContent">
               <null>
               </null>
@@ -2185,6 +2285,16 @@
             <Content name="ColorMapContent">
               <uri>rbxassetid://5123498730</uri>
             </Content>
+            <Content name="EmissiveMaskContent">
+              <null>
+              </null>
+            </Content>
+            <float name="EmissiveStrength">1</float>
+            <Color3 name="EmissiveTint">
+              <R>1</R>
+              <G>1</G>
+              <B>1</B>
+            </Color3>
             <Content name="MetalnessMapContent">
               <uri>rbxassetid://6036394111</uri>
             </Content>

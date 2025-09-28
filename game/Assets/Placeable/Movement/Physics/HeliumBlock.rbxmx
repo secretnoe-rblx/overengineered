@@ -199,6 +199,8 @@
           <string name="FlipbookIncompatible">Particle texture must be 1024 by 1024 to use flipbooks.</string>
           <token name="FlipbookLayout">0</token>
           <token name="FlipbookMode">0</token>
+          <int name="FlipbookSizeX">1</int>
+          <int name="FlipbookSizeY">1</int>
           <bool name="FlipbookStartRandom">false</bool>
           <NumberRange name="Lifetime">2 2 </NumberRange>
           <float name="LightEmission">0</float>
