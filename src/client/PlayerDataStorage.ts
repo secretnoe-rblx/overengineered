@@ -1,6 +1,7 @@
 import { HttpService } from "@rbxts/services";
 import { LoadingController } from "client/controller/LoadingController";
 import { LogControl } from "client/gui/static/LogControl";
+import { Observables } from "engine/shared/event/Observables";
 import { ObservableValue } from "engine/shared/event/ObservableValue";
 import { ArgsSignal } from "engine/shared/event/Signal";
 import { JSON } from "engine/shared/fixes/Json";
@@ -69,11 +70,8 @@ export class PlayerDataStorage {
 		this._data = new ObservableValue(data);
 		this.data = this._data.asReadonly();
 
-		this.config = new ObservableValue(data.settings);
-		this.data.subscribe((d) => this.config.set(d.settings));
-
-		this.achievements = new ObservableValue(data.achievements);
-		this.data.subscribe((d) => this.achievements.set(d.achievements));
+		this.config = Observables.createObservableFromObjectPropertyTyped(this._data, ["settings"]);
+		this.achievements = Observables.createObservableFromObjectPropertyTyped(this._data, ["achievements"]);
 
 		const slots = new ObservableValue<{ readonly [k in number]: SlotMeta }>(Objects.empty);
 		this.data.subscribe((data) => slots.set(SlotsMeta.toTable(data.slots)), true);
