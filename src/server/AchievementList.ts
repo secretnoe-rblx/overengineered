@@ -94,6 +94,7 @@ class AchievementTheIssue extends Achievement {
 			id: "THE_ISSUE",
 			name: "DMCA abuse",
 			description: "Now go to our community server and read #the-issue channel",
+			hidden: true,
 		});
 
 		this.event.subscribe(player.Chatted, (msg, recv) => {
@@ -112,9 +113,9 @@ class AchievementLuaCircuitObtained extends Achievement {
 			description: `Obtain ${LuaCircuitBlock.displayName} by joining our community server and following instructions there.`,
 		});
 
-		this.onEnable(() =>
-			this.set({ completed: (playerDatabase.get(player.UserId).features?.indexOf("lua_circuit") ?? 0) > 0 }),
-		);
+		this.onEnable(() => {
+			this.set({ completed: (playerDatabase.get(player.UserId).features?.indexOf("lua_circuit") ?? -1) > -1 });
+		});
 	}
 }
 
