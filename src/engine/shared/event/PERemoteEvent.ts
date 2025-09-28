@@ -90,6 +90,9 @@ export class C2SRemoteEvent<TArg = undefined> extends PERemoteEvent<CustomRemote
 }
 
 export class S2CRemoteEvent<TArg = undefined> extends PERemoteEvent<CustomRemoteEvent<TArg>> {
+	private readonly _sent = new ArgsSignal<[player: Player, arg: TArg]>();
+	readonly sent = this._sent.asReadonly();
+
 	/** @client */
 	readonly invoked = new ArgsSignal<[arg: TArg]>();
 
@@ -106,13 +109,16 @@ export class S2CRemoteEvent<TArg = undefined> extends PERemoteEvent<CustomRemote
 	send(players: Player | readonly Player[] | "everyone", arg: TArg): void;
 	send(players: Player | readonly Player[] | "everyone", arg?: TArg) {
 		if (typeIs(players, "Instance")) {
+			this._sent.Fire(players, arg!);
 			this.event.FireClient(players, arg!);
 		} else if (players === "everyone") {
 			for (const player of Players.GetPlayers()) {
+				this._sent.Fire(player, arg!);
 				this.event.FireClient(player, arg!);
 			}
 		} else {
 			for (const player of players) {
+				this._sent.Fire(player, arg!);
 				this.event.FireClient(player, arg!);
 			}
 		}

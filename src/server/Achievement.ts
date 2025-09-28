@@ -1,4 +1,6 @@
 import { Component } from "engine/shared/component/Component";
+import { Objects } from "engine/shared/fixes/Objects";
+import { Strings } from "engine/shared/fixes/String.propmacro";
 import { CustomRemotes } from "shared/Remotes";
 import type { AchievementData } from "shared/AchievementData";
 
@@ -6,9 +8,18 @@ export type baseAchievementStats = {
 	readonly id: string;
 	readonly name: string;
 	readonly description: string;
-	readonly imageURL?: string;
+	readonly imageID?: number;
 	readonly hidden?: boolean;
-	readonly visualizationType?: "NONE" | "PROGRESS_BAR" | "NUMBER";
+
+	/** If set, signifies a maximum value for `progress` and enables a progress bar */
+	readonly max?: number;
+
+	/** Visual units:
+	 * `undefined` (default): Converts to shorthand (1234 into 1.23K)
+	 * `time`: Converts to short time (3600 to 1 hour)
+	 * `precise`: Doesn't change the number
+	 */
+	readonly units?: "time" | "precise";
 };
 
 export abstract class Achievement<Z = {}, T extends Z & AchievementData = Z & AchievementData> extends Component {
@@ -24,6 +35,10 @@ export abstract class Achievement<Z = {}, T extends Z & AchievementData = Z & Ac
 	/** @deprecated @hidden Internal usage only */
 	setData(data: T | undefined) {
 		this.data = data;
+
+		if (data?.completed) {
+			this.disable();
+		}
 	}
 
 	private remotechanged = false;
@@ -48,6 +63,20 @@ export abstract class Achievement<Z = {}, T extends Z & AchievementData = Z & Ac
 
 	set(data: T) {
 		if (this.getData()?.completed) return;
+		if (Objects.deepEquals(data, this.data)) {
+			return;
+		}
+
+		print(`AMONGUS setting ${this.info.id} to ${Strings.pretty(data)}`);
+		this.forceSet(data);
+	}
+
+	/** @hidden @deprecated */
+	forceSet(data: T) {
+		print(`AMONGUS FORCEsetting ${this.info.id} to ${Strings.pretty(data)}`);
+		if (this.info.max && data.progress && data.progress >= this.info.max) {
+			(data as Writable<T>).completed = true;
+		}
 
 		if (data.completed) {
 			(data as Writable<T>).completionDateUnix = DateTime.now().UnixTimestamp;
@@ -55,21 +84,11 @@ export abstract class Achievement<Z = {}, T extends Z & AchievementData = Z & Ac
 		this.data = data;
 		this.dbchanged = this.remotechanged = true;
 
-		// const pdata = this.database.get(this.player.UserId);
-		// this.database.set(this.player.UserId, {
-		// 	...pdata,
-		// 	achievements: { ...(pdata.achievements ?? {}), [this.info.id]: data },
-		// });
-
 		// send update immediately if completed
 		if (data.completed) {
 			CustomRemotes.achievements.update.send(this.player, { [this.info.id]: data });
+			this.remotechanged = false;
+			this.disable();
 		}
-	}
-
-	/** Shorthand for `this.set` with `data.completed = true` */
-	complete(data: Omit<T, "completed" | "completionDateUnix">) {
-		(data as Writable<T>).completed = true;
-		this.set(data as T);
 	}
 }

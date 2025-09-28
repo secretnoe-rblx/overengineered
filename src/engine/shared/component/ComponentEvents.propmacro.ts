@@ -124,9 +124,7 @@ export const ComponentEvents2Macros: PropertyMacros<ComponentEvents> = {
 		if (selv.state.isDestroyed()) return;
 
 		const sub = () => selv.eventHandler.subscribe(signal, callback);
-
 		selv.onEnable(sub);
-		if (selv.state.isEnabled()) sub();
 	},
 
 	subscribeRegistration: (

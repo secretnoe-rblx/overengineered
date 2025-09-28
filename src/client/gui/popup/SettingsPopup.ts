@@ -1,4 +1,5 @@
 import { Interface } from "client/gui/Interface";
+import { PlayerSettingsAchievements } from "client/gui/playerSettings/PlayerSettingsAchievements";
 import { PlayerSettingsBlacklist } from "client/gui/playerSettings/PlayerSettingsBlacklist";
 import { PlayerSettingsCamera } from "client/gui/playerSettings/PlayerSettingsCamera";
 import { PlayerSettingsControls } from "client/gui/playerSettings/PlayerSettingsControls";
@@ -136,6 +137,7 @@ export class SettingsPopup extends Control<SettingsPopup2Definition> {
 			const content = this.parent(new Content(gui.Content.Content, playerData.config));
 			const sidebar = this.parent(new Sidebar(gui.Content.Sidebar.ScrollingFrame));
 
+			sidebar.addButton("achievements", 18627409276, () => content.set(PlayerSettingsAchievements));
 			sidebar.addButton("general", 18627409276, () => content.set(PlayerSettingsGeneral));
 			sidebar.addButton("interface", 18627409276, () => content.set(PlayerSettingsInterface));
 			sidebar.addButton("camera", 18627409276, () => content.set(PlayerSettingsCamera));

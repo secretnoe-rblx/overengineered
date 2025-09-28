@@ -117,4 +117,40 @@ export namespace Strings {
 
 		return "just now";
 	}
+
+	export function prettyTime(seconds: number): string {
+		const intervals = [
+			{ label: "year", seconds: 31536000 },
+			{ label: "month", seconds: 2592000 },
+			{ label: "day", seconds: 86400 },
+			{ label: "hour", seconds: 3600 },
+			{ label: "min", seconds: 60 },
+			{ label: "sec", seconds: 1 },
+		];
+
+		for (const interval of intervals) {
+			const count = math.floor(seconds / interval.seconds);
+			if (count >= 1) {
+				return `${count} ${interval.label}`;
+			}
+		}
+
+		return "0 sec";
+	}
+	export function prettyKMT(num: number): string {
+		const round = (num: number) => math.round(num * 100) / 100;
+
+		if (num < 1000) return `${round(num)}`;
+		num /= 1000;
+		if (num < 1000) return `${round(num)}k`;
+		num /= 1000;
+		if (num < 1000) return `${round(num)}M`;
+		num /= 1000;
+		if (num < 1000) return `${round(num)}G`;
+		num /= 1000;
+		if (num < 1000) return `${round(num)}T`;
+		num /= 1000;
+
+		return `${round(num)}`;
+	}
 }

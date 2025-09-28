@@ -1,4 +1,4 @@
-import { RunService } from "@rbxts/services";
+import { RunService, TextChatService } from "@rbxts/services";
 import {
 	BidirectionalRemoteEvent,
 	C2S2CRemoteFunction,
@@ -170,10 +170,19 @@ export const CustomRemotes = {
 	playerLoaded: new C2SRemoteEvent("player_loaded"),
 	adminDataFor: new C2S2CRemoteFunction<number, Response<PlayerInitResponse>>("player_init_admin"),
 
+	chat: {
+		systemMessage: new S2CRemoteEvent<string>("chat_sysmsg", "RemoteEvent"),
+	},
 	updateSaves: new S2CRemoteEvent<readonly SlotMeta[]>("pl_save_update", "RemoteEvent"),
 	achievements: {
 		update: new S2CRemoteEvent<{ readonly [k in string]: AchievementData }>("pl_achs_updated", "RemoteEvent"),
-		loaded: new S2CRemoteEvent<{ readonly [k in string]: baseAchievementStats }>("pl_achs_loaded", "RemoteEvent"),
+		loaded: new S2CRemoteEvent<{
+			readonly order: readonly string[];
+			readonly data: { readonly [k in string]: baseAchievementStats };
+		}>("pl_achs_loaded", "RemoteEvent"),
+
+		admin_set: new C2SRemoteEvent<{ readonly [k in string]: AchievementData }>("pl_achs_adm_set", "RemoteEvent"),
+		admin_reset: new C2SRemoteEvent<string[]>("pl_achs_adm_reset", "RemoteEvent"),
 	},
 
 	physics: {
@@ -206,4 +215,10 @@ export const CustomRemotes = {
 
 if (RunService.IsServer()) {
 	CustomRemotes.playerLoaded.invoked.Connect((player) => $log(`Received ${player.Name} loaded request`));
+}
+if (RunService.IsClient()) {
+	CustomRemotes.chat.systemMessage.invoked.Connect((text) => {
+		const channel = TextChatService.FindFirstChild("TextChannels")?.FindFirstChild("RBXGeneral") as TextChannel;
+		channel?.DisplaySystemMessage(`<font color='#FAFAFA'>${text}</font>`);
+	});
 }
