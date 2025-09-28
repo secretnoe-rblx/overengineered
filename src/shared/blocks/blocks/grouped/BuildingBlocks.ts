@@ -20,6 +20,24 @@ const blocks: BlockBuildersWithoutIdAndDefaults = {
 
 		weldRegionsSource: BlockCreation.WeldRegions.fAutomatic("cube"),
 	},
+	scalabletruss1: {
+		displayName: "Scalable truss 1",
+		description: "Maybe climbable, possible cool, actually scalable. Empty variant",
+
+		weldRegionsSource: BlockCreation.WeldRegions.fAutomatic("cube"),
+	},
+	scalabletruss2: {
+		displayName: "Scalable truss 2",
+		description: "Maybe climbable, possible cool, actually scalable. Somewhat empty variant",
+
+		weldRegionsSource: BlockCreation.WeldRegions.fAutomatic("cube"),
+	},
+	scalabletruss3: {
+		displayName: "Scalable truss 3",
+		description: "Maybe climbable, possible cool, actually scalable. Kinda empty variant",
+
+		weldRegionsSource: BlockCreation.WeldRegions.fAutomatic("cube"),
+	},
 	cone: {
 		displayName: "Cone",
 		description: "Filled with weird geometry jokes. Sadly, no ice cream",
@@ -404,6 +422,46 @@ const cylinders: BlockBuildersWithoutIdAndDefaults = {
 		displayName: "Half Cylinder To 2x1 Cube Connector",
 		description: "A connector but wife left me",
 	},
+
+	cylinderto2x2cubehollowconnector: {
+		displayName: "Cylinder To 2x2 Cube Hollow Connector",
+		description:
+			"A connector to connect your connections between cylinder connection and cube connection but big and hollow",
+	},
+	cylinderto2x4cubehollowconnector: {
+		displayName: "Cylinder To 2x4 Cube Hollow Connector",
+		description:
+			"A connector to connect your connections between cylinder connection and cube connection but increased in size but hollow",
+	},
+	halfcylinderto2x2cubehollowconnector: {
+		displayName: "Half Cylinder To 2x2 Cube Hollow Connector",
+		description: "A connector to connect things but hollow",
+	},
+	halfcylinderto2x1cubehollowconnector: {
+		displayName: "Half Cylinder To 2x1 Cube Hollow Connector",
+		description: "A connector but wife left me but hollow",
+	},
+
+	cylinderto1x1cubehollowconnector: {
+		displayName: "Cylinder To 1x1 Cube Hollow Connector",
+		description:
+			"A connector to connect your connections between cylinder connection and cube connection but hollow",
+	},
+	cylinderto2x1cubehollowconnector: {
+		displayName: "Cylinder To 2x1 Cube Hollow Connector",
+		description:
+			"A connector to connect your connections between cylinder connection and cube connection but wide but hollow",
+	},
+	halfcylinderto1x1cubehollowconnector: {
+		displayName: "Half Cylinder To 1x1 Cube Hollow Connector",
+		description:
+			"A connector to connect your connections between cylinder connection and cube connection but some sizes were halved but hollow",
+	},
+	halfcylinderto1xhalfcubehollowconnector: {
+		displayName: "Half Cylinder To 1xHalf Cube Hollow Connector",
+		description:
+			"A connector to connect your connections but I'm getting tired of making the descriptions but hollow",
+	},
 };
 
 const wedges: BlockBuildersWithoutIdAndDefaults = {
@@ -506,6 +564,10 @@ const random: BlockBuildersWithoutIdAndDefaults = {
 	handle: {
 		displayName: "Handle",
 		description: "To hold",
+	},
+	bolthead: {
+		displayName: "Bolt head",
+		description: "Why? No idea, but you have it so be happy. or else.",
 	},
 };
 //

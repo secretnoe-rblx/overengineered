@@ -1,5 +1,6 @@
 import { HttpService, Workspace } from "@rbxts/services";
 import { HostedService } from "engine/shared/di/HostedService";
+import { Objects } from "engine/shared/fixes/Objects";
 import type { PlayerDataStorage } from "client/PlayerDataStorage";
 
 @injectable
@@ -12,19 +13,23 @@ export class CameraController extends HostedService {
 				camera.FieldOfView = playerData.config.get().betterCamera.fov;
 			}
 		}, true);
-		this.event.subscribeObservable(
-			playerData.config.createBased((x) => x.betterCamera),
-			(betterCamera) => {
-				$log("better_camera set to " + HttpService.JSONEncode(betterCamera));
-				Workspace.SetAttribute("camera_improved", betterCamera?.improved === true);
-				Workspace.SetAttribute("camera_playerCentered", betterCamera?.playerCentered === true);
-				Workspace.SetAttribute("camera_strictFollow", betterCamera?.strictFollow === true);
+		this.event.subscribeRegistration(() =>
+			playerData.config
+				.fReadonlyCreateBased((c) => c.betterCamera)
+				.subscribeWithCustomEquality(
+					(betterCamera) => {
+						$log("better_camera set to " + HttpService.JSONEncode(betterCamera));
+						Workspace.SetAttribute("camera_improved", betterCamera?.improved === true);
+						Workspace.SetAttribute("camera_playerCentered", betterCamera?.playerCentered === true);
+						Workspace.SetAttribute("camera_strictFollow", betterCamera?.strictFollow === true);
 
-				if (Workspace.CurrentCamera) {
-					Workspace.CurrentCamera.FieldOfView = betterCamera.fov;
-				}
-			},
-			true,
+						if (Workspace.CurrentCamera) {
+							Workspace.CurrentCamera.FieldOfView = betterCamera.fov;
+						}
+					},
+					Objects.deepEquals,
+					true,
+				),
 		);
 	}
 }
