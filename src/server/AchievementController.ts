@@ -72,13 +72,16 @@ export class AchievementController extends HostedService {
 
 		this.event.subscribe(CustomRemotes.playerLoaded.invoked, (player) => {
 			const controller = serverPlayersController.controllers.get(player.UserId);
-			if (!controller) return;
+			if (!controller) {
+				$warn("Could not initialize achievement controller for " + player.Name);
+				return;
+			}
 
 			const list = controller.parent(new AchievementList(controller.player));
 			task.defer(() => {
 				const database = serverPlayersController.players;
 				const achdata = database.get(player.UserId).achievements;
-				cachedAchievementData ??= init(list, controller.player, achdata);
+				cachedAchievementData = init(list, controller.player, achdata);
 
 				// player update sending loop
 				controller.event.loop(1, () => {
