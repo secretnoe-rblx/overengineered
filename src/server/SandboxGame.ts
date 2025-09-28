@@ -1,4 +1,4 @@
-import { RunService, ServerScriptService, Workspace } from "@rbxts/services";
+import { ServerScriptService, Workspace } from "@rbxts/services";
 
 import { InMemoryDatabaseBackend } from "engine/server/backend/InMemoryDatabaseBackend";
 import { Logger } from "engine/shared/Logger";
@@ -74,10 +74,7 @@ export namespace SandboxGame {
 		builder.services.registerService(ServerBlockLogicController);
 		builder.services.registerService(UnreliableRemoteController);
 		builder.services.registerService(RagdollController);
-
-		if (RunService.IsStudio()) {
-			builder.services.registerService(AchievementController);
-		}
+		builder.services.registerService(AchievementController);
 
 		// BadgeController.initializeIfProd(builder);
 	}
