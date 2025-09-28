@@ -25,7 +25,8 @@
 				"Map": { "path": "./game/Workspace/map.rbxm" },
 				"Obstacles": { "path": "./game/Workspace/obstacles.rbxm" },
 				"Plots": { "path": "./game/Workspace/plots.rbxm" },
-				"Terrain": { "path": "./game/Workspace/Terrain.rbxmx" }
+				"Terrain": { "path": "./game/Workspace/Terrain.rbxmx" },
+				"Triggers": { "path": "./game/Workspace/Triggers.rbxmx" }
 			}
 		},
 		"Players": {
