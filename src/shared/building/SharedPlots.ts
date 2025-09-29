@@ -18,13 +18,15 @@ for (const plot of plotsFolder.GetChildren()) {
 
 /** Reading the plots data */
 export class SharedPlots {
+	static instance: SharedPlots;
+
 	static initialize() {
 		const plots: readonly SharedPlot[] = (plotsFolder.GetChildren() as unknown as PlotModel[])
 			.map((p) => new SharedPlot(p).with((c) => c.enable()))
 			.sort((left, right) => left.instance.Name < right.instance.Name);
 		const plotComponents: ReadonlyMap<PlotModel, SharedPlot> = new Map(plots.map((p) => [p.instance, p]));
 
-		return new SharedPlots(plots, plotComponents);
+		return (this.instance = new SharedPlots(plots, plotComponents));
 	}
 
 	constructor(
