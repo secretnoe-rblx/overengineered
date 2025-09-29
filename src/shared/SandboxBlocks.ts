@@ -56,7 +56,7 @@ import { OwnerLocatorBlock } from "shared/blocks/blocks/OwnerLocatorBlock";
 import { ParticleBlocks } from "shared/blocks/blocks/particle/ParticleBlocks";
 import { PassengerSeatBlock } from "shared/blocks/blocks/PassengerSeatBlock";
 import { PistonBlock } from "shared/blocks/blocks/PistonBlock";
-import { RadarSectionBlock } from "shared/blocks/blocks/RadarSectionBlock";
+import { radarBlocks } from "shared/blocks/blocks/RadarSectionBlock";
 import { RadioReceiverBlock } from "shared/blocks/blocks/RadioReceiverBlock";
 import { RadioTransmitterBlock } from "shared/blocks/blocks/RadioTransmitterBlock";
 import { RandomAccessMemoryBlock } from "shared/blocks/blocks/RandomAccessMemoryBlock";
@@ -195,7 +195,7 @@ export const CreateSandboxBlocks = (di: DIContainer): BlockList => {
 		MouseSensorBlock,
 		RadioReceiverBlock,
 		RadioTransmitterBlock,
-		RadarSectionBlock,
+		...radarBlocks,
 		SpeedometerBlock,
 		LaserBlock,
 
