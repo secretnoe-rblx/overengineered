@@ -424,6 +424,9 @@ abstract class AchievementCheckpoints extends Achievement<{ checkpoints_finished
 	}
 }
 
+//may be will be used some day
+const getExtremesOfArray = (arr: number[]): LuaTuple<[number, number]> => $tuple(math.min(...arr), math.max(...arr));
+
 abstract class AchievementCheckpointsWithTimeout extends Achievement {
 	constructor(
 		player: Player,
@@ -439,8 +442,9 @@ abstract class AchievementCheckpointsWithTimeout extends Achievement {
 		const listLen = triggersList.size();
 		for (let i = 0; i < listLen; i++) {
 			const t = triggersList[i];
-			let thread: thread;
 
+			//I believe it to be kinda clever actually
+			let thread: thread;
 			this.event.subscribe(t.Touched, (inst) => {
 				//get player's mode
 				// yes it DOESN'T actually check if player is in their own vehicle
@@ -679,7 +683,7 @@ abstract class AchievementFindGetNearObject extends Achievement {
 			}
 
 			// same result, purposefully separated conditions
-			if (character.Position.sub(targetObject.Position).Magnitude < activationDistance) {
+			if (character.Position.sub(targetObject.Position).Magnitude > activationDistance) {
 				counter = 0;
 				return;
 			}
