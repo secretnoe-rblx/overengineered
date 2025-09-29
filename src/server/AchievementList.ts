@@ -306,7 +306,9 @@ class AchievementCatchOnFire extends Achievement {
 			description: "Better call the fire department! (We don't have one)",
 		});
 
-		this.event.subscribe(fireffect.event.c2s.invoked, (owner) => this.set({ completed: owner === player }));
+		this.event.subscribe(fireffect.event.s2c.sent, (owner) => {
+			this.set({ completed: owner === player });
+		});
 	}
 }
 
@@ -699,10 +701,10 @@ class AchievementFindBanana extends AchievementFindGetNearObject {
 				name: "Completely bananas!",
 				description: "Find the banana!",
 				hidden: true,
-				max: 8,
+				max: 4,
 			},
 			ws.Map.Banana.PrimaryPart,
-			10,
+			40,
 		);
 	}
 }
@@ -717,10 +719,10 @@ class AchievementFindUFO extends AchievementFindGetNearObject {
 				name: "I Want to Believe!",
 				description: "Find the UFO!",
 				hidden: true,
-				max: 8,
+				max: 4,
 			},
 			ws.Map.UFO.PrimaryPart,
-			15,
+			90,
 		);
 	}
 }
