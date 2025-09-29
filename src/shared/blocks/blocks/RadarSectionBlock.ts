@@ -95,12 +95,16 @@ const definitionRadial = {
 
 const ownDetectablesSet = new Set<BasePart>();
 
-if (!RunService.IsClient()) {
-	CustomRemotes.modes.set.processed.Connect((player, { mode }) => {
-		if (Players.LocalPlayer !== player) return;
+if (RunService.IsClient()) {
+	const p = Players.LocalPlayer;
+	CustomRemotes.modes.set.sent.Connect(({ mode }) => {
 		if (mode === "ride") {
-			const blocks = SharedPlots.instance.getPlotComponentByOwnerID(player.UserId).getblocks();
-			for (const b of blocks) ownDetectablesSet.add(b.PrimaryPart);
+			const blocks = SharedPlots.instance.getPlotComponentByOwnerID(p.UserId).getBlocks();
+
+			for (const b of blocks) {
+				if (!b.PrimaryPart) continue;
+				ownDetectablesSet.add(b.PrimaryPart);
+			}
 			return;
 		}
 
