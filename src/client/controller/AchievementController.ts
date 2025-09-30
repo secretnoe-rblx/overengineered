@@ -191,6 +191,10 @@ class AchievementControl extends PartialControl<AchievementControlParts> {
 export type AchievementsGuiDefinition = GuiObject & {
 	readonly Settings: GuiObject;
 	readonly TemplatePB: GuiObject;
+	readonly TotalProgressBar: GuiObject & {
+		readonly Fill: GuiObject;
+		readonly ValueLabel: TextLabel;
+	};
 };
 @injectable
 export class AchievementsGui extends Control<AchievementsGuiDefinition> {
@@ -249,10 +253,19 @@ export class AchievementsGui extends Control<AchievementsGuiDefinition> {
 		this.event.subscribeObservable(
 			playerData.achievements,
 			(datas) => {
+				let completed = 0;
 				for (const [id, data] of pairs(datas)) {
 					if (!(id in achs)) continue;
 					achs[id].update(data);
+
+					if (data.completed) {
+						completed++;
+					}
 				}
+
+				const total = as.order.size();
+				gui.TotalProgressBar.Fill.Size = new UDim2(completed / total, 0, 1, 0);
+				gui.TotalProgressBar.ValueLabel.Text = `Achievement completion: ${completed}/${total}`;
 			},
 			true,
 		);

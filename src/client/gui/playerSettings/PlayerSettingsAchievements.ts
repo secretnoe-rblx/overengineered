@@ -16,6 +16,7 @@ export class PlayerSettingsAchievements extends Control {
 			Popups: { Crossplatform: { Achievements: { Content: { ScrollingFrame: AchievementsGuiDefinition } } } };
 		}>().Popups.Crossplatform.Achievements.Content.ScrollingFrame;
 		sc.TemplatePB.Clone().Parent = gui;
+		sc.TotalProgressBar.Clone().Parent = gui;
 		sc.Settings.Clone().Parent = gui;
 
 		this.onInject((di) => {
