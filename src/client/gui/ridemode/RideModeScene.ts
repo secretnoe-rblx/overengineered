@@ -367,8 +367,6 @@ export class RideModeScene extends Control<RideModeSceneDefinition> {
 		this.controls.onEnterSettingsMode.Connect(() => controlsEditMode.set(true));
 		this.controls.onQuitSettingsMode.Connect(() => controlsEditMode.set(false));
 
-		gui.FindFirstChild("ActionBar")!.Destroy();
-
 		this.info = this.parent(new ComponentChildren<Control>().withParentInstance(this.gui.Info));
 
 		this.infoTemplate = this.asTemplate(this.gui.Info.Template);

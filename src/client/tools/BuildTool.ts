@@ -7,7 +7,6 @@ import { MaterialColorEditControl } from "client/gui/buildmode/MaterialColorEdit
 import { MirrorEditorControl } from "client/gui/buildmode/MirrorEditorControl";
 import { DebugLog } from "client/gui/DebugLog";
 import { Interface } from "client/gui/Interface";
-import { ScaleEditorControl } from "client/gui/ScaleEditor";
 import { LogControl } from "client/gui/static/LogControl";
 import { Signals } from "client/Signals";
 import { BlockGhoster } from "client/tools/additional/BlockGhoster";
@@ -33,7 +32,6 @@ import type { BlockSelectionControlDefinition } from "client/gui/buildmode/Block
 import type { MaterialColorEditControlDefinition } from "client/gui/buildmode/MaterialColorEditControl";
 import type { MirrorEditorControlDefinition } from "client/gui/buildmode/MirrorEditorControl";
 import type { MainScreenLayout } from "client/gui/MainScreenLayout";
-import type { ScaleEditorControlDefinition } from "client/gui/ScaleEditor";
 import type { Tooltip } from "client/gui/static/TooltipsControl";
 import type { BuildingMode } from "client/modes/build/BuildingMode";
 import type { ClientBuilding } from "client/modes/build/ClientBuilding";
@@ -300,21 +298,6 @@ namespace Scene {
 		constructor(@inject tool: BuildTool, @inject mainScreen: MainScreenLayout, @inject di: DIContainer) {
 			super();
 			this.tool = tool;
-
-			const scaleEditorGui = Interface.getGameUI<{
-				BuildingMode: { Scale: GuiObject & { Content: ScaleEditorControlDefinition } };
-			}>().BuildingMode.Scale;
-			scaleEditorGui.Visible = false;
-			this.parent(new ScaleEditorControl(scaleEditorGui.Content, tool.blockScale));
-
-			const scaleEditorBtn = this.parent(
-				new Control(
-					Interface.getGameUI<{ BuildingMode: { Action: { Scale: GuiButton } } }>().BuildingMode.Action.Scale,
-				),
-			).addButtonAction(() => (scaleEditorGui.Visible = !scaleEditorGui.Visible));
-
-			this.onEnabledStateChange((enabled) => scaleEditorBtn.setVisibleAndEnabled(enabled), true);
-			this.onDisable(() => (scaleEditorGui.Visible = false));
 
 			const inventory = this.parentGui(mainScreen.registerLeft<BlockSelectionControlDefinition>("Inventory"));
 			this.blockSelector = this.parent(tool.di.resolveForeignClass(BlockSelectionControl, [inventory.instance]));
