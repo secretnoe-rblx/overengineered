@@ -24,6 +24,14 @@ const definition = {
 				number: { config: 20 },
 			},
 		},
+
+		reset: {
+			displayName: "Reset",
+			tooltip: "Reset to starting value",
+			types: {
+				bool: { config: false },
+			},
+		},
 	},
 	output: {
 		value: {
@@ -38,10 +46,16 @@ class Logic extends BlockLogic<typeof definition> {
 	constructor(block: BlockLogicArgs) {
 		super(definition, block);
 
+		const startCache = this.initializeInputCache("startValue");
+		const resetCache = this.initializeInputCache("reset");
 		const set = (value: number) => this.output.value.set("number", value);
 		this.onkFirstInputs(["startValue"], ({ startValue }) => set(startValue));
 
 		this.onAlwaysInputs(({ targetValue, speed }, { dt }) => {
+			if (resetCache.get()) {
+				set(startCache.get());
+				return;
+			}
 			const start = this.output.value.justGet().value;
 			if (start === targetValue) return;
 
