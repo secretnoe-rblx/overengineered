@@ -215,7 +215,18 @@ export class AchievementsGui extends Control<AchievementsGuiDefinition> {
 
 		const achs: { [k in string]: AchievementControl } = {};
 		const as = achievementController.allAchievements.get();
-		for (const id of as.order) {
+
+		const orderMap = as.order.mapToMap((v, i) => $tuple(v, i));
+		const sortedOrder = [...as.order].sort((l, r) => {
+			const lc = playerData.achievements.get()?.[l]?.completed ?? false;
+			const rc = playerData.achievements.get()?.[r]?.completed ?? false;
+
+			if (lc && !rc) return false;
+			if (rc && !lc) return true;
+
+			return (orderMap.get(l) ?? 0) < (orderMap.get(r) ?? 1);
+		});
+		for (const id of sortedOrder) {
 			achs[id] = this.parent(new AchievementControl(template(), as.data[id]));
 		}
 
