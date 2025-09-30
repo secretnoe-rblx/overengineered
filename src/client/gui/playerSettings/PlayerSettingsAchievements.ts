@@ -1,7 +1,6 @@
 import { AchievementsGui } from "client/controller/AchievementController";
 import { Control } from "engine/client/gui/Control";
 import { Interface } from "engine/client/gui/Interface";
-import type { AchievementsGuiDefinition } from "client/controller/AchievementController";
 import type {
 	ConfigControlListDefinition,
 	ConfigControlTemplateList,
@@ -13,14 +12,12 @@ export class PlayerSettingsAchievements extends Control {
 		super(gui);
 
 		const sc = Interface.getInterface<{
-			Popups: { Crossplatform: { Achievements: { Content: { ScrollingFrame: AchievementsGuiDefinition } } } };
-		}>().Popups.Crossplatform.Achievements.Content.ScrollingFrame;
-		sc.TemplatePB.Clone().Parent = gui;
-		sc.TotalProgressBar.Clone().Parent = gui;
-		sc.Settings.Clone().Parent = gui;
+			Popups: { Crossplatform: { Achievements: { Content: GuiObject } } };
+		}>().Popups.Crossplatform.Achievements.Content.Clone();
+		sc.Parent = gui;
 
 		this.onInject((di) => {
-			this.parent(di.resolveForeignClass(AchievementsGui, [gui as never]));
+			this.parent(di.resolveForeignClass(AchievementsGui, [sc as never]));
 		});
 	}
 }

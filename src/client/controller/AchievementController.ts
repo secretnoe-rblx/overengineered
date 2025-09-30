@@ -188,18 +188,19 @@ class AchievementControl extends PartialControl<AchievementControlParts> {
 	}
 }
 
-export type AchievementsGuiDefinition = GuiObject & {
+export type AchievementsGuiParts = {
 	readonly Settings: GuiObject;
 	readonly TemplatePB: GuiObject;
+	readonly ScrollingFrame: ScrollingFrame;
 	readonly TotalProgressBar: GuiObject & {
 		readonly Fill: GuiObject;
 		readonly ValueLabel: TextLabel;
 	};
 };
 @injectable
-export class AchievementsGui extends Control<AchievementsGuiDefinition> {
+export class AchievementsGui extends PartialControl<AchievementsGuiParts> {
 	constructor(
-		gui: AchievementsGuiDefinition,
+		gui: GuiObject,
 		@inject playerData: PlayerDataStorage,
 		@inject achievementController: AchievementController,
 	) {
@@ -209,13 +210,13 @@ export class AchievementsGui extends Control<AchievementsGuiDefinition> {
 			readonly CompletedCheckbox: CheckBoxControlDefinition;
 			readonly NoncompletedCheckbox: CheckBoxControlDefinition;
 		};
-		const settings = this.parent(new PartialControl<settings>(gui.Settings));
+		const settings = this.parent(new PartialControl<settings>(this.parts.Settings));
 		const completedcb = this.parent(new CheckBoxControl(settings.parts.CompletedCheckbox));
 		completedcb.value.set(true);
 		const noncompletedcb = this.parent(new CheckBoxControl(settings.parts.NoncompletedCheckbox));
 		noncompletedcb.value.set(true);
 
-		const template = this.asTemplate(gui.TemplatePB);
+		const template = this.asTemplate(this.parts.TemplatePB);
 
 		const achs: { [k in string]: AchievementControl } = {};
 		const as = achievementController.allAchievements.get();
@@ -230,8 +231,9 @@ export class AchievementsGui extends Control<AchievementsGuiDefinition> {
 
 			return (orderMap.get(l) ?? 0) < (orderMap.get(r) ?? 1);
 		});
+		const sf = this.parent(new Control(this.parts.ScrollingFrame));
 		for (const id of sortedOrder) {
-			achs[id] = this.parent(new AchievementControl(template(), as.data[id]));
+			achs[id] = sf.parent(new AchievementControl(template(), as.data[id]));
 		}
 
 		const updateFilters = () => {
@@ -264,8 +266,8 @@ export class AchievementsGui extends Control<AchievementsGuiDefinition> {
 				}
 
 				const total = as.order.size();
-				gui.TotalProgressBar.Fill.Size = new UDim2(completed / total, 0, 1, 0);
-				gui.TotalProgressBar.ValueLabel.Text = `Achievement completion: ${completed}/${total}`;
+				this.parts.TotalProgressBar.Fill.Size = new UDim2(completed / total, 0, 1, 0);
+				this.parts.TotalProgressBar.ValueLabel.Text = `Achievement completion: ${completed}/${total}`;
 			},
 			true,
 		);
