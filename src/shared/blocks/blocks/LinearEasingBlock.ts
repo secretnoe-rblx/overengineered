@@ -4,7 +4,7 @@ import type { BlockLogicArgs, BlockLogicFullBothDefinitions } from "shared/block
 import type { BlockBuilder } from "shared/blocks/Block";
 
 const definition = {
-	inputOrder: ["startValue", "targetValue", "speed"],
+	inputOrder: ["reset", "startValue", "targetValue", "speed"],
 	input: {
 		startValue: {
 			displayName: "Start value",
