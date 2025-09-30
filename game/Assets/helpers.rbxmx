@@ -1390,7 +1390,7 @@
             <bool name="DefinesCapabilities">false</bool>
             <int64 name="SourceAssetId">-1</int64>
             <BinaryString name="Tags"></BinaryString>
-            <float name="Transparency">1</float>
+            <float name="Transparency">0</float>
             <bool name="Visible">true</bool>
           </Properties>
         </Item>
