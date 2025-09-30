@@ -1635,11 +1635,28 @@ const v34: UpgradableBlocksSerializer<SerializedBlocks<SerializedBlockBase>, typ
 	},
 };
 
+// Replace military turbine model customData
+const v35: UpgradableBlocksSerializer<SerializedBlocks<SerializedBlockBase>, typeof v34> = {
+	version: 35,
+
+	upgradeFrom(prev: SerializedBlocks<SerializedBlockBase>): SerializedBlocks<SerializedBlockBase> {
+		return {
+			version: this.version,
+			blocks: prev.blocks.map(
+				(b): SerializedBlockBase => ({
+					...b,
+					id: b.id === "radioreciever" ? "radioreceiver" : b.id,
+				}),
+			),
+		};
+	},
+};
+
 //
 
 const versions = [
 	...([v4, v5, v6, v7, v8, v9, v10, v11, v12, v13, v14, v15, v16, v17, v18, v19, v20, v21, v22] as const),
-	...([v23, v24, v25, v26, v27, v28, v29, v30, v31, v32, v33, v34] as const),
+	...([v23, v24, v25, v26, v27, v28, v29, v30, v31, v32, v33, v34, v35] as const),
 ] as const;
 const current = versions[versions.size() - 1] as typeof versions extends readonly [...unknown[], infer T] ? T : never;
 

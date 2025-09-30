@@ -145,7 +145,7 @@ namespace BlockConfigTypes {
 		readonly controllableNumber: ControllableNumber;
 		readonly byte: Byte;
 		readonly bytearray: ByteArray;
-		readonly code: Code
+		readonly code: Code;
 	}
 }
 
@@ -1364,7 +1364,7 @@ const radiotransmitter = {
 	output: {},
 } as const satisfies BlockConfigBothDefinitions;
 
-const radioreciever = {
+const radioreceiver = {
 	input: {
 		frequency: {
 			type: "clampedNumber",
@@ -1811,7 +1811,7 @@ export const _BlockConfigRegistrySave = {
 	tpscounter: tpscounter,
 	altimeter,
 	radiotransmitter,
-	radioreciever,
+	radioreceiver,
 
 	radarsection,
 	firesensor,
