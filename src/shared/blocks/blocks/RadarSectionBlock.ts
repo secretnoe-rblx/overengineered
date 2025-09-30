@@ -1,5 +1,7 @@
 import { Players, RunService } from "@rbxts/services";
+import { t } from "engine/shared/t";
 import { InstanceBlockLogic as InstanceBlockLogic } from "shared/blockLogic/BlockLogic";
+import { BlockSynchronizer } from "shared/blockLogic/BlockSynchronizer";
 import { BlockCreation } from "shared/blocks/BlockCreation";
 import { SharedPlots } from "shared/building/SharedPlots";
 import { CustomRemotes } from "shared/Remotes";
@@ -11,6 +13,7 @@ const definition = {
 	input: {
 		maxDistance: {
 			displayName: "Max Distance",
+			tooltip: "Returns coordinates relative to this block instead of relative to global grid",
 			unit: "Studs",
 			types: {
 				number: {
@@ -93,7 +96,9 @@ const definitionRadial = {
 	},
 } satisfies BlockLogicFullBothDefinitions;
 
-const ownDetectablesSet = new Set<BasePart>();
+type radarBlock = BlockModel & {
+	RadarView: BasePart | UnionOperation | MeshPart;
+};
 
 if (RunService.IsClient()) {
 	const p = Players.LocalPlayer;
@@ -112,9 +117,32 @@ if (RunService.IsClient()) {
 	});
 }
 
+const updateEventType = t.interface({
+	block: t.instance("Model").nominal("blockModel").as<radarBlock>(),
+	size: t.vector3,
+	offset: t.cframe,
+	position: t.vector3,
+});
+
+type UpdateData = t.Infer<typeof updateEventType>;
+
+const events = {
+	updateSize: new BlockSynchronizer(
+		"b_radar_size_update",
+		updateEventType, //useless comment just to calm down the text formatter
+		({ block, size, offset, position }: UpdateData) => {
+			block.RadarView.Size = size;
+			block.RadarView.Position = position;
+			block.RadarView.PivotOffset = offset;
+		},
+	),
+} as const;
+
+const ownDetectablesSet = new Set<BasePart>();
+
 export type { Logic as RadarSectionBlockLogic };
 @injectable
-class Logic extends InstanceBlockLogic<typeof definition> {
+class Logic extends InstanceBlockLogic<typeof definition, radarBlock> {
 	constructor(
 		def: typeof definition,
 		block: InstanceBlockLogicArgs,
@@ -157,6 +185,7 @@ class Logic extends InstanceBlockLogic<typeof definition> {
 			if (ownDetectablesSet.has(part)) return;
 
 			//check if minDistance !== 0 ig?
+			//probably useless
 			if (!minDistance) return;
 
 			this.allTouchedBlocks.add(part);
@@ -228,9 +257,14 @@ class Logic extends InstanceBlockLogic<typeof definition> {
 
 class RadialRadarLogic extends Logic {
 	constructor(block: InstanceBlockLogicArgs) {
+		const zeroOffset = new CFrame(0, 0, 0);
 		super(definitionRadial, block, (view, detectionSize, maxDistance) => {
-			view.Size = new Vector3(maxDistance, maxDistance, maxDistance);
-			view.PivotOffset = new CFrame();
+			events.updateSize.send({
+				block: this.instance,
+				size: new Vector3(maxDistance, maxDistance, maxDistance),
+				offset: zeroOffset,
+				position: this.instance.GetPivot().Position,
+			});
 		});
 	}
 }
@@ -240,13 +274,17 @@ class RadarSectionLogic extends Logic {
 		super(definition, block, (view, detectionSize, maxDistance) => {
 			const halvedMaxDist = maxDistance / 2;
 			const ds = detectionSize * (detectionSize - math.sqrt(halvedMaxDist / (maxDistance + halvedMaxDist))) * 10;
-			view.Size = new Vector3(ds, view.Size.Y, ds);
-			view.PivotOffset = new CFrame(0, -view.Size.Y / 2 - 0.4, 0);
+			events.updateSize.send({
+				block: this.instance,
+				size: new Vector3(ds, view.Size.Y, ds),
+				offset: new CFrame(0, -view.Size.Y / 2 - 0.4, 0),
+				position: view.Position,
+			});
 		});
 	}
 }
 
-export const radarBlocks = [
+export const RadarBlocks = [
 	{
 		...BlockCreation.defaults,
 		id: "radarsection",

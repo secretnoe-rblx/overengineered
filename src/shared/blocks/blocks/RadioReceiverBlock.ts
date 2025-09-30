@@ -94,7 +94,7 @@ export const RadioReceiverBlock = {
 
 	logic: { definition, ctor: Logic },
 	modelSource: {
-		model: BlockCreation.Model.fFromAssets("radioreciever"),
+		model: BlockCreation.Model.fFromAssets("radioreceiver"),
 		category: () => ["Logic", "Communication"],
 	},
 } as const satisfies BlockBuilder;
