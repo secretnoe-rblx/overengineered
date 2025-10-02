@@ -256,9 +256,18 @@ const cones: BlockBuildersWithoutIdAndDefaults = {
 		displayName: "Cone",
 		description: "Filled with weird geometry jokes. Sadly, no ice cream",
 	},
+	conehalf: {
+		displayName: "Cone Half",
+		description: "Half of a cone, surprisingly",
+	},
+	conequarter: {
+		displayName: "Cone Quarter",
+		description: "What do you evene expect from thsi",
+	},
+
 	halfcone: {
 		displayName: "Half Cone",
-		description: "As half as much geometry jokes in this one. Still no ice cream tho...",
+		description: "Not to be confused with cone half",
 	},
 	cutcone: {
 		displayName: "Cut Cone",
