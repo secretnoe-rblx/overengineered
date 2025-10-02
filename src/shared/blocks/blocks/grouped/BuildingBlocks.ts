@@ -38,18 +38,6 @@ const blocks: BlockBuildersWithoutIdAndDefaults = {
 
 		weldRegionsSource: BlockCreation.WeldRegions.fAutomatic("cube"),
 	},
-	cone: {
-		displayName: "Cone",
-		description: "Filled with weird geometry jokes. Sadly, no ice cream",
-	},
-	halfcone: {
-		displayName: "Half Cone",
-		description: "As half as much geometry jokes in this one. Still no ice cream tho...",
-	},
-	cutcone: {
-		displayName: "Cut Cone",
-		description: "Filled with weird geome",
-	},
 	halfblock: {
 		displayName: "Half Block",
 		description: "Like a block, but with a small caveat...",
@@ -260,6 +248,34 @@ const cornerWedges: BlockBuildersWithoutIdAndDefaults = {
 		description: "Same halved corner wedge, but mirrored!",
 
 		mirror: { behaviour: "normal", replacementId: "halfcornerwedge4x1" },
+	},
+};
+
+const cones: BlockBuildersWithoutIdAndDefaults = {
+	cone: {
+		displayName: "Cone",
+		description: "Filled with weird geometry jokes. Sadly, no ice cream",
+	},
+	halfcone: {
+		displayName: "Half Cone",
+		description: "As half as much geometry jokes in this one. Still no ice cream tho...",
+	},
+	cutcone: {
+		displayName: "Cut Cone",
+		description: "Filled with weird geome",
+	},
+
+	hollowcone: {
+		displayName: "Hollow Cone",
+		description: "Finally, ice cream jokes are on the menu",
+	},
+	hollowconehalf: {
+		displayName: "Hollow Cone Half",
+		description: "Half of something useful",
+	},
+	hollowconequarter: {
+		displayName: "Hollow Cone Quarter",
+		description: "Quarter of something useful",
 	},
 };
 
@@ -577,6 +593,7 @@ const list: BlockBuildersWithoutIdAndDefaults = {
 	...balls,
 	...beams,
 	...cornerWedges,
+	...cones,
 	...cylinders,
 	...wedges,
 	...trainWheels,
