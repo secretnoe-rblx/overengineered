@@ -20,7 +20,6 @@
         <SecurityCapabilities name="Capabilities">0</SecurityCapabilities>
         <bool name="ClipsDescendants">true</bool>
         <float name="DistanceLowerLimit">0</float>
-        <float name="DistanceStep">0</float>
         <float name="DistanceUpperLimit">-1</float>
         <bool name="Enabled">true</bool>
         <Vector3 name="ExtentsOffset">
@@ -468,7 +467,6 @@
         <SecurityCapabilities name="Capabilities">0</SecurityCapabilities>
         <bool name="ClipsDescendants">true</bool>
         <float name="DistanceLowerLimit">0</float>
-        <float name="DistanceStep">0</float>
         <float name="DistanceUpperLimit">-1</float>
         <bool name="Enabled">true</bool>
         <Vector3 name="ExtentsOffset">
