@@ -968,7 +968,7 @@ namespace ShiftRegisterInput {
 					ttt = data[`input${i as 0}Type`] as t;
 				}
 				ttt ??= data.extenderType;
-				print(ttt);
+
 				if (!lockInputs.get()) {
 					for (let i = 0; i < inputAmount; i++) values[i] = (data[`input${i as 0}`] ?? filler) as t2;
 					values[inputAmount] = (data.extender ?? filler) as t2;
@@ -979,7 +979,6 @@ namespace ShiftRegisterInput {
 				if (!shift.get()) return;
 
 				const v = values.shift();
-				print(values);
 
 				if (!v || v === filler) return;
 				this.output.output.set(ttt, v as t2);
