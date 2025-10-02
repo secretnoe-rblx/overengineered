@@ -726,7 +726,7 @@ class AchievementFindUFO extends AchievementFindGetNearObject {
 				max: 4,
 			},
 			ws.Map.UFO.PrimaryPart,
-			90,
+			150,
 		);
 	}
 }
