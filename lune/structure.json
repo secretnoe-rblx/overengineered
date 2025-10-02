@@ -5,6 +5,9 @@
 			"children": {
 				"Assets": {
 					"children": {
+						"CommonWeldColliders": {
+							"kind": { "kind": "folder", "root": "./game/Assets/CommonWeldColliders" }
+						},
 						"Placeable": {
 							"kind": { "kind": "folder", "root": "./game/Assets/Placeable" }
 						},
