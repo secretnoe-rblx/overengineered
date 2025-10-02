@@ -23,7 +23,7 @@ export type BlockLogicWithConfigDefinitionTypes<TKeys extends PrimitiveKeys> = {
 	readonly [k in TKeys]: OmitOverUnion<Primitives[k], "default">;
 };
 
-type BlockLogicInputDef = {
+export type BlockLogicInputDef = {
 	readonly displayName: string;
 	readonly types: Partial<BlockLogicWithConfigDefinitionTypes<PrimitiveKeys>>;
 	readonly group?: string;
@@ -34,7 +34,7 @@ type BlockLogicInputDef = {
 export type BlockLogicNoConfigDefinitionTypes<TKeys extends PrimitiveKeys> = {
 	readonly [k in TKeys]: OmitOverUnion<Primitives[k], "default" | "config">;
 };
-type BlockLogicOutputDef = {
+export type BlockLogicOutputDef = {
 	readonly displayName: string;
 	readonly tooltip?: string;
 	readonly unit?: string;

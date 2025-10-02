@@ -11,8 +11,11 @@ import type {
 	AllOutputKeysToObject,
 	BlockLogicArgs,
 	BlockLogicFullBothDefinitions,
+	BlockLogicInputDef,
+	BlockLogicOutputDef,
 	BlockLogicOutputDefs,
 	BlockLogicTickContext,
+	InstanceBlockLogicArgs,
 } from "shared/blockLogic/BlockLogic";
 import type { BlockLogicTypes } from "shared/blockLogic/BlockLogicTypes";
 import type { LogicValueStorageContainer } from "shared/blockLogic/BlockLogicValueStorage";
@@ -795,6 +798,208 @@ namespace Demux {
 	] as const satisfies BlockBuilder[];
 }
 
+namespace ShiftRegisterOutput {
+	const possibleTypes = asMap(BlockConfigDefinitions.any).keys();
+	const outputsGenerator = (outputsAmount: number) => {
+		const res: Partial<Record<`output${0 | 1 | 2 | 3 | 4 | 5 | 6 | 7}`, BlockLogicOutputDef>> = {};
+		for (let i = 0; i < outputsAmount; i++) {
+			res[`output${i as 0}`] = {
+				displayName: `Output ${i}`,
+				types: possibleTypes,
+				group: "1",
+			};
+		}
+		return res;
+	};
+
+	const outputAmount = 8;
+	const outps = outputsGenerator(outputAmount);
+	const definition = {
+		inputOrder: ["shift", "lockOutput", "inputValue"],
+		outputOrder: [...new Array(outputAmount, "output").map((v, i) => v + i), "extender"],
+		input: {
+			shift: {
+				displayName: "Shift",
+				types: BlockConfigDefinitions.bool,
+			},
+			lockOutput: {
+				displayName: "Lock Outputs",
+				types: {
+					bool: {
+						config: false,
+					},
+				},
+			},
+			inputValue: {
+				displayName: "Input",
+				types: BlockConfigDefinitions.any,
+				group: "1",
+			},
+		},
+		output: {
+			...(outps as { [x: string]: BlockLogicOutputDef }),
+			extender: {
+				displayName: `Extender Output`,
+				types: possibleTypes,
+				group: "1",
+			},
+		},
+	} satisfies BlockLogicFullBothDefinitions;
+
+	class Logic extends BlockLogic<typeof definition> {
+		constructor(block: InstanceBlockLogicArgs) {
+			super(definition, block);
+
+			const values: (string | number | boolean | Vector3 | Color3 | BlockLogicTypes.SoundValue)[] = [];
+
+			const shift = this.initializeInputCache("shift");
+			const lockOutput = this.initializeInputCache("lockOutput");
+			const val = this.initializeInputCache("inputValue");
+
+			const updateOutputs = () => {
+				const arr_len = values.size();
+				const len = math.min(arr_len, outputAmount);
+				if (!lockOutput.get()) {
+					for (let i = 0; i < len; i++) this.output[`output${i}` as "extender"].set(val.getType(), values[i]);
+				}
+
+				if (arr_len > outputAmount) this.output.extender.set(val.getType(), values[outputAmount]);
+			};
+
+			this.onk(["lockOutput"], ({ lockOutput }) => {
+				if (lockOutput) return;
+				updateOutputs();
+			});
+
+			// we do shiftin' here
+			this.onTicc(() => {
+				if (!shift.get()) return;
+				values.unshift(val.get());
+
+				updateOutputs();
+
+				if (values.size() > outputAmount) values.pop();
+			});
+		}
+	}
+
+	export const block = {
+		...BlockCreation.defaults,
+		id: "shiftregisteroutput",
+		displayName: "Shift Register (Output)",
+		description: "Shifts input values while 'Shift' input is active. Can be connected serially to extends inputs",
+		search: {
+			aliases: ["extend", "bit"],
+		},
+
+		logic: { definition: definition, ctor: Logic },
+	} as const satisfies BlockBuilder;
+}
+
+namespace ShiftRegisterInput {
+	const inputsGenerator = (outputsAmount: number) => {
+		const res: Partial<Record<`input${0 | 1 | 2 | 3 | 4 | 5 | 6 | 7}`, BlockLogicInputDef>> = {};
+		for (let i = 0; i < outputsAmount; i++) {
+			res[`input${i as 0}`] = {
+				displayName: `input ${i}`,
+				types: BlockConfigDefinitions.any,
+				group: "1",
+			};
+		}
+
+		return res as Required<typeof res>;
+	};
+
+	const inputAmount = 8;
+	const inpts = inputsGenerator(inputAmount);
+
+	const definition = {
+		inputOrder: ["shift", "lockInputs", ...new Array(inputAmount, "input").map((v, i) => v + i), "extender"],
+		outputOrder: ["output"],
+		input: {
+			shift: {
+				displayName: "Shift",
+				types: BlockConfigDefinitions.bool,
+			},
+			lockInputs: {
+				displayName: "Lock Inputs",
+				types: {
+					bool: {
+						config: false,
+					},
+				},
+			},
+			...inpts,
+			extender: {
+				displayName: `Extender Input`,
+				tooltip: `Not affected by the 'lock' input signal`,
+				types: BlockConfigDefinitions.any,
+				group: "1",
+			},
+		},
+		output: {
+			output: {
+				displayName: `Extender Output`,
+				types: asMap(BlockConfigDefinitions.any).keys(),
+				group: "1",
+			},
+		},
+	} satisfies BlockLogicFullBothDefinitions;
+
+	class Logic extends BlockLogic<typeof definition> {
+		constructor(block: InstanceBlockLogicArgs) {
+			super(definition, block);
+
+			type t = BlockLogicTypes.IdListOfType<typeof BlockConfigDefinitions.any> | undefined;
+			type t2 = string | number | boolean | Vector3 | Color3 | BlockLogicTypes.SoundValue;
+			// init values here
+
+			const filler = {};
+			//fill array with crap because lua arrays can't store nils
+			const values: (t2 | typeof filler)[] = new Array(inputAmount, filler);
+			const shift = this.initializeInputCache("shift");
+			const lockInputs = this.initializeInputCache("lockInputs");
+
+			this.onkRecalcInputsAny([...asMap(inpts).keys(), "extender"], (data) => {
+				//get first type
+				let ttt: t;
+				for (let i = 0; i < inputAmount; i++) {
+					if (ttt) break;
+					ttt = data[`input${i as 0}Type`] as t;
+				}
+				ttt ??= data.extenderType;
+				print(ttt);
+				if (!lockInputs.get()) {
+					for (let i = 0; i < inputAmount; i++) values[i] = (data[`input${i as 0}`] ?? filler) as t2;
+					values[inputAmount] = (data.extender ?? filler) as t2;
+				}
+
+				//shift values here
+				if (!ttt) return;
+				if (!shift.get()) return;
+
+				const v = values.shift();
+				print(values);
+
+				if (!v || v === filler) return;
+				this.output.output.set(ttt, v as t2);
+			});
+		}
+	}
+
+	export const block = {
+		...BlockCreation.defaults,
+		id: "shiftregisterinput",
+		displayName: "Shift Register (Input)",
+		description: "Shifts input values while 'Shift' input is active. Can be connected serially to extends inputs",
+		search: {
+			aliases: ["extend", "bit", "input"],
+		},
+
+		logic: { definition: definition, ctor: Logic },
+	} as const satisfies BlockBuilder;
+}
+
 export const BasicLogicGateBlocks: readonly BlockBuilder[] = [
 	And.block,
 	Or.block,
@@ -805,4 +1010,6 @@ export const BasicLogicGateBlocks: readonly BlockBuilder[] = [
 	Not.block,
 	...Mux.blocks,
 	...Demux.blocks,
+	ShiftRegisterOutput.block,
+	ShiftRegisterInput.block,
 ];
