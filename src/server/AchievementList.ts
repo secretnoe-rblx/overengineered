@@ -79,7 +79,7 @@ class AchievementWelcome extends Achievement {
 	constructor(@inject player: Player) {
 		super(player, {
 			id: "WELCOME",
-			name: `Hi, ${player.Name}!`,
+			name: `Hi!`,
 			description: `Welcome to OverEngineered!`,
 		});
 
