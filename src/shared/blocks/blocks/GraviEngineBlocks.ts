@@ -213,4 +213,4 @@ const list: BlockBuildersWithoutIdAndDefaults = {
 		search,
 	},
 };
-export const JetEngineBlocks = BlockCreation.arrayFromObject(list);
+export const GraviEngineBlocks = BlockCreation.arrayFromObject(list);

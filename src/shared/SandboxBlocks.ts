@@ -16,6 +16,7 @@ import { DisconnectBlock } from "shared/blocks/blocks/DisconnectBlock";
 import { FallbackBlock } from "shared/blocks/blocks/FallbackBlock";
 import { FireSensorBlock } from "shared/blocks/blocks/FireSensorBlock";
 import { GPSSensorBlock } from "shared/blocks/blocks/GPSSensorBlock";
+import { GraviEngineBlocks } from "shared/blocks/blocks/GraviEngineBlocks";
 import { GravitySensorBlock } from "shared/blocks/blocks/GravitySensorBlock";
 import { BasicLogicGateBlocks } from "shared/blocks/blocks/grouped/BasicLogicGateBlocks";
 import { BasicOperationBlocks } from "shared/blocks/blocks/grouped/BasicOperationBlocks";
@@ -215,6 +216,7 @@ export const CreateSandboxBlocks = (di: DIContainer): BlockList => {
 
 		GyroscopeBlock,
 		...JetEngineBlocks,
+		...GraviEngineBlocks,
 	];
 
 	if (GameDefinitions.isTesting) {
