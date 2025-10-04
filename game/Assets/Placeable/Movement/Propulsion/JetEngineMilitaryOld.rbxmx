@@ -274,8 +274,42 @@
           <bool name="Visible">false</bool>
         </Properties>
       </Item>
+      <Item class="AlignPosition" referent="7">
+        <Properties>
+          <string name="Name">AlignPosition</string>
+          <bool name="ApplyAtCenterOfMass">false</bool>
+          <Ref name="Attachment0">8</Ref>
+          <Ref name="Attachment1">6</Ref>
+          <BinaryString name="AttributesSerialize"></BinaryString>
+          <SecurityCapabilities name="Capabilities">0</SecurityCapabilities>
+          <int name="Color">194</int>
+          <bool name="Enabled">true</bool>
+          <token name="ForceLimitMode">0</token>
+          <token name="ForceRelativeTo">2</token>
+          <Vector3 name="MaxAxesForce">
+            <X>10000</X>
+            <Y>10000</Y>
+            <Z>10000</Z>
+          </Vector3>
+          <float name="MaxForce">INF</float>
+          <float name="MaxVelocity">INF</float>
+          <token name="Mode">1</token>
+          <Vector3 name="Position">
+            <X>0</X>
+            <Y>0</Y>
+            <Z>0</Z>
+          </Vector3>
+          <bool name="ReactionForceEnabled">false</bool>
+          <float name="Responsiveness">200</float>
+          <bool name="RigidityEnabled">true</bool>
+          <bool name="DefinesCapabilities">false</bool>
+          <int64 name="SourceAssetId">-1</int64>
+          <BinaryString name="Tags"></BinaryString>
+          <bool name="Visible">false</bool>
+        </Properties>
+      </Item>
     </Item>
-    <Item class="MeshPart" referent="7">
+    <Item class="MeshPart" referent="9">
       <Properties>
         <string name="Name">Circle.004_Circle.005</string>
         <SharedString name="AeroMeshData">rxNJufX5oaagQE3qNtzJSQ==</SharedString>
@@ -415,7 +449,7 @@
         </Vector3>
         <int name="VertexCount">0</int>
       </Properties>
-      <Item class="WeldConstraint" referent="8">
+      <Item class="WeldConstraint" referent="10">
         <Properties>
           <string name="Name">WeldConstraint</string>
           <BinaryString name="AttributesSerialize"></BinaryString>
@@ -434,7 +468,7 @@
             <R22>1</R22>
           </CoordinateFrame>
           <SecurityCapabilities name="Capabilities">0</SecurityCapabilities>
-          <Ref name="Part0Internal">7</Ref>
+          <Ref name="Part0Internal">9</Ref>
           <Ref name="Part1Internal">2</Ref>
           <bool name="DefinesCapabilities">false</bool>
           <int64 name="SourceAssetId">-1</int64>
@@ -443,7 +477,7 @@
         </Properties>
       </Item>
     </Item>
-    <Item class="MeshPart" referent="9">
+    <Item class="MeshPart" referent="11">
       <Properties>
         <string name="Name">Circle_Circle</string>
         <SharedString name="AeroMeshData">rxNJufX5oaagQE3qNtzJSQ==</SharedString>
@@ -583,7 +617,7 @@
         </Vector3>
         <int name="VertexCount">0</int>
       </Properties>
-      <Item class="WeldConstraint" referent="10">
+      <Item class="WeldConstraint" referent="12">
         <Properties>
           <string name="Name">WeldConstraint</string>
           <BinaryString name="AttributesSerialize"></BinaryString>
@@ -602,8 +636,8 @@
             <R22>1</R22>
           </CoordinateFrame>
           <SecurityCapabilities name="Capabilities">0</SecurityCapabilities>
-          <Ref name="Part0Internal">9</Ref>
-          <Ref name="Part1Internal">7</Ref>
+          <Ref name="Part0Internal">11</Ref>
+          <Ref name="Part1Internal">9</Ref>
           <bool name="DefinesCapabilities">false</bool>
           <int64 name="SourceAssetId">-1</int64>
           <int name="State">3</int>
@@ -611,7 +645,7 @@
         </Properties>
       </Item>
     </Item>
-    <Item class="MeshPart" referent="11">
+    <Item class="MeshPart" referent="13">
       <Properties>
         <string name="Name">flame_(no_collision)_Circle.017</string>
         <SharedString name="AeroMeshData">rxNJufX5oaagQE3qNtzJSQ==</SharedString>
@@ -751,7 +785,7 @@
         </Vector3>
         <int name="VertexCount">0</int>
       </Properties>
-      <Item class="WeldConstraint" referent="12">
+      <Item class="WeldConstraint" referent="14">
         <Properties>
           <string name="Name">WeldConstraint</string>
           <BinaryString name="AttributesSerialize"></BinaryString>
@@ -770,8 +804,8 @@
             <R22>1</R22>
           </CoordinateFrame>
           <SecurityCapabilities name="Capabilities">0</SecurityCapabilities>
-          <Ref name="Part0Internal">11</Ref>
-          <Ref name="Part1Internal">9</Ref>
+          <Ref name="Part0Internal">13</Ref>
+          <Ref name="Part1Internal">11</Ref>
           <bool name="DefinesCapabilities">false</bool>
           <int64 name="SourceAssetId">-1</int64>
           <int name="State">3</int>
@@ -779,7 +813,7 @@
         </Properties>
       </Item>
     </Item>
-    <Item class="MeshPart" referent="13">
+    <Item class="MeshPart" referent="15">
       <Properties>
         <string name="Name">TurbineShaft</string>
         <SharedString name="AeroMeshData">rxNJufX5oaagQE3qNtzJSQ==</SharedString>
@@ -919,7 +953,7 @@
         </Vector3>
         <int name="VertexCount">0</int>
       </Properties>
-      <Item class="Sound" referent="14">
+      <Item class="Sound" referent="16">
         <Properties>
           <string name="Name">Working</string>
           <BinaryString name="AttributesSerialize"></BinaryString>
@@ -946,7 +980,7 @@
           <float name="Volume">0.5</float>
         </Properties>
       </Item>
-      <Item class="Sound" referent="15">
+      <Item class="Sound" referent="17">
         <Properties>
           <string name="Name">Start</string>
           <BinaryString name="AttributesSerialize"></BinaryString>
@@ -973,7 +1007,7 @@
           <float name="Volume">1</float>
         </Properties>
       </Item>
-      <Item class="Sound" referent="16">
+      <Item class="Sound" referent="18">
         <Properties>
           <string name="Name">Shut</string>
           <BinaryString name="AttributesSerialize"></BinaryString>
@@ -1000,7 +1034,7 @@
           <float name="Volume">3</float>
         </Properties>
       </Item>
-      <Item class="Sound" referent="17">
+      <Item class="Sound" referent="19">
         <Properties>
           <string name="Name">Idle</string>
           <BinaryString name="AttributesSerialize"></BinaryString>
@@ -1027,8 +1061,33 @@
           <float name="Volume">1</float>
         </Properties>
       </Item>
+      <Item class="Attachment" referent="8">
+        <Properties>
+          <string name="Name">BladesAttachment</string>
+          <BinaryString name="AttributesSerialize"></BinaryString>
+          <CoordinateFrame name="CFrame">
+            <X>0</X>
+            <Y>0</Y>
+            <Z>0</Z>
+            <R00>1</R00>
+            <R01>0</R01>
+            <R02>0</R02>
+            <R10>0</R10>
+            <R11>1</R11>
+            <R12>0</R12>
+            <R20>0</R20>
+            <R21>0</R21>
+            <R22>1</R22>
+          </CoordinateFrame>
+          <SecurityCapabilities name="Capabilities">0</SecurityCapabilities>
+          <bool name="DefinesCapabilities">false</bool>
+          <int64 name="SourceAssetId">-1</int64>
+          <BinaryString name="Tags"></BinaryString>
+          <bool name="Visible">false</bool>
+        </Properties>
+      </Item>
     </Item>
-    <Item class="MeshPart" referent="18">
+    <Item class="MeshPart" referent="20">
       <Properties>
         <string name="Name">TurbineS</string>
         <SharedString name="AeroMeshData">rxNJufX5oaagQE3qNtzJSQ==</SharedString>
@@ -1168,7 +1227,7 @@
         </Vector3>
         <int name="VertexCount">0</int>
       </Properties>
-      <Item class="WeldConstraint" referent="19">
+      <Item class="WeldConstraint" referent="21">
         <Properties>
           <string name="Name">WeldConstraint</string>
           <BinaryString name="AttributesSerialize"></BinaryString>
@@ -1187,7 +1246,7 @@
             <R22>1</R22>
           </CoordinateFrame>
           <SecurityCapabilities name="Capabilities">0</SecurityCapabilities>
-          <Ref name="Part0Internal">18</Ref>
+          <Ref name="Part0Internal">20</Ref>
           <Ref name="Part1Internal">2</Ref>
           <bool name="DefinesCapabilities">false</bool>
           <int64 name="SourceAssetId">-1</int64>
@@ -1196,7 +1255,7 @@
         </Properties>
       </Item>
     </Item>
-    <Item class="MeshPart" referent="20">
+    <Item class="MeshPart" referent="22">
       <Properties>
         <string name="Name">tubicalr.001_Circle.019</string>
         <SharedString name="AeroMeshData">rxNJufX5oaagQE3qNtzJSQ==</SharedString>
@@ -1336,7 +1395,7 @@
         </Vector3>
         <int name="VertexCount">0</int>
       </Properties>
-      <Item class="WeldConstraint" referent="21">
+      <Item class="WeldConstraint" referent="23">
         <Properties>
           <string name="Name">WeldConstraint</string>
           <BinaryString name="AttributesSerialize"></BinaryString>
@@ -1355,7 +1414,7 @@
             <R22>1</R22>
           </CoordinateFrame>
           <SecurityCapabilities name="Capabilities">0</SecurityCapabilities>
-          <Ref name="Part0Internal">20</Ref>
+          <Ref name="Part0Internal">22</Ref>
           <Ref name="Part1Internal">2</Ref>
           <bool name="DefinesCapabilities">false</bool>
           <int64 name="SourceAssetId">-1</int64>
@@ -1462,7 +1521,7 @@
           <Z>0</Z>
         </Vector3>
       </Properties>
-      <Item class="WeldConstraint" referent="22">
+      <Item class="WeldConstraint" referent="24">
         <Properties>
           <string name="Name">WeldConstraint</string>
           <BinaryString name="AttributesSerialize"></BinaryString>
@@ -1490,7 +1549,7 @@
         </Properties>
       </Item>
     </Item>
-    <Item class="Folder" referent="23">
+    <Item class="Folder" referent="25">
       <Properties>
         <string name="Name">WeldRegions</string>
         <BinaryString name="AttributesSerialize"></BinaryString>
@@ -1499,7 +1558,7 @@
         <int64 name="SourceAssetId">-1</int64>
         <BinaryString name="Tags"></BinaryString>
       </Properties>
-      <Item class="Part" referent="24">
+      <Item class="Part" referent="26">
         <Properties>
           <string name="Name">Part</string>
           <bool name="Anchored">true</bool>
@@ -1598,7 +1657,7 @@
           </Vector3>
         </Properties>
       </Item>
-      <Item class="Part" referent="25">
+      <Item class="Part" referent="27">
         <Properties>
           <string name="Name">Part</string>
           <bool name="Anchored">true</bool>
@@ -1697,7 +1756,7 @@
           </Vector3>
         </Properties>
       </Item>
-      <Item class="Part" referent="26">
+      <Item class="Part" referent="28">
         <Properties>
           <string name="Name">Part</string>
           <bool name="Anchored">true</bool>
@@ -1797,7 +1856,7 @@
         </Properties>
       </Item>
     </Item>
-    <Item class="UnionOperation" referent="27">
+    <Item class="UnionOperation" referent="29">
       <Properties>
         <string name="Name">WeldThing1</string>
         <SharedString name="AeroMeshData">rxNJufX5oaagQE3qNtzJSQ==</SharedString>
@@ -1935,7 +1994,7 @@
           <Z>0</Z>
         </Vector3>
       </Properties>
-      <Item class="WeldConstraint" referent="28">
+      <Item class="WeldConstraint" referent="30">
         <Properties>
           <string name="Name">WeldConstraint</string>
           <BinaryString name="AttributesSerialize"></BinaryString>
@@ -1954,7 +2013,7 @@
             <R22>0</R22>
           </CoordinateFrame>
           <SecurityCapabilities name="Capabilities">0</SecurityCapabilities>
-          <Ref name="Part0Internal">27</Ref>
+          <Ref name="Part0Internal">29</Ref>
           <Ref name="Part1Internal">2</Ref>
           <bool name="DefinesCapabilities">false</bool>
           <int64 name="SourceAssetId">-1</int64>
@@ -1963,7 +2022,7 @@
         </Properties>
       </Item>
     </Item>
-    <Item class="UnionOperation" referent="29">
+    <Item class="UnionOperation" referent="31">
       <Properties>
         <string name="Name">WeldThing2</string>
         <SharedString name="AeroMeshData">rxNJufX5oaagQE3qNtzJSQ==</SharedString>
@@ -2101,7 +2160,7 @@
           <Z>0</Z>
         </Vector3>
       </Properties>
-      <Item class="WeldConstraint" referent="30">
+      <Item class="WeldConstraint" referent="32">
         <Properties>
           <string name="Name">WeldConstraint</string>
           <BinaryString name="AttributesSerialize"></BinaryString>
@@ -2120,7 +2179,7 @@
             <R22>0</R22>
           </CoordinateFrame>
           <SecurityCapabilities name="Capabilities">0</SecurityCapabilities>
-          <Ref name="Part0Internal">29</Ref>
+          <Ref name="Part0Internal">31</Ref>
           <Ref name="Part1Internal">2</Ref>
           <bool name="DefinesCapabilities">false</bool>
           <int64 name="SourceAssetId">-1</int64>
@@ -2129,7 +2188,7 @@
         </Properties>
       </Item>
     </Item>
-    <Item class="UnionOperation" referent="31">
+    <Item class="UnionOperation" referent="33">
       <Properties>
         <string name="Name">WeldThing11</string>
         <SharedString name="AeroMeshData">rxNJufX5oaagQE3qNtzJSQ==</SharedString>
@@ -2267,7 +2326,7 @@
           <Z>0</Z>
         </Vector3>
       </Properties>
-      <Item class="WeldConstraint" referent="32">
+      <Item class="WeldConstraint" referent="34">
         <Properties>
           <string name="Name">WeldConstraint</string>
           <BinaryString name="AttributesSerialize"></BinaryString>
@@ -2286,7 +2345,7 @@
             <R22>0</R22>
           </CoordinateFrame>
           <SecurityCapabilities name="Capabilities">0</SecurityCapabilities>
-          <Ref name="Part0Internal">31</Ref>
+          <Ref name="Part0Internal">33</Ref>
           <Ref name="Part1Internal">2</Ref>
           <bool name="DefinesCapabilities">false</bool>
           <int64 name="SourceAssetId">-1</int64>

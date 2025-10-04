@@ -6,7 +6,6 @@ import { t } from "engine/shared/t";
 import { InstanceBlockLogic } from "shared/blockLogic/BlockLogic";
 import { BlockSynchronizer } from "shared/blockLogic/BlockSynchronizer";
 import { BlockCreation } from "shared/blocks/BlockCreation";
-import { BlockManager } from "shared/building/BlockManager";
 import type { PlayerDataStorage } from "client/PlayerDataStorage";
 import type { BlockLogicFullBothDefinitions, InstanceBlockLogicArgs } from "shared/blockLogic/BlockLogic";
 import type { BlockBuilder } from "shared/blocks/Block";
@@ -76,10 +75,12 @@ type buttonType = BlockModel & {
 			TextLabel: TextLabel;
 		};
 	};
-	ClickableBase: {
+	Base: UnionOperation & {
+		AlignPosition: AlignPosition;
+		PressedPosition: Attachment;
+		DepressedPosition: Attachment;
 		ClickDetector: ClickDetector;
 	};
-	Base: UnionOperation;
 	LED: BasePart;
 };
 const baseLEDColor = Color3.fromRGB(17, 17, 17);
@@ -109,36 +110,18 @@ const updateButtonText = ({ block, buttonColor, text }: updateTextData) => {
 
 const updateButtonState = ({ block, LEDcolor, buttonState }: updateStateData) => {
 	block.LED.Color = buttonState ? LEDcolor : baseLEDColor;
-	allButtonStates.set(block, buttonState);
+	block.Base.AlignPosition.Attachment1 = buttonState ? block.Base.PressedPosition : block.Base.DepressedPosition;
 };
 
 const init = ({ block, owner }: initButton) => {
+	// handler just in case I decide to change some things
 	const handler = new EventHandler();
 
-	block.ClickableBase.ClickDetector.MaxActivationDistance = math.huge;
+	block.Base.ClickDetector.MaxActivationDistance = math.huge;
 	const onClickEvent = () => clickEvent.send(owner, block);
-	handler.subscribe(block.ClickableBase.ClickDetector.MouseClick, onClickEvent);
-
-	const YScale = BlockManager.manager.scale.get(block)?.Y;
-	if (!YScale) return;
-
-	const base = block.Base;
-	const button = block.Button;
-
-	// defining constants and magic numbers
-	const pressedPosition = new Vector3(0.35 * YScale, 0.35 * YScale, 0.35 * YScale);
-	const depressedPosition = new Vector3(0.5 * YScale, 0.5 * YScale, 0.5 * YScale);
-
-	handler.subscribe(RunService.Heartbeat, () => {
-		const state = allButtonStates.get(block);
-		button.Position = base.CFrame.UpVector.mul(state ? pressedPosition : depressedPosition).add(base.Position);
-		button.Orientation = base.Orientation;
-	});
-
+	handler.subscribe(block.Base.ClickDetector.MouseClick, onClickEvent);
 	handler.subscribe(block.DescendantRemoving, () => handler.unsubscribeAll());
 };
-
-const allButtonStates = new Map<buttonType, boolean>();
 
 const events = {
 	updateText: new BlockSynchronizer("b_button_data_update_text", updateTextDataType, updateButtonText),
