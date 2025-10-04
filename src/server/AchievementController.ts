@@ -8,6 +8,12 @@ import type { Achievement } from "server/Achievement";
 import type { ServerPlayersController } from "server/ServerPlayersController";
 import type { AchievementData } from "shared/AchievementData";
 
+/* TODO: 
+	add achievement sound
+	id:
+	79540987785492
+*/
+
 const init = (list: AchievementList, player: Player, data: { readonly [x: string]: AchievementData } | undefined) => {
 	const instanced = allAchievements.map((ach) => {
 		const instance = list.add(ach);

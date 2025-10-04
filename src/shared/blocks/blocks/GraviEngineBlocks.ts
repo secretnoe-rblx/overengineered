@@ -1,4 +1,9 @@
+import { RunService } from "@rbxts/services";
+import { EventHandler } from "engine/shared/event/EventHandler";
+import { Instances } from "engine/shared/fixes/Instances";
+import { t } from "engine/shared/t";
 import { InstanceBlockLogic } from "shared/blockLogic/BlockLogic";
+import { BlockSynchronizer } from "shared/blockLogic/BlockSynchronizer";
 import { BlockCreation } from "shared/blocks/BlockCreation";
 import { BlockManager } from "shared/building/BlockManager";
 import { Physics } from "shared/Physics";
@@ -7,7 +12,7 @@ import type { BlockBuildersWithoutIdAndDefaults, BlockLogicInfo } from "shared/b
 import type { SoundEffect } from "shared/effects/SoundEffect";
 
 const definition = {
-	inputOrder: ["thrust", "strength"],
+	inputOrder: ["thrust", "strength", "color"],
 	input: {
 		thrust: {
 			displayName: "Thrust",
@@ -57,6 +62,15 @@ const definition = {
 				},
 			},
 		},
+
+		color: {
+			displayName: "Color",
+			types: {
+				color: {
+					config: Color3.fromRGB(4, 175, 236),
+				},
+			},
+		},
 	},
 	output: {
 		maxpower: {
@@ -67,28 +81,91 @@ const definition = {
 	},
 } satisfies BlockLogicFullBothDefinitions;
 
-type JetModel = BlockModel & {
-	readonly TurbineShaft: MeshPart & {
-		readonly Working: Sound;
-		readonly Idle: Sound;
-		readonly Start: Sound;
-		readonly Shut: Sound;
-		readonly HingeConstraint: HingeConstraint;
-	};
-	readonly TurbineBody: Instance & {
+type engineModel = BlockModel & {
+	readonly InnerRing: Instance & {
 		readonly VectorForce: VectorForce;
-		readonly BladeLocation: Attachment;
+	};
+
+	readonly Base: Instance & {
+		readonly Sound: Sound;
 	};
 	readonly ColBox: Part;
+	readonly PropRings: Instance &
+		Record<
+			`ring${0 | 1 | 2 | 3 | 4 | 5 | 6}`,
+			UnionOperation & {
+				AlignOrientation: AlignOrientation;
+				AlignPosition: AlignPosition;
+				RingAttachment: Attachment;
+			}
+		>;
+};
+
+const updateEventType = t.interface({
+	block: t.instance("Model").nominal("blockModel").as<engineModel>(),
+	strength: t.number,
+});
+type UpdateData = t.Infer<typeof updateEventType>;
+
+const initEventType = t.interface({
+	block: t.instance("Model").nominal("blockModel").as<engineModel>(),
+	color: t.color,
+});
+type InitData = t.Infer<typeof initEventType>;
+
+const blockInstances = new Map<engineModel, number>();
+const childAmount = 7;
+const events = {
+	updateRings: new BlockSynchronizer("b_graviengine_update", updateEventType, ({ block, strength }: UpdateData) => {
+		blockInstances.set(block, strength);
+	}),
+
+	init: new BlockSynchronizer("b_graviengine_init", initEventType, ({ block, color }: InitData) => {
+		const folder = block.WaitForChild("PropRings");
+		const rings = new Array(childAmount, {}).map(
+			(v, i) => folder.WaitForChild(`ring${i as 0}`) as typeof block.PropRings.ring0,
+		);
+
+		const len = block.PropRings.GetChildren().size();
+		for (let i = 0; i < len; i++) {
+			rings[i].Color = color;
+
+			if (i > 0) {
+				const indx = len - i;
+				const ring = rings[indx];
+				const at = rings[indx - 1].RingAttachment;
+				ring.AlignOrientation.Attachment1 = at;
+				ring.AlignPosition.Attachment1 = at;
+
+				ring.AlignOrientation.Responsiveness = 30;
+				ring.AlignPosition.Responsiveness = 30;
+
+				const prp = i / (len - 1);
+				const sz = block.PropRings.ring0.Size;
+				ring.Size = sz.apply((v) => prp * v);
+			}
+		}
+
+		const handler = new EventHandler();
+		handler.subscribe(RunService.Heartbeat, () => {
+			const stren = blockInstances.get(block);
+			if (stren === undefined) return;
+
+			const gravModifier = Physics.GetGravityModifierOnHeight(Physics.LocalHeight.fromGlobal(block.GetPivot().Y));
+			const trp = math.clamp(0.85 - stren * (1 - gravModifier), 0, 1);
+			const len = rings.size();
+			for (let i = 0; i < len; i++) {
+				rings[i].Transparency = trp;
+			}
+		});
+
+		handler.subscribe(block.Destroying, () => handler.unsubscribeAll());
+	}),
 };
 
 export type { Logic as JetBlockLogic };
-
 @injectable
-class Logic extends InstanceBlockLogic<typeof definition, JetModel> {
-	// Instances
-	private readonly vectorForce;
-
+class Logic extends InstanceBlockLogic<typeof definition, engineModel> {
 	// Math
 	private readonly basePower = 30_000;
 	private readonly maxPower;
@@ -99,26 +176,12 @@ class Logic extends InstanceBlockLogic<typeof definition, JetModel> {
 	) {
 		super(definition, block);
 
-		// const
-		const maxSoundVolume = 0.5;
-
-		// vals
-		const thrust = this.initializeInputCache("thrust");
-
 		// Instances
 		const colbox = this.instance.ColBox;
-		const shaft = this.instance.TurbineShaft;
-		const body = this.instance.TurbineBody;
-		// const hinge = shaft.HingeConstraint;
-
-		this.vectorForce = body.VectorForce;
+		const vectorForce = this.instance.InnerRing.VectorForce;
 
 		// Sounds
-		// const wSound = shaft.Working;
-		// const iSound = shaft.Idle;
-		// const stSound = shaft.Start;
-		// const shSound = shaft.Shut;
-		// const soundStageArray = [stSound, shSound];
+		const wSound = this.instance.Base.Sound;
 
 		// Math
 		let multiplier = (colbox.Size.X * colbox.Size.Y * colbox.Size.Z) / 8;
@@ -130,84 +193,61 @@ class Logic extends InstanceBlockLogic<typeof definition, JetModel> {
 		// Max power
 		this.maxPower = this.basePower * multiplier;
 		this.output.maxpower.set("number", this.maxPower);
-
-		// let playing: Sound = iSound;
-		// const stopOtherSoundAndPlayNewOne = (sound: Sound) => {
-		// 	if (playing === sound) return;
-
-		// 	this.soundEffect.send(this.instance.PrimaryPart!, {
-		// 		sound: playing,
-		// 		isPlaying: false,
-		// 		volume: playing.Volume,
-		// 	});
-
-		// 	this.soundEffect.send(this.instance.PrimaryPart!, {
-		// 		sound: sound,
-		// 		isPlaying: true,
-		// 		volume: playing.Volume,
-		// 	});
-
-		// 	playing = sound;
-		// };
-
 		const magicThreshold = 0.2;
-		// const updateSound = (volume: number, currentThrust: number, previousThrust: number) => {
-		// 	const changed = currentThrust !== previousThrust;
-		// 	// update volume
-		// 	for (const s of soundStageArray) s.Volume = volume;
-
-		// 	if (!changed) return;
-		// 	this.soundEffect.send(this.instance.PrimaryPart!, {
-		// 		sound: iSound,
-		// 		isPlaying: true,
-		// 		volume: volume,
-		// 	});
-
-		// 	if (currentThrust > previousThrust) return stopOtherSoundAndPlayNewOne(stSound);
-		// 	return stopOtherSoundAndPlayNewOne(shSound);
-		// };
-
 		const updateForce = (modifier: number) => {
 			const gravModifier = Physics.GetAirDensityModifierOnHeight(
 				Physics.LocalHeight.fromGlobal(this.instance.GetPivot().Y),
 			);
 
-			this.vectorForce.Force = new Vector3(
-				this.maxPower * modifier * math.clamp(gravModifier - magicThreshold, 0, 1),
-			);
+			const mod = 1 - math.clamp(gravModifier - magicThreshold, 0, 1);
+
+			const f = this.maxPower * modifier;
+			vectorForce.Force = new Vector3(0, 0, -f * mod);
+
+			events.updateRings.send({
+				block: this.instance,
+				strength: math.abs(f) / this.maxPower,
+			});
 		};
 
-		let lastThrust = 0;
-		let thrustPercent = 0;
-		let strengthPercent = 0;
-		this.onAlwaysInputs(({ thrust, strength }) => {
+		// why do we even have two values to begin with :sob:
+		this.onk(["thrust", "strength"], ({ thrust, strength }) => {
 			//nan check
+			// no strength check lol
+			// this code is so old, holy crap
 			if (typeIs(thrust, "number") && thrust !== thrust) return;
-
-			//the code
-			thrustPercent = thrust / 100;
-			strengthPercent = strength / 100;
-
-			updateForce(thrustPercent * strengthPercent);
-			// updateSound(thrustPercent * maxSoundVolume, thrust, lastThrust);
-
-			lastThrust = thrust;
+			const v = (thrust / 100) * (strength / 100);
+			const base = 0.4;
+			this.soundEffect.send(this.instance.PrimaryPart!, {
+				sound: wSound,
+				isPlaying: true,
+				volume: math.abs(v) * base,
+			});
+			updateForce(v);
 		});
 
 		this.onDisable(() => {
 			updateForce(0);
-			// updateSound(0, 0, 0);
-			// playing.Stop();
 		});
 	}
 }
 
-const search = { partialAliases: ["turbine", "engine", "military", "civil", "engine", "afterburner"] };
-const logic: BlockLogicInfo = { definition, ctor: Logic };
+const immediate = BlockCreation.immediate(definition, (block: engineModel, config) => {
+	for (let i = 0; i < childAmount; i++) Instances.waitForChild(block, "PropRings", `ring${i}`);
+
+	events.init.send({
+		block,
+		color: BlockCreation.defaultIfWiredUnset(config?.color, definition.input.color.types.color.config),
+	});
+});
+
+const search = { partialAliases: ["propeller", "gravity"] };
+const logic: BlockLogicInfo = { definition, ctor: Logic, immediate };
 const list: BlockBuildersWithoutIdAndDefaults = {
 	gravipane: {
 		displayName: "Gravi Pane",
-		description: "",
+		description:
+			"Basically a bi-directonal magic board that works well in space and not so well in the existing gravity field of the planet",
 		logic,
 		limit: 50,
 		search,
