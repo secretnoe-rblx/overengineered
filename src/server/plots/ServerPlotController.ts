@@ -35,6 +35,7 @@ export class ServerPlotController extends Component {
 			plot.getCenter(),
 			plot.bounds,
 		]);
+		this.blocks.initializeTimeBasedDelay();
 
 		if (
 			// !game.GetService("RunService").IsStudio() && // uncomment to enable private server behaviour in studio

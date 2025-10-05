@@ -35,7 +35,9 @@ export class BuildingPlot extends ReadonlyPlot {
 		@inject private readonly blockList: BlockList,
 	) {
 		super(instance, origin, boundingBox);
+	}
 
+	initializeTimeBasedDelay() {
 		const addDelay = (signal: ReadonlyArgsSignal<[]>) => {
 			let lastWait = 0;
 			signal.Connect(() => {
