@@ -570,7 +570,7 @@
     <Item class="Part" referent="9">
       <Properties>
         <string name="Name">corner1</string>
-        <bool name="Anchored">false</bool>
+        <bool name="Anchored">true</bool>
         <BinaryString name="AttributesSerialize"></BinaryString>
         <bool name="AudioCanCollide">true</bool>
         <float name="BackParamA">-0.5</float>
@@ -696,7 +696,7 @@
     <Item class="Part" referent="11">
       <Properties>
         <string name="Name">corner2</string>
-        <bool name="Anchored">false</bool>
+        <bool name="Anchored">true</bool>
         <BinaryString name="AttributesSerialize"></BinaryString>
         <bool name="AudioCanCollide">true</bool>
         <float name="BackParamA">-0.5</float>
@@ -822,7 +822,7 @@
     <Item class="Part" referent="13">
       <Properties>
         <string name="Name">corner4</string>
-        <bool name="Anchored">false</bool>
+        <bool name="Anchored">true</bool>
         <BinaryString name="AttributesSerialize"></BinaryString>
         <bool name="AudioCanCollide">true</bool>
         <float name="BackParamA">-0.5</float>
@@ -948,7 +948,7 @@
     <Item class="Part" referent="15">
       <Properties>
         <string name="Name">corner3</string>
-        <bool name="Anchored">false</bool>
+        <bool name="Anchored">true</bool>
         <BinaryString name="AttributesSerialize"></BinaryString>
         <bool name="AudioCanCollide">true</bool>
         <float name="BackParamA">-0.5</float>
@@ -1075,7 +1075,7 @@
       <Properties>
         <string name="Name">InnerRing</string>
         <SharedString name="AeroMeshData">rxNJufX5oaagQE3qNtzJSQ==</SharedString>
-        <bool name="Anchored">false</bool>
+        <bool name="Anchored">true</bool>
         <ContentId name="AssetId">
           <null>
           </null>
@@ -1288,7 +1288,7 @@
       <Properties>
         <string name="Name">Base</string>
         <SharedString name="AeroMeshData">rxNJufX5oaagQE3qNtzJSQ==</SharedString>
-        <bool name="Anchored">false</bool>
+        <bool name="Anchored">true</bool>
         <ContentId name="AssetId">
           <null>
           </null>
