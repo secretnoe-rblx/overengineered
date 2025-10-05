@@ -79,8 +79,9 @@ class AchievementWelcome extends Achievement {
 	constructor(@inject player: Player) {
 		super(player, {
 			id: "WELCOME",
-			name: `Hi!`,
+			name: `Hello!`,
 			description: `Welcome to OverEngineered!`,
+			imageID: "78364064019512",
 		});
 
 		this.onEnable(() => this.set({ completed: true }));
@@ -690,7 +691,7 @@ class AchievementAirRingsEasy extends AchievementCheckpoints {
 				id: `AIR_COURSE_EASY`,
 				name: "Flight School Graduate",
 				description: `Finish easy difficulty air course`,
-				imageID: "131435346372992",
+				imageID: "101267722343574",
 			},
 			"AirRingsEasy",
 		);
@@ -707,7 +708,7 @@ class AchievementAirRingsMedium extends AchievementCheckpointsWithTimeout {
 				id: `AIR_COURSE_MEDIUM`,
 				name: "Through John's Heart",
 				description: `Finish medium difficulty air course in 25 seconds or less`,
-				imageID: "131435346372992",
+				imageID: "101267722343574",
 			},
 			25,
 			"AirRingsMedium",
@@ -725,7 +726,7 @@ class AchievementAirRingsHard extends AchievementCheckpointsWithTimeout {
 				id: `AIR_COURSE_HARD`,
 				name: "No Room for Error",
 				description: `Finish intentionally hard air course in 60 seconds or less.. Designed to test player's skills in engineering and piloting.`,
-				imageID: "131435346372992",
+				imageID: "101267722343574",
 			},
 			60,
 			"AirRingsHard",
