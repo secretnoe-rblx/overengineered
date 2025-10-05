@@ -361,7 +361,7 @@ class AchievementSpeedRecord100k extends AchievementSpeedRecord {
 
 @injectable
 class AchievementCatchOnFire extends Achievement {
-	constructor(@inject player: Player, @inject fireffect: FireEffect) {
+	constructor(@inject player: Player, @inject fireffect: FireEffect, @inject plots: SharedPlots) {
 		super(player, {
 			id: "CATCH_ON_FIRE",
 			name: "OverCooked!",
@@ -369,8 +369,11 @@ class AchievementCatchOnFire extends Achievement {
 			imageID: "89747760666734",
 		});
 
-		this.event.subscribe(fireffect.event.s2c.sent, (owner) => {
-			this.set({ completed: owner === player });
+		this.event.subscribe(fireffect.event.s2c.sent, (_, args) => {
+			const owner = plots.plots.find((c) => args.part.IsDescendantOf(c.instance))?.ownerId?.get();
+			if (!owner) return;
+
+			this.set({ completed: owner === player.UserId });
 		});
 	}
 }
