@@ -1635,7 +1635,7 @@ const v34: UpgradableBlocksSerializer<SerializedBlocks<SerializedBlockBase>, typ
 	},
 };
 
-// Replace military turbine model customData
+// Fix radio receiver id
 const v35: UpgradableBlocksSerializer<SerializedBlocks<SerializedBlockBase>, typeof v34> = {
 	version: 35,
 
