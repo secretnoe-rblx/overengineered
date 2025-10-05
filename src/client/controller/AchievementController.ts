@@ -299,8 +299,8 @@ export class AchievementController extends HostedService {
 
 		this.parent(new NotificationController(this.allAchievements));
 
-		const hiddenAchSound = ReplicatedAssets.waitForAsset<Sound>("AchievementUnlock", "Hidden");
-		const commonAchSound = ReplicatedAssets.waitForAsset<Sound>("AchievementUnlock", "Common");
+		const hiddenAchSound = ReplicatedAssets.waitForAsset<Sound>("Effects", "AchievementUnlock", "Hidden");
+		const commonAchSound = ReplicatedAssets.waitForAsset<Sound>("Effects", "AchievementUnlock", "Common");
 
 		CustomRemotes.achievements.ahievementUnlock.invoked.Connect(({ player, id }) => {
 			const channel = TextChatService.FindFirstChild("TextChannels")?.FindFirstChild("RBXGeneral") as TextChannel;
