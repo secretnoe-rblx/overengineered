@@ -182,6 +182,11 @@ export class AdminGui extends HostedService {
 					const c = pds.achievements.get().WELCOME.completed;
 					CustomRemotes.achievements.admin_set.send({ WELCOME: { completed: !c } });
 				});
+				sub.addButton("Toggle HIDDEN ACHIEVEMENT", () => {
+					const pds = di.resolve<PlayerDataStorage>();
+					const c = pds.achievements.get().BE_AFK_15_MINUTES.completed;
+					CustomRemotes.achievements.admin_set.send({ BE_AFK_15_MINUTES: { completed: !c } });
+				});
 			});
 		});
 
