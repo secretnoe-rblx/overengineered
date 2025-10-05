@@ -1,5 +1,6 @@
 import { ConfigControlList } from "client/gui/configControls/ConfigControlsList";
 import { BasicCarTutorial } from "client/tutorial/tutorials/BasicCarTutorial";
+import { BasicPlaneTutorial } from "client/tutorial/tutorials/BasicPlaneTutorial";
 import { NewBasicPlaneTutorial } from "client/tutorial/tutorials/NewBasicPlaneTutorial";
 import type {
 	ConfigControlListDefinition,
@@ -24,7 +25,9 @@ export class PlayerSettingsTutorial extends ConfigControlList {
 				this.addButton("Basic plane", () => run(NewBasicPlaneTutorial)) //
 					.setDescription("Basic controls and mechanics");
 				this.addButton("Basic car", () => run(BasicCarTutorial)) //
-					.setDescription("Basic controls and mechanics");
+					.setDescription("Basic controls and mechanics [2]");
+				this.addButton("Basic plane (old)", () => run(BasicPlaneTutorial)) //
+					.setDescription("Basic controls and mechanics but old");
 			}
 		});
 	}
