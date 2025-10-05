@@ -103,11 +103,19 @@ namespace Markers {
 			if (offset === "center") {
 				offset = Vector3.zero;
 			}
-			if (scale) {
-				offset = offset.mul(scale);
-			}
 
 			const markerInstance = ReplicatedStorage.Assets.Wires.WireMarker.Clone();
+			if (scale) {
+				offset = offset.mul(scale);
+
+				const scaleNum = scale.findMin();
+				markerInstance.Size = new UDim2(
+					markerInstance.Size.X.Scale * scaleNum,
+					markerInstance.Size.X.Offset * scaleNum,
+					markerInstance.Size.Y.Scale * scaleNum,
+					markerInstance.Size.Y.Offset * scaleNum,
+				);
+			}
 
 			markerInstance.MaxDistance = 200;
 			markerInstance.Adornee = origin;
@@ -242,7 +250,11 @@ namespace Markers {
 
 					if (connected) {
 						const wire = this.children.add(
-							WireComponent.create(componentMap.get(connected) as Output, this),
+							WireComponent.create(
+								componentMap.get(connected) as Output,
+								this,
+								(gui.Size.X.Scale / ReplicatedStorage.Assets.Wires.WireMarker.Size.X.Scale) * 0.15,
+							),
 						);
 						wire.instance.Parent = wireParent;
 					}
@@ -381,7 +393,7 @@ namespace Scene {
 type WireComponentDefinition = Part;
 class WireComponent extends InstanceComponent<WireComponentDefinition> {
 	private static readonly visibleTransparency = 0.4;
-	static createInstance(): WireComponentDefinition {
+	static createInstance(thickness: number): WireComponentDefinition {
 		return Element.create("Part", {
 			Anchored: true,
 			CanCollide: false,
@@ -392,10 +404,11 @@ class WireComponent extends InstanceComponent<WireComponentDefinition> {
 			Material: Enum.Material.Neon,
 			Transparency: this.visibleTransparency,
 			Shape: Enum.PartType.Cylinder,
+			Size: new Vector3(1, thickness, thickness),
 		});
 	}
-	static create(from: Markers.Output, to: Markers.Input): WireComponent {
-		return new WireComponent(this.createInstance(), from, to);
+	static create(from: Markers.Output, to: Markers.Input, thickness: number): WireComponent {
+		return new WireComponent(this.createInstance(thickness), from, to);
 	}
 
 	private readonly types;
@@ -438,7 +451,8 @@ class WireComponent extends InstanceComponent<WireComponentDefinition> {
 	static staticSetPosition(wire: WireComponentDefinition, from: Vector3, to: Vector3) {
 		const distance = to.sub(from).Magnitude;
 
-		wire.Size = new Vector3(distance - 0.4, 0.15, 0.15);
+		const distscale = (wire.Size.Y / 0.15) * 0.4;
+		wire.Size = new Vector3(distance - distscale, wire.Size.Y, wire.Size.Z);
 		wire.CFrame = new CFrame(from, to).mul(new CFrame(0, 0, -distance / 2)).mul(CFrame.Angles(0, math.rad(90), 0));
 	}
 }
@@ -609,7 +623,10 @@ namespace Controllers {
 					this.event.subscribe(marker.instance.TextButton.MouseButton1Down, () => {
 						if (currentMoverContainer.get()) return;
 
-						const wire = WireComponent.createInstance();
+						const wire = WireComponent.createInstance(
+							(marker.instance.Size.X.Scale / ReplicatedStorage.Assets.Wires.WireMarker.Size.X.Scale) *
+								0.15,
+						);
 						wire.Parent = wireParent;
 						currentMoverContainer.set(new WireMover(wire, marker));
 					});

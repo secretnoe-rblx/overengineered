@@ -99,11 +99,19 @@ export namespace BlockWiresMarkers {
 			if (offset === "center") {
 				offset = Vector3.zero;
 			}
-			if (scale) {
-				offset = offset.mul(scale);
-			}
 
 			const markerInstance = (perfab ?? ReplicatedStorage.Assets.Wires.WireMarker).Clone();
+			if (scale) {
+				offset = offset.mul(scale);
+
+				const scaleNum = scale.findMin();
+				markerInstance.Size = new UDim2(
+					markerInstance.Size.X.Scale * scaleNum,
+					markerInstance.Size.X.Offset * scaleNum,
+					markerInstance.Size.Y.Scale * scaleNum,
+					markerInstance.Size.Y.Offset * scaleNum,
+				);
+			}
 
 			markerInstance.MaxDistance = 200;
 			markerInstance.Adornee = origin;
@@ -242,7 +250,13 @@ export namespace BlockWiresMarkers {
 			this.children.clear();
 
 			if (marker) {
-				const wire = this.children.add(WireComponent.create(marker, this));
+				const wire = this.children.add(
+					WireComponent.create(
+						marker,
+						this,
+						(marker.instance.Size.X.Scale / ReplicatedStorage.Assets.Wires.WireMarker.Size.X.Scale) * 0.15,
+					),
+				);
 				wire.instance.Parent = wireParent;
 			}
 		}
@@ -299,7 +313,7 @@ export namespace BlockWiresMarkers {
 export type WireComponentDefinition = Part;
 export class WireComponent extends InstanceComponent<WireComponentDefinition> {
 	private static readonly visibleTransparency = 0.4;
-	static createInstance(): WireComponentDefinition {
+	static createInstance(thickness: number): WireComponentDefinition {
 		return Element.create("Part", {
 			Anchored: true,
 			CanCollide: false,
@@ -310,10 +324,11 @@ export class WireComponent extends InstanceComponent<WireComponentDefinition> {
 			Material: Enum.Material.Neon,
 			Transparency: this.visibleTransparency,
 			Shape: Enum.PartType.Cylinder,
+			Size: new Vector3(1, thickness, thickness),
 		});
 	}
-	static create(from: BlockWiresMarkers.Output, to: BlockWiresMarkers.Input): WireComponent {
-		const wire = new WireComponent(this.createInstance(), from.position, to.position);
+	static create(from: BlockWiresMarkers.Output, to: BlockWiresMarkers.Input, thickness: number): WireComponent {
+		const wire = new WireComponent(this.createInstance(thickness), from.position, to.position);
 		wire.subColorsFromTypes(from.availableTypes);
 
 		return wire;
@@ -365,7 +380,8 @@ export class WireComponent extends InstanceComponent<WireComponentDefinition> {
 	static staticSetPosition(wire: WireComponentDefinition, from: Vector3, to: Vector3) {
 		const distance = to.sub(from).Magnitude;
 
-		wire.Size = new Vector3(distance - 0.4, 0.15, 0.15);
+		const distscale = (wire.Size.Y / 0.15) * 0.4;
+		wire.Size = new Vector3(distance - distscale, wire.Size.Y, wire.Size.Z);
 		wire.CFrame = new CFrame(from, to).mul(new CFrame(0, 0, -distance / 2)).mul(CFrame.Angles(0, math.rad(90), 0));
 	}
 }

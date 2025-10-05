@@ -102,7 +102,7 @@ class Marker extends InstanceComponent<BlockWiresMarkers.MarkerComponentDefiniti
 		return BlockWiresMarkers.Marker.createInstance(
 			origin,
 			"center",
-			undefined,
+			BlockManager.getBlockDataByPart(origin)?.scale,
 			origin,
 			ReplicatedStorage.Assets.Wires.WeldMarker,
 		);
@@ -238,7 +238,9 @@ namespace Controllers {
 
 					hoverMarker = marker;
 
-					const wire = WireComponent.createInstance();
+					const wire = WireComponent.createInstance(
+						(marker.instance.Size.X.Scale / ReplicatedStorage.Assets.Wires.WireMarker.Size.X.Scale) * 0.15,
+					);
 					wire.Parent = wireParent;
 					currentMoverContainer.set(new WireMover(wire, marker));
 				});
@@ -479,7 +481,12 @@ export class WeldTool extends ToolBase {
 			const marker2 = partMarkers.get(weld.Part1);
 			if (!marker2) continue;
 
-			const instance = WireComponent.createInstance();
+			const instance = WireComponent.createInstance(
+				math.min(
+					marker1.instance.Size.X.Scale / ReplicatedStorage.Assets.Wires.WireMarker.Size.X.Scale,
+					marker2.instance.Size.X.Scale / ReplicatedStorage.Assets.Wires.WireMarker.Size.X.Scale,
+				) * 0.15,
+			);
 			instance.Parent = wireParent;
 			const wire = this.instances.add(new WireComponent(instance, weld.Part0.Position, weld.Part1.Position));
 			wire.event
