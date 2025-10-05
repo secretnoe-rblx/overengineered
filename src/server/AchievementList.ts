@@ -184,7 +184,7 @@ class AchievementPlaytime12H extends AchievementPlaytime {
 				id: "SPEND_12_HOUR",
 				name: `Master Engineer`,
 			},
-			1 * 60 * 60,
+			12 * 60 * 60,
 		);
 	}
 }
@@ -199,7 +199,7 @@ class AchievementPlaytime36H extends AchievementPlaytime {
 				name: `Get a Life`,
 				hidden: true,
 			},
-			1 * 60 * 60,
+			36 * 60 * 60,
 		);
 	}
 }
