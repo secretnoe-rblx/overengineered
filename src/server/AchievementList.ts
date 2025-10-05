@@ -95,6 +95,7 @@ class AchievementTheIssue extends Achievement {
 			name: "DMCA abuse",
 			description: "Now go to our community server and read #the-issue channel",
 			hidden: true,
+			imageID: "76517691012059",
 		});
 
 		this.event.subscribe(player.Chatted, (msg, recv) => {
@@ -111,6 +112,7 @@ class AchievementLuaCircuitObtained extends Achievement {
 			id: "LUA_CIRCUIT",
 			name: "Oh yeah, it's big brain time",
 			description: `Obtain ${LuaCircuitBlock.displayName} by joining our community server and following instructions there.`,
+			imageID: "93831558669845",
 		});
 
 		this.onEnable(() => {
@@ -119,18 +121,18 @@ class AchievementLuaCircuitObtained extends Achievement {
 	}
 }
 
-@injectable
-class AchievementPlaytime extends Achievement<{ seconds_spent: number }> {
-	constructor(@inject player: Player) {
+abstract class AchievementPlaytime extends Achievement<{ seconds_spent: number }> {
+	constructor(player: Player, data: Partial<baseAchievementStats>, target_seconds: number) {
 		//1 hour
-		const target_seconds = 1 * 60 * 60;
 		const target_hours = target_seconds / 60 / 60;
 		super(player, {
+			...data,
 			id: "SPEND_1_HOUR",
 			name: `Spare time`,
 			description: `Play for over ${target_hours} ${target_hours > 1 ? "hours" : "hour"} in total`,
 			max: target_seconds,
 			units: "time",
+			imageID: "100755497882706",
 		});
 
 		this.onEnable(() => {
@@ -145,6 +147,62 @@ class AchievementPlaytime extends Achievement<{ seconds_spent: number }> {
 }
 
 @injectable
+class AchievementPlaytime1H extends AchievementPlaytime {
+	constructor(@inject player: Player) {
+		super(
+			player,
+			{
+				id: "SPEND_1_HOUR",
+				name: `Spare time`,
+			},
+			1 * 60 * 60,
+		);
+	}
+}
+
+@injectable
+class AchievementPlaytime4H extends AchievementPlaytime {
+	constructor(@inject player: Player) {
+		super(
+			player,
+			{
+				id: "SPEND_4_HOUR",
+				name: `Time well spent`,
+			},
+			4 * 60 * 60,
+		);
+	}
+}
+
+@injectable
+class AchievementPlaytime12H extends AchievementPlaytime {
+	constructor(@inject player: Player) {
+		super(
+			player,
+			{
+				id: "SPEND_12_HOUR",
+				name: `Master Engineer`,
+			},
+			1 * 60 * 60,
+		);
+	}
+}
+
+@injectable
+class AchievementPlaytime36H extends AchievementPlaytime {
+	constructor(@inject player: Player) {
+		super(
+			player,
+			{
+				id: "SPEND_36_HOUR",
+				name: `Get a Life`,
+				hidden: true,
+			},
+			1 * 60 * 60,
+		);
+	}
+}
+@injectable
 class AchievementAfkTime extends Achievement<{ seconds_record: number }> {
 	constructor(@inject player: Player) {
 		//15 minutes
@@ -157,6 +215,7 @@ class AchievementAfkTime extends Achievement<{ seconds_record: number }> {
 			hidden: true,
 			max: target_seconds,
 			units: "time",
+			imageID: "100755497882706",
 		});
 
 		this.onEnable(() => {
@@ -186,6 +245,7 @@ abstract class AchievementHeightRecord extends Achievement<{ height_record: numb
 			description: `${description} (${targetHeight} studs traveled)`,
 			max: targetHeight,
 			hidden,
+			imageID: "105060915517150",
 		});
 
 		this.onEnable(() => {
@@ -238,6 +298,7 @@ abstract class AchievementSpeedRecord extends Achievement<{ time_record: number 
 			hidden,
 			max: 3,
 			units: "time",
+			imageID: "84161963549773",
 		});
 
 		this.onEnable(() => {
@@ -304,6 +365,7 @@ class AchievementCatchOnFire extends Achievement {
 			id: "CATCH_ON_FIRE",
 			name: "OverCooked!",
 			description: "Better call the fire department! (We don't have one)",
+			imageID: "89747760666734",
 		});
 
 		this.event.subscribe(fireffect.event.s2c.sent, (owner) => {
@@ -324,6 +386,7 @@ class AchievementOverclock extends Achievement {
 			id: "USE_OVERCLOCK",
 			name: "OverClocked!",
 			description: "What's that noise? OHHH MY PC",
+			imageID: "75746597939007",
 		});
 
 		let hasOverClock = false;
@@ -491,6 +554,7 @@ abstract class AchievementCentrifuge extends AchievementCheckpointsWithTimeout {
 				name,
 				description: `Make a lap in the Centrifuge in ${timeout_seconds} seconds or less`,
 				hidden,
+				imageID: "109486075173347",
 			},
 			timeout_seconds,
 			"Centrifuge",
@@ -543,6 +607,7 @@ abstract class AchievementAmogusTrack extends AchievementCheckpointsWithTimeout 
 				name,
 				description,
 				hidden,
+				imageID: "103876818849553",
 			},
 			timeout_seconds,
 			"AmogusTrack",
@@ -586,6 +651,7 @@ abstract class AchievementOvalTrack extends AchievementCheckpointsWithTimeout {
 				id: `RACE_TRACK_OVALS_TARGET_${timeout_seconds}`,
 				name,
 				description,
+				imageID: "127597860492025",
 			},
 			timeout_seconds,
 			"OvalTrack",
@@ -624,6 +690,7 @@ class AchievementAirRingsEasy extends AchievementCheckpoints {
 				id: `AIR_COURSE_EASY`,
 				name: "Flight School Graduate",
 				description: `Finish easy difficulty air course`,
+				imageID: "131435346372992",
 			},
 			"AirRingsEasy",
 		);
@@ -640,6 +707,7 @@ class AchievementAirRingsMedium extends AchievementCheckpointsWithTimeout {
 				id: `AIR_COURSE_MEDIUM`,
 				name: "Through John's Heart",
 				description: `Finish medium difficulty air course in 25 seconds or less`,
+				imageID: "131435346372992",
 			},
 			25,
 			"AirRingsMedium",
@@ -657,6 +725,7 @@ class AchievementAirRingsHard extends AchievementCheckpointsWithTimeout {
 				id: `AIR_COURSE_HARD`,
 				name: "No Room for Error",
 				description: `Finish intentionally hard air course in 60 seconds or less.. Designed to test player's skills in engineering and piloting.`,
+				imageID: "131435346372992",
 			},
 			60,
 			"AirRingsHard",
@@ -706,6 +775,7 @@ class AchievementFindBanana extends AchievementFindGetNearObject {
 				description: "Find the banana!",
 				hidden: true,
 				max: 4,
+				imageID: "132805406903978",
 			},
 			ws.Map.Banana.PrimaryPart,
 			40,
@@ -724,6 +794,7 @@ class AchievementFindUFO extends AchievementFindGetNearObject {
 				description: "Find the UFO!",
 				hidden: true,
 				max: 4,
+				imageID: "110520480308001",
 			},
 			ws.Map.UFO.PrimaryPart,
 			150,
@@ -738,6 +809,7 @@ class AchievementBreakSomething extends Achievement {
 			id: "BREAK_MAP_DESTRUCTABLE",
 			name: "Breaking Change",
 			description: "Break a hydrant or something, or be near when it happens",
+			imageID: "79485719904367",
 		});
 
 		const activationDistance = 15;
@@ -767,6 +839,7 @@ class AchievementFOVMax extends Achievement {
 			description: "Set your FOV to the maximum value",
 			hidden: true,
 			max: 120,
+			imageID: "129519370592474",
 		});
 
 		this.event.subscribe(serverPlayerController.remotes.player.updateSettings.invoked, (p, s) => {
@@ -780,7 +853,10 @@ class AchievementFOVMax extends Achievement {
 export const allAchievements: readonly ConstructorOf<Achievement>[] = [
 	AchievementWelcome,
 	AchievementLuaCircuitObtained,
-	AchievementPlaytime,
+	AchievementPlaytime1H,
+	AchievementPlaytime4H,
+	AchievementPlaytime12H,
+	AchievementPlaytime36H,
 	AchievementAfkTime,
 
 	AchievementHeightRecord25k,

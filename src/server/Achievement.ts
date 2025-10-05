@@ -7,7 +7,7 @@ export type baseAchievementStats = {
 	readonly id: string;
 	readonly name: string;
 	readonly description: string;
-	readonly imageID?: number;
+	readonly imageID?: string;
 	readonly hidden?: boolean;
 
 	/** If set, signifies a maximum value for `progress` and enables a progress bar */

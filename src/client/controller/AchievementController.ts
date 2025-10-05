@@ -120,6 +120,7 @@ class AchievementControl extends PartialControl<AchievementControlParts> {
 		this.parts.TitleLabel.Text = info.name;
 		this.parts.DescriptionLabel.Text = info.description;
 		this.parts.IconImage.Image = `rbxassetid://${info.imageID ?? defaultAchievementId}`;
+
 		this.update({});
 
 		this.event.loop(1, () => {
@@ -134,7 +135,7 @@ class AchievementControl extends PartialControl<AchievementControlParts> {
 	}
 	update(data: AchievementData) {
 		this.data = data;
-		const showHiddenInStudio = false;
+		const showHiddenInStudio = true;
 		if (this.info.hidden) {
 			const showInStudio = showHiddenInStudio && RunService.IsStudio();
 			this.visibilityComponent().setVisible(showInStudio || (data.completed ?? false), "hiddenach");
