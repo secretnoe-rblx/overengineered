@@ -104,7 +104,7 @@ export namespace BlockWiresMarkers {
 			if (scale) {
 				offset = offset.mul(scale);
 
-				const scaleNum = scale.findMin();
+				const scaleNum = math.min(scale.findMin(), 1);
 				markerInstance.Size = new UDim2(
 					markerInstance.Size.X.Scale * scaleNum,
 					markerInstance.Size.X.Offset * scaleNum,
