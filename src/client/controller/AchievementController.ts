@@ -22,6 +22,7 @@ type AchievementNotificationParts = {
 	readonly NameLabel: TextLabel;
 	readonly DescriptionLabel: TextLabel;
 	readonly IconImage: ImageLabel;
+	readonly RareGradient: UIGradient;
 };
 class AchievementNotification extends PartialControl<AchievementNotificationParts> {
 	constructor(gui: GuiObject, info: baseAchievementStats) {
@@ -30,6 +31,14 @@ class AchievementNotification extends PartialControl<AchievementNotificationPart
 		this.parts.NameLabel.Text = info.name;
 		this.parts.DescriptionLabel.Text = info.description;
 		this.parts.IconImage.Image = `rbxassetid://${info.imageID ?? defaultAchievementId}`;
+
+		if (info.hidden) {
+			this.parts.RareGradient.Enabled = true;
+			this.gui.BackgroundColor3 = Color3.fromRGB(129, 0, 129);
+		} else {
+			this.parts.RareGradient.Enabled = false;
+			this.gui.BackgroundColor3 = Color3.fromRGB(1, 4, 9);
+		}
 	}
 }
 class NotificationController extends Component {
