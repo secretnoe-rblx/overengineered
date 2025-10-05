@@ -1,5 +1,4 @@
 import { HostedService } from "engine/shared/di/HostedService";
-import { Strings } from "engine/shared/fixes/String.propmacro";
 import { allAchievements } from "server/AchievementList";
 import { isNotAdmin_AutoBanned } from "server/BanAdminExploiter";
 import { CustomRemotes } from "shared/Remotes";
@@ -101,7 +100,7 @@ export class AchievementController extends HostedService {
 
 					if (asMap(datas).isEmpty()) return;
 
-					$log(`Sending to ${player.Name} achievement datas: ${Strings.pretty(asMap(datas).keys())}`);
+					// $log(`Sending to ${player.Name} achievement datas: ${Strings.pretty(asMap(datas).keys())}`);
 					CustomRemotes.achievements.update.send(player, datas);
 				});
 
@@ -116,7 +115,7 @@ export class AchievementController extends HostedService {
 
 					if (asMap(datas).isEmpty()) return;
 
-					$log(`Flushing of ${player.Name} achievement datas: ${Strings.pretty(asMap(datas).keys())}`);
+					// $log(`Flushing of ${player.Name} achievement datas: ${Strings.pretty(asMap(datas).keys())}`);
 					const pdata = database.get(player.UserId);
 					database.set(player.UserId, {
 						...pdata,
