@@ -127,13 +127,13 @@ abstract class AchievementPlaytime extends Achievement<{ seconds_spent: number }
 		//1 hour
 		const target_hours = target_seconds / 60 / 60;
 		super(player, {
-			...data,
 			id: "SPEND_1_HOUR",
 			name: `Spare time`,
 			description: `Play for over ${target_hours} ${target_hours > 1 ? "hours" : "hour"} in total`,
 			max: target_seconds,
 			units: "time",
 			imageID: "100755497882706",
+			...data,
 		});
 
 		this.onEnable(() => {
