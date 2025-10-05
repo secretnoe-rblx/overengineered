@@ -1,4 +1,4 @@
-import { RunService } from "@rbxts/services";
+import { RunService, TextChatService } from "@rbxts/services";
 import { CheckBoxControl } from "client/gui/controls/CheckBoxControl";
 import { Control } from "engine/client/gui/Control";
 import { Interface } from "engine/client/gui/Interface";
@@ -10,6 +10,7 @@ import { HostedService } from "engine/shared/di/HostedService";
 import { ObservableValue } from "engine/shared/event/ObservableValue";
 import { Strings } from "engine/shared/fixes/String.propmacro";
 import { CustomRemotes } from "shared/Remotes";
+import { ReplicatedAssets } from "shared/ReplicatedAssets";
 import type { CheckBoxControlDefinition } from "client/gui/controls/CheckBoxControl";
 import type { PlayerDataStorage } from "client/PlayerDataStorage";
 import type { ReadonlyObservableValue } from "engine/shared/event/ObservableValue";
@@ -297,5 +298,27 @@ export class AchievementController extends HostedService {
 		this.event.subscribe(CustomRemotes.achievements.loaded.invoked, (data) => this.allAchievements.set(data));
 
 		this.parent(new NotificationController(this.allAchievements));
+
+		const hiddenAchSound = ReplicatedAssets.waitForAsset<Sound>("AchievementUnlock", "Hidden");
+		const commonAchSound = ReplicatedAssets.waitForAsset<Sound>("AchievementUnlock", "Common");
+
+		CustomRemotes.achievements.ahievementUnlock.invoked.Connect(({ player, id }) => {
+			const channel = TextChatService.FindFirstChild("TextChannels")?.FindFirstChild("RBXGeneral") as TextChannel;
+			const { hidden, name } = this.allAchievements.get().data[id];
+
+			if (hidden) {
+				channel?.DisplaySystemMessage(
+					`<b><font color='#FF0000'>${player.DisplayName}</font> obtained secret achievement <font color='#B88FFF'>"${name}"</font>!</b>`,
+				);
+				hiddenAchSound.TimePosition = 0;
+				hiddenAchSound.Play();
+			} else {
+				channel?.DisplaySystemMessage(
+					`<font color='#FF0000'>${player.DisplayName}</font> unlocked achievement <font color='#FFD700'>"${name}"</font>!`,
+				);
+				commonAchSound.TimePosition = 0;
+				commonAchSound.Play();
+			}
+		});
 	}
 }

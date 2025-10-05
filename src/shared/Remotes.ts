@@ -183,6 +183,11 @@ export const CustomRemotes = {
 
 		admin_set: new C2SRemoteEvent<{ readonly [k in string]: AchievementData }>("pl_achs_adm_set", "RemoteEvent"),
 		admin_reset: new C2SRemoteEvent<string[]>("pl_achs_adm_reset", "RemoteEvent"),
+
+		ahievementUnlock: new S2CRemoteEvent<{ readonly player: Player; readonly id: string }>(
+			"chat_ach_unlock",
+			"RemoteEvent",
+		),
 	},
 
 	physics: {

@@ -2,16 +2,9 @@ import { HostedService } from "engine/shared/di/HostedService";
 import { allAchievements } from "server/AchievementList";
 import { isNotAdmin_AutoBanned } from "server/BanAdminExploiter";
 import { CustomRemotes } from "shared/Remotes";
-import type { baseAchievementStats } from "server/Achievement";
 import type { Achievement } from "server/Achievement";
 import type { ServerPlayersController } from "server/ServerPlayersController";
 import type { AchievementData } from "shared/AchievementData";
-
-/* TODO: 
-	add achievement sound
-	id:
-	79540987785492
-*/
 
 const init = (list: AchievementList, player: Player, data: { readonly [x: string]: AchievementData } | undefined) => {
 	const instanced = allAchievements.map((ach) => {
@@ -53,25 +46,10 @@ export class AchievementController extends HostedService {
 	constructor(@inject serverPlayersController: ServerPlayersController) {
 		super();
 
-		let cachedAchievementData: { readonly [x: string]: baseAchievementStats } | undefined;
-
 		this.event.subscribe(CustomRemotes.achievements.update.sent, (player, data) => {
-			for (const [k, v] of pairs(data)) {
+			for (const [id, v] of pairs(data)) {
 				if (!v.completed) continue;
-
-				const d = cachedAchievementData?.[k];
-				if (!d) continue;
-				if (d.hidden) {
-					CustomRemotes.chat.systemMessage.send(
-						"everyone",
-						`<b><font color='#FF0000'>${player.DisplayName}</font> obtained secret achievement <font color='#FFD700'>"${d.name}"</font>!</b>`,
-					);
-					continue;
-				}
-				CustomRemotes.chat.systemMessage.send(
-					"everyone",
-					`<font color='#FF0000'>${player.DisplayName}</font> got achievement <font color='#FFD700'>"${d.name}"</font>!`,
-				);
+				CustomRemotes.achievements.ahievementUnlock.send("everyone", { player, id });
 			}
 		});
 
@@ -86,7 +64,7 @@ export class AchievementController extends HostedService {
 			task.defer(() => {
 				const database = serverPlayersController.players;
 				const achdata = database.get(player.UserId).achievements;
-				cachedAchievementData = init(list, controller.player, achdata);
+				init(list, controller.player, achdata);
 
 				// player update sending loop
 				controller.event.loop(1, () => {
