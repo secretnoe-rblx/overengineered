@@ -16,6 +16,8 @@ interface RadarChunks {
 	detectedCords: Vector3;
 }
 
+const ownDetectablesSet = new Set<BasePart>();
+
 if (RunService.IsClient()) {
 	const p = Players.LocalPlayer;
 	CustomRemotes.modes.set.sent.Connect(({ mode }) => {
@@ -120,29 +122,6 @@ const definition = {
 	},
 } satisfies BlockLogicFullBothDefinitions;
 
-type radarBlock = BlockModel & {
-	RadarView: BasePart | UnionOperation | MeshPart;
-};
-
-if (RunService.IsClient()) {
-	const p = Players.LocalPlayer;
-	CustomRemotes.modes.set.sent.Connect(({ mode }) => {
-		if (mode === "ride") {
-			const blocks = SharedPlots.instance.getPlotComponentByOwnerID(p.UserId).getBlocks();
-
-			for (const b of blocks) {
-				if (!b.PrimaryPart) continue;
-				ownDetectablesSet.add(b.PrimaryPart);
-			}
-			return;
-		}
-
-		ownDetectablesSet.clear();
-	});
-}
-
-const ownDetectablesSet = new Set<BasePart>();
-
 export type { Logic as DistantRadarSectionBlockLogic };
 class Logic extends InstanceBlockLogic<typeof definition> {
 	constructor(block: InstanceBlockLogicArgs) {
@@ -185,6 +164,9 @@ class Logic extends InstanceBlockLogic<typeof definition> {
 				radarChunk.CanCollide = false;
 
 				radarChunk.Parent = metalBase;
+
+				// перемещаем на стартовую позицию
+				radarChunk.CFrame = radarChunk.CFrame.mul(new CFrame(inputValues.chunkStartIndex * 100, 0, 0));
 
 				if (inputValues.visibility) {
 					radarChunk.Transparency = 0.8;
