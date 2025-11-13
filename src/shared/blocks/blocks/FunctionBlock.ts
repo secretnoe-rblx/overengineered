@@ -11,11 +11,11 @@ class ArithmeticExpressionEvaluator {
 	evaluate(expression: string, resultIsInteger: boolean = false): number | undefined {
 		this.str = expression;
 		this.pos = 0;
+		this.ch = "0";
 		const outcome = this.parse();
-		if (!outcome) {
-			return outcome;
+		if (outcome === undefined) {
+			return undefined;
 		}
-
 		if (resultIsInteger) {
 			return math.round(outcome);
 		}
@@ -27,9 +27,7 @@ class ArithmeticExpressionEvaluator {
 	}
 
 	private eat(charToEat: string): boolean {
-		while (this.ch === " ") {
-			this.nextChar();
-		}
+		while (this.ch === " ") this.nextChar();
 		if (this.ch === charToEat) {
 			this.nextChar();
 			return true;
@@ -40,27 +38,27 @@ class ArithmeticExpressionEvaluator {
 	private parse(): number | undefined {
 		this.nextChar();
 		const x = this.parseExpression();
+		// пропустить хвостовые пробелы
+		while (this.ch === " ") this.nextChar();
 		if (this.pos <= this.str.size()) {
+			// если остались непрочитанные символы — ошибка
 			return undefined;
 		}
-
 		return x;
 	}
 
 	private parseExpression(): number | undefined {
 		let x = this.parseTerm();
-		if (!x) return x;
+		if (x === undefined) return undefined;
 
 		for (;;) {
 			if (this.eat("+")) {
-				// addition
 				const term = this.parseTerm();
-				if (!term) return term;
+				if (term === undefined) return undefined;
 				x += term;
 			} else if (this.eat("-")) {
-				// subtraction
 				const term = this.parseTerm();
-				if (!term) return term;
+				if (term === undefined) return undefined;
 				x -= term;
 			} else {
 				return x;
@@ -70,18 +68,26 @@ class ArithmeticExpressionEvaluator {
 
 	private parseTerm(): number | undefined {
 		let x = this.parseFactor();
-		if (!x) return x;
+		if (x === undefined) return undefined;
 
 		for (;;) {
 			if (this.eat("*")) {
-				// multiplication
 				const factor = this.parseFactor();
-				if (!factor) return factor;
+				if (factor === undefined) return undefined;
 				x *= factor;
+			} else if (this.eat("%")) {
+				// остаток от деления
+				const rhs = this.parseFactor();
+				if (rhs === undefined) return undefined;
+				x = x % rhs;
+			} else if (this.matchKeyword("//")) {
+				// целочисленное деление (округление к -inf, как floor)
+				const rhs = this.parseFactor();
+				if (rhs === undefined) return undefined;
+				x = math.floor(x / rhs);
 			} else if (this.eat("/")) {
-				// division
 				const factor = this.parseFactor();
-				if (!factor) return factor;
+				if (factor === undefined) return undefined;
 				x /= factor;
 			} else {
 				return x;
@@ -89,40 +95,77 @@ class ArithmeticExpressionEvaluator {
 		}
 	}
 
+	// Проверка на ключевое слово/оператор из нескольких символов
+	private matchKeyword(word: string): boolean {
+		while (this.ch === " ") this.nextChar();
+		const start = this.pos;
+		const endPos = start + word.size() - 1;
+		if (endPos <= this.str.size() && this.str.sub(start, endPos) === word) {
+			// сдвигаем pos на длину слова
+			for (let i = 0; i < word.size(); i++) this.nextChar();
+			return true;
+		}
+		return false;
+	}
+
 	private parseFactor(): number | undefined {
-		if (this.eat("+")) {
-			// unary plus
-			return this.parseFactor();
-		}
+		// унарные %/+/-
+		if (this.eat("%")) return this.parseFactor();
+		if (this.eat("+")) return this.parseFactor();
 		if (this.eat("-")) {
-			// unary minus
-			const factor = this.parseFactor();
-			if (!factor) return factor;
-			return -factor;
+			const f = this.parseFactor();
+			if (f === undefined) return undefined;
+			return -f;
 		}
+
 		let x: number | undefined = undefined;
 		const startPos = this.pos;
+
 		if (this.eat("(")) {
-			// parentheses
 			x = this.parseExpression();
-			this.eat(")");
-		} else if ((this.ch >= "0" && this.ch <= "9") || this.ch === ".") {
-			// numbers
-			while ((this.ch >= "0" && this.ch <= "9") || this.ch === ".") {
-				this.nextChar();
+			if (!this.eat(")")) return undefined;
+		} else if (this.isAlpha(this.ch)) {
+			// идентификатор: функция или переменная
+			const nameStart = this.pos;
+			while (this.isAlpha(this.ch)) this.nextChar();
+			const ident = this.str.sub(nameStart, this.pos - 1).lower();
+
+			// функции sin/cos/abs, синтаксис: func(expr)
+			if (ident === "sin" || ident === "cos" || ident === "abs") {
+				if (!this.eat("(")) return undefined;
+				const arg = this.parseExpression();
+				if (arg === undefined) return undefined;
+				if (!this.eat(")")) return undefined;
+
+				if (ident === "sin") x = math.sin(arg);
+				else if (ident === "cos") x = math.cos(arg);
+				else x = math.abs(arg);
+			} else {
+				// если это просто переменная (a..z) — в текущей реализации значения уже подставлены строкой,
+				// так что сюда попасть не должны. Но если попадем — ошибка.
+				return undefined;
 			}
+		} else if ((this.ch >= "0" && this.ch <= "9") || this.ch === ".") {
+			while ((this.ch >= "0" && this.ch <= "9") || this.ch === ".") this.nextChar();
 			x = tonumber(this.str.sub(startPos, this.pos - 1));
+		} else {
+			return undefined;
 		}
-		if (!x) return x;
 
+		if (x === undefined) return undefined;
+
+		// возведение в степень (право-ассоциативное)
 		if (this.eat("^")) {
-			// exponentiation
 			const factor = this.parseFactor();
-			if (!factor) return undefined;
-
+			if (factor === undefined) return undefined;
 			x = math.pow(x, factor);
 		}
+
 		return x;
+	}
+
+	private isAlpha(c: string): boolean {
+		return (c >= "a" && c <= "z") || (c >= "A" && c <= "Z");
 	}
 }
 
