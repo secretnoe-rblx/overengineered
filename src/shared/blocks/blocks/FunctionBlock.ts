@@ -39,7 +39,9 @@ class ArithmeticExpressionEvaluator {
 		this.nextChar();
 		const x = this.parseExpression();
 		// skip trailing spaces
-		while (this.ch === " ") this.nextChar();
+		while (this.ch === " ") {
+			this.nextChar();
+		}
 		if (this.pos <= this.str.size()) {
 			// if there are unread characters left, an error occurs
 			return undefined;
