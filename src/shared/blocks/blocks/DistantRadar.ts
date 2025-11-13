@@ -147,10 +147,10 @@ class Logic extends InstanceBlockLogic<typeof definition> {
 		let c = 0;
 		this.onTicc(() => {
 			if (c > inputValues.chunkSpawnRate) {
-				// Создаем новый Part
+				// Create a new Part
 				const radarChunk = new Instance("Part") as Part;
 
-				// Настраиваем базовые свойства
+				// Setting up basic properties
 				radarChunk.Name = "RadarChunk";
 				radarChunk.Color = new Color3(245 / 255, 205 / 255, 48 / 255);
 				radarChunk.Size = new Vector3(100, 1, 1);
@@ -165,7 +165,7 @@ class Logic extends InstanceBlockLogic<typeof definition> {
 
 				radarChunk.Parent = metalBase;
 
-				// перемещаем на стартовую позицию
+				// move to the starting position
 				radarChunk.CFrame = radarChunk.CFrame.mul(new CFrame(inputValues.chunkStartIndex * 100, 0, 0));
 
 				if (inputValues.visibility) {
@@ -183,14 +183,14 @@ class Logic extends InstanceBlockLogic<typeof definition> {
 				};
 
 				const connection = radarChunk.Touched.Connect((otherPart) => {
-					if (otherPart.HasTag(TagUtils.allTags.SPECIAL_RADARVIEW)) return; // игнорируем спец теги
-					if (!inputValues.detectSelf && ownDetectablesSet.has(otherPart)) return; // игнорируем свои блоки если выставлена такая возможность
+					if (otherPart.HasTag(TagUtils.allTags.SPECIAL_RADARVIEW)) return; // ignore special tags
+					if (!inputValues.detectSelf && ownDetectablesSet.has(otherPart)) return; // ignore your blocks if this option is set
 
-					// сохраняем данные
+					// save data
 					item.isDetected = true;
 					item.detectedCords = otherPart.Position;
 
-					// блокируем эвент чтобы не детектить другие блоки просто так
+					// block the event so as not to detect other blocks without reason
 					connection?.Disconnect();
 				});
 
@@ -202,10 +202,10 @@ class Logic extends InstanceBlockLogic<typeof definition> {
 			const toRemove = [];
 			let detectedCords = new Vector3(0, 0, 0);
 			let isDetected = false;
-			let i = 0; // итератор
-			// пробегаемся по созданным чанкам чтобы переместить их вперёд
+			let i = 0; // iterator
+			// we run through the created chunks to move them forward
 			for (const item of radarChunksList) {
-				// если чанк привысил допустимое расстояние или пересёкся с блоком, то перемещаем его в массив на удаление, чтобы не спамить чанками бесконечно
+				// if a chunk exceeds the allowed distance or intersects with a block, then we move it to the array for deletion, so as not to spam chunks endlessly
 				if (item.c > inputValues.chunkCap || item.isDetected) {
 					if (item.isDetected) {
 						detectedCords = item.detectedCords;
@@ -215,7 +215,7 @@ class Logic extends InstanceBlockLogic<typeof definition> {
 					continue;
 				}
 
-				// перемещаем блок на 100 едениц
+				// move the block by 100 units
 				item.moveVector = item.moveVector.mul(new CFrame(100, 0, 0));
 
 				item.radarChunk.CFrame = item.moveVector;
