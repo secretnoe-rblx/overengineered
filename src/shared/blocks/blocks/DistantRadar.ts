@@ -251,7 +251,7 @@ class Logic extends InstanceBlockLogic<typeof definition> {
 
 			if (detectQueryCap.size() > 0) {
 				this.output.gps.set("vector3", detectQueryCap[0].add(offset));
-				detectQueryCap.remove(1);
+				detectQueryCap.remove(0);
 				this.output.isDetected.set("bool", true);
 			} else {
 				this.output.isDetected.set("bool", false);
@@ -268,7 +268,6 @@ class Logic extends InstanceBlockLogic<typeof definition> {
 
 					// void checking
 					if (radarChunksList[i].radarChunk.Position.Y < -offset.Y) {
-						print(radarChunksList[i].radarChunk.Position.Y, -offset.Y);
 						isDrop = true;
 					}
 
