@@ -11,9 +11,9 @@ import type { BlockBuilder } from "shared/blocks/Block";
 interface RadarChunks {
 	radarChunk: Part;
 	c: number;
-	moveVector: CFrame;
 	isDetected: boolean;
 	detectedCords: Vector3;
+	isAvalaible: boolean;
 }
 
 const ownDetectablesSet = new Set<BasePart>();
@@ -36,30 +36,39 @@ if (RunService.IsClient()) {
 }
 
 const definition = {
-	inputOrder: ["chunkStartIndex", "chunkCap", "chunkSpawnRate", "endSize", "visibility", "detectSelf"],
+	inputOrder: [
+		"start",
+		"end",
+		"chunkSpawnRate",
+		"chunkEndSize",
+		"visibility",
+		"detectSelf",
+		"radarChunksCap",
+		"detectQueryCap",
+	],
 	input: {
-		chunkStartIndex: {
-			displayName: "Chunk Start Index",
-			types: {
-				number: {
-					config: 1,
-					clamp: {
-						showAsSlider: true,
-						min: 1,
-						max: 1024,
-					},
-				},
-			},
-		},
-		chunkCap: {
-			displayName: "chunkCap",
+		start: {
+			displayName: "Start",
 			types: {
 				number: {
 					config: 60,
 					clamp: {
 						showAsSlider: true,
-						min: 0,
-						max: 2048,
+						min: 1,
+						max: 131072,
+					},
+				},
+			},
+		},
+		end: {
+			displayName: "End",
+			types: {
+				number: {
+					config: 4096,
+					clamp: {
+						showAsSlider: true,
+						min: 1,
+						max: 131072,
 					},
 				},
 			},
@@ -68,16 +77,16 @@ const definition = {
 			displayName: "chunkSpawnRate",
 			types: {
 				number: {
-					config: 20,
+					config: 60,
 					clamp: {
 						showAsSlider: true,
-						min: 2,
-						max: 24000,
+						min: 1,
+						max: 16384,
 					},
 				},
 			},
 		},
-		endSize: {
+		chunkEndSize: {
 			displayName: "endSize",
 			types: {
 				number: {
@@ -109,6 +118,34 @@ const definition = {
 			},
 			connectorHidden: true,
 		},
+		radarChunksCap: {
+			displayName: "Radar Chunks Capacity",
+			types: {
+				number: {
+					config: 32,
+					clamp: {
+						showAsSlider: true,
+						min: 1,
+						max: 16384,
+					},
+				},
+			},
+			connectorHidden: true,
+		},
+		detectQueryCap: {
+			displayName: "Detect Query Capacity",
+			types: {
+				number: {
+					config: 4,
+					clamp: {
+						showAsSlider: true,
+						min: 1,
+						max: 64,
+					},
+				},
+			},
+			connectorHidden: true,
+		},
 	},
 	output: {
 		gps: {
@@ -127,118 +164,146 @@ class Logic extends InstanceBlockLogic<typeof definition> {
 	constructor(block: InstanceBlockLogicArgs) {
 		super(definition, block);
 
+		const offset = new Vector3(0, -GameDefinitions.HEIGHT_OFFSET, 0);
+
 		let inputValues = {
-			chunkStartIndex: 0,
-			chunkCap: 0,
+			start: 0,
+			end: 0,
 			chunkSpawnRate: 0,
-			endSize: 0,
+			chunkEndSize: 0,
 			visibility: false,
 			detectSelf: false,
+			radarChunksCap: 0,
+			detectQueryCap: 0,
 		};
 		this.on((data) => (inputValues = data));
 		this.output.gps.set("vector3", new Vector3(0, 0, 0));
 
-		const radarChunksList: RadarChunks[] = [];
-
 		const metalBase = this.instance.FindFirstChild("MetalBase") as BasePart;
 
-		const offset = new Vector3(0, -GameDefinitions.HEIGHT_OFFSET, 0);
+		const mainRadarChunk = this.instance.FindFirstChild("RadarChunk") as Part;
+		mainRadarChunk.Anchored = true;
+		const radarChunksList: RadarChunks[] = [];
 
-		let c = 0;
+		let tickCounter = 0;
+		let isFirstTick = true;
+		// Since the radar can detect several targets in one tick, we will store them in a queue and output the result every logical tick
+		const detectQueryCap: Vector3[] = [];
 		this.onTicc(() => {
-			if (c > inputValues.chunkSpawnRate) {
-				// Create a new Part
-				const radarChunk = new Instance("Part") as Part;
+			if (isFirstTick) {
+				// init
+				for (let i = 0; i < inputValues.radarChunksCap; i++) {
+					const cloneRadarChunk = mainRadarChunk.Clone();
+					cloneRadarChunk.Anchored = true;
+					cloneRadarChunk.Parent = metalBase;
 
-				// Setting up basic properties
-				radarChunk.Name = "RadarChunk";
-				radarChunk.Color = new Color3(245 / 255, 205 / 255, 48 / 255);
-				radarChunk.Size = new Vector3(100, 1, 1);
-				radarChunk.CFrame = metalBase.CFrame;
-				radarChunk.Material = Enum.Material.Plastic;
-				radarChunk.Reflectance = 0;
-				radarChunk.Anchored = true;
-				radarChunk.CanTouch = true;
-				radarChunk.Massless = true;
-				radarChunk.CastShadow = false;
-				radarChunk.CanCollide = false;
+					const item: RadarChunks = {
+						radarChunk: cloneRadarChunk,
+						c: 0,
+						isDetected: false,
+						detectedCords: new Vector3(0, 0, 0),
+						isAvalaible: true,
+					};
+					item.radarChunk.Position = offset;
 
-				radarChunk.Parent = metalBase;
-
-				// move to the starting position
-				radarChunk.CFrame = radarChunk.CFrame.mul(new CFrame(inputValues.chunkStartIndex * 100, 0, 0));
-
-				if (inputValues.visibility) {
-					radarChunk.Transparency = 0.8;
-				} else {
-					radarChunk.Transparency = 1;
-				}
-
-				const item: RadarChunks = {
-					radarChunk: radarChunk,
-					c: inputValues.chunkStartIndex,
-					moveVector: radarChunk.CFrame,
-					isDetected: false,
-					detectedCords: new Vector3(0, 0, 0),
-				};
-
-				const connection = radarChunk.Touched.Connect((otherPart) => {
-					if (otherPart.HasTag(TagUtils.allTags.SPECIAL_RADARVIEW)) return; // ignore special tags
-					if (!inputValues.detectSelf && ownDetectablesSet.has(otherPart)) return; // ignore your blocks if this option is set
-
-					// save data
-					item.isDetected = true;
-					item.detectedCords = otherPart.Position;
-
-					// block the event so as not to detect other blocks without reason
-					connection?.Disconnect();
-				});
-
-				radarChunksList.push(item);
-
-				c = 0;
-			}
-
-			const toRemove = [];
-			let detectedCords = new Vector3(0, 0, 0);
-			let isDetected = false;
-			let i = 0; // iterator
-			// we run through the created chunks to move them forward
-			for (const item of radarChunksList) {
-				// if a chunk exceeds the allowed distance or intersects with a block, then we move it to the array for deletion, so as not to spam chunks endlessly
-				if (item.c > inputValues.chunkCap || item.isDetected) {
-					if (item.isDetected) {
-						detectedCords = item.detectedCords;
-						isDetected = item.isDetected;
+					if (inputValues.visibility) {
+						item.radarChunk.Transparency = 0.8;
+					} else {
+						item.radarChunk.Transparency = 1;
 					}
-					toRemove.push(i);
-					continue;
+
+					cloneRadarChunk.Touched.Connect((otherPart) => {
+						if (item.isAvalaible || item.isDetected) {
+							return;
+						}
+
+						if (otherPart.HasTag(TagUtils.allTags.SPECIAL_RADARVIEW)) return; // ignore special tags
+						if (!inputValues.detectSelf && ownDetectablesSet.has(otherPart)) return; // ignore own blocks if this option is set
+
+						// save data
+						item.isDetected = true;
+						item.detectedCords = otherPart.Position;
+					});
+
+					radarChunksList.push(item);
 				}
 
-				// move the block by 100 units
-				item.moveVector = item.moveVector.mul(new CFrame(100, 0, 0));
-
-				item.radarChunk.CFrame = item.moveVector;
-
-				const newSize = (inputValues.endSize * item.c) / inputValues.chunkCap;
-				item.radarChunk.Size = new Vector3(100, newSize, newSize);
-
-				item.c++;
-				i++;
+				isFirstTick = false;
 			}
 
-			for (const item of toRemove) {
-				radarChunksList[item].radarChunk.Destroy();
+			if (tickCounter >= inputValues.chunkSpawnRate) {
+				// find and mark new chunk
+				for (let i = 0; i < inputValues.radarChunksCap; i++) {
+					if (radarChunksList[i].isAvalaible) {
+						radarChunksList[i].radarChunk.CFrame = metalBase.CFrame;
+						radarChunksList[i].radarChunk.Position = metalBase.Position;
+						radarChunksList[i].radarChunk.CFrame.mul(new CFrame(inputValues.start, 0, 0));
+						radarChunksList[i].c = 0;
+						radarChunksList[i].isAvalaible = false;
+						radarChunksList[i].isDetected = false;
 
-				radarChunksList.remove(item);
+						break;
+					}
+				}
+
+				tickCounter = 1; // drop tick counter when chunk was selected
 			}
 
-			if (isDetected) {
-				this.output.gps.set("vector3", offset.add(detectedCords));
+			if (detectQueryCap.size() > 0) {
+				this.output.gps.set("vector3", detectQueryCap[0].add(offset));
+				detectQueryCap.remove(1);
+				this.output.isDetected.set("bool", true);
+			} else {
+				this.output.isDetected.set("bool", false);
 			}
-			this.output.isDetected.set("bool", isDetected);
 
-			c++;
+			tickCounter++;
+		});
+
+		this.event.subscribe<[number]>(RunService.Heartbeat as ReadonlyArgsSignal<[number]>, (dt) => {
+			// we run through the created chunks to move them forward
+			for (let i = 0; i < inputValues.radarChunksCap; i++) {
+				if (!radarChunksList[i].isAvalaible) {
+					let isDrop = false;
+
+					// void checking
+					if (radarChunksList[i].radarChunk.Position.Y < -offset.Y) {
+						print(radarChunksList[i].radarChunk.Position.Y, -offset.Y);
+						isDrop = true;
+					}
+
+					// border checking
+					if (radarChunksList[i].c * 100 > inputValues.end) {
+						isDrop = true;
+					}
+
+					// detection checking
+					if (radarChunksList[i].isDetected) {
+						if (detectQueryCap.size() < inputValues.detectQueryCap) {
+							detectQueryCap.push(radarChunksList[i].detectedCords);
+						}
+
+						isDrop = true;
+					}
+
+					if (isDrop) {
+						radarChunksList[i].radarChunk.Position = offset;
+						radarChunksList[i].c = 0;
+						radarChunksList[i].isDetected = false;
+						radarChunksList[i].detectedCords = new Vector3(0, 0, 0);
+						radarChunksList[i].isAvalaible = true;
+					} else {
+						radarChunksList[i].radarChunk.CFrame = radarChunksList[i].radarChunk.CFrame.add(
+							radarChunksList[i].radarChunk.CFrame.RightVector.mul(100),
+						);
+
+						const newSize = (inputValues.chunkEndSize * radarChunksList[i].c * 100) / inputValues.end;
+						radarChunksList[i].radarChunk.Size = new Vector3(100, newSize, newSize);
+
+						radarChunksList[i].c++;
+					}
+				}
+			}
 		});
 	}
 }
